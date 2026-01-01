@@ -40,20 +40,14 @@ const Options = ({ options, onSelect, selectedAnswer, feedback, correctName, aut
                                 : 'bg-emerald-500/20 text-emerald-700 border-emerald-500';
                         } else {
                             // Other options - muted
-                            btnClass = theme === 'dark'
-                                ? 'bg-slate-800 text-slate-400 border-slate-700'
-                                : 'bg-slate-100 text-slate-400 border-slate-200';
+                            btnClass = 'bg-slate-100 text-slate-400 border-slate-200';
                         }
                     } else if (isSelected) {
                         // Selected but not submitted yet (non-auto mode)
-                        btnClass = theme === 'dark'
-                            ? 'bg-slate-700 text-white border-slate-600 ring-2 ring-slate-400' // Dark mode selected
-                            : 'bg-sky-500 text-white border-sky-600 ring-2 ring-sky-400';
+                        btnClass = 'bg-sky-500 text-white border-sky-600 ring-2 ring-sky-400';
                     } else {
-                        // Default unselected - LIGHTER colors for dark mode
-                        btnClass = theme === 'dark'
-                            ? 'bg-slate-800 hover:bg-slate-700 text-slate-200 border-slate-700'
-                            : 'bg-white hover:bg-slate-50 text-slate-800 border-slate-200';
+                        // Default unselected
+                        btnClass = 'bg-white hover:bg-slate-50 text-slate-800 border-slate-200';
                     }
 
                     return (

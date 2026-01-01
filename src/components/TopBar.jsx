@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useTheme } from '../context/ThemeContext';
 import { motion, AnimatePresence } from 'framer-motion';
-import logo from '../assets/girify-logo.png';
+import Logo from './Logo';
 
 const TopBar = ({ onOpenPage }) => {
     const { theme, toggleTheme, t } = useTheme();
@@ -30,7 +30,7 @@ const TopBar = ({ onOpenPage }) => {
                         </svg>
                     </button>
                     <div className="flex items-end pb-1">
-                        <img src={logo} alt="Girify" className="h-6 md:h-8 w-auto object-contain" />
+                        <Logo className="h-6 md:h-8 w-auto object-contain" />
                     </div>
                 </div>
 

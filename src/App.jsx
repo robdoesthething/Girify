@@ -16,7 +16,7 @@ import { calculateTimeScore } from './utils/scoring';
 import { saveScore } from './utils/leaderboard';
 import { getCuriosityByStreets } from './data/curiosities';
 import { fetchWikiImage } from './utils/wiki';
-import logo from './assets/girify-logo.png';
+import Logo from './components/Logo';
 import { gameReducer, initialState } from './reducers/gameReducer';
 
 // Helper to normalize strings for comparison
@@ -367,7 +367,7 @@ const AppContent = () => {
 
   return (
     <div className={`fixed inset-0 w-full h-full flex flex-col overflow-hidden transition-colors duration-500
-            ${theme === 'dark' ? 'bg-slate-950 text-white' : 'bg-slate-50 text-slate-900'}
+            bg-slate-50 ${theme === 'dark' ? 'text-white' : 'text-slate-900'}
         `}>
       <TopBar onOpenPage={handleOpenPage} />
 
@@ -378,7 +378,7 @@ const AppContent = () => {
         />
       )}
 
-      <div className={`flex-1 flex ${['mobile', 'tablet'].includes(deviceMode) ? 'flex-col' : 'flex-row'} overflow-hidden ${theme === 'dark' ? 'bg-neutral-800' : 'bg-slate-50'}`}>
+      <div className={`flex-1 flex ${['mobile', 'tablet'].includes(deviceMode) ? 'flex-col' : 'flex-row'} overflow-hidden bg-slate-50`}>
 
         <div className={`relative z-0 min-w-0 ${['mobile', 'tablet'].includes(deviceMode) ? 'flex-1 w-full order-1' : 'flex-1 h-full order-1'}`}>
           <MapArea
@@ -391,7 +391,7 @@ const AppContent = () => {
         {state.gameState === 'playing' && (
           <div className={`
                   relative z-20 backdrop-blur-sm shadow-xl shrink-0
-                  ${theme === 'dark' ? 'bg-slate-900/95 border-slate-700' : 'bg-white/95 border-slate-200'}
+                  bg-white/95 border-slate-200
                   ${['mobile', 'tablet'].includes(deviceMode)
               ? 'w-full h-[40%] order-2 border-t'
               : 'w-[350px] lg:w-[400px] h-full order-2 border-l'
@@ -435,7 +435,7 @@ const AppContent = () => {
       {state.gameState === 'intro' && (
         <div className="fixed inset-0 z-10 flex flex-col items-center justify-center p-6 text-center bg-slate-50/80 dark:bg-slate-950/80 backdrop-blur-sm pointer-events-auto overflow-hidden">
           <div className="max-w-xs md:max-w-md w-full flex flex-col items-center">
-            <img src={logo} alt="Girify" className="mb-6 w-32 md:w-48 object-contain" />
+            <Logo className="mb-6 h-16 md:h-24 w-auto object-contain" />
             <p className={`text-lg md:text-xl mb-8 font-light text-center px-4 animate-fadeIn ${theme === 'dark' ? 'text-slate-300' : 'text-slate-600'}`}>
               Can you name the city's most iconic streets?
             </p>
