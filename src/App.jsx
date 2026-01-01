@@ -96,7 +96,7 @@ const AppContent = () => {
         // Yes.
         // BUT we only care if feedback is 'transitioning'.
         // If feedback is transitioning, handleNext is correct for THAT state.
-      }, 500); // 500ms delay to allow user to see the highlighted answer
+      }, 1000); // 1000ms delay to ensure user sees the highlighted answer
     }
     return () => clearTimeout(timeoutId);
   }, [state.feedback, state.autoAdvance]); // handleNext is safe to omit if we trust the closure, but strict linting would complain.
