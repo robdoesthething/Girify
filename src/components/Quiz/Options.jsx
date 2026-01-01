@@ -16,8 +16,13 @@ const Options = ({ options, onSelect, selectedAnswer, feedback, correctName, aut
 
                     if (isSubmitted) {
                         if (isSelected) {
-                            // User's answer - always show in blue
-                            if (isCorrectOption) {
+                            // User's answer
+                            if (autoAdvance) {
+                                // Auto-mode: Neutral highlight (no green/red) as requested
+                                btnClass = theme === 'dark'
+                                    ? 'bg-slate-600/50 text-white border-slate-500 ring-2 ring-indigo-400'
+                                    : 'bg-sky-500 text-white border-sky-600 ring-2 ring-sky-300';
+                            } else if (isCorrectOption) {
                                 // Correct! Blue with success ring
                                 btnClass = theme === 'dark'
                                     ? 'bg-slate-600/50 text-white border-slate-500 ring-2 ring-emerald-500' // Dark mode selected (Grey)
