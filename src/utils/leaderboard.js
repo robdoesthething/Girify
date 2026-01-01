@@ -11,7 +11,12 @@ const SCORES_COLLECTION = 'scores'; // Full History
  * 2. 'highscores' collection (Personal Best, if improved)
  */
 export const saveScore = async (username, score, time) => {
-    if (!username) return;
+    if (!username) {
+        console.warn('[Leaderboard] saveScore called without username, skipping.');
+        return;
+    }
+
+    console.log(`[Leaderboard] Saving score for ${username}: ${score} pts, ${time}s`);
 
     try {
         const now = Timestamp.now();
@@ -26,6 +31,7 @@ export const saveScore = async (username, score, time) => {
 
         // 1. Add to History (Always)
         await addDoc(collection(db, SCORES_COLLECTION), scoreData);
+        console.log('[Leaderboard] Score saved to history successfully');
 
         // 2. Check & Update Personal Best (All Time)
         const userDocRef = doc(db, HIGHSCORES_COLLECTION, username);
@@ -45,10 +51,11 @@ export const saveScore = async (username, score, time) => {
 
         if (shouldUpdate) {
             await setDoc(userDocRef, scoreData);
-            console.log("New Personal Best saved!");
+            console.log("[Leaderboard] New Personal Best saved!");
         }
     } catch (e) {
         console.error("Error saving score: ", e);
+        console.error("[Leaderboard] Full error details:", e.code, e.message);
     }
 };
 

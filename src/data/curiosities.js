@@ -240,17 +240,19 @@ export function getCuriosityByStreets(quizStreets) {
             title: random.location,
             fact: random.text,
             image: random.image || getRandomImage(),
-            location: random.location
+            location: random.location,
+            matchedStreet: null
         };
     }
 
-    // Try to find a match
+    // Try to find a match - check each street against curiosities
     for (const street of quizStreets) {
         const simpleName = simplify(street.name);
 
         // Find a curiosity where the location name matches loosely
         const match = CURIOSITIES_DATA.find(c => {
             const simpleLoc = simplify(c.location);
+            // Check both directions for substring matching
             return simpleName.includes(simpleLoc) || simpleLoc.includes(simpleName);
         });
 
@@ -259,17 +261,19 @@ export function getCuriosityByStreets(quizStreets) {
                 title: match.location,
                 fact: match.text,
                 image: match.image || getRandomImage(),
-                location: match.location
+                location: match.location,
+                matchedStreet: street.name // Include which street matched
             };
         }
     }
 
-    // No match found? Return random.
+    // No match found? Pick a random curiosity but note it wasn't matched
     const random = CURIOSITIES_DATA[Math.floor(Math.random() * CURIOSITIES_DATA.length)];
     return {
         title: random.location,
         fact: random.text,
         image: random.image || getRandomImage(),
-        location: random.location
+        location: random.location,
+        matchedStreet: null
     };
 }
