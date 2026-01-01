@@ -76,13 +76,10 @@ export const getLeaderboard = async (period = 'all') => {
             // For periods, we query the history 'scores' collection.
             // To avoid missing index issues and ensure robustness, we fetch the most recent 200 scores
             // and filter them in memory. This is efficient enough for the current scale.
-            // Fetch recent scores without strict ordering first to avoid index issues
+            // Fetch recent scores using 'date' (YYYYMMDD) which is a number/string and indexed by default.
+            // This is safer than timestamp and ensures we get the latest days.
             const scoresRef = collection(db, SCORES_COLLECTION);
-            // Just get a batch of recent-ish documents. Without an index, we can't reliable sort by descendant timestamp fast if distinct is involved.
-            // But basic orderBy timestamp usually works if single field.
-            // If it's failing, we'll try fetching without orderBy and sorting client side, or assume index issue.
-            // Let's try removing orderBy for safety if that's the blocker (limit to 500 to catch enough data)
-            const q = query(scoresRef, limit(500));
+            const q = query(scoresRef, orderBy("date", "desc"), limit(500));
             const snapshot = await getDocs(q);
 
             const now = new Date();
