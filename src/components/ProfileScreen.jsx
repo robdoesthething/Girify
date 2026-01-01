@@ -1,17 +1,45 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { useTheme } from '../context/ThemeContext';
+import { getFriendCount } from '../utils/social';
+
+// Helper to calculate daily streak from history
+const calculateStreak = (history) => {
+    if (!history || history.length === 0) return 0;
+
+    // Sort by date descending
+    const sorted = [...history].sort((a, b) => b.date - a.date);
+
+    // Get today's date seed (YYYYMMDD format)
+    const today = new Date();
+    const todaySeed = parseInt(`${today.getFullYear()}${String(today.getMonth() + 1).padStart(2, '0')}${String(today.getDate()).padStart(2, '0')}`);
+
+    let streak = 0;
+    let expectedDate = todaySeed;
+
+    for (const record of sorted) {
+        if (record.date === expectedDate) {
+            streak++;
+            // Move to previous day
+            const d = new Date(today);
+            d.setDate(d.getDate() - streak);
+            expectedDate = parseInt(`${d.getFullYear()}${String(d.getMonth() + 1).padStart(2, '0')}${String(d.getDate()).padStart(2, '0')}`);
+        } else if (record.date < expectedDate) {
+            break;
+        }
+    }
+
+    return streak;
+};
 
 const ProfileScreen = ({ onClose, username }) => {
     const { theme } = useTheme();
 
-    // Fetch Data
-    // Fetch Data with Safety Checks
     const [history, setHistory] = React.useState([]);
     const [joinedDate, setJoinedDate] = React.useState(new Date().toLocaleDateString());
+    const [friendCount, setFriendCount] = React.useState(0);
 
     React.useEffect(() => {
-        console.log("ProfileScreen Mounted");
         try {
             const rawHistory = localStorage.getItem('girify_history');
             const parsedHistory = rawHistory ? JSON.parse(rawHistory) : [];
@@ -25,15 +53,21 @@ const ProfileScreen = ({ onClose, username }) => {
             console.error("Profile data load error:", e);
             setHistory([]);
         }
-    }, []);
 
-    // Stats Calculation
+        const loadFriendCount = async () => {
+            if (username) {
+                const count = await getFriendCount(username);
+                setFriendCount(count);
+            }
+        };
+        loadFriendCount();
+    }, [username]);
+
     const totalGames = history.length;
     const bestScore = totalGames > 0 ? Math.max(...history.map(h => (h && h.score) || 0)) : 0;
     const totalScore = history.reduce((acc, curr) => acc + ((curr && curr.score) || 0), 0);
     const avgScore = totalGames > 0 ? Math.round(totalScore / totalGames) : 0;
-
-    // Derive generic avatar (using intl api just for a color or first letter)
+    const dailyStreak = calculateStreak(history);
     const initial = username ? username.charAt(0).toUpperCase() : '?';
 
     return (
@@ -58,23 +92,31 @@ const ProfileScreen = ({ onClose, username }) => {
                     <div className="w-24 h-24 rounded-full bg-gradient-to-br from-sky-400 to-indigo-600 flex items-center justify-center text-4xl font-black text-white shadow-lg mb-4 ring-4 ring-white dark:ring-slate-700">
                         {initial}
                     </div>
-                    <h2 className="text-2xl font-black tracking-tight">{username}</h2>
+                    <h2 className="text-2xl font-black tracking-tight">{username || 'Player'}</h2>
                     <p className="text-xs font-bold uppercase tracking-widest opacity-50 mt-1">Player since {joinedDate}</p>
                 </div>
 
                 {/* Stats Grid */}
-                <div className="p-6 grid grid-cols-3 gap-4 border-b border-slate-100 dark:border-slate-800">
+                <div className="p-6 grid grid-cols-5 gap-2 border-b border-slate-100 dark:border-slate-800">
                     <div className="text-center">
-                        <p className="text-2xl font-black text-slate-700 dark:text-slate-200">{totalGames}</p>
-                        <p className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Games</p>
+                        <p className="text-xl font-black text-orange-500">🔥{dailyStreak}</p>
+                        <p className="text-[9px] uppercase font-bold text-slate-400 tracking-wider">Streak</p>
                     </div>
                     <div className="text-center">
-                        <p className="text-2xl font-black text-emerald-500">{bestScore}</p>
-                        <p className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Best</p>
+                        <p className="text-xl font-black text-purple-500">👥{friendCount}</p>
+                        <p className="text-[9px] uppercase font-bold text-slate-400 tracking-wider">Friends</p>
                     </div>
                     <div className="text-center">
-                        <p className="text-2xl font-black text-sky-500">{avgScore}</p>
-                        <p className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Avg</p>
+                        <p className="text-xl font-black text-slate-700 dark:text-slate-200">{totalGames}</p>
+                        <p className="text-[9px] uppercase font-bold text-slate-400 tracking-wider">Games</p>
+                    </div>
+                    <div className="text-center">
+                        <p className="text-xl font-black text-emerald-500">{bestScore}</p>
+                        <p className="text-[9px] uppercase font-bold text-slate-400 tracking-wider">Best</p>
+                    </div>
+                    <div className="text-center">
+                        <p className="text-xl font-black text-sky-500">{avgScore}</p>
+                        <p className="text-[9px] uppercase font-bold text-slate-400 tracking-wider">Avg</p>
                     </div>
                 </div>
 
@@ -103,7 +145,6 @@ const ProfileScreen = ({ onClose, username }) => {
                         </div>
                     )}
                 </div>
-
             </motion.div>
         </div>
     );

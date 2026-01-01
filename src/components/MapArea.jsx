@@ -76,9 +76,33 @@ const LANDMARKS = [
     { name: "Monument a Colom", pos: [41.3758, 2.1778], icon: "👉" },
     { name: "Boqueria", pos: [41.3817, 2.1716], icon: "🍇" },
     { name: "Palau de la Música", pos: [41.3875, 2.1753], icon: "🎻" },
-    { name: "Parc Ciutadella", pos: [41.3881, 2.1873], icon: "🌳" },
     { name: "Santa Maria del Mar", pos: [41.3837, 2.1820], icon: "⛪" },
     { name: "Poble Espanyol", pos: [41.3675, 2.1469], icon: "🏘️" },
+
+    // Parks
+    { name: "Parc de la Ciutadella", pos: [41.3881, 2.1873], icon: "🌳" },
+    { name: "Parc del Laberint d'Horta", pos: [41.4397, 2.1465], icon: "🌳" },
+    { name: "Parc de Montjuïc", pos: [41.3636, 2.1578], icon: "🌳" },
+    { name: "Parc del Guinardó", pos: [41.4187, 2.1642], icon: "🌳" },
+    { name: "Jardins de Mossèn Costa i Llobera", pos: [41.3661, 2.1659], icon: "🌵" },
+    { name: "Parc de Diagonal Mar", pos: [41.4103, 2.2168], icon: "🌳" },
+    { name: "Parc de l'Espanya Industrial", pos: [41.3768, 2.1378], icon: "🌳" },
+    { name: "Parc de Joan Miró", pos: [41.3773, 2.1461], icon: "🌳" },
+
+    // Museums
+    { name: "Museu Picasso", pos: [41.3851, 2.1811], icon: "🖼️" },
+    { name: "MACBA", pos: [41.3833, 2.1667], icon: "🖼️" },
+    { name: "Museu Marítim", pos: [41.3755, 2.1754], icon: "⚓" },
+    { name: "CosmoCaixa", pos: [41.4130, 2.1317], icon: "🔬" },
+    { name: "Fundació Joan Miró", pos: [41.3685, 2.1600], icon: "🖼️" },
+    { name: "CaixaForum", pos: [41.3710, 2.1492], icon: "🖼️" },
+    { name: "Museu d'Història de Barcelona", pos: [41.3840, 2.1773], icon: "🏺" },
+
+    // Mountains & Viewpoints
+    { name: "Montjuïc", pos: [41.3636, 2.1578], icon: "⛰️" },
+    { name: "Bunkers del Carmel", pos: [41.4186, 2.1579], icon: "🏔️" },
+    { name: "Turó de la Rovira", pos: [41.4189, 2.1580], icon: "👀" },
+    { name: "Collserola Tower", pos: [41.4175, 2.1150], icon: "📡" },
 
     // Shopping Malls
     { name: "Heron City (Som Multiespai)", pos: [41.4350, 2.1818], icon: "🛍️" },

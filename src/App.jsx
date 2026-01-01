@@ -1,23 +1,24 @@
-import { useState, useMemo, useEffect } from 'react';
+import { useReducer, useMemo, useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import MapArea from './components/MapArea';
-import QuizInterface from './components/QuizInterface';
+import Quiz from './components/Quiz';
 import TopBar from './components/TopBar';
 import RegisterPanel from './components/RegisterPanel';
 import LeaderboardScreen from './components/LeaderboardScreen';
 import SettingsScreen from './components/SettingsScreen';
 import AboutScreen from './components/AboutScreen';
+import ProfileScreen from './components/ProfileScreen';
 import { ThemeProvider, useTheme } from './context/ThemeContext';
 import rawStreets from './data/streets.json';
 import * as turf from '@turf/turf';
-import { getTodaySeed, selectDailyStreets, hasPlayedToday, markTodayAsPlayed, getTimeUntilNext } from './utils/dailyChallenge';
+import { getTodaySeed, selectDailyStreets, hasPlayedToday, markTodayAsPlayed } from './utils/dailyChallenge';
 import { calculateTimeScore } from './utils/scoring';
 import { saveScore } from './utils/leaderboard';
 import { getCuriosityByStreets } from './data/curiosities';
 import { fetchWikiImage } from './utils/wiki';
 import logoImage from './assets/girify-logo.png';
+import { gameReducer, initialState } from './reducers/gameReducer';
 
-// Helper to normalize strings for comparison
 // Helper to normalize strings for comparison
 const normalize = (str) => {
   return str
@@ -31,30 +32,15 @@ const normalize = (str) => {
 // Improved prefix extraction
 const getPrefix = (name) => {
   if (!name) return '';
-  // Match common prefixes, ensuring we capture the full type including "de", "d'", etc.
-  // Case insensitive, matches start of string.
   const match = name.match(/^(Carrer|Avinguda|Plaça|Passeig|Passatge|Ronda|Via|Camí|Jardins|Parc|Rambla|Travessera)(\s+d(e|els|es|el|ala)|(?=\s))?/i);
   return match ? match[0].trim() : '';
 };
-
-const checkAnswer = (input, streetName) => {
-  const normInput = normalize(input);
-  const normTarget = normalize(streetName);
-  // Compare core names by removing prefixes
-  const p1 = getPrefix(input);
-  const p2 = getPrefix(streetName);
-
-  const coreInput = p1 ? normInput.replace(normalize(p1), '') : normInput;
-  const coreTarget = p2 ? normTarget.replace(normalize(p2), '') : normTarget;
-
-  return coreInput === coreTarget || normInput === normTarget;
-}
 
 // Extract first name from full name
 const getFirstName = (fullName) => {
   if (!fullName) return '';
   return fullName.trim().split(' ')[0];
-}
+};
 
 // Get custom congrats message based on score
 const getCongratsMessage = (score, maxScore) => {
@@ -64,65 +50,50 @@ const getCongratsMessage = (score, maxScore) => {
   if (percentage >= 60) return "Great job! 👏";
   if (percentage >= 40) return "Good effort! 💪";
   return "Keep practicing! 📚";
-}
+};
 
 const AppContent = () => {
-  const { deviceMode, theme, zoom } = useTheme();
-  const [gameState, setGameState] = useState('intro');
-  const [username, setUsername] = useState(localStorage.getItem('girify_username') || '');
-  const [quizStreets, setQuizStreets] = useState([]);
-  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
-  const [score, setScore] = useState(0);
-  const [feedback, setFeedback] = useState('idle');
-  const [options, setOptions] = useState([]);
+  const { deviceMode, theme } = useTheme();
 
-  // Auto-Advance State (Lifted from local storage)
-  const [autoAdvance, setAutoAdvance] = useState(() => {
-    return localStorage.getItem('girify_auto_advance') !== 'false';
-  });
+  const [state, dispatch] = useReducer(gameReducer, initialState);
 
-  // Sync Auto-Advance to LocalStorage
+  // Parse referral code from URL on load
   useEffect(() => {
-    localStorage.setItem('girify_auto_advance', autoAdvance);
-  }, [autoAdvance]);
+    const params = new URLSearchParams(window.location.search);
+    const ref = params.get('ref');
+    if (ref && !localStorage.getItem('girify_referrer')) {
+      localStorage.setItem('girify_referrer', ref);
+      console.log('[Referral] Stored referrer:', ref);
+    }
+  }, []);
 
-  // Lifted State: Hints
-  const [hintStreets, setHintStreets] = useState([]);
-  const [hintsRevealedCount, setHintsRevealedCount] = useState(0);
-
-  // Stats
-  const [startTime, setStartTime] = useState(Date.now());
-  const [quizResults, setQuizResults] = useState([]);
-  const [questionStartTime, setQuestionStartTime] = useState(Date.now());
+  // Sync Auto-Advance
+  useEffect(() => {
+    localStorage.setItem('girify_auto_advance', state.autoAdvance);
+  }, [state.autoAdvance]);
 
   const setupGame = (freshName) => {
-    // Check for registration first
-    const activeName = freshName || username;
+    const activeName = freshName || state.username;
     if (!activeName) {
-      setGameState('register');
+      dispatch({ type: 'SET_GAME_STATE', payload: 'register' });
       return;
     }
 
     const isValidType = (name) => {
       if (!name) return false;
       const lower = name.toLowerCase();
-      // Filter out non-street entities if needed, though raw filter does most work
       return !lower.includes("autopista") && !lower.includes("autovia") && !lower.includes("b-1") && !lower.includes("b-2");
     };
 
     const rawValidStreets = rawStreets.filter(s => isValidType(s.name) && s.geometry && s.geometry.length > 0);
-
     const uniqueStreetsMap = new Map();
     rawValidStreets.forEach(s => {
-      // Deduplicate: If name exists, keep the one with MORE geometry points (likely the main segment)
       if (!uniqueStreetsMap.has(s.name)) {
         uniqueStreetsMap.set(s.name, s);
       } else {
         const existing = uniqueStreetsMap.get(s.name);
-        // Calculate complexity/length roughly by number of segments/points
         const currentLength = s.geometry.flat().length;
         const existingLength = existing.geometry.flat().length;
-
         if (currentLength > existingLength) {
           uniqueStreetsMap.set(s.name, s);
         }
@@ -132,56 +103,41 @@ const AppContent = () => {
 
     if (validStreets.length === 0) {
       console.error("No valid streets found!");
-      alert("Error: No street data available. Please check the data source.");
-      setGameState('intro');
+      alert("Error: No street data available.");
+      dispatch({ type: 'SET_GAME_STATE', payload: 'intro' });
       return;
     }
 
     const todaySeed = getTodaySeed();
     const selected = selectDailyStreets(validStreets, todaySeed);
 
-    setQuizStreets(selected);
-    setCurrentQuestionIndex(0);
-    setScore(0);
-    setFeedback('idle');
-    setGameState('playing');
-    setHintsRevealedCount(0);
-    setStartTime(Date.now());
-    setQuestionStartTime(Date.now());
-    setQuizResults([]);
+    let initialOptions = [];
     if (selected.length > 0) {
-      generateOptions(selected[0], validStreets);
+      initialOptions = generateOptionsList(selected[0], validStreets);
     }
+
+    dispatch({
+      type: 'START_GAME',
+      payload: {
+        quizStreets: selected,
+        initialOptions: initialOptions
+      }
+    });
   };
 
-  const generateOptions = (target, allStreets) => {
+  const generateOptionsList = (target, allStreets) => {
     const targetPrefix = getPrefix(target.name);
-
-    // Filter distractors: must have same prefix and not be the target
-    let potentialDistractors = allStreets.filter(s =>
+    let pool = allStreets.filter(s =>
       s.id !== target.id &&
       getPrefix(s.name) === targetPrefix
     );
 
-    // If we don't have enough strict matches, we might just have to fallback to randoms
-    // But per user request, we want SAME prefix.
-    // Ideally, the question selection itself should ensure enough distractors exist, but here we handle the generated set.
-
-    let pool = potentialDistractors;
     if (pool.length < 3) {
-      // Fallback: relax prefix requirement if absolutely necessary, but prioritize strictness.
-      // Or, just pick randoms but this violates the "SAME prefix" rule. 
-      // Better strategy: The game selects questions. If a question is "Via Augusta", we need "Via ..." distractors.
-      // If none exist, it looks broken. 
-      // We will fill with *any* street if strict match fails, but this should be rare for common prefixes.
       pool = allStreets.filter(s => s.id !== target.id);
     }
 
-    // Pick 3 random distractors from the pool
     const distractors = [];
     const usedIds = new Set([target.id]);
-
-    // Shuffle pool first to pick randoms
     pool.sort(() => 0.5 - Math.random());
 
     for (const street of pool) {
@@ -191,19 +147,16 @@ const AppContent = () => {
         usedIds.add(street.id);
       }
     }
-
-    // Shuffle final options
     const opts = [target, ...distractors].sort(() => 0.5 - Math.random());
-    setOptions(opts);
+    return opts;
   };
 
-  const currentStreet = gameState === 'playing' ? quizStreets[currentQuestionIndex] : null;
+  const currentStreet = state.gameState === 'playing' ? state.quizStreets[state.currentQuestionIndex] : null;
 
   // Hint Calculation Effect
   useEffect(() => {
-    setHintsRevealedCount(0); // Reset on new street
     if (!currentStreet) {
-      setHintStreets([]);
+      dispatch({ type: 'SET_HINT_STREETS', payload: [] });
       return;
     }
 
@@ -213,7 +166,6 @@ const AppContent = () => {
     try {
       const currentGeo = turf.multiLineString(toTurf(currentStreet.geometry));
 
-      // Strategy 1: Intersections
       for (const street of rawStreets) {
         if (street.id === currentStreet.id) continue;
         const lower = street.name.toLowerCase();
@@ -228,178 +180,162 @@ const AppContent = () => {
         }
       }
 
-      // Strategy 2: Fallback (Proximity) if < 3 hints
       if (hints.length < 3) {
         const currentCentroid = turf.centroid(currentGeo);
         const candidates = [];
-
         for (const street of rawStreets) {
           if (street.id === currentStreet.id) continue;
-          if (hints.some(h => h.id === street.id)) continue; // Already added
-
+          if (hints.some(h => h.id === street.id)) continue;
           const lower = street.name.toLowerCase();
           if (lower.includes("autopista") || lower.includes("autovia") || lower.includes("ronda")) continue;
-
           if (street.geometry) {
-            // Approximate distance using first point or centroid (expensive?)
-            // Optimized: use first point of first segment
             const p1 = street.geometry[0][0];
-            const otherPoint = turf.point([p1[1], p1[0]]); // Swap for GeoJSON
+            const otherPoint = turf.point([p1[1], p1[0]]);
             const dist = turf.distance(currentCentroid, otherPoint);
             candidates.push({ street, dist });
           }
         }
-
-        // Sort by distance and take what we need
         candidates.sort((a, b) => a.dist - b.dist);
         const needed = 3 - hints.length;
         const extra = candidates.slice(0, needed).map(c => c.street);
         hints = [...hints, ...extra];
       }
-
     } catch (e) {
       console.error("Turf error", e);
     }
-
-    setHintStreets(hints);
+    dispatch({ type: 'SET_HINT_STREETS', payload: hints });
   }, [currentStreet]);
 
   const handleSelectAnswer = (selectedStreet) => {
-    // If we are already transitioning, ignore clicks (simple debounce)
-    if (feedback === 'transitioning') return;
+    // Always process answer immediately on click
+    // The only difference with autoAdvance is whether we auto-move to next question
+    processAnswer(selectedStreet);
+  };
+
+  const handleSubmit = () => {
+    if (state.selectedAnswer) {
+      processAnswer(state.selectedAnswer);
+    }
+  };
+
+  const processAnswer = (selectedStreet) => {
+    if (state.feedback === 'transitioning') return;
 
     const isCorrect = selectedStreet.id === currentStreet.id;
-    // If answer before timer starts (during fly animation), count as 0s or handle gracefully
-    const timeElapsed = questionStartTime
-      ? (Date.now() - questionStartTime) / 1000
-      : 0; // Instant answer!
+    const timeElapsed = state.questionStartTime
+      ? (Date.now() - state.questionStartTime) / 1000
+      : 0;
 
-    // Calculate time-based score (0-100 points) with hint penalty
-    const points = calculateTimeScore(timeElapsed, isCorrect, hintsRevealedCount);
+    const points = calculateTimeScore(timeElapsed, isCorrect, state.hintsRevealedCount);
 
     const result = {
       street: currentStreet,
-      userAnswer: selectedStreet.name, // Store user answer for summary
+      userAnswer: selectedStreet.name,
       status: isCorrect ? 'correct' : 'failed',
       time: timeElapsed,
       points: points,
-      hintsUsed: hintsRevealedCount
+      hintsUsed: state.hintsRevealedCount
     };
 
-    setQuizResults(prev => [...prev, result]);
+    dispatch({
+      type: 'ANSWER_SUBMITTED',
+      payload: { result, points }
+    });
 
-    // Add points to total score
-    setScore(s => s + points);
-
-    // Briefly lock input before moving on
-    setFeedback('transitioning');
-
-    // Check Auto-Advance Setting (State)
-    console.log("Auto Advance State:", autoAdvance); // Debug
-
-    if (autoAdvance) {
-      // Auto-advance after 500ms
+    if (state.autoAdvance) {
       setTimeout(() => {
         handleNext();
       }, 5000);
     }
-    // Else: Wait for manual "Next" click (which calls handleNext)
-    // Else: Wait for manual "Next" click (which calls handleNext)
   };
 
   const handleNext = () => {
-    if (currentQuestionIndex + 1 < quizStreets.length) {
-      const nextIndex = currentQuestionIndex + 1;
-      setCurrentQuestionIndex(nextIndex);
-      setFeedback('idle');
-      // setQuestionStartTime(Date.now()); // Handled by Effect
-      setHintsRevealedCount(0);
+    // Guard: only proceed if we're in transitioning state (answer was submitted)
+    // This prevents double-clicks and stale closure issues
+    if (state.feedback !== 'transitioning') {
+      console.warn('[handleNext] Blocked - feedback is:', state.feedback);
+      return;
+    }
 
-      // Generate options for next
-      generateOptions(quizStreets[nextIndex], rawStreets);
-    } else {
-      // Mark today as played when quiz is completed
-      try {
-        if (!isReplay) {
-          markTodayAsPlayed();
+    const nextIndex = state.currentQuestionIndex + 1;
 
-          // Save to history
-          const history = JSON.parse(localStorage.getItem('girify_history') || '[]');
-          const newRecord = {
-            date: getTodaySeed(),
-            score: score,
-            avgTime: (quizResults.reduce((acc, curr) => acc + (curr.time || 0), 0) / quizResults.length).toFixed(1),
-            timestamp: Date.now()
-          };
-          history.push(newRecord);
-          localStorage.setItem('girify_history', JSON.stringify(history));
+    // Check if game is over
+    if (nextIndex >= state.quizStreets.length) {
+      if (state.gameState === 'playing') {
+        try {
+          if (!hasPlayedToday()) {
+            markTodayAsPlayed();
+            const history = JSON.parse(localStorage.getItem('girify_history') || '[]');
+            const avgTime = state.quizResults.length ? (state.quizResults.reduce((acc, curr) => acc + (curr.time || 0), 0) / state.quizResults.length).toFixed(1) : 0;
 
-          // Save to Global Leaderboard
-          if (username) {
-            saveScore(username, score, newRecord.avgTime).catch(err => console.error("Leaderboard save failed:", err));
+            const newRecord = {
+              date: getTodaySeed(),
+              score: state.score,
+              avgTime: avgTime,
+              timestamp: Date.now()
+            };
+            history.push(newRecord);
+            localStorage.setItem('girify_history', JSON.stringify(history));
+
+            if (state.username) {
+              saveScore(state.username, state.score, newRecord.avgTime).catch(err => console.error("Leaderboard save failed:", err));
+            }
           }
+        } catch (e) {
+          console.error("Error saving", e);
         }
-      } catch (e) {
-        console.error("Error saving game data:", e);
       }
+      dispatch({ type: 'NEXT_QUESTION', payload: {} });
+    } else {
+      const nextStreet = state.quizStreets[nextIndex];
+      const nextOptions = generateOptionsList(nextStreet, rawStreets);
 
-      setGameState('summary');
+      dispatch({
+        type: 'NEXT_QUESTION',
+        payload: { options: nextOptions }
+      });
     }
   };
 
   const handleRegister = (name) => {
-    setUsername(name);
     localStorage.setItem('girify_username', name);
-    setupGame(name); // Start game immediately after registration
+    dispatch({ type: 'SET_USERNAME', payload: name });
+    setupGame(name);
   };
-
-  const [activePage, setActivePage] = useState(null); // 'leaderboard', 'settings', 'about' or null
 
   const handleLogout = () => {
-    setUsername('');
     localStorage.removeItem('girify_username');
-    localStorage.removeItem('girify_history'); // Optional: clear history too if desired
-    setGameState('intro'); // Go back to intro
-    setActivePage(null); // Close settings
+    dispatch({ type: 'LOGOUT' });
   };
+
+  const handleOpenPage = (page) => {
+    dispatch({ type: 'SET_ACTIVE_PAGE', payload: page });
+  }
 
   return (
     <div className={`fixed inset-0 w-full h-full flex flex-col overflow-hidden transition-colors duration-500
             ${theme === 'dark' ? 'bg-slate-950 text-white' : 'bg-slate-50 text-slate-900'}
         `}>
-      {/* Top Navigation */}
-      <TopBar onOpenPage={setActivePage} />
+      <TopBar onOpenPage={handleOpenPage} />
 
-      {/* Unified Question Banner - Visible on both Mobile and Desktop */}
-      {gameState === 'playing' && (
-        <div className="absolute top-12 left-0 right-0 z-[1000] flex flex-col shadow-lg">
-          <div className="bg-[#000080] text-white font-bold text-center py-3 px-3 uppercase tracking-wider text-xs sm:text-sm flex justify-between items-center">
-            <span>Which street is highlighted?</span>
-            <span className="opacity-80 font-mono">Question {currentQuestionIndex + 1} / {quizStreets.length}</span>
-          </div>
-          <div className="w-full bg-slate-200 dark:bg-slate-700 h-1.5">
-            <div
-              className="bg-sky-500 h-1.5 transition-all duration-500 shadow-[0_0_8px_rgba(14,165,233,0.5)]"
-              style={{ width: `${((currentQuestionIndex + 1) / quizStreets.length) * 100}%` }}
-            />
-          </div>
-        </div>
+      {state.gameState === 'playing' && (
+        <Quiz.Banner
+          currentQuestionIndex={state.currentQuestionIndex}
+          totalQuestions={state.quizStreets.length}
+        />
       )}
 
-      {/* Main Content Area - Full Viewport Responsive */}
       <div className={`flex-1 flex ${['mobile', 'tablet'].includes(deviceMode) ? 'flex-col' : 'flex-row'} overflow-hidden ${theme === 'dark' ? 'bg-slate-900' : 'bg-slate-50'}`}>
 
-        {/* Main Content (Map) - Takes available space */}
         <div className={`relative z-0 min-w-0 ${['mobile', 'tablet'].includes(deviceMode) ? 'flex-1 w-full order-1' : 'flex-1 h-full order-1'}`}>
           <MapArea
             currentStreet={currentStreet}
-            hintStreets={gameState === 'playing' ? hintStreets.slice(0, hintsRevealedCount) : []}
+            hintStreets={state.gameState === 'playing' ? state.hintStreets.slice(0, state.hintsRevealedCount) : []}
             theme={theme}
           />
         </div>
 
-        {/* Sidebar (Quiz Interface) - Fixed width on Desktop, order changes on mobile */}
-        {gameState === 'playing' && (
+        {state.gameState === 'playing' && (
           <div className={`
                   relative z-20 bg-white/95 dark:bg-slate-900/95 backdrop-blur-sm shadow-xl shrink-0
                   ${['mobile', 'tablet'].includes(deviceMode)
@@ -407,27 +343,43 @@ const AppContent = () => {
               : 'w-[350px] lg:w-[400px] h-full order-2 border-l border-slate-200 dark:border-slate-800'
             }
                `}>
-            <QuizInterface
-              questionIndex={currentQuestionIndex}
-              totalQuestions={quizStreets.length}
-              score={score}
-              options={options}
-              onSelectOption={handleSelectAnswer}
-              onNext={handleNext}
-              feedback={feedback}
-              correctName={currentStreet?.name}
-              hintStreets={hintStreets}
-              onHintReveal={() => setHintsRevealedCount(h => h + 1)}
-            />
+            <Quiz>
+              <Quiz.Container keyProp={state.currentQuestionIndex}>
+                <Quiz.Content>
+                  <Quiz.Options
+                    options={state.options}
+                    onSelect={handleSelectAnswer}
+                    selectedAnswer={state.selectedAnswer}
+                    feedback={state.feedback}
+                    correctName={currentStreet?.name}
+                  />
+                </Quiz.Content>
+
+                <Quiz.Hints
+                  hintStreets={state.hintStreets}
+                  hintsRevealed={state.hintsRevealedCount}
+                  onReveal={() => dispatch({ type: 'REVEAL_HINT' })}
+                  feedback={state.feedback}
+                />
+
+                {/* Show Next button after answer is submitted (feedback=transitioning) */}
+                {state.feedback === 'transitioning' && !state.autoAdvance && (
+                  <Quiz.NextButton
+                    onNext={handleNext}
+                    isLastQuestion={state.currentQuestionIndex >= state.quizStreets.length - 1}
+                    isSubmit={false}
+                    feedback={state.feedback}
+                  />
+                )}
+              </Quiz.Container>
+            </Quiz>
           </div>
         )}
       </div>
 
-      {/* Overlays (Intro / Summary / Register) - Absolute covering everything */}
-      {gameState === 'intro' && (
+      {state.gameState === 'intro' && (
         <div className="fixed inset-0 z-10 flex flex-col items-center justify-center p-6 text-center bg-slate-50/80 dark:bg-slate-950/80 backdrop-blur-sm pointer-events-auto overflow-hidden">
           <div className="max-w-xs md:max-w-md w-full flex flex-col items-center">
-            {/* Logo Image */}
             <img
               src={logoImage}
               alt="Girify Logo"
@@ -440,16 +392,14 @@ const AppContent = () => {
             <button
               onClick={() => {
                 const seen = localStorage.getItem('girify_instructions_seen');
-                // If user is registered or has seen instructions, skip them
-                if (username || seen === 'true') {
-                  // Skip instructions directly to game or register
-                  if (username) {
+                if (state.username || seen === 'true') {
+                  if (state.username) {
                     setupGame();
                   } else {
-                    setGameState('register');
+                    dispatch({ type: 'SET_GAME_STATE', payload: 'register' });
                   }
                 } else {
-                  setGameState('instructions');
+                  dispatch({ type: 'SET_GAME_STATE', payload: 'instructions' });
                 }
               }}
               className={`w-full max-w-xs px-8 py-4 rounded-full font-bold text-lg tracking-widest hover:scale-105 transition-all duration-300 shadow-xl animate-bounce-subtle
@@ -469,7 +419,7 @@ const AppContent = () => {
         </div>
       )}
 
-      {gameState === 'instructions' && (
+      {state.gameState === 'instructions' && (
         <div className={`absolute inset-0 z-[2000] flex flex-col items-center justify-center p-6 text-center backdrop-blur-sm transition-colors duration-1000
                 ${theme === 'dark' ? 'bg-slate-950/80 text-white' : 'bg-slate-50/80 text-slate-900'}
             `}>
@@ -495,72 +445,66 @@ const AppContent = () => {
           <button
             onClick={() => {
               localStorage.setItem('girify_instructions_seen', 'true');
-              if (username) {
+              if (state.username) {
                 setupGame();
               } else {
-                setGameState('register');
+                dispatch({ type: 'SET_GAME_STATE', payload: 'register' });
               }
             }}
             className="px-8 py-3 bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl shadow-lg font-bold text-lg transition-all transform hover:scale-105"
           >
-            {username ? "I'M READY!" : "NEXT"}
+            {state.username ? "I'M READY!" : "NEXT"}
           </button>
         </div>
       )}
 
-      {gameState === 'register' && (
+      {state.gameState === 'register' && (
         <RegisterPanel
           theme={theme}
           onRegister={handleRegister}
         />
       )}
 
-      {gameState === 'summary' && (
+      {state.gameState === 'summary' && (
         <div className="absolute inset-0 z-50 pointer-events-auto">
           <SummaryScreen
-            score={score}
-            total={quizStreets.length}
+            score={state.score}
+            total={state.quizStreets.length}
             theme={theme}
-            username={username}
-            onRestart={setupGame}
-            quizResults={quizResults}
-            quizStreets={quizStreets}
+            username={state.username}
+            onRestart={() => setupGame()}
+            quizResults={state.quizResults}
+            quizStreets={state.quizStreets}
           />
         </div>
       )}
 
-      {/* Pages Overlays */}
       <AnimatePresence>
-        {activePage === 'leaderboard' && <LeaderboardScreen onClose={() => setActivePage(null)} />}
-        {activePage === 'settings' && <SettingsScreen onClose={() => setActivePage(null)} onLogout={handleLogout} autoAdvance={autoAdvance} setAutoAdvance={setAutoAdvance} />}
-        {activePage === 'about' && <AboutScreen onClose={() => setActivePage(null)} />}
-        {activePage === 'profile' && <ProfileScreen onClose={() => setActivePage(null)} username={username} />}
+        {state.activePage === 'leaderboard' && <LeaderboardScreen key="leaderboard" onClose={() => handleOpenPage(null)} currentUser={state.username} />}
+        {state.activePage === 'settings' && <SettingsScreen key="settings" onClose={() => handleOpenPage(null)} onLogout={handleLogout} autoAdvance={state.autoAdvance} setAutoAdvance={(val) => dispatch({ type: 'SET_AUTO_ADVANCE', payload: val })} />}
+        {state.activePage === 'about' && <AboutScreen key="about" onClose={() => handleOpenPage(null)} />}
+        {state.activePage === 'profile' && <ProfileScreen key="profile" onClose={() => handleOpenPage(null)} username={state.username} />}
       </AnimatePresence>
 
     </div>
   );
 };
 
-// Extracted Summary Component for cleanliness
+// SummaryScreen remains largely unchanged but ensures it receives props
 const SummaryScreen = ({ score, total, theme, username, onRestart, quizResults, quizStreets }) => {
-  const [view, setView] = useState('summary'); // 'summary' or 'rankings'
+  const [view, setView] = useState('summary');
   const [curiosityRevealed, setCuriosityRevealed] = useState(false);
 
   const totalTime = quizResults.reduce((acc, curr) => acc + (curr.time || 0), 0);
   const avgTime = quizResults.length ? (totalTime / quizResults.length).toFixed(1) : 0;
   const maxPossibleScore = total * 100;
-
-  // Get contextual curiosity based on the streets played
   const curiosity = useMemo(() => getCuriosityByStreets(quizStreets), [quizStreets]);
-
-  // Dynamic Image State
   const [displayImage, setDisplayImage] = useState(curiosity.image);
 
   useEffect(() => {
     let active = true;
     const loadDynamicImage = async () => {
       if (curiosity.title) {
-        // Try fetching specific location image
         const url = await fetchWikiImage(curiosity.title);
         if (active && url) {
           setDisplayImage(url);
@@ -571,31 +515,30 @@ const SummaryScreen = ({ score, total, theme, username, onRestart, quizResults, 
     return () => { active = false; };
   }, [curiosity]);
 
-  // Load history for rankings
   const history = JSON.parse(localStorage.getItem('girify_history') || '[]');
-  const personalBest = history.length ? Math.max(...history.map(h => h.score)) : score;
-  const todayScore = history.find(h => h.date === getTodaySeed())?.score || score;
 
   const handleShare = async () => {
-    const shareUrl = window.location.href;
+    // Include referral code in share URL
+    const baseUrl = window.location.origin;
+    const refCode = username ? username.toLowerCase().replace(/[^a-z0-9]/g, '') : '';
+    const shareUrl = refCode ? `${baseUrl}?ref=${refCode}` : baseUrl;
     const text = `🌆 Girify Daily Challenge:\nScore: ${score}/${maxPossibleScore}\nAvg Time: ${avgTime}s\n\nCan you beat me? Play here: ${shareUrl} #Girify #Barcelona`;
 
     const performShare = async () => {
-      if (navigator.share) {
-        try {
+      try {
+        if (navigator.share) {
           await navigator.share({
             title: 'Girify - Barcelona Street Quiz',
             text: text,
           });
           return true;
-        } catch (err) {
-          if (err.name !== 'AbortError') console.error(err);
-          return false;
+        } else {
+          await navigator.clipboard.writeText(text);
+          alert('Results copied to clipboard!');
+          return true;
         }
-      } else {
-        await navigator.clipboard.writeText(text);
-        alert('Results copied to clipboard!');
-        return true;
+      } catch (err) {
+        return false;
       }
     };
 
@@ -616,14 +559,12 @@ const SummaryScreen = ({ score, total, theme, username, onRestart, quizResults, 
           </div>
           <h2 className="text-2xl font-black mb-4 tracking-tight">{getCongratsMessage(score, maxPossibleScore).replace('!', `, ${getFirstName(username)}!`)}</h2>
 
-          {/* Total Score */}
           <div className={`w-full p-4 rounded-2xl border mb-4 ${theme === 'dark' ? 'bg-slate-800/50 border-slate-700' : 'bg-white border-slate-100'}`}>
             <span className="text-[10px] uppercase tracking-widest text-slate-500 mb-1 font-bold block">Your Score</span>
             <span className="text-3xl font-black text-sky-500">{score}</span>
             <span className="text-xs text-slate-400 ml-1">/ {maxPossibleScore}</span>
           </div>
 
-          {/* 10 Questions Breakdown */}
           <div className="w-full mb-4">
             <h3 className="text-[10px] uppercase tracking-widest text-slate-500 mb-2 font-bold">Question Breakdown</h3>
             <div className="grid grid-cols-5 gap-1.5">
@@ -646,7 +587,6 @@ const SummaryScreen = ({ score, total, theme, username, onRestart, quizResults, 
             </div>
           </div>
 
-          {/* Share to Unlock Curiosity */}
           <div className={`w-full p-4 rounded-2xl border mb-3 ${theme === 'dark' ? 'bg-sky-500/10 border-sky-500/20' : 'bg-sky-50 border-sky-100'}`}>
             <p className="text-sky-500 font-bold mb-1 text-sm">🎁 City Curiosity Unlocked!</p>
             <p className="text-[10px] mb-3 text-slate-500 font-medium">Share your results to reveal a secret about Barcelona.</p>
@@ -654,8 +594,13 @@ const SummaryScreen = ({ score, total, theme, username, onRestart, quizResults, 
               onClick={handleShare}
               className="w-full py-3 bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl shadow-lg font-bold text-sm transition-all transform hover:scale-105 flex items-center justify-center gap-2"
             >
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" /></svg>
               Share & Reveal
+            </button>
+          </div>
+
+          <div className="flex gap-2 w-full justify-center">
+            <button onClick={() => setView('rankings')} className={`px-6 py-2 rounded-xl text-xs font-bold uppercase tracking-widest bg-slate-200 dark:bg-slate-800 text-slate-600 dark:text-slate-400`}>
+              Rankings
             </button>
           </div>
         </motion.div>
@@ -663,87 +608,31 @@ const SummaryScreen = ({ score, total, theme, username, onRestart, quizResults, 
 
       {view === 'rankings' && (
         <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="flex flex-col items-center w-full max-w-sm">
-          <h2 className="text-3xl font-black mb-1 tracking-tight">Your Rankings</h2>
-          <p className="text-slate-500 mb-8 font-medium text-sm">Personal achievement board</p>
-
-          <div className="grid grid-cols-2 gap-4 w-full">
-            <div className={`p-4 rounded-2xl flex flex-col items-center justify-center ${theme === 'dark' ? 'bg-slate-800' : 'bg-white shadow-sm border border-slate-100'}`}>
-              <span className="text-xs uppercase font-bold opacity-60">Total Score</span>
-              <span className="text-3xl font-black text-sky-500">{score}</span>
-            </div>
-            <div className={`p-4 rounded-2xl flex flex-col items-center justify-center ${theme === 'dark' ? 'bg-slate-800' : 'bg-white shadow-sm border border-slate-100'}`}>
-              <span className="text-xs uppercase font-bold opacity-60">Questions</span>
-              <span className="text-3xl font-black">{quizResults.length}/10</span>
-            </div>
-          </div>
+          <h2 className="text-2xl font-black mb-4">Rankings</h2>
           <div className="w-full space-y-2 mb-8">
-            <h3 className="text-left text-[10px] uppercase font-bold tracking-widest text-slate-500 ml-2">Recent Challenges</h3>
-            {history.slice(-3).reverse().map((record, i) => (
-              <div key={record.timestamp} className={`flex justify-between items-center p-3 rounded-2xl border ${theme === 'dark' ? 'bg-slate-800/30 border-slate-700' : 'bg-slate-50 border-slate-100'}`}>
-                <div className="text-left">
-                  <p className="text-[10px] font-bold text-slate-500">{new Date(record.timestamp).toLocaleDateString()}</p>
-                  <p className="text-sm font-black">{record.score} pts</p>
-                </div>
-                <div className="text-right">
-                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-tighter">{record.avgTime}s avg</p>
-                </div>
+            {history.slice(-3).reverse().map((record) => (
+              <div key={record.timestamp} className="p-3 border rounded-xl flex justify-between">
+                <span>{new Date(record.timestamp).toLocaleDateString()}</span>
+                <span className="font-bold">{record.score}</span>
               </div>
             ))}
           </div>
-
-
-          <div className="flex gap-2 w-full justify-center">
-            <button
-              onClick={() => setView('summary')}
-              className={`px-6 py-2 rounded-xl text-xs font-bold uppercase tracking-widest bg-slate-200 dark:bg-slate-800 text-slate-600 dark:text-slate-400`}
-            >
-              Back
-            </button>
-          </div>
+          <button onClick={() => setView('summary')} className="px-6 py-2 bg-slate-200 rounded-lg">Back</button>
         </motion.div>
       )}
 
       {view === 'breakdown' && (
         <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="flex flex-col items-center w-full max-w-md h-full pb-20">
-          <h2 className="text-2xl font-black mb-6 tracking-tight">Game Breakdown</h2>
-          <div className="w-full flex-1 overflow-y-auto space-y-3 pr-2">
-            {quizResults.map((res, idx) => (
-              <div key={idx} className={`p-4 rounded-2xl border text-left ${theme === 'dark' ? 'bg-slate-800/50 border-slate-700' : 'bg-white border-slate-100'}`}>
-                <div className="flex justify-between items-start mb-2">
-                  <span className="text-[10px] font-bold uppercase tracking-widest opacity-60">Question {idx + 1}</span>
-                  <span className={`text-xs font-black px-2 py-0.5 rounded ${res.status === 'correct' ? 'bg-emerald-500/10 text-emerald-500' : 'bg-rose-500/10 text-rose-500'}`}>
-                    {res.status === 'correct' ? 'CORRECT' : 'WRONG'}
-                  </span>
-                </div>
-                <p className={`font-bold text-sm mb-1 ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>{res.street.name}</p>
-
-                {res.status !== 'correct' && (
-                  <div className="text-xs space-y-1 mt-2 p-2 rounded bg-slate-100 dark:bg-slate-800">
-                    <div className="flex gap-2">
-                      <span className="opacity-50 w-16">You Picked:</span>
-                      <span className="text-rose-500 font-medium line-clamp-1">{res.userAnswer}</span>
-                    </div>
-                    <div className="flex gap-2">
-                      <span className="opacity-50 w-16">Correct:</span>
-                      <span className="text-emerald-500 font-medium line-clamp-1">{res.street.name}</span>
-                    </div>
-                  </div>
-                )}
-                {res.status === 'correct' && (
-                  <p className="text-xs text-emerald-500 font-medium mt-1">✓ Correctly identified</p>
-                )}
+          <h2 className="text-2xl font-black mb-4">Breakdown</h2>
+          <div className="w-full flex-1 overflow-y-auto space-y-2">
+            {quizResults.map((r, i) => (
+              <div key={i} className="p-2 border rounded text-left">
+                <div className="font-bold">{r.street.name}</div>
+                <div className={`text-xs ${r.status === 'correct' ? 'text-emerald-500' : 'text-red-500'}`}>{r.status}</div>
               </div>
             ))}
           </div>
-
-          <div className="pt-4 w-full flex justify-center">
-            <button
-              onClick={() => setView('summary')}
-              className={`px-8 py-3 rounded-xl font-bold uppercase tracking-widest shadow-lg ${theme === 'dark' ? 'bg-slate-700 text-white' : 'bg-slate-200 text-slate-800'}`}
-            >
-              Back to Summary
-            </button>
-          </div>
+          <button onClick={() => setView('summary')} className="px-6 py-2 bg-slate-200 rounded-lg mt-4">Back</button>
         </motion.div>
       )}
 
@@ -752,11 +641,10 @@ const SummaryScreen = ({ score, total, theme, username, onRestart, quizResults, 
           <h2 className="text-xs font-black mb-1 text-sky-500 uppercase tracking-[0.3em]">City Curiosity</h2>
           <h3 className="text-2xl font-black mb-4 text-slate-800 dark:text-white">{curiosity.title}</h3>
 
-          <div className={`rounded-[2.5rem] overflow-hidden mb-8 shadow-2xl border ${theme === 'dark' ? 'bg-slate-800/50 border-slate-700' : 'bg-white border-slate-200'}`}>
+          <div className="rounded-[2.5rem] overflow-hidden mb-8 shadow-2xl border">
             <img
               src={displayImage}
               alt="Barcelona"
-              onError={(e) => { e.target.onerror = null; e.target.src = "https://images.unsplash.com/photo-1583422409516-2895a77efded?w=800"; }}
               className="w-full h-56 object-cover transition-opacity duration-500"
             />
             <div className="p-8">
@@ -770,7 +658,6 @@ const SummaryScreen = ({ score, total, theme, username, onRestart, quizResults, 
           >
             PLAY AGAIN
           </button>
-          <p className="text-slate-500 text-[10px] font-bold uppercase tracking-widest mt-6">See you tomorrow for more!</p>
         </motion.div>
       )}
     </div>

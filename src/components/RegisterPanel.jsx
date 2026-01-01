@@ -1,7 +1,43 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { auth, googleProvider } from '../firebase';
-import { signInWithPopup, createUserWithEmailAndPassword, signInWithEmailAndPassword, updateProfile } from 'firebase/auth';
+import { signInWithPopup, createUserWithEmailAndPassword, signInWithEmailAndPassword, updateProfile, sendEmailVerification } from 'firebase/auth';
+import { ensureUserProfile, recordReferral } from '../utils/social';
+
+// Username validation constants
+const MAX_USERNAME_LENGTH = 20;
+const USERNAME_REGEX = /^[a-zA-Z0-9_]+$/;
+
+// Basic profanity filter (add more as needed)
+const BLOCKED_WORDS = [
+    'admin', 'moderator', 'girify', 'support', 'official',
+    'fuck', 'shit', 'ass', 'bitch', 'dick', 'cock', 'pussy',
+    'nazi', 'hitler', 'nigger', 'faggot', 'retard'
+];
+
+const validateUsername = (username) => {
+    if (!username || username.trim().length === 0) {
+        return { valid: false, error: 'Username is required' };
+    }
+    if (username.length > MAX_USERNAME_LENGTH) {
+        return { valid: false, error: `Username must be ${MAX_USERNAME_LENGTH} characters or less` };
+    }
+    if (username.length < 3) {
+        return { valid: false, error: 'Username must be at least 3 characters' };
+    }
+    if (!USERNAME_REGEX.test(username)) {
+        return { valid: false, error: 'Username can only contain letters, numbers, and underscores' };
+    }
+
+    const lowerName = username.toLowerCase();
+    for (const word of BLOCKED_WORDS) {
+        if (lowerName.includes(word)) {
+            return { valid: false, error: 'This username is not allowed' };
+        }
+    }
+
+    return { valid: true, error: null };
+};
 
 const RegisterPanel = ({ theme, onRegister }) => {
     const [isSignUp, setIsSignUp] = useState(false);
@@ -18,6 +54,22 @@ const RegisterPanel = ({ theme, onRegister }) => {
             const result = await signInWithPopup(auth, googleProvider);
             const user = result.user;
             const displayName = user.displayName || user.email?.split('@')[0] || 'User';
+
+            // Ensure user profile exists
+            await ensureUserProfile(displayName);
+
+            // Record referral if exists
+            const referrer = localStorage.getItem('girify_referrer');
+            if (referrer && referrer !== displayName) {
+                await recordReferral(referrer, displayName);
+                localStorage.removeItem('girify_referrer');
+            }
+
+            // Save joined date
+            if (!localStorage.getItem('girify_joined')) {
+                localStorage.setItem('girify_joined', new Date().toLocaleDateString());
+            }
+
             onRegister(displayName);
         } catch (err) {
             console.error("Google Login failed", err);
@@ -39,6 +91,15 @@ const RegisterPanel = ({ theme, onRegister }) => {
             return;
         }
 
+        // Validate username on signup
+        if (isSignUp) {
+            const validation = validateUsername(name);
+            if (!validation.valid) {
+                setError(validation.error);
+                return;
+            }
+        }
+
         try {
             setLoading(true);
             setError('');
@@ -48,8 +109,40 @@ const RegisterPanel = ({ theme, onRegister }) => {
             if (isSignUp) {
                 userCredential = await createUserWithEmailAndPassword(auth, email, password);
                 await updateProfile(userCredential.user, { displayName: name });
+
+                // Send verification email
+                await sendEmailVerification(userCredential.user);
+
+                // Ensure user profile exists
+                await ensureUserProfile(name);
+
+                // Record referral if exists
+                const referrer = localStorage.getItem('girify_referrer');
+                if (referrer && referrer !== name) {
+                    await recordReferral(referrer, name);
+                    localStorage.removeItem('girify_referrer');
+                }
+
+                // Save joined date
+                if (!localStorage.getItem('girify_joined')) {
+                    localStorage.setItem('girify_joined', new Date().toLocaleDateString());
+                }
+
+                setError('');
+                setLoading(false);
+                alert('✉️ Verification email sent! Please check your inbox and verify your email before signing in.');
+                setIsSignUp(false); // Switch to sign-in mode
+                return;
             } else {
                 userCredential = await signInWithEmailAndPassword(auth, email, password);
+
+                // Check if email is verified
+                if (!userCredential.user.emailVerified) {
+                    setError('Please verify your email before signing in. Check your inbox for the verification link.');
+                    setLoading(false);
+                    return;
+                }
+
                 displayName = userCredential.user.displayName || email.split('@')[0];
             }
 
@@ -62,6 +155,7 @@ const RegisterPanel = ({ theme, onRegister }) => {
             if (err.code === 'auth/wrong-password') msg = 'Incorrect password.';
             if (err.code === 'auth/email-already-in-use') msg = 'Email already in use.';
             if (err.code === 'auth/weak-password') msg = 'Password should be at least 6 characters.';
+            if (err.code === 'auth/invalid-credential') msg = 'Invalid email or password.';
             setError(msg);
             setLoading(false);
         }
