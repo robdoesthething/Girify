@@ -49,7 +49,7 @@ const LeaderboardScreen = ({ onClose, currentUser }) => {
 
     return (
         <>
-            <div className={`fixed inset-0 z-[8000] flex flex-col pt-16 pb-6 px-4 md:px-8 overflow-hidden pointer-events-auto backdrop-blur-md ${theme === 'dark' ? 'bg-slate-950 text-white' : 'bg-slate-50 text-slate-900'}`}>
+            <div className={`fixed inset-0 z-[8000] flex flex-col pt-16 pb-6 px-4 md:px-8 overflow-hidden pointer-events-auto backdrop-blur-md ${theme === 'dark' ? 'bg-neutral-950 text-white' : 'bg-slate-50 text-slate-900'}`}>
                 {/* Header */}
                 <div className="flex justify-between items-center max-w-2xl mx-auto w-full mb-6 shrink-0">
                     <h2 className="text-3xl font-black tracking-tight text-slate-900 dark:text-white">{t('leaderboard')}</h2>
@@ -62,15 +62,15 @@ const LeaderboardScreen = ({ onClose, currentUser }) => {
                 </div>
 
                 {/* Tabs */}
-                <div className="max-w-2xl mx-auto w-full flex p-1 mb-6 rounded-xl bg-slate-200 dark:bg-slate-800 shrink-0">
+                <div className="max-w-2xl mx-auto w-full flex p-1 mb-6 rounded-xl bg-slate-200 dark:bg-neutral-800 shrink-0">
                     {TABS.map(tab => (
                         <button
                             key={tab.id}
                             onClick={() => setPeriod(tab.id)}
                             className={`flex-1 py-2 text-sm font-bold rounded-lg transition-all
                                 ${period === tab.id
-                                    ? 'bg-white dark:bg-slate-700 shadow-sm text-sky-500'
-                                    : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'}
+                                    ? 'bg-white dark:bg-neutral-700 shadow-sm text-sky-500'
+                                    : 'text-slate-500 hover:text-slate-700 dark:hover:text-neutral-300'}
                             `}
                         >
                             {tab.label}
@@ -112,7 +112,7 @@ const LeaderboardScreen = ({ onClose, currentUser }) => {
                                     key={s.id || index}
                                     onClick={() => setSelectedUser(s.username)}
                                     className={`flex items-center p-4 rounded-2xl border cursor-pointer hover:scale-[1.02] transition-transform
-                                    ${theme === 'dark' ? 'bg-slate-900/50 border-slate-800 text-slate-100' : 'bg-white border-slate-100 text-slate-900'}
+                                    ${theme === 'dark' ? 'bg-neutral-900/50 border-neutral-800 text-neutral-100' : 'bg-white border-slate-100 text-slate-900'}
                                     ${index < 3 ? 'border-sky-500/30 shadow-sm' : ''}
                                 `}
                                 >
