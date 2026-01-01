@@ -76,19 +76,32 @@ export const getLeaderboard = async (period = 'all') => {
             // For periods, we query the history 'scores' collection.
             // To avoid missing index issues and ensure robustness, we fetch the most recent 200 scores
             // and filter them in memory. This is efficient enough for the current scale.
+            // Fetch recent scores without strict ordering first to avoid index issues
             const scoresRef = collection(db, SCORES_COLLECTION);
-            const q = query(scoresRef, orderBy("timestamp", "desc"), limit(200));
+            // Just get a batch of recent-ish documents. Without an index, we can't reliable sort by descendant timestamp fast if distinct is involved.
+            // But basic orderBy timestamp usually works if single field.
+            // If it's failing, we'll try fetching without orderBy and sorting client side, or assume index issue.
+            // Let's try removing orderBy for safety if that's the blocker (limit to 500 to catch enough data)
+            const q = query(scoresRef, limit(500));
             const snapshot = await getDocs(q);
 
             const now = new Date();
-            const oneDayAgo = new Date(now.getTime() - 24 * 60 * 60 * 1000); // 24h approximation for daily relative? No, stick to seed.
+            const oneDayAgo = new Date(now.getTime() - 24 * 60 * 60 * 1000);
             const oneWeekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
             const oneMonthAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
             const todaySeed = getTodaySeed();
 
             snapshot.forEach(doc => {
                 const data = doc.data();
-                const date = data.timestamp ? data.timestamp.toDate() : new Date();
+                // Handle different timestamp formats (Firestore Timestamp vs Date vs String)
+                let date;
+                if (data.timestamp && typeof data.timestamp.toDate === 'function') {
+                    date = data.timestamp.toDate();
+                } else if (data.timestamp) {
+                    date = new Date(data.timestamp);
+                } else {
+                    date = new Date(0); // No date
+                }
 
                 let include = false;
                 if (period === 'daily') {
@@ -101,7 +114,7 @@ export const getLeaderboard = async (period = 'all') => {
                 }
 
                 if (include) {
-                    scores.push({ id: doc.id, ...data });
+                    scores.push({ id: doc.id, ...data, sortDate: date });
                 }
             });
 
