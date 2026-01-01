@@ -391,7 +391,7 @@ const AppContent = () => {
         {state.gameState === 'playing' && (
           <div className={`
                   relative z-20 backdrop-blur-sm shadow-xl shrink-0
-                  ${theme === 'dark' ? 'bg-neutral-100/95 border-neutral-200' : 'bg-white/95 border-slate-200'}
+                  ${theme === 'dark' ? 'bg-slate-900/95 border-slate-700' : 'bg-white/95 border-slate-200'}
                   ${['mobile', 'tablet'].includes(deviceMode)
               ? 'w-full h-[40%] order-2 border-t'
               : 'w-[350px] lg:w-[400px] h-full order-2 border-l'
