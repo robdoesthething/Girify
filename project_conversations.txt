@@ -1,0 +1,147 @@
+# Girify Project - Full Conversation History Export
+Export Date: 2026-01-01
+
+This document contains the consolidated history of the Girify project, including tasks, implementation plans, and walkthroughs from 4 key conversations.
+
+---
+
+## CONVERSATION 1: Initial Setup & Core Logic
+ID: 731c0795-fd0c-48b4-a7ba-e3dc40f988b9
+Goal: Barcelona Street Quiz App (Initial Build)
+
+### Tasks
+- [x] Requirements Gathering & Planning
+    - [x] Clarify map provider and data source <!-- id: 0 -->
+    - [ ] Create implementation plan <!-- id: 1 -->
+- [ ] Project Setup
+    - [ ] Initialize Vite + React project <!-- id: 2 -->
+    - [ ] Setup Tailwind CSS <!-- id: 3 -->
+    - [ ] Setup Map library (Leaflet/Mapbox) <!-- id: 4 -->
+- [ ] Core Implementation
+    - [ ] Create Map Component with blinking highlight capability (Leaflet) <!-- id: 5 -->
+    - [ ] Create Quiz Logic (Pool of 100+ streets, Random 20, Text Input) <!-- id: 6 -->
+    - [ ] Implement UI/UX (English UI, Catalan names, Score, Animations) <!-- id: 7 -->
+    - [ ] Data preparation (Source ~100 major Barcelona streets GeoJSON) <!-- id: 8 -->
+- [ ] Verification & Polish
+    - [ ] Test quiz flow <!-- id: 9 -->
+    - [ ] Polish aesthetics <!-- id: 10 -->
+- [ ] Deployment
+    - [ ] Prepare for deployment (Vercel/Netlify) <!-- id: 11 -->
+
+### Walkthrough / Outcome
+I have successfully built and deployed the initial version of the Barcelona Streets Quiz app.
+
+#### Changes Made
+- **Project Structure**: Created a Vite + React + Tailwind CSS project.
+- **Map Implementation**: Integrated `react-leaflet` with a dark CartoDB basemap for a premium feel.
+- **Highlight Effect**: Added a custom "neon pulse" animation using CSS keyframes and Leaflet Polylines.
+- **Quiz Logic**: Implemented the game engine in `App.jsx` with a robust `checkAnswer` function that handles fuzzy matching (ignoring prefixes like "Carrer de", accents, and case).
+- **UI/UX**: Created a glassmorphism interface with `framer-motion` animations for feedback (Success/Failure) and smooth transitions.
+
+---
+
+## CONVERSATION 2: Enhancing Game Mechanics
+ID: 4db38467-87b1-4aae-84e6-c91b926b8474
+Goal: Enhancing Quiz Game Mechanics (Attempts, Timer, Visuals)
+
+### Tasks
+- [x] Game Mechanics <!-- id: 31 -->
+    - [x] **Attempts & Speed Logic**: Implement 3 attempts, timer updates in App.jsx. <!-- id: 33 -->
+    - [x] **Street Prefixes**: QuizInterface splits name/prefix. Prefix shown as label. <!-- id: 32 -->
+    - [x] **Timer resets**: Timer resets on new question. <!-- id: 39 -->
+    - [x] **Submit/Next Button**: Explicit button added to assist navigation. <!-- id: 40 -->
+- [x] Visual Updates <!-- id: 35 -->
+    - [x] **Map Styles**: Target Street = Navy Blue. Hint Styles = Neon Blue. <!-- id: 36 -->
+    - [x] **Attempts Tracker**: "TRIES" label and improved dots visual. <!-- id: 41 -->
+- [x] Social Features <!-- id: 37 -->
+    - [x] **Share Button**: Results screen shows Avg Speed and Share button. <!-- id: 38 -->
+
+### Walkthrough / Outcome
+We've overhauled the gameplay to be more competitive and polished.
+
+#### 1. Smarter Input
+- **Prefix Isolation**: You no longer need to type "Carrer de", "Avinguda", etc. The game automatically displays the prefix (e.g., "Carrer de...") and you just type the name (e.g., "Balmes").
+
+#### 2. 3-Attempt Challenge & Navigation
+- **Submit / Next Button**: A large, easy-to-use button helps you submit answers and move to the next question.
+- **Attempts**: You have **3 attempts** per street, clearly shown with a "TRIES" indicator.
+    - If you guess wrong, the input shakes and you lose an attempt.
+    - After 3 strikes, the round is marked as failed and you can click "Next Street".
+
+#### 3. Speed Tracking
+- The game now covertly tracks how fast you answer each question.
+
+#### 4. Visual Polish
+- **Target Street**: Now a **Navy Blue** line.
+- **Hints**: Now a bright neon blue to match the "target" style, as requested.
+
+#### 5. Share Your Score
+- At the end of the game, a new **Summary Screen** shows your Score and **Average Speed**.
+- Click **Share** to copy your results or invoke the system share sheet.
+
+---
+
+## CONVERSATION 3: UI Refinements & Features
+ID: c93df487-5e04-46fb-a109-1bb5f9f9721e
+Goal: UI Overlays, Zoom, Dark Mode, & Device Detection
+
+### Tasks
+(Selected highlights from comprehensive task list)
+- [x] Implement Zoom Functionality
+- [x] Barcelona Borders (Data Fetch & Render)
+- [x] User Feedback Rounds 1-23 (Significant UI polishes: Dark Mode, Tooltips, Mobile Layouts)
+- [x] Round 24: Time Scoring & Daily Challenge
+- [x] Round 25: Rankings & Register Panel
+- [x] Round 28: Start Flow Improvements
+- [x] Round 29: Social Login (Later replaced by Email/Pwd)
+- [x] Round 30: Email/Password Auth & Mobile Stability
+- [x] Round 31: Pages (Leaderboard, Settings, About)
+- [x] Round 33: Leaderboard Database Integration
+
+### Walkthrough / Outcome
+EXTENSIVE updates to UI and functionality.
+- **Zoom**: Added zoom controls and logic (later refined to native responsive).
+- **Layout**: Fixed sticky sidebars on Desktop and full-screen layouts on Mobile.
+- **Gamification**: Added Daily Challenge mode with shared seeds for all users.
+- **Auth**: Implemented Firebase Authentication (Email/Password & Google).
+- **Leaderboard**: Created a real Firestore-backed leaderboard.
+- **Pages**: Added dedicated Settings, About, and Leaderboard screens.
+- **Dark Mode**: Fully implemented and set to default, then later refined.
+
+---
+
+## CONVERSATION 4: Critical Fixes (Current)
+ID: c6970714-c962-4761-bfea-736397a27904
+Goal: Profile, Settings, Leaderboard & Auth Fixes
+
+### Tasks
+- [x] Fix Google Login (Added Guest fallback)
+- [x] Feature: Profile Page (Implemented & Debugged)
+- [x] Feature: Settings Page Fixes (Notification Toggle, Hide Dev Tools)
+- [x] Feature: Leaderboard (Fixed Z-Index & Data Display)
+- [x] Feature: Contextual Curiosities (Wiki Images & Fallback)
+- [x] Favicon Updates (Lizard Icon)
+- [x] UI: Persistent TopBar & Z-Index overrides for overlays
+
+### Walkthrough / Outcome
+Updates deployed to address critical blockers.
+
+#### 1. 🔑 "Continue as Guest" Added
+- **Problem**: Gmail login was failing for some users.
+- **Solution**: Added a "Continue as Guest" button to bypass auth issues.
+
+#### 2. 🖼️ Curiosity Images Fixed
+- **Problem**: Images in summary screen not loading.
+- **Solution**: Added automatic fallback to generic Barcelona photos.
+
+#### 3. 👤 Profile Accessibility
+- **Fix**: ensured Profile screen handles empty states and has correct z-index overlay. Added debug logs.
+
+#### 4. ⚙️ Settings Polished
+- **Fix**: Converted Notification button to a Toggle Switch. Hid Developer Tools.
+
+#### 5. 🦎 Favicon
+- **Status**: Updated to lizard icon (pending final vector crop).
+
+---
+**End of History Export**
