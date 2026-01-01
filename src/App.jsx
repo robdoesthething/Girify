@@ -96,7 +96,7 @@ const AppContent = () => {
         // Yes.
         // BUT we only care if feedback is 'transitioning'.
         // If feedback is transitioning, handleNext is correct for THAT state.
-      }, 1500);
+      }, 100); // Minimal delay to ensure state update
     }
     return () => clearTimeout(timeoutId);
   }, [state.feedback, state.autoAdvance]); // handleNext is safe to omit if we trust the closure, but strict linting would complain.
@@ -378,7 +378,7 @@ const AppContent = () => {
         />
       )}
 
-      <div className={`flex-1 flex ${['mobile', 'tablet'].includes(deviceMode) ? 'flex-col' : 'flex-row'} overflow-hidden ${theme === 'dark' ? 'bg-neutral-900' : 'bg-slate-50'}`}>
+      <div className={`flex-1 flex ${['mobile', 'tablet'].includes(deviceMode) ? 'flex-col' : 'flex-row'} overflow-hidden ${theme === 'dark' ? 'bg-neutral-800' : 'bg-slate-50'}`}>
 
         <div className={`relative z-0 min-w-0 ${['mobile', 'tablet'].includes(deviceMode) ? 'flex-1 w-full order-1' : 'flex-1 h-full order-1'}`}>
           <MapArea
@@ -391,7 +391,7 @@ const AppContent = () => {
         {state.gameState === 'playing' && (
           <div className={`
                   relative z-20 backdrop-blur-sm shadow-xl shrink-0
-                  ${theme === 'dark' ? 'bg-neutral-900/95 border-neutral-800' : 'bg-white/95 border-slate-200'}
+                  ${theme === 'dark' ? 'bg-neutral-200/95 border-neutral-300' : 'bg-white/95 border-slate-200'}
                   ${['mobile', 'tablet'].includes(deviceMode)
               ? 'w-full h-[40%] order-2 border-t'
               : 'w-[350px] lg:w-[400px] h-full order-2 border-l'
@@ -400,6 +400,9 @@ const AppContent = () => {
             <Quiz>
               <Quiz.Container keyProp={state.currentQuestionIndex}>
                 <Quiz.Content>
+                  <div className={`text-center mb-4 font-bold ${theme === 'dark' ? 'text-neutral-600' : 'text-slate-700'}`}>
+                    {t('whichStreet')}
+                  </div>
                   <Quiz.Options
                     options={state.options}
                     onSelect={handleSelectAnswer}
