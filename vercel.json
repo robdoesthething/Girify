@@ -1,0 +1,9 @@
+{
+    "name": "girify-barcelona-quiz",
+    "rewrites": [
+        {
+            "source": "/(.*)",
+            "destination": "/index.html"
+        }
+    ]
+}
