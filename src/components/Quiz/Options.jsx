@@ -18,26 +18,12 @@ const Options = ({ options, onSelect, selectedAnswer, feedback, correctName, aut
                         if (isSelected) {
                             // User's answer
                             if (autoAdvance) {
-                                // Auto-mode: Neutral highlight (no green/red) as requested
-                                btnClass = theme === 'dark'
-                                    ? 'bg-slate-600/50 text-white border-slate-500 ring-2 ring-indigo-400'
-                                    : 'bg-sky-500 text-white border-sky-600 ring-2 ring-sky-300';
-                            } else if (isCorrectOption) {
-                                // Correct! Blue with success ring
-                                btnClass = theme === 'dark'
-                                    ? 'bg-slate-600/50 text-white border-slate-500 ring-2 ring-emerald-500' // Dark mode selected (Grey)
-                                    : 'bg-sky-500 text-white border-sky-600 ring-2 ring-emerald-400'; // Light mode selected
+                                // Auto-mode: Dark blue highlight
+                                btnClass = 'bg-[#000080] text-white border-[#000060] ring-2 ring-blue-400';
                             } else {
-                                // Wrong - Blue with red ring
-                                btnClass = theme === 'dark'
-                                    ? 'bg-slate-600/50 text-white border-slate-500 ring-2 ring-red-500'
-                                    : 'bg-sky-500 text-white border-sky-600 ring-2 ring-red-400';
+                                // Non-auto mode: Just show selected in dark blue (no correctness indication)
+                                btnClass = 'bg-[#000080] text-white border-[#000060] ring-2 ring-blue-400';
                             }
-                        } else if (isCorrectOption && !isSelected && !autoAdvance) {
-                            // Only show correct answer in NON-AUTO mode
-                            btnClass = theme === 'dark'
-                                ? 'bg-emerald-600/30 text-emerald-400 border-emerald-500'
-                                : 'bg-emerald-500/20 text-emerald-700 border-emerald-500';
                         } else {
                             // Other options - muted
                             btnClass = 'bg-slate-100 text-slate-400 border-slate-200';
