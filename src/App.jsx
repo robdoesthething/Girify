@@ -16,7 +16,7 @@ import { calculateTimeScore } from './utils/scoring';
 import { saveScore } from './utils/leaderboard';
 import { getCuriosityByStreets } from './data/curiosities';
 import { fetchWikiImage } from './utils/wiki';
-import Logo from './components/Logo';
+import logo from './assets/girify-logo.png';
 import { gameReducer, initialState } from './reducers/gameReducer';
 
 // Helper to normalize strings for comparison
@@ -435,7 +435,7 @@ const AppContent = () => {
       {state.gameState === 'intro' && (
         <div className="fixed inset-0 z-10 flex flex-col items-center justify-center p-6 text-center bg-slate-50/80 dark:bg-slate-950/80 backdrop-blur-sm pointer-events-auto overflow-hidden">
           <div className="max-w-xs md:max-w-md w-full flex flex-col items-center">
-            <Logo className="mb-6 scale-150" />
+            <img src={logo} alt="Girify" className="mb-6 w-32 md:w-48 object-contain" />
             <p className={`text-lg md:text-xl mb-8 font-light text-center px-4 animate-fadeIn ${theme === 'dark' ? 'text-slate-300' : 'text-slate-600'}`}>
               Can you name the city's most iconic streets?
             </p>
