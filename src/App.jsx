@@ -400,9 +400,6 @@ const AppContent = () => {
             <Quiz>
               <Quiz.Container keyProp={state.currentQuestionIndex}>
                 <Quiz.Content>
-                  <div className={`text-center mb-4 font-bold ${theme === 'dark' ? 'text-neutral-600' : 'text-slate-700'}`}>
-                    {t('whichStreet')}
-                  </div>
                   <Quiz.Options
                     options={state.options}
                     onSelect={handleSelectAnswer}
