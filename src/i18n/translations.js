@@ -1,5 +1,6 @@
 // Translations for Girify app
 // Languages: English (en), Spanish (es), Catalan (ca)
+import CatalanFlag from '../components/icons/CatalanFlag';
 
 const translations = {
     en: {
@@ -27,6 +28,7 @@ const translations = {
 
         // Quiz
         question: 'Question',
+        whichStreet: 'Which street is highlighted?',
         of: 'of',
         hints: 'HINTS',
         revealHint: 'Reveal Hint',
@@ -43,7 +45,11 @@ const translations = {
         next: 'NEXT',
         startQuiz: 'START QUIZ',
         replayChallenge: 'REPLAY CHALLENGE',
+        replayChallenge: 'REPLAY CHALLENGE',
         scoreNotSaved: 'Score will not be saved',
+        tapStreet: 'Tap the highlighted street',
+        clickStreet: 'Click the highlighted street',
+
 
         // About
         aboutGirify: 'About Girify',
@@ -158,6 +164,7 @@ const translations = {
 
         // Quiz
         question: 'Pregunta',
+        whichStreet: '¿Qué calle está resaltada?',
         of: 'de',
         hints: 'PISTAS',
         revealHint: 'Revelar pista',
@@ -174,7 +181,11 @@ const translations = {
         next: 'SIGUIENTE',
         startQuiz: 'EMPEZAR QUIZ',
         replayChallenge: 'REPETIR RETO',
+        replayChallenge: 'REPETIR RETO',
         scoreNotSaved: 'La puntuación no se guardará',
+        tapStreet: 'Toca la calle resaltada',
+        clickStreet: 'Haz clic en la calle resaltada',
+
 
         // About
         aboutGirify: 'Sobre Girify',
@@ -289,6 +300,7 @@ const translations = {
 
         // Quiz
         question: 'Pregunta',
+        whichStreet: 'Quin carrer està ressaltat?',
         of: 'de',
         hints: 'PISTES',
         revealHint: 'Revelar pista',
@@ -368,7 +380,11 @@ const translations = {
         next: 'SEGÜENT',
         startQuiz: 'COMENÇAR QUIZ',
         replayChallenge: 'REPETIR REPTE',
+        replayChallenge: 'REPETIR REPTE',
         scoreNotSaved: 'La puntuació no es guardarà',
+        tapStreet: 'Toca el carrer ressaltat',
+        clickStreet: 'Fes clic al carrer ressaltat',
+
 
         // Summary
         dailyChallengeComplete: 'Repte Diari Completat',
@@ -403,7 +419,9 @@ export const getTranslation = (lang, key) => {
 export const LANGUAGES = [
     { code: 'en', name: 'English', flag: '🇬🇧' },
     { code: 'es', name: 'Español', flag: '🇪🇸' },
-    { code: 'ca', name: 'Català', flag: '🏴' }
+    { code: 'en', name: 'English', flag: '🇬🇧' },
+    { code: 'es', name: 'Español', flag: '🇪🇸' },
+    { code: 'ca', name: 'Català', flag: <CatalanFlag className="w-4 h-3 inline-block shadow-sm" /> }
 ];
 
 export default translations;

@@ -198,24 +198,7 @@ const RegisterPanel = ({ theme: themeProp, onRegister }) => {
                     Continue with Google
                 </button>
 
-                <div className="relative mb-6">
-                    <div className="absolute inset-0 flex items-center"><div className={`w-full border-t ${theme === 'dark' ? 'border-slate-700' : 'border-slate-200'}`}></div></div>
-                    <div className="relative flex justify-center text-xs uppercase"><span className={`px-2 ${theme === 'dark' ? 'bg-slate-900 text-slate-500' : 'bg-white text-slate-400'}`}>Or</span></div>
-                </div>
 
-                {/* Guest Button */}
-                <button
-                    onClick={() => {
-                        const guestName = `Guest_${Math.floor(Math.random() * 1000)}`;
-                        onRegister(guestName);
-                    }}
-                    disabled={loading}
-                    className={`w-full py-3 mb-6 rounded-xl border flex items-center justify-center gap-2 transition-colors font-bold text-sm shadow-sm
-                        ${theme === 'dark' ? 'bg-slate-800 hover:bg-slate-700 border-slate-700 text-slate-300' : 'bg-slate-50 hover:bg-slate-100 border-slate-200 text-slate-600'}
-                    `}
-                >
-                    Continue as Guest
-                </button>
 
                 <div className="relative mb-6">
                     <div className="absolute inset-0 flex items-center"><div className={`w-full border-t ${theme === 'dark' ? 'border-slate-700' : 'border-slate-200'}`}></div></div>
