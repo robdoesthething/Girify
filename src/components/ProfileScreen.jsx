@@ -2,6 +2,7 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { useTheme } from '../context/ThemeContext';
 import { getFriendCount } from '../utils/social';
+import FriendRequests from './FriendRequests';
 
 // Helper to calculate daily streak from history
 const calculateStreak = (history) => {
@@ -94,6 +95,13 @@ const ProfileScreen = ({ onClose, username }) => {
                     </div>
                     <h2 className="text-2xl font-black tracking-tight">{username || 'Player'}</h2>
                     <p className="text-xs font-bold uppercase tracking-widest opacity-50 mt-1">{t('playerSince')} {joinedDate}</p>
+                </div>
+
+                {/* Friend Requests (Only for current user looking at themselves) */}
+                {/* Note: The ProfileScreen is usually FOR the Current User. PublicProfileModal is for others. */}
+                {/* So we can safely assume 'username' is the current user if this component is used for "My Profile" */}
+                <div className="px-6 pt-4">
+                    <FriendRequests username={username} />
                 </div>
 
                 {/* Stats Grid */}
