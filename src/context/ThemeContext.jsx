@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import { getTranslation, LANGUAGES } from '../i18n/translations';
 
 const ThemeContext = createContext();
 
@@ -7,6 +8,16 @@ export const useTheme = () => useContext(ThemeContext);
 export const ThemeProvider = ({ children }) => {
     // Theme: 'light' | 'dark'
     const [theme, setTheme] = useState('light');
+
+    // Language: 'en' | 'es' | 'ca'
+    const [language, setLanguage] = useState(() => {
+        const saved = localStorage.getItem('girify_language');
+        if (saved) return saved;
+        // Auto-detect from browser
+        const browserLang = navigator.language?.split('-')[0];
+        if (['es', 'ca'].includes(browserLang)) return browserLang;
+        return 'en';
+    });
 
     // Zoom State
     const [zoom, setZoom] = useState(1);
@@ -34,13 +45,31 @@ export const ThemeProvider = ({ children }) => {
         setTheme(prev => prev === 'dark' ? 'light' : 'dark');
     };
 
+    const changeLanguage = (lang) => {
+        setLanguage(lang);
+        localStorage.setItem('girify_language', lang);
+    };
+
+    // Translation helper
+    const t = (key) => getTranslation(language, key);
+
     useEffect(() => {
         // Apply theme data-attribute to html or body for Tailwind dark mode if configured
         document.documentElement.setAttribute('class', theme);
     }, [theme]);
 
     return (
-        <ThemeContext.Provider value={{ theme, toggleTheme, deviceMode, zoom, setZoom }}>
+        <ThemeContext.Provider value={{
+            theme,
+            toggleTheme,
+            deviceMode,
+            zoom,
+            setZoom,
+            language,
+            changeLanguage,
+            languages: LANGUAGES,
+            t
+        }}>
             {children}
         </ThemeContext.Provider>
     );
