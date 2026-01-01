@@ -15,8 +15,8 @@ const TopBar = ({ onOpenPage }) => {
     return (
         <>
             <div className={`fixed top-0 left-0 right-0 h-12 z-[4000] flex items-center justify-between px-3 md:px-6 transition-colors duration-300
-                ${theme === 'dark' ? 'bg-neutral-100/90 text-neutral-900' : 'bg-white/90 text-slate-800'} 
-                backdrop-blur-md border-b ${theme === 'dark' ? 'border-neutral-200' : 'border-slate-200'}
+                ${theme === 'dark' ? 'bg-slate-900/90 text-white' : 'bg-white/90 text-slate-800'} 
+                backdrop-blur-md border-b ${theme === 'dark' ? 'border-slate-800' : 'border-slate-200'}
             `}>
 
                 {/* Left: Menu & Brand */}
