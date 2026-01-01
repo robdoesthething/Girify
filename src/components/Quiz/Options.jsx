@@ -52,9 +52,9 @@ const Options = ({ options, onSelect, selectedAnswer, feedback, correctName }) =
                             ? 'bg-sky-600 text-white border-sky-500 ring-2 ring-sky-400'
                             : 'bg-sky-500 text-white border-sky-600 ring-2 ring-sky-400';
                     } else {
-                        // Default unselected
+                        // Default unselected - LIGHTER colors for dark mode
                         btnClass = theme === 'dark'
-                            ? 'bg-slate-700 hover:bg-slate-600 text-white border-slate-600'
+                            ? 'bg-slate-600 hover:bg-slate-500 text-white border-slate-500'
                             : 'bg-white hover:bg-slate-50 text-slate-800 border-slate-200';
                     }
 
