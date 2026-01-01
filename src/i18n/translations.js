@@ -92,6 +92,9 @@ const translations = {
         usernameTooShort: 'Username must be at least 3 characters',
         usernameInvalid: 'Username can only contain letters, numbers, and underscores',
         usernameNotAllowed: 'This username is not allowed',
+        googleLoginFailed: 'Google login failed',
+        enterEmailAndPassword: 'Please enter email and password',
+        enterYourName: 'Please enter your name',
     },
 
     es: {
@@ -184,6 +187,9 @@ const translations = {
         usernameTooShort: 'El nombre debe tener al menos 3 caracteres',
         usernameInvalid: 'Solo puede contener letras, números y guiones bajos',
         usernameNotAllowed: 'Este nombre de usuario no está permitido',
+        googleLoginFailed: 'Error al iniciar sesión con Google',
+        enterEmailAndPassword: 'Por favor ingresa email y contraseña',
+        enterYourName: 'Por favor ingresa tu nombre',
     },
 
     ca: {
@@ -276,6 +282,9 @@ const translations = {
         usernameTooShort: 'El nom ha de tenir almenys 3 caràcters',
         usernameInvalid: 'Només pot contenir lletres, números i guions baixos',
         usernameNotAllowed: "Aquest nom d'usuari no està permès",
+        googleLoginFailed: 'Error en iniciar sessió amb Google',
+        enterEmailAndPassword: 'Si us plau introdueix email i contrasenya',
+        enterYourName: 'Si us plau introdueix el teu nom',
     }
 };
 

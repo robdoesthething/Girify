@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { auth, googleProvider } from '../firebase';
 import { signInWithPopup, createUserWithEmailAndPassword, signInWithEmailAndPassword, updateProfile, sendEmailVerification } from 'firebase/auth';
 import { ensureUserProfile, recordReferral } from '../utils/social';
+import { useTheme } from '../context/ThemeContext';
 
 // Username validation constants
 const MAX_USERNAME_LENGTH = 20;
@@ -15,31 +16,33 @@ const BLOCKED_WORDS = [
     'nazi', 'hitler', 'nigger', 'faggot', 'retard'
 ];
 
-const validateUsername = (username) => {
+const validateUsername = (username, t) => {
     if (!username || username.trim().length === 0) {
-        return { valid: false, error: 'Username is required' };
+        return { valid: false, error: t('usernameRequired') };
     }
     if (username.length > MAX_USERNAME_LENGTH) {
-        return { valid: false, error: `Username must be ${MAX_USERNAME_LENGTH} characters or less` };
+        return { valid: false, error: t('usernameTooLong') };
     }
     if (username.length < 3) {
-        return { valid: false, error: 'Username must be at least 3 characters' };
+        return { valid: false, error: t('usernameShort') };
     }
     if (!USERNAME_REGEX.test(username)) {
-        return { valid: false, error: 'Username can only contain letters, numbers, and underscores' };
+        return { valid: false, error: t('usernameInvalid') };
     }
 
     const lowerName = username.toLowerCase();
     for (const word of BLOCKED_WORDS) {
         if (lowerName.includes(word)) {
-            return { valid: false, error: 'This username is not allowed' };
+            return { valid: false, error: t('usernameNotAllowed') };
         }
     }
 
     return { valid: true, error: null };
 };
 
-const RegisterPanel = ({ theme, onRegister }) => {
+const RegisterPanel = ({ theme: themeProp, onRegister }) => {
+    const { t } = useTheme();
+    const theme = themeProp;
     const [isSignUp, setIsSignUp] = useState(false);
     const [name, setName] = useState('');
     const [email, setEmail] = useState('');
@@ -75,7 +78,7 @@ const RegisterPanel = ({ theme, onRegister }) => {
             console.error("Google Login failed", err);
             console.error("Error code:", err.code);
             console.error("Error message:", err.message);
-            setError(`Google login failed: ${err.message}`);
+            setError(t('googleLoginFailed', { message: err.message }));
             setLoading(false);
         }
     };
@@ -83,17 +86,17 @@ const RegisterPanel = ({ theme, onRegister }) => {
     const handleEmailAuth = async (e) => {
         e.preventDefault();
         if (!email || !password) {
-            setError('Please enter email and password');
+            setError(t('enterEmailAndPassword'));
             return;
         }
         if (isSignUp && !name) {
-            setError('Please enter your name');
+            setError(t('enterYourName'));
             return;
         }
 
         // Validate username on signup
         if (isSignUp) {
-            const validation = validateUsername(name);
+            const validation = validateUsername(name, t);
             if (!validation.valid) {
                 setError(validation.error);
                 return;
@@ -130,15 +133,15 @@ const RegisterPanel = ({ theme, onRegister }) => {
 
                 setError('');
                 setLoading(false);
-                alert('✉️ Verification email sent! Please check your inbox and verify your email before signing in.');
-                setIsSignUp(false); // Switch to sign-in mode
+                alert(t('verificationSent'));
+                setIsSignUp(false);
                 return;
             } else {
                 userCredential = await signInWithEmailAndPassword(auth, email, password);
 
                 // Check if email is verified
                 if (!userCredential.user.emailVerified) {
-                    setError('Please verify your email before signing in. Check your inbox for the verification link.');
+                    setError(t('verifyEmail'));
                     setLoading(false);
                     return;
                 }
