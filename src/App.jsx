@@ -16,7 +16,7 @@ import { calculateTimeScore } from './utils/scoring';
 import { saveScore } from './utils/leaderboard';
 import { getCuriosityByStreets } from './data/curiosities';
 import { fetchWikiImage } from './utils/wiki';
-import logoImage from './assets/girify-logo.png';
+import Logo from './components/Logo';
 import { gameReducer, initialState } from './reducers/gameReducer';
 
 // Helper to normalize strings for comparison
@@ -391,7 +391,7 @@ const AppContent = () => {
         {state.gameState === 'playing' && (
           <div className={`
                   relative z-20 backdrop-blur-sm shadow-xl shrink-0
-                  ${theme === 'dark' ? 'bg-neutral-200/95 border-neutral-300' : 'bg-white/95 border-slate-200'}
+                  ${theme === 'dark' ? 'bg-neutral-100/95 border-neutral-200' : 'bg-white/95 border-slate-200'}
                   ${['mobile', 'tablet'].includes(deviceMode)
               ? 'w-full h-[40%] order-2 border-t'
               : 'w-[350px] lg:w-[400px] h-full order-2 border-l'
@@ -435,11 +435,7 @@ const AppContent = () => {
       {state.gameState === 'intro' && (
         <div className="fixed inset-0 z-10 flex flex-col items-center justify-center p-6 text-center bg-slate-50/80 dark:bg-slate-950/80 backdrop-blur-sm pointer-events-auto overflow-hidden">
           <div className="max-w-xs md:max-w-md w-full flex flex-col items-center">
-            <img
-              src={logoImage}
-              alt="Girify Logo"
-              className="w-full h-auto mb-6 max-h-40 object-contain animate-fadeIn"
-            />
+            <Logo className="mb-6 scale-150" />
             <p className={`text-lg md:text-xl mb-8 font-light text-center px-4 animate-fadeIn ${theme === 'dark' ? 'text-slate-300' : 'text-slate-600'}`}>
               Can you name the city's most iconic streets?
             </p>
