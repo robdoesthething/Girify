@@ -20,12 +20,12 @@ const Options = ({ options, onSelect, selectedAnswer, feedback, correctName, aut
                             if (isCorrectOption) {
                                 // Correct! Blue with success ring
                                 btnClass = theme === 'dark'
-                                    ? 'bg-sky-600 text-white border-sky-500 ring-2 ring-emerald-400'
-                                    : 'bg-sky-500 text-white border-sky-600 ring-2 ring-emerald-400';
+                                    ? 'bg-slate-600/50 text-white border-slate-500 ring-2 ring-emerald-500' // Dark mode selected (Grey)
+                                    : 'bg-sky-500 text-white border-sky-600 ring-2 ring-emerald-400'; // Light mode selected
                             } else {
                                 // Wrong - Blue with red ring
                                 btnClass = theme === 'dark'
-                                    ? 'bg-sky-600 text-white border-sky-500 ring-2 ring-red-400'
+                                    ? 'bg-slate-600/50 text-white border-slate-500 ring-2 ring-red-500'
                                     : 'bg-sky-500 text-white border-sky-600 ring-2 ring-red-400';
                             }
                         } else if (isCorrectOption && !isSelected && !autoAdvance) {
@@ -42,12 +42,12 @@ const Options = ({ options, onSelect, selectedAnswer, feedback, correctName, aut
                     } else if (isSelected) {
                         // Selected but not submitted yet (non-auto mode)
                         btnClass = theme === 'dark'
-                            ? 'bg-sky-600 text-white border-sky-500 ring-2 ring-sky-400'
+                            ? 'bg-slate-600/50 text-white border-slate-500 ring-2 ring-slate-400' // Dark mode selected (Grey)
                             : 'bg-sky-500 text-white border-sky-600 ring-2 ring-sky-400';
                     } else {
                         // Default unselected - LIGHTER colors for dark mode
                         btnClass = theme === 'dark'
-                            ? 'bg-slate-600 hover:bg-slate-500 text-white border-slate-500'
+                            ? 'bg-slate-800 hover:bg-slate-700 text-slate-200 border-slate-700'
                             : 'bg-white hover:bg-slate-50 text-slate-800 border-slate-200';
                     }
 

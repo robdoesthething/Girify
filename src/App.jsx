@@ -337,10 +337,11 @@ const AppContent = () => {
 
         {state.gameState === 'playing' && (
           <div className={`
-                  relative z-20 bg-white/95 dark:bg-slate-900/95 backdrop-blur-sm shadow-xl shrink-0
+                  relative z-20 backdrop-blur-sm shadow-xl shrink-0
+                  ${theme === 'dark' ? 'bg-slate-950/95 border-slate-800' : 'bg-white/95 border-slate-200'}
                   ${['mobile', 'tablet'].includes(deviceMode)
-              ? 'w-full h-[40%] order-2 border-t border-slate-200 dark:border-slate-800'
-              : 'w-[350px] lg:w-[400px] h-full order-2 border-l border-slate-200 dark:border-slate-800'
+              ? 'w-full h-[40%] order-2 border-t'
+              : 'w-[350px] lg:w-[400px] h-full order-2 border-l'
             }
                `}>
             <Quiz>
