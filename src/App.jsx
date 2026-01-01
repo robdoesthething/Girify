@@ -96,7 +96,7 @@ const AppContent = () => {
         // Yes.
         // BUT we only care if feedback is 'transitioning'.
         // If feedback is transitioning, handleNext is correct for THAT state.
-      }, 100); // Minimal delay to ensure state update
+      }, 500); // 500ms delay to allow user to see the highlighted answer
     }
     return () => clearTimeout(timeoutId);
   }, [state.feedback, state.autoAdvance]); // handleNext is safe to omit if we trust the closure, but strict linting would complain.
@@ -571,10 +571,11 @@ const SummaryScreen = ({ score, total, theme, username, onRestart, quizResults, 
 
   const handleShare = async () => {
     // Include referral code in share URL
-    const baseUrl = window.location.origin;
+    // Use prod URL if available, otherwise fallback
+    const baseUrl = 'https://girify.vercel.app'; // Updated to Prod URL
     const refCode = username ? username.toLowerCase().replace(/[^a-z0-9]/g, '') : '';
     const shareUrl = refCode ? `${baseUrl}?ref=${refCode}` : baseUrl;
-    const text = `🌆 Girify Daily Challenge:\nScore: ${score}/${maxPossibleScore}\nAvg Time: ${avgTime}s\n\nCan you beat me? Play here: ${shareUrl} #Girify #Barcelona`;
+    const text = `🌆 Girify Daily Challenge:\nScore: ${score}/${maxPossibleScore}\n\nCan you beat me? Play here: ${shareUrl} #Girify #Barcelona`;
 
     const performShare = async () => {
       try {
