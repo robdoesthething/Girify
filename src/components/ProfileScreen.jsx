@@ -33,7 +33,7 @@ const calculateStreak = (history) => {
 };
 
 const ProfileScreen = ({ onClose, username }) => {
-    const { theme } = useTheme();
+    const { theme, t } = useTheme();
 
     const [history, setHistory] = React.useState([]);
     const [joinedDate, setJoinedDate] = React.useState(new Date().toLocaleDateString());
@@ -93,45 +93,45 @@ const ProfileScreen = ({ onClose, username }) => {
                         {initial}
                     </div>
                     <h2 className="text-2xl font-black tracking-tight">{username || 'Player'}</h2>
-                    <p className="text-xs font-bold uppercase tracking-widest opacity-50 mt-1">Player since {joinedDate}</p>
+                    <p className="text-xs font-bold uppercase tracking-widest opacity-50 mt-1">{t('playerSince')} {joinedDate}</p>
                 </div>
 
                 {/* Stats Grid */}
                 <div className="p-6 grid grid-cols-5 gap-2 border-b border-slate-100 dark:border-slate-800">
                     <div className="text-center">
                         <p className="text-xl font-black text-orange-500">🔥{dailyStreak}</p>
-                        <p className="text-[9px] uppercase font-bold text-slate-400 tracking-wider">Streak</p>
+                        <p className="text-[9px] uppercase font-bold text-slate-400 tracking-wider">{t('streak')}</p>
                     </div>
                     <div className="text-center">
                         <p className="text-xl font-black text-purple-500">👥{friendCount}</p>
-                        <p className="text-[9px] uppercase font-bold text-slate-400 tracking-wider">Friends</p>
+                        <p className="text-[9px] uppercase font-bold text-slate-400 tracking-wider">{t('friends')}</p>
                     </div>
                     <div className="text-center">
                         <p className="text-xl font-black text-slate-700 dark:text-slate-200">{totalGames}</p>
-                        <p className="text-[9px] uppercase font-bold text-slate-400 tracking-wider">Games</p>
+                        <p className="text-[9px] uppercase font-bold text-slate-400 tracking-wider">{t('games')}</p>
                     </div>
                     <div className="text-center">
                         <p className="text-xl font-black text-emerald-500">{bestScore}</p>
-                        <p className="text-[9px] uppercase font-bold text-slate-400 tracking-wider">Best</p>
+                        <p className="text-[9px] uppercase font-bold text-slate-400 tracking-wider">{t('best')}</p>
                     </div>
                     <div className="text-center">
                         <p className="text-xl font-black text-sky-500">{avgScore}</p>
-                        <p className="text-[9px] uppercase font-bold text-slate-400 tracking-wider">Avg</p>
+                        <p className="text-[9px] uppercase font-bold text-slate-400 tracking-wider">{t('avg')}</p>
                     </div>
                 </div>
 
                 {/* Recent History */}
                 <div className="flex-1 overflow-y-auto p-6">
-                    <h3 className="text-sm font-bold uppercase tracking-wider opacity-50 mb-4">Recent Activity</h3>
+                    <h3 className="text-sm font-bold uppercase tracking-wider opacity-50 mb-4">{t('recentActivity')}</h3>
 
                     {history.length === 0 ? (
-                        <div className="text-center py-10 opacity-40 text-sm">No games played yet.</div>
+                        <div className="text-center py-10 opacity-40 text-sm">{t('noGamesYet')}</div>
                     ) : (
                         <div className="space-y-3">
                             {history.slice().reverse().map((game, i) => (
                                 <div key={i} className={`flex items-center justify-between p-3 rounded-xl border ${theme === 'dark' ? 'border-slate-800 bg-slate-800/50' : 'border-slate-100'}`}>
                                     <div>
-                                        <p className="font-bold text-sm">Daily Challenge</p>
+                                        <p className="font-bold text-sm">{t('dailyChallenge')}</p>
                                         <p className="text-[10px] text-slate-400">{new Date(game.timestamp || Date.now()).toLocaleDateString()}</p>
                                     </div>
                                     <div className="text-right">
