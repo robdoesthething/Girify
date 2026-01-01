@@ -43,17 +43,17 @@ const getFirstName = (fullName) => {
 };
 
 // Get custom congrats message based on score
-const getCongratsMessage = (score, maxScore) => {
+// Get custom congrats message based on score
+const getCongratsMessage = (score, maxScore, t) => {
   const percentage = (score / maxScore) * 100;
-  if (percentage >= 90) return "Outstanding! 🌟";
-  if (percentage >= 75) return "Excellent work! 🎉";
-  if (percentage >= 60) return "Great job! 👏";
-  if (percentage >= 40) return "Good effort! 💪";
-  return "Keep practicing! 📚";
+  if (percentage >= 90) return t('congratsOutstanding');
+  if (percentage >= 75) return t('congratsExcellent');
+  if (percentage >= 60) return t('congratsGreat');
+  if (percentage >= 40) return t('congratsGood');
+  return t('congratsKeepPracticing');
 };
-
 const AppContent = () => {
-  const { deviceMode, theme } = useTheme();
+  const { deviceMode, theme, t } = useTheme();
 
   const [state, dispatch] = useReducer(gameReducer, initialState);
 
@@ -411,10 +411,10 @@ const AppContent = () => {
             >
               {hasPlayedToday() ? (
                 <span className="flex flex-col items-center leading-none gap-1">
-                  <span>REPLAY CHALLENGE</span>
-                  <span className="text-[9px] opacity-80 font-medium normal-case tracking-normal">Score will not be saved</span>
+                  <span>{t('replayChallenge')}</span>
+                  <span className="text-[9px] opacity-80 font-medium normal-case tracking-normal">{t('scoreNotSaved')}</span>
                 </span>
-              ) : 'START QUIZ'}
+              ) : t('startQuiz')}
             </button>
           </div>
         </div>
@@ -424,23 +424,23 @@ const AppContent = () => {
         <div className={`absolute inset-0 z-[2000] flex flex-col items-center justify-center p-6 text-center backdrop-blur-sm transition-colors duration-1000
                 ${theme === 'dark' ? 'bg-slate-950/80 text-white' : 'bg-slate-50/80 text-slate-900'}
             `}>
-          <h2 className="text-3xl font-bold mb-6 text-sky-500">How to Play</h2>
+          <h2 className="text-3xl font-bold mb-6 text-sky-500">{t('howToPlay')}</h2>
           <ul className="text-left space-y-4 text-lg mb-8 max-w-md mx-auto">
             <li className="flex gap-3">
               <span>📍</span>
-              <span>A street will be highlighted in <span className="text-sky-500 font-bold">Blue</span> on the map.</span>
+              <span>{t('instructionsPoint1')}</span>
             </li>
             <li className="flex gap-3">
               <span>🤔</span>
-              <span>Guess the correct name from 4 options.</span>
+              <span>{t('instructionsPoint2')}</span>
             </li>
             <li className="flex gap-3">
               <span>💡</span>
-              <span>Need help? Reveal hints to help you find it.</span>
+              <span>{t('instructionsPoint3')}</span>
             </li>
             <li className="flex gap-3 text-emerald-600 dark:text-emerald-400 font-medium">
               <span>⏳</span>
-              <span>Speed matters! Higher score for faster answers.</span>
+              <span>{t('instructionsPoint4')}</span>
             </li>
           </ul>
           <button
@@ -454,7 +454,7 @@ const AppContent = () => {
             }}
             className="px-8 py-3 bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl shadow-lg font-bold text-lg transition-all transform hover:scale-105"
           >
-            {state.username ? "I'M READY!" : "NEXT"}
+            {state.username ? t('imReady') : t('next')}
           </button>
         </div>
       )}
@@ -476,6 +476,7 @@ const AppContent = () => {
             onRestart={() => setupGame()}
             quizResults={state.quizResults}
             quizStreets={state.quizStreets}
+            t={t}
           />
         </div>
       )}
@@ -492,7 +493,7 @@ const AppContent = () => {
 };
 
 // SummaryScreen remains largely unchanged but ensures it receives props
-const SummaryScreen = ({ score, total, theme, username, onRestart, quizResults, quizStreets }) => {
+const SummaryScreen = ({ score, total, theme, username, onRestart, quizResults, quizStreets, t }) => {
   const [view, setView] = useState('summary');
   const [curiosityRevealed, setCuriosityRevealed] = useState(false);
 
@@ -555,19 +556,19 @@ const SummaryScreen = ({ score, total, theme, username, onRestart, quizResults, 
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="flex flex-col items-center w-full max-w-md">
           <div className="mb-1">
             <span className="px-3 py-1 bg-sky-500/10 text-sky-500 rounded-full text-[10px] uppercase font-bold tracking-widest border border-sky-500/20">
-              Daily Challenge Complete
+              {t('dailyChallengeComplete')}
             </span>
           </div>
-          <h2 className="text-2xl font-black mb-4 tracking-tight">{getCongratsMessage(score, maxPossibleScore).replace('!', `, ${getFirstName(username)}!`)}</h2>
+          <h2 className="text-2xl font-black mb-4 tracking-tight">{getCongratsMessage(score, maxPossibleScore, t).replace('!', `, ${getFirstName(username)}!`)}</h2>
 
           <div className={`w-full p-4 rounded-2xl border mb-4 ${theme === 'dark' ? 'bg-slate-800/50 border-slate-700' : 'bg-white border-slate-100'}`}>
-            <span className="text-[10px] uppercase tracking-widest text-slate-500 mb-1 font-bold block">Your Score</span>
+            <span className="text-[10px] uppercase tracking-widest text-slate-500 mb-1 font-bold block">{t('yourScore')}</span>
             <span className="text-3xl font-black text-sky-500">{score}</span>
             <span className="text-xs text-slate-400 ml-1">/ {maxPossibleScore}</span>
           </div>
 
           <div className="w-full mb-4">
-            <h3 className="text-[10px] uppercase tracking-widest text-slate-500 mb-2 font-bold">Question Breakdown</h3>
+            <h3 className="text-[10px] uppercase tracking-widest text-slate-500 mb-2 font-bold">{t('questionBreakdown')}</h3>
             <div className="grid grid-cols-5 gap-1.5">
               {quizResults.map((result, idx) => {
                 const isCorrect = result.status === 'correct';
@@ -589,13 +590,13 @@ const SummaryScreen = ({ score, total, theme, username, onRestart, quizResults, 
           </div>
 
           <div className={`w-full p-4 rounded-2xl border mb-3 ${theme === 'dark' ? 'bg-sky-500/10 border-sky-500/20' : 'bg-sky-50 border-sky-100'}`}>
-            <p className="text-sky-500 font-bold mb-1 text-sm">🎁 City Curiosity Unlocked!</p>
-            <p className="text-[10px] mb-3 text-slate-500 font-medium">Share your results to reveal a secret about Barcelona.</p>
+            <p className="text-sky-500 font-bold mb-1 text-sm">{t('cityCuriosityUnlocked')}</p>
+            <p className="text-[10px] mb-3 text-slate-500 font-medium">{t('shareToReveal')}</p>
             <button
               onClick={handleShare}
               className="w-full py-3 bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl shadow-lg font-bold text-sm transition-all transform hover:scale-105 flex items-center justify-center gap-2"
             >
-              Share & Reveal
+              {t('shareAndReveal')}
             </button>
           </div>
 
