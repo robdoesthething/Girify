@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useTheme } from '../context/ThemeContext';
 import { motion, AnimatePresence } from 'framer-motion';
-import logoImage from '../assets/girify-logo.png';
+import Logo from './Logo';
 
 const TopBar = ({ onOpenPage }) => {
     const { theme, toggleTheme, t } = useTheme();
@@ -15,8 +15,8 @@ const TopBar = ({ onOpenPage }) => {
     return (
         <>
             <div className={`fixed top-0 left-0 right-0 h-12 z-[4000] flex items-center justify-between px-3 md:px-6 transition-colors duration-300
-                ${theme === 'dark' ? 'bg-neutral-200/90 text-neutral-900' : 'bg-white/90 text-slate-800'} 
-                backdrop-blur-md border-b ${theme === 'dark' ? 'border-neutral-300' : 'border-slate-200'}
+                ${theme === 'dark' ? 'bg-neutral-100/90 text-neutral-900' : 'bg-white/90 text-slate-800'} 
+                backdrop-blur-md border-b ${theme === 'dark' ? 'border-neutral-200' : 'border-slate-200'}
             `}>
 
                 {/* Left: Menu & Brand */}
@@ -30,7 +30,7 @@ const TopBar = ({ onOpenPage }) => {
                         </svg>
                     </button>
                     <div className="flex items-end pb-1">
-                        <img src={logoImage} alt="Girify" className="h-5 md:h-6 w-auto object-contain" />
+                        <Logo className="scale-75 origin-left" />
                     </div>
                 </div>
 
