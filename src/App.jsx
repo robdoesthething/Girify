@@ -72,13 +72,8 @@ const AppContent = () => {
     localStorage.setItem('girify_auto_advance', state.autoAdvance);
   }, [state.autoAdvance]);
 
-  const setupGame = (freshName) => {
-    const activeName = freshName || state.username;
-    if (!activeName) {
-      dispatch({ type: 'SET_GAME_STATE', payload: 'register' });
-      return;
-    }
-
+  // Memoize valid streets for use in setupGame and handleNext
+  const validStreets = useMemo(() => {
     const isValidType = (name) => {
       if (!name) return false;
       const lower = name.toLowerCase();
@@ -99,7 +94,15 @@ const AppContent = () => {
         }
       }
     });
-    const validStreets = Array.from(uniqueStreetsMap.values());
+    return Array.from(uniqueStreetsMap.values());
+  }, []);
+
+  const setupGame = (freshName) => {
+    const activeName = freshName || state.username;
+    if (!activeName) {
+      dispatch({ type: 'SET_GAME_STATE', payload: 'register' });
+      return;
+    }
 
     if (validStreets.length === 0) {
       console.error("No valid streets found!");
@@ -245,7 +248,7 @@ const AppContent = () => {
     if (state.autoAdvance) {
       setTimeout(() => {
         handleNext();
-      }, 5000);
+      }, 1500);
     }
   };
 
@@ -253,11 +256,17 @@ const AppContent = () => {
     // Guard: only proceed if we're in transitioning state (answer was submitted)
     // This prevents double-clicks and stale closure issues
     if (state.feedback !== 'transitioning') {
-      console.warn('[handleNext] Blocked - feedback is:', state.feedback);
+      // console.warn('[handleNext] Blocked - feedback is:', state.feedback);
       return;
     }
 
     const nextIndex = state.currentQuestionIndex + 1;
+    let nextOptions = [];
+
+    // Generate options for the next question if available
+    if (nextIndex < state.quizStreets.length) {
+      nextOptions = generateOptionsList(state.quizStreets[nextIndex], validStreets);
+    }
 
     // Check if game is over
     if (nextIndex >= state.quizStreets.length) {
@@ -288,7 +297,7 @@ const AppContent = () => {
       dispatch({ type: 'NEXT_QUESTION', payload: {} });
     } else {
       const nextStreet = state.quizStreets[nextIndex];
-      const nextOptions = generateOptionsList(nextStreet, rawStreets);
+      const nextOptions = generateOptionsList(nextStreet, validStreets);
 
       dispatch({
         type: 'NEXT_QUESTION',
