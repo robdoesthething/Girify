@@ -357,6 +357,42 @@ const translations = {
         googleLoginFailed: 'Error en iniciar sessió amb Google',
         enterEmailAndPassword: 'Si us plau introdueix email i contrasenya',
         enterYourName: 'Si us plau introdueix el teu nom',
+
+        // Instructions
+        howToPlay: 'Com Jugar',
+        instructionsPoint1: 'Un carrer apareixerà ressaltat en Blau al mapa.',
+        instructionsPoint2: "Endevina el nom correcte entre 4 opcions.",
+        instructionsPoint3: "Necessites ajuda? Revela pistes per trobar-lo.",
+        instructionsPoint4: 'La velocitat compta! Més punts per respondre ràpid.',
+        imReady: "ESTIC APUNT!",
+        next: 'SEGÜENT',
+        startQuiz: 'COMENÇAR QUIZ',
+        replayChallenge: 'REPETIR REPTE',
+        scoreNotSaved: 'La puntuació no es guardarà',
+
+        // Summary
+        dailyChallengeComplete: 'Repte Diari Completat',
+        questionBreakdown: 'Detall de Preguntes',
+        cityCuriosityUnlocked: '🎁 Curiositat Desbloquejada!',
+        shareToReveal: 'Comparteix els resultats per revelar un secret sobre Barcelona.',
+        shareAndReveal: 'Compartir i Revelar',
+        congratsOutstanding: 'Excel·lent! 🌟',
+        congratsExcellent: 'Molt bona feina! 🎉',
+        congratsGreat: 'Bona feina! 👏',
+        congratsGood: 'Bon esforç! 💪',
+        congratsKeepPracticing: 'Segueix practicant! 📚',
+
+        // About
+        aboutGirify: 'Quant a Girify',
+        aboutDescription: "Girify és una forma divertida i interactiva d'aprendre els carrers de Barcelona. Tant si ets un local intentant dominar el teu barri com un visitant explorant, el nostre qüestionari t'ajuda a construir un mapa mental de la ciutat.",
+        aboutCredits: 'Crèdits',
+        aboutFooter: 'Dissenyat i construït amb ❤️ per a Barcelona. Dades del mapa proporcionades per OpenStreetMap.',
+        rightsReserved: '© 2025 Girify. Tots els drets reservats.',
+        aboutPoint1: 'Un carrer es ressaltarà en blau al mapa.',
+        aboutPoint2: 'Tens 4 opcions per triar.',
+        aboutPoint3: 'Com més ràpid responguis, més punts obtindràs!',
+        aboutPoint4: "Utilitza pistes si t'encalles (però intenta no fer-ho!).",
+        aboutPoint5: 'Aconsegueix una puntuació perfecta per desbloquejar curiositats especials.',
     }
 };
 
