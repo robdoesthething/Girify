@@ -33,6 +33,30 @@ const translations = {
         nextQuestion: 'Next Question',
         finishQuiz: 'Finish Quiz',
 
+        // Instructions
+        howToPlay: 'How to Play',
+        instructionsPoint1: 'A street will be highlighted in Blue on the map.',
+        instructionsPoint2: 'Guess the correct name from 4 options.',
+        instructionsPoint3: 'Need help? Reveal hints to help you find it.',
+        instructionsPoint4: 'Speed matters! Higher score for faster answers.',
+        imReady: "I'M READY!",
+        next: 'NEXT',
+        startQuiz: 'START QUIZ',
+        replayChallenge: 'REPLAY CHALLENGE',
+        scoreNotSaved: 'Score will not be saved',
+
+        // Summary
+        dailyChallengeComplete: 'Daily Challenge Complete',
+        questionBreakdown: 'Question Breakdown',
+        cityCuriosityUnlocked: '🎁 City Curiosity Unlocked!',
+        shareToReveal: 'Share your results to reveal a secret about Barcelona.',
+        shareAndReveal: 'Share & Reveal',
+        congratsOutstanding: 'Outstanding! 🌟',
+        congratsExcellent: 'Excellent work! 🎉',
+        congratsGreat: 'Great job! 👏',
+        congratsGood: 'Good effort! 💪',
+        congratsKeepPracticing: 'Keep practicing! 📚',
+
         // Results
         dailyChallenge: 'Daily Challenge',
         yourScore: 'Your Score',
@@ -127,6 +151,30 @@ const translations = {
         revealHint: 'Revelar pista',
         nextQuestion: 'Siguiente pregunta',
         finishQuiz: 'Terminar quiz',
+
+        // Instructions
+        howToPlay: 'Cómo Jugar',
+        instructionsPoint1: 'Una calle aparecerá resaltada en Azul en el mapa.',
+        instructionsPoint2: 'Adivina el nombre correcto entre 4 opciones.',
+        instructionsPoint3: '¿Necesitas ayuda? Revela pistas para encontrarla.',
+        instructionsPoint4: '¡La velocidad importa! Más puntos por responder rápido.',
+        imReady: "¡ESTOY LISTO!",
+        next: 'SIGUIENTE',
+        startQuiz: 'EMPEZAR QUIZ',
+        replayChallenge: 'REPETIR RETO',
+        scoreNotSaved: 'La puntuación no se guardará',
+
+        // Summary
+        dailyChallengeComplete: 'Reto Diario Completado',
+        questionBreakdown: 'Desglose de Preguntas',
+        cityCuriosityUnlocked: '🎁 ¡Curiosidad Desbloqueada!',
+        shareToReveal: 'Comparte tus resultados para revelar un secreto sobre Barcelona.',
+        shareAndReveal: 'Compartir y Revelar',
+        congratsOutstanding: '¡Sobresaliente! 🌟',
+        congratsExcellent: '¡Excelente trabajo! 🎉',
+        congratsGreat: '¡Gran trabajo! 👏',
+        congratsGood: '¡Buen esfuerzo! 💪',
+        congratsKeepPracticing: '¡Sigue practicando! 📚',
 
         // Results
         dailyChallenge: 'Reto diario',

@@ -5,7 +5,7 @@ import { getLeaderboard } from '../utils/leaderboard';
 import PublicProfileModal from './PublicProfileModal';
 
 const LeaderboardScreen = ({ onClose, currentUser }) => {
-    const { theme } = useTheme();
+    const { theme, t } = useTheme();
     const [scores, setScores] = useState([]);
     const [loading, setLoading] = useState(true);
     const [period, setPeriod] = useState('all'); // 'all', 'monthly', 'weekly', 'daily'
@@ -41,10 +41,10 @@ const LeaderboardScreen = ({ onClose, currentUser }) => {
     };
 
     const TABS = [
-        { id: 'all', label: 'All Time' },
-        { id: 'monthly', label: 'Monthly' },
-        { id: 'weekly', label: 'Weekly' },
-        { id: 'daily', label: 'Daily' }
+        { id: 'all', label: t('allTime') },
+        { id: 'monthly', label: t('monthly') },
+        { id: 'weekly', label: t('weekly') },
+        { id: 'daily', label: t('daily') }
     ];
 
     return (
@@ -52,7 +52,7 @@ const LeaderboardScreen = ({ onClose, currentUser }) => {
             <div className="fixed inset-0 z-[8000] flex flex-col pt-16 pb-6 px-4 md:px-8 overflow-hidden pointer-events-auto bg-slate-50 dark:bg-slate-900 backdrop-blur-md">
                 {/* Header */}
                 <div className="flex justify-between items-center max-w-2xl mx-auto w-full mb-6 shrink-0">
-                    <h2 className="text-3xl font-black tracking-tight text-slate-900 dark:text-white">Leaderboard</h2>
+                    <h2 className="text-3xl font-black tracking-tight text-slate-900 dark:text-white">{t('leaderboard')}</h2>
                     <button
                         onClick={onClose}
                         className={`p-2 rounded-full transition-colors text-slate-900 dark:text-white hover:bg-black/5 dark:hover:bg-white/10`}
@@ -83,12 +83,12 @@ const LeaderboardScreen = ({ onClose, currentUser }) => {
                     {loading ? (
                         <div className="flex flex-col items-center justify-center py-20 opacity-50">
                             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-sky-500 mb-4"></div>
-                            <p className="text-sm font-bold uppercase tracking-widest text-slate-500">Loading rankings...</p>
+                            <p className="text-sm font-bold uppercase tracking-widest text-slate-500">{t('loadingRankings')}</p>
                         </div>
                     ) : scores.length === 0 ? (
                         <div className="text-center py-20 opacity-50">
-                            <p className="text-lg font-bold mb-2 text-slate-700 dark:text-slate-300">No records found</p>
-                            <p className="text-sm text-slate-500">Be the first to set a record in this period!</p>
+                            <p className="text-lg font-bold mb-2 text-slate-700 dark:text-slate-300">{t('noRecords')}</p>
+                            <p className="text-sm text-slate-500">{t('beFirst')}</p>
                         </div>
                     ) : (
                         scores.map((s, index) => {
