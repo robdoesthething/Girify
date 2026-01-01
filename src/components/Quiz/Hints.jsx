@@ -10,7 +10,7 @@ const Hints = ({ hintStreets, hintsRevealed, onReveal, feedback }) => {
     if (feedback === 'idle' && hintStreets.length === 0) return null;
 
     return (
-        <div className={`p-2 md:p-4 border-t ${theme === 'dark' ? 'border-slate-800 bg-slate-900' : 'border-slate-100 bg-slate-50'}`}>
+        <div className={`p-2 md:p-4 border-t ${theme === 'dark' ? 'border-neutral-800 bg-neutral-900' : 'border-slate-100 bg-slate-50'}`}>
             <div className="flex flex-col gap-1.5 md:gap-3">
                 <div className="flex justify-between items-center text-[10px] md:text-xs text-slate-500 uppercase font-bold tracking-wider">
                     <span>{t('hints')}</span>

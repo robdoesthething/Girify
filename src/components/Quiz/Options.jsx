@@ -36,18 +36,18 @@ const Options = ({ options, onSelect, selectedAnswer, feedback, correctName, aut
                         } else {
                             // Other options - muted
                             btnClass = theme === 'dark'
-                                ? 'bg-slate-700/50 text-slate-500 border-slate-600'
+                                ? 'bg-neutral-800/50 text-neutral-500 border-neutral-700'
                                 : 'bg-slate-100 text-slate-400 border-slate-200';
                         }
                     } else if (isSelected) {
                         // Selected but not submitted yet (non-auto mode)
                         btnClass = theme === 'dark'
-                            ? 'bg-slate-600/50 text-white border-slate-500 ring-2 ring-slate-400' // Dark mode selected (Grey)
+                            ? 'bg-neutral-600 text-white border-neutral-500 ring-2 ring-neutral-400' // Dark mode selected (Neutral)
                             : 'bg-sky-500 text-white border-sky-600 ring-2 ring-sky-400';
                     } else {
                         // Default unselected - LIGHTER colors for dark mode
                         btnClass = theme === 'dark'
-                            ? 'bg-slate-800 hover:bg-slate-700 text-slate-200 border-slate-700'
+                            ? 'bg-neutral-800 hover:bg-neutral-700 text-neutral-200 border-neutral-700'
                             : 'bg-white hover:bg-slate-50 text-slate-800 border-slate-200';
                     }
 

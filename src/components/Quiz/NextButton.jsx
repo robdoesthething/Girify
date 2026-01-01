@@ -23,7 +23,7 @@ const NextButton = ({ onNext, isLastQuestion, feedback }) => {
                 }}
                 className={`w-full sm:w-auto px-6 md:px-8 py-2 md:py-3 text-sm md:text-base rounded-full font-black shadow-lg transition-all active:scale-95 border
                     ${theme === 'dark'
-                        ? 'bg-slate-200 hover:bg-white text-slate-900 border-white' // High contrast button for dark mode
+                        ? 'bg-neutral-200 hover:bg-white text-neutral-900 border-white' // High contrast button for dark mode
                         : 'bg-slate-900 hover:bg-slate-800 text-white border-slate-900'
                     }
                 `}
