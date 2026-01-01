@@ -3,12 +3,11 @@ import { motion } from 'framer-motion';
 import { useTheme } from '../../context/ThemeContext';
 
 const NextButton = ({ onNext, isLastQuestion, feedback }) => {
-    const { theme } = useTheme();
+    const { theme, t } = useTheme();
 
-    // Only show when answer has been submitted
     if (feedback !== 'transitioning') return null;
 
-    const label = isLastQuestion ? 'Finish Quiz' : 'Next Question';
+    const label = isLastQuestion ? t('finishQuiz') : t('nextQuestion');
 
     return (
         <motion.div

@@ -2,9 +2,8 @@ import React from 'react';
 import { useTheme } from '../../context/ThemeContext';
 
 const Hints = ({ hintStreets, hintsRevealed, onReveal, feedback }) => {
-    const { theme } = useTheme();
+    const { theme, t } = useTheme();
 
-    // Logic for revealing
     const canReveal = hintsRevealed < 3 && hintsRevealed < hintStreets.length;
 
     if (feedback !== 'idle' && hintStreets.length === 0) return null;
@@ -14,13 +13,13 @@ const Hints = ({ hintStreets, hintsRevealed, onReveal, feedback }) => {
         <div className={`p-2 md:p-4 border-t ${theme === 'dark' ? 'border-slate-700 bg-slate-800' : 'border-slate-100 bg-slate-50'}`}>
             <div className="flex flex-col gap-1.5 md:gap-3">
                 <div className="flex justify-between items-center text-[10px] md:text-xs text-slate-500 uppercase font-bold tracking-wider">
-                    <span>Hints</span>
+                    <span>{t('hints')}</span>
                     {canReveal && (
                         <button
                             onClick={onReveal}
                             className="text-sky-500 hover:text-sky-600 transition-colors text-[10px] md:text-xs"
                         >
-                            Reveal Hint
+                            {t('revealHint')}
                         </button>
                     )}
                 </div>

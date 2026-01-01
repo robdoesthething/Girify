@@ -4,13 +4,12 @@ import { useTheme } from '../../context/ThemeContext';
 import { colors, spacers, shadows } from '../../styles/tokens';
 
 const Banner = ({ currentQuestionIndex, totalQuestions }) => {
-    const { theme } = useTheme();
+    const { theme, t } = useTheme();
 
     return (
         <div className="absolute top-12 left-0 right-0 z-[1000] flex flex-col shadow-lg">
             <div className="bg-[#000080] text-white font-bold text-center py-3 px-3 uppercase tracking-wider text-xs sm:text-sm flex justify-between items-center">
-                <span>Which street is highlighted?</span>
-                <span className="opacity-80 font-mono">Question {currentQuestionIndex + 1} / {totalQuestions}</span>
+                <span>{t('question')} {currentQuestionIndex + 1} {t('of')} {totalQuestions}</span>
             </div>
             <div className={`w-full h-1.5 ${theme === 'dark' ? 'bg-slate-700' : 'bg-slate-200'}`}>
                 <div
