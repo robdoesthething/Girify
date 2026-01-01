@@ -45,6 +45,18 @@ const translations = {
         replayChallenge: 'REPLAY CHALLENGE',
         scoreNotSaved: 'Score will not be saved',
 
+        // About
+        aboutGirify: 'About Girify',
+        aboutDescription: 'Girify is a fun, interactive way to learn the streets of Barcelona. Whether you are a local trying to master your neighborhood or a visitor exploring the city, our quiz helps you build a mental map of the city.',
+        aboutCredits: 'Credits',
+        aboutFooter: 'Designed and built with ❤️ for Barcelona. Map data provided by OpenStreetMap contributors.',
+        rightsReserved: '© 2025 Girify. All rights reserved.',
+        aboutPoint1: 'A street is highlighted in blue on the map.',
+        aboutPoint2: 'You have 4 options to choose from.',
+        aboutPoint3: 'The faster you answer, the more points you get!',
+        aboutPoint4: 'Use hints if you get stuck (but try not to!).',
+        aboutPoint5: 'Get a perfect score to unlock special city curiosities.',
+
         // Summary
         dailyChallengeComplete: 'Daily Challenge Complete',
         questionBreakdown: 'Question Breakdown',
@@ -163,6 +175,18 @@ const translations = {
         startQuiz: 'EMPEZAR QUIZ',
         replayChallenge: 'REPETIR RETO',
         scoreNotSaved: 'La puntuación no se guardará',
+
+        // About
+        aboutGirify: 'Sobre Girify',
+        aboutDescription: 'Girify es una forma divertida e interactiva de aprender las calles de Barcelona. Ya seas un local intentando dominar tu barrio o un visitante explorando, nuestro quiz te ayuda a construir un mapa mental de la ciudad.',
+        aboutCredits: 'Créditos',
+        aboutFooter: 'Diseñado y construido con ❤️ para Barcelona. Datos del mapa proporcionados por OpenStreetMap.',
+        rightsReserved: '© 2025 Girify. Todos los derechos reservados.',
+        aboutPoint1: 'Una calle se resalta en azul en el mapa.',
+        aboutPoint2: 'Tienes 4 opciones para elegir.',
+        aboutPoint3: '¡Cuanto más rápido respondas, más puntos obtienes!',
+        aboutPoint4: 'Usa pistas si te atascas (¡pero intenta no hacerlo!).',
+        aboutPoint5: 'Consigue una puntuación perfecta para desbloquear curiosidades especiales.',
 
         // Summary
         dailyChallengeComplete: 'Reto Diario Completado',
