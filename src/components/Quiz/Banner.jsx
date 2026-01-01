@@ -1,7 +1,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { useTheme } from '../../context/ThemeContext';
-import { colors, spacing, shadows } from '../../styles/tokens';
+import { colors, spacers, shadows } from '../../styles/tokens';
 
 const Banner = ({ currentQuestionIndex, totalQuestions }) => {
     const { theme } = useTheme();
