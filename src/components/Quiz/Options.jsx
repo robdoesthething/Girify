@@ -1,29 +1,22 @@
 import React from 'react';
 import { useTheme } from '../../context/ThemeContext';
 
-const Options = ({ options, onSelect, selectedAnswer, feedback, correctName }) => {
+const Options = ({ options, onSelect, selectedAnswer, feedback, correctName, autoAdvance }) => {
     const { theme } = useTheme();
 
     return (
         <div className="flex-1 min-h-0 flex flex-col justify-center px-4 pb-2">
             <div className="grid grid-cols-2 sm:flex sm:flex-col gap-2 sm:gap-3 w-full max-w-lg mx-auto h-full sm:h-auto">
                 {options.map((opt) => {
-                    // Check if this option is the one currently selected (manually)
                     const isSelected = selectedAnswer && opt.id === selectedAnswer.id;
-                    // Check if this is the correct answer (for showing after submission)
                     const isCorrectOption = opt.name === correctName;
-                    // Is the answer submitted (transitioning state)?
                     const isSubmitted = feedback === 'transitioning';
 
                     let btnClass = '';
 
                     if (isSubmitted) {
-                        // After submission: 
-                        // - Selected answer: show in blue with ring (user's choice)
-                        // - Correct answer (if different): show green checkmark indication
-                        // - Others: muted
                         if (isSelected) {
-                            // This is the user's final answer - ALWAYS highlight in blue
+                            // User's answer - always show in blue
                             if (isCorrectOption) {
                                 // Correct! Blue with success ring
                                 btnClass = theme === 'dark'
@@ -35,8 +28,8 @@ const Options = ({ options, onSelect, selectedAnswer, feedback, correctName }) =
                                     ? 'bg-sky-600 text-white border-sky-500 ring-2 ring-red-400'
                                     : 'bg-sky-500 text-white border-sky-600 ring-2 ring-red-400';
                             }
-                        } else if (isCorrectOption && !isSelected) {
-                            // Show the correct answer with green styling (if user got it wrong)
+                        } else if (isCorrectOption && !isSelected && !autoAdvance) {
+                            // Only show correct answer in NON-AUTO mode
                             btnClass = theme === 'dark'
                                 ? 'bg-emerald-600/30 text-emerald-400 border-emerald-500'
                                 : 'bg-emerald-500/20 text-emerald-700 border-emerald-500';

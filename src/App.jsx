@@ -352,6 +352,7 @@ const AppContent = () => {
                     selectedAnswer={state.selectedAnswer}
                     feedback={state.feedback}
                     correctName={currentStreet?.name}
+                    autoAdvance={state.autoAdvance}
                   />
                 </Quiz.Content>
 
