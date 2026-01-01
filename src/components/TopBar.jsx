@@ -20,7 +20,7 @@ const TopBar = ({ onOpenPage }) => {
             `}>
 
                 {/* Left: Menu & Brand */}
-                <div className="flex items-center gap-2 md:gap-4">
+                <div className="flex items-end gap-2 md:gap-4">
                     <button
                         onClick={() => setMenuOpen(!menuOpen)}
                         className={`p-1.5 md:p-2 rounded-full transition-colors ${theme === 'dark' ? 'hover:bg-slate-800' : 'hover:bg-slate-100'}`}
@@ -29,7 +29,7 @@ const TopBar = ({ onOpenPage }) => {
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
                         </svg>
                     </button>
-                    <div className="flex items-center">
+                    <div className="flex items-end pb-1">
                         <img src={logoImage} alt="Girify" className="h-5 md:h-6 w-auto object-contain" />
                     </div>
                 </div>
