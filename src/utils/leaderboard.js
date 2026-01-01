@@ -73,33 +73,37 @@ export const getLeaderboard = async (period = 'all') => {
             const snapshot = await getDocs(q);
             snapshot.forEach(doc => scores.push({ id: doc.id, ...doc.data() }));
         } else {
-            // For periods, we query the history 'scores' collection
-            // Optimally, we'd use composite indexes. For small apps, we verify filtering client/server mix.
-
+            // For periods, we query the history 'scores' collection.
+            // To avoid missing index issues and ensure robustness, we fetch the most recent 200 scores
+            // and filter them in memory. This is efficient enough for the current scale.
             const scoresRef = collection(db, SCORES_COLLECTION);
+            const q = query(scoresRef, orderBy("timestamp", "desc"), limit(200));
+            const snapshot = await getDocs(q);
 
-            if (period === 'daily') {
-                // Filter by today's seed
-                const q = query(scoresRef, where("date", "==", getTodaySeed())); // Requires simple index (auto-created usually)
-                const snapshot = await getDocs(q);
-                snapshot.forEach(doc => scores.push({ id: doc.id, ...doc.data() }));
-            } else {
-                // Weekly / Monthly: Fetch recent scores and filter
-                // (Using a simple query limit to avoid fetching everything)
-                const q = query(scoresRef, orderBy("timestamp", "desc"), limit(500));
-                const snapshot = await getDocs(q);
+            const now = new Date();
+            const oneDayAgo = new Date(now.getTime() - 24 * 60 * 60 * 1000); // 24h approximation for daily relative? No, stick to seed.
+            const oneWeekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+            const oneMonthAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+            const todaySeed = getTodaySeed();
 
-                const now = new Date();
-                const oneWeekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
-                const oneMonthAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+            snapshot.forEach(doc => {
+                const data = doc.data();
+                const date = data.timestamp ? data.timestamp.toDate() : new Date();
 
-                snapshot.forEach(doc => {
-                    const data = doc.data();
-                    const date = data.timestamp.toDate();
-                    if (period === 'weekly' && date > oneWeekAgo) scores.push({ id: doc.id, ...data });
-                    if (period === 'monthly' && date > oneMonthAgo) scores.push({ id: doc.id, ...data });
-                });
-            }
+                let include = false;
+                if (period === 'daily') {
+                    // Match seed exactly
+                    if (data.date === todaySeed) include = true;
+                } else if (period === 'weekly') {
+                    if (date > oneWeekAgo) include = true;
+                } else if (period === 'monthly') {
+                    if (date > oneMonthAgo) include = true;
+                }
+
+                if (include) {
+                    scores.push({ id: doc.id, ...data });
+                }
+            });
 
             // Deduplicate: Keep best score per user
             scores = deduplicateScores(scores);
