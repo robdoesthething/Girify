@@ -1,5 +1,5 @@
 import { useReducer, useMemo, useEffect, useState } from 'react';
-import { AnimatePresence } from 'framer-motion';
+import { AnimatePresence, motion } from 'framer-motion';
 import MapArea from './components/MapArea';
 import Quiz from './components/Quiz';
 import TopBar from './components/TopBar';
