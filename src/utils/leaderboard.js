@@ -31,6 +31,7 @@ const SCORES_COLLECTION = 'scores'; // Full History
  * // Saves to history and updates personal best if score > previous best
  */
 export const saveScore = async (username, score, time) => {
+  console.log(`[Leaderboard] saveScore called for ${username}. Score: ${score}, Time: ${time}`);
   if (!username) {
     console.warn('[Leaderboard] saveScore called without username, skipping.');
     return;

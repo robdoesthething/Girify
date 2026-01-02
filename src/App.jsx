@@ -339,8 +339,11 @@ const AppContent = () => {
     if (nextIndex >= state.quizStreets.length) {
       if (state.gameState === 'playing') {
         try {
+          // Debug logs for user report "not updating"
+          console.log('[Game] Finished. hasPlayedToday:', hasPlayedToday());
           if (!hasPlayedToday()) {
             markTodayAsPlayed();
+            console.log('[Game] Marking as played and saving...');
             const history = JSON.parse(localStorage.getItem('girify_history') || '[]');
             const avgTime = state.quizResults.length
               ? (
@@ -358,15 +361,19 @@ const AppContent = () => {
             };
             history.push(newRecord);
             localStorage.setItem('girify_history', JSON.stringify(history));
+            console.log('[Game] History saved locally. Total games:', history.length);
 
             if (state.username) {
-              saveScore(state.username, state.score, newRecord.avgTime).catch(err =>
-                console.error('Leaderboard save failed:', err)
-              );
+              console.log('[Game] Saving to Leaderboard...');
+              saveScore(state.username, state.score, newRecord.avgTime)
+                .then(() => console.log('[Game] Leaderboard save success.'))
+                .catch(err => console.error('[Game] Leaderboard save failed:', err));
             }
+          } else {
+            console.log('[Game] Already played today. Skipping save.');
           }
         } catch (e) {
-          console.error('Error saving', e);
+          console.error('[Game] Error saving game:', e);
         }
       }
       dispatch({ type: 'NEXT_QUESTION', payload: {} });

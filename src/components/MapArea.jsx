@@ -223,9 +223,9 @@ const MapArea = ({ currentStreet, hintStreets = [], theme = 'dark' }) => {
           attributionControl={false}
           touchZoom={true}
           maxBounds={[
-            [41.2, 2.0],
-            [41.6, 2.35],
-          ]} // Relaxed bounds
+            [41.32, 2.05],
+            [41.48, 2.25],
+          ]} // Tight Barcelona bounds
           maxBoundsViscosity={0.9} // Firmer edges
           className="h-full w-full outline-none"
         >
