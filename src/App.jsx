@@ -24,7 +24,7 @@ import { fetchWikiImage } from './utils/wiki';
 import Logo from './components/Logo';
 import { gameReducer, initialState } from './reducers/gameReducer';
 import { auth } from './firebase';
-import { onAuthStateChanged } from 'firebase/auth';
+import { onAuthStateChanged, signOut } from 'firebase/auth';
 
 /**
  * Extract the street type prefix from a street name.
@@ -388,6 +388,7 @@ const AppContent = () => {
   };
 
   const handleLogout = () => {
+    signOut(auth).catch(err => console.error('Sign out error', err));
     localStorage.removeItem('girify_username');
     localStorage.removeItem('lastPlayedDate'); // Reset daily played status so new user sees 'Start'
     dispatch({ type: 'LOGOUT' });

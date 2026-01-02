@@ -14,15 +14,7 @@ const LeaderboardScreen = ({ onClose, currentUser }) => {
 
   const [error, setError] = useState(null);
 
-  useEffect(() => {
-    loadScores();
-  }, [period, loadScores]);
-
-  /* eslint-disable react-hooks/exhaustive-deps */
-  const loadScores = async () => {
-    // We disable exhaustive-deps because we only want to fetch when 'period' changes.
-    // Including 'loadScores' in the dependency array (if it was wrapped in useCallback)
-    // is technically correct but adds boilerplate for this simple fetch logic.
+  const loadScores = React.useCallback(async () => {
     setLoading(true);
     setError(null);
     setScores([]); // Clear previous scores while loading
@@ -55,7 +47,11 @@ const LeaderboardScreen = ({ onClose, currentUser }) => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [period]);
+
+  useEffect(() => {
+    loadScores();
+  }, [loadScores]);
 
   const TABS = [
     { id: 'all', label: t('allTime') },
