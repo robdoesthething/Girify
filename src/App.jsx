@@ -1,5 +1,5 @@
 import { useReducer, useMemo, useEffect, useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { AnimatePresence } from 'framer-motion';
 import MapArea from './components/MapArea';
 import Quiz from './components/Quiz';
 import TopBar from './components/TopBar';
@@ -25,33 +25,6 @@ import Logo from './components/Logo';
 import { gameReducer, initialState } from './reducers/gameReducer';
 import { auth } from './firebase';
 import { onAuthStateChanged } from 'firebase/auth';
-// Custom hooks for reusable logic
-import { useScoreCalculator, useDailyChallenge } from './hooks';
-
-/**
- * Normalize street names for comparison by removing accents, prefixes, and punctuation.
- * Used to match user input against correct answers.
- *
- * @param {string} str - Street name to normalize
- * @returns {string} Normalized string (lowercase, no accents, no prefixes, alphanumeric only)
- *
- * @example
- * normalize('Carrer de Balmes');
- * // Returns: 'balmes'
- *
- * @example
- * normalize('Avinguda Diagonal');
- * // Returns: 'diagonal'
- */
-const normalize = str => {
-  return str
-    .toLowerCase()
-    .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '') // remove accents
-    .replace(/^(carrer|avinguda|plaça|passeig|passatge|ronda|via|camí)\s+d(e|els|es)?\s+/i, '') // remove prefixes
-    .replace(/^(carrer|avinguda|plaça|passeig|passatge|ronda|via|camí)\s+/i, '') // remove prefixes simple
-    .replace(/[^a-z0-9]/g, ''); // remove punctuation
-};
 
 /**
  * Extract the street type prefix from a street name.
@@ -122,7 +95,6 @@ const AppContent = () => {
     const ref = params.get('ref');
     if (ref && !localStorage.getItem('girify_referrer')) {
       localStorage.setItem('girify_referrer', ref);
-      console.log('[Referral] Stored referrer:', ref);
     }
   }, []);
 
@@ -203,7 +175,6 @@ const AppContent = () => {
 
     if (validStreets.length === 0) {
       console.error('No valid streets found!');
-      alert('Error: No street data available.');
       dispatch({ type: 'SET_GAME_STATE', payload: 'intro' });
       return;
     }
@@ -327,12 +298,6 @@ const AppContent = () => {
     processAnswer(selectedStreet);
   };
 
-  const handleSubmit = () => {
-    if (state.selectedAnswer) {
-      processAnswer(state.selectedAnswer);
-    }
-  };
-
   const processAnswer = selectedStreet => {
     if (state.feedback === 'transitioning') return;
 
@@ -367,12 +332,8 @@ const AppContent = () => {
     }
 
     const nextIndex = state.currentQuestionIndex + 1;
-    let nextOptions = [];
-
     // Generate options for the next question if available
-    if (nextIndex < state.quizStreets.length) {
-      nextOptions = generateOptionsList(state.quizStreets[nextIndex], validStreets);
-    }
+    // (Logic moved to else block to avoid shadowing and unused vars)
 
     // Check if game is over
     if (nextIndex >= state.quizStreets.length) {
@@ -437,17 +398,14 @@ const AppContent = () => {
 
   // Firebase Auth State Listener (Moved to bottom to fix hoisting)
   useEffect(() => {
-    console.log('[Auth] Setting up auth state listener');
     const unsubscribe = onAuthStateChanged(auth, user => {
       if (user) {
-        console.log('[Auth] User authenticated:', user.email, user.displayName);
         // User is signed in
         const displayName = user.displayName || user.email?.split('@')[0] || 'User';
 
         // Check if we already have this user set
         const currentUsername = localStorage.getItem('girify_username');
         if (currentUsername !== displayName) {
-          console.log('[Auth] Setting username to:', displayName);
           localStorage.setItem('girify_username', displayName);
           dispatch({ type: 'SET_USERNAME', payload: displayName });
 
@@ -457,20 +415,13 @@ const AppContent = () => {
           }
         }
       } else {
-        console.log('[Auth] User signed out');
-        // User is signed out - only clear if we're not in guest mode
-        const currentUsername = state.username;
-        if (currentUsername && auth.currentUser === null) {
-          // This means user was logged out from Firebase
-          // We should respect that and clear local state
-          console.log('[Auth] Clearing user state due to sign out');
-        }
+        // This means user was logged out from Firebase
+        // We should respect that and clear local state
       }
     });
 
     // Cleanup subscription on unmount
     return () => {
-      console.log('[Auth] Cleaning up auth state listener');
       unsubscribe();
     };
   }, [state.gameState]);
