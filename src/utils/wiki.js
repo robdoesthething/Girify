@@ -4,6 +4,21 @@
 const WIKI_API_BASE = "https://ca.wikipedia.org/w/api.php"; // Use Catalan Wikipedia for Barcelona relevance
 // Fallback to English if needed, but CA is better for "Carrer de..."
 
+/**
+ * Fetch a thumbnail image from Catalan Wikipedia for a given query.
+ * Uses MediaWiki API to search for page images. Returns null if no image found.
+ * 
+ * @param {string} query - Search term (e.g., "Sagrada Família", "Carrer de Balmes")
+ * @returns {Promise<string|null>} URL of thumbnail image (600px) or null if not found
+ * 
+ * @example
+ * const imageUrl = await fetchWikiImage('Sagrada Família');
+ * // Returns: "https://upload.wikimedia.org/wikipedia/commons/thumb/..."
+ * 
+ * @example
+ * const noImage = await fetchWikiImage('NonexistentPage');
+ * // Returns: null
+ */
 export const fetchWikiImage = async (query) => {
     if (!query) return null;
 

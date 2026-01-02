@@ -21,7 +21,21 @@ import { gameReducer, initialState } from './reducers/gameReducer';
 import { auth } from './firebase';
 import { onAuthStateChanged } from 'firebase/auth';
 
-// Helper to normalize strings for comparison
+/**
+ * Normalize street names for comparison by removing accents, prefixes, and punctuation.
+ * Used to match user input against correct answers.
+ * 
+ * @param {string} str - Street name to normalize
+ * @returns {string} Normalized string (lowercase, no accents, no prefixes, alphanumeric only)
+ * 
+ * @example
+ * normalize('Carrer de Balmes');
+ * // Returns: 'balmes'
+ * 
+ * @example
+ * normalize('Avinguda Diagonal');
+ * // Returns: 'diagonal'
+ */
 const normalize = (str) => {
   return str
     .toLowerCase()
@@ -31,21 +45,54 @@ const normalize = (str) => {
     .replace(/[^a-z0-9]/g, ""); // remove punctuation
 };
 
-// Improved prefix extraction
+/**
+ * Extract the street type prefix from a street name.
+ * Matches common Barcelona street types (Carrer, Avinguda, Plaça, etc.).
+ * 
+ * @param {string} name - Full street name
+ * @returns {string} Street prefix (e.g., 'Carrer de', 'Avinguda') or empty string
+ * 
+ * @example
+ * getPrefix('Carrer de Balmes');
+ * // Returns: 'Carrer de'
+ * 
+ * @example
+ * getPrefix('Plaça Catalunya');
+ * // Returns: 'Plaça'
+ */
 const getPrefix = (name) => {
   if (!name) return '';
   const match = name.match(/^(Carrer|Avinguda|Plaça|Passeig|Passatge|Ronda|Via|Camí|Jardins|Parc|Rambla|Travessera)(\s+d(e|els|es|el|ala)|(?=\s))?/i);
   return match ? match[0].trim() : '';
 };
 
-// Extract first name from full name
+/**
+ * Extract first name from a full name string.
+ * 
+ * @param {string} fullName - Full name (e.g., 'John Doe')
+ * @returns {string} First name or empty string
+ * 
+ * @example
+ * getFirstName('John Doe');
+ * // Returns: 'John'
+ */
 const getFirstName = (fullName) => {
   if (!fullName) return '';
   return fullName.trim().split(' ')[0];
 };
 
-// Get custom congrats message based on score
-// Get custom congrats message based on score
+/**
+ * Get congratulatory message based on score percentage.
+ * 
+ * @param {number} score - Points earned
+ * @param {number} maxScore - Maximum possible points
+ * @param {Function} t - Translation function
+ * @returns {string} Translated congratulations message
+ * 
+ * @example
+ * getCongratsMessage(1800, 2000, t);
+ * // Returns: t('congratsExcellent') // 90% score
+ */
 const getCongratsMessage = (score, maxScore, t) => {
   const percentage = (score / maxScore) * 100;
   if (percentage >= 90) return t('congratsOutstanding');
@@ -187,6 +234,17 @@ const AppContent = () => {
     return Array.from(uniqueStreetsMap.values());
   }, []);
 
+  /**
+   * Initialize and start a new game with daily challenge streets.
+   * Generates today's street selection using deterministic seeding.
+   * 
+   * @param {string} [freshName] - Optional username to use (defaults to state.username)
+   * @returns {void}
+   * 
+   * @example
+   * setupGame('JohnDoe');
+   * // Starts game with today's 10 streets for user JohnDoe
+   */
   const setupGame = (freshName) => {
     const activeName = freshName || state.username;
     if (!activeName) {
@@ -218,6 +276,19 @@ const AppContent = () => {
     });
   };
 
+  /**
+   * Generate 4 multiple-choice options for a quiz question.
+   * Includes the correct answer plus 3 distractors with matching street type prefix.
+   * Falls back to any streets if not enough matching prefixes available.
+   * 
+   * @param {{id: string, name: string}} target - The correct street
+   * @param {Array<{id: string, name: string}>} allStreets - Pool of all available streets
+   * @returns {Array<{id: string, name: string}>} Array of 4 shuffled options
+   * 
+   * @example
+   * generateOptionsList(targetStreet, validStreets);
+   * // Returns: [street1, street2, street3, street4] (shuffled, includes target)
+   */
   const generateOptionsList = (target, allStreets) => {
     const targetPrefix = getPrefix(target.name);
     let pool = allStreets.filter(s =>
