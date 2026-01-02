@@ -1,6 +1,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { useTheme } from '../context/ThemeContext';
+import PropTypes from 'prop-types';
 
 const AboutScreen = ({ onClose }) => {
     const { theme, t } = useTheme();
@@ -50,6 +51,10 @@ const AboutScreen = ({ onClose }) => {
             </motion.div>
         </div>
     );
+};
+
+AboutScreen.propTypes = {
+    onClose: PropTypes.func.isRequired
 };
 
 export default AboutScreen;

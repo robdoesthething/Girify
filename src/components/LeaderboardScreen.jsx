@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useTheme } from '../context/ThemeContext';
 import { getLeaderboard } from '../utils/leaderboard';
 import PublicProfileModal from './PublicProfileModal';
+import PropTypes from 'prop-types';
 
 const LeaderboardScreen = ({ onClose, currentUser }) => {
     const { theme, t } = useTheme();
@@ -155,6 +156,11 @@ const LeaderboardScreen = ({ onClose, currentUser }) => {
             </AnimatePresence>
         </>
     );
+};
+
+LeaderboardScreen.propTypes = {
+    onClose: PropTypes.func.isRequired,
+    currentUser: PropTypes.string
 };
 
 export default LeaderboardScreen;

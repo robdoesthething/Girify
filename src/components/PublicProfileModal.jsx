@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useTheme } from '../context/ThemeContext';
 import { getUserProfile, sendFriendRequest, getFriendshipStatus, blockUser, getBlockStatus } from '../utils/social';
+import PropTypes from 'prop-types';
 
 const PublicProfileModal = ({ username, onClose, currentUser }) => {
     const { theme } = useTheme();
@@ -194,6 +195,12 @@ const PublicProfileModal = ({ username, onClose, currentUser }) => {
             </motion.div>
         </div>
     );
+};
+
+PublicProfileModal.propTypes = {
+    username: PropTypes.string.isRequired,
+    onClose: PropTypes.func.isRequired,
+    currentUser: PropTypes.string
 };
 
 export default PublicProfileModal;

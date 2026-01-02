@@ -4,6 +4,7 @@ import { auth, googleProvider } from '../firebase';
 import { signInWithPopup, createUserWithEmailAndPassword, signInWithEmailAndPassword, updateProfile, sendEmailVerification } from 'firebase/auth';
 import { ensureUserProfile, recordReferral } from '../utils/social';
 import { useTheme } from '../context/ThemeContext';
+import PropTypes from 'prop-types';
 
 // Username validation constants
 const MAX_USERNAME_LENGTH = 20;
@@ -315,6 +316,11 @@ const RegisterPanel = ({ theme: themeProp, onRegister }) => {
             </motion.div>
         </div>
     );
+};
+
+RegisterPanel.propTypes = {
+    theme: PropTypes.oneOf(['dark', 'light']).isRequired,
+    onRegister: PropTypes.func.isRequired
 };
 
 export default RegisterPanel;

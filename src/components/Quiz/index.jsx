@@ -5,6 +5,7 @@ import Options from './Options';
 import Hints from './Hints';
 import NextButton from './NextButton';
 import { useTheme } from '../../context/ThemeContext';
+import PropTypes from 'prop-types';
 
 const Quiz = ({ children, className }) => {
     const { theme, deviceMode } = useTheme();
@@ -50,5 +51,19 @@ Quiz.Hints = Hints;
 Quiz.NextButton = NextButton;
 Quiz.Container = Container;
 Quiz.Content = Content;
+
+Quiz.propTypes = {
+    children: PropTypes.node,
+    className: PropTypes.string
+};
+
+Container.propTypes = {
+    children: PropTypes.node.isRequired,
+    keyProp: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired
+};
+
+Content.propTypes = {
+    children: PropTypes.node.isRequired
+};
 
 export default Quiz;

@@ -1,5 +1,6 @@
 import React from 'react';
 import { useTheme } from '../../context/ThemeContext';
+import PropTypes from 'prop-types';
 
 const Options = ({ options, onSelect, selectedAnswer, feedback, correctName, autoAdvance }) => {
     const { theme } = useTheme();
@@ -52,6 +53,23 @@ const Options = ({ options, onSelect, selectedAnswer, feedback, correctName, aut
             </div>
         </div>
     );
+};
+
+Options.propTypes = {
+    options: PropTypes.arrayOf(
+        PropTypes.shape({
+            id: PropTypes.string.isRequired,
+            name: PropTypes.string.isRequired
+        })
+    ).isRequired,
+    onSelect: PropTypes.func.isRequired,
+    selectedAnswer: PropTypes.shape({
+        id: PropTypes.string.isRequired,
+        name: PropTypes.string.isRequired
+    }),
+    feedback: PropTypes.oneOf(['idle', 'transitioning']).isRequired,
+    correctName: PropTypes.string,
+    autoAdvance: PropTypes.bool.isRequired
 };
 
 export default Options;

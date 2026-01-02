@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useTheme } from '../context/ThemeContext';
 import { motion, AnimatePresence } from 'framer-motion';
 import Logo from './Logo';
+import PropTypes from 'prop-types';
 
 const TopBar = ({ onOpenPage }) => {
     const { theme, toggleTheme, t } = useTheme();
@@ -97,6 +98,10 @@ const TopBar = ({ onOpenPage }) => {
             </AnimatePresence>
         </>
     );
+};
+
+TopBar.propTypes = {
+    onOpenPage: PropTypes.func.isRequired
 };
 
 export default TopBar;

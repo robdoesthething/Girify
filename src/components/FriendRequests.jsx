@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useTheme } from '../context/ThemeContext';
 import { getPendingFriendRequests, acceptFriendRequest } from '../utils/social';
+import PropTypes from 'prop-types';
 
 const FriendRequests = ({ username }) => {
     const { theme } = useTheme();
@@ -68,6 +69,10 @@ const FriendRequests = ({ username }) => {
             </div>
         </div>
     );
+};
+
+FriendRequests.propTypes = {
+    username: PropTypes.string.isRequired
 };
 
 export default FriendRequests;

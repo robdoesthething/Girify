@@ -1,6 +1,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { useTheme } from '../../context/ThemeContext';
+import PropTypes from 'prop-types';
 
 const NextButton = ({ onNext, isLastQuestion, feedback }) => {
     const { theme, t } = useTheme();
@@ -32,6 +33,12 @@ const NextButton = ({ onNext, isLastQuestion, feedback }) => {
             </button>
         </motion.div>
     );
+};
+
+NextButton.propTypes = {
+    onNext: PropTypes.func.isRequired,
+    isLastQuestion: PropTypes.bool.isRequired,
+    feedback: PropTypes.oneOf(['idle', 'transitioning']).isRequired
 };
 
 export default NextButton;

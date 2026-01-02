@@ -1,6 +1,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { useTheme } from '../context/ThemeContext';
+import PropTypes from 'prop-types';
 
 const SettingsScreen = ({ onClose, onLogout, autoAdvance, setAutoAdvance }) => {
     const { theme, toggleTheme, language, changeLanguage, languages, t, deviceMode } = useTheme();
@@ -179,6 +180,13 @@ const SettingsScreen = ({ onClose, onLogout, autoAdvance, setAutoAdvance }) => {
             </motion.div>
         </div>
     );
+};
+
+SettingsScreen.propTypes = {
+    onClose: PropTypes.func.isRequired,
+    onLogout: PropTypes.func.isRequired,
+    autoAdvance: PropTypes.bool.isRequired,
+    setAutoAdvance: PropTypes.func.isRequired
 };
 
 export default SettingsScreen;

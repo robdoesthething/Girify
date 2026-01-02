@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTheme } from '../context/ThemeContext';
+import PropTypes from 'prop-types';
 
 const QuizInterface = ({
     questionIndex,
@@ -158,6 +159,33 @@ const QuizInterface = ({
             </motion.div>
         </div>
     );
+};
+
+QuizInterface.propTypes = {
+    questionIndex: PropTypes.number.isRequired,
+    totalQuestions: PropTypes.number.isRequired,
+    score: PropTypes.number.isRequired,
+    options: PropTypes.arrayOf(
+        PropTypes.shape({
+            id: PropTypes.string.isRequired,
+            name: PropTypes.string.isRequired
+        })
+    ).isRequired,
+    onSelectOption: PropTypes.func.isRequired,
+    onNext: PropTypes.func.isRequired,
+    feedback: PropTypes.oneOf(['idle', 'correct', 'wrong', 'transitioning']).isRequired,
+    correctName: PropTypes.string.isRequired,
+    hintStreets: PropTypes.arrayOf(
+        PropTypes.shape({
+            id: PropTypes.string.isRequired,
+            name: PropTypes.string.isRequired
+        })
+    ),
+    onHintReveal: PropTypes.func.isRequired
+};
+
+QuizInterface.defaultProps = {
+    hintStreets: []
 };
 
 export default QuizInterface;
