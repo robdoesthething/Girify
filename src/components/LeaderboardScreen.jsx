@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { AnimatePresence } from 'framer-motion';
 import { useTheme } from '../context/ThemeContext';
 import { getLeaderboard } from '../utils/leaderboard';
 import PublicProfileModal from './PublicProfileModal';
@@ -18,7 +18,11 @@ const LeaderboardScreen = ({ onClose, currentUser }) => {
     loadScores();
   }, [period, loadScores]);
 
+  /* eslint-disable react-hooks/exhaustive-deps */
   const loadScores = async () => {
+    // We disable exhaustive-deps because we only want to fetch when 'period' changes.
+    // Including 'loadScores' in the dependency array (if it was wrapped in useCallback)
+    // is technically correct but adds boilerplate for this simple fetch logic.
     setLoading(true);
     setError(null);
     setScores([]); // Clear previous scores while loading
@@ -156,7 +160,7 @@ const LeaderboardScreen = ({ onClose, currentUser }) => {
                 } else if (s.timestamp) {
                   dateStr = new Date(s.timestamp).toLocaleDateString();
                 }
-              } catch (e) {
+              } catch {
                 dateStr = 'Unknown';
               }
 

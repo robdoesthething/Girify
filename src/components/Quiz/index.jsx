@@ -1,14 +1,14 @@
 import React from 'react';
-import { motion } from 'framer-motion';
+
 import Banner from './Banner';
 import Options from './Options';
 import Hints from './Hints';
 import NextButton from './NextButton';
-import { useTheme } from '../../context/ThemeContext';
+
 import PropTypes from 'prop-types';
 
 const Quiz = ({ children, className }) => {
-  const { theme, deviceMode } = useTheme();
+  /* const { t } = useTheme(); */
 
   return (
     <div

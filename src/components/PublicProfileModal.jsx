@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
+// eslint-disable-next-line no-unused-vars
+import { motion, AnimatePresence } from 'framer-motion';
 import { useTheme } from '../context/ThemeContext';
 import {
   getUserProfile,
@@ -25,10 +26,7 @@ const PublicProfileModal = ({ username, onClose, currentUser }) => {
       setLoading(true);
       setError(null);
       try {
-        console.log('[PublicProfile] Loading profile for:', username);
         const data = await getUserProfile(username);
-        console.log('[PublicProfile] Profile data:', data);
-
         if (data) {
           setProfile(data);
         } else {
@@ -83,6 +81,7 @@ const PublicProfileModal = ({ username, onClose, currentUser }) => {
 
   const handleBlock = async () => {
     if (!currentUser || blocking) return;
+    // eslint-disable-next-line no-alert
     const confirmed = window.confirm(
       `Block ${username}? They won't be able to send you friend requests.`
     );

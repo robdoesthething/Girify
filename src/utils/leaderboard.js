@@ -36,8 +36,6 @@ export const saveScore = async (username, score, time) => {
     return;
   }
 
-  console.log(`[Leaderboard] Saving score for ${username}: ${score} pts, ${time}s`);
-
   try {
     const now = Timestamp.now();
     const scoreData = {
@@ -49,9 +47,7 @@ export const saveScore = async (username, score, time) => {
       platform: 'web',
     };
 
-    // 1. Add to History (Always)
     await addDoc(collection(db, SCORES_COLLECTION), scoreData);
-    console.log('[Leaderboard] Score saved to history successfully');
 
     // 2. Check & Update Personal Best (All Time)
     const userDocRef = doc(db, HIGHSCORES_COLLECTION, username);
@@ -71,7 +67,6 @@ export const saveScore = async (username, score, time) => {
 
     if (shouldUpdate) {
       await setDoc(userDocRef, scoreData);
-      console.log('[Leaderboard] New Personal Best saved!');
     }
   } catch (e) {
     console.error('Error saving score: ', e);
@@ -116,7 +111,6 @@ export const getLeaderboard = async (period = 'all') => {
       const snapshot = await getDocs(q);
 
       const now = new Date();
-      const oneDayAgo = new Date(now.getTime() - 24 * 60 * 60 * 1000);
       const oneWeekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
       const oneMonthAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
       const todaySeed = getTodaySeed();

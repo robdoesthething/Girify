@@ -4,7 +4,10 @@ import './index.css';
 import App from './App.jsx';
 
 // Debug: log to console
-console.log('[main.jsx] Starting app initialization');
+// eslint-disable-next-line no-console
+console.log(`[Girify] App initialized. Mode: ${import.meta.env.MODE}`);
+// eslint-disable-next-line no-console
+console.log('[Girify] Current user agent:', navigator.userAgent);
 
 try {
   createRoot(document.getElementById('root')).render(
@@ -12,6 +15,7 @@ try {
       <App />
     </StrictMode>
   );
+  // eslint-disable-next-line no-console
   console.log('[main.jsx] App rendered successfully');
 } catch (e) {
   console.error('[main.jsx] Failed to render:', e);

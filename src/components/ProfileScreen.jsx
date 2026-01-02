@@ -1,5 +1,5 @@
 import React from 'react';
-import { motion } from 'framer-motion';
+import { AnimatePresence } from 'framer-motion';
 import { useTheme } from '../context/ThemeContext';
 import { getFriendCount } from '../utils/social';
 import FriendRequests from './FriendRequests';
@@ -175,7 +175,9 @@ const ProfileScreen = ({ onClose, username }) => {
                     <div>
                       <p className="font-bold text-sm">{t('dailyChallenge')}</p>
                       <p className="text-[10px] text-slate-400">
-                        {game.timestamp ? new Date(game.timestamp).toLocaleDateString() : 'Just now'}
+                        {game.timestamp
+                          ? new Date(game.timestamp).toLocaleDateString()
+                          : 'Just now'}
                       </p>
                     </div>
                     <div className="text-right">
