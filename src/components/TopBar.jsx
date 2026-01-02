@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useTheme } from '../context/ThemeContext';
+// eslint-disable-next-line no-unused-vars
 import { motion, AnimatePresence } from 'framer-motion';
 import Logo from './Logo';
 import PropTypes from 'prop-types';
@@ -16,16 +17,16 @@ const TopBar = ({ onOpenPage }) => {
   return (
     <>
       <div
-        className={`fixed top-0 left-0 right-0 h-12 z-[4000] flex items-center justify-between px-3 md:px-6 transition-colors duration-300
-                ${theme === 'dark' ? 'bg-slate-700/90 text-white' : 'bg-white/90 text-slate-800'} 
-                backdrop-blur-md border-b ${theme === 'dark' ? 'border-slate-600' : 'border-slate-200'}
-            `}
+        className={`fixed top - 0 left - 0 right - 0 h - 12 z - [4000] flex items - center justify - between px - 3 md: px - 6 transition - colors duration - 300
+                ${theme === 'dark' ? 'bg-slate-700/90 text-white' : 'bg-white/90 text-slate-800'}
+backdrop - blur - md border - b ${theme === 'dark' ? 'border-slate-600' : 'border-slate-200'}
+`}
       >
         {/* Left: Menu & Brand */}
         <div className="flex items-end gap-2 md:gap-4">
           <button
             onClick={() => setMenuOpen(!menuOpen)}
-            className={`p-1.5 md:p-2 rounded-full transition-colors ${theme === 'dark' ? 'hover:bg-neutral-300' : 'hover:bg-slate-100'}`}
+            className={`p - 1.5 md: p - 2 rounded - full transition - colors ${theme === 'dark' ? 'hover:bg-neutral-300' : 'hover:bg-slate-100'} `}
           >
             <svg
               className="w-5 h-5 md:w-6 md:h-6"
@@ -51,7 +52,7 @@ const TopBar = ({ onOpenPage }) => {
           {/* Theme Toggle */}
           <button
             onClick={toggleTheme}
-            className={`p-1.5 md:p-2 rounded-full transition-colors ${theme === 'dark' ? 'bg-neutral-300 text-yellow-600 hover:bg-neutral-400' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}
+            className={`p - 1.5 md: p - 2 rounded - full transition - colors ${theme === 'dark' ? 'bg-neutral-300 text-yellow-600 hover:bg-neutral-400' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'} `}
             title="Toggle Theme"
           >
             {theme === 'dark' ? (
@@ -105,9 +106,9 @@ const TopBar = ({ onOpenPage }) => {
               animate={{ x: 0 }}
               exit={{ x: '-100%' }}
               transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-              className={`fixed top-0 bottom-0 left-0 w-64 z-[7000] p-6 shadow-2xl
+              className={`fixed top - 0 bottom - 0 left - 0 w - 64 z - [7000] p - 6 shadow - 2xl
                                     ${theme === 'dark' ? 'bg-neutral-200 text-neutral-900' : 'bg-white text-slate-800'}
-                                `}
+`}
             >
               <div className="flex justify-between items-center mb-8">
                 <h2 className="text-xl font-bold">{t('menu')}</h2>

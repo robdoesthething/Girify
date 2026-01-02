@@ -1,5 +1,6 @@
 import React from 'react';
-import { motion } from 'framer-motion';
+// eslint-disable-next-line no-unused-vars
+import { motion, AnimatePresence } from 'framer-motion';
 import { useTheme } from '../context/ThemeContext';
 import PropTypes from 'prop-types';
 
@@ -11,12 +12,13 @@ const SettingsScreen = ({ onClose, onLogout, autoAdvance, setAutoAdvance }) => {
 
   const handleClearHistory = () => {
     if (
-      confirm(
+      window.confirm(
         t('clearHistoryConfirm') ||
           'Are you sure you want to clear your game history? This cannot be undone.'
       )
     ) {
       localStorage.removeItem('girify_history');
+      // eslint-disable-next-line no-alert
       alert(t('historyCleared') || 'Game history cleared.');
       // Force reload to update UI (simplest way since history is read from LS in many places)
       window.location.reload();
@@ -24,7 +26,8 @@ const SettingsScreen = ({ onClose, onLogout, autoAdvance, setAutoAdvance }) => {
   };
 
   const handleSignOut = () => {
-    if (confirm('Are you sure you want to sign out?')) {
+    // eslint-disable-next-line no-alert
+    if (window.confirm('Are you sure you want to sign out?')) {
       onLogout();
     }
   };
@@ -35,6 +38,7 @@ const SettingsScreen = ({ onClose, onLogout, autoAdvance, setAutoAdvance }) => {
 
   const handleEnableNotifications = async () => {
     if (!('Notification' in window)) {
+      // eslint-disable-next-line no-alert
       alert('This browser does not support desktop notification');
       return;
     }
@@ -47,9 +51,11 @@ const SettingsScreen = ({ onClose, onLogout, autoAdvance, setAutoAdvance }) => {
     const permission = await Notification.requestPermission();
     if (permission === 'granted') {
       setNotificationsEnabled(true);
+      // eslint-disable-next-line no-alert
       alert("Notifications enabled! You'll receive daily reminders.");
     } else {
       setNotificationsEnabled(false);
+      // eslint-disable-next-line no-alert
       alert('Notifications denied. Please enable them in your browser settings.');
     }
   };

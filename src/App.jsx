@@ -424,6 +424,7 @@ const AppContent = () => {
     return () => {
       unsubscribe();
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [state.gameState]);
 
   // Handle Auto-Advance (Moved to bottom to fix hoisting)
@@ -435,6 +436,7 @@ const AppContent = () => {
       }, 1000);
     }
     return () => clearTimeout(timeoutId);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [state.feedback, state.autoAdvance]);
 
   return (
@@ -668,8 +670,6 @@ const SummaryScreen = ({
   const [view, setView] = useState('summary');
   const [curiosityRevealed, setCuriosityRevealed] = useState(false);
 
-  const totalTime = quizResults.reduce((acc, curr) => acc + (curr.time || 0), 0);
-  const avgTime = quizResults.length ? (totalTime / quizResults.length).toFixed(1) : 0;
   const maxPossibleScore = total * 100;
   const curiosity = useMemo(() => getCuriosityByStreets(quizStreets), [quizStreets]);
   const [displayImage, setDisplayImage] = useState(curiosity.image);
@@ -710,10 +710,11 @@ const SummaryScreen = ({
           return true;
         } else {
           await navigator.clipboard.writeText(text);
+          // eslint-disable-next-line no-alert
           alert('Results copied to clipboard!');
           return true;
         }
-      } catch (err) {
+      } catch {
         return false;
       }
     };

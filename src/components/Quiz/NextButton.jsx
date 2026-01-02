@@ -1,5 +1,7 @@
 import React from 'react';
+// eslint-disable-next-line no-unused-vars
 import { motion } from 'framer-motion';
+
 import { useTheme } from '../../context/ThemeContext';
 import PropTypes from 'prop-types';
 
@@ -19,7 +21,6 @@ const NextButton = ({ onNext, isLastQuestion, feedback }) => {
       <button
         onClick={e => {
           e.stopPropagation();
-          console.log('Next button clicked');
           onNext();
         }}
         className={`w-full sm:w-auto px-6 md:px-8 py-2 md:py-3 text-sm md:text-base rounded-full font-black shadow-lg transition-all active:scale-95 border

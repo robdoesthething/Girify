@@ -1,17 +1,14 @@
 import React from 'react';
-import { useTheme } from '../../context/ThemeContext';
+
 import PropTypes from 'prop-types';
 
-const Options = ({ options, onSelect, selectedAnswer, feedback, correctName, autoAdvance }) => {
-  const { theme } = useTheme();
-
+const Options = ({ options, onSelect, selectedAnswer, feedback, autoAdvance }) => {
   return (
     <div className="flex-1 min-h-0 flex flex-col justify-center px-4 pb-2">
       <div className="grid grid-cols-2 sm:flex sm:flex-col gap-2 sm:gap-3 w-full max-w-lg mx-auto h-full sm:h-auto">
         {options.map(opt => {
           const isSelected = selectedAnswer && opt.id === selectedAnswer.id;
-          const isCorrectOption = opt.name === correctName;
-          const isSubmitted = feedback === 'transitioning';
+          const isSubmitted = feedback !== 'idle';
 
           let btnClass = '';
 
