@@ -161,40 +161,37 @@ const SettingsScreen = ({ onClose, onLogout, autoAdvance, setAutoAdvance }) => {
           </div>
 
           {/* Notifications - Mobile Only */}
-          {['mobile', 'tablet'].includes(deviceMode) && (
-            <div className="space-y-4">
-              <h3 className="text-sm font-bold uppercase tracking-wider opacity-50">
-                Notifications
-              </h3>
-              <div
-                className={`flex items-center justify-between p-4 rounded-xl border ${theme === 'dark' ? 'border-slate-800 bg-slate-800/50' : 'border-slate-100 bg-slate-50'}`}
-              >
-                <div className="flex items-center gap-3">
-                  <div
-                    className={`p-2 rounded-full ${theme === 'dark' ? 'bg-amber-500/20 text-amber-400' : 'bg-amber-100 text-amber-600'}`}
-                  >
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"
-                      />
-                    </svg>
-                  </div>
-                  <span className="font-medium">Daily Reminders</span>
-                </div>
-                <button
-                  onClick={handleEnableNotifications}
-                  className={`w-12 h-7 rounded-full transition-colors relative ${notificationsEnabled ? 'bg-emerald-500' : 'bg-slate-300'}`}
+
+          <div className="space-y-4">
+            <h3 className="text-sm font-bold uppercase tracking-wider opacity-50">Notifications</h3>
+            <div
+              className={`flex items-center justify-between p-4 rounded-xl border ${theme === 'dark' ? 'border-slate-800 bg-slate-800/50' : 'border-slate-100 bg-slate-50'}`}
+            >
+              <div className="flex items-center gap-3">
+                <div
+                  className={`p-2 rounded-full ${theme === 'dark' ? 'bg-amber-500/20 text-amber-400' : 'bg-amber-100 text-amber-600'}`}
                 >
-                  <div
-                    className={`absolute top-1 w-5 h-5 rounded-full bg-white transition-all shadow-sm ${notificationsEnabled ? 'left-6' : 'left-1'}`}
-                  />
-                </button>
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"
+                    />
+                  </svg>
+                </div>
+                <span className="font-medium">Daily Reminders</span>
               </div>
+              <button
+                onClick={handleEnableNotifications}
+                className={`w-12 h-7 rounded-full transition-colors relative ${notificationsEnabled ? 'bg-emerald-500' : 'bg-slate-300'}`}
+              >
+                <div
+                  className={`absolute top-1 w-5 h-5 rounded-full bg-white transition-all shadow-sm ${notificationsEnabled ? 'left-6' : 'left-1'}`}
+                />
+              </button>
             </div>
-          )}
+          </div>
 
           {/* Data */}
           <div className="space-y-4">
