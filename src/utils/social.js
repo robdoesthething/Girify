@@ -6,7 +6,16 @@ const FRIENDSHIPS_COLLECTION = 'friendships';
 const REFERRALS_COLLECTION = 'referrals';
 
 /**
- * Get or create user profile document
+ * Get or create user profile document in Firestore.
+ * If user doesn't exist, creates a new profile with default values.
+ * 
+ * @param {string} username - User's display name (used as document ID)
+ * @returns {Promise<{username: string, joinedAt: Timestamp, friendCount: number, gamesPlayed: number, bestScore: number, referralCode: string}|null>}
+ *          User profile object or null if username is invalid
+ * 
+ * @example
+ * const profile = await ensureUserProfile('JohnDoe');
+ * // Returns existing profile or creates new one with defaults
  */
 export const ensureUserProfile = async (username) => {
     if (!username) return null;
@@ -32,7 +41,16 @@ export const ensureUserProfile = async (username) => {
 };
 
 /**
- * Get user profile by username
+ * Fetch user profile from Firestore by username.
+ * Falls back to highscores collection if user profile doesn't exist.
+ * 
+ * @param {string} username - User's display name
+ * @returns {Promise<{username: string, gamesPlayed: number, bestScore: number, friendCount: number}|null>}
+ *          User profile object or null if not found
+ * 
+ * @example
+ * const profile = await getUserProfile('JohnDoe');
+ * // Returns: { username: 'JohnDoe', gamesPlayed: 15, bestScore: 1850, ... }
  */
 export const getUserProfile = async (username) => {
     if (!username) return null;
@@ -64,7 +82,16 @@ export const getUserProfile = async (username) => {
 };
 
 /**
- * Update user stats after a game
+ * Update user statistics after completing a game.
+ * Increments games played count and updates best score if improved.
+ * 
+ * @param {string} username - User's display name
+ * @param {number} score - Score achieved in the game
+ * @returns {Promise<void>}
+ * 
+ * @example
+ * await updateUserStats('JohnDoe', 1900);
+ * // Updates gamesPlayed and bestScore if 1900 > previous best
  */
 export const updateUserStats = async (username, score) => {
     if (!username) return;
@@ -91,7 +118,16 @@ export const updateUserStats = async (username, score) => {
 };
 
 /**
- * Send friend request
+ * Send a friend request from one user to another.
+ * Checks if friendship already exists before creating request.
+ * 
+ * @param {string} fromUser - Username of requester
+ * @param {string} toUser - Username of recipient
+ * @returns {Promise<void>}
+ * 
+ * @example
+ * await sendFriendRequest('JohnDoe', 'JaneSmith');
+ * // Creates pending friendship document in Firestore
  */
 export const sendFriendRequest = async (fromUser, toUser) => {
     if (!fromUser || !toUser || fromUser === toUser) return;
@@ -190,7 +226,16 @@ export const getFriendCount = async (username) => {
 };
 
 /**
- * Record a referral
+ * Record a referral when a new user signs up via referral link.
+ * Creates a document in the referrals collection.
+ * 
+ * @param {string} referrer - Username of the user who referred
+ * @param {string} referred - Username of the new user
+ * @returns {Promise<void>}
+ * 
+ * @example
+ * await recordReferral('JohnDoe', 'NewUser123');
+ * // Saves referral record with timestamp
  */
 export const recordReferral = async (referrer, referred) => {
     if (!referrer || !referred || referrer === referred) return;

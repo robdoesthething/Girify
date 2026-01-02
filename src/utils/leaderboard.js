@@ -6,9 +6,18 @@ const HIGHSCORES_COLLECTION = 'highscores'; // Personal Bests (All Time)
 const SCORES_COLLECTION = 'scores'; // Full History
 
 /**
- * Save score to both:
- * 1. 'scores' collection (History for Daily/Weekly rankings)
- * 2. 'highscores' collection (Personal Best, if improved)
+ * Save user's score to Firestore in two collections:
+ * 1. 'scores' collection - Full history for daily/weekly/monthly rankings
+ * 2. 'highscores' collection - Personal best (all-time), updated only if improved
+ * 
+ * @param {string} username - User's display name
+ * @param {number} score - Total points earned (0-2000 for 20 questions)
+ * @param {number|string} time - Average time per question in seconds
+ * @returns {Promise<void>}
+ * 
+ * @example
+ * await saveScore('JohnDoe', 1850, '8.5');
+ * // Saves to history and updates personal best if score > previous best
  */
 export const saveScore = async (username, score, time) => {
     if (!username) {
@@ -60,8 +69,21 @@ export const saveScore = async (username, score, time) => {
 };
 
 /**
- * Get leaderboard with deduplication (One entry per user)
- * @param {string} period - 'all', 'daily', 'weekly', 'monthly'
+ * Fetch leaderboard scores with automatic deduplication (one entry per user).
+ * For 'all' period, queries pre-calculated highscores for efficiency.
+ * For time-based periods, fetches recent history and filters in-memory.
+ * 
+ * @param {('all'|'daily'|'weekly'|'monthly')} period - Time period for leaderboard
+ * @returns {Promise<Array<{id: string, username: string, score: number, time: number, date: number, timestamp: Timestamp}>>} 
+ *          Top 50 scores, sorted by score (desc) then time (asc)
+ * 
+ * @example
+ * const topScores = await getLeaderboard('daily');
+ * // Returns today's top 50 scores, one per user
+ * 
+ * @example
+ * const allTimeScores = await getLeaderboard('all');
+ * // Returns all-time personal bests, top 50
  */
 export const getLeaderboard = async (period = 'all') => {
     try {
@@ -132,6 +154,14 @@ export const getLeaderboard = async (period = 'all') => {
     }
 };
 
+/**
+ * Deduplicate scores array to keep only the best score per user.
+ * If scores are equal, keeps the one with faster time.
+ * 
+ * @param {Array<{username: string, score: number, time: number}>} scores - Array of score objects
+ * @returns {Array<{username: string, score: number, time: number}>} Deduplicated scores
+ * @private
+ */
 const deduplicateScores = (scores) => {
     const userBest = {};
     scores.forEach(s => {
