@@ -393,6 +393,7 @@ const AppContent = () => {
               score: state.score,
               avgTime: avgTime,
               timestamp: Date.now(),
+              username: state.username, // Associate record with user
             };
             history.push(newRecord);
             localStorage.setItem('girify_history', JSON.stringify(history));
@@ -865,6 +866,10 @@ const SummaryScreen = ({
           <h2 className="text-2xl font-black mb-4">Rankings</h2>
           <div className="w-full space-y-2 mb-8">
             {history
+              .filter(record => {
+                // If logged in, show only my records. If guest (no username), show only guest records.
+                return (record.username || '') === (username || '');
+              })
               .slice(-3)
               .reverse()
               .map(record => (
