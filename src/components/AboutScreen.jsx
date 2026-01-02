@@ -1,5 +1,5 @@
 import React from 'react';
-import { AnimatePresence } from 'framer-motion';
+import { AnimatePresence, motion } from 'framer-motion';
 import { useTheme } from '../context/ThemeContext';
 import PropTypes from 'prop-types';
 
@@ -7,7 +7,7 @@ const AboutScreen = ({ onClose }) => {
   const { theme, t } = useTheme();
 
   return (
-    <div className="absolute inset-0 z-[2005] flex items-center justify-center p-4 backdrop-blur-sm bg-black/50 overflow-hidden">
+    <div className="fixed inset-0 z-[8000] flex items-center justify-center p-4 backdrop-blur-sm bg-black/50 overflow-hidden">
       <motion.div
         initial={{ scale: 0.9, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
