@@ -7,8 +7,8 @@
  * @returns {number} - Random number between 0 and 1
  */
 function seededRandom(seed) {
-    const x = Math.sin(seed++) * 10000;
-    return x - Math.floor(x);
+  const x = Math.sin(seed++) * 10000;
+  return x - Math.floor(x);
 }
 
 /**
@@ -16,11 +16,11 @@ function seededRandom(seed) {
  * @returns {number} - Date seed
  */
 export function getTodaySeed() {
-    const today = new Date();
-    const year = today.getFullYear();
-    const month = String(today.getMonth() + 1).padStart(2, '0');
-    const day = String(today.getDate()).padStart(2, '0');
-    return parseInt(`${year}${month}${day}`);
+  const today = new Date();
+  const year = today.getFullYear();
+  const month = String(today.getMonth() + 1).padStart(2, '0');
+  const day = String(today.getDate()).padStart(2, '0');
+  return parseInt(`${year}${month}${day}`);
 }
 
 /**
@@ -30,16 +30,16 @@ export function getTodaySeed() {
  * @returns {Array} - Shuffled array
  */
 function seededShuffle(array, seed) {
-    const shuffled = [...array];
-    let currentSeed = seed;
+  const shuffled = [...array];
+  let currentSeed = seed;
 
-    for (let i = shuffled.length - 1; i > 0; i--) {
-        const j = Math.floor(seededRandom(currentSeed) * (i + 1));
-        [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
-        currentSeed++;
-    }
+  for (let i = shuffled.length - 1; i > 0; i--) {
+    const j = Math.floor(seededRandom(currentSeed) * (i + 1));
+    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+    currentSeed++;
+  }
 
-    return shuffled;
+  return shuffled;
 }
 
 /**
@@ -49,24 +49,24 @@ function seededShuffle(array, seed) {
  * @returns {Array} - Selected 10 streets for the day
  */
 export function selectDailyStreets(validStreets, seed) {
-    // Shuffle with seed
-    const shuffled = seededShuffle(validStreets, seed);
+  // Shuffle with seed
+  const shuffled = seededShuffle(validStreets, seed);
 
-    // Select by tiers
-    const tier1 = shuffled.filter(s => s.tier === 1).slice(0, 3);
-    const tier2 = shuffled.filter(s => s.tier === 2).slice(0, 3);
-    const tier3 = shuffled.filter(s => s.tier === 3).slice(0, 2);
-    const tier4 = shuffled.filter(s => s.tier === 4).slice(0, 2);
+  // Select by tiers
+  const tier1 = shuffled.filter(s => s.tier === 1).slice(0, 3);
+  const tier2 = shuffled.filter(s => s.tier === 2).slice(0, 3);
+  const tier3 = shuffled.filter(s => s.tier === 3).slice(0, 2);
+  const tier4 = shuffled.filter(s => s.tier === 4).slice(0, 2);
 
-    let selected = [...tier1, ...tier2, ...tier3, ...tier4];
+  let selected = [...tier1, ...tier2, ...tier3, ...tier4];
 
-    // Fallback if tiers didn't yield enough
-    if (selected.length < 10) {
-        selected = shuffled.slice(0, 10);
-    }
+  // Fallback if tiers didn't yield enough
+  if (selected.length < 10) {
+    selected = shuffled.slice(0, 10);
+  }
 
-    // Shuffle again with different seed offset
-    return seededShuffle(selected, seed + 1000);
+  // Shuffle again with different seed offset
+  return seededShuffle(selected, seed + 1000);
 }
 
 /**
@@ -74,17 +74,17 @@ export function selectDailyStreets(validStreets, seed) {
  * @returns {boolean}
  */
 export function hasPlayedToday() {
-    const today = getTodaySeed();
-    const lastPlayed = localStorage.getItem('lastPlayedDate');
-    return lastPlayed === String(today);
+  const today = getTodaySeed();
+  const lastPlayed = localStorage.getItem('lastPlayedDate');
+  return lastPlayed === String(today);
 }
 
 /**
  * Mark today as played
  */
 export function markTodayAsPlayed() {
-    const today = getTodaySeed();
-    localStorage.setItem('lastPlayedDate', String(today));
+  const today = getTodaySeed();
+  localStorage.setItem('lastPlayedDate', String(today));
 }
 
 /**
@@ -92,14 +92,14 @@ export function markTodayAsPlayed() {
  * @returns {string} - Formatted time string
  */
 export function getTimeUntilNext() {
-    const now = new Date();
-    const tomorrow = new Date(now);
-    tomorrow.setDate(tomorrow.getDate() + 1);
-    tomorrow.setHours(0, 0, 0, 0);
+  const now = new Date();
+  const tomorrow = new Date(now);
+  tomorrow.setDate(tomorrow.getDate() + 1);
+  tomorrow.setHours(0, 0, 0, 0);
 
-    const diff = tomorrow - now;
-    const hours = Math.floor(diff / (1000 * 60 * 60));
-    const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+  const diff = tomorrow - now;
+  const hours = Math.floor(diff / (1000 * 60 * 60));
+  const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
 
-    return `${hours}h ${minutes}m`;
+  return `${hours}h ${minutes}m`;
 }
