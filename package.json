@@ -1,7 +1,22 @@
 {
   "name": "girify",
+  "description": "Girify - Manchester Street Quiz Game. Identify streets on the map in a daily challenge.",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/robdoesthething/Girify.git"
+  },
+  "keywords": [
+    "game",
+    "quiz",
+    "map",
+    "barcelona",
+    "streets",
+    "geography"
+  ],
+  "author": "robdoesthething",
+  "license": "MIT",
   "private": true,
-  "version": "0.0.0",
+  "version": "0.1.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
