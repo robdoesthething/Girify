@@ -58,6 +58,8 @@ const RegisterPanel = ({ theme: themeProp, onRegister }) => {
             const user = result.user;
             const displayName = user.displayName || user.email?.split('@')[0] || 'User';
 
+            console.log('[RegisterPanel] Google login successful for:', displayName);
+
             // Ensure user profile exists
             await ensureUserProfile(displayName);
 
@@ -73,12 +75,35 @@ const RegisterPanel = ({ theme: themeProp, onRegister }) => {
                 localStorage.setItem('girify_joined', new Date().toLocaleDateString());
             }
 
-            onRegister(displayName);
+            // Don't call onRegister here - let the onAuthStateChanged listener in App.jsx handle it
+            // This prevents race conditions and ensures proper auth state management
+            console.log('[RegisterPanel] Profile created, waiting for auth state listener');
+
+            // The auth state listener will automatically call handleRegister
+            setLoading(false);
         } catch (err) {
-            console.error("Google Login failed", err);
-            console.error("Error code:", err.code);
-            console.error("Error message:", err.message);
-            setError(t('googleLoginFailed', { message: err.message }));
+            console.error('[RegisterPanel] Google Login failed:', err);
+            console.error('[RegisterPanel] Error code:', err.code);
+            console.error('[RegisterPanel] Error message:', err.message);
+
+            // Handle specific error cases
+            let errorMessage = 'Google sign-in failed. Please try again.';
+
+            if (err.code === 'auth/popup-closed-by-user') {
+                errorMessage = 'Sign-in cancelled. Please try again.';
+            } else if (err.code === 'auth/cancelled-popup-request') {
+                errorMessage = 'Multiple sign-in attempts detected. Please try again.';
+            } else if (err.code === 'auth/network-request-failed') {
+                errorMessage = 'Network error. Please check your connection and try again.';
+            } else if (err.code === 'auth/too-many-requests') {
+                errorMessage = 'Too many attempts. Please wait a moment and try again.';
+            } else if (err.code === 'auth/popup-blocked') {
+                errorMessage = 'Popup blocked by browser. Please allow popups and try again.';
+            } else if (err.message) {
+                errorMessage = `Google sign-in failed: ${err.message}`;
+            }
+
+            setError(errorMessage);
             setLoading(false);
         }
     };
@@ -110,11 +135,13 @@ const RegisterPanel = ({ theme: themeProp, onRegister }) => {
             let displayName = name;
 
             if (isSignUp) {
+                console.log('[RegisterPanel] Creating new account for:', name);
                 userCredential = await createUserWithEmailAndPassword(auth, email, password);
                 await updateProfile(userCredential.user, { displayName: name });
 
                 // Send verification email
                 await sendEmailVerification(userCredential.user);
+                console.log('[RegisterPanel] Verification email sent to:', email);
 
                 // Ensure user profile exists
                 await ensureUserProfile(name);
@@ -133,32 +160,58 @@ const RegisterPanel = ({ theme: themeProp, onRegister }) => {
 
                 setError('');
                 setLoading(false);
-                alert(t('verificationSent'));
+                alert('Verification email sent! Please check your inbox and verify your email before signing in.');
                 setIsSignUp(false);
                 return;
             } else {
+                console.log('[RegisterPanel] Signing in with email:', email);
                 userCredential = await signInWithEmailAndPassword(auth, email, password);
 
                 // Check if email is verified
                 if (!userCredential.user.emailVerified) {
-                    setError(t('verifyEmail'));
+                    console.log('[RegisterPanel] Email not verified for:', email);
+                    setError('Please verify your email address before signing in. Check your inbox for the verification link.');
+                    // Sign out the user since they're not verified
+                    await auth.signOut();
                     setLoading(false);
                     return;
                 }
 
                 displayName = userCredential.user.displayName || email.split('@')[0];
+                console.log('[RegisterPanel] Email sign-in successful for:', displayName);
             }
 
-            onRegister(displayName);
+            // Don't call onRegister here - let the onAuthStateChanged listener in App.jsx handle it
+            // This prevents race conditions and ensures proper auth state management
+            console.log('[RegisterPanel] Auth successful, waiting for auth state listener');
+            setLoading(false);
         } catch (err) {
-            console.error("Email Auth failed", err);
-            let msg = 'Authentication failed.';
-            if (err.code === 'auth/invalid-email') msg = 'Invalid email address.';
-            if (err.code === 'auth/user-not-found') msg = 'No account found with this email.';
-            if (err.code === 'auth/wrong-password') msg = 'Incorrect password.';
-            if (err.code === 'auth/email-already-in-use') msg = 'Email already in use.';
-            if (err.code === 'auth/weak-password') msg = 'Password should be at least 6 characters.';
-            if (err.code === 'auth/invalid-credential') msg = 'Invalid email or password.';
+            console.error('[RegisterPanel] Email Auth failed:', err);
+            console.error('[RegisterPanel] Error code:', err.code);
+
+            let msg = 'Authentication failed. Please try again.';
+
+            // More specific error messages
+            if (err.code === 'auth/invalid-email') {
+                msg = 'Invalid email address format.';
+            } else if (err.code === 'auth/user-not-found') {
+                msg = 'No account found with this email. Please sign up first.';
+            } else if (err.code === 'auth/wrong-password') {
+                msg = 'Incorrect password. Please try again.';
+            } else if (err.code === 'auth/email-already-in-use') {
+                msg = 'This email is already registered. Please sign in instead.';
+            } else if (err.code === 'auth/weak-password') {
+                msg = 'Password must be at least 6 characters long.';
+            } else if (err.code === 'auth/invalid-credential') {
+                msg = 'Invalid email or password. Please check your credentials.';
+            } else if (err.code === 'auth/network-request-failed') {
+                msg = 'Network error. Please check your connection and try again.';
+            } else if (err.code === 'auth/too-many-requests') {
+                msg = 'Too many failed attempts. Please wait a moment and try again.';
+            } else if (err.code === 'auth/user-disabled') {
+                msg = 'This account has been disabled. Please contact support.';
+            }
+
             setError(msg);
             setLoading(false);
         }

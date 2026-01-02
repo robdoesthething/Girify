@@ -18,6 +18,8 @@ import { getCuriosityByStreets } from './data/curiosities';
 import { fetchWikiImage } from './utils/wiki';
 import Logo from './components/Logo';
 import { gameReducer, initialState } from './reducers/gameReducer';
+import { auth } from './firebase';
+import { onAuthStateChanged } from 'firebase/auth';
 
 // Helper to normalize strings for comparison
 const normalize = (str) => {
@@ -66,6 +68,46 @@ const AppContent = () => {
       console.log('[Referral] Stored referrer:', ref);
     }
   }, []);
+
+  // Firebase Auth State Listener
+  useEffect(() => {
+    console.log('[Auth] Setting up auth state listener');
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (user) {
+        console.log('[Auth] User authenticated:', user.email, user.displayName);
+        // User is signed in
+        const displayName = user.displayName || user.email?.split('@')[0] || 'User';
+
+        // Check if we already have this user set
+        const currentUsername = localStorage.getItem('girify_username');
+        if (currentUsername !== displayName) {
+          console.log('[Auth] Setting username to:', displayName);
+          localStorage.setItem('girify_username', displayName);
+          dispatch({ type: 'SET_USERNAME', payload: displayName });
+
+          // Only setup game if we're in register state
+          if (state.gameState === 'register') {
+            setupGame(displayName);
+          }
+        }
+      } else {
+        console.log('[Auth] User signed out');
+        // User is signed out - only clear if we're not in guest mode
+        const currentUsername = state.username;
+        if (currentUsername && auth.currentUser === null) {
+          // This means user was logged out from Firebase
+          // We should respect that and clear local state
+          console.log('[Auth] Clearing user state due to sign out');
+        }
+      }
+    });
+
+    // Cleanup subscription on unmount
+    return () => {
+      console.log('[Auth] Cleaning up auth state listener');
+      unsubscribe();
+    };
+  }, [state.gameState]); // Only re-run if gameState changes
 
   // Sync Auto-Advance
   useEffect(() => {
