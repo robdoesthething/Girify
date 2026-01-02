@@ -12,29 +12,41 @@ const LeaderboardScreen = ({ onClose, currentUser }) => {
   const [period, setPeriod] = useState('all'); // 'all', 'monthly', 'weekly', 'daily'
   const [selectedUser, setSelectedUser] = useState(null);
 
+  const [error, setError] = useState(null);
+
   useEffect(() => {
     loadScores();
   }, [period, loadScores]);
 
   const loadScores = async () => {
     setLoading(true);
+    setError(null);
     setScores([]); // Clear previous scores while loading
 
     try {
       // Race against a 5-second timeout to prevent infinite loading
-      const timeoutPromise = new Promise(resolve => setTimeout(() => resolve(null), 5000));
+      const timeoutPromise = new Promise((_, reject) =>
+        setTimeout(() => reject(new Error('Timeout: Server response took too long')), 5000)
+      );
       const dataPromise = getLeaderboard(period);
 
       const data = await Promise.race([dataPromise, timeoutPromise]);
 
       if (data === null) {
-        console.warn('Leaderboard fetch timed out');
         setScores([]);
       } else {
         setScores(data);
       }
-    } catch (error) {
-      console.error('Failed to load scores:', error);
+    } catch (err) {
+      console.error('Failed to load scores:', err);
+      // Detailed error message for debugging
+      let msg = err.message || 'Failed to load leaderboard';
+      if (msg.includes('Missing or insufficient permissions')) {
+        msg = 'Database permissions error. Ask admin to check Firestore rules.';
+      } else if (msg.includes('Timeout')) {
+        msg = 'Connection timed out. Please check your internet.';
+      }
+      setError(msg);
       setScores([]);
     } finally {
       setLoading(false);
@@ -80,10 +92,11 @@ const LeaderboardScreen = ({ onClose, currentUser }) => {
               key={tab.id}
               onClick={() => setPeriod(tab.id)}
               className={`flex-1 py-2 text-sm font-bold rounded-lg transition-all
-                                ${period === tab.id
-                  ? 'bg-white dark:bg-neutral-700 shadow-sm text-sky-500'
-                  : 'text-slate-500 hover:text-slate-700 dark:hover:text-neutral-300'
-                }
+                                ${
+                                  period === tab.id
+                                    ? 'bg-white dark:bg-neutral-700 shadow-sm text-sky-500'
+                                    : 'text-slate-500 hover:text-slate-700 dark:hover:text-neutral-300'
+                                }
                             `}
             >
               {tab.label}
@@ -99,6 +112,32 @@ const LeaderboardScreen = ({ onClose, currentUser }) => {
               <p className="text-sm font-bold uppercase tracking-widest text-slate-500">
                 {t('loadingRankings')}
               </p>
+            </div>
+          ) : error ? (
+            <div className="text-center py-20">
+              <div className="text-red-500 mb-2">
+                <svg
+                  className="w-12 h-12 mx-auto mb-2"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+                  />
+                </svg>
+                <p className="font-bold text-lg">{t('error') || 'Error'}</p>
+              </div>
+              <p className="text-sm text-slate-500 max-w-xs mx-auto">{error}</p>
+              <button
+                onClick={loadScores}
+                className="mt-4 px-6 py-2 bg-slate-200 hover:bg-slate-300 rounded-lg text-slate-700 font-bold text-sm transition-colors"
+              >
+                {t('retry') || 'Retry'}
+              </button>
             </div>
           ) : scores.length === 0 ? (
             <div className="text-center py-20 opacity-50">
@@ -135,14 +174,15 @@ const LeaderboardScreen = ({ onClose, currentUser }) => {
                 >
                   <div
                     className={`w-8 h-8 flex items-center justify-center rounded-full font-black text-sm mr-4
-                                    ${index === 0
-                        ? 'bg-yellow-400 text-yellow-900'
-                        : index === 1
-                          ? 'bg-slate-300 text-slate-800'
-                          : index === 2
-                            ? 'bg-amber-600 text-amber-100'
-                            : 'bg-slate-100 dark:bg-slate-700 text-slate-500'
-                      }
+                                    ${
+                                      index === 0
+                                        ? 'bg-yellow-400 text-yellow-900'
+                                        : index === 1
+                                          ? 'bg-slate-300 text-slate-800'
+                                          : index === 2
+                                            ? 'bg-amber-600 text-amber-100'
+                                            : 'bg-slate-100 dark:bg-slate-700 text-slate-500'
+                                    }
                                 `}
                   >
                     {index + 1}
