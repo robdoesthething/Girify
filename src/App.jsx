@@ -389,6 +389,7 @@ const AppContent = () => {
 
   const handleLogout = () => {
     localStorage.removeItem('girify_username');
+    localStorage.removeItem('lastPlayedDate'); // Reset daily played status so new user sees 'Start'
     dispatch({ type: 'LOGOUT' });
   };
 
