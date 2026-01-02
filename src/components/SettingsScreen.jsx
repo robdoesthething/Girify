@@ -124,36 +124,6 @@ const SettingsScreen = ({ onClose, onLogout, autoAdvance, setAutoAdvance }) => {
           </div>
 
           {/* Appearance */}
-          <div className="space-y-4">
-            <h3 className="text-sm font-bold uppercase tracking-wider opacity-50">{t('theme')}</h3>
-            <div
-              className={`flex items-center justify-between p-4 rounded-xl border ${theme === 'dark' ? 'border-slate-800 bg-slate-800/50' : 'border-slate-100 bg-slate-50'}`}
-            >
-              <div className="flex items-center gap-3">
-                <div
-                  className={`p-2 rounded-full ${theme === 'dark' ? 'bg-indigo-500/20 text-indigo-400' : 'bg-indigo-100 text-indigo-600'}`}
-                >
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"
-                    />
-                  </svg>
-                </div>
-                <span className="font-medium">{t('darkMode')}</span>
-              </div>
-              <button
-                onClick={toggleTheme}
-                className={`w-12 h-7 rounded-full transition-colors relative ${theme === 'dark' ? 'bg-emerald-500' : 'bg-slate-300'}`}
-              >
-                <div
-                  className={`absolute top-1 w-5 h-5 rounded-full bg-white transition-all shadow-sm ${theme === 'dark' ? 'left-6' : 'left-1'}`}
-                />
-              </button>
-            </div>
-          </div>
 
           {/* Gameplay */}
           <div className="space-y-4">
