@@ -126,79 +126,11 @@ const AppContent = () => {
     }
   }, []);
 
-  // Firebase Auth State Listener
-  useEffect(() => {
-    console.log('[Auth] Setting up auth state listener');
-    const unsubscribe = onAuthStateChanged(auth, user => {
-      if (user) {
-        console.log('[Auth] User authenticated:', user.email, user.displayName);
-        // User is signed in
-        const displayName = user.displayName || user.email?.split('@')[0] || 'User';
-
-        // Check if we already have this user set
-        const currentUsername = localStorage.getItem('girify_username');
-        if (currentUsername !== displayName) {
-          console.log('[Auth] Setting username to:', displayName);
-          localStorage.setItem('girify_username', displayName);
-          dispatch({ type: 'SET_USERNAME', payload: displayName });
-
-          // Only setup game if we're in register state
-          if (state.gameState === 'register') {
-            setupGame(displayName);
-          }
-        }
-      } else {
-        console.log('[Auth] User signed out');
-        // User is signed out - only clear if we're not in guest mode
-        const currentUsername = state.username;
-        if (currentUsername && auth.currentUser === null) {
-          // This means user was logged out from Firebase
-          // We should respect that and clear local state
-          console.log('[Auth] Clearing user state due to sign out');
-        }
-      }
-    });
-
-    // Cleanup subscription on unmount
-    return () => {
-      console.log('[Auth] Cleaning up auth state listener');
-      unsubscribe();
-    };
-  }, [state.gameState]); // Only re-run if gameState changes
-
   // Sync Auto-Advance
   useEffect(() => {
     localStorage.setItem('girify_auto_advance', state.autoAdvance);
   }, [state.autoAdvance]);
 
-  // Handle Auto-Advance with useEffect to avoid stale closures
-  useEffect(() => {
-    let timeoutId;
-    if (state.feedback === 'transitioning' && state.autoAdvance) {
-      timeoutId = setTimeout(() => {
-        handleNext(); // calling handleNext within scope is safe here if handleNext uses state ref or is stable?
-        // Actually handleNext depends on state.currentQuestionIndex.
-        // But since this effect re-runs on state.feedback change, handleNext closure MIGHT be stale if handleNext is not a dependency?
-        // handleNext is defined deep in the component.
-        // Ideally we should call a function that uses LATEST state.
-        // But handleNext is rebuilt on every render?
-        // No, handleNext uses 'state' from useReducer, which is const in render scope.
-        // So on every render, handleNext closes over the NEW state.
-        // Therefore, if this effect runs, it uses the handleNext from that render cycle.
-        // Wait, 'handleNext' is not in dependency array!
-        // I should add handleNext to dependency array?
-        // Or better: just dispatch NEXT_QUESTION directly?
-        // But handleNext has LOGIC (generating options).
-        // I'll call handleNext() but I need to make sure handleNext is stable or effect re-runs.
-        // Since handleNext changes on every render (it closes over state),
-        // adding it to deps means effect runs on every render?
-        // Yes.
-        // BUT we only care if feedback is 'transitioning'.
-        // If feedback is transitioning, handleNext is correct for THAT state.
-      }, 1000); // 1000ms delay to ensure user sees the highlighted answer
-    }
-    return () => clearTimeout(timeoutId);
-  }, [state.feedback, state.autoAdvance]); // handleNext is safe to omit if we trust the closure, but strict linting would complain.
   // Actually, to be safe, I'll move handleNext logic (option gen) inside the effect or dispatch directly?
   // Re-using handleNext is better if I can.
   // I'll use a ref for handleNext? No.
@@ -262,7 +194,7 @@ const AppContent = () => {
    * setupGame('JohnDoe');
    * // Starts game with today's 10 streets for user JohnDoe
    */
-  const setupGame = freshName => {
+  function setupGame(freshName) {
     const activeName = freshName || state.username;
     if (!activeName) {
       dispatch({ type: 'SET_GAME_STATE', payload: 'register' });
@@ -291,7 +223,7 @@ const AppContent = () => {
         initialOptions: initialOptions,
       },
     });
-  };
+  }
 
   /**
    * Generate 4 multiple-choice options for a quiz question.
@@ -388,6 +320,8 @@ const AppContent = () => {
   }, [currentStreet]);
 
   const handleSelectAnswer = selectedStreet => {
+    // Dispatch SELECT_ANSWER to ensure UI updates immediately for click feedback
+    dispatch({ type: 'SELECT_ANSWER', payload: selectedStreet });
     // Always process answer immediately on click
     // The only difference with autoAdvance is whether we auto-move to next question
     processAnswer(selectedStreet);
@@ -418,13 +352,13 @@ const AppContent = () => {
 
     dispatch({
       type: 'ANSWER_SUBMITTED',
-      payload: { result, points },
+      payload: { result, points, selectedStreet },
     });
 
     // Auto-advance is now handled by useEffect to ensure state consistency
   };
 
-  const handleNext = () => {
+  function handleNext() {
     // Guard: only proceed if we're in transitioning state (answer was submitted)
     // This prevents double-clicks and stale closure issues
     if (state.feedback !== 'transitioning') {
@@ -449,9 +383,9 @@ const AppContent = () => {
             const history = JSON.parse(localStorage.getItem('girify_history') || '[]');
             const avgTime = state.quizResults.length
               ? (
-                state.quizResults.reduce((acc, curr) => acc + (curr.time || 0), 0) /
-                state.quizResults.length
-              ).toFixed(1)
+                  state.quizResults.reduce((acc, curr) => acc + (curr.time || 0), 0) /
+                  state.quizResults.length
+                ).toFixed(1)
               : 0;
 
             const newRecord = {
@@ -483,7 +417,7 @@ const AppContent = () => {
         payload: { options: nextOptions },
       });
     }
-  };
+  }
 
   const handleRegister = name => {
     localStorage.setItem('girify_username', name);
@@ -499,6 +433,57 @@ const AppContent = () => {
   const handleOpenPage = page => {
     dispatch({ type: 'SET_ACTIVE_PAGE', payload: page });
   };
+
+  // Firebase Auth State Listener (Moved to bottom to fix hoisting)
+  useEffect(() => {
+    console.log('[Auth] Setting up auth state listener');
+    const unsubscribe = onAuthStateChanged(auth, user => {
+      if (user) {
+        console.log('[Auth] User authenticated:', user.email, user.displayName);
+        // User is signed in
+        const displayName = user.displayName || user.email?.split('@')[0] || 'User';
+
+        // Check if we already have this user set
+        const currentUsername = localStorage.getItem('girify_username');
+        if (currentUsername !== displayName) {
+          console.log('[Auth] Setting username to:', displayName);
+          localStorage.setItem('girify_username', displayName);
+          dispatch({ type: 'SET_USERNAME', payload: displayName });
+
+          // Only setup game if we're in register state
+          if (state.gameState === 'register') {
+            setupGame(displayName);
+          }
+        }
+      } else {
+        console.log('[Auth] User signed out');
+        // User is signed out - only clear if we're not in guest mode
+        const currentUsername = state.username;
+        if (currentUsername && auth.currentUser === null) {
+          // This means user was logged out from Firebase
+          // We should respect that and clear local state
+          console.log('[Auth] Clearing user state due to sign out');
+        }
+      }
+    });
+
+    // Cleanup subscription on unmount
+    return () => {
+      console.log('[Auth] Cleaning up auth state listener');
+      unsubscribe();
+    };
+  }, [state.gameState]);
+
+  // Handle Auto-Advance (Moved to bottom to fix hoisting)
+  useEffect(() => {
+    let timeoutId;
+    if (state.feedback === 'transitioning' && state.autoAdvance) {
+      timeoutId = setTimeout(() => {
+        handleNext();
+      }, 1000);
+    }
+    return () => clearTimeout(timeoutId);
+  }, [state.feedback, state.autoAdvance]);
 
   return (
     <div
@@ -537,10 +522,11 @@ const AppContent = () => {
             className={`
                   relative z-20 backdrop-blur-sm shadow-xl shrink-0
                   bg-white/95 border-slate-200
-                  ${['mobile', 'tablet'].includes(deviceMode)
-                ? 'w-full h-[40%] order-2 border-t'
-                : 'w-[350px] lg:w-[400px] h-full order-2 border-l'
-              }
+                  ${
+                    ['mobile', 'tablet'].includes(deviceMode)
+                      ? 'w-full h-[40%] order-2 border-t'
+                      : 'w-[350px] lg:w-[400px] h-full order-2 border-l'
+                  }
                `}
           >
             <Quiz>
@@ -602,10 +588,11 @@ const AppContent = () => {
                 }
               }}
               className={`w-full max-w-xs px-8 py-4 rounded-full font-bold text-lg tracking-widest hover:scale-105 transition-all duration-300 shadow-xl animate-bounce-subtle
-                          ${hasPlayedToday()
-                  ? 'bg-[#000080] hover:bg-slate-900 text-white'
-                  : 'bg-sky-500 hover:bg-sky-600 text-white'
-                }
+                          ${
+                            hasPlayedToday()
+                              ? 'bg-[#000080] hover:bg-slate-900 text-white'
+                              : 'bg-sky-500 hover:bg-sky-600 text-white'
+                          }
                       `}
             >
               {hasPlayedToday() ? (
@@ -827,13 +814,14 @@ const SummaryScreen = ({
                   <div
                     key={idx}
                     className={`aspect-square rounded-lg flex flex-col items-center justify-center border-2 transition-all
-                      ${isCorrect
-                        ? theme === 'dark'
-                          ? 'bg-sky-500/20 border-sky-500 text-sky-400'
-                          : 'bg-sky-500/10 border-sky-500 text-sky-600'
-                        : theme === 'dark'
-                          ? 'bg-slate-700/50 border-slate-600 text-slate-400'
-                          : 'bg-slate-100 border-slate-300 text-slate-500'
+                      ${
+                        isCorrect
+                          ? theme === 'dark'
+                            ? 'bg-sky-500/20 border-sky-500 text-sky-400'
+                            : 'bg-sky-500/10 border-sky-500 text-sky-600'
+                          : theme === 'dark'
+                            ? 'bg-slate-700/50 border-slate-600 text-slate-400'
+                            : 'bg-slate-100 border-slate-300 text-slate-500'
                       }`}
                   >
                     <span className="text-[8px] font-bold opacity-60">Q{idx + 1}</span>
