@@ -2,6 +2,8 @@ import React, { useEffect, useState, useRef } from 'react';
 import { MapContainer, TileLayer, Polyline, useMap, useMapEvents, Marker, Tooltip } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
+import PropTypes from 'prop-types';
+
 
 // Component to update map view when street changes
 const ChangeView = ({ coords }) => {
@@ -298,6 +300,36 @@ const MapArea = ({ currentStreet, hintStreets = [], theme = 'dark' }) => {
             </div>
         );
     }
+};
+
+MapArea.propTypes = {
+    currentStreet: PropTypes.shape({
+        id: PropTypes.string.isRequired,
+        name: PropTypes.string.isRequired,
+        geometry: PropTypes.arrayOf(
+            PropTypes.arrayOf(
+                PropTypes.arrayOf(PropTypes.number)
+            )
+        ).isRequired
+    }),
+    hintStreets: PropTypes.arrayOf(
+        PropTypes.shape({
+            id: PropTypes.string.isRequired,
+            name: PropTypes.string.isRequired,
+            geometry: PropTypes.arrayOf(
+                PropTypes.arrayOf(
+                    PropTypes.arrayOf(PropTypes.number)
+                )
+            ).isRequired
+        })
+    ),
+    theme: PropTypes.oneOf(['dark', 'light'])
+};
+
+MapArea.defaultProps = {
+    currentStreet: null,
+    hintStreets: [],
+    theme: 'dark'
 };
 
 export default MapArea;

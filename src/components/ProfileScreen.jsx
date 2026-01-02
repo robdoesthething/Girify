@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { useTheme } from '../context/ThemeContext';
 import { getFriendCount } from '../utils/social';
 import FriendRequests from './FriendRequests';
+import PropTypes from 'prop-types';
 
 // Helper to calculate daily streak from history
 const calculateStreak = (history) => {
@@ -156,6 +157,11 @@ const ProfileScreen = ({ onClose, username }) => {
             </motion.div>
         </div>
     );
+};
+
+ProfileScreen.propTypes = {
+    onClose: PropTypes.func.isRequired,
+    username: PropTypes.string.isRequired
 };
 
 export default ProfileScreen;

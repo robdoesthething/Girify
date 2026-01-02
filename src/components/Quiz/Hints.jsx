@@ -1,5 +1,6 @@
 import React from 'react';
 import { useTheme } from '../../context/ThemeContext';
+import PropTypes from 'prop-types';
 
 const Hints = ({ hintStreets, hintsRevealed, onReveal, feedback }) => {
     const { theme, t } = useTheme();
@@ -39,6 +40,18 @@ const Hints = ({ hintStreets, hintsRevealed, onReveal, feedback }) => {
             </div>
         </div>
     );
+};
+
+Hints.propTypes = {
+    hintStreets: PropTypes.arrayOf(
+        PropTypes.shape({
+            id: PropTypes.string.isRequired,
+            name: PropTypes.string.isRequired
+        })
+    ).isRequired,
+    hintsRevealed: PropTypes.number.isRequired,
+    onReveal: PropTypes.func.isRequired,
+    feedback: PropTypes.oneOf(['idle', 'transitioning']).isRequired
 };
 
 export default Hints;

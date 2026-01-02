@@ -1,4 +1,5 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 
 const PlaytestScreen = () => {
     // We use the base URL without query params to ensure iframes render the normal app
@@ -56,5 +57,8 @@ const PlaytestScreen = () => {
         </div>
     );
 };
+
+// PlaytestScreen has no props
+PlaytestScreen.propTypes = {};
 
 export default PlaytestScreen;

@@ -2,6 +2,7 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { useTheme } from '../../context/ThemeContext';
 import { colors, spacers, shadows } from '../../styles/tokens';
+import PropTypes from 'prop-types';
 
 const Banner = ({ currentQuestionIndex, totalQuestions }) => {
     const { theme, t } = useTheme();
@@ -21,6 +22,11 @@ const Banner = ({ currentQuestionIndex, totalQuestions }) => {
             </div>
         </div>
     );
+};
+
+Banner.propTypes = {
+    currentQuestionIndex: PropTypes.number.isRequired,
+    totalQuestions: PropTypes.number.isRequired
 };
 
 export default Banner;
