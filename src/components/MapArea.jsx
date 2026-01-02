@@ -241,15 +241,15 @@ const MapArea = ({ currentStreet, hintStreets = [], theme = 'dark' }) => {
         <MapContainer
           center={[41.3879, 2.1699]}
           zoom={13}
-          minZoom={12} // Prevent zooming out to void
+          minZoom={11} // Allow zooming out more
           scrollWheelZoom={true}
           zoomControl={false}
           attributionControl={false}
           touchZoom={true}
           maxBounds={[
-            [41.32, 2.05],
-            [41.48, 2.25],
-          ]} // Tight Barcelona bounds
+            [41.25, 2.0], // Expanded South-West
+            [41.55, 2.3], // Expanded North-East
+          ]} // Loose Barcelona bounds
           maxBoundsViscosity={0.9} // Firmer edges
           className="h-full w-full outline-none"
         >
