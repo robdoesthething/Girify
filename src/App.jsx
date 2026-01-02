@@ -449,9 +449,9 @@ const AppContent = () => {
             const history = JSON.parse(localStorage.getItem('girify_history') || '[]');
             const avgTime = state.quizResults.length
               ? (
-                  state.quizResults.reduce((acc, curr) => acc + (curr.time || 0), 0) /
-                  state.quizResults.length
-                ).toFixed(1)
+                state.quizResults.reduce((acc, curr) => acc + (curr.time || 0), 0) /
+                state.quizResults.length
+              ).toFixed(1)
               : 0;
 
             const newRecord = {
@@ -537,11 +537,10 @@ const AppContent = () => {
             className={`
                   relative z-20 backdrop-blur-sm shadow-xl shrink-0
                   bg-white/95 border-slate-200
-                  ${
-                    ['mobile', 'tablet'].includes(deviceMode)
-                      ? 'w-full h-[40%] order-2 border-t'
-                      : 'w-[350px] lg:w-[400px] h-full order-2 border-l'
-                  }
+                  ${['mobile', 'tablet'].includes(deviceMode)
+                ? 'w-full h-[40%] order-2 border-t'
+                : 'w-[350px] lg:w-[400px] h-full order-2 border-l'
+              }
                `}
           >
             <Quiz>
@@ -603,11 +602,10 @@ const AppContent = () => {
                 }
               }}
               className={`w-full max-w-xs px-8 py-4 rounded-full font-bold text-lg tracking-widest hover:scale-105 transition-all duration-300 shadow-xl animate-bounce-subtle
-                          ${
-                            hasPlayedToday()
-                              ? 'bg-[#000080] hover:bg-slate-900 text-white'
-                              : 'bg-sky-500 hover:bg-sky-600 text-white'
-                          }
+                          ${hasPlayedToday()
+                  ? 'bg-[#000080] hover:bg-slate-900 text-white'
+                  : 'bg-sky-500 hover:bg-sky-600 text-white'
+                }
                       `}
             >
               {hasPlayedToday() ? (
@@ -829,14 +827,13 @@ const SummaryScreen = ({
                   <div
                     key={idx}
                     className={`aspect-square rounded-lg flex flex-col items-center justify-center border-2 transition-all
-                      ${
-                        isCorrect
-                          ? theme === 'dark'
-                            ? 'bg-sky-500/20 border-sky-500 text-sky-400'
-                            : 'bg-sky-500/10 border-sky-500 text-sky-600'
-                          : theme === 'dark'
-                            ? 'bg-slate-700/50 border-slate-600 text-slate-400'
-                            : 'bg-slate-100 border-slate-300 text-slate-500'
+                      ${isCorrect
+                        ? theme === 'dark'
+                          ? 'bg-sky-500/20 border-sky-500 text-sky-400'
+                          : 'bg-sky-500/10 border-sky-500 text-sky-600'
+                        : theme === 'dark'
+                          ? 'bg-slate-700/50 border-slate-600 text-slate-400'
+                          : 'bg-slate-100 border-slate-300 text-slate-500'
                       }`}
                   >
                     <span className="text-[8px] font-bold opacity-60">Q{idx + 1}</span>

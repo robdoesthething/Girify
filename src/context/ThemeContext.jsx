@@ -3,6 +3,7 @@ import { getTranslation, LANGUAGES } from '../i18n/translations';
 
 const ThemeContext = createContext();
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const useTheme = () => useContext(ThemeContext);
 
 export const ThemeProvider = ({ children }) => {

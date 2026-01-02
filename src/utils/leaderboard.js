@@ -10,7 +10,6 @@ import {
   limit,
   getDocs,
   Timestamp,
-  where,
 } from 'firebase/firestore';
 import { getTodaySeed } from './dailyChallenge';
 

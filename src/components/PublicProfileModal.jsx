@@ -105,6 +105,9 @@ const PublicProfileModal = ({ username, onClose, currentUser }) => {
     <div
       className="fixed inset-0 z-[9000] flex items-center justify-center p-4 backdrop-blur-sm bg-black/50 overflow-hidden"
       onClick={onClose}
+      role="button"
+      tabIndex={0}
+      onKeyDown={e => e.key === 'Escape' && onClose()}
     >
       <motion.div
         initial={{ scale: 0.9, opacity: 0 }}
