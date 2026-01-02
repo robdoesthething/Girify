@@ -14,7 +14,7 @@ const LeaderboardScreen = ({ onClose, currentUser }) => {
 
   useEffect(() => {
     loadScores();
-  }, [period]);
+  }, [period, loadScores]);
 
   const loadScores = async () => {
     setLoading(true);
@@ -80,11 +80,10 @@ const LeaderboardScreen = ({ onClose, currentUser }) => {
               key={tab.id}
               onClick={() => setPeriod(tab.id)}
               className={`flex-1 py-2 text-sm font-bold rounded-lg transition-all
-                                ${
-                                  period === tab.id
-                                    ? 'bg-white dark:bg-neutral-700 shadow-sm text-sky-500'
-                                    : 'text-slate-500 hover:text-slate-700 dark:hover:text-neutral-300'
-                                }
+                                ${period === tab.id
+                  ? 'bg-white dark:bg-neutral-700 shadow-sm text-sky-500'
+                  : 'text-slate-500 hover:text-slate-700 dark:hover:text-neutral-300'
+                }
                             `}
             >
               {tab.label}
@@ -136,15 +135,14 @@ const LeaderboardScreen = ({ onClose, currentUser }) => {
                 >
                   <div
                     className={`w-8 h-8 flex items-center justify-center rounded-full font-black text-sm mr-4
-                                    ${
-                                      index === 0
-                                        ? 'bg-yellow-400 text-yellow-900'
-                                        : index === 1
-                                          ? 'bg-slate-300 text-slate-800'
-                                          : index === 2
-                                            ? 'bg-amber-600 text-amber-100'
-                                            : 'bg-slate-100 dark:bg-slate-700 text-slate-500'
-                                    }
+                                    ${index === 0
+                        ? 'bg-yellow-400 text-yellow-900'
+                        : index === 1
+                          ? 'bg-slate-300 text-slate-800'
+                          : index === 2
+                            ? 'bg-amber-600 text-amber-100'
+                            : 'bg-slate-100 dark:bg-slate-700 text-slate-500'
+                      }
                                 `}
                   >
                     {index + 1}

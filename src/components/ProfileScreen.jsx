@@ -175,7 +175,7 @@ const ProfileScreen = ({ onClose, username }) => {
                     <div>
                       <p className="font-bold text-sm">{t('dailyChallenge')}</p>
                       <p className="text-[10px] text-slate-400">
-                        {new Date(game.timestamp || Date.now()).toLocaleDateString()}
+                        {game.timestamp ? new Date(game.timestamp).toLocaleDateString() : 'Just now'}
                       </p>
                     </div>
                     <div className="text-right">

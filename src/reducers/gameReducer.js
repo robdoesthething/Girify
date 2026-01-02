@@ -86,7 +86,7 @@ export function gameReducer(state, action) {
         selectedAnswer: null, // Reset selection after submit
       };
 
-    case 'NEXT_QUESTION':
+    case 'NEXT_QUESTION': {
       const nextIndex = state.currentQuestionIndex + 1;
       const isFinished = nextIndex >= state.quizStreets.length;
 
@@ -110,6 +110,7 @@ export function gameReducer(state, action) {
         // Ideally we pass them here if we pre-calc them.
         options: action.payload.options || [],
       };
+    }
 
     case 'SET_ACTIVE_PAGE':
       return {

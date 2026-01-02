@@ -7,7 +7,7 @@
  * @param {number} hintsCount - Number of hints revealed (0-3)
  * @returns {number} - Points earned (0-100)
  */
-export function calculateTimeScore(timeInSeconds, isCorrect, hintsCount = 0) {
+export function calculateTimeScore(timeInSeconds, isCorrect, _hintsCount = 0) {
   if (!isCorrect) return 0;
 
   let basePoints = 0;
