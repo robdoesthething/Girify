@@ -107,7 +107,7 @@ export const getLeaderboard = async (period = 'all') => {
       // and filter them in memory. This is efficient enough for the current scale.
       // Fetch recent scores using 'timestamp' which is inclusive and standard.
       const scoresRef = collection(db, SCORES_COLLECTION);
-      const q = query(scoresRef, orderBy('timestamp', 'desc'), limit(500));
+      const q = query(scoresRef, orderBy('timestamp', 'desc'), limit(1000));
       const snapshot = await getDocs(q);
 
       const now = new Date();
