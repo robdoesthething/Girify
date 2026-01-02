@@ -50,7 +50,8 @@ export const saveScore = async (username, score, time) => {
     await addDoc(collection(db, SCORES_COLLECTION), scoreData);
 
     // 2. Check & Update Personal Best (All Time)
-    const userDocRef = doc(db, HIGHSCORES_COLLECTION, username);
+    const sanitizedUsername = username.replace(/\//g, '_');
+    const userDocRef = doc(db, HIGHSCORES_COLLECTION, sanitizedUsername);
     const userDoc = await getDoc(userDocRef);
     let shouldUpdate = false;
 
@@ -104,10 +105,9 @@ export const getLeaderboard = async (period = 'all') => {
       // For periods, we query the history 'scores' collection.
       // To avoid missing index issues and ensure robustness, we fetch the most recent 200 scores
       // and filter them in memory. This is efficient enough for the current scale.
-      // Fetch recent scores using 'date' (YYYYMMDD) which is a number/string and indexed by default.
-      // This is safer than timestamp and ensures we get the latest days.
+      // Fetch recent scores using 'timestamp' which is inclusive and standard.
       const scoresRef = collection(db, SCORES_COLLECTION);
-      const q = query(scoresRef, orderBy('date', 'desc'), limit(500));
+      const q = query(scoresRef, orderBy('timestamp', 'desc'), limit(500));
       const snapshot = await getDocs(q);
 
       const now = new Date();
