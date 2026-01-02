@@ -1,10 +1,13 @@
 # 🗺️ Girify - Barcelona Streets Quiz
 
+![Coverage](https://img.shields.io/badge/coverage-unknown-grey)
+
 A daily geography challenge where users identify Barcelona streets on an interactive map. Everyone gets the same 10 streets each day!
 
 🎮 **[Play Live](https://girify.vercel.app)**
 
 ## Features
+
 - 🌍 Interactive Leaflet map with Barcelona streets
 - 🎯 Daily challenges with deterministic seeding
 - ⚡ Speed-based scoring system
@@ -15,6 +18,7 @@ A daily geography challenge where users identify Barcelona streets on an interac
 - 📱 Fully responsive (Mobile/Tablet/Desktop)
 
 ## Tech Stack
+
 - **Frontend**: React 18, Vite, Tailwind CSS
 - **Map**: Leaflet.js + OpenStreetMap
 - **Backend**: Firebase (Auth + Firestore)
@@ -24,6 +28,7 @@ A daily geography challenge where users identify Barcelona streets on an interac
 ## Local Development
 
 ### Prerequisites
+
 - Node.js 18+
 - npm or yarn
 - Firebase project (for auth & database)
@@ -31,24 +36,28 @@ A daily geography challenge where users identify Barcelona streets on an interac
 ### Setup
 
 1. **Clone the repository**
+
 ```bash
 git clone https://github.com/robdoesthething/Girify.git
 cd Girify
 ```
 
 2. **Install dependencies**
+
 ```bash
 npm install
 ```
 
 3. **Configure Firebase**
-   
+
    Copy the env template:
+
 ```bash
 cp .env.template .env.development
 ```
-   
-   Fill in your Firebase credentials in `.env.development`:
+
+Fill in your Firebase credentials in `.env.development`:
+
 ```env
 VITE_FIREBASE_API_KEY=your_api_key
 VITE_FIREBASE_AUTH_DOMAIN=your_auth_domain
@@ -59,13 +68,15 @@ VITE_FIREBASE_APP_ID=your_app_id
 ```
 
 4. **Run development server**
+
 ```bash
 npm run dev
 ```
-   
-   Open [http://localhost:5173](http://localhost:5173)
+
+Open [http://localhost:5173](http://localhost:5173)
 
 5. **Build for production**
+
 ```bash
 npm run build
 ```
@@ -73,12 +84,14 @@ npm run build
 ## Data Pipeline
 
 The app uses 200 curated Barcelona streets extracted from OpenStreetMap:
+
 ```bash
 # Fetch latest street data (requires ~180s)
 npm run fetch-streets
 ```
 
 This runs `scripts/fetchStreets.js` which:
+
 1. Queries Overpass API for Barcelona streets
 2. Filters and deduplicates ~11,466 segments
 3. Saves 200 best streets to `src/data/streets.json`
@@ -86,20 +99,24 @@ This runs `scripts/fetchStreets.js` which:
 ## Game Mechanics
 
 ### Daily Challenge System
+
 - Uses date-based seeding: `hash("2026-01-01") → deterministic shuffle`
 - Everyone gets the same 10 streets per day
 - No backend coordination needed!
 
 ### Scoring
+
 - **Speed-based**: <3s = 1000pts, <10s = 750pts, <20s = 500pts, >20s = 250pts
 - **No hint penalties** (as of v1.0)
 
 ### Hints
+
 - 3 hints per question
 - Shows nearby intersecting streets
 - Fallback: nearest streets by distance
 
 ## Project Structure
+
 ```
 Girify/
 ├── src/
@@ -129,6 +146,7 @@ Deployed automatically via Vercel on push to `main`:
 ## Contributing
 
 Contributions welcome! Please:
+
 1. Fork the repository
 2. Create a feature branch (`git checkout -b feature/amazing-feature`)
 3. Commit changes (`git commit -m 'Add amazing feature'`)

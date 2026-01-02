@@ -14,6 +14,11 @@ import 'leaflet/dist/leaflet.css';
 import PropTypes from 'prop-types';
 
 // Component to update map view when street changes
+/**
+ * Component to update map view when street changes
+ * @param {Object} props
+ * @param {number[][][]} props.coords - Coordinates of the street to focus on
+ */
 const ChangeView = ({ coords }) => {
   const map = useMap();
   useEffect(() => {
@@ -30,7 +35,11 @@ const ChangeView = ({ coords }) => {
   return null;
 };
 
-// Component to handle zoom events
+/**
+ * Component to handle zoom events
+ * @param {Object} props
+ * @param {Function} props.setCurrentZoom - State setter for current zoom level
+ */
 const ZoomHandler = ({ setCurrentZoom }) => {
   const map = useMapEvents({
     zoomend: () => {
@@ -40,7 +49,13 @@ const ZoomHandler = ({ setCurrentZoom }) => {
   return null;
 };
 
-// Recenter Control Component
+/**
+ * Recenter Control Component
+ * @param {Object} props
+ * @param {number[]} props.center - Center coordinates [lat, long]
+ * @param {number} props.zoom - Zoom level
+ * @param {number[][][]} props.bounds - Bounds to fit
+ */
 const RecenterControl = ({ center, zoom, bounds }) => {
   const map = useMap();
 
@@ -158,6 +173,15 @@ const createEmojiIcon = emoji => {
   });
 };
 
+/**
+ * Main Map Area Component
+ * Renders the Leaflet map, streets, hints, and landmarks.
+ *
+ * @param {Object} props
+ * @param {Object} props.currentStreet - The current target street object
+ * @param {Object[]} props.hintStreets - Array of hint street objects
+ * @param {'dark'|'light'} props.theme - Current theme
+ */
 const MapArea = ({ currentStreet, hintStreets = [], theme = 'dark' }) => {
   // ... params
   const [boundary, setBoundary] = useState(null);
