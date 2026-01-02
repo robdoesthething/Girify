@@ -5,19 +5,19 @@ import logoDark from '../assets/girify-logo-dark.png';
 import PropTypes from 'prop-types';
 
 const Logo = ({ className }) => {
-    const { theme } = useTheme();
+  const { theme } = useTheme();
 
-    return (
-        <img
-            src={theme === 'dark' ? logoDark : logoImage}
-            alt="Girify"
-            className={`${className || ''}`}
-        />
-    );
+  return (
+    <img
+      src={theme === 'dark' ? logoDark : logoImage}
+      alt="Girify"
+      className={`${className || ''}`}
+    />
+  );
 };
 
 Logo.propTypes = {
-    className: PropTypes.string
+  className: PropTypes.string,
 };
 
 export default Logo;
