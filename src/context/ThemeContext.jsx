@@ -7,7 +7,7 @@ const ThemeContext = createContext();
 export const useTheme = () => useContext(ThemeContext);
 
 export const ThemeProvider = ({ children }) => {
-  // Theme: 'light' | 'dark'
+  // Theme: 'light' | 'dark' - Forced to light for now
   const [theme, setTheme] = useState('light');
 
   // Language: 'en' | 'es' | 'ca'
@@ -43,7 +43,8 @@ export const ThemeProvider = ({ children }) => {
   }, []);
 
   const toggleTheme = () => {
-    setTheme(prev => (prev === 'dark' ? 'light' : 'dark'));
+    // Disabled dark mode for now
+    setTheme('light');
   };
 
   const changeLanguage = lang => {
