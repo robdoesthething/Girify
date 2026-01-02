@@ -12,6 +12,7 @@ const SettingsScreen = ({ onClose, onLogout, autoAdvance, setAutoAdvance }) => {
 
   const handleClearHistory = () => {
     if (
+      // eslint-disable-next-line no-alert
       window.confirm(
         t('clearHistoryConfirm') ||
           'Are you sure you want to clear your game history? This cannot be undone.'
