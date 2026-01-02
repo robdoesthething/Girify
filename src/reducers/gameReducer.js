@@ -83,7 +83,7 @@ export function gameReducer(state, action) {
         score: state.score + action.payload.points,
         quizResults: [...state.quizResults, action.payload.result],
         feedback: 'transitioning',
-        selectedAnswer: null, // Reset selection after submit
+        selectedAnswer: action.payload.selectedStreet, // Persist selection after submit
       };
 
     case 'NEXT_QUESTION': {
