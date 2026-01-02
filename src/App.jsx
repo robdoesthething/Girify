@@ -339,38 +339,32 @@ const AppContent = () => {
     if (nextIndex >= state.quizStreets.length) {
       if (state.gameState === 'playing') {
         try {
-          // Debug logs for user report "not updating"
-          console.log('[Game] Finished. hasPlayedToday:', hasPlayedToday());
-          if (!hasPlayedToday()) {
-            markTodayAsPlayed();
-            console.log('[Game] Marking as played and saving...');
-            const history = JSON.parse(localStorage.getItem('girify_history') || '[]');
-            const avgTime = state.quizResults.length
-              ? (
-                  state.quizResults.reduce((acc, curr) => acc + (curr.time || 0), 0) /
-                  state.quizResults.length
-                ).toFixed(1)
-              : 0;
+          console.log('[Game] Finished. Saving result...');
+          markTodayAsPlayed(); // Ensure today is marked
 
-            const newRecord = {
-              date: getTodaySeed(),
-              score: state.score,
-              avgTime: avgTime,
-              timestamp: Date.now(),
-              username: state.username, // Associate record with user
-            };
-            history.push(newRecord);
-            localStorage.setItem('girify_history', JSON.stringify(history));
-            console.log('[Game] History saved locally. Total games:', history.length);
+          const history = JSON.parse(localStorage.getItem('girify_history') || '[]');
+          const avgTime = state.quizResults.length
+            ? (
+                state.quizResults.reduce((acc, curr) => acc + (curr.time || 0), 0) /
+                state.quizResults.length
+              ).toFixed(1)
+            : 0;
 
-            if (state.username) {
-              console.log('[Game] Saving to Leaderboard...');
-              saveScore(state.username, state.score, newRecord.avgTime)
-                .then(() => console.log('[Game] Leaderboard save success.'))
-                .catch(err => console.error('[Game] Leaderboard save failed:', err));
-            }
-          } else {
-            console.log('[Game] Already played today. Skipping save.');
+          const newRecord = {
+            date: getTodaySeed(),
+            score: state.score,
+            avgTime: avgTime,
+            timestamp: Date.now(),
+            username: state.username, // Associate record with user
+          };
+          history.push(newRecord);
+          localStorage.setItem('girify_history', JSON.stringify(history));
+          console.log('[Game] History saved locally.');
+
+          if (state.username) {
+            saveScore(state.username, state.score, newRecord.avgTime).catch(err =>
+              console.error('[Game] Leaderboard save failed:', err)
+            );
           }
         } catch (e) {
           console.error('[Game] Error saving game:', e);
