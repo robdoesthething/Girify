@@ -16,6 +16,8 @@ import {
   selectDailyStreets,
   hasPlayedToday,
   markTodayAsPlayed,
+  selectDistractors,
+  shuffleOptions,
 } from './utils/dailyChallenge';
 import { calculateTimeScore } from './utils/scoring';
 import { saveScore } from './utils/leaderboard';
@@ -184,7 +186,7 @@ const AppContent = () => {
 
     let initialOptions = [];
     if (selected.length > 0) {
-      initialOptions = generateOptionsList(selected[0], validStreets);
+      initialOptions = generateOptionsList(selected[0], validStreets, 0);
     }
 
     dispatch({
@@ -197,39 +199,18 @@ const AppContent = () => {
   }
 
   /**
-   * Generate 4 multiple-choice options for a quiz question.
-   * Includes the correct answer plus 3 distractors with matching street type prefix.
-   * Falls back to any streets if not enough matching prefixes available.
-   *
-   * @param {{id: string, name: string}} target - The correct street
-   * @param {Array<{id: string, name: string}>} allStreets - Pool of all available streets
-   * @returns {Array<{id: string, name: string}>} Array of 4 shuffled options
-   *
-   * @example
-   * generateOptionsList(targetStreet, validStreets);
-   * // Returns: [street1, street2, street3, street4] (shuffled, includes target)
+   * Generate 4 multiple-choice options deterministicly.
    */
-  const generateOptionsList = (target, allStreets) => {
-    const targetPrefix = getPrefix(target.name);
-    let pool = allStreets.filter(s => s.id !== target.id && getPrefix(s.name) === targetPrefix);
+  const generateOptionsList = (target, allStreets, questionIndex) => {
+    const todaySeed = getTodaySeed();
+    // Unique seed for this question index
+    const questionSeed = todaySeed + questionIndex * 100;
 
-    if (pool.length < 3) {
-      pool = allStreets.filter(s => s.id !== target.id);
-    }
+    const distractors = selectDistractors(allStreets, target, questionSeed);
+    const opts = [target, ...distractors];
 
-    const distractors = [];
-    const usedIds = new Set([target.id]);
-    pool.sort(() => 0.5 - Math.random());
-
-    for (const street of pool) {
-      if (distractors.length >= 3) break;
-      if (!usedIds.has(street.id)) {
-        distractors.push(street);
-        usedIds.add(street.id);
-      }
-    }
-    const opts = [target, ...distractors].sort(() => 0.5 - Math.random());
-    return opts;
+    // Shuffle final options with a slightly different seed to vary position
+    return shuffleOptions(opts, questionSeed + 50);
   };
 
   const currentStreet =
@@ -362,9 +343,12 @@ const AppContent = () => {
           console.log('[Game] History saved locally.');
 
           if (state.username) {
-            saveScore(state.username, state.score, newRecord.avgTime).catch(err =>
-              console.error('[Game] Leaderboard save failed:', err)
-            );
+            console.log('[Game] Attempting to save to leaderboard:', state.username, state.score);
+            saveScore(state.username, state.score, newRecord.avgTime)
+              .then(() => console.log('[Game] Leaderboard save success'))
+              .catch(err => console.error('[Game] Leaderboard save failed:', err));
+          } else {
+            console.warn('[Game] No username, skipping leaderboard save');
           }
         } catch (e) {
           console.error('[Game] Error saving game:', e);
@@ -373,7 +357,7 @@ const AppContent = () => {
       dispatch({ type: 'NEXT_QUESTION', payload: {} });
     } else {
       const nextStreet = state.quizStreets[nextIndex];
-      const nextOptions = generateOptionsList(nextStreet, validStreets);
+      const nextOptions = generateOptionsList(nextStreet, validStreets, nextIndex);
 
       dispatch({
         type: 'NEXT_QUESTION',

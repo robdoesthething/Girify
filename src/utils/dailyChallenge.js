@@ -103,3 +103,41 @@ export function getTimeUntilNext() {
 
   return `${hours}h ${minutes}m`;
 }
+
+/**
+ * Deterministically select 3 distractors for a target street
+ * @param {Array} validStreets - All valid streets
+ * @param {Object} target - The correct street
+ * @param {number} seed - Question-specific seed
+ * @returns {Array} - 3 distractor streets
+ */
+export function selectDistractors(validStreets, target, seed) {
+  const getPrefix = name => {
+    if (!name) return '';
+    const match = name.match(
+      /^(Carrer|Avinguda|Plaça|Passeig|Passatge|Ronda|Via|Camí|Jardins|Parc|Rambla|Travessera)(\s+d(e|els|es|el|ala)|(?=\s))?/i
+    );
+    return match ? match[0].trim() : '';
+  };
+
+  const targetPrefix = getPrefix(target.name);
+  let pool = validStreets.filter(s => s.id !== target.id && getPrefix(s.name) === targetPrefix);
+
+  if (pool.length < 3) {
+    pool = validStreets.filter(s => s.id !== target.id);
+  }
+
+  // Shuffle pool with seed
+  const shuffledPool = seededShuffle(pool, seed);
+  return shuffledPool.slice(0, 3);
+}
+
+/**
+ * Deterministically shuffle options (target + distractors)
+ * @param {Array} options - Array of 4 options
+ * @param {number} seed - Seed
+ * @returns {Array} - Shuffled options
+ */
+export function shuffleOptions(options, seed) {
+  return seededShuffle(options, seed);
+}

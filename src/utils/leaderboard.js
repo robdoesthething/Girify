@@ -104,45 +104,60 @@ export const getLeaderboard = async (period = 'all') => {
       snapshot.forEach(doc => scores.push({ id: doc.id, ...doc.data() }));
     } else {
       // For periods, we query the history 'scores' collection.
-      // To avoid missing index issues and ensure robustness, we fetch the most recent 200 scores
-      // and filter them in memory. This is efficient enough for the current scale.
-      // Fetch recent scores using 'timestamp' which is inclusive and standard.
       const scoresRef = collection(db, SCORES_COLLECTION);
-      const q = query(scoresRef, orderBy('timestamp', 'desc'), limit(10000));
+      const q = query(scoresRef, orderBy('timestamp', 'desc'), limit(1000));
+      console.log(`[Leaderboard] Fetching scores for period: ${period}`);
       const snapshot = await getDocs(q);
+      console.log(`[Leaderboard] Fetched ${snapshot.size} documents from 'scores'`);
 
       const now = new Date();
-      now.setHours(0, 0, 0, 0); // Start of today
+      now.setHours(23, 59, 59, 999); // End of today for safer comparison? No, start of day for start dates.
+      // Reset to start of today for comparisons
+      const todayStart = new Date();
+      todayStart.setHours(0, 0, 0, 0);
 
       // Start of Week (Monday)
-      // JS getDay(): 0 = Sunday, 1 = Monday.
-      const day = now.getDay();
-      const diff = day === 0 ? 6 : day - 1; // days to subtract to get to Monday
-      const startOfWeek = new Date(now);
-      startOfWeek.setDate(now.getDate() - diff);
+      const day = todayStart.getDay();
+      const diff = day === 0 ? 6 : day - 1;
+      const startOfWeek = new Date(todayStart);
+      startOfWeek.setDate(todayStart.getDate() - diff);
       startOfWeek.setHours(0, 0, 0, 0);
 
       // Start of Month
-      const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+      const startOfMonth = new Date(todayStart.getFullYear(), todayStart.getMonth(), 1);
 
       const todaySeed = getTodaySeed();
 
+      console.log(
+        `[Leaderboard] Filters - TodaySeed: ${todaySeed}, StartOfWeek: ${startOfWeek.toISOString()}, StartOfMonth: ${startOfMonth.toISOString()}`
+      );
+
       snapshot.forEach(doc => {
         const data = doc.data();
-        // Handle different timestamp formats (Firestore Timestamp vs Date vs String)
+        // Handle different timestamp formats
         let date;
         if (data.timestamp && typeof data.timestamp.toDate === 'function') {
           date = data.timestamp.toDate();
+        } else if (data.timestamp && data.timestamp.seconds) {
+          // Handle raw Firestore obj if slightly malformed
+          date = new Date(data.timestamp.seconds * 1000);
         } else if (data.timestamp) {
           date = new Date(data.timestamp);
         } else {
-          date = new Date(0); // No date
+          date = new Date(0);
         }
 
         let include = false;
         if (period === 'daily') {
-          // Match seed exactly
-          if (data.date === todaySeed) include = true;
+          // Robust check: try seed match OR date match
+          if (data.date === todaySeed) {
+            include = true;
+          } else {
+            // Fallback: check if date is today
+            const d = new Date(date);
+            d.setHours(0, 0, 0, 0);
+            if (d.getTime() === todayStart.getTime()) include = true;
+          }
         } else if (period === 'weekly') {
           if (date >= startOfWeek) include = true;
         } else if (period === 'monthly') {
@@ -153,6 +168,8 @@ export const getLeaderboard = async (period = 'all') => {
           scores.push({ id: doc.id, ...data, sortDate: date });
         }
       });
+
+      console.log(`[Leaderboard] Scores after filtering for '${period}': ${scores.length}`);
 
       // Deduplicate: Keep best score per user
       scores = deduplicateScores(scores);
