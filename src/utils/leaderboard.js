@@ -111,8 +111,19 @@ export const getLeaderboard = async (period = 'all') => {
       const snapshot = await getDocs(q);
 
       const now = new Date();
-      const oneWeekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
-      const oneMonthAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+      now.setHours(0, 0, 0, 0); // Start of today
+
+      // Start of Week (Monday)
+      // JS getDay(): 0 = Sunday, 1 = Monday.
+      const day = now.getDay();
+      const diff = day === 0 ? 6 : day - 1; // days to subtract to get to Monday
+      const startOfWeek = new Date(now);
+      startOfWeek.setDate(now.getDate() - diff);
+      startOfWeek.setHours(0, 0, 0, 0);
+
+      // Start of Month
+      const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+
       const todaySeed = getTodaySeed();
 
       snapshot.forEach(doc => {
@@ -132,9 +143,9 @@ export const getLeaderboard = async (period = 'all') => {
           // Match seed exactly
           if (data.date === todaySeed) include = true;
         } else if (period === 'weekly') {
-          if (date > oneWeekAgo) include = true;
+          if (date >= startOfWeek) include = true;
         } else if (period === 'monthly') {
-          if (date > oneMonthAgo) include = true;
+          if (date >= startOfMonth) include = true;
         }
 
         if (include) {
