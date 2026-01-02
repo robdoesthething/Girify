@@ -10,8 +10,16 @@ const SettingsScreen = ({ onClose, onLogout, autoAdvance, setAutoAdvance }) => {
   );
 
   const handleClearHistory = () => {
-    if (confirm('Are you sure you want to clear your game history? This cannot be undone.')) {
-      onLogout();
+    if (
+      confirm(
+        t('clearHistoryConfirm') ||
+          'Are you sure you want to clear your game history? This cannot be undone.'
+      )
+    ) {
+      localStorage.removeItem('girify_history');
+      alert(t('historyCleared') || 'Game history cleared.');
+      // Force reload to update UI (simplest way since history is read from LS in many places)
+      window.location.reload();
     }
   };
 
