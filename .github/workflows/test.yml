@@ -30,6 +30,10 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Security Audit
+        run: npm audit --audit-level=moderate
+        continue-on-error: false
+
       - name: Run linter
         run: npm run lint
 
