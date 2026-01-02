@@ -20,6 +20,9 @@ import Logo from './components/Logo';
 import { gameReducer, initialState } from './reducers/gameReducer';
 import { auth } from './firebase';
 import { onAuthStateChanged } from 'firebase/auth';
+// Custom hooks for reusable logic
+import { useScoreCalculator, useDailyChallenge } from './hooks';
+
 
 /**
  * Normalize street names for comparison by removing accents, prefixes, and punctuation.
