@@ -11,6 +11,7 @@ import {
   addDoc,
   updateDoc,
   limit,
+  deleteDoc,
 } from 'firebase/firestore';
 
 const USERS_COLLECTION = 'users';
@@ -414,6 +415,28 @@ export const migrateUser = async (oldUsername, newHandle) => {
       }
     } catch (e) {
       console.warn('[Migration] Failed to migrate scores (non-critical):', e);
+    }
+
+    // 4. Migrate Subcollections (Requests & Friends)
+    const subcollections = ['requests', 'friends'];
+    for (const sub of subcollections) {
+      try {
+        const subQ = query(collection(db, USERS_COLLECTION, oldUsername, sub));
+        const subSnap = await getDocs(subQ);
+
+        subSnap.forEach(async docMsg => {
+          const data = docMsg.data();
+          // Copy to new handle profile
+          await setDoc(doc(db, USERS_COLLECTION, newHandle, sub, docMsg.id), data);
+          // Delete from old profile
+          await deleteDoc(docMsg.ref);
+        });
+
+        if (!subSnap.empty)
+          console.log(`[Migration] Migrated ${subSnap.size} documents in '${sub}'`);
+      } catch (e) {
+        console.warn(`[Migration] Failed to migrate subcollection ${sub}:`, e);
+      }
     }
 
     // eslint-disable-next-line no-console

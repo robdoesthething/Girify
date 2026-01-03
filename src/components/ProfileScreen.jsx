@@ -70,7 +70,18 @@ const ProfileScreen = ({ onClose, username }) => {
     try {
       const rawHistory = localStorage.getItem('girify_history');
       const parsedHistory = rawHistory ? JSON.parse(rawHistory) : [];
-      return Array.isArray(parsedHistory) ? parsedHistory : [];
+      const list = Array.isArray(parsedHistory) ? parsedHistory : [];
+      // Filter: Keep only the FIRST attempt per day (User Requirement)
+      // Assuming 'date' is the day seed (YYYYMMDD integer)
+      const seenDates = new Set();
+      const uniqueList = [];
+      list.forEach(game => {
+        if (!seenDates.has(game.date)) {
+          seenDates.add(game.date);
+          uniqueList.push(game);
+        }
+      });
+      return uniqueList;
     } catch (e) {
       console.error('Profile data load error:', e);
       return [];
