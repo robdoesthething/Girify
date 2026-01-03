@@ -6,7 +6,7 @@ import Logo from './Logo';
 import PropTypes from 'prop-types';
 
 const TopBar = ({ onOpenPage }) => {
-  const { theme, toggleTheme, t } = useTheme();
+  const { theme, t } = useTheme();
   const [menuOpen, setMenuOpen] = useState(false);
 
   const handleMenuClick = page => {

@@ -31,6 +31,7 @@ const SCORES_COLLECTION = 'scores'; // Full History
  * // Saves to history and updates personal best if score > previous best
  */
 export const saveScore = async (username, score, time) => {
+  // eslint-disable-next-line no-console
   console.log(`[Leaderboard] saveScore called for ${username}. Score: ${score}, Time: ${time}`);
   if (!username) {
     console.warn('[Leaderboard] saveScore called without username, skipping.');
@@ -106,8 +107,10 @@ export const getLeaderboard = async (period = 'all') => {
       // For periods, we query the history 'scores' collection.
       const scoresRef = collection(db, SCORES_COLLECTION);
       const q = query(scoresRef, orderBy('timestamp', 'desc'), limit(1000));
+      // eslint-disable-next-line no-console
       console.log(`[Leaderboard] Fetching scores for period: ${period}`);
       const snapshot = await getDocs(q);
+      // eslint-disable-next-line no-console
       console.log(`[Leaderboard] Fetched ${snapshot.size} documents from 'scores'`);
 
       const now = new Date();
@@ -128,6 +131,7 @@ export const getLeaderboard = async (period = 'all') => {
 
       const todaySeed = getTodaySeed();
 
+      // eslint-disable-next-line no-console
       console.log(
         `[Leaderboard] Filters - TodaySeed: ${todaySeed}, StartOfWeek: ${startOfWeek.toISOString()}, StartOfMonth: ${startOfMonth.toISOString()}`
       );
@@ -169,6 +173,7 @@ export const getLeaderboard = async (period = 'all') => {
         }
       });
 
+      // eslint-disable-next-line no-console
       console.log(`[Leaderboard] Scores after filtering for '${period}': ${scores.length}`);
 
       // Deduplicate: Keep best score per user

@@ -1,27 +1,28 @@
+/* eslint-disable no-undef, no-console */
 // Firebase Messaging Service Worker
 importScripts('https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js');
 importScripts('https://www.gstatic.com/firebasejs/9.0.0/firebase-messaging-compat.js');
 
-// Initialize the Firebase app in the service worker by passing in the messagingSenderId.
+// Initialize the Firebase app in the service worker
 firebase.initializeApp({
-    apiKey: "REPLACE_WITH_YOUR_API_KEY", // Note: Usually needed here, but standard practice often puts config. 
-    // For Vercel/Vite, we can't inject env vars into SW easily without build steps.
-    // We will assume the browser handles the registration via main thread config generally, 
-    // but for background handling, explicit init is often required. 
-    // However, for this MVP, we'll try standard 'setBackgroundMessageHandler'.
-    messagingSenderId: "367803389445"
+  apiKey: 'AIzaSyDKaEi-d2ekrCkm2Gyw0VtfQCktY1GVTsY',
+  authDomain: 'glorify-ad348.firebaseapp.com',
+  projectId: 'glorify-ad348',
+  storageBucket: 'glorify-ad348.firebasestorage.app',
+  messagingSenderId: '469511129298',
+  appId: '1:469511129298:web:3bfddeeec0611dafcd050b',
 });
 
 const messaging = firebase.messaging();
 
-messaging.onBackgroundMessage((payload) => {
-    console.log('[firebase-messaging-sw.js] Received background message ', payload);
-    // Customize notification here
-    const notificationTitle = payload.notification.title;
-    const notificationOptions = {
-        body: payload.notification.body,
-        icon: '/girify-logo.png'
-    };
+messaging.onBackgroundMessage(payload => {
+  console.log('[firebase-messaging-sw.js] Received background message ', payload);
+  const notificationTitle = payload.notification.title;
+  const notificationOptions = {
+    body: payload.notification.body,
+    icon: '/lizard-v2.png',
+    data: payload.data,
+  };
 
-    self.registration.showNotification(notificationTitle, notificationOptions);
+  self.registration.showNotification(notificationTitle, notificationOptions);
 });

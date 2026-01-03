@@ -4,7 +4,24 @@ import { getTranslation, LANGUAGES } from '../i18n/translations';
 const ThemeContext = createContext();
 
 // eslint-disable-next-line react-refresh/only-export-components
-export const useTheme = () => useContext(ThemeContext);
+export const useTheme = () => {
+  const context = useContext(ThemeContext);
+  if (!context) {
+    // Defensive coding: Return default values if used outside provider (e.g. tests)
+    return {
+      theme: 'light',
+      language: 'en',
+      changeLanguage: () => {},
+      toggleTheme: () => {},
+      languages: [],
+      t: key => key,
+      deviceMode: 'desktop',
+      zoom: 1,
+      setZoom: () => {},
+    };
+  }
+  return context;
+};
 
 export const ThemeProvider = ({ children }) => {
   // Theme: 'light' | 'dark' - Forced to light for now

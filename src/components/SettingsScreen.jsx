@@ -2,13 +2,19 @@ import React from 'react';
 // eslint-disable-next-line no-unused-vars
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTheme } from '../context/ThemeContext';
+import { useNotifications } from '../hooks/useNotifications';
 import PropTypes from 'prop-types';
 
 const SettingsScreen = ({ onClose, onLogout, autoAdvance, setAutoAdvance }) => {
-  const { theme, toggleTheme, language, changeLanguage, languages, t, deviceMode } = useTheme();
-  const [notificationsEnabled, setNotificationsEnabled] = React.useState(
-    'Notification' in window && Notification.permission === 'granted'
-  );
+  const { theme, language, changeLanguage, languages, t } = useTheme();
+
+  // Use Notifications Hook
+  const { isSupported, isIOS, permission, requestPermission } = useNotifications();
+  const [notificationsEnabled, setNotificationsEnabled] = React.useState(permission === 'granted');
+
+  React.useEffect(() => {
+    setNotificationsEnabled(permission === 'granted');
+  }, [permission]);
 
   const handleClearHistory = () => {
     if (
@@ -35,30 +41,6 @@ const SettingsScreen = ({ onClose, onLogout, autoAdvance, setAutoAdvance }) => {
 
   const toggleAutoAdvance = () => {
     setAutoAdvance(!autoAdvance);
-  };
-
-  const handleEnableNotifications = async () => {
-    if (!('Notification' in window)) {
-      // eslint-disable-next-line no-alert
-      alert('This browser does not support desktop notification');
-      return;
-    }
-
-    if (notificationsEnabled) {
-      setNotificationsEnabled(false);
-      return;
-    }
-
-    const permission = await Notification.requestPermission();
-    if (permission === 'granted') {
-      setNotificationsEnabled(true);
-      // eslint-disable-next-line no-alert
-      alert("Notifications enabled! You'll receive daily reminders.");
-    } else {
-      setNotificationsEnabled(false);
-      // eslint-disable-next-line no-alert
-      alert('Notifications denied. Please enable them in your browser settings.');
-    }
   };
 
   return (
@@ -183,14 +165,51 @@ const SettingsScreen = ({ onClose, onLogout, autoAdvance, setAutoAdvance }) => {
                 <span className="font-medium">Daily Reminders</span>
               </div>
               <button
-                onClick={handleEnableNotifications}
-                className={`w-12 h-7 rounded-full transition-colors relative ${notificationsEnabled ? 'bg-emerald-500' : 'bg-slate-300'}`}
+                onClick={async () => {
+                  if (!isSupported) {
+                    if (isIOS) {
+                      // eslint-disable-next-line no-alert
+                      alert('Notifications are not available on iPhone for this web app.');
+                    } else {
+                      // eslint-disable-next-line no-alert
+                      alert('Notifications are not supported in this browser.');
+                    }
+                    return;
+                  }
+                  if (notificationsEnabled) {
+                    // We cannot really "unsubscribe" easily from client without backend,
+                    // but we can toggle UI state or reset permission (not possible in JS).
+                    // Best we can do is just tell them content.
+                    // eslint-disable-next-line no-alert
+                    alert(
+                      'To disable notifications, please reset permissions in your browser settings.'
+                    );
+                  } else {
+                    const granted = await requestPermission();
+                    if (granted) {
+                      setNotificationsEnabled(true);
+                      // eslint-disable-next-line no-alert
+                      alert('Notifications enabled! You will receive daily reminders.');
+                    } else {
+                      // eslint-disable-next-line no-alert
+                      alert(
+                        'Notifications were blocked. Please enable them in your browser settings.'
+                      );
+                    }
+                  }
+                }}
+                className={`w-12 h-7 rounded-full transition-colors relative ${notificationsEnabled ? 'bg-emerald-500' : 'bg-slate-300'} ${!isSupported ? 'opacity-50 cursor-not-allowed' : ''}`}
               >
                 <div
                   className={`absolute top-1 w-5 h-5 rounded-full bg-white transition-all shadow-sm ${notificationsEnabled ? 'left-6' : 'left-1'}`}
                 />
               </button>
             </div>
+            {isIOS && (
+              <p className="px-4 pb-2 text-xs text-rose-500 text-right -mt-3">
+                Not available on iPhone
+              </p>
+            )}
           </div>
 
           {/* Data */}
