@@ -5,12 +5,16 @@ import { motion } from 'framer-motion';
 import { useTheme } from '../../context/ThemeContext';
 import PropTypes from 'prop-types';
 
-const NextButton = ({ onNext, isLastQuestion, feedback }) => {
+const NextButton = ({ onNext, isLastQuestion, feedback, isSubmit }) => {
   const { theme, t } = useTheme();
 
   if (feedback !== 'transitioning') return null;
 
-  const label = isLastQuestion ? t('finishQuiz') : t('nextQuestion');
+  const label = isSubmit
+    ? t('submit') || 'Submit'
+    : isLastQuestion
+      ? t('finishQuiz')
+      : t('nextQuestion');
 
   return (
     <motion.div
@@ -41,6 +45,7 @@ NextButton.propTypes = {
   onNext: PropTypes.func.isRequired,
   isLastQuestion: PropTypes.bool.isRequired,
   feedback: PropTypes.oneOf(['idle', 'transitioning']).isRequired,
+  isSubmit: PropTypes.bool,
 };
 
 export default NextButton;
