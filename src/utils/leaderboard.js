@@ -24,15 +24,14 @@ const SCORES_COLLECTION = 'scores'; // Full History
  * @param {string} username - User's display name
  * @param {number} score - Total points earned (0-2000 for 20 questions)
  * @param {number|string} time - Average time per question in seconds
+ * @param {boolean} isBonus - If true, this score is a "Retry" allowed by referral
  * @returns {Promise<void>}
- *
- * @example
- * await saveScore('JohnDoe', 1850, '8.5');
- * // Saves to history and updates personal best if score > previous best
  */
-export const saveScore = async (username, score, time) => {
+export const saveScore = async (username, score, time, isBonus = false) => {
   // eslint-disable-next-line no-console
-  console.log(`[Leaderboard] saveScore called for ${username}. Score: ${score}, Time: ${time}`);
+  console.log(
+    `[Leaderboard] saveScore called for ${username}. Score: ${score}, Time: ${time}, Bonus: ${isBonus}`
+  );
   if (!username) {
     console.warn('[Leaderboard] saveScore called without username, skipping.');
     return;
@@ -47,6 +46,7 @@ export const saveScore = async (username, score, time) => {
       date: getTodaySeed(),
       timestamp: now,
       platform: 'web',
+      isBonus, // Store bonus flag
     };
 
     await addDoc(collection(db, SCORES_COLLECTION), scoreData);
@@ -203,21 +203,30 @@ export const getLeaderboard = async (period = 'all') => {
 };
 
 /**
- * Daily Mode: Keep best score per user.
+ * Daily Mode: Keep FIRST score per user (First Attempt).
+ * EXCEPTION: If 'isBonus' is true (Referral Retry), allow REPLACEMENT if score is better.
  */
 const deduplicateBestScore = scores => {
-  const userBest = {};
-  scores.forEach(s => {
-    if (!userBest[s.username]) {
-      userBest[s.username] = s;
+  const userEntry = {};
+
+  // Sort by time ASC to process chronological order
+  const sorted = [...scores].sort((a, b) => a.sortDate - b.sortDate);
+
+  sorted.forEach(s => {
+    if (!userEntry[s.username]) {
+      // First attempt of the day -> Keep it
+      userEntry[s.username] = s;
     } else {
-      const best = userBest[s.username];
-      if (s.score > best.score || (s.score === best.score && s.time < best.time)) {
-        userBest[s.username] = s;
+      const current = userEntry[s.username];
+
+      // If this subsequent attempt is a BONUS and is BETTER, replace
+      if (s.isBonus && s.score > current.score) {
+        userEntry[s.username] = s;
       }
+      // Otherwise ignore (Strict First Attempt Rule)
     }
   });
-  return Object.values(userBest);
+  return Object.values(userEntry);
 };
 
 /**

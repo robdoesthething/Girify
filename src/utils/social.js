@@ -352,32 +352,77 @@ export const migrateUser = async (oldUsername, newHandle) => {
 
     if (oldDoc.exists()) {
       profileData = oldDoc.data();
-      // eslint-disable-next-line no-console
-      console.log(`[Migration] Found old profile for ${oldUsername}. Copying data...`);
-    } else {
-      // eslint-disable-next-line no-console
-      console.log(`[Migration] No old profile found for ${oldUsername}. Creating new.`);
+      // Mark old profile as migrated
+      await updateDoc(oldRef, { migratedTo: newHandle });
     }
 
+    // 1. Migrate User Profile
     const newRef = doc(db, USERS_COLLECTION, newHandle);
-
-    // Merge old data with new structure
     const newData = {
       ...profileData,
       username: newHandle,
-      realName: profileData.realName || oldUsername, // Ensure realName is preserved
+      realName: profileData.realName || oldUsername,
       avatarId: profileData.avatarId || Math.floor(Math.random() * 20) + 1,
+      // Preserve joinedAt strictly
+      joinedAt: profileData.joinedAt || Timestamp.now(),
       migratedFrom: oldUsername,
       updatedAt: Timestamp.now(),
-      // Ensure we don't overwrite ID if it was in data
       id: newHandle,
     };
-
     await setDoc(newRef, newData);
+
+    // 2. Migrate Highscore (Search Index)
+    // This ensures 'searchUsers' finds the NEW handle and NOT the old name
+    const oldHighscoreRef = doc(db, 'highscores', oldUsername);
+    const oldHighscoreDoc = await getDoc(oldHighscoreRef);
+
+    if (oldHighscoreDoc.exists()) {
+      const hsData = oldHighscoreDoc.data();
+      const newHighscoreRef = doc(db, 'highscores', newHandle);
+      await setDoc(newHighscoreRef, {
+        ...hsData,
+        username: newHandle,
+        migratedFrom: oldUsername,
+      });
+      // Delete old highscore to remove from search results
+      const { deleteDoc } = await import('firebase/firestore');
+      await deleteDoc(oldHighscoreRef);
+    }
+
     // eslint-disable-next-line no-console
     console.log(`[Migration] Successfully migrated ${oldUsername} to ${newHandle}`);
   } catch (error) {
     console.error('[Migration] Error migrating user:', error);
     throw error;
+  }
+};
+
+/**
+ * Check if the user has a successful referral TODAY.
+ * Used to grant a "Retry" bonus for the daily challenge.
+ */
+export const hasDailyReferral = async username => {
+  if (!username) return false;
+
+  try {
+    // Helper functionality usually relies on timestamp query
+    // Let's use Timestamp.now() filtering
+
+    // We need to import getTodaySeed or replicate logic.
+    // Easier to just query by timestamp > start of day.
+    const startOfDay = new Date();
+    startOfDay.setHours(0, 0, 0, 0);
+
+    const q = query(
+      collection(db, REFERRALS_COLLECTION),
+      where('referrer', '==', username),
+      where('createdAt', '>=', Timestamp.fromDate(startOfDay))
+    );
+
+    const snap = await getDocs(q);
+    return !snap.empty;
+  } catch (e) {
+    console.error('Error checking daily referral:', e);
+    return false;
   }
 };

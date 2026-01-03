@@ -21,7 +21,7 @@ import {
 } from './utils/dailyChallenge';
 import { calculateTimeScore } from './utils/scoring';
 import { saveScore } from './utils/leaderboard';
-import { ensureUserProfile, migrateUser } from './utils/social'; // Import migrateUser
+import { ensureUserProfile, migrateUser, hasDailyReferral } from './utils/social'; // Import migrateUser, hasDailyReferral
 import { gameReducer, initialState } from './reducers/gameReducer';
 import { auth } from './firebase';
 import { onAuthStateChanged, signOut, updateProfile } from 'firebase/auth';
@@ -234,7 +234,10 @@ const AppRoutes = () => {
           localStorage.setItem('girify_history', JSON.stringify(history));
 
           if (state.username) {
-            saveScore(state.username, state.score, newRecord.avgTime);
+            // Check for referral bonus (allows retry)
+            hasDailyReferral(state.username).then(isBonus => {
+              saveScore(state.username, state.score, newRecord.avgTime, isBonus);
+            });
           }
         } catch (e) {
           console.error('[Game] Error saving game:', e);
@@ -279,6 +282,7 @@ const AppRoutes = () => {
         // MIGRATION: Ensure handle format (Name#1234)
         if (!/.*#\d{4}$/.test(displayName)) {
           try {
+            // eslint-disable-next-line no-console
             console.log('[Migration] Promoting user to Handle format...');
             const randomId = Math.floor(1000 + Math.random() * 9000);
             const sanitizedName = displayName.replace(/[^a-zA-Z0-9]/g, '');
@@ -292,6 +296,7 @@ const AppRoutes = () => {
             await migrateUser(displayName, handle);
 
             displayName = handle;
+            // eslint-disable-next-line no-console
             console.log('[Migration] Success! New handle:', displayName);
           } catch (e) {
             console.error('[Migration] Failed to migrate user to handle:', e);
