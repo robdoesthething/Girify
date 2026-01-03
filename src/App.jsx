@@ -21,7 +21,7 @@ import {
 } from './utils/dailyChallenge';
 import { calculateTimeScore } from './utils/scoring';
 import { saveScore } from './utils/leaderboard';
-import { ensureUserProfile, migrateUser, hasDailyReferral } from './utils/social'; // Import migrateUser, hasDailyReferral
+import { ensureUserProfile, migrateUser, hasDailyReferral, healMigration } from './utils/social'; // Import social helpers
 import { gameReducer, initialState } from './reducers/gameReducer';
 import { auth } from './firebase';
 import { onAuthStateChanged, signOut, updateProfile } from 'firebase/auth';
@@ -303,7 +303,12 @@ const AppRoutes = () => {
           }
         } else {
           // Even if handle exists, ensure Firestore profile matches
-          ensureUserProfile(displayName).catch(e => console.error(e));
+          ensureUserProfile(displayName)
+            .then(() => {
+              // Self-heal any broken migration links
+              healMigration(displayName).catch(err => console.error(err));
+            })
+            .catch(e => console.error(e));
         }
 
         const currentUsername = localStorage.getItem('girify_username');
