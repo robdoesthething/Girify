@@ -96,104 +96,106 @@ export const saveScore = async (username, score, time) => {
  */
 export const getLeaderboard = async (period = 'all') => {
   try {
-    let scores = [];
+    // For all periods (including 'all'), we now need cumulative history from 'scores'.
+    // 'all' = Cumulative score of 1st game of every day.
+    // 'highscores' collection is now only for "Best Single Game" which might be used elsewhere,
+    // but for this specific leaderboard requirement, we query 'scores'.
 
-    if (period === 'all') {
-      // Efficient: Just query the Pre-Calculated Highscores
-      const q = query(collection(db, HIGHSCORES_COLLECTION), orderBy('score', 'desc'), limit(50));
-      const snapshot = await getDocs(q);
-      snapshot.forEach(doc => scores.push({ id: doc.id, ...doc.data() }));
-    } else {
-      // For periods, we query the history 'scores' collection.
-      const scoresRef = collection(db, SCORES_COLLECTION);
-      const q = query(scoresRef, orderBy('timestamp', 'desc'), limit(1000));
+    const scoresRef = collection(db, SCORES_COLLECTION);
+    // Increase limit to capture more history for 'all' time aggregation
+    // Long term: Move this aggregation to backend (Cloud Functions)
+    const q = query(scoresRef, orderBy('timestamp', 'desc'), limit(2000));
+
+    if (import.meta.env.DEV) {
       // eslint-disable-next-line no-console
       console.log(`[Leaderboard] Fetching scores for period: ${period}`);
-      const snapshot = await getDocs(q);
+    }
+
+    const snapshot = await getDocs(q);
+
+    if (import.meta.env.DEV) {
       // eslint-disable-next-line no-console
       console.log(`[Leaderboard] Fetched ${snapshot.size} documents from 'scores'`);
+    }
 
-      const now = new Date();
-      now.setHours(23, 59, 59, 999);
+    const rawScores = [];
+    // Reset to start of today for comparisons
+    const todayStart = new Date();
+    todayStart.setHours(0, 0, 0, 0);
 
-      // Reset to start of today for comparisons
-      const todayStart = new Date();
-      todayStart.setHours(0, 0, 0, 0);
+    // Start of Week (Monday)
+    const day = todayStart.getDay();
+    const diff = day === 0 ? 6 : day - 1;
+    const startOfWeek = new Date(todayStart);
+    startOfWeek.setDate(todayStart.getDate() - diff);
+    startOfWeek.setHours(0, 0, 0, 0);
 
-      // Start of Week (Monday)
-      const day = todayStart.getDay();
-      const diff = day === 0 ? 6 : day - 1;
-      const startOfWeek = new Date(todayStart);
-      startOfWeek.setDate(todayStart.getDate() - diff);
-      startOfWeek.setHours(0, 0, 0, 0);
+    // Start of Month
+    const startOfMonth = new Date(todayStart.getFullYear(), todayStart.getMonth(), 1);
 
-      // Start of Month
-      const startOfMonth = new Date(todayStart.getFullYear(), todayStart.getMonth(), 1);
+    const todaySeed = getTodaySeed();
 
-      const todaySeed = getTodaySeed();
+    if (import.meta.env.DEV) {
+      // eslint-disable-next-line no-console
+      console.log(
+        `[Leaderboard] Filters - TodaySeed: ${todaySeed}, StartOfWeek: ${startOfWeek.toISOString()}, StartOfMonth: ${startOfMonth.toISOString()}`
+      );
+    }
 
-      if (import.meta.env.DEV) {
-        // eslint-disable-next-line no-console
-        console.log(
-          `[Leaderboard] Filters - TodaySeed: ${todaySeed}, StartOfWeek: ${startOfWeek.toISOString()}, StartOfMonth: ${startOfMonth.toISOString()}`
-        );
+    snapshot.forEach(doc => {
+      const data = doc.data();
+      // Handle different timestamp formats
+      let date;
+      if (data.timestamp && typeof data.timestamp.toDate === 'function') {
+        date = data.timestamp.toDate();
+      } else if (data.timestamp && data.timestamp.seconds) {
+        date = new Date(data.timestamp.seconds * 1000);
+      } else if (data.timestamp) {
+        date = new Date(data.timestamp);
+      } else {
+        date = new Date(0);
       }
 
-      snapshot.forEach(doc => {
-        const data = doc.data();
-        // Handle different timestamp formats
-        let date;
-        if (data.timestamp && typeof data.timestamp.toDate === 'function') {
-          date = data.timestamp.toDate();
-        } else if (data.timestamp && data.timestamp.seconds) {
-          // Handle raw Firestore obj if slightly malformed
-          date = new Date(data.timestamp.seconds * 1000);
-        } else if (data.timestamp) {
-          date = new Date(data.timestamp);
+      let include = false;
+      if (period === 'daily') {
+        // Daily: Only today's games
+        if (data.date === todaySeed) {
+          include = true;
         } else {
-          date = new Date(0);
+          const d = new Date(date);
+          d.setHours(0, 0, 0, 0);
+          if (d.getTime() === todayStart.getTime()) include = true;
         }
+      } else if (period === 'weekly') {
+        if (date >= startOfWeek) include = true;
+      } else if (period === 'monthly') {
+        if (date >= startOfMonth) include = true;
+      } else if (period === 'all') {
+        include = true;
+      }
 
-        let include = false;
-        if (period === 'daily') {
-          // Robust check: try seed match OR date match
-          if (data.date === todaySeed) {
-            include = true;
-          } else {
-            // Fallback: check if date is today
-            const d = new Date(date);
-            d.setHours(0, 0, 0, 0);
-            if (d.getTime() === todayStart.getTime()) include = true;
-          }
-        } else if (period === 'weekly') {
-          if (date >= startOfWeek) include = true;
-        } else if (period === 'monthly') {
-          if (date >= startOfMonth) include = true;
-        }
+      if (include) {
+        rawScores.push({ id: doc.id, ...data, sortDate: date });
+      }
+    });
 
-        if (include) {
-          scores.push({ id: doc.id, ...data, sortDate: date });
-        } else {
-          if (import.meta.env.DEV) {
-            // eslint-disable-next-line no-console
-            console.log(
-              `[Leaderboard] Excluded ${doc.id} (${date.toISOString()}) for period ${period}`
-            );
-          }
-        }
-      });
+    let finalScores = [];
 
-      // Deduplicate: Keep best score per user
-      scores = deduplicateScores(scores);
+    if (period === 'daily') {
+      // Daily: Keep BEST result (Max Score, Min Time)
+      finalScores = deduplicateBestScore(rawScores);
+    } else {
+      // Weekly/Monthly/All: Cumulative sum of 1st result of each day
+      finalScores = aggregateCumulativeScores(rawScores);
     }
 
     // Sort Final Result (Score DESC, Time ASC)
-    scores.sort((a, b) => {
+    finalScores.sort((a, b) => {
       if (b.score !== a.score) return b.score - a.score;
       return a.time - b.time;
     });
 
-    return scores.slice(0, 50); // Top 50
+    return finalScores.slice(0, 50); // Top 50
   } catch (e) {
     console.error('Error getting leaderboard: ', e);
     return [];
@@ -201,20 +203,14 @@ export const getLeaderboard = async (period = 'all') => {
 };
 
 /**
- * Deduplicate scores array to keep only the best score per user.
- * If scores are equal, keeps the one with faster time.
- *
- * @param {Array<{username: string, score: number, time: number}>} scores - Array of score objects
- * @returns {Array<{username: string, score: number, time: number}>} Deduplicated scores
- * @private
+ * Daily Mode: Keep best score per user.
  */
-const deduplicateScores = scores => {
+const deduplicateBestScore = scores => {
   const userBest = {};
   scores.forEach(s => {
     if (!userBest[s.username]) {
       userBest[s.username] = s;
     } else {
-      // Check if this new score is better
       const best = userBest[s.username];
       if (s.score > best.score || (s.score === best.score && s.time < best.time)) {
         userBest[s.username] = s;
@@ -222,4 +218,53 @@ const deduplicateScores = scores => {
     }
   });
   return Object.values(userBest);
+};
+
+/**
+ * Cumulative Mode: Sum of 'First Game of the Day' for each user.
+ */
+const aggregateCumulativeScores = scores => {
+  const userDailyGames = {}; // { username: { dateString: firstGameObj } }
+
+  scores.forEach(s => {
+    const dateKey = s.sortDate.toISOString().split('T')[0];
+    const username = s.username;
+
+    if (!userDailyGames[username]) {
+      userDailyGames[username] = {};
+    }
+
+    if (!userDailyGames[username][dateKey]) {
+      userDailyGames[username][dateKey] = s;
+    } else {
+      // Keep the EARLIEST game of the day
+      const currentFirst = userDailyGames[username][dateKey];
+      if (s.sortDate < currentFirst.sortDate) {
+        userDailyGames[username][dateKey] = s;
+      }
+    }
+  });
+
+  // Sum up valid daily games
+  const aggregated = [];
+  Object.keys(userDailyGames).forEach(username => {
+    const dailyGames = Object.values(userDailyGames[username]);
+    let totalScore = 0;
+    let totalTime = 0;
+
+    dailyGames.forEach(g => {
+      totalScore += g.score;
+      totalTime += g.time;
+    });
+
+    aggregated.push({
+      id: username,
+      username: username,
+      score: totalScore,
+      time: dailyGames.length ? totalTime / dailyGames.length : 0, // Average time per game
+      gamesCount: dailyGames.length,
+    });
+  });
+
+  return aggregated;
 };

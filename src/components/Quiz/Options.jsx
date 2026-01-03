@@ -28,7 +28,7 @@ const Options = ({ options, onSelect, selectedAnswer, feedback, autoAdvance }) =
             }
           } else if (isSelected) {
             // Selected but not submitted yet (non-auto mode)
-            btnClass = 'bg-sky-500 text-white border-sky-500 ring-2 ring-sky-400';
+            btnClass = 'bg-sky-500 text-white border-[#000080] ring-2 ring-sky-400';
           } else {
             // Default unselected
             btnClass = 'bg-white hover:bg-slate-50 text-slate-800 border-slate-200';

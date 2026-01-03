@@ -481,7 +481,18 @@ const AppContent = () => {
                 <Quiz.Content>
                   <Quiz.Options
                     options={state.options}
-                    onSelect={handleSelectAnswer}
+                    onSelect={street => {
+                      // If transitioning, ignore
+                      if (state.feedback === 'transitioning') return;
+
+                      if (state.autoAdvance) {
+                        // Auto-mode: Select and Process immediately
+                        handleSelectAnswer(street);
+                      } else {
+                        // Manual mode: Just select, wait for submit
+                        dispatch({ type: 'SELECT_ANSWER', payload: street });
+                      }
+                    }}
                     selectedAnswer={state.selectedAnswer}
                     feedback={state.feedback}
                     correctName={currentStreet?.name}
@@ -495,6 +506,16 @@ const AppContent = () => {
                   onReveal={() => dispatch({ type: 'REVEAL_HINT' })}
                   feedback={state.feedback}
                 />
+
+                {/* Show Submit button if answer selected but not submitted (manual mode) */}
+                {state.feedback === 'selected' && !state.autoAdvance && state.selectedAnswer && (
+                  <Quiz.NextButton
+                    onNext={() => processAnswer(state.selectedAnswer)}
+                    isLastQuestion={false}
+                    isSubmit={true}
+                    feedback="transitioning" // Force show by mocking feedback prop
+                  />
+                )}
 
                 {/* Show Next button after answer is submitted (feedback=transitioning) */}
                 {state.feedback === 'transitioning' && !state.autoAdvance && (
