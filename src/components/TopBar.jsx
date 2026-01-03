@@ -104,6 +104,12 @@ backdrop-blur-md border-b ${theme === 'dark' ? 'border-slate-600' : 'border-slat
                   👤 {t('myProfile')}
                 </button>
                 <button
+                  onClick={() => handleMenuClick('friends')}
+                  className="text-left py-2 px-3 rounded-lg hover:bg-slate-500/10 font-medium"
+                >
+                  👥 {t('friends')}
+                </button>
+                <button
                   onClick={() => handleMenuClick('leaderboard')}
                   className="text-left py-2 px-3 rounded-lg hover:bg-slate-500/10 font-medium"
                 >
