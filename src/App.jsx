@@ -21,9 +21,10 @@ import {
 } from './utils/dailyChallenge';
 import { calculateTimeScore } from './utils/scoring';
 import { saveScore } from './utils/leaderboard';
+import { ensureUserProfile } from './utils/social';
 import { gameReducer, initialState } from './reducers/gameReducer';
 import { auth } from './firebase';
-import { onAuthStateChanged, signOut } from 'firebase/auth';
+import { onAuthStateChanged, signOut, updateProfile } from 'firebase/auth';
 
 const AppRoutes = () => {
   const { deviceMode, theme, t } = useTheme();
@@ -271,9 +272,35 @@ const AppRoutes = () => {
 
   // Auth Listener
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, user => {
+    const unsubscribe = onAuthStateChanged(auth, async user => {
       if (user) {
-        const displayName = user.displayName || user.email?.split('@')[0] || 'User';
+        let displayName = user.displayName || user.email?.split('@')[0] || 'User';
+
+        // MIGRATION: Ensure handle format (Name#1234)
+        if (!/.*#\d{4}$/.test(displayName)) {
+          try {
+            console.log('[Migration] Promoting user to Handle format...');
+            const randomId = Math.floor(1000 + Math.random() * 9000);
+            const sanitizedName = displayName.replace(/[^a-zA-Z0-9]/g, '');
+            const handle = `${sanitizedName}#${randomId}`;
+
+            // 1. Update Firebase Auth Profile
+            await updateProfile(user, { displayName: handle });
+
+            // 2. Ensure Firestore User Profile exists with correct data
+            // We pass the OLD displayName as realName to preserve it privately
+            await ensureUserProfile(handle, { realName: displayName });
+
+            displayName = handle;
+            console.log('[Migration] Success! New handle:', displayName);
+          } catch (e) {
+            console.error('[Migration] Failed to migrate user to handle:', e);
+          }
+        } else {
+          // Even if handle exists, ensure Firestore profile matches
+          ensureUserProfile(displayName).catch(e => console.error(e));
+        }
+
         const currentUsername = localStorage.getItem('girify_username');
         if (currentUsername !== displayName) {
           localStorage.setItem('girify_username', displayName);
