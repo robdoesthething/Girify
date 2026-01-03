@@ -21,7 +21,7 @@ import {
 } from './utils/dailyChallenge';
 import { calculateTimeScore } from './utils/scoring';
 import { saveScore } from './utils/leaderboard';
-import { ensureUserProfile } from './utils/social';
+import { ensureUserProfile, migrateUser } from './utils/social'; // Import migrateUser
 import { gameReducer, initialState } from './reducers/gameReducer';
 import { auth } from './firebase';
 import { onAuthStateChanged, signOut, updateProfile } from 'firebase/auth';
@@ -287,9 +287,9 @@ const AppRoutes = () => {
             // 1. Update Firebase Auth Profile
             await updateProfile(user, { displayName: handle });
 
-            // 2. Ensure Firestore User Profile exists with correct data
-            // We pass the OLD displayName as realName to preserve it privately
-            await ensureUserProfile(handle, { realName: displayName });
+            // 2. DATA MIGRATION: Copy old profile data to new handle
+            // We pass the OLD displayName as the source to copy from
+            await migrateUser(displayName, handle);
 
             displayName = handle;
             console.log('[Migration] Success! New handle:', displayName);
