@@ -448,6 +448,55 @@ export const migrateUser = async (oldUsername, newHandle) => {
 };
 
 /**
+ * Self-healing/Repair function.
+ * Ensures that if a user claims to be migratedFrom 'OldName',
+ * that 'OldName' actually points to them, and 'OldName' is removed from highscores.
+ */
+export const healMigration = async handle => {
+  if (!handle) return;
+  try {
+    const userRef = doc(db, USERS_COLLECTION, handle);
+    const userDoc = await getDoc(userRef);
+    if (!userDoc.exists()) return;
+
+    const data = userDoc.data();
+    const oldName = data.migratedFrom;
+
+    if (oldName && oldName !== handle) {
+      // 1. Ensure Backward Link (Old -> New)
+      const oldUserRef = doc(db, USERS_COLLECTION, oldName);
+      const oldUserDoc = await getDoc(oldUserRef);
+
+      // If old doc exists but doesn't point to us, fix it
+      if (oldUserDoc.exists()) {
+        const oldData = oldUserDoc.data();
+        if (oldData.migratedTo !== handle) {
+          await updateDoc(oldUserRef, { migratedTo: handle });
+          // eslint-disable-next-line no-console
+          console.log(`[Heal] Fixed migratedTo link for ${oldName}`);
+        }
+      } else {
+        // If old doc is gone, we might want to recreate a tombstone?
+        // For now, assume if it's gone, people naturally won't find it effectively
+        // unless highscore exists.
+      }
+
+      // 2. Cleanup Old Highscore (Ghost Search Result)
+      const oldHsRef = doc(db, 'highscores', oldName);
+      const oldHsDoc = await getDoc(oldHsRef);
+      if (oldHsDoc.exists()) {
+        const { deleteDoc } = await import('firebase/firestore');
+        await deleteDoc(oldHsRef);
+        // eslint-disable-next-line no-console
+        console.log(`[Heal] Removed ghost highscore for ${oldName}`);
+      }
+    }
+  } catch (e) {
+    console.warn('[Heal] Migration repair failed:', e);
+  }
+};
+
+/**
  * Check if the user has a successful referral TODAY.
  * Used to grant a "Retry" bonus for the daily challenge.
  */
