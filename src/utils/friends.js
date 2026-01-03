@@ -57,9 +57,20 @@ export const sendFriendRequest = async (fromUsername, toUsername) => {
   if (fromUsername === toUsername) return { error: 'Cannot add yourself' };
 
   const fromClean = sanitize(fromUsername);
-  const toClean = sanitize(toUsername);
+  let toClean = sanitize(toUsername);
 
   try {
+    // 0. Check if target user has migrated
+    const targetRef = doc(db, USERS_COLLECTION, toClean);
+    const targetDoc = await getDoc(targetRef);
+    if (targetDoc.exists()) {
+      const data = targetDoc.data();
+      if (data.migratedTo) {
+        // Redirect request to the new handle
+        toClean = sanitize(data.migratedTo);
+        // Note: We don't update toUsername variable, but we use toClean for paths
+      }
+    }
     // Check if already friends
     const friendshipRef = doc(db, USERS_COLLECTION, fromClean, 'friends', toClean);
     const friendshipSnap = await getDoc(friendshipRef);

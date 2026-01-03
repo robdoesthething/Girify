@@ -56,7 +56,7 @@ const SummaryScreen = ({
   const handleShare = async () => {
     // Include referral code in share URL
     // Use prod URL if available, otherwise fallback
-    const baseUrl = 'https://girify.vercel.app'; // Updated to Prod URL
+    const baseUrl = 'https://girifyapp.com'; // Updated to Prod URL
     const refCode = username ? username.toLowerCase().replace(/[^a-z0-9]/g, '') : '';
     const shareUrl = refCode ? `${baseUrl}?ref=${refCode}` : baseUrl;
     const text = `🌆 Girify Daily Challenge:\nScore: ${score}/${maxPossibleScore}\n\nCan you beat me? Play here: ${shareUrl} #Girify #Barcelona`;

@@ -10,6 +10,7 @@ import {
   Timestamp,
   addDoc,
   updateDoc,
+  limit,
 } from 'firebase/firestore';
 
 const USERS_COLLECTION = 'users';
@@ -387,6 +388,32 @@ export const migrateUser = async (oldUsername, newHandle) => {
       // Delete old highscore to remove from search results
       const { deleteDoc } = await import('firebase/firestore');
       await deleteDoc(oldHighscoreRef);
+    }
+
+    // 3. Migrate Recent Scores (Best Effort)
+    try {
+      const scoresQ = query(
+        collection(db, 'scores'),
+        where('username', '==', oldUsername),
+        limit(50)
+      );
+      const scoresSnap = await getDocs(scoresQ);
+      const { writeBatch } = await import('firebase/firestore');
+      const batch = writeBatch(db);
+
+      let batchCount = 0;
+      scoresSnap.forEach(scoreDoc => {
+        batch.update(scoreDoc.ref, { username: newHandle });
+        batchCount++;
+      });
+
+      if (batchCount > 0) {
+        await batch.commit();
+        // eslint-disable-next-line no-console
+        console.log(`[Migration] Migrated ${batchCount} recent scores.`);
+      }
+    } catch (e) {
+      console.warn('[Migration] Failed to migrate scores (non-critical):', e);
     }
 
     // eslint-disable-next-line no-console
