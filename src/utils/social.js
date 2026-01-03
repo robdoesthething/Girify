@@ -333,3 +333,51 @@ export const updateUserProfile = async (username, data) => {
   const userRef = doc(db, USERS_COLLECTION, username);
   await updateDoc(userRef, data);
 };
+
+/**
+ * Migrate a user from an old username/real name to a new handle.
+ * Copies all profile data (gamesPlayed, bestScore, etc.) to the new document.
+ *
+ * @param {string} oldUsername - The old username (e.g. "Roberto")
+ * @param {string} newHandle - The new handle (e.g. "Roberto#1234")
+ * @returns {Promise<void>}
+ */
+export const migrateUser = async (oldUsername, newHandle) => {
+  if (!oldUsername || !newHandle || oldUsername === newHandle) return;
+
+  try {
+    const oldRef = doc(db, USERS_COLLECTION, oldUsername);
+    const oldDoc = await getDoc(oldRef);
+    let profileData = {};
+
+    if (oldDoc.exists()) {
+      profileData = oldDoc.data();
+      // eslint-disable-next-line no-console
+      console.log(`[Migration] Found old profile for ${oldUsername}. Copying data...`);
+    } else {
+      // eslint-disable-next-line no-console
+      console.log(`[Migration] No old profile found for ${oldUsername}. Creating new.`);
+    }
+
+    const newRef = doc(db, USERS_COLLECTION, newHandle);
+
+    // Merge old data with new structure
+    const newData = {
+      ...profileData,
+      username: newHandle,
+      realName: profileData.realName || oldUsername, // Ensure realName is preserved
+      avatarId: profileData.avatarId || Math.floor(Math.random() * 20) + 1,
+      migratedFrom: oldUsername,
+      updatedAt: Timestamp.now(),
+      // Ensure we don't overwrite ID if it was in data
+      id: newHandle,
+    };
+
+    await setDoc(newRef, newData);
+    // eslint-disable-next-line no-console
+    console.log(`[Migration] Successfully migrated ${oldUsername} to ${newHandle}`);
+  } catch (error) {
+    console.error('[Migration] Error migrating user:', error);
+    throw error;
+  }
+};
