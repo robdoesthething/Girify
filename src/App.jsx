@@ -1,4 +1,5 @@
 import { useReducer, useMemo, useEffect, useState } from 'react';
+// eslint-disable-next-line no-unused-vars
 import { AnimatePresence, motion } from 'framer-motion';
 import MapArea from './components/MapArea';
 import Quiz from './components/Quiz';
@@ -43,6 +44,7 @@ import { onAuthStateChanged, signOut } from 'firebase/auth';
  * getPrefix('Plaça Catalunya');
  * // Returns: 'Plaça'
  */
+// eslint-disable-next-line no-unused-vars
 const getPrefix = name => {
   if (!name) return '';
   const match = name.match(
@@ -320,6 +322,7 @@ const AppContent = () => {
     if (nextIndex >= state.quizStreets.length) {
       if (state.gameState === 'playing') {
         try {
+          // eslint-disable-next-line no-console
           console.log('[Game] Finished. Saving result...');
           markTodayAsPlayed(); // Ensure today is marked
 
@@ -340,11 +343,14 @@ const AppContent = () => {
           };
           history.push(newRecord);
           localStorage.setItem('girify_history', JSON.stringify(history));
+          // eslint-disable-next-line no-console
           console.log('[Game] History saved locally.');
 
           if (state.username) {
+            // eslint-disable-next-line no-console
             console.log('[Game] Attempting to save to leaderboard:', state.username, state.score);
             saveScore(state.username, state.score, newRecord.avgTime)
+              // eslint-disable-next-line no-console
               .then(() => console.log('[Game] Leaderboard save success'))
               .catch(err => console.error('[Game] Leaderboard save failed:', err));
           } else {
