@@ -28,7 +28,7 @@ const REFERRALS_COLLECTION = 'referrals';
  * const profile = await ensureUserProfile('JohnDoe');
  * // Returns existing profile or creates new one with defaults
  */
-export const ensureUserProfile = async username => {
+export const ensureUserProfile = async (username, additionalData = {}) => {
   if (!username) return null;
 
   const userRef = doc(db, USERS_COLLECTION, username);
@@ -38,6 +38,8 @@ export const ensureUserProfile = async username => {
     // Create new user profile
     const profileData = {
       username,
+      realName: additionalData.realName || '',
+      avatarId: additionalData.avatarId || Math.floor(Math.random() * 20) + 1,
       joinedAt: Timestamp.now(),
       friendCount: 0,
       gamesPlayed: 0,
@@ -322,9 +324,12 @@ export const getBlockStatus = async (user1, user2) => {
 /**
  * Update user profile with avatar URL
  */
-export const updateUserAvatar = async (username, avatarUrl) => {
-  if (!username || !avatarUrl) return;
+/**
+ * Update user profile data
+ */
+export const updateUserProfile = async (username, data) => {
+  if (!username || !data) return;
 
   const userRef = doc(db, USERS_COLLECTION, username);
-  await updateDoc(userRef, { avatarUrl });
+  await updateDoc(userRef, data);
 };

@@ -1,10 +1,33 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 // eslint-disable-next-line no-unused-vars
 import { AnimatePresence, motion } from 'framer-motion';
 import { useTheme } from '../context/ThemeContext';
-import { getFriendCount } from '../utils/social';
+import { getFriendCount, getUserProfile, updateUserProfile } from '../utils/social';
 import FriendRequests from './FriendRequests';
 import PropTypes from 'prop-types';
+
+const AVATARS = [
+  '🐶',
+  '🐱',
+  '🐭',
+  '🐹',
+  '🐰',
+  '🦊',
+  '🐻',
+  '🐼',
+  '🐨',
+  '🐯',
+  '🦁',
+  '🐮',
+  '🐷',
+  '🐸',
+  '🐵',
+  '🐔',
+  '🐧',
+  '🐦',
+  '🦆',
+  '🦅',
+];
 
 // Helper to calculate daily streak from history
 const calculateStreak = history => {
@@ -42,40 +65,79 @@ const calculateStreak = history => {
 const ProfileScreen = ({ onClose, username }) => {
   const { theme, t } = useTheme();
 
-  const [history, setHistory] = React.useState([]);
-  const [joinedDate, setJoinedDate] = React.useState(new Date().toLocaleDateString());
-  const [friendCount, setFriendCount] = React.useState(0);
-
-  React.useEffect(() => {
+  // Initialize state functions to avoid synchronous effect updates
+  const [history] = useState(() => {
     try {
       const rawHistory = localStorage.getItem('girify_history');
       const parsedHistory = rawHistory ? JSON.parse(rawHistory) : [];
-      if (Array.isArray(parsedHistory)) {
-        setHistory(parsedHistory);
-      }
-
-      const savedDate = localStorage.getItem('girify_joined');
-      if (savedDate) setJoinedDate(savedDate);
+      return Array.isArray(parsedHistory) ? parsedHistory : [];
     } catch (e) {
       console.error('Profile data load error:', e);
-      setHistory([]);
+      return [];
     }
+  });
 
-    const loadFriendCount = async () => {
+  const [joinedDate] = useState(() => {
+    return localStorage.getItem('girify_joined') || new Date().toLocaleDateString();
+  });
+
+  const [friendCount, setFriendCount] = useState(0);
+
+  // Profile Edit State
+  const [profileData, setProfileData] = useState(null);
+  const [isEditing, setIsEditing] = useState(false);
+  const [editName, setEditName] = useState('');
+  const [editAvatarId, setEditAvatarId] = useState(0); // 0-indexed for array
+
+  useEffect(() => {
+    const loadProfile = async () => {
       if (username) {
         const count = await getFriendCount(username);
         setFriendCount(count);
+
+        const profile = await getUserProfile(username);
+        if (profile) {
+          setProfileData(profile);
+          setEditName(profile.realName || '');
+          // If avatarId is stored as 1-20, subtract 1 for array index. Default to 0.
+          setEditAvatarId(profile.avatarId ? profile.avatarId - 1 : 0);
+        }
       }
     };
-    loadFriendCount();
+    loadProfile();
   }, [username]);
+
+  const handleSaveProfile = async () => {
+    // Save realName and avatarId
+    const data = {
+      realName: editName,
+      avatarId: editAvatarId + 1, // Store as 1-based ID
+    };
+    await updateUserProfile(username, data);
+    setProfileData(prev => ({ ...prev, ...data }));
+    setIsEditing(false);
+  };
+
+  const cycleAvatar = () => {
+    setEditAvatarId(prev => (prev + 1) % AVATARS.length);
+  };
 
   const totalGames = history.length;
   const bestScore = totalGames > 0 ? Math.max(...history.map(h => (h && h.score) || 0)) : 0;
   const totalScore = history.reduce((acc, curr) => acc + ((curr && curr.score) || 0), 0);
   const avgScore = totalGames > 0 ? Math.round(totalScore / totalGames) : 0;
   const dailyStreak = calculateStreak(history);
-  const initial = username ? username.charAt(0).toUpperCase() : '?';
+
+  // Determine display avatar
+  const currentAvatarId = isEditing
+    ? editAvatarId
+    : profileData?.avatarId
+      ? profileData.avatarId - 1
+      : 0;
+
+  // Safe bounds check
+  const safeAvatarIndex = Math.max(0, Math.min(currentAvatarId, AVATARS.length - 1));
+  const displayAvatar = AVATARS[safeAvatarIndex];
 
   return (
     <div className="fixed inset-0 z-[8000] flex items-center justify-center p-4 backdrop-blur-sm bg-black/50 overflow-hidden">
@@ -105,18 +167,105 @@ const ProfileScreen = ({ onClose, username }) => {
             </svg>
           </button>
 
-          <div className="w-24 h-24 rounded-full bg-gradient-to-br from-sky-400 to-indigo-600 flex items-center justify-center text-4xl font-black text-white shadow-lg mb-4 ring-4 ring-white dark:ring-slate-700">
-            {initial}
+          {/* Edit Button (Top Left) */}
+          {!isEditing && (
+            <button
+              onClick={() => setIsEditing(true)}
+              className={`absolute top-4 left-4 p-2 rounded-full transition-colors ${theme === 'dark' ? 'hover:bg-slate-800 text-sky-400' : 'hover:bg-slate-100 text-sky-600'}`}
+            >
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"
+                />
+              </svg>
+            </button>
+          )}
+
+          {/* Avatar Circle */}
+          <div className="relative group">
+            <div
+              role="button"
+              tabIndex={0}
+              onClick={isEditing ? cycleAvatar : undefined}
+              onKeyDown={e => {
+                if (isEditing && (e.key === 'Enter' || e.key === ' ')) {
+                  e.preventDefault();
+                  cycleAvatar();
+                }
+              }}
+              className={`w-24 h-24 rounded-full bg-gradient-to-br from-sky-400 to-indigo-600 flex items-center justify-center text-4xl shadow-lg mb-4 ring-4 ring-white dark:ring-slate-700 select-none outline-none focus:ring-sky-500
+                ${isEditing ? 'cursor-pointer hover:scale-105 transition-transform' : ''}
+              `}
+            >
+              {displayAvatar}
+            </div>
+            {isEditing && (
+              <div className="absolute bottom-0 right-0 bg-white dark:bg-slate-800 rounded-full p-1 shadow-md">
+                <svg
+                  className="w-4 h-4 text-slate-500"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+                  />
+                </svg>
+              </div>
+            )}
           </div>
-          <h2 className="text-2xl font-black tracking-tight">{username || 'Player'}</h2>
-          <p className="text-xs font-bold uppercase tracking-widest opacity-50 mt-1">
+
+          {/* Handle / Name Display */}
+          <h2 className="text-2xl font-black tracking-tight">{username}</h2>
+
+          {isEditing ? (
+            <div className="mt-2 w-full max-w-[200px]">
+              <input
+                type="text"
+                value={editName}
+                onChange={e => setEditName(e.target.value)}
+                placeholder="Your Real Name"
+                onKeyDown={e => {
+                  if (e.key === ' ') e.stopPropagation(); // prevent game hotkeys if any
+                }}
+                className={`w-full px-3 py-1 text-center text-sm rounded-lg border outline-none ${theme === 'dark' ? 'bg-slate-900 border-slate-700' : 'bg-white border-slate-200'}`}
+              />
+              <div className="flex justify-center gap-2 mt-3">
+                <button
+                  onClick={() => setIsEditing(false)}
+                  className="text-xs px-3 py-1 rounded bg-slate-200 dark:bg-slate-700"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleSaveProfile}
+                  className="text-xs px-3 py-1 rounded bg-sky-500 text-white"
+                >
+                  Save
+                </button>
+              </div>
+            </div>
+          ) : (
+            profileData?.realName && (
+              <p className="text-sm font-medium opacity-70 mt-1">
+                {profileData.realName}{' '}
+                <span className="text-[10px] opacity-50 uppercase">(Private)</span>
+              </p>
+            )
+          )}
+
+          <p className="text-xs font-bold uppercase tracking-widest opacity-50 mt-2">
             {t('playerSince')} {joinedDate}
           </p>
         </div>
 
-        {/* Friend Requests (Only for current user looking at themselves) */}
-        {/* Note: The ProfileScreen is usually FOR the Current User. PublicProfileModal is for others. */}
-        {/* So we can safely assume 'username' is the current user if this component is used for "My Profile" */}
+        {/* Friend Requests */}
         <div className="px-6 pt-4">
           <FriendRequests username={username} />
         </div>

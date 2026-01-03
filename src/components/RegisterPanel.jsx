@@ -80,13 +80,23 @@ const RegisterPanel = ({ theme: themeProp }) => {
       const user = result.user;
       const displayName = user.displayName || user.email?.split('@')[0] || 'User';
 
+      // Generate handle
+      const randomId = Math.floor(1000 + Math.random() * 9000);
+      const sanitizedName = displayName.replace(/[^a-zA-Z0-9]/g, '');
+      const handle = `${sanitizedName}#${randomId}`;
+      const avatarId = Math.floor(Math.random() * 20) + 1;
+
+      if (user.displayName !== handle) {
+        await updateProfile(user, { displayName: handle });
+      }
+
       // Ensure user profile exists
-      await ensureUserProfile(displayName);
+      await ensureUserProfile(handle, { realName: displayName, avatarId });
 
       // Record referral if exists
       const referrer = localStorage.getItem('girify_referrer');
-      if (referrer && referrer !== displayName) {
-        await recordReferral(referrer, displayName);
+      if (referrer && referrer !== handle) {
+        await recordReferral(referrer, handle);
         localStorage.removeItem('girify_referrer');
       }
 
@@ -149,19 +159,25 @@ const RegisterPanel = ({ theme: themeProp }) => {
           return;
         }
 
+        // Generate handle
+        const randomId = Math.floor(1000 + Math.random() * 9000);
+        const sanitizedName = name.replace(/[^a-zA-Z0-9]/g, '');
+        const handle = `${sanitizedName}#${randomId}`;
+        const avatarId = Math.floor(Math.random() * 20) + 1;
+
         userCredential = await createUserWithEmailAndPassword(auth, email, password);
-        await updateProfile(userCredential.user, { displayName: name });
+        await updateProfile(userCredential.user, { displayName: handle });
 
         // Send verification email
         await sendEmailVerification(userCredential.user);
 
         // Ensure user profile exists
-        await ensureUserProfile(name);
+        await ensureUserProfile(handle, { realName: name, avatarId });
 
         // Record referral if exists
         const referrer = localStorage.getItem('girify_referrer');
-        if (referrer && referrer !== name) {
-          await recordReferral(referrer, name);
+        if (referrer && referrer !== handle) {
+          await recordReferral(referrer, handle);
           localStorage.removeItem('girify_referrer');
         }
 
