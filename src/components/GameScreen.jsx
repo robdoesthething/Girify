@@ -1,0 +1,227 @@
+import React from 'react';
+// eslint-disable-next-line no-unused-vars
+import { motion, AnimatePresence } from 'framer-motion';
+import MapArea from './MapArea';
+import Quiz from './Quiz';
+import RegisterPanel from './RegisterPanel';
+import SummaryScreen from './SummaryScreen';
+import Logo from './Logo';
+
+const GameScreen = ({
+  state,
+  dispatch,
+  theme,
+  deviceMode,
+  t,
+  currentStreet,
+  handleSelectAnswer,
+  handleNext,
+  processAnswer,
+  setupGame,
+  handleRegister,
+  hasPlayedToday,
+}) => {
+  return (
+    <div className="flex-1 flex flex-col w-full h-full relative overflow-hidden">
+      {state.gameState === 'playing' && (
+        <Quiz.Banner
+          currentQuestionIndex={state.currentQuestionIndex}
+          totalQuestions={state.quizStreets.length}
+        />
+      )}
+
+      <div
+        className={`flex-1 flex ${['mobile', 'tablet'].includes(deviceMode) ? 'flex-col' : 'flex-row'} overflow-hidden bg-slate-50`}
+      >
+        <div
+          className={`relative z-0 min-w-0 ${['mobile', 'tablet'].includes(deviceMode) ? 'flex-1 w-full order-1' : 'flex-1 h-full order-1'}`}
+        >
+          <MapArea
+            currentStreet={currentStreet}
+            hintStreets={
+              state.gameState === 'playing'
+                ? state.hintStreets.slice(0, state.hintsRevealedCount)
+                : []
+            }
+            theme={theme}
+          />
+        </div>
+
+        {state.gameState === 'playing' && (
+          <div
+            className={`
+                  relative z-20 backdrop-blur-sm shadow-xl shrink-0
+                  bg-white/95 border-slate-200
+                  ${
+                    ['mobile', 'tablet'].includes(deviceMode)
+                      ? 'w-full h-[40%] order-2 border-t'
+                      : 'w-[350px] lg:w-[400px] h-full order-2 border-l'
+                  }
+               `}
+          >
+            <Quiz>
+              <Quiz.Container keyProp={state.currentQuestionIndex}>
+                <Quiz.Content>
+                  <Quiz.Options
+                    options={state.options}
+                    onSelect={street => {
+                      // If transitioning, ignore
+                      if (state.feedback === 'transitioning') return;
+
+                      if (state.autoAdvance) {
+                        // Auto-mode: Select and Process immediately
+                        handleSelectAnswer(street);
+                      } else {
+                        // Manual mode: Just select, wait for submit
+                        dispatch({ type: 'SELECT_ANSWER', payload: street });
+                      }
+                    }}
+                    selectedAnswer={state.selectedAnswer}
+                    feedback={state.feedback}
+                    correctName={currentStreet?.name}
+                    autoAdvance={state.autoAdvance}
+                  />
+                </Quiz.Content>
+
+                <Quiz.Hints
+                  hintStreets={state.hintStreets}
+                  hintsRevealed={state.hintsRevealedCount}
+                  onReveal={() => dispatch({ type: 'REVEAL_HINT' })}
+                  feedback={state.feedback}
+                />
+
+                {/* Show Submit button if answer selected but not submitted (manual mode) */}
+                {state.feedback === 'selected' && !state.autoAdvance && state.selectedAnswer && (
+                  <Quiz.NextButton
+                    onNext={() => processAnswer(state.selectedAnswer)}
+                    isLastQuestion={false}
+                    isSubmit={true}
+                    feedback="transitioning" // Force show by mocking feedback prop
+                  />
+                )}
+
+                {/* Show Next button after answer is submitted (feedback=transitioning) */}
+                {state.feedback === 'transitioning' && !state.autoAdvance && (
+                  <Quiz.NextButton
+                    onNext={handleNext}
+                    isLastQuestion={state.currentQuestionIndex >= state.quizStreets.length - 1}
+                    isSubmit={false}
+                    feedback={state.feedback}
+                  />
+                )}
+              </Quiz.Container>
+            </Quiz>
+          </div>
+        )}
+      </div>
+
+      {state.gameState === 'intro' && (
+        <div className="fixed inset-0 z-10 flex flex-col items-center justify-center p-6 text-center bg-slate-50/80 dark:bg-slate-950/80 backdrop-blur-sm pointer-events-auto overflow-hidden">
+          <div className="max-w-xs md:max-w-md w-full flex flex-col items-center">
+            <Logo className="mb-6 h-16 md:h-24 w-auto object-contain" />
+            <p
+              className={`text-lg md:text-xl mb-8 font-light text-center px-4 animate-fadeIn ${theme === 'dark' ? 'text-slate-300' : 'text-slate-600'}`}
+            >
+              Can you name the city's most iconic streets?
+            </p>
+
+            <button
+              onClick={() => {
+                const seen = localStorage.getItem('girify_instructions_seen');
+                if (state.username || seen === 'true') {
+                  if (state.username) {
+                    setupGame();
+                  } else {
+                    dispatch({ type: 'SET_GAME_STATE', payload: 'register' });
+                  }
+                } else {
+                  dispatch({ type: 'SET_GAME_STATE', payload: 'instructions' });
+                }
+              }}
+              className={`w-full max-w-xs px-8 py-4 rounded-full font-bold text-lg tracking-widest hover:scale-105 transition-all duration-300 shadow-xl animate-bounce-subtle
+                          ${
+                            hasPlayedToday()
+                              ? 'bg-[#000080] hover:bg-slate-900 text-white'
+                              : 'bg-sky-500 hover:bg-sky-600 text-white'
+                          }
+                      `}
+            >
+              {hasPlayedToday() ? (
+                <span className="flex flex-col items-center leading-none gap-1">
+                  <span>{t('replayChallenge')}</span>
+                  <span className="text-[9px] opacity-80 font-medium normal-case tracking-normal">
+                    {t('scoreNotSaved')}
+                  </span>
+                </span>
+              ) : (
+                t('startQuiz')
+              )}
+            </button>
+          </div>
+        </div>
+      )}
+
+      {state.gameState === 'instructions' && (
+        <div
+          className={`absolute inset-0 z-[2000] flex flex-col items-center justify-center p-6 text-center backdrop-blur-sm transition-colors duration-1000
+                ${theme === 'dark' ? 'bg-slate-950/80 text-white' : 'bg-slate-50/80 text-slate-900'}
+            `}
+        >
+          <h2 className="text-3xl font-bold mb-6 text-sky-500">{t('howToPlay')}</h2>
+          <ul className="text-left space-y-4 text-lg mb-8 max-w-md mx-auto">
+            <li className="flex gap-3">
+              <span>📍</span>
+              <span>{t('instructionsPoint1')}</span>
+            </li>
+            <li className="flex gap-3">
+              <span>🤔</span>
+              <span>{t('instructionsPoint2')}</span>
+            </li>
+            <li className="flex gap-3">
+              <span>💡</span>
+              <span>{t('instructionsPoint3')}</span>
+            </li>
+            <li className="flex gap-3 text-emerald-600 dark:text-emerald-400 font-medium">
+              <span>⏳</span>
+              <span>{t('instructionsPoint4')}</span>
+            </li>
+          </ul>
+          <button
+            onClick={() => {
+              localStorage.setItem('girify_instructions_seen', 'true');
+              if (state.username) {
+                setupGame();
+              } else {
+                dispatch({ type: 'SET_GAME_STATE', payload: 'register' });
+              }
+            }}
+            className="px-8 py-3 bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl shadow-lg font-bold text-lg transition-all transform hover:scale-105"
+          >
+            {state.username ? t('imReady') : t('next')}
+          </button>
+        </div>
+      )}
+
+      {state.gameState === 'register' && (
+        <RegisterPanel theme={theme} onRegister={handleRegister} />
+      )}
+
+      {state.gameState === 'summary' && (
+        <div className="absolute inset-0 z-50 pointer-events-auto">
+          <SummaryScreen
+            score={state.score}
+            total={state.quizStreets.length}
+            theme={theme}
+            username={state.username}
+            onRestart={() => setupGame()}
+            quizResults={state.quizResults}
+            quizStreets={state.quizStreets}
+            t={t}
+          />
+        </div>
+      )}
+    </div>
+  );
+};
+
+export default GameScreen;

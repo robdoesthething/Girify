@@ -200,9 +200,6 @@ const LeaderboardScreen = ({ onClose, currentUser }) => {
 
                   <div className="text-right">
                     <p className="text-xl font-black text-sky-500">{s.score}</p>
-                    <p className="text-[10px] text-emerald-500 font-bold uppercase tracking-tighter">
-                      {s.time}s
-                    </p>
                   </div>
                 </motion.div>
               );
