@@ -114,7 +114,8 @@ export const getLeaderboard = async (period = 'all') => {
       console.log(`[Leaderboard] Fetched ${snapshot.size} documents from 'scores'`);
 
       const now = new Date();
-      now.setHours(23, 59, 59, 999); // End of today for safer comparison? No, start of day for start dates.
+      now.setHours(23, 59, 59, 999);
+
       // Reset to start of today for comparisons
       const todayStart = new Date();
       todayStart.setHours(0, 0, 0, 0);
@@ -131,10 +132,12 @@ export const getLeaderboard = async (period = 'all') => {
 
       const todaySeed = getTodaySeed();
 
-      // eslint-disable-next-line no-console
-      console.log(
-        `[Leaderboard] Filters - TodaySeed: ${todaySeed}, StartOfWeek: ${startOfWeek.toISOString()}, StartOfMonth: ${startOfMonth.toISOString()}`
-      );
+      if (import.meta.env.DEV) {
+        // eslint-disable-next-line no-console
+        console.log(
+          `[Leaderboard] Filters - TodaySeed: ${todaySeed}, StartOfWeek: ${startOfWeek.toISOString()}, StartOfMonth: ${startOfMonth.toISOString()}`
+        );
+      }
 
       snapshot.forEach(doc => {
         const data = doc.data();
@@ -170,11 +173,15 @@ export const getLeaderboard = async (period = 'all') => {
 
         if (include) {
           scores.push({ id: doc.id, ...data, sortDate: date });
+        } else {
+          if (import.meta.env.DEV) {
+            // eslint-disable-next-line no-console
+            console.log(
+              `[Leaderboard] Excluded ${doc.id} (${date.toISOString()}) for period ${period}`
+            );
+          }
         }
       });
-
-      // eslint-disable-next-line no-console
-      console.log(`[Leaderboard] Scores after filtering for '${period}': ${scores.length}`);
 
       // Deduplicate: Keep best score per user
       scores = deduplicateScores(scores);
