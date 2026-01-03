@@ -281,22 +281,23 @@ const MapArea = ({ currentStreet, hintStreets = [], theme = 'dark' }) => {
             />
           )}
 
-          {/* Landmarks Layer - Tooltips only show when zoomed in */}
-          {LANDMARKS.map((l, idx) => (
-            <Marker key={idx} position={l.pos} icon={createEmojiIcon(l.icon)}>
-              {currentZoom >= 14 && (
-                <Tooltip
-                  permanent
-                  direction="bottom"
-                  offset={[0, 5]}
-                  opacity={0.9}
-                  className="font-bold text-sm"
-                >
-                  {l.name}
-                </Tooltip>
-              )}
-            </Marker>
-          ))}
+          {/* Landmarks Layer - Only show when zoomed in to avoid overcrowding */}
+          {currentZoom >= 13 &&
+            LANDMARKS.map((l, idx) => (
+              <Marker key={idx} position={l.pos} icon={createEmojiIcon(l.icon)}>
+                {currentZoom >= 15 && (
+                  <Tooltip
+                    permanent
+                    direction="bottom"
+                    offset={[0, 5]}
+                    opacity={0.9}
+                    className="font-bold text-sm"
+                  >
+                    {l.name}
+                  </Tooltip>
+                )}
+              </Marker>
+            ))}
 
           {/* Render Hints separately */}
           {hintStreets.map(street => (
