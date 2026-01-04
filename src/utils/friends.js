@@ -223,7 +223,40 @@ export const getFriendFeed = async friendsList => {
 
   // Sort client side (merge chunks)
   allScores.sort((a, b) => b.timestamp - a.timestamp);
-  return allScores.slice(0, 50);
+
+  // Filter: Only keep the FIRST score per user per day
+  const uniqueScores = [];
+  const seenUserDays = new Set();
+
+  for (const s of allScores) {
+    if (!s.timestamp) continue;
+    const date = new Date(s.timestamp.seconds * 1000).toDateString(); // "Fri Jan 01 2026"
+    const key = `${s.username}_${date}`;
+    if (!seenUserDays.has(key)) {
+      seenUserDays.add(key);
+      uniqueScores.push(s);
+    }
+  }
+
+  return uniqueScores.slice(0, 50);
+};
+
+/**
+ * Remove a friend
+ */
+export const removeFriend = async (user1, user2) => {
+  if (!user1 || !user2) return { error: 'Invalid users' };
+  const clean1 = sanitize(user1);
+  const clean2 = sanitize(user2);
+
+  try {
+    await deleteDoc(doc(db, USERS_COLLECTION, clean1, 'friends', clean2));
+    await deleteDoc(doc(db, USERS_COLLECTION, clean2, 'friends', clean1));
+    return { success: true };
+  } catch (e) {
+    console.error('Error removing friend:', e);
+    return { error: e.message };
+  }
 };
 
 /**
