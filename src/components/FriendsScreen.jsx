@@ -25,6 +25,7 @@ const FriendsScreen = ({ onClose, username }) => {
   const [searchResults, setSearchResults] = useState([]);
   const [searching, setSearching] = useState(false);
   const [addMessage, setAddMessage] = useState(null);
+  const [successfulRequests, setSuccessfulRequests] = useState(new Set());
 
   // Load initial data
   useEffect(() => {
@@ -71,6 +72,7 @@ const FriendsScreen = ({ onClose, username }) => {
     const res = await sendFriendRequest(username, targetUser);
     if (res.success) {
       setAddMessage(`Request sent to ${targetUser}!`);
+      setSuccessfulRequests(prev => new Set(prev).add(targetUser));
     } else {
       setAddMessage(`Error: ${res.error}`);
     }
@@ -172,9 +174,16 @@ const FriendsScreen = ({ onClose, username }) => {
                     <span className="font-bold">{u.username}</span>
                     <button
                       onClick={() => handleSendRequest(u.username)}
-                      className="text-xs bg-slate-200 dark:bg-slate-700 px-3 py-1 rounded hover:bg-sky-500 hover:text-white transition-colors"
+                      disabled={successfulRequests.has(u.username)}
+                      className={`text-xs px-3 py-1 rounded transition-colors font-bold
+                          ${
+                            successfulRequests.has(u.username)
+                              ? 'bg-emerald-500 text-white cursor-default'
+                              : 'bg-slate-200 dark:bg-slate-700 hover:bg-sky-500 hover:text-white'
+                          }
+                        `}
                     >
-                      Add
+                      {successfulRequests.has(u.username) ? 'Sent' : 'Add'}
                     </button>
                   </div>
                 ))}

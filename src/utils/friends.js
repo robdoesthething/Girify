@@ -18,6 +18,7 @@ import {
 const USERS_COLLECTION = 'users'; // Store user profiles/friends here
 const HIGHSCORES_COLLECTION = 'highscores'; // For searching users
 const SCORES_COLLECTION = 'scores'; // For feed
+const BLOCKS_COLLECTION = 'blocks';
 
 // Helper to match leaderboard sanitization
 const sanitize = name => name.replace(/\//g, '_');
@@ -223,4 +224,75 @@ export const getFriendFeed = async friendsList => {
   // Sort client side (merge chunks)
   allScores.sort((a, b) => b.timestamp - a.timestamp);
   return allScores.slice(0, 50);
+};
+
+/**
+ * Get friendship status between two users (using subcollections)
+ */
+export const getFriendshipStatus = async (user1, user2) => {
+  if (!user1 || !user2) return 'none';
+  const clean1 = sanitize(user1);
+  const clean2 = sanitize(user2);
+
+  try {
+    // Check if friends
+    const friendRef = doc(db, USERS_COLLECTION, clean1, 'friends', clean2);
+    const friendSnap = await getDoc(friendRef);
+    if (friendSnap.exists()) return 'friends';
+
+    // Check if I sent request
+    const sentRef = doc(db, USERS_COLLECTION, clean2, 'requests', clean1);
+    const sentSnap = await getDoc(sentRef);
+    if (sentSnap.exists()) return 'pending';
+
+    // Check if they sent request
+    const receivedRef = doc(db, USERS_COLLECTION, clean1, 'requests', clean2);
+    const receivedSnap = await getDoc(receivedRef);
+    if (receivedSnap.exists()) return 'pending';
+
+    return 'none';
+  } catch (e) {
+    console.error('Error checking friendship:', e);
+    return 'none';
+  }
+};
+
+/**
+ * Block a user
+ */
+export const blockUser = async (blocker, blocked) => {
+  if (!blocker || !blocked || blocker === blocked) return;
+
+  const blockId = `${sanitize(blocker)}_${sanitize(blocked)}`;
+  await setDoc(doc(db, BLOCKS_COLLECTION, blockId), {
+    blocker,
+    blocked,
+    createdAt: Timestamp.now(),
+  });
+};
+
+/**
+ * Unblock a user
+ */
+export const unblockUser = async (blocker, blocked) => {
+  if (!blocker || !blocked) return;
+
+  const blockId = `${sanitize(blocker)}_${sanitize(blocked)}`;
+  const blockRef = doc(db, BLOCKS_COLLECTION, blockId);
+  await deleteDoc(blockRef);
+};
+
+/**
+ * Check if user1 has blocked user2
+ */
+export const getBlockStatus = async (user1, user2) => {
+  try {
+    const blockId = `${sanitize(user1)}_${sanitize(user2)}`;
+    const blockRef = doc(db, BLOCKS_COLLECTION, blockId);
+    const blockDoc = await getDoc(blockRef);
+    return blockDoc.exists();
+  } catch (e) {
+    console.error('Error checking block status:', e);
+    return false;
+  }
 };

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useTheme } from '../context/ThemeContext';
-import { getPendingFriendRequests, acceptFriendRequest } from '../utils/social';
+import { getIncomingRequests, acceptFriendRequest } from '../utils/friends';
 import PropTypes from 'prop-types';
 
 const FriendRequests = ({ username }) => {
@@ -13,7 +13,7 @@ const FriendRequests = ({ username }) => {
       if (!username) return;
       setLoading(true);
       try {
-        const data = await getPendingFriendRequests(username);
+        const data = await getIncomingRequests(username);
         setRequests(data);
       } catch (error) {
         console.error('Error loading friend requests:', error);

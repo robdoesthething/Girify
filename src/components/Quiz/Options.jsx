@@ -20,7 +20,7 @@ const Options = ({ options, onSelect, selectedAnswer, feedback, autoAdvance }) =
                 btnClass = 'bg-[#000080] text-white border-[#000080] ring-2 ring-blue-400';
               } else {
                 // Non-auto mode: Just show selected in dark blue (no correctness indication)
-                btnClass = 'bg-[#000080] text-white border-[#000080] ring-2 ring-blue-400';
+                btnClass = 'bg-[#000080] text-white border-[#000080] ring-4 ring-[#000080]/30';
               }
             } else {
               // Other options - muted
@@ -28,7 +28,7 @@ const Options = ({ options, onSelect, selectedAnswer, feedback, autoAdvance }) =
             }
           } else if (isSelected) {
             // Selected but not submitted yet (non-auto mode)
-            btnClass = 'bg-sky-500 text-white border-[#000080] ring-2 ring-sky-400';
+            btnClass = 'bg-sky-500 text-white border-[#000080] ring-4 ring-[#000080]/30';
           } else {
             // Default unselected
             btnClass = 'bg-white hover:bg-slate-50 text-slate-800 border-slate-200';
@@ -37,7 +37,10 @@ const Options = ({ options, onSelect, selectedAnswer, feedback, autoAdvance }) =
           return (
             <button
               key={opt.id}
-              onClick={() => onSelect(opt)}
+              onClick={e => {
+                e.currentTarget.blur();
+                onSelect(opt);
+              }}
               disabled={feedback === 'transitioning'}
               className={`w-full min-h-[2.75rem] sm:min-h-[3.5rem] flex-shrink-0 flex items-center justify-center sm:justify-start px-2 sm:px-4 rounded-xl text-center sm:text-left transition-all duration-200 relative overflow-hidden group border
                                 ${btnClass}
