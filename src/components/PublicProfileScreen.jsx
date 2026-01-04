@@ -8,33 +8,63 @@ import {
   blockUser,
   getBlockStatus,
 } from '../utils/friends';
+import { getEquippedCosmetics } from '../utils/giuros';
+import { getUnlockedAchievements } from '../data/achievements';
+import cosmetics from '../data/cosmetics.json';
 import TopBar from './TopBar';
 
+const AVATARS = [
+  '🐶',
+  '🐱',
+  '🐭',
+  '🐹',
+  '🐰',
+  '🦊',
+  '🐻',
+  '🐼',
+  '🐨',
+  '🐯',
+  '🦁',
+  '🐮',
+  '🐷',
+  '🐸',
+  '🐵',
+  '🐔',
+  '🐧',
+  '🐦',
+  '🦆',
+  '🦅',
+];
+
 const PublicProfileScreen = ({ currentUser }) => {
-  const { theme } = useTheme();
+  const { theme, t } = useTheme();
   const { username: encodedUsername } = useParams();
   const username = decodeURIComponent(encodedUsername || '');
   const navigate = useNavigate();
 
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [friendStatus, setFriendStatus] = useState('none'); // 'none' | 'pending' | 'friends'
+  const [friendStatus, setFriendStatus] = useState('none');
   const [isBlocked, setIsBlocked] = useState(false);
   const [sendingRequest, setSendingRequest] = useState(false);
   const [requestSent, setRequestSent] = useState(false);
   const [blocking, setBlocking] = useState(false);
   const [error, setError] = useState(null);
+  const [equippedCosmetics, setEquippedCosmetics] = useState({});
 
   useEffect(() => {
     const loadProfile = async () => {
       setLoading(true);
       setError(null);
       try {
-        const data = await getUserProfile(username);
+        const [data, cosmeticsData] = await Promise.all([
+          getUserProfile(username),
+          getEquippedCosmetics(username),
+        ]);
+
         if (data) {
           setProfile(data);
         } else {
-          // Create a basic profile fallback
           setProfile({
             username,
             gamesPlayed: 0,
@@ -42,6 +72,7 @@ const PublicProfileScreen = ({ currentUser }) => {
             friendCount: 0,
           });
         }
+        setEquippedCosmetics(cosmeticsData || {});
 
         if (currentUser && currentUser !== username) {
           const [status, blocked] = await Promise.all([
@@ -57,7 +88,6 @@ const PublicProfileScreen = ({ currentUser }) => {
       } catch (e) {
         console.error('Error loading profile:', e);
         setError('Failed to load profile');
-        // Fallback even on error
         setProfile({
           username,
           gamesPlayed: 0,
@@ -106,7 +136,24 @@ const PublicProfileScreen = ({ currentUser }) => {
     }
   };
 
+  // Avatar Calculation
+  const avatarIndex = profile?.avatarId ? profile.avatarId - 1 : 0;
+  const safeAvatarIndex = Math.max(0, Math.min(avatarIndex, AVATARS.length - 1));
+  const displayAvatar = AVATARS[safeAvatarIndex] || AVATARS[0];
   const initial = username ? username.charAt(0).toUpperCase() : '?';
+
+  // Frame Calculation
+  const equippedFrame = cosmetics.avatarFrames.find(f => f.id === equippedCosmetics.frameId);
+  const frameClass = equippedFrame?.cssClass || 'ring-4 ring-white dark:ring-slate-700';
+
+  // Achievements Calculation
+  // We don't have streak in public profile, so we pass 0 or a best guess
+  const userStats = {
+    gamesPlayed: profile?.gamesPlayed || 0,
+    bestScore: profile?.bestScore || 0,
+    streak: 0, // Not available publicly
+  };
+  const unlockedBadges = getUnlockedAchievements(userStats);
 
   return (
     <div
@@ -117,7 +164,7 @@ const PublicProfileScreen = ({ currentUser }) => {
       <TopBar onOpenPage={page => navigate(page ? `/${page}` : '/')} />
 
       <div className="flex-1 overflow-y-auto w-full px-4 py-8">
-        <div className="max-w-md mx-auto w-full">
+        <div className="max-w-2xl mx-auto">
           {/* Back Button */}
           <button
             onClick={() => navigate(-1)}
@@ -131,7 +178,7 @@ const PublicProfileScreen = ({ currentUser }) => {
                 d="M15 19l-7-7 7-7"
               />
             </svg>
-            Back
+            {t('back')}
           </button>
 
           <div
@@ -147,59 +194,140 @@ const PublicProfileScreen = ({ currentUser }) => {
                   : 'border-slate-100 bg-slate-50'
               }`}
             >
-              <div className="w-24 h-24 rounded-full bg-gradient-to-br from-sky-400 to-indigo-600 flex items-center justify-center text-4xl font-black text-white shadow-lg mb-4 ring-4 ring-white dark:ring-slate-700">
-                {initial}
-              </div>
+              {loading ? (
+                <div className="w-24 h-24 rounded-full bg-slate-200 dark:bg-slate-700 animate-pulse mb-4"></div>
+              ) : (
+                <div
+                  className={`w-24 h-24 rounded-full bg-gradient-to-br from-sky-400 to-indigo-600 flex items-center justify-center text-4xl shadow-lg mb-4 ${frameClass}`}
+                >
+                  {profile && profile.avatarId ? displayAvatar : initial}
+                </div>
+              )}
+
               <h2 className="text-2xl font-black tracking-tight">{username}</h2>
+              {profile?.realName && (
+                <p className="text-sm font-bold opacity-50 mt-1">{profile.realName}</p>
+              )}
+              {profile?.joinedAt && (
+                <p className="text-xs font-bold uppercase tracking-widest opacity-40 mt-2">
+                  {t('playerSince')}{' '}
+                  {profile.joinedAt.toDate
+                    ? profile.joinedAt.toDate().toLocaleDateString()
+                    : new Date(profile.joinedAt.seconds * 1000).toLocaleDateString()}
+                </p>
+              )}
+
+              {/* Achievements Badges (Small Row) */}
+              {unlockedBadges.length > 0 && (
+                <div className="flex flex-wrap justify-center gap-2 mt-3">
+                  {unlockedBadges.slice(0, 6).map(badge => (
+                    <span
+                      key={badge.id}
+                      className="text-xl"
+                      title={`${badge.name}: ${badge.description}`}
+                    >
+                      {badge.emoji}
+                    </span>
+                  ))}
+                  {unlockedBadges.length > 6 && (
+                    <span className="text-xs text-slate-400 self-center">
+                      +{unlockedBadges.length - 6}
+                    </span>
+                  )}
+                </div>
+              )}
             </div>
 
             {/* Content */}
-            <div className="p-8">
+            <div className="p-0">
+              {' '}
+              {/* Padding removed to match ProfileScreen stats spacing */}
               {loading ? (
-                <div className="flex justify-center py-8">
+                <div className="flex justify-center py-12">
                   <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-sky-500"></div>
                 </div>
               ) : profile ? (
                 <>
-                  {/* Stats */}
-                  <div className="grid grid-cols-3 gap-4 mb-8">
-                    <div className="text-center p-3 rounded-xl bg-slate-50 dark:bg-slate-900/50">
-                      <p className="text-3xl font-black text-slate-700 dark:text-slate-200">
-                        {profile.gamesPlayed !== undefined ? profile.gamesPlayed : 0}
-                      </p>
-                      <p className="text-[10px] uppercase font-bold text-slate-400 tracking-wider mt-1">
-                        Games
-                      </p>
-                    </div>
-                    <div className="text-center p-3 rounded-xl bg-slate-50 dark:bg-slate-900/50">
-                      <p className="text-3xl font-black text-emerald-500">
-                        {profile.bestScore !== undefined ? profile.bestScore : 0}
-                      </p>
-                      <p className="text-[10px] uppercase font-bold text-slate-400 tracking-wider mt-1">
-                        Best
+                  {/* Stats Grid */}
+                  <div className="p-6 grid grid-cols-5 gap-2 border-b border-slate-100 dark:border-slate-800">
+                    <div className="text-center opacity-50">
+                      {/* Streak Unknown */}
+                      <p className="text-xl font-black text-slate-400">-</p>
+                      <p className="text-[9px] uppercase font-bold text-slate-400 tracking-wider">
+                        {t('streak')}
                       </p>
                     </div>
-                    <div className="text-center p-3 rounded-xl bg-slate-50 dark:bg-slate-900/50">
-                      <p className="text-3xl font-black text-sky-500">
-                        {profile.friendCount !== undefined ? profile.friendCount : 0}
+                    <div className="text-center">
+                      <p className="text-xl font-black text-purple-500">
+                        👥{profile.friendCount || 0}
                       </p>
-                      <p className="text-[10px] uppercase font-bold text-slate-400 tracking-wider mt-1">
-                        Friends
+                      <p className="text-[9px] uppercase font-bold text-slate-400 tracking-wider">
+                        {t('friends')}
+                      </p>
+                    </div>
+                    <div className="text-center">
+                      <p className="text-xl font-black text-slate-700 dark:text-slate-200">
+                        {profile.gamesPlayed || 0}
+                      </p>
+                      <p className="text-[9px] uppercase font-bold text-slate-400 tracking-wider">
+                        {t('games')}
+                      </p>
+                    </div>
+                    <div className="text-center">
+                      <p className="text-xl font-black text-emerald-500">
+                        {profile.bestScore || 0}
+                      </p>
+                      <p className="text-[9px] uppercase font-bold text-slate-400 tracking-wider">
+                        {t('best')}
+                      </p>
+                    </div>
+                    <div className="text-center opacity-50">
+                      {/* Avg Unknown */}
+                      <p className="text-xl font-black text-slate-400">-</p>
+                      <p className="text-[9px] uppercase font-bold text-slate-400 tracking-wider">
+                        {t('avg')}
                       </p>
                     </div>
                   </div>
 
-                  {/* Actions */}
+                  {/* Achievements Detail Block */}
+                  <div className="p-6 border-b border-slate-100 dark:border-slate-800">
+                    <h3 className="text-sm font-bold uppercase tracking-wider opacity-50 mb-4">
+                      {t('achievements')} ({unlockedBadges.length})
+                    </h3>
+                    {unlockedBadges.length > 0 ? (
+                      <div className="grid grid-cols-4 sm:grid-cols-5 gap-3">
+                        {unlockedBadges.map(badge => (
+                          <div
+                            key={badge.id}
+                            className={`flex flex-col items-center p-2 rounded-xl ${
+                              theme === 'dark' ? 'bg-slate-700/50' : 'bg-slate-50'
+                            }`}
+                            title={badge.description}
+                          >
+                            <span className="text-2xl mb-1">{badge.emoji}</span>
+                            <span className="text-[10px] text-center font-bold opacity-70 leading-tight">
+                              {badge.name}
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <p className="text-sm opacity-50 text-center py-4">No achievements yet.</p>
+                    )}
+                  </div>
+
+                  {/* Actions Area */}
                   {currentUser && currentUser !== username && (
-                    <div className="space-y-4">
+                    <div className="p-6 space-y-4 bg-slate-50 dark:bg-slate-800/20">
                       {/* Friend Button */}
                       {!isBlocked &&
                         (friendStatus === 'friends' ? (
-                          <div className="w-full py-4 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 rounded-xl text-center font-bold">
+                          <div className="w-full py-4 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 rounded-xl text-center font-bold border border-emerald-500/20">
                             ✅ Friends
                           </div>
                         ) : friendStatus === 'pending' || requestSent ? (
-                          <div className="w-full py-4 bg-yellow-500/10 text-yellow-600 dark:text-yellow-400 rounded-xl text-center font-bold">
+                          <div className="w-full py-4 bg-yellow-500/10 text-yellow-600 dark:text-yellow-400 rounded-xl text-center font-bold border border-yellow-500/20">
                             ⏳ Request Pending
                           </div>
                         ) : (
@@ -208,7 +336,7 @@ const PublicProfileScreen = ({ currentUser }) => {
                             disabled={sendingRequest}
                             className="w-full py-4 bg-sky-500 hover:bg-sky-600 text-white rounded-xl font-bold transition-all disabled:opacity-50 shadow-lg shadow-sky-500/20"
                           >
-                            {sendingRequest ? 'Sending...' : '👋 Add Friend'}
+                            {sendingRequest ? 'Sending Friend Request...' : '👋 Add Friend'}
                           </button>
                         ))}
 
@@ -221,7 +349,7 @@ const PublicProfileScreen = ({ currentUser }) => {
                         <button
                           onClick={handleBlock}
                           disabled={blocking}
-                          className={`w-full py-3 rounded-xl text-sm font-bold transition-all
+                          className={`w-full py-3 rounded-xl text-sm font-bold transition-all opacity-60 hover:opacity-100
                                       ${theme === 'dark' ? 'text-red-400 hover:bg-red-500/10' : 'text-red-500 hover:bg-red-50'}
                                   `}
                         >

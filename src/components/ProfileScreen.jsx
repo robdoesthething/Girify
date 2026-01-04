@@ -214,31 +214,33 @@ const ProfileScreen = ({ onClose, username }) => {
             </button>
           </div>
 
-          {/* Giuros Explainer Callout */}
-          <div
-            className={`mb-6 p-4 rounded-2xl border ${
-              theme === 'dark'
-                ? 'bg-yellow-500/10 border-yellow-500/30'
-                : 'bg-yellow-50 border-yellow-200'
-            }`}
-          >
-            <div className="flex items-start gap-3">
-              <img src="/giuro.png" alt="" className="h-8 w-auto object-contain shrink-0 mt-0.5" />
-              <div className="flex-1">
-                <h4 className="font-bold text-yellow-700 dark:text-yellow-400 mb-1">
-                  {t('giurosExplainerTitle')}
-                </h4>
-                <p className="text-sm text-yellow-600/80 dark:text-yellow-300/70 mb-3">
-                  {t('giurosExplainerText')}
-                </p>
-                <button
-                  onClick={() => navigate('/shop')}
-                  className="text-sm font-bold text-yellow-700 dark:text-yellow-400 hover:underline flex items-center gap-1"
-                >
-                  {t('goToShop')} →
-                </button>
+          {/* Giuros Explainer Callout - Comic Bubble Style */}
+          <div className="relative mb-8 mx-2 filter drop-shadow-md">
+            <div
+              className={`p-4 rounded-xl border-2 border-slate-900 bg-white dark:bg-slate-800 text-slate-900 dark:text-white relative z-10`}
+            >
+              <div className="flex items-start gap-3">
+                <img
+                  src="/giuro.png"
+                  alt=""
+                  className="h-8 w-auto object-contain shrink-0 mt-0.5"
+                />
+                <div className="flex-1">
+                  <h3 className="font-black text-lg mb-1">{t('giurosExplainerTitle')}</h3>
+                  <p className="text-sm opacity-80 mb-3 leading-relaxed">
+                    {t('giurosExplainerText')}
+                  </p>
+                  <button
+                    onClick={() => navigate('/shop')}
+                    className="px-4 py-2 bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-lg text-xs font-black uppercase tracking-wider hover:scale-105 transition-transform"
+                  >
+                    {t('goToShop')}
+                  </button>
+                </div>
               </div>
             </div>
+            {/* Speech Bubble Tail */}
+            <div className="absolute -bottom-3 left-10 w-6 h-6 bg-white dark:bg-slate-800 border-b-2 border-r-2 border-slate-900 transform rotate-45 z-0"></div>
           </div>
 
           {/* Profile Card */}
@@ -490,29 +492,59 @@ const ProfileScreen = ({ onClose, username }) => {
                 <div className="text-center py-10 opacity-40 text-sm">{t('noGamesYet')}</div>
               ) : (
                 <div className="space-y-3">
-                  {allHistory
-                    .slice()
-                    .reverse()
-                    .slice(0, 10)
-                    .map((game, i) => (
-                      <div
-                        key={i}
-                        className={`flex items-center justify-between p-3 rounded-xl border ${theme === 'dark' ? 'border-slate-800 bg-slate-800/50' : 'border-slate-100'}`}
-                      >
-                        <div>
-                          <p className="font-bold text-sm">{t('dailyChallenge')}</p>
-                          <p className="text-[10px] text-slate-400">
-                            {game.timestamp
-                              ? new Date(game.timestamp).toLocaleDateString()
-                              : 'Just now'}
-                          </p>
+                  {(() => {
+                    const sorted = [...allHistory].sort(
+                      (a, b) => (b.timestamp || 0) - (a.timestamp || 0)
+                    );
+                    const dailyEarliest = new Map();
+                    // Determine earliest timestamp for each date
+                    sorted.forEach(g => {
+                      if (g.timestamp) {
+                        if (!dailyEarliest.has(g.date) || g.timestamp < dailyEarliest.get(g.date)) {
+                          dailyEarliest.set(g.date, g.timestamp);
+                        }
+                      }
+                    });
+
+                    return sorted.slice(0, 50).map((game, i) => {
+                      // It is the daily result if its timestamp matches the earliest for that date
+                      const isDaily =
+                        game.timestamp && dailyEarliest.get(game.date) === game.timestamp;
+
+                      return (
+                        <div
+                          key={i}
+                          className={`flex items-center justify-between p-3 rounded-xl border transition-colors
+                                  ${
+                                    isDaily
+                                      ? theme === 'dark'
+                                        ? 'bg-emerald-900/20 border-emerald-500/30'
+                                        : 'bg-emerald-50 border-emerald-200'
+                                      : theme === 'dark'
+                                        ? 'bg-slate-800/50 border-slate-700'
+                                        : 'bg-white border-slate-100'
+                                  }`}
+                        >
+                          <div>
+                            <p className="font-bold text-sm">{t('dailyChallenge')}</p>
+                            <p className="text-[10px] text-slate-400">
+                              {game.timestamp
+                                ? new Date(game.timestamp).toLocaleDateString()
+                                : 'Just now'}
+                            </p>
+                          </div>
+                          <div className="text-right">
+                            <span
+                              className={`font-black text-lg ${isDaily ? 'text-emerald-600 dark:text-emerald-400 scale-110 inline-block' : 'text-slate-400 font-medium'}`}
+                            >
+                              {game.score}
+                            </span>
+                            <span className="text-[10px] font-bold text-slate-400 ml-1">PTS</span>
+                          </div>
                         </div>
-                        <div className="text-right">
-                          <span className="font-black text-lg text-emerald-500">{game.score}</span>
-                          <span className="text-[10px] font-bold text-slate-400 ml-1">PTS</span>
-                        </div>
-                      </div>
-                    ))}
+                      );
+                    });
+                  })()}
                 </div>
               )}
             </div>
