@@ -128,6 +128,22 @@ const translations = {
     blockUser: 'Block User',
     blocked: 'Blocked',
 
+    // Shop
+    shop: 'Shop',
+    giuros: 'Giuros',
+    frames: 'Frames',
+    badges: 'Badges',
+    titles: 'Titles',
+    special: 'Special',
+    buy: 'Buy',
+    equip: 'Equip',
+    equipped: 'Equipped',
+    owned: 'Owned',
+    notEnoughGiuros: 'Not enough giuros!',
+    alreadyOwned: 'Already owned!',
+    purchased: 'Purchased',
+    back: 'Back',
+
     // Errors
     usernameRequired: 'Username is required',
     usernameTooLong: 'Username must be 20 characters or less',
@@ -264,6 +280,22 @@ const translations = {
     blockUser: 'Bloquear usuario',
     blocked: 'Bloqueado',
 
+    // Shop
+    shop: 'Tienda',
+    giuros: 'Giuros',
+    frames: 'Marcos',
+    badges: 'Insignias',
+    titles: 'Títulos',
+    special: 'Especial',
+    buy: 'Comprar',
+    equip: 'Equipar',
+    equipped: 'Equipado',
+    owned: 'Obtenido',
+    notEnoughGiuros: '¡No tienes suficientes giuros!',
+    alreadyOwned: '¡Ya lo tienes!',
+    purchased: 'Comprado',
+    back: 'Volver',
+
     // Errors
     usernameRequired: 'El nombre de usuario es obligatorio',
     usernameTooLong: 'El nombre debe tener 20 caracteres o menos',
@@ -359,6 +391,22 @@ const translations = {
     friendsLabel: 'Amics',
     blockUser: 'Bloquejar usuari',
     blocked: 'Bloquejat',
+
+    // Shop
+    shop: 'Botiga',
+    giuros: 'Giuros',
+    frames: 'Marcs',
+    badges: 'Insígnies',
+    titles: 'Títols',
+    special: 'Especial',
+    buy: 'Comprar',
+    equip: 'Equipar',
+    equipped: 'Equipat',
+    owned: 'Obtingut',
+    notEnoughGiuros: 'No tens prou giuros!',
+    alreadyOwned: 'Ja el tens!',
+    purchased: 'Comprat',
+    back: 'Tornar',
 
     // Errors
     usernameRequired: "El nom d'usuari és obligatori",
