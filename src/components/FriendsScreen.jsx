@@ -11,6 +11,7 @@ import {
   removeFriend,
   blockUser,
 } from '../utils/friends';
+import { ACTIVITY_TYPES } from '../data/activityTypes';
 // PublicProfileModal removed
 import { useNavigate } from 'react-router-dom';
 // eslint-disable-next-line no-unused-vars
@@ -18,7 +19,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 
 const FriendsScreen = ({ onClose, username }) => {
   const navigate = useNavigate();
-  const { theme } = useTheme();
+  const { theme, t } = useTheme();
   const [activeTab, setActiveTab] = useState('feed');
   const [friends, setFriends] = useState([]);
   const [requests, setRequests] = useState([]);
@@ -236,27 +237,90 @@ const FriendsScreen = ({ onClose, username }) => {
                 </button>
               </div>
             ) : (
-              feed.map(item => (
-                <div
-                  key={item.id}
-                  className="p-4 rounded-xl border bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 shadow-sm"
-                >
-                  <div className="flex justify-between items-start mb-2">
-                    <div>
-                      <span className="font-black text-lg text-sky-500">{item.username}</span>
-                      <span className="text-slate-500 text-sm ml-2">scored {item.score}</span>
+              feed.map(item => {
+                if (item.type === ACTIVITY_TYPES.USERNAME_CHANGED) {
+                  return (
+                    <div
+                      key={item.id}
+                      className="p-4 rounded-xl border bg-white dark:bg-slate-900 border-amber-200 dark:border-amber-900/30 shadow-sm"
+                    >
+                      <div className="flex justify-between items-start mb-2">
+                        <div>
+                          <span className="font-black text-lg text-amber-500">
+                            {item.oldUsername}
+                          </span>
+                          <span className="text-slate-500 text-sm ml-2">{t('changedNameTo')}</span>
+                          <span className="font-black text-lg text-amber-500 ml-2">
+                            {item.username}
+                          </span>
+                        </div>
+                        <span className="text-xs text-slate-400">
+                          {item.timestamp?.seconds
+                            ? new Date(item.timestamp.seconds * 1000).toLocaleDateString()
+                            : 'Just now'}
+                        </span>
+                      </div>
                     </div>
-                    <span className="text-xs text-slate-400">
-                      {item.timestamp?.seconds
-                        ? new Date(item.timestamp.seconds * 1000).toLocaleDateString()
-                        : 'Just now'}
-                    </span>
+                  );
+                }
+
+                if (item.type === ACTIVITY_TYPES.BADGE_EARNED) {
+                  return (
+                    <div
+                      key={item.id}
+                      className="p-4 rounded-xl border bg-white dark:bg-slate-900 border-purple-200 dark:border-purple-900/30 shadow-sm"
+                    >
+                      <div className="flex justify-between items-start mb-2">
+                        <div>
+                          <span className="font-black text-lg text-purple-500">
+                            {item.username}
+                          </span>
+                          <span className="text-slate-500 text-sm ml-2">{t('badgeEarned')}</span>
+                          {item.badge && (
+                            <span className="ml-2 text-xl" title={item.badge.name}>
+                              {item.badge.emoji}
+                            </span>
+                          )}
+                        </div>
+                        <span className="text-xs text-slate-400">
+                          {item.timestamp?.seconds
+                            ? new Date(item.timestamp.seconds * 1000).toLocaleDateString()
+                            : 'Just now'}
+                        </span>
+                      </div>
+                    </div>
+                  );
+                }
+
+                // Default: Score
+                return (
+                  <div
+                    key={item.id}
+                    className="p-4 rounded-xl border bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 shadow-sm"
+                  >
+                    <div className="flex justify-between items-start mb-2">
+                      <div className="flex items-baseline flex-wrap">
+                        <span className="font-black text-lg text-sky-500 mr-2">
+                          {item.username}
+                        </span>
+                        <span className="text-slate-500 text-sm">
+                          {t('scored')} <strong>{item.score}</strong> {t('points')}
+                        </span>
+                      </div>
+                      <span className="text-xs text-slate-400 whitespace-nowrap ml-2">
+                        {item.timestamp?.seconds
+                          ? new Date(item.timestamp.seconds * 1000).toLocaleDateString()
+                          : 'Just now'}
+                      </span>
+                    </div>
+                    {item.time && (
+                      <div className="text-xs text-slate-500 font-mono">
+                        {t('avgTime')}: {item.time}s
+                      </div>
+                    )}
                   </div>
-                  {item.time && (
-                    <div className="text-xs text-slate-500 font-mono">Avg Time: {item.time}s</div>
-                  )}
-                </div>
-              ))
+                );
+              })
             )}
           </div>
         )}

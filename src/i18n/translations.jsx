@@ -153,6 +153,23 @@ const translations = {
     googleLoginFailed: 'Google login failed',
     enterEmailAndPassword: 'Please enter email and password',
     enterYourName: 'Please enter your name',
+
+    // Giuros Explainer
+    giurosExplainerTitle: 'What are Giuros?',
+    giurosExplainerText:
+      'Earn Giuros by playing daily, maintaining streaks, and completing challenges. Spend them on cosmetics!',
+    goToShop: 'Go to Shop',
+
+    // Achievements
+    achievements: 'Achievements',
+    badgeEarned: 'earned a badge',
+    changedNameTo: 'changed name to',
+    nextAchievement: 'Next Achievement',
+    progress: 'Progress',
+
+    // Activity Feed
+    scored: 'scored',
+    points: 'points',
   },
 
   es: {
@@ -305,6 +322,23 @@ const translations = {
     googleLoginFailed: 'Error al iniciar sesión con Google',
     enterEmailAndPassword: 'Por favor ingresa email y contraseña',
     enterYourName: 'Por favor ingresa tu nombre',
+
+    // Giuros Explainer
+    giurosExplainerTitle: '¿Qué son los Giuros?',
+    giurosExplainerText:
+      'Gana Giuros jugando a diario, manteniendo rachas y completando retos. ¡Gástalos en cosméticos!',
+    goToShop: 'Ir a la tienda',
+
+    // Achievements
+    achievements: 'Logros',
+    badgeEarned: 'ha ganado una insignia',
+    changedNameTo: 'cambió su nombre a',
+    nextAchievement: 'Siguiente logro',
+    progress: 'Progreso',
+
+    // Activity Feed
+    scored: 'puntuó',
+    points: 'puntos',
   },
 
   ca: {
@@ -457,6 +491,23 @@ const translations = {
     aboutPoint3: 'Com més ràpid responguis, més punts obtindràs!',
     aboutPoint4: "Utilitza pistes si t'encalles (però intenta no fer-ho!).",
     aboutPoint5: 'Aconsegueix una puntuació perfecta per desbloquejar curiositats especials.',
+
+    // Giuros Explainer
+    giurosExplainerTitle: 'Què són els Giuros?',
+    giurosExplainerText:
+      "Guanya Giuros jugant cada dia, mantenint ratxes i completant reptes. Gasta'ls en cosmètics!",
+    goToShop: 'Anar a la botiga',
+
+    // Achievements
+    achievements: 'Assoliments',
+    badgeEarned: 'ha guanyat una insígnia',
+    changedNameTo: 'ha canviat el nom a',
+    nextAchievement: 'Proper assoliment',
+    progress: 'Progrés',
+
+    // Activity Feed
+    scored: 'va puntuar',
+    points: 'punts',
   },
 };
 

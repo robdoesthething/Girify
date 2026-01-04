@@ -178,25 +178,22 @@ export const getFriends = async username => {
 
 /**
  * Get Friend Activity Feed
+ * Returns an array of activity events with types:
+ * - daily_score: First daily score from a friend
+ * - badge_earned: Friend earned a new badge (future: requires activity tracking)
+ * - username_changed: Friend changed their username
  */
 export const getFriendFeed = async friendsList => {
   if (!friendsList || friendsList.length === 0) return [];
 
-  // Firestore 'in' query supports up to 10 items.
-  // If friends > 10, we need to batch or just fetch recent scores and filter client side?
-  // Fetching ALL recent scores is expensive.
-  // We'll limit to 10 friends for now or do multiple queries.
-  // Optimized: Filter by username 'in' [array of usernames].
-
   const friendNames = friendsList.map(f => f.username);
+  const allActivities = [];
 
-  // Chunk into batches of 10
+  // 1. Fetch daily scores
   const chunks = [];
   for (let i = 0; i < friendNames.length; i += 10) {
     chunks.push(friendNames.slice(i, i + 10));
   }
-
-  const allScores = [];
 
   for (const chunk of chunks) {
     const q = query(
@@ -205,40 +202,83 @@ export const getFriendFeed = async friendsList => {
       orderBy('timestamp', 'desc'),
       limit(20)
     );
-    // Note: requires composite index. If fails, user needs to create index link.
-    // simpler: order client side? No, 'in' query works with order by?
-    // "OrderBy must match the field in the equality filter" -> NO.
-    // "You can perform range (<, <=, >, >=) or inequality (!=) comparisons..."
-    // 'IN' is equality.
-    // However, if we order by timestamp, we need index: username ASC timestamp DESC.
 
     try {
       const snap = await getDocs(q);
-      snap.forEach(doc => allScores.push({ id: doc.id, ...doc.data() }));
+      snap.forEach(docSnap => {
+        const data = docSnap.data();
+        allActivities.push({
+          id: docSnap.id,
+          type: 'daily_score',
+          username: data.username,
+          score: data.score,
+          time: data.time,
+          timestamp: data.timestamp,
+        });
+      });
     } catch (e) {
       console.warn('Feed query failed (likely missing index):', e);
-      // Fallback: fetch without ordering? Or just return empty.
     }
   }
 
-  // Sort client side (merge chunks)
-  allScores.sort((a, b) => b.timestamp - a.timestamp);
+  // 2. Check for username changes (migratedFrom field in user profiles)
+  for (const chunk of chunks) {
+    try {
+      for (const username of chunk) {
+        const userRef = doc(db, USERS_COLLECTION, username);
+        const userDoc = await getDoc(userRef);
+        if (userDoc.exists()) {
+          const data = userDoc.data();
+          if (data.migratedFrom && data.updatedAt) {
+            allActivities.push({
+              id: `namechange_${username}`,
+              type: 'username_changed',
+              username: username,
+              oldUsername: data.migratedFrom,
+              timestamp: data.updatedAt,
+            });
+          }
+        }
+      }
+    } catch (e) {
+      console.warn('Error checking username changes:', e);
+    }
+  }
 
-  // Filter: Only keep the FIRST score per user per day
-  const uniqueScores = [];
+  // Sort all activities by timestamp
+  allActivities.sort((a, b) => {
+    const timeA = a.timestamp?.seconds || 0;
+    const timeB = b.timestamp?.seconds || 0;
+    return timeB - timeA;
+  });
+
+  // Filter: Only keep the FIRST score per user per day for score activities
+  const uniqueActivities = [];
   const seenUserDays = new Set();
+  const seenNameChanges = new Set();
 
-  for (const s of allScores) {
-    if (!s.timestamp) continue;
-    const date = new Date(s.timestamp.seconds * 1000).toDateString(); // "Fri Jan 01 2026"
-    const key = `${s.username}_${date}`;
-    if (!seenUserDays.has(key)) {
-      seenUserDays.add(key);
-      uniqueScores.push(s);
+  for (const activity of allActivities) {
+    if (activity.type === 'daily_score') {
+      if (!activity.timestamp) continue;
+      const date = new Date(activity.timestamp.seconds * 1000).toDateString();
+      const key = `${activity.username}_${date}`;
+      if (!seenUserDays.has(key)) {
+        seenUserDays.add(key);
+        uniqueActivities.push(activity);
+      }
+    } else if (activity.type === 'username_changed') {
+      // Only show each name change once
+      if (!seenNameChanges.has(activity.username)) {
+        seenNameChanges.add(activity.username);
+        uniqueActivities.push(activity);
+      }
+    } else {
+      // Other activity types (badge_earned, etc.) - add directly
+      uniqueActivities.push(activity);
     }
   }
 
-  return uniqueScores.slice(0, 50);
+  return uniqueActivities.slice(0, 50);
 };
 
 /**

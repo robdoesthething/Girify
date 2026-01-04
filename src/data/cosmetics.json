@@ -25,50 +25,6 @@
       "cssClass": "ring-4 ring-cyan-400 shadow-lg shadow-cyan-400/50"
     }
   ],
-  "badges": [
-    {
-      "id": "badge_explorer",
-      "name": "Explorer",
-      "cost": 30,
-      "emoji": "🧭",
-      "description": "A true street explorer"
-    },
-    {
-      "id": "badge_veteran",
-      "name": "Veteran",
-      "cost": 75,
-      "emoji": "⭐",
-      "description": "Seasoned player"
-    },
-    {
-      "id": "badge_champion",
-      "name": "Champion",
-      "cost": 150,
-      "emoji": "🏆",
-      "description": "Top tier player"
-    },
-    {
-      "id": "badge_scholar",
-      "name": "Scholar",
-      "cost": 50,
-      "emoji": "📚",
-      "description": "Barcelona knowledge expert"
-    },
-    {
-      "id": "badge_fire",
-      "name": "On Fire",
-      "cost": 40,
-      "emoji": "🔥",
-      "description": "Hot streak holder"
-    },
-    {
-      "id": "badge_owl",
-      "name": "Night Owl",
-      "cost": 35,
-      "emoji": "🦉",
-      "description": "Plays at midnight"
-    }
-  ],
   "titles": [
     {
       "id": "title_explorer",
