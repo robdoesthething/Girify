@@ -3,17 +3,17 @@
   "name": "Girify - Barcelona Street Quiz",
   "icons": [
     {
-      "src": "/favicon.png",
+      "src": "/favicon2.png",
       "sizes": "64x64 32x32 24x24 16x16",
       "type": "image/png"
     },
     {
-      "src": "/lizard-v2.png",
+      "src": "/favicon2.png",
       "type": "image/png",
       "sizes": "192x192"
     },
     {
-      "src": "/lizard-v2.png",
+      "src": "/favicon2.png",
       "type": "image/png",
       "sizes": "512x512"
     }
