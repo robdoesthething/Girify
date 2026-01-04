@@ -30,6 +30,10 @@ describe('Daily Challenge - Game Logic', () => {
     vi.clearAllMocks();
   });
 
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
   describe('getTodaySeed', () => {
     it('should return a seed in YYYYMMDD format', () => {
       const seed = getTodaySeed();
@@ -53,14 +57,14 @@ describe('Daily Challenge - Game Logic', () => {
     });
 
     it('should generate correct seed for a specific date', () => {
-      // Mock Date to return a specific date
-      const mockDate = new Date('2024-03-15');
-      vi.spyOn(global, 'Date').mockImplementation(() => mockDate);
+      // Set system time to a specific date
+      vi.useFakeTimers();
+      vi.setSystemTime(new Date('2024-03-15'));
 
       const seed = getTodaySeed();
       expect(seed).toBe(20240315);
 
-      vi.restoreAllMocks();
+      vi.useRealTimers();
     });
   });
 
@@ -187,17 +191,25 @@ describe('Daily Challenge - Game Logic', () => {
       expect(minutes).toBeLessThan(60);
     });
 
-    it('should decrease over time', async () => {
+    it('should decrease over time', () => {
+      vi.useFakeTimers();
+      // Set to 10:00 AM
+      const start = new Date();
+      start.setHours(10, 0, 0, 0);
+      vi.setSystemTime(start);
+
       const time1 = getTimeUntilNext();
 
-      // Wait a bit
-      await new Promise(resolve => setTimeout(resolve, 100));
+      // Advance time by 1 hour
+      vi.advanceTimersByTime(1000 * 60 * 60);
 
       const time2 = getTimeUntilNext();
 
-      // Times should be close but time2 should be slightly less
-      // (or same if we're unlucky with timing)
-      expect(time2).toBeTruthy();
+      // time1 should be "14h 0m", time2 should be "13h 0m" (roughly)
+      // We just check that string changed effectively
+      expect(time1).not.toBe(time2);
+
+      vi.useRealTimers();
     });
   });
 });
