@@ -116,6 +116,12 @@ backdrop-blur-md border-b ${theme === 'dark' ? 'border-slate-600' : 'border-slat
                   🏆 {t('leaderboard')}
                 </button>
                 <button
+                  onClick={() => handleMenuClick('shop')}
+                  className="text-left py-2 px-3 rounded-lg hover:bg-slate-500/10 font-medium"
+                >
+                  🛒 Shop
+                </button>
+                <button
                   onClick={() => handleMenuClick('about')}
                   className="text-left py-2 px-3 rounded-lg hover:bg-slate-500/10 font-medium"
                 >

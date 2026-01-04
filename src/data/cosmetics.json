@@ -1,0 +1,108 @@
+{
+  "avatarFrames": [
+    {
+      "id": "frame_gold",
+      "name": "Golden Frame",
+      "cost": 100,
+      "cssClass": "ring-4 ring-yellow-400"
+    },
+    {
+      "id": "frame_silver",
+      "name": "Silver Frame",
+      "cost": 50,
+      "cssClass": "ring-4 ring-slate-300"
+    },
+    {
+      "id": "frame_bronze",
+      "name": "Bronze Frame",
+      "cost": 25,
+      "cssClass": "ring-4 ring-amber-600"
+    },
+    {
+      "id": "frame_neon",
+      "name": "Neon Frame",
+      "cost": 150,
+      "cssClass": "ring-4 ring-cyan-400 shadow-lg shadow-cyan-400/50"
+    }
+  ],
+  "badges": [
+    {
+      "id": "badge_explorer",
+      "name": "Explorer",
+      "cost": 30,
+      "emoji": "🧭",
+      "description": "A true street explorer"
+    },
+    {
+      "id": "badge_veteran",
+      "name": "Veteran",
+      "cost": 75,
+      "emoji": "⭐",
+      "description": "Seasoned player"
+    },
+    {
+      "id": "badge_champion",
+      "name": "Champion",
+      "cost": 150,
+      "emoji": "🏆",
+      "description": "Top tier player"
+    },
+    {
+      "id": "badge_scholar",
+      "name": "Scholar",
+      "cost": 50,
+      "emoji": "📚",
+      "description": "Barcelona knowledge expert"
+    },
+    {
+      "id": "badge_fire",
+      "name": "On Fire",
+      "cost": 40,
+      "emoji": "🔥",
+      "description": "Hot streak holder"
+    },
+    {
+      "id": "badge_owl",
+      "name": "Night Owl",
+      "cost": 35,
+      "emoji": "🦉",
+      "description": "Plays at midnight"
+    }
+  ],
+  "titles": [
+    {
+      "id": "title_explorer",
+      "name": "Street Explorer",
+      "cost": 25,
+      "prefix": "🧭"
+    },
+    {
+      "id": "title_master",
+      "name": "Street Master",
+      "cost": 100,
+      "prefix": "🎓"
+    },
+    {
+      "id": "title_legend",
+      "name": "Barcelona Legend",
+      "cost": 200,
+      "prefix": "👑"
+    }
+  ],
+  "special": [
+    {
+      "id": "handle_change",
+      "name": "Change Handle",
+      "cost": 50,
+      "description": "Change your username once",
+      "consumable": true
+    },
+    {
+      "id": "custom_avatar",
+      "name": "Custom Avatar",
+      "cost": 75,
+      "description": "Upload a custom profile picture",
+      "consumable": false
+    }
+  ]
+}

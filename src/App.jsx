@@ -9,6 +9,7 @@ import ProfileScreen from './components/ProfileScreen';
 import FriendsScreen from './components/FriendsScreen';
 import PublicProfileScreen from './components/PublicProfileScreen';
 import GameScreen from './components/GameScreen';
+import ShopScreen from './components/ShopScreen';
 
 // ... inside Routes
 
@@ -25,7 +26,8 @@ import {
 } from './utils/dailyChallenge';
 import { calculateTimeScore } from './utils/scoring';
 import { saveScore } from './utils/leaderboard';
-import { ensureUserProfile, migrateUser, hasDailyReferral, healMigration } from './utils/social'; // Import social helpers
+import { ensureUserProfile, migrateUser, hasDailyReferral, healMigration } from './utils/social';
+import { claimDailyLoginBonus, awardChallengeBonus } from './utils/giuros';
 import { gameReducer, initialState } from './reducers/gameReducer';
 import { auth } from './firebase';
 import { onAuthStateChanged, signOut, updateProfile } from 'firebase/auth';
@@ -242,6 +244,17 @@ const AppRoutes = () => {
             hasDailyReferral(state.username).then(isBonus => {
               saveScore(state.username, state.score, newRecord.avgTime, isBonus);
             });
+
+            // Award giuros for completing the daily challenge
+            const historyForStreak = JSON.parse(localStorage.getItem('girify_history') || '[]');
+            const streak = historyForStreak.filter((h, i, arr) => {
+              // Simple streak calculation for bonus
+              return arr.findIndex(x => x.date === h.date) === i;
+            }).length;
+            awardChallengeBonus(state.username, streak).then(result => {
+              // eslint-disable-next-line no-console
+              console.log(`[Giuros] Challenge bonus: +${result.bonus}`);
+            });
           }
         } catch (e) {
           console.error('[Game] Error saving game:', e);
@@ -311,6 +324,14 @@ const AppRoutes = () => {
             .then(profile => {
               // Self-heal any broken migration links
               healMigration(displayName).catch(err => console.error(err));
+
+              // Claim daily login bonus (giuros)
+              claimDailyLoginBonus(displayName).then(result => {
+                if (result.claimed) {
+                  // eslint-disable-next-line no-console
+                  console.log(`[Giuros] Daily login bonus claimed: +${result.bonus}`);
+                }
+              });
 
               // Sync joined date
               if (profile && profile.joinedAt) {
@@ -420,6 +441,7 @@ const AppRoutes = () => {
               <FriendsScreen onClose={() => handleOpenPage(null)} username={state.username} />
             }
           />
+          <Route path="/shop" element={<ShopScreen username={state.username} />} />
         </Routes>
       </AnimatePresence>
     </div>
