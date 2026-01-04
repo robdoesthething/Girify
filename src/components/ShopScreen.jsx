@@ -13,7 +13,7 @@ import TopBar from './TopBar';
 import PropTypes from 'prop-types';
 
 const ShopScreen = ({ username }) => {
-  const { theme } = useTheme();
+  const { theme, t } = useTheme();
   const navigate = useNavigate();
 
   const [balance, setBalance] = useState(0);
@@ -42,13 +42,13 @@ const ShopScreen = ({ username }) => {
 
   const handlePurchase = async (item, _category) => {
     if (purchased.includes(item.id)) {
-      setMessage({ type: 'error', text: 'Already owned!' });
+      setMessage({ type: 'error', text: t('alreadyOwned') });
       setTimeout(() => setMessage(null), 2000);
       return;
     }
 
     if (balance < item.cost) {
-      setMessage({ type: 'error', text: 'Not enough giuros!' });
+      setMessage({ type: 'error', text: t('notEnoughGiuros') });
       setTimeout(() => setMessage(null), 2000);
       return;
     }
@@ -92,10 +92,10 @@ const ShopScreen = ({ username }) => {
   };
 
   const tabs = [
-    { id: 'frames', label: '🖼️ Frames', items: cosmetics.avatarFrames },
-    { id: 'badges', label: '🏅 Badges', items: cosmetics.badges },
-    { id: 'titles', label: '🏷️ Titles', items: cosmetics.titles },
-    { id: 'special', label: '✨ Special', items: cosmetics.special },
+    { id: 'frames', label: `🖼️ ${t('frames')}`, items: cosmetics.avatarFrames },
+    { id: 'badges', label: `🏅 ${t('badges')}`, items: cosmetics.badges },
+    { id: 'titles', label: `🏷️ ${t('titles')}`, items: cosmetics.titles },
+    { id: 'special', label: `✨ ${t('special')}`, items: cosmetics.special },
   ];
 
   const activeItems = tabs.find(t => t.id === activeTab)?.items || [];
@@ -132,17 +132,17 @@ const ShopScreen = ({ username }) => {
                   d="M15 19l-7-7 7-7"
                 />
               </svg>
-              Back
+              {t('back')}
             </button>
 
             {/* Balance */}
             <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-yellow-500/20 border border-yellow-500/30">
-              <img src="/giuro.png" alt="Giuros" className="w-6 h-6" />
+              <img src="/giuro.png" alt="Giuros" className="w-6 h-6 rounded-full object-cover" />
               <span className="font-black text-yellow-600 dark:text-yellow-400">{balance}</span>
             </div>
           </div>
 
-          <h1 className="text-3xl font-black mb-6">🛒 Shop</h1>
+          <h1 className="text-3xl font-black mb-6">🛒 {t('shop')}</h1>
 
           {/* Message */}
           {message && (
@@ -221,7 +221,7 @@ const ShopScreen = ({ username }) => {
                       <div className="text-right">
                         {owned ? (
                           <span className="text-xs font-bold text-emerald-500 bg-emerald-500/20 px-2 py-1 rounded-full">
-                            ✓ Owned
+                            ✓ {t('owned')}
                           </span>
                         ) : (
                           <div className="flex items-center gap-1">
@@ -248,7 +248,7 @@ const ShopScreen = ({ username }) => {
                                   : 'bg-slate-100 hover:bg-slate-200'
                             }`}
                           >
-                            {active ? '✓ Equipped' : 'Equip'}
+                            {active ? `✓ ${t('equipped')}` : t('equip')}
                           </button>
                         )
                       ) : (
@@ -261,7 +261,7 @@ const ShopScreen = ({ username }) => {
                               : 'bg-slate-300 text-slate-500 cursor-not-allowed'
                           }`}
                         >
-                          Buy
+                          {t('buy')}
                         </button>
                       )}
                     </div>
