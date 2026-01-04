@@ -20,7 +20,7 @@ const Options = ({ options, onSelect, selectedAnswer, feedback, autoAdvance }) =
                 btnClass = 'bg-[#000080] text-white border-[#000080] ring-2 ring-blue-400';
               } else {
                 // Non-auto mode: Just show selected in dark blue (no correctness indication)
-                btnClass = 'bg-[#000080] text-white border-[#000080] ring-4 ring-[#000080]/30';
+                btnClass = 'bg-[#000080] text-white border-[#000080] ring-4 ring-[#000080]';
               }
             } else {
               // Other options - muted
@@ -28,7 +28,7 @@ const Options = ({ options, onSelect, selectedAnswer, feedback, autoAdvance }) =
             }
           } else if (isSelected) {
             // Selected but not submitted yet (non-auto mode)
-            btnClass = 'bg-sky-500 text-white border-[#000080] ring-4 ring-[#000080]/30';
+            btnClass = 'bg-sky-500 text-white border-[#000080] ring-4 ring-[#000080]';
           } else {
             // Default unselected
             btnClass = 'bg-white hover:bg-slate-50 text-slate-800 border-slate-200';

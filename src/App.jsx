@@ -314,6 +314,11 @@ const AppRoutes = () => {
                   ? profile.joinedAt.toDate()
                   : new Date(profile.joinedAt.seconds * 1000);
                 localStorage.setItem('girify_joined', date.toLocaleDateString());
+              } else {
+                // Fallback if no joined date in profile (legacy users)
+                if (!localStorage.getItem('girify_joined')) {
+                  localStorage.setItem('girify_joined', new Date().toLocaleDateString());
+                }
               }
             })
             .catch(e => console.error(e));
