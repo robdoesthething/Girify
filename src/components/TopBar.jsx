@@ -23,7 +23,7 @@ backdrop-blur-md border-b ${theme === 'dark' ? 'border-slate-600' : 'border-slat
 `}
       >
         {/* Left: Menu & Brand */}
-        <div className="flex items-end gap-3 md:gap-4 pb-1">
+        <div className="flex items-center gap-3 md:gap-4">
           <button
             onClick={() => setMenuOpen(!menuOpen)}
             className={`p-2 rounded-full transition-colors shrink-0 ${theme === 'dark' ? 'hover:bg-neutral-300' : 'hover:bg-slate-100'} `}
@@ -37,7 +37,7 @@ backdrop-blur-md border-b ${theme === 'dark' ? 'border-slate-600' : 'border-slat
               />
             </svg>
           </button>
-          <div className="flex items-end">
+          <div className="flex items-center">
             <Logo className="h-5 md:h-7 w-auto object-contain" />
           </div>
         </div>
