@@ -21,6 +21,23 @@ const GameScreen = ({
   handleRegister,
   hasPlayedToday,
 }) => {
+  // New helper for Manual Mode: Submit -> Delay -> Next
+  const handleManualNext = () => {
+    // 1. Submit Answer
+    if (state.feedback === 'selected') {
+      processAnswer(state.selectedAnswer);
+
+      // 2. Wait 1.5s then Advance
+      setTimeout(() => {
+        handleNext();
+      }, 1500);
+    }
+    // If somehow already submitted (e.g. fast clicks), just advance
+    else if (state.feedback === 'transitioning') {
+      handleNext();
+    }
+  };
+
   return (
     <div className="flex-1 flex flex-col w-full h-full relative overflow-hidden">
       {state.gameState === 'playing' && (
@@ -90,23 +107,17 @@ const GameScreen = ({
                   feedback={state.feedback}
                 />
 
-                {/* Show Submit button if answer selected but not submitted (manual mode) */}
-                {state.feedback === 'selected' && !state.autoAdvance && state.selectedAnswer && (
+                {/* Manual Mode: Single "Next" Button */}
+                {/* Changes from "Wait" (disabled) -> "Next" (submit+advance) */}
+                {!state.autoAdvance && (
                   <Quiz.NextButton
-                    onNext={() => processAnswer(state.selectedAnswer)}
-                    isLastQuestion={false}
-                    isSubmit={true}
-                    feedback="transitioning" // Force show by mocking feedback prop
-                  />
-                )}
-
-                {/* Show Next button after answer is submitted (feedback=transitioning) */}
-                {state.feedback === 'transitioning' && !state.autoAdvance && (
-                  <Quiz.NextButton
-                    onNext={handleNext}
+                    onNext={handleManualNext}
                     isLastQuestion={state.currentQuestionIndex >= state.quizStreets.length - 1}
-                    isSubmit={false}
+                    // If 'selected', it acts as Submit. If 'transitioning', it's waiting/advancing.
+                    // We disable it if nothing selected yet.
+                    isSubmit={state.feedback === 'selected'}
                     feedback={state.feedback}
+                    disabled={!state.selectedAnswer && state.feedback === 'idle'}
                   />
                 )}
               </Quiz.Container>

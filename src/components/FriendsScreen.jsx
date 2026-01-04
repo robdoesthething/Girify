@@ -11,11 +11,13 @@ import {
   removeFriend,
   blockUser,
 } from '../utils/friends';
-import PublicProfileModal from './PublicProfileModal';
+// PublicProfileModal removed
+import { useNavigate } from 'react-router-dom';
 // eslint-disable-next-line no-unused-vars
 import { motion, AnimatePresence } from 'framer-motion';
 
 const FriendsScreen = ({ onClose, username }) => {
+  const navigate = useNavigate();
   const { theme } = useTheme();
   const [activeTab, setActiveTab] = useState('feed');
   const [friends, setFriends] = useState([]);
@@ -29,7 +31,7 @@ const FriendsScreen = ({ onClose, username }) => {
   const [searching, setSearching] = useState(false);
   const [addMessage, setAddMessage] = useState(null);
   const [successfulRequests, setSuccessfulRequests] = useState(new Set());
-  const [selectedUser, setSelectedUser] = useState(null);
+  // selectedUser state removed as we navigate
   const [activeMenu, setActiveMenu] = useState(null); // username of active menu
 
   // Load initial data
@@ -273,10 +275,10 @@ const FriendsScreen = ({ onClose, username }) => {
                   className="flex-1 cursor-pointer"
                   role="button"
                   tabIndex={0}
-                  onClick={() => setSelectedUser(f.username)}
+                  onClick={() => navigate(`/user/${f.username}`)}
                   onKeyDown={e => {
                     if (e.key === 'Enter' || e.key === ' ') {
-                      setSelectedUser(f.username);
+                      navigate(`/user/${f.username}`);
                     }
                   }}
                 >
@@ -315,7 +317,7 @@ const FriendsScreen = ({ onClose, username }) => {
                         <button
                           onClick={e => {
                             e.stopPropagation();
-                            setSelectedUser(f.username);
+                            navigate(`/user/${f.username}`);
                             setActiveMenu(null);
                           }}
                           className="w-full text-left px-4 py-2.5 text-sm font-bold hover:bg-slate-50 dark:hover:bg-slate-700 flex items-center gap-2"
@@ -351,14 +353,7 @@ const FriendsScreen = ({ onClose, username }) => {
           </div>
         )}
 
-        {/* Profile Modal */}
-        {selectedUser && (
-          <PublicProfileModal
-            username={selectedUser}
-            currentUser={username}
-            onClose={() => setSelectedUser(null)}
-          />
-        )}
+        {/* Profile Modal Removed */}
 
         {!loading && activeTab === 'requests' && (
           <div className="space-y-2">
