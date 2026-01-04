@@ -70,17 +70,6 @@ const ShopScreen = ({ username }) => {
 
     if (category === 'frames') {
       newEquipped.frameId = item.id;
-    } else if (category === 'badges') {
-      const currentBadges = newEquipped.badgeIds || [];
-      if (currentBadges.includes(item.id)) {
-        newEquipped.badgeIds = currentBadges.filter(b => b !== item.id);
-      } else if (currentBadges.length < 3) {
-        newEquipped.badgeIds = [...currentBadges, item.id];
-      } else {
-        setMessage({ type: 'error', text: 'Max 3 badges!' });
-        setTimeout(() => setMessage(null), 2000);
-        return;
-      }
     } else if (category === 'titles') {
       newEquipped.titleId = item.id;
     }
@@ -93,7 +82,6 @@ const ShopScreen = ({ username }) => {
 
   const tabs = [
     { id: 'frames', label: `🖼️ ${t('frames')}`, items: cosmetics.avatarFrames },
-    { id: 'badges', label: `🏅 ${t('badges')}`, items: cosmetics.badges },
     { id: 'titles', label: `🏷️ ${t('titles')}`, items: cosmetics.titles },
     { id: 'special', label: `✨ ${t('special')}`, items: cosmetics.special },
   ];
@@ -103,7 +91,6 @@ const ShopScreen = ({ username }) => {
   const isOwned = itemId => purchased.includes(itemId);
   const isEquipped = itemId => {
     if (activeTab === 'frames') return equipped.frameId === itemId;
-    if (activeTab === 'badges') return (equipped.badgeIds || []).includes(itemId);
     if (activeTab === 'titles') return equipped.titleId === itemId;
     return false;
   };
@@ -137,7 +124,7 @@ const ShopScreen = ({ username }) => {
 
             {/* Balance */}
             <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-yellow-500/20 border border-yellow-500/30">
-              <img src="/giuro.png" alt="Giuros" className="w-6 h-6 rounded-full object-cover" />
+              <img src="/giuro.png" alt="Giuros" className="h-5 w-auto object-contain" />
               <span className="font-black text-yellow-600 dark:text-yellow-400">{balance}</span>
             </div>
           </div>
@@ -225,7 +212,7 @@ const ShopScreen = ({ username }) => {
                           </span>
                         ) : (
                           <div className="flex items-center gap-1">
-                            <img src="/giuro.png" alt="" className="w-4 h-4" />
+                            <img src="/giuro.png" alt="" className="h-4 w-auto object-contain" />
                             <span className="font-black text-yellow-600 dark:text-yellow-400">
                               {item.cost}
                             </span>

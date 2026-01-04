@@ -2,16 +2,16 @@ import React, { useEffect, useState } from 'react';
 // eslint-disable-next-line no-unused-vars
 import { AnimatePresence, motion } from 'framer-motion';
 import { useTheme } from '../context/ThemeContext';
+import { useNavigate } from 'react-router-dom';
 import { getLeaderboard } from '../utils/leaderboard';
-import PublicProfileModal from './PublicProfileModal';
 import PropTypes from 'prop-types';
 
-const LeaderboardScreen = ({ onClose, currentUser }) => {
+const LeaderboardScreen = ({ onClose }) => {
   const { theme, t } = useTheme();
+  const navigate = useNavigate();
   const [scores, setScores] = useState([]);
   const [loading, setLoading] = useState(true);
   const [period, setPeriod] = useState('all'); // 'all', 'monthly', 'weekly', 'daily'
-  const [selectedUser, setSelectedUser] = useState(null);
 
   const [error, setError] = useState(null);
 
@@ -167,7 +167,7 @@ const LeaderboardScreen = ({ onClose, currentUser }) => {
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: index * 0.05 }}
                   key={s.id || index}
-                  onClick={() => setSelectedUser(s.username)}
+                  onClick={() => navigate(`/user/${encodeURIComponent(s.username)}`)}
                   className={`flex items-center p-4 rounded-2xl border cursor-pointer hover:scale-[1.02] transition-transform
                                     ${theme === 'dark' ? 'bg-neutral-900/50 border-neutral-800 text-neutral-100' : 'bg-white border-slate-100 text-slate-900'}
                                     ${index < 3 ? 'border-sky-500/30 shadow-sm' : ''}
@@ -207,24 +207,12 @@ const LeaderboardScreen = ({ onClose, currentUser }) => {
           )}
         </div>
       </div>
-
-      {/* Profile Modal */}
-      <AnimatePresence>
-        {selectedUser && (
-          <PublicProfileModal
-            username={selectedUser}
-            onClose={() => setSelectedUser(null)}
-            currentUser={currentUser}
-          />
-        )}
-      </AnimatePresence>
     </>
   );
 };
 
 LeaderboardScreen.propTypes = {
   onClose: PropTypes.func.isRequired,
-  currentUser: PropTypes.string,
 };
 
 export default LeaderboardScreen;

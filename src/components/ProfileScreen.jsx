@@ -6,6 +6,7 @@ import { useTheme } from '../context/ThemeContext';
 import { getFriendCount, getUserProfile, updateUserProfile } from '../utils/social';
 import { getGiuros, getEquippedCosmetics } from '../utils/giuros';
 import cosmetics from '../data/cosmetics.json';
+import { getUnlockedAchievements, getNextAchievement } from '../data/achievements';
 import FriendRequests from './FriendRequests';
 import TopBar from './TopBar';
 import PropTypes from 'prop-types';
@@ -71,27 +72,31 @@ const ProfileScreen = ({ onClose, username }) => {
   const navigate = useNavigate();
 
   // Initialize state functions to avoid synchronous effect updates
-  const [history] = useState(() => {
+  // allHistory = ALL games played (for total count)
+  // uniqueHistory = only first game per day (for streak calculation)
+  const [allHistory] = useState(() => {
     try {
       const rawHistory = localStorage.getItem('girify_history');
       const parsedHistory = rawHistory ? JSON.parse(rawHistory) : [];
-      const list = Array.isArray(parsedHistory) ? parsedHistory : [];
-      // Filter: Keep only the FIRST attempt per day (User Requirement)
-      // Assuming 'date' is the day seed (YYYYMMDD integer)
-      const seenDates = new Set();
-      const uniqueList = [];
-      list.forEach(game => {
-        if (!seenDates.has(game.date)) {
-          seenDates.add(game.date);
-          uniqueList.push(game);
-        }
-      });
-      return uniqueList;
+      return Array.isArray(parsedHistory) ? parsedHistory : [];
     } catch (e) {
       console.error('Profile data load error:', e);
       return [];
     }
   });
+
+  // For streak calculation, we need unique days
+  const uniqueHistory = React.useMemo(() => {
+    const seenDates = new Set();
+    const uniqueList = [];
+    allHistory.forEach(game => {
+      if (!seenDates.has(game.date)) {
+        seenDates.add(game.date);
+        uniqueList.push(game);
+      }
+    });
+    return uniqueList;
+  }, [allHistory]);
 
   const [joinedDate] = useState(() => {
     return localStorage.getItem('girify_joined') || new Date().toLocaleDateString();
@@ -146,11 +151,16 @@ const ProfileScreen = ({ onClose, username }) => {
     setEditAvatarId(prev => (prev + 1) % AVATARS.length);
   };
 
-  const totalGames = history.length;
-  const bestScore = totalGames > 0 ? Math.max(...history.map(h => (h && h.score) || 0)) : 0;
-  const totalScore = history.reduce((acc, curr) => acc + ((curr && curr.score) || 0), 0);
+  const totalGames = allHistory.length; // Use ALL games, not just unique days
+  const bestScore = totalGames > 0 ? Math.max(...allHistory.map(h => (h && h.score) || 0)) : 0;
+  const totalScore = allHistory.reduce((acc, curr) => acc + ((curr && curr.score) || 0), 0);
   const avgScore = totalGames > 0 ? Math.round(totalScore / totalGames) : 0;
-  const dailyStreak = calculateStreak(history);
+  const dailyStreak = calculateStreak(uniqueHistory); // Use unique days for streak
+
+  // Achievement badges
+  const userStats = { gamesPlayed: totalGames, bestScore, streak: dailyStreak };
+  const unlockedBadges = getUnlockedAchievements(userStats);
+  const nextBadge = getNextAchievement(userStats);
 
   // Determine display avatar
   const currentAvatarId = isEditing
@@ -166,11 +176,6 @@ const ProfileScreen = ({ onClose, username }) => {
   // Get equipped frame class
   const equippedFrame = cosmetics.avatarFrames.find(f => f.id === equippedCosmetics.frameId);
   const frameClass = equippedFrame?.cssClass || 'ring-4 ring-white dark:ring-slate-700';
-
-  // Get equipped badges
-  const equippedBadges = (equippedCosmetics.badgeIds || [])
-    .map(id => cosmetics.badges.find(b => b.id === id))
-    .filter(Boolean);
 
   return (
     <div
@@ -204,9 +209,36 @@ const ProfileScreen = ({ onClose, username }) => {
               onClick={() => navigate('/shop')}
               className="flex items-center gap-2 px-4 py-2 rounded-full bg-yellow-500/20 border border-yellow-500/30 hover:bg-yellow-500/30 transition-colors"
             >
-              <img src="/giuro.png" alt="Giuros" className="w-6 h-6 rounded-full object-cover" />
+              <img src="/giuro.png" alt="Giuros" className="h-5 w-auto object-contain" />
               <span className="font-black text-yellow-600 dark:text-yellow-400">{giuros}</span>
             </button>
+          </div>
+
+          {/* Giuros Explainer Callout */}
+          <div
+            className={`mb-6 p-4 rounded-2xl border ${
+              theme === 'dark'
+                ? 'bg-yellow-500/10 border-yellow-500/30'
+                : 'bg-yellow-50 border-yellow-200'
+            }`}
+          >
+            <div className="flex items-start gap-3">
+              <img src="/giuro.png" alt="" className="h-8 w-auto object-contain shrink-0 mt-0.5" />
+              <div className="flex-1">
+                <h4 className="font-bold text-yellow-700 dark:text-yellow-400 mb-1">
+                  {t('giurosExplainerTitle')}
+                </h4>
+                <p className="text-sm text-yellow-600/80 dark:text-yellow-300/70 mb-3">
+                  {t('giurosExplainerText')}
+                </p>
+                <button
+                  onClick={() => navigate('/shop')}
+                  className="text-sm font-bold text-yellow-700 dark:text-yellow-400 hover:underline flex items-center gap-1"
+                >
+                  {t('goToShop')} →
+                </button>
+              </div>
+            </div>
           </div>
 
           {/* Profile Card */}
@@ -288,14 +320,23 @@ const ProfileScreen = ({ onClose, username }) => {
               {/* Handle / Name Display */}
               <h2 className="text-2xl font-black tracking-tight">{username}</h2>
 
-              {/* Equipped Badges */}
-              {equippedBadges.length > 0 && (
-                <div className="flex gap-2 mt-2">
-                  {equippedBadges.map(badge => (
-                    <span key={badge.id} className="text-xl" title={badge.name}>
+              {/* Achievement Badges (earned through gameplay) */}
+              {unlockedBadges.length > 0 && (
+                <div className="flex flex-wrap justify-center gap-2 mt-2">
+                  {unlockedBadges.slice(0, 6).map(badge => (
+                    <span
+                      key={badge.id}
+                      className="text-xl"
+                      title={`${badge.name}: ${badge.description}`}
+                    >
                       {badge.emoji}
                     </span>
                   ))}
+                  {unlockedBadges.length > 6 && (
+                    <span className="text-xs text-slate-400 self-center">
+                      +{unlockedBadges.length - 6}
+                    </span>
+                  )}
                 </div>
               )}
 
@@ -381,19 +422,78 @@ const ProfileScreen = ({ onClose, username }) => {
               </div>
             </div>
 
+            {/* Achievements Section */}
+            <div className="p-6 border-b border-slate-100 dark:border-slate-800">
+              <h3 className="text-sm font-bold uppercase tracking-wider opacity-50 mb-4">
+                {t('achievements')} ({unlockedBadges.length})
+              </h3>
+
+              {unlockedBadges.length > 0 ? (
+                <div className="grid grid-cols-4 sm:grid-cols-5 gap-3">
+                  {unlockedBadges.map(badge => (
+                    <div
+                      key={badge.id}
+                      className={`flex flex-col items-center p-2 rounded-xl ${
+                        theme === 'dark' ? 'bg-slate-700/50' : 'bg-slate-50'
+                      }`}
+                      title={badge.description}
+                    >
+                      <span className="text-2xl mb-1">{badge.emoji}</span>
+                      <span className="text-[10px] text-center font-bold opacity-70 leading-tight">
+                        {badge.name}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-sm opacity-50 text-center py-4">
+                  Play games to unlock achievements!
+                </p>
+              )}
+
+              {/* Next Achievement Progress */}
+              {nextBadge && (
+                <div
+                  className={`mt-4 p-3 rounded-xl ${theme === 'dark' ? 'bg-slate-700/30' : 'bg-slate-100'}`}
+                >
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-xs font-bold opacity-60">{t('nextAchievement')}</span>
+                    <span className="text-lg">{nextBadge.emoji}</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div
+                      className={`flex-1 h-2 rounded-full ${theme === 'dark' ? 'bg-slate-600' : 'bg-slate-200'}`}
+                    >
+                      <div
+                        className="h-2 rounded-full bg-gradient-to-r from-sky-500 to-indigo-500 transition-all"
+                        style={{ width: `${Math.round(nextBadge.progress * 100)}%` }}
+                      />
+                    </div>
+                    <span className="text-xs font-bold opacity-60">
+                      {Math.round(nextBadge.progress * 100)}%
+                    </span>
+                  </div>
+                  <p className="text-xs opacity-50 mt-1">
+                    {nextBadge.name}: {nextBadge.description}
+                  </p>
+                </div>
+              )}
+            </div>
+
             {/* Recent History */}
             <div className="flex-1 overflow-y-auto p-6">
               <h3 className="text-sm font-bold uppercase tracking-wider opacity-50 mb-4">
                 {t('recentActivity')}
               </h3>
 
-              {history.length === 0 ? (
+              {allHistory.length === 0 ? (
                 <div className="text-center py-10 opacity-40 text-sm">{t('noGamesYet')}</div>
               ) : (
                 <div className="space-y-3">
-                  {history
+                  {allHistory
                     .slice()
                     .reverse()
+                    .slice(0, 10)
                     .map((game, i) => (
                       <div
                         key={i}
