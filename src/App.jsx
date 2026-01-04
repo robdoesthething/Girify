@@ -8,7 +8,7 @@ import AboutScreen from './components/AboutScreen';
 import ProfileScreen from './components/ProfileScreen';
 import FriendsScreen from './components/FriendsScreen';
 import PublicProfileScreen from './components/PublicProfileScreen';
-// ... imports
+import GameScreen from './components/GameScreen';
 
 // ... inside Routes
 
