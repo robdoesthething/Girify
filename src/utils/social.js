@@ -97,26 +97,69 @@ export const getUserProfile = async username => {
     const snapshot = await getDocs(q); // Iterate to count. Expensive but necessary for healing.
     const gamesPlayed = snapshot.size;
 
-    // 3. Construct Corrected Data
+    // 3. Count Friends from subcollection (matches friends.js storage)
+    const friendsSnapshot = await getDocs(collection(db, USERS_COLLECTION, username, 'friends'));
+    const friendCount = friendsSnapshot.size;
+
+    // 4. Determine "Player Since" (First Game Date)
+    // If we have scores, find the earliest one
+    let joinedAt = profileData?.joinedAt || Timestamp.now();
+    if (!snapshot.empty) {
+      let earliestGame = null;
+      snapshot.forEach(doc => {
+        const d = doc.data();
+        let t = null;
+        if (d.timestamp?.toDate) t = d.timestamp.toDate();
+        else if (d.timestamp?.seconds) t = new Date(d.timestamp.seconds * 1000);
+        else if (d.timestamp) t = new Date(d.timestamp); // Number or string
+
+        if (t) {
+          if (!earliestGame || t < earliestGame) {
+            earliestGame = t;
+          }
+        }
+      });
+
+      // If earliest game is older than current joinedAt (or joinedAt is essentially "now" from defaults), update it
+      const currentJoinedDate = joinedAt.toDate
+        ? joinedAt.toDate()
+        : new Date(joinedAt.seconds * 1000);
+
+      // Heuristic: If earliest game is essentially older, or we have a default "now" joinedAt
+      if (earliestGame && earliestGame < currentJoinedDate) {
+        joinedAt = Timestamp.fromDate(earliestGame);
+      }
+    }
+
+    // 5. Construct Corrected Data
     const correctedData = {
       username,
       gamesPlayed: Math.max(profileData?.gamesPlayed || 0, gamesPlayed),
       bestScore: Math.max(profileData?.bestScore || 0, bestScore),
-      friendCount: profileData?.friendCount || 0,
-      joinedAt: profileData?.joinedAt || Timestamp.now(), // Keep existing or default
+      friendCount: Math.max(profileData?.friendCount || 0, friendCount),
+      joinedAt: joinedAt,
       migratedTo: profileData?.migratedTo || null,
     };
 
-    // 4. SELF-HEAL: Update Firestore if we found data
-    if (correctedData.gamesPlayed > 0 || correctedData.bestScore > 0) {
+    // 6. SELF-HEAL: Update Firestore if we found data
+    const needsUpdate =
+      correctedData.gamesPlayed !== (profileData?.gamesPlayed || 0) ||
+      correctedData.bestScore !== (profileData?.bestScore || 0) ||
+      correctedData.friendCount !== (profileData?.friendCount || 0) ||
+      // Simple timestamp comparison (seconds)
+      correctedData.joinedAt.seconds !== (profileData?.joinedAt?.seconds || 0);
+
+    if (needsUpdate || correctedData.gamesPlayed > 0) {
       if (userDoc.exists()) {
         await updateDoc(userRef, {
           gamesPlayed: correctedData.gamesPlayed,
           bestScore: correctedData.bestScore,
+          friendCount: correctedData.friendCount,
+          joinedAt: correctedData.joinedAt,
         });
         // eslint-disable-next-line no-console
         console.log(
-          `[UserProfile] Healed stats for ${username}: Games=${correctedData.gamesPlayed}, Best=${correctedData.bestScore}`
+          `[UserProfile] Healed stats for ${username}: Games=${correctedData.gamesPlayed}, Friends=${correctedData.friendCount}, Since=${correctedData.joinedAt.toDate()}`
         );
       } else {
         // If profile didn't exist at all, create it
@@ -270,13 +313,14 @@ export const getFriendshipStatus = async (user1, user2) => {
 export const getFriendCount = async username => {
   if (!username) return 0;
 
-  const userRef = doc(db, USERS_COLLECTION, username);
-  const userDoc = await getDoc(userRef);
-
-  if (userDoc.exists()) {
-    return userDoc.data().friendCount || 0;
+  try {
+    // Count friends from subcollection (matches friends.js storage)
+    const friendsSnapshot = await getDocs(collection(db, USERS_COLLECTION, username, 'friends'));
+    return friendsSnapshot.size;
+  } catch (e) {
+    console.error('Error getting friend count:', e);
+    return 0;
   }
-  return 0;
 };
 
 /**
