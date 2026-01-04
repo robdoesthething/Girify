@@ -18,6 +18,7 @@ const PublicProfileModal = ({ username, onClose, currentUser }) => {
   const [friendStatus, setFriendStatus] = useState('none'); // 'none' | 'pending' | 'friends'
   const [isBlocked, setIsBlocked] = useState(false);
   const [sendingRequest, setSendingRequest] = useState(false);
+  const [requestSent, setRequestSent] = useState(false);
   const [blocking, setBlocking] = useState(false);
   const [error, setError] = useState(null);
 
@@ -46,6 +47,9 @@ const PublicProfileModal = ({ username, onClose, currentUser }) => {
           ]);
           setFriendStatus(status);
           setIsBlocked(blocked);
+          if (status === 'pending') {
+            setRequestSent(true);
+          }
         }
       } catch (e) {
         console.error('Error loading profile:', e);
@@ -71,6 +75,7 @@ const PublicProfileModal = ({ username, onClose, currentUser }) => {
     setSendingRequest(true);
     try {
       await sendFriendRequest(currentUser, username);
+      setRequestSent(true);
       setFriendStatus('pending');
     } catch (e) {
       console.error('Error sending friend request:', e);
@@ -182,7 +187,7 @@ const PublicProfileModal = ({ username, onClose, currentUser }) => {
                       <div className="w-full py-3 bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 rounded-xl text-center font-bold text-sm">
                         ✅ Friends
                       </div>
-                    ) : friendStatus === 'pending' ? (
+                    ) : friendStatus === 'pending' || requestSent ? (
                       <div className="w-full py-3 bg-yellow-500/20 text-yellow-600 dark:text-yellow-400 rounded-xl text-center font-bold text-sm">
                         ⏳ Request Pending
                       </div>
