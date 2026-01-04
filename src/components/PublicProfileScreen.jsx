@@ -12,7 +12,8 @@ import TopBar from './TopBar';
 
 const PublicProfileScreen = ({ currentUser }) => {
   const { theme } = useTheme();
-  const { username } = useParams();
+  const { username: encodedUsername } = useParams();
+  const username = decodeURIComponent(encodedUsername || '');
   const navigate = useNavigate();
 
   const [profile, setProfile] = useState(null);
