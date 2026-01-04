@@ -304,9 +304,17 @@ const AppRoutes = () => {
         } else {
           // Even if handle exists, ensure Firestore profile matches
           ensureUserProfile(displayName)
-            .then(() => {
+            .then(profile => {
               // Self-heal any broken migration links
               healMigration(displayName).catch(err => console.error(err));
+
+              // Sync joined date
+              if (profile && profile.joinedAt) {
+                const date = profile.joinedAt.toDate
+                  ? profile.joinedAt.toDate()
+                  : new Date(profile.joinedAt.seconds * 1000);
+                localStorage.setItem('girify_joined', date.toLocaleDateString());
+              }
             })
             .catch(e => console.error(e));
         }

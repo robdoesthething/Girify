@@ -2,13 +2,13 @@ import React, { useState, useEffect } from 'react';
 // eslint-disable-next-line no-unused-vars
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTheme } from '../context/ThemeContext';
+import { getUserProfile } from '../utils/social';
 import {
-  getUserProfile,
   sendFriendRequest,
   getFriendshipStatus,
   blockUser,
   getBlockStatus,
-} from '../utils/social';
+} from '../utils/friends';
 import PropTypes from 'prop-types';
 
 const PublicProfileModal = ({ username, onClose, currentUser }) => {

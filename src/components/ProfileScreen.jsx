@@ -342,11 +342,7 @@ const ProfileScreen = ({ onClose, username }) => {
                       </p>
                     </div>
                     <div className="text-right">
-                      <span
-                        className={`font-black text-lg ${game.score >= 800 ? 'text-emerald-500' : 'text-slate-600 dark:text-slate-300'}`}
-                      >
-                        {game.score}
-                      </span>
+                      <span className="font-black text-lg text-emerald-500">{game.score}</span>
                       <span className="text-[10px] font-bold text-slate-400 ml-1">PTS</span>
                     </div>
                   </div>
