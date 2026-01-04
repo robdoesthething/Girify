@@ -47,6 +47,11 @@ export const ensureUserProfile = async (username, additionalData = {}) => {
       gamesPlayed: 0,
       bestScore: 0,
       referralCode: username.toLowerCase().replace(/[^a-z0-9]/g, ''),
+      // Giuros currency system
+      giuros: 10,
+      purchasedCosmetics: [],
+      equippedCosmetics: {},
+      lastLoginDate: null,
     };
     await setDoc(userRef, profileData);
     return profileData;
