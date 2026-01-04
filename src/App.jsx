@@ -7,7 +7,11 @@ import SettingsScreen from './components/SettingsScreen';
 import AboutScreen from './components/AboutScreen';
 import ProfileScreen from './components/ProfileScreen';
 import FriendsScreen from './components/FriendsScreen';
-import GameScreen from './components/GameScreen';
+import PublicProfileScreen from './components/PublicProfileScreen';
+// ... imports
+
+// ... inside Routes
+
 import { ThemeProvider, useTheme } from './context/ThemeContext';
 import rawStreets from './data/streets.json';
 import * as turf from '@turf/turf';
@@ -405,6 +409,10 @@ const AppRoutes = () => {
             element={
               <ProfileScreen onClose={() => handleOpenPage(null)} username={state.username} />
             }
+          />
+          <Route
+            path="/user/:username"
+            element={<PublicProfileScreen currentUser={state.username} />}
           />
           <Route
             path="/friends"
