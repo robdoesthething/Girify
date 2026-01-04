@@ -4,25 +4,25 @@
       "id": "frame_gold",
       "name": "Golden Frame",
       "cost": 100,
-      "cssClass": "ring-4 ring-yellow-400"
+      "cssClass": "ring-4 ring-yellow-500 shadow-lg shadow-yellow-500/50"
     },
     {
       "id": "frame_silver",
       "name": "Silver Frame",
       "cost": 50,
-      "cssClass": "ring-4 ring-slate-300"
+      "cssClass": "ring-4 ring-slate-400 shadow-md shadow-slate-400/50"
     },
     {
       "id": "frame_bronze",
       "name": "Bronze Frame",
       "cost": 25,
-      "cssClass": "ring-4 ring-amber-600"
+      "cssClass": "ring-4 ring-orange-700 shadow-sm shadow-orange-700/50"
     },
     {
       "id": "frame_neon",
       "name": "Neon Frame",
       "cost": 150,
-      "cssClass": "ring-4 ring-cyan-400 shadow-lg shadow-cyan-400/50"
+      "cssClass": "ring-4 ring-cyan-400 shadow-lg shadow-cyan-400/50 animate-pulse"
     }
   ],
   "titles": [
