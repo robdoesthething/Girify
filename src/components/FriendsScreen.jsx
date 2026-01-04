@@ -8,7 +8,10 @@ import {
   declineFriendRequest,
   getFriends,
   getFriendFeed,
+  removeFriend,
+  blockUser,
 } from '../utils/friends';
+import PublicProfileModal from './PublicProfileModal';
 // eslint-disable-next-line no-unused-vars
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -26,6 +29,8 @@ const FriendsScreen = ({ onClose, username }) => {
   const [searching, setSearching] = useState(false);
   const [addMessage, setAddMessage] = useState(null);
   const [successfulRequests, setSuccessfulRequests] = useState(new Set());
+  const [selectedUser, setSelectedUser] = useState(null);
+  const [activeMenu, setActiveMenu] = useState(null); // username of active menu
 
   // Load initial data
   useEffect(() => {
@@ -88,6 +93,24 @@ const FriendsScreen = ({ onClose, username }) => {
   const handleDecline = async requester => {
     await declineFriendRequest(username, requester);
     loadRequests(); // Reload
+  };
+
+  const handleRemoveFriend = async friendName => {
+    // eslint-disable-next-line no-alert
+    if (!window.confirm(`Are you sure you want to remove ${friendName}?`)) return;
+    await removeFriend(username, friendName);
+    loadFriends(); // Reload list
+    loadFeed(); // Reload feed as it might change
+  };
+
+  const handleBlockUser = async friendName => {
+    // eslint-disable-next-line no-alert
+    if (!window.confirm(`Are you sure you want to block ${friendName}?`)) return;
+    await blockUser(username, friendName);
+    // Also remove from friends if blocked
+    await removeFriend(username, friendName);
+    loadFriends();
+    loadFeed();
   };
 
   const tabClass =
@@ -244,15 +267,97 @@ const FriendsScreen = ({ onClose, username }) => {
             {friends.map(f => (
               <div
                 key={f.username}
-                className="p-3 rounded-lg border flex justify-between items-center bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800"
+                className="p-3 rounded-lg border flex justify-between items-center bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 transition-colors relative"
               >
-                <span className="font-bold">{f.username}</span>
-                <span className="text-xs text-slate-400">
-                  Since {new Date(f.since?.seconds * 1000).getFullYear()}
-                </span>
+                <div
+                  className="flex-1 cursor-pointer"
+                  role="button"
+                  tabIndex={0}
+                  onClick={() => setSelectedUser(f.username)}
+                  onKeyDown={e => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      setSelectedUser(f.username);
+                    }
+                  }}
+                >
+                  <span className="font-bold">{f.username}</span>
+                  <div className="text-xs text-slate-400">
+                    Since {new Date(f.since?.seconds * 1000).getFullYear()}
+                  </div>
+                </div>
+
+                {/* Menu Button */}
+                <div className="relative">
+                  <button
+                    onClick={e => {
+                      e.stopPropagation();
+                      setActiveMenu(activeMenu === f.username ? null : f.username);
+                    }}
+                    className="p-2 ml-2 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors"
+                  >
+                    <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M12 8c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z" />
+                    </svg>
+                  </button>
+
+                  {/* Dropdown */}
+                  {activeMenu === f.username && (
+                    <>
+                      {/* eslint-disable-next-line jsx-a11y/click-events-have-key-events */}
+                      <div
+                        className="fixed inset-0 z-40 cursor-default"
+                        onClick={e => {
+                          e.stopPropagation();
+                          setActiveMenu(null);
+                        }}
+                      />
+                      <div className="absolute right-0 top-full mt-1 w-40 bg-white dark:bg-slate-800 rounded-xl shadow-xl border border-slate-100 dark:border-slate-700 z-50 overflow-hidden py-1">
+                        <button
+                          onClick={e => {
+                            e.stopPropagation();
+                            setSelectedUser(f.username);
+                            setActiveMenu(null);
+                          }}
+                          className="w-full text-left px-4 py-2.5 text-sm font-bold hover:bg-slate-50 dark:hover:bg-slate-700 flex items-center gap-2"
+                        >
+                          👤 Profile
+                        </button>
+                        <button
+                          onClick={e => {
+                            e.stopPropagation();
+                            handleRemoveFriend(f.username);
+                            setActiveMenu(null);
+                          }}
+                          className="w-full text-left px-4 py-2.5 text-sm font-bold text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 hover:text-red-500 flex items-center gap-2"
+                        >
+                          Unfriend
+                        </button>
+                        <button
+                          onClick={e => {
+                            e.stopPropagation();
+                            handleBlockUser(f.username);
+                            setActiveMenu(null);
+                          }}
+                          className="w-full text-left px-4 py-2.5 text-sm font-bold text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-700 hover:text-slate-600 flex items-center gap-2"
+                        >
+                          🚫 Block
+                        </button>
+                      </div>
+                    </>
+                  )}
+                </div>
               </div>
             ))}
           </div>
+        )}
+
+        {/* Profile Modal */}
+        {selectedUser && (
+          <PublicProfileModal
+            username={selectedUser}
+            currentUser={username}
+            onClose={() => setSelectedUser(null)}
+          />
         )}
 
         {!loading && activeTab === 'requests' && (

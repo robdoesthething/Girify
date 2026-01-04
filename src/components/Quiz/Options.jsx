@@ -17,10 +17,12 @@ const Options = ({ options, onSelect, selectedAnswer, feedback, autoAdvance }) =
               // User's answer
               if (autoAdvance) {
                 // Auto-mode: Dark blue highlight
-                btnClass = 'bg-[#000080] text-white border-[#000080] ring-2 ring-blue-400';
+                btnClass =
+                  'bg-[#000080] text-white border-[#000080] ring-2 ring-[#000080] ring-opacity-100 shadow-none';
               } else {
                 // Non-auto mode: Just show selected in dark blue (no correctness indication)
-                btnClass = 'bg-[#000080] text-white border-[#000080] ring-4 ring-[#000080]';
+                btnClass =
+                  'bg-[#000080] text-white border-[#000080] ring-4 ring-[#000080] ring-opacity-100 shadow-none';
               }
             } else {
               // Other options - muted
@@ -28,10 +30,11 @@ const Options = ({ options, onSelect, selectedAnswer, feedback, autoAdvance }) =
             }
           } else if (isSelected) {
             // Selected but not submitted yet (non-auto mode)
-            btnClass = 'bg-sky-500 text-white border-[#000080] ring-4 ring-[#000080]';
+            btnClass =
+              'bg-sky-500 text-white border-[#000080] ring-4 ring-[#000080] ring-opacity-100 shadow-none';
           } else {
             // Default unselected
-            btnClass = 'bg-white hover:bg-slate-50 text-slate-800 border-slate-200';
+            btnClass = 'bg-white active:bg-slate-50 text-slate-800 border-slate-200';
           }
 
           return (
@@ -42,7 +45,7 @@ const Options = ({ options, onSelect, selectedAnswer, feedback, autoAdvance }) =
                 onSelect(opt);
               }}
               disabled={feedback === 'transitioning'}
-              className={`w-full min-h-[2.75rem] sm:min-h-[3.5rem] flex-shrink-0 flex items-center justify-center sm:justify-start px-2 sm:px-4 rounded-xl text-center sm:text-left transition-all duration-200 relative overflow-hidden group border
+              className={`w-full min-h-[2.75rem] sm:min-h-[3.5rem] flex-shrink-0 flex items-center justify-center sm:justify-start px-2 sm:px-4 rounded-xl text-center sm:text-left transition-all duration-200 relative overflow-hidden group border focus:outline-none focus:ring-0
                                 ${btnClass}
                             `}
             >

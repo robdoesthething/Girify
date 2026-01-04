@@ -433,6 +433,7 @@ export const migrateUser = async (oldUsername, newHandle) => {
         });
 
         if (!subSnap.empty)
+          // eslint-disable-next-line no-console
           console.log(`[Migration] Migrated ${subSnap.size} documents in '${sub}'`);
       } catch (e) {
         console.warn(`[Migration] Failed to migrate subcollection ${sub}:`, e);
