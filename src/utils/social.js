@@ -72,28 +72,67 @@ export const getUserProfile = async username => {
 
   const userRef = doc(db, USERS_COLLECTION, username);
   const userDoc = await getDoc(userRef);
+  const profileData = userDoc.exists() ? { id: userDoc.id, ...userDoc.data() } : null;
 
-  if (!userDoc.exists()) {
-    // Try to build profile from highscores data
-    try {
-      const highscoreRef = doc(db, 'highscores', username);
-      const highscoreDoc = await getDoc(highscoreRef);
-      if (highscoreDoc.exists()) {
-        const data = highscoreDoc.data();
-        return {
-          username,
-          gamesPlayed: 1,
-          bestScore: data.score || 0,
-          friendCount: 0,
-        };
-      }
-    } catch (e) {
-      console.error('Error fetching highscore:', e);
-    }
-    return null;
+  // FAST PATH: If we have a healthy profile, return it
+  if (profileData && profileData.gamesPlayed > 0) {
+    return profileData;
   }
 
-  return { id: userDoc.id, ...userDoc.data() };
+  // SLOW PATH / HEALING: Missing profile or zero stats. Check legacy collections.
+  try {
+    // 1. Check Highscore (Best Score)
+    const highscoreRef = doc(db, 'highscores', username);
+    const highscoreDoc = await getDoc(highscoreRef);
+    let bestScore = 0;
+    if (highscoreDoc.exists()) {
+      bestScore = highscoreDoc.data().score || 0;
+    }
+
+    // 2. Count Total Games from 'scores' collection
+    // Note: 'countFromServer' is efficient but requires backend support.
+    // If not available in this client SDK version, we standard query.
+    // Optimizing by selecting only one field.
+    const q = query(collection(db, 'scores'), where('username', '==', username));
+    const snapshot = await getDocs(q); // Iterate to count. Expensive but necessary for healing.
+    const gamesPlayed = snapshot.size;
+
+    // 3. Construct Corrected Data
+    const correctedData = {
+      username,
+      gamesPlayed: Math.max(profileData?.gamesPlayed || 0, gamesPlayed),
+      bestScore: Math.max(profileData?.bestScore || 0, bestScore),
+      friendCount: profileData?.friendCount || 0,
+      joinedAt: profileData?.joinedAt || Timestamp.now(), // Keep existing or default
+      migratedTo: profileData?.migratedTo || null,
+    };
+
+    // 4. SELF-HEAL: Update Firestore if we found data
+    if (correctedData.gamesPlayed > 0 || correctedData.bestScore > 0) {
+      if (userDoc.exists()) {
+        await updateDoc(userRef, {
+          gamesPlayed: correctedData.gamesPlayed,
+          bestScore: correctedData.bestScore,
+        });
+        // eslint-disable-next-line no-console
+        console.log(
+          `[UserProfile] Healed stats for ${username}: Games=${correctedData.gamesPlayed}, Best=${correctedData.bestScore}`
+        );
+      } else {
+        // If profile didn't exist at all, create it
+        await setDoc(userRef, {
+          ...correctedData,
+          createdAt: Timestamp.now(),
+        });
+      }
+    }
+
+    return correctedData;
+  } catch (e) {
+    console.error('Error healing user profile:', e);
+    // Return what we have as fallback
+    return profileData || { username, gamesPlayed: 0, bestScore: 0, friendCount: 0 };
+  }
 };
 
 /**
