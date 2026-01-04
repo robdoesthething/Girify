@@ -275,10 +275,10 @@ const FriendsScreen = ({ onClose, username }) => {
                   className="flex-1 cursor-pointer"
                   role="button"
                   tabIndex={0}
-                  onClick={() => navigate(`/user/${f.username}`)}
+                  onClick={() => navigate(`/user/${encodeURIComponent(f.username)}`)}
                   onKeyDown={e => {
                     if (e.key === 'Enter' || e.key === ' ') {
-                      navigate(`/user/${f.username}`);
+                      navigate(`/user/${encodeURIComponent(f.username)}`);
                     }
                   }}
                 >
@@ -317,7 +317,7 @@ const FriendsScreen = ({ onClose, username }) => {
                         <button
                           onClick={e => {
                             e.stopPropagation();
-                            navigate(`/user/${f.username}`);
+                            navigate(`/user/${encodeURIComponent(f.username)}`);
                             setActiveMenu(null);
                           }}
                           className="w-full text-left px-4 py-2.5 text-sm font-bold hover:bg-slate-50 dark:hover:bg-slate-700 flex items-center gap-2"
