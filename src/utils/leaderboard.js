@@ -158,8 +158,15 @@ export const getLeaderboard = async (period = 'all') => {
 
       let include = false;
       // Better username handling - use the username from data, or doc ID as fallback
+      // IMPORTANT: Filter out old format usernames (without @)
       const loweredUsername =
         data.username?.toLowerCase() || doc.id.toLowerCase() || 'unknown user';
+
+      // Skip entries that don't follow @username format
+      if (!loweredUsername.startsWith('@')) {
+        // Try to skip old format entries - they should have migrated
+        return;
+      }
 
       if (period === 'daily') {
         // Daily: Only today's games
