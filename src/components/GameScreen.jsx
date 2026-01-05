@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 // eslint-disable-next-line no-unused-vars
 import { motion, AnimatePresence } from 'framer-motion';
 import MapArea from './MapArea';
@@ -6,6 +6,7 @@ import Quiz from './Quiz';
 import RegisterPanel from './RegisterPanel';
 import SummaryScreen from './SummaryScreen';
 import Logo from './Logo';
+import OnboardingTour from './OnboardingTour';
 
 const GameScreen = ({
   state,
@@ -21,6 +22,13 @@ const GameScreen = ({
   handleRegister,
   hasPlayedToday,
 }) => {
+  const [showOnboarding, setShowOnboarding] = useState(() => {
+    // Show only if not completed and not logged in (no username in state)
+    // We check props.state.username which is available in closure
+    const completed = localStorage.getItem('girify_onboarding_completed');
+    return !completed && !state.username;
+  });
+
   // New helper for Manual Mode: Submit -> Delay -> Next
   const handleManualNext = () => {
     // 1. Submit Answer
@@ -231,6 +239,9 @@ const GameScreen = ({
           />
         </div>
       )}
+
+      {showOnboarding && <OnboardingTour onComplete={() => setShowOnboarding(false)} />}
+      {showOnboarding && <OnboardingTour onComplete={() => setShowOnboarding(false)} />}
     </div>
   );
 };

@@ -30,8 +30,9 @@ const REFERRALS_COLLECTION = 'referrals';
  * const profile = await ensureUserProfile('JohnDoe');
  * // Returns existing profile or creates new one with defaults
  */
-export const ensureUserProfile = async (username, uid = null, additionalData = {}) => {
-  if (!username) return null;
+export const ensureUserProfile = async (usernameInput, uid = null, additionalData = {}) => {
+  if (!usernameInput) return null;
+  const username = usernameInput.toLowerCase();
 
   const userRef = doc(db, USERS_COLLECTION, username);
   const userDoc = await getDoc(userRef);

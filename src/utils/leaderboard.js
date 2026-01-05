@@ -157,6 +157,8 @@ export const getLeaderboard = async (period = 'all') => {
       }
 
       let include = false;
+      const loweredUsername = data.username ? data.username.toLowerCase() : 'unknown';
+
       if (period === 'daily') {
         // Daily: Only today's games
         if (data.date === todaySeed) {
@@ -175,7 +177,7 @@ export const getLeaderboard = async (period = 'all') => {
       }
 
       if (include) {
-        rawScores.push({ id: doc.id, ...data, sortDate: date });
+        rawScores.push({ id: doc.id, ...data, username: loweredUsername, sortDate: date });
       }
     });
 
@@ -193,6 +195,15 @@ export const getLeaderboard = async (period = 'all') => {
     finalScores.sort((a, b) => {
       if (b.score !== a.score) return b.score - a.score;
       return a.time - b.time;
+    });
+
+    // Safety check: ensure unique users in final list (double check)
+    const seen = new Set();
+    finalScores = finalScores.filter(s => {
+      const u = s.username.toLowerCase();
+      if (seen.has(u)) return false;
+      seen.add(u);
+      return true;
     });
 
     return finalScores.slice(0, 50); // Top 50
