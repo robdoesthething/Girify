@@ -3,6 +3,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { getCuriosityByStreets } from '../data/curiosities';
 import { fetchWikiImage } from '../utils/wiki';
+import FeedbackModal from './FeedbackModal';
 
 const getFirstName = fullName => {
   if (!fullName) return '';
@@ -30,6 +31,10 @@ const SummaryScreen = ({
 }) => {
   const [view, setView] = useState('summary');
   const [curiosityRevealed, setCuriosityRevealed] = useState(false);
+  const [showFeedbackModal, setShowFeedbackModal] = useState(false);
+
+  // 1/7 chance to show feedback instead of curiosity
+  const [showFeedbackRequest] = useState(() => Math.random() < 1 / 7);
 
   const maxPossibleScore = total * 100;
   const curiosity = useMemo(() => getCuriosityByStreets(quizStreets), [quizStreets]);
@@ -81,7 +86,13 @@ const SummaryScreen = ({
     };
 
     const shared = await performShare();
-    if (shared) setCuriosityRevealed(true);
+    if (shared) {
+      if (showFeedbackRequest) {
+        setShowFeedbackModal(true);
+      } else {
+        setCuriosityRevealed(true);
+      }
+    }
   };
 
   return (
@@ -261,6 +272,16 @@ const SummaryScreen = ({
             PLAY AGAIN
           </button>
         </motion.div>
+      )}
+      {showFeedbackModal && (
+        <FeedbackModal
+          isOpen={true}
+          onClose={() => {
+            setShowFeedbackModal(false);
+            onRestart(); // Go back to start after feedback
+          }}
+          username={username}
+        />
       )}
     </div>
   );

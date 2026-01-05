@@ -1,6 +1,28 @@
 // Translations for Girify app
 // Languages: English (en), Spanish (es), Catalan (ca)
 import CatalanFlag from '../components/icons/CatalanFlag';
+import SpanishFlag from '../components/icons/SpanishFlag';
+import UKFlag from '../components/icons/UKFlag';
+
+// ... (existing translations object code which I am not showing here to save space)
+
+export const LANGUAGES = [
+  {
+    code: 'en',
+    name: 'English',
+    flag: <UKFlag className="w-5 h-3.5 inline-block shadow-sm rounded-sm" />,
+  },
+  {
+    code: 'es',
+    name: 'Español',
+    flag: <SpanishFlag className="w-5 h-3.5 inline-block shadow-sm rounded-sm" />,
+  },
+  {
+    code: 'ca',
+    name: 'Català',
+    flag: <CatalanFlag className="w-5 h-3.5 inline-block shadow-sm rounded-sm" />,
+  },
+];
 
 const translations = {
   en: {
@@ -43,7 +65,7 @@ const translations = {
     instructionsPoint4: 'Speed matters! Higher score for faster answers.',
     imReady: "I'M READY!",
     next: 'NEXT',
-    startQuiz: 'START QUIZ',
+    startQuiz: 'PLAY',
     replayChallenge: 'REPLAY CHALLENGE',
     scoreNotSaved: 'Score will not be saved',
     tapStreet: 'Tap the highlighted street',
@@ -212,7 +234,7 @@ const translations = {
     instructionsPoint4: '¡La velocidad importa! Más puntos por responder rápido.',
     imReady: '¡ESTOY LISTO!',
     next: 'SIGUIENTE',
-    startQuiz: 'EMPEZAR QUIZ',
+    startQuiz: 'JUGAR',
     replayChallenge: 'REPETIR RETO',
     scoreNotSaved: 'La puntuación no se guardará',
     tapStreet: 'Toca la calle resaltada',
@@ -460,7 +482,7 @@ const translations = {
     instructionsPoint4: 'La velocitat compta! Més punts per respondre ràpid.',
     imReady: 'ESTIC APUNT!',
     next: 'SEGÜENT',
-    startQuiz: 'COMENÇAR QUIZ',
+    startQuiz: 'JUGAR',
     replayChallenge: 'REPETIR REPTE',
     scoreNotSaved: 'La puntuació no es guardarà',
     tapStreet: 'Toca el carrer ressaltat',
@@ -514,11 +536,5 @@ const translations = {
 export const getTranslation = (lang, key) => {
   return translations[lang]?.[key] || translations.en[key] || key;
 };
-
-export const LANGUAGES = [
-  { code: 'en', name: 'English', flag: '🇬🇧' },
-  { code: 'es', name: 'Español', flag: '🇪🇸' },
-  { code: 'ca', name: 'Català', flag: <CatalanFlag className="w-4 h-3 inline-block shadow-sm" /> },
-];
 
 export default translations;

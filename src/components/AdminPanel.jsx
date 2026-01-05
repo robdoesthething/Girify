@@ -23,6 +23,7 @@ const AdminPanel = () => {
   const [feedback, setFeedback] = useState([]);
   const [loading, setLoading] = useState(false);
   const [editingUser, setEditingUser] = useState(null);
+  const [migrationStatus, setMigrationStatus] = useState(null);
 
   const fetchData = React.useCallback(async () => {
     setLoading(true);
@@ -32,9 +33,61 @@ const AdminPanel = () => {
     setLoading(false);
   }, []);
 
+  const handleMigration = async () => {
+    // eslint-disable-next-line no-alert
+    if (
+      !window.confirm(
+        'WARNING: This will migrate ALL users to lowercase usernames. This is destructive. Are you sure?'
+      )
+    )
+      return;
+
+    setMigrationStatus('Starting migration...');
+    try {
+      const { collection, getDocs, doc, writeBatch } = await import('firebase/firestore');
+      const { db } = await import('../firebase');
+
+      const usersRef = collection(db, 'users');
+      const snapshot = await getDocs(usersRef);
+      let migrated = 0;
+      let count = 0;
+      let batch = writeBatch(db);
+      const batchSize = 200;
+
+      for (const userDoc of snapshot.docs) {
+        const oldId = userDoc.id;
+        const newId = oldId.toLowerCase();
+
+        if (oldId !== newId) {
+          const oldData = userDoc.data();
+          const targetRef = doc(db, 'users', newId);
+          // Overwrite with lowercase ID, keeping data
+          batch.set(targetRef, { ...oldData, username: newId, originalId: oldId }, { merge: true });
+          batch.delete(userDoc.ref);
+
+          migrated++;
+          count++;
+        }
+
+        if (count >= batchSize) {
+          await batch.commit();
+          batch = writeBatch(db);
+          count = 0;
+        }
+      }
+
+      if (count > 0) await batch.commit();
+
+      setMigrationStatus(`Migration complete. Migrated ${migrated} users.`);
+      fetchData(); // Refresh list
+    } catch (e) {
+      console.error(e);
+      setMigrationStatus(`Error: ${e.message}`);
+    }
+  };
+
   // Initial Fetch
   useEffect(() => {
-    // eslint-disable-next-line
     fetchData();
   }, [fetchData]);
 
@@ -105,6 +158,24 @@ const AdminPanel = () => {
                     value={users.reduce((acc, u) => acc + (u.gamesPlayed || 0), 0)}
                     color="text-emerald-500"
                   />
+                </div>
+
+                {/* Data Tools */}
+                <div className="p-6 rounded-2xl bg-white dark:bg-slate-800 shadow-sm border border-slate-100 dark:border-slate-700">
+                  <h3 className="text-xl font-bold mb-4">Data Tools</h3>
+                  <div className="flex items-center gap-4">
+                    <button
+                      onClick={handleMigration}
+                      className="px-6 py-3 rounded-xl bg-rose-500 hover:bg-rose-600 text-white font-bold transition-all shadow-lg shadow-rose-500/20"
+                    >
+                      ⚠️ Fix Usernames (Lowercase Migration)
+                    </button>
+                    {migrationStatus && (
+                      <span className="font-mono text-sm opacity-70 bg-slate-100 dark:bg-slate-900 px-3 py-1 rounded">
+                        {migrationStatus}
+                      </span>
+                    )}
+                  </div>
                 </div>
               </div>
             )}
