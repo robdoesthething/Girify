@@ -96,7 +96,7 @@ const calculateStreak = history => {
   return streak;
 };
 
-const ProfileScreen = ({ onClose, username }) => {
+const ProfileScreen = ({ username }) => {
   const { theme, t } = useTheme();
   const navigate = useNavigate();
 
@@ -609,7 +609,6 @@ const ProfileScreen = ({ onClose, username }) => {
 };
 
 ProfileScreen.propTypes = {
-  onClose: PropTypes.func.isRequired,
   username: PropTypes.string.isRequired,
 };
 

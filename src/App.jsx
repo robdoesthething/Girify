@@ -39,6 +39,8 @@ import { auth } from './firebase';
 import { onAuthStateChanged, signOut, updateProfile } from 'firebase/auth';
 
 import FeedbackModal from './components/FeedbackModal';
+import AdminRoute from './components/AdminRoute';
+import AdminPanel from './components/AdminPanel';
 
 const AppRoutes = () => {
   const { deviceMode, theme, t } = useTheme();
@@ -361,7 +363,7 @@ const AppRoutes = () => {
         }
 
         // Ensure Firestore profile matches
-        ensureUserProfile(displayName)
+        ensureUserProfile(displayName, user.uid)
           .then(profile => {
             // Self-heal any broken migration links
             healMigration(displayName).catch(err => console.error(err));
@@ -505,6 +507,7 @@ const AppRoutes = () => {
                 onLogout={handleLogout}
                 autoAdvance={state.autoAdvance}
                 setAutoAdvance={val => dispatch({ type: 'SET_AUTO_ADVANCE', payload: val })}
+                username={state.username}
               />
             }
           />
@@ -526,6 +529,11 @@ const AppRoutes = () => {
             }
           />
           <Route path="/shop" element={<ShopScreen username={state.username} />} />
+
+          {/* Admin Route */}
+          <Route element={<AdminRoute />}>
+            <Route path="/admin" element={<AdminPanel />} />
+          </Route>
         </Routes>
       </AnimatePresence>
     </div>

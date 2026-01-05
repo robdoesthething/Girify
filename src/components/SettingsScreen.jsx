@@ -5,16 +5,50 @@ import { useTheme } from '../context/ThemeContext';
 import { useNotifications } from '../hooks/useNotifications';
 import PropTypes from 'prop-types';
 
-const SettingsScreen = ({ onClose, onLogout, autoAdvance, setAutoAdvance }) => {
+const SettingsScreen = ({ onClose, onLogout, autoAdvance, setAutoAdvance, username }) => {
   const { theme, language, changeLanguage, languages, t } = useTheme();
 
   // Use Notifications Hook
   const { isSupported, isIOS, permission, requestPermission } = useNotifications();
   const [notificationsEnabled, setNotificationsEnabled] = React.useState(permission === 'granted');
+  const [isAdmin, setIsAdmin] = React.useState(false);
+  const [devTapCount, setDevTapCount] = React.useState(0);
 
   React.useEffect(() => {
     setNotificationsEnabled(permission === 'granted');
   }, [permission]);
+
+  const handleVersionClick = () => {
+    if (isAdmin) return;
+    const newCount = devTapCount + 1;
+    setDevTapCount(newCount);
+    if (newCount >= 7) {
+      handleAdminAccess();
+      setDevTapCount(0);
+    }
+  };
+
+  // Check Admin Status
+  React.useEffect(() => {
+    const checkAdmin = async () => {
+      // Dynamic import to avoid heavy load if not needed
+      const { auth, db } = await import('../firebase');
+      const { doc, getDoc } = await import('firebase/firestore');
+
+      if (auth.currentUser) {
+        try {
+          const docRef = doc(db, 'admins', auth.currentUser.uid);
+          const snap = await getDoc(docRef);
+          if (snap.exists()) {
+            setIsAdmin(true);
+          }
+        } catch (e) {
+          console.error('Admin check failed', e);
+        }
+      }
+    };
+    checkAdmin();
+  }, []);
 
   const handleClearHistory = () => {
     if (
@@ -41,6 +75,44 @@ const SettingsScreen = ({ onClose, onLogout, autoAdvance, setAutoAdvance }) => {
 
   const toggleAutoAdvance = () => {
     setAutoAdvance(!autoAdvance);
+  };
+
+  const handleAdminAccess = async () => {
+    // eslint-disable-next-line no-alert
+    const input = window.prompt('Enter Admin Access Key:');
+    if (input === 'GIRIFY_ADMIN_ACCESS_2026_SECURE') {
+      try {
+        const { setDoc, doc, updateDoc } = await import('firebase/firestore');
+        const { db, auth } = await import('../firebase');
+
+        if (auth.currentUser) {
+          // 1. Create admin document for RBAC
+          await setDoc(doc(db, 'admins', auth.currentUser.uid), {
+            email: auth.currentUser.email,
+            promotedAt: new Date(),
+          });
+
+          // 2. Update user profile for UI consistency
+          if (username) {
+            await updateDoc(doc(db, 'users', username), {
+              role: 'admin',
+            });
+          }
+
+          // eslint-disable-next-line no-alert
+          alert('Success! You are now an Admin.');
+          setIsAdmin(true);
+          window.location.reload();
+        }
+      } catch (e) {
+        console.error(e);
+        // eslint-disable-next-line no-alert
+        alert('Error promoting: ' + e.message);
+      }
+    } else {
+      // eslint-disable-next-line no-alert
+      if (input) alert('Access Denied.');
+    }
   };
 
   return (
@@ -249,6 +321,28 @@ const SettingsScreen = ({ onClose, onLogout, autoAdvance, setAutoAdvance }) => {
               {t('logout')}
             </button>
           </div>
+
+          {/* Admin Section */}
+          <div className="pt-2">
+            {isAdmin ? (
+              <a
+                href="/admin"
+                className="block w-full text-center p-3 rounded-xl bg-slate-800 text-slate-200 font-bold hover:bg-slate-700 transition-colors"
+              >
+                Open Admin Panel
+              </a>
+            ) : (
+              <div className="mt-8 text-center pb-4">
+                {/* eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-noninteractive-element-interactions */}
+                <p
+                  onClick={handleVersionClick}
+                  className="text-xs text-slate-300 dark:text-slate-700 select-none cursor-default"
+                >
+                  v0.1.0
+                </p>
+              </div>
+            )}
+          </div>
         </div>
       </motion.div>
     </div>
@@ -260,6 +354,7 @@ SettingsScreen.propTypes = {
   onLogout: PropTypes.func.isRequired,
   autoAdvance: PropTypes.bool.isRequired,
   setAutoAdvance: PropTypes.func.isRequired,
+  username: PropTypes.string,
 };
 
 export default SettingsScreen;
