@@ -96,6 +96,9 @@ const translations = {
     congratsGreat: 'Great job! 👏',
     congratsGood: 'Good effort! 💪',
     congratsKeepPracticing: 'Keep practicing! 📚',
+    greatJob: 'Great Job!',
+    shareAndEarnGiuros: 'Share & Earn Giuros',
+    inviteFriendsEarnRewards: 'Invite friends and earn rewards when they play!',
 
     // Results
     dailyChallenge: 'Daily Challenge',
@@ -192,6 +195,14 @@ const translations = {
     // Activity Feed
     scored: 'scored',
     points: 'points',
+
+    // Feedback
+    feedbackTitle: 'We value your feedback!',
+    feedbackSubtitle: 'Tell us what you think about Girify. Helpful feedback helps us improve!',
+    feedbackPlaceholder: 'What would you like to see improved?',
+    submitFeedback: 'Submit Feedback',
+    feedbackPending: "Your feedback is under review. You'll be notified when approved!",
+    cancel: 'Cancel',
   },
 
   es: {
@@ -265,6 +276,9 @@ const translations = {
     congratsGreat: '¡Gran trabajo! 👏',
     congratsGood: '¡Buen esfuerzo! 💪',
     congratsKeepPracticing: '¡Sigue practicando! 📚',
+    greatJob: '¡Gran Trabajo!',
+    shareAndEarnGiuros: 'Compartir y Ganar Giuros',
+    inviteFriendsEarnRewards: '¡Invita amigos y gana recompensas cuando jueguen!',
 
     // Results
     dailyChallenge: 'Reto diario',
@@ -361,6 +375,14 @@ const translations = {
     // Activity Feed
     scored: 'puntuó',
     points: 'puntos',
+
+    // Feedback
+    feedbackTitle: '¡Valoramos tu opinión!',
+    feedbackSubtitle: 'Dinos qué piensas sobre Girify. ¡Tu opinión nos ayuda a mejorar!',
+    feedbackPlaceholder: '¿Qué te gustaría que mejoráramos?',
+    submitFeedback: 'Enviar Opinión',
+    feedbackPending: '¡Tu opinión está siendo revisada. Te notificaremos cuando sea aprobada!',
+    cancel: 'Cancelar',
   },
 
   ca: {
@@ -499,6 +521,9 @@ const translations = {
     congratsGreat: 'Bona feina! 👏',
     congratsGood: 'Bon esforç! 💪',
     congratsKeepPracticing: 'Segueix practicant! 📚',
+    greatJob: 'Bona Feina!',
+    shareAndEarnGiuros: 'Compartir i Guanyar Giuros',
+    inviteFriendsEarnRewards: 'Convida amics i guanya recompenses quan juguin!',
 
     // About
     aboutGirify: 'Quant a Girify',
@@ -530,6 +555,15 @@ const translations = {
     // Activity Feed
     scored: 'va puntuar',
     points: 'punts',
+
+    // Feedback
+    feedbackTitle: 'Valorem la teva opinió!',
+    feedbackSubtitle:
+      'Explica\u0027ns què penses sobre Girify. La teva opinió ens ajuda a millorar!',
+    feedbackPlaceholder: 'Què t\u0027agradaria que milloréssim?',
+    submitFeedback: 'Enviar Opinió',
+    feedbackPending: 'La teva opinió està sent revisada. Et notificarem quan sigui aprovada!',
+    cancel: 'Cancel·lar',
   },
 };
 

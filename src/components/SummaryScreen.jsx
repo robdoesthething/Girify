@@ -6,11 +6,11 @@ import { fetchWikiImage } from '../utils/wiki';
 import FeedbackModal from './FeedbackModal';
 
 const SummaryScreen = ({ score, total, theme, username, onRestart, quizStreets, t }) => {
-  const [view, setView] = useState(() => (showFeedbackRequest ? 'feedback' : 'curiosity'));
-  const [showFeedbackModal, setShowFeedbackModal] = useState(showFeedbackRequest);
-
   // 1/7 chance to show feedback instead of curiosity
   const [showFeedbackRequest] = useState(() => Math.random() < 1 / 7);
+
+  const [view, setView] = useState(() => (showFeedbackRequest ? 'feedback' : 'curiosity'));
+  const [showFeedbackModal, setShowFeedbackModal] = useState(showFeedbackRequest);
 
   const maxPossibleScore = total * 100;
   const curiosity = useMemo(() => getCuriosityByStreets(quizStreets), [quizStreets]);

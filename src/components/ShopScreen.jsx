@@ -203,7 +203,7 @@ const ShopScreen = ({ username }) => {
                         {item.cssClass && (
                           <div className="mt-2">
                             <div
-                              className={`w-10 h-10 rounded-full bg-gradient-to-br from-sky-400 to-indigo-600 ${item.cssClass}`}
+                              className={`w-10 h-10 rounded-full bg-slate-200 dark:bg-slate-600 ${item.cssClass}`}
                             ></div>
                           </div>
                         )}
