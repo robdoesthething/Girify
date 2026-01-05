@@ -232,8 +232,8 @@ describe('Firebase Leaderboard Functions', () => {
       expect(mocks.limit).toHaveBeenCalledWith(2000);
       expect(result).toHaveLength(2);
       expect(result[0]).toMatchObject({
-        id: 'User1',
-        username: 'User1',
+        id: 'user1',
+        username: 'user1',
         score: 1800,
       });
     });

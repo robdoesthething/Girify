@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 // eslint-disable-next-line no-unused-vars
 import { motion, AnimatePresence } from 'framer-motion';
 import MapArea from './MapArea';
@@ -240,7 +240,6 @@ const GameScreen = ({
         </div>
       )}
 
-      {showOnboarding && <OnboardingTour onComplete={() => setShowOnboarding(false)} />}
       {showOnboarding && <OnboardingTour onComplete={() => setShowOnboarding(false)} />}
     </div>
   );

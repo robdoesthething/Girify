@@ -34,8 +34,8 @@ const AdminPanel = () => {
   }, []);
 
   const handleMigration = async () => {
-    // eslint-disable-next-line no-alert
     if (
+      // eslint-disable-next-line no-alert
       !window.confirm(
         'WARNING: This will migrate ALL users to lowercase usernames. This is destructive. Are you sure?'
       )
