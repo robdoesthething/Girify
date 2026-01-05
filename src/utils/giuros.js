@@ -65,6 +65,14 @@ export const addGiuros = async (username, amount, reason = '') => {
 };
 
 /**
+ * Award giuros (wrapper for feedback/other general rewards)
+ * @param {string} username
+ * @param {number} amount
+ * @returns {Promise<{success: boolean, newBalance: number}>}
+ */
+export const awardGiuros = (username, amount) => addGiuros(username, amount, 'reward');
+
+/**
  * Spend giuros on a cosmetic item
  * @param {string} username
  * @param {number} cost

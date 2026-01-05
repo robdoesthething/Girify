@@ -34,7 +34,6 @@ const AVATARS = [
   '🦅',
 ];
 
-// Helper to calculate daily streak from history
 const calculateStreak = history => {
   if (!history || history.length === 0) return 0;
 
@@ -43,23 +42,53 @@ const calculateStreak = history => {
 
   // Get today's date seed (YYYYMMDD format)
   const today = new Date();
-  const todaySeed = parseInt(
-    `${today.getFullYear()}${String(today.getMonth() + 1).padStart(2, '0')}${String(today.getDate()).padStart(2, '0')}`
-  );
+  const getSeed = d =>
+    parseInt(
+      `${d.getFullYear()}${String(d.getMonth() + 1).padStart(2, '0')}${String(d.getDate()).padStart(2, '0')}`
+    );
+
+  const todaySeed = getSeed(today);
+
+  // Calculate yesterday seed for grace period check
+  const yesterday = new Date(today);
+  yesterday.setDate(yesterday.getDate() - 1);
+  const yesterdaySeed = getSeed(yesterday);
 
   let streak = 0;
-  let expectedDate = todaySeed;
+  // If we haven't played today, we check if we played yesterday to continue streak
+  // But if we played today, we start counting from today
+  const lastPlayed = sorted[0].date;
 
+  // Grace period logic:
+  // If last game was today, streak is valid.
+  // If last game was yesterday, streak is valid (but current streak count doesn't increase until today is played,
+  // OR we count yesterday's streak. The user wants to NOT lose streak.
+  // Usually streak = consecutive days up to now.
+  // If I played yesterday, my streak is N. If I play today, it becomes N+1.
+  // If I don't play today, it remains N until midnight, then becomes 0?
+  // The request says "Streak should only be lost after a day has passed without completing".
+  // So if I played yesterday (Seed Y), and today is Seed T.
+  // If I haven't played T yet, my streak is determined by the chain ending at Y.
+
+  let expectedDate = lastPlayed === todaySeed ? todaySeed : yesterdaySeed;
+
+  // If the last played game is OLDER than yesterday, streak is broken -> 0
+  if (lastPlayed < yesterdaySeed) return 0;
+
+  // Otherwise, count backwards from the last valid game (today or yesterday)
   for (const record of sorted) {
     if (record.date === expectedDate) {
       streak++;
-      // Move to previous day
-      const d = new Date(today);
-      d.setDate(d.getDate() - streak);
-      expectedDate = parseInt(
-        `${d.getFullYear()}${String(d.getMonth() + 1).padStart(2, '0')}${String(d.getDate()).padStart(2, '0')}`
-      );
+      // Move expected to previous day
+      // We need to decode the seed to subtract a day safely
+      const year = Math.floor(expectedDate / 10000);
+      const month = Math.floor((expectedDate % 10000) / 100);
+      const day = expectedDate % 100;
+      const d = new Date(year, month - 1, day); // month is 0-indexed in Date
+      d.setDate(d.getDate() - 1);
+      expectedDate = getSeed(d);
     } else if (record.date < expectedDate) {
+      // Gap found
       break;
     }
   }
@@ -111,6 +140,9 @@ const ProfileScreen = ({ onClose, username }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [editName, setEditName] = useState('');
   const [editAvatarId, setEditAvatarId] = useState(0); // 0-indexed for array
+
+  // Achievements State
+  const [selectedAchievement, setSelectedAchievement] = useState(null);
 
   useEffect(() => {
     const loadProfile = async () => {
@@ -187,7 +219,7 @@ const ProfileScreen = ({ onClose, username }) => {
 
       <div className="flex-1 overflow-y-auto w-full px-4 py-6 pt-16">
         <div className="max-w-2xl mx-auto">
-          {/* Giuros Balance Bar */}
+          {/* Header */}
           <div className="flex items-center justify-between mb-6">
             <button
               onClick={() => navigate(-1)}
@@ -203,352 +235,373 @@ const ProfileScreen = ({ onClose, username }) => {
               </svg>
               {t('back')}
             </button>
+            <h1 className="text-xl font-black absolute left-1/2 transform -translate-x-1/2">
+              {t('profile') || 'Profile'}
+            </h1>
 
             {/* Giuros Balance */}
-            <button
-              onClick={() => navigate('/shop')}
-              className="flex items-center gap-2 px-4 py-2 rounded-full bg-yellow-500/20 border border-yellow-500/30 hover:bg-yellow-500/30 transition-colors"
-            >
-              <img src="/giuro.png" alt="Giuros" className="h-5 w-auto object-contain" />
-              <span className="font-black text-yellow-600 dark:text-yellow-400">{giuros}</span>
+            <button onClick={() => navigate('/shop')} className="flex items-center gap-2">
+              <img src="/giuro.png" alt="Giuros" className="h-6 w-auto object-contain" />
+              <span className="font-black text-lg text-yellow-600 dark:text-yellow-400">
+                {giuros}
+              </span>
             </button>
           </div>
 
-          {/* Giuros Explainer Callout - Comic Bubble Style */}
-          <div className="relative mb-8 mx-2 filter drop-shadow-md">
-            <div
-              className={`p-4 rounded-xl border-2 border-slate-900 bg-white dark:bg-slate-800 text-slate-900 dark:text-white relative z-10`}
-            >
-              <div className="flex items-start gap-3">
-                <img
-                  src="/giuro.png"
-                  alt=""
-                  className="h-8 w-auto object-contain shrink-0 mt-0.5"
-                />
-                <div className="flex-1">
-                  <h3 className="font-black text-lg mb-1">{t('giurosExplainerTitle')}</h3>
-                  <p className="text-sm opacity-80 mb-3 leading-relaxed">
-                    {t('giurosExplainerText')}
-                  </p>
-                  <button
-                    onClick={() => navigate('/shop')}
-                    className="px-4 py-2 bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-lg text-xs font-black uppercase tracking-wider hover:scale-105 transition-transform"
-                  >
-                    {t('goToShop')}
-                  </button>
-                </div>
-              </div>
-            </div>
-            {/* Speech Bubble Tail */}
-            <div className="absolute -bottom-3 left-10 w-6 h-6 bg-white dark:bg-slate-800 border-b-2 border-r-2 border-slate-900 transform rotate-45 z-0"></div>
-          </div>
+          {!profileData && (
+            // Loading state
+            <div className="py-10 text-center opacity-50">Loading profile...</div>
+          )}
 
-          {/* Profile Card */}
-          <div
-            className={`rounded-3xl shadow-xl overflow-hidden ${theme === 'dark' ? 'bg-slate-800' : 'bg-white'}`}
-          >
-            {/* Header with Avatar */}
-            <div
-              className={`p-8 flex flex-col items-center border-b shrink-0 relative ${theme === 'dark' ? 'border-slate-700 bg-slate-800/50' : 'border-slate-100 bg-slate-50'}`}
-            >
-              <button
-                onClick={onClose}
-                className={`absolute top-4 right-4 p-2 rounded-full transition-colors ${theme === 'dark' ? 'hover:bg-slate-800' : 'hover:bg-slate-100'}`}
-              >
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M6 18L18 6M6 6l12 12"
-                  />
-                </svg>
-              </button>
-
-              {/* Edit Button (Top Left) */}
-              {!isEditing && (
-                <button
-                  onClick={() => setIsEditing(true)}
-                  className={`absolute top-4 left-4 p-2 rounded-full transition-colors ${theme === 'dark' ? 'hover:bg-slate-800 text-sky-400' : 'hover:bg-slate-100 text-sky-600'}`}
-                >
-                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"
-                    />
-                  </svg>
-                </button>
-              )}
-
-              {/* Avatar Circle */}
-              <div className="relative group">
+          {profileData && (
+            <>
+              {/* Giuros Explainer Callout - Comic Bubble Style */}
+              <div className="relative mb-8 mx-2 filter drop-shadow-md">
                 <div
-                  role="button"
-                  tabIndex={0}
-                  onClick={isEditing ? cycleAvatar : undefined}
-                  onKeyDown={e => {
-                    if (isEditing && (e.key === 'Enter' || e.key === ' ')) {
-                      e.preventDefault();
-                      cycleAvatar();
-                    }
-                  }}
-                  className={`w-24 h-24 rounded-full bg-gradient-to-br from-sky-400 to-indigo-600 flex items-center justify-center text-4xl shadow-lg mb-4 ${frameClass} select-none outline-none focus:ring-sky-500
+                  className={`p-4 rounded-xl border-2 border-slate-900 bg-white dark:bg-slate-800 text-slate-900 dark:text-white relative z-10`}
+                >
+                  <div className="flex items-start gap-3">
+                    <img
+                      src="/giuro.png"
+                      alt=""
+                      className="h-8 w-auto object-contain shrink-0 mt-0.5"
+                    />
+                    <div className="flex-1">
+                      <h3 className="font-black text-lg mb-1">{t('giurosExplainerTitle')}</h3>
+                      <p className="text-sm opacity-80 mb-3 leading-relaxed">
+                        {t('giurosExplainerText')}
+                      </p>
+                      <button
+                        onClick={() => navigate('/shop')}
+                        className="px-4 py-2 bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-lg text-xs font-black uppercase tracking-wider hover:scale-105 transition-transform"
+                      >
+                        {t('goToShop')}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+                {/* Speech Bubble Tail */}
+                <div className="absolute -bottom-3 left-10 w-6 h-6 bg-white dark:bg-slate-800 border-b-2 border-r-2 border-slate-900 transform rotate-45 z-0"></div>
+              </div>
+
+              {/* Main Profile Info - Removed Card Style, now cleaner layout */}
+              <div className="flex flex-col items-center mb-8">
+                {/* Avatar Circle */}
+                <div className="relative group mb-4">
+                  <div
+                    role="button"
+                    tabIndex={0}
+                    onClick={isEditing ? cycleAvatar : undefined}
+                    onKeyDown={e => {
+                      if (isEditing && (e.key === 'Enter' || e.key === ' ')) {
+                        e.preventDefault();
+                        cycleAvatar();
+                      }
+                    }}
+                    className={`w-28 h-28 rounded-full bg-gradient-to-br from-sky-400 to-indigo-600 flex items-center justify-center text-5xl shadow-2xl ${frameClass} select-none outline-none focus:ring-sky-500
                 ${isEditing ? 'cursor-pointer hover:scale-105 transition-transform' : ''}
               `}
-                >
-                  {displayAvatar}
-                </div>
-                {isEditing && (
-                  <div className="absolute bottom-0 right-0 bg-white dark:bg-slate-800 rounded-full p-1 shadow-md">
-                    <svg
-                      className="w-4 h-4 text-slate-500"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
+                  >
+                    {displayAvatar}
+                  </div>
+                  {/* Edit Button overlay */}
+                  {!isEditing && (
+                    <button
+                      onClick={() => setIsEditing(true)}
+                      className={`absolute -bottom-1 -right-1 p-2 rounded-full shadow-lg ${theme === 'dark' ? 'bg-slate-700 text-white' : 'bg-white text-slate-900'}`}
                     >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+                      <svg
+                        className="w-4 h-4"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"
+                        />
+                      </svg>
+                    </button>
+                  )}
+                  {isEditing && (
+                    <div className="absolute bottom-0 right-0 bg-white dark:bg-slate-800 rounded-full p-1 shadow-md">
+                      <svg
+                        className="w-4 h-4 text-slate-500"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+                        />
+                      </svg>
+                    </div>
+                  )}
+                </div>
+
+                {/* Handle / Name Display */}
+                <h2 className="text-3xl font-black tracking-tight mb-1">{username}</h2>
+
+                {/* Equipped Title + Real Name */}
+                <div className="flex flex-col items-center gap-1">
+                  {/* Show equipped title badge/icon if any */}
+                  {/* (Assuming titleId maps to a string or object in future, just showing emoji for now if applicable) */}
+
+                  {isEditing ? (
+                    <div className="mt-2 w-full max-w-[200px] flex flex-col gap-2">
+                      <input
+                        type="text"
+                        value={editName}
+                        onChange={e => setEditName(e.target.value)}
+                        placeholder="Your Real Name"
+                        onKeyDown={e => {
+                          if (e.key === ' ') e.stopPropagation(); // prevent game hotkeys if any
+                        }}
+                        className={`w-full px-3 py-2 text-center text-sm rounded-lg border outline-none ${theme === 'dark' ? 'bg-slate-800 border-slate-700' : 'bg-white border-slate-200'}`}
                       />
-                    </svg>
+                      <div className="flex justify-center gap-2">
+                        <button
+                          onClick={() => setIsEditing(false)}
+                          className="flex-1 text-xs px-3 py-2 rounded-lg bg-slate-200 dark:bg-slate-700 font-bold"
+                        >
+                          Cancel
+                        </button>
+                        <button
+                          onClick={handleSaveProfile}
+                          className="flex-1 text-xs px-3 py-2 rounded-lg bg-sky-500 text-white font-bold"
+                        >
+                          Save
+                        </button>
+                      </div>
+                    </div>
+                  ) : (
+                    profileData?.realName && (
+                      <p className="text-sm font-medium opacity-60">
+                        {profileData.realName}{' '}
+                        <span className="text-[10px] opacity-70 uppercase bg-slate-200 dark:bg-slate-700 px-1 rounded ml-1">
+                          Private
+                        </span>
+                      </p>
+                    )
+                  )}
+                </div>
+
+                <p className="text-[10px] font-bold uppercase tracking-widest opacity-40 mt-3">
+                  {t('playerSince')} {joinedDate}
+                </p>
+              </div>
+
+              {/* Friend Requests */}
+              <div className="mb-6">
+                <FriendRequests username={username} />
+              </div>
+
+              {/* Stats Grid - Clean, no borders, just icons */}
+              <div className="grid grid-cols-5 gap-4 mb-8">
+                <div className="flex flex-col items-center p-3 rounded-2xl bg-orange-500/10 dark:bg-orange-500/5">
+                  <span className="text-2xl mb-1">🔥</span>
+                  <span className="text-xl font-black text-orange-500">{dailyStreak}</span>
+                  <span className="text-[9px] uppercase font-bold text-slate-400 tracking-wider">
+                    {t('streak')}
+                  </span>
+                </div>
+                <div className="flex flex-col items-center p-3 rounded-2xl bg-purple-500/10 dark:bg-purple-500/5">
+                  <span className="text-2xl mb-1">👥</span>
+                  <span className="text-xl font-black text-purple-500">{friendCount}</span>
+                  <span className="text-[9px] uppercase font-bold text-slate-400 tracking-wider">
+                    {t('friends')}
+                  </span>
+                </div>
+                <div className="flex flex-col items-center p-3 rounded-2xl bg-slate-500/10 dark:bg-slate-500/5">
+                  <span className="text-2xl mb-1">🎮</span>
+                  <span className="text-xl font-black text-slate-700 dark:text-slate-200">
+                    {totalGames}
+                  </span>
+                  <span className="text-[9px] uppercase font-bold text-slate-400 tracking-wider">
+                    {t('games')}
+                  </span>
+                </div>
+                <div className="flex flex-col items-center p-3 rounded-2xl bg-emerald-500/10 dark:bg-emerald-500/5">
+                  <span className="text-2xl mb-1">🏆</span>
+                  <span className="text-xl font-black text-emerald-500">{bestScore}</span>
+                  <span className="text-[9px] uppercase font-bold text-slate-400 tracking-wider">
+                    {t('best')}
+                  </span>
+                </div>
+                <div className="flex flex-col items-center p-3 rounded-2xl bg-sky-500/10 dark:bg-sky-500/5">
+                  <span className="text-2xl mb-1">📊</span>
+                  <span className="text-xl font-black text-sky-500">{avgScore}</span>
+                  <span className="text-[9px] uppercase font-bold text-slate-400 tracking-wider">
+                    {t('avg')}
+                  </span>
+                </div>
+              </div>
+
+              {/* Achievements Section */}
+              <div className="mb-8">
+                <h3 className="text-xs font-bold uppercase tracking-widest opacity-50 mb-4 ml-1">
+                  {t('achievements')} ({unlockedBadges.length})
+                </h3>
+
+                {unlockedBadges.length > 0 ? (
+                  <div className="grid grid-cols-4 sm:grid-cols-5 gap-3">
+                    {unlockedBadges.map(badge => (
+                      <button
+                        key={badge.id}
+                        onClick={() =>
+                          setSelectedAchievement(
+                            selectedAchievement?.id === badge.id ? null : badge
+                          )
+                        }
+                        className={`flex flex-col items-center p-3 rounded-2xl transition-all cursor-pointer border w-full h-full text-left ${
+                          selectedAchievement?.id === badge.id
+                            ? 'border-sky-500 bg-sky-500/10 dark:bg-sky-500/20 scale-105 shadow-md'
+                            : theme === 'dark'
+                              ? 'bg-slate-800 border-transparent hover:bg-slate-700'
+                              : 'bg-white border-transparent shadow-sm hover:shadow-md'
+                        }`}
+                        title={badge.description}
+                      >
+                        <span className="text-3xl mb-1">{badge.emoji}</span>
+                        <span className="text-[10px] text-center font-bold opacity-70 leading-tight">
+                          {badge.name}
+                        </span>
+                      </button>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-sm opacity-50 text-center py-4 bg-slate-100 dark:bg-slate-800 rounded-xl">
+                    Play games to unlock achievements!
+                  </p>
+                )}
+
+                {/* Selected Achievement Detail View */}
+                <AnimatePresence>
+                  {selectedAchievement && (
+                    <motion.div
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: 'auto' }}
+                      exit={{ opacity: 0, height: 0 }}
+                      className="mt-4 p-4 rounded-xl bg-sky-500/10 border border-sky-500/30 overflow-hidden"
+                    >
+                      <div className="flex items-center gap-4">
+                        <span className="text-4xl">{selectedAchievement.emoji}</span>
+                        <div>
+                          <h4 className="font-bold text-sky-600 dark:text-sky-400">
+                            {selectedAchievement.name}
+                          </h4>
+                          <p className="text-sm opacity-80">{selectedAchievement.description}</p>
+                        </div>
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+
+                {/* Next Achievement Progress */}
+                {nextBadge && (
+                  <div
+                    className={`mt-4 p-4 rounded-2xl border ${theme === 'dark' ? 'bg-slate-800 border-slate-700' : 'bg-white border-slate-100 shadow-sm'}`}
+                  >
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-xs font-bold opacity-60">{t('nextAchievement')}</span>
+                      <span className="text-lg">{nextBadge.emoji}</span>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <div
+                        className={`flex-1 h-3 rounded-full ${theme === 'dark' ? 'bg-slate-700' : 'bg-slate-100'}`}
+                      >
+                        <div
+                          className="h-3 rounded-full bg-gradient-to-r from-sky-500 to-indigo-500 transition-all shadow-sm"
+                          style={{ width: `${Math.round(nextBadge.progress * 100)}%` }}
+                        />
+                      </div>
+                      <span className="text-xs font-bold opacity-60 w-8 text-right">
+                        {Math.round(nextBadge.progress * 100)}%
+                      </span>
+                    </div>
+                    <p className="text-xs opacity-50 mt-2">
+                      {nextBadge.name}: {nextBadge.description}
+                    </p>
                   </div>
                 )}
               </div>
 
-              {/* Handle / Name Display */}
-              <h2 className="text-2xl font-black tracking-tight">{username}</h2>
+              {/* Recent History */}
+              <div className="mb-20">
+                <h3 className="text-xs font-bold uppercase tracking-widest opacity-50 mb-4 ml-1">
+                  {t('recentActivity')}
+                </h3>
 
-              {/* Achievement Badges (earned through gameplay) */}
-              {unlockedBadges.length > 0 && (
-                <div className="flex flex-wrap justify-center gap-2 mt-2">
-                  {unlockedBadges.slice(0, 6).map(badge => (
-                    <span
-                      key={badge.id}
-                      className="text-xl"
-                      title={`${badge.name}: ${badge.description}`}
-                    >
-                      {badge.emoji}
-                    </span>
-                  ))}
-                  {unlockedBadges.length > 6 && (
-                    <span className="text-xs text-slate-400 self-center">
-                      +{unlockedBadges.length - 6}
-                    </span>
-                  )}
-                </div>
-              )}
-
-              {isEditing ? (
-                <div className="mt-2 w-full max-w-[200px]">
-                  <input
-                    type="text"
-                    value={editName}
-                    onChange={e => setEditName(e.target.value)}
-                    placeholder="Your Real Name"
-                    onKeyDown={e => {
-                      if (e.key === ' ') e.stopPropagation(); // prevent game hotkeys if any
-                    }}
-                    className={`w-full px-3 py-1 text-center text-sm rounded-lg border outline-none ${theme === 'dark' ? 'bg-slate-900 border-slate-700' : 'bg-white border-slate-200'}`}
-                  />
-                  <div className="flex justify-center gap-2 mt-3">
-                    <button
-                      onClick={() => setIsEditing(false)}
-                      className="text-xs px-3 py-1 rounded bg-slate-200 dark:bg-slate-700"
-                    >
-                      Cancel
-                    </button>
-                    <button
-                      onClick={handleSaveProfile}
-                      className="text-xs px-3 py-1 rounded bg-sky-500 text-white"
-                    >
-                      Save
-                    </button>
-                  </div>
-                </div>
-              ) : (
-                profileData?.realName && (
-                  <p className="text-sm font-medium opacity-70 mt-1">
-                    {profileData.realName}{' '}
-                    <span className="text-[10px] opacity-50 uppercase">(Private)</span>
-                  </p>
-                )
-              )}
-
-              <p className="text-xs font-bold uppercase tracking-widest opacity-50 mt-2">
-                {t('playerSince')} {joinedDate}
-              </p>
-            </div>
-
-            {/* Friend Requests */}
-            <div className="px-6 pt-4">
-              <FriendRequests username={username} />
-            </div>
-
-            {/* Stats Grid */}
-            <div className="p-6 grid grid-cols-5 gap-2 border-b border-slate-100 dark:border-slate-800">
-              <div className="text-center">
-                <p className="text-xl font-black text-orange-500">🔥{dailyStreak}</p>
-                <p className="text-[9px] uppercase font-bold text-slate-400 tracking-wider">
-                  {t('streak')}
-                </p>
-              </div>
-              <div className="text-center">
-                <p className="text-xl font-black text-purple-500">👥{friendCount}</p>
-                <p className="text-[9px] uppercase font-bold text-slate-400 tracking-wider">
-                  {t('friends')}
-                </p>
-              </div>
-              <div className="text-center">
-                <p className="text-xl font-black text-slate-700 dark:text-slate-200">
-                  {totalGames}
-                </p>
-                <p className="text-[9px] uppercase font-bold text-slate-400 tracking-wider">
-                  {t('games')}
-                </p>
-              </div>
-              <div className="text-center">
-                <p className="text-xl font-black text-emerald-500">{bestScore}</p>
-                <p className="text-[9px] uppercase font-bold text-slate-400 tracking-wider">
-                  {t('best')}
-                </p>
-              </div>
-              <div className="text-center">
-                <p className="text-xl font-black text-sky-500">{avgScore}</p>
-                <p className="text-[9px] uppercase font-bold text-slate-400 tracking-wider">
-                  {t('avg')}
-                </p>
-              </div>
-            </div>
-
-            {/* Achievements Section */}
-            <div className="p-6 border-b border-slate-100 dark:border-slate-800">
-              <h3 className="text-sm font-bold uppercase tracking-wider opacity-50 mb-4">
-                {t('achievements')} ({unlockedBadges.length})
-              </h3>
-
-              {unlockedBadges.length > 0 ? (
-                <div className="grid grid-cols-4 sm:grid-cols-5 gap-3">
-                  {unlockedBadges.map(badge => (
-                    <div
-                      key={badge.id}
-                      className={`flex flex-col items-center p-2 rounded-xl ${
-                        theme === 'dark' ? 'bg-slate-700/50' : 'bg-slate-50'
-                      }`}
-                      title={badge.description}
-                    >
-                      <span className="text-2xl mb-1">{badge.emoji}</span>
-                      <span className="text-[10px] text-center font-bold opacity-70 leading-tight">
-                        {badge.name}
-                      </span>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <p className="text-sm opacity-50 text-center py-4">
-                  Play games to unlock achievements!
-                </p>
-              )}
-
-              {/* Next Achievement Progress */}
-              {nextBadge && (
-                <div
-                  className={`mt-4 p-3 rounded-xl ${theme === 'dark' ? 'bg-slate-700/30' : 'bg-slate-100'}`}
-                >
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-xs font-bold opacity-60">{t('nextAchievement')}</span>
-                    <span className="text-lg">{nextBadge.emoji}</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <div
-                      className={`flex-1 h-2 rounded-full ${theme === 'dark' ? 'bg-slate-600' : 'bg-slate-200'}`}
-                    >
-                      <div
-                        className="h-2 rounded-full bg-gradient-to-r from-sky-500 to-indigo-500 transition-all"
-                        style={{ width: `${Math.round(nextBadge.progress * 100)}%` }}
-                      />
-                    </div>
-                    <span className="text-xs font-bold opacity-60">
-                      {Math.round(nextBadge.progress * 100)}%
-                    </span>
-                  </div>
-                  <p className="text-xs opacity-50 mt-1">
-                    {nextBadge.name}: {nextBadge.description}
-                  </p>
-                </div>
-              )}
-            </div>
-
-            {/* Recent History */}
-            <div className="flex-1 overflow-y-auto p-6">
-              <h3 className="text-sm font-bold uppercase tracking-wider opacity-50 mb-4">
-                {t('recentActivity')}
-              </h3>
-
-              {allHistory.length === 0 ? (
-                <div className="text-center py-10 opacity-40 text-sm">{t('noGamesYet')}</div>
-              ) : (
-                <div className="space-y-3">
-                  {(() => {
-                    const sorted = [...allHistory].sort(
-                      (a, b) => (b.timestamp || 0) - (a.timestamp || 0)
-                    );
-                    const dailyEarliest = new Map();
-                    // Determine earliest timestamp for each date
-                    sorted.forEach(g => {
-                      if (g.timestamp) {
-                        if (!dailyEarliest.has(g.date) || g.timestamp < dailyEarliest.get(g.date)) {
-                          dailyEarliest.set(g.date, g.timestamp);
+                {allHistory.length === 0 ? (
+                  <div className="text-center py-10 opacity-40 text-sm">{t('noGamesYet')}</div>
+                ) : (
+                  <div className="space-y-3">
+                    {(() => {
+                      const sorted = [...allHistory].sort(
+                        (a, b) => (b.timestamp || 0) - (a.timestamp || 0)
+                      );
+                      const dailyEarliest = new Map();
+                      // Determine earliest timestamp for each date
+                      sorted.forEach(g => {
+                        if (g.timestamp) {
+                          if (
+                            !dailyEarliest.has(g.date) ||
+                            g.timestamp < dailyEarliest.get(g.date)
+                          ) {
+                            dailyEarliest.set(g.date, g.timestamp);
+                          }
                         }
-                      }
-                    });
+                      });
 
-                    return sorted.slice(0, 50).map((game, i) => {
-                      // It is the daily result if its timestamp matches the earliest for that date
-                      const isDaily =
-                        game.timestamp && dailyEarliest.get(game.date) === game.timestamp;
+                      return sorted.slice(0, 50).map((game, i) => {
+                        // It is the daily result if its timestamp matches the earliest for that date
+                        const isDaily =
+                          game.timestamp && dailyEarliest.get(game.date) === game.timestamp;
 
-                      return (
-                        <div
-                          key={i}
-                          className={`flex items-center justify-between p-3 rounded-xl border transition-colors
+                        return (
+                          <div
+                            key={i}
+                            className={`flex items-center justify-between p-4 rounded-2xl border transition-colors
                                   ${
                                     isDaily
                                       ? theme === 'dark'
-                                        ? 'bg-emerald-900/20 border-emerald-500/30'
-                                        : 'bg-emerald-50 border-emerald-200'
+                                        ? 'bg-emerald-900/10 border-emerald-500/20'
+                                        : 'bg-emerald-50 border-emerald-100'
                                       : theme === 'dark'
                                         ? 'bg-slate-800/50 border-slate-700'
                                         : 'bg-white border-slate-100'
                                   }`}
-                        >
-                          <div>
-                            <p className="font-bold text-sm">{t('dailyChallenge')}</p>
-                            <p className="text-[10px] text-slate-400">
-                              {game.timestamp
-                                ? new Date(game.timestamp).toLocaleDateString()
-                                : 'Just now'}
-                            </p>
+                          >
+                            <div>
+                              <p className="font-bold text-sm">{t('dailyChallenge')}</p>
+                              <p className="text-[10px] text-slate-400">
+                                {game.timestamp
+                                  ? new Date(game.timestamp).toLocaleDateString()
+                                  : 'Just now'}
+                              </p>
+                            </div>
+                            <div className="text-right">
+                              <span
+                                className={`font-black text-lg ${isDaily ? 'text-emerald-600 dark:text-emerald-400 scale-110 inline-block' : 'text-slate-400 font-medium'}`}
+                              >
+                                {game.score}
+                              </span>
+                              <span className="text-[10px] font-bold text-slate-400 ml-1">PTS</span>
+                            </div>
                           </div>
-                          <div className="text-right">
-                            <span
-                              className={`font-black text-lg ${isDaily ? 'text-emerald-600 dark:text-emerald-400 scale-110 inline-block' : 'text-slate-400 font-medium'}`}
-                            >
-                              {game.score}
-                            </span>
-                            <span className="text-[10px] font-bold text-slate-400 ml-1">PTS</span>
-                          </div>
-                        </div>
-                      );
-                    });
-                  })()}
-                </div>
-              )}
-            </div>
-          </div>
+                        );
+                      });
+                    })()}
+                  </div>
+                )}
+              </div>
+            </>
+          )}
         </div>
       </div>
     </div>

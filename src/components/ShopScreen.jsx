@@ -106,10 +106,10 @@ const ShopScreen = ({ username }) => {
       <div className="flex-1 overflow-y-auto w-full px-4 py-6 pt-16">
         <div className="max-w-2xl mx-auto">
           {/* Header */}
-          <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center justify-between mb-8 relative">
             <button
               onClick={() => navigate(-1)}
-              className="flex items-center gap-2 text-sm font-bold opacity-60 hover:opacity-100 transition-opacity"
+              className="flex items-center gap-2 text-sm font-bold opacity-60 hover:opacity-100 transition-opacity z-10"
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path
@@ -122,14 +122,19 @@ const ShopScreen = ({ username }) => {
               {t('back')}
             </button>
 
-            {/* Balance */}
-            <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-yellow-500/20 border border-yellow-500/30">
-              <img src="/giuro.png" alt="Giuros" className="h-5 w-auto object-contain" />
-              <span className="font-black text-yellow-600 dark:text-yellow-400">{balance}</span>
+            {/* Title Centered */}
+            <h1 className="text-xl font-black absolute left-1/2 transform -translate-x-1/2 flex items-center gap-2">
+              <span>🛒</span> {t('shop')}
+            </h1>
+
+            {/* Balance - Transparent */}
+            <div className="flex items-center gap-2 px-2 z-10">
+              <img src="/giuro.png" alt="Giuros" className="h-6 w-auto object-contain" />
+              <span className="font-black text-lg text-yellow-600 dark:text-yellow-400">
+                {balance}
+              </span>
             </div>
           </div>
-
-          <h1 className="text-3xl font-black mb-6">🛒 {t('shop')}</h1>
 
           {/* Message */}
           {message && (
