@@ -5,33 +5,9 @@ import { getCuriosityByStreets } from '../data/curiosities';
 import { fetchWikiImage } from '../utils/wiki';
 import FeedbackModal from './FeedbackModal';
 
-const getFirstName = fullName => {
-  if (!fullName) return '';
-  return fullName.trim().split(' ')[0];
-};
-
-const getCongratsMessage = (score, maxScore, t) => {
-  const percentage = (score / maxScore) * 100;
-  if (percentage >= 90) return t('congratsOutstanding');
-  if (percentage >= 75) return t('congratsExcellent');
-  if (percentage >= 60) return t('congratsGreat');
-  if (percentage >= 40) return t('congratsGood');
-  return t('congratsKeepPracticing');
-};
-
-const SummaryScreen = ({
-  score,
-  total,
-  theme,
-  username,
-  onRestart,
-  quizResults,
-  quizStreets,
-  t,
-}) => {
-  const [view, setView] = useState('summary');
-  const [curiosityRevealed, setCuriosityRevealed] = useState(false);
-  const [showFeedbackModal, setShowFeedbackModal] = useState(false);
+const SummaryScreen = ({ score, total, theme, username, onRestart, quizStreets, t }) => {
+  const [view, setView] = useState(() => (showFeedbackRequest ? 'feedback' : 'curiosity'));
+  const [showFeedbackModal, setShowFeedbackModal] = useState(showFeedbackRequest);
 
   // 1/7 chance to show feedback instead of curiosity
   const [showFeedbackRequest] = useState(() => Math.random() < 1 / 7);
@@ -56,42 +32,29 @@ const SummaryScreen = ({
     };
   }, [curiosity]);
 
-  const history = JSON.parse(localStorage.getItem('girify_history') || '[]');
+  const handleNext = () => {
+    setView('actions');
+  };
 
   const handleShare = async () => {
-    // Include referral code in share URL
-    // Use prod URL if available, otherwise fallback
-    const baseUrl = 'https://girifyapp.com'; // Updated to Prod URL
+    const baseUrl = 'https://girifyapp.com';
     const refCode = username ? username.toLowerCase().replace(/[^a-z0-9]/g, '') : '';
     const shareUrl = refCode ? `${baseUrl}?ref=${refCode}` : baseUrl;
     const text = `🌆 Girify Daily Challenge:\nScore: ${score}/${maxPossibleScore}\n\nCan you beat me? Play here: ${shareUrl} #Girify #Barcelona`;
 
-    const performShare = async () => {
-      try {
-        if (navigator.share) {
-          await navigator.share({
-            title: 'Girify - Barcelona Street Quiz',
-            text: text,
-          });
-          return true;
-        } else {
-          await navigator.clipboard.writeText(text);
-          // eslint-disable-next-line no-alert
-          alert('Results copied to clipboard!');
-          return true;
-        }
-      } catch {
-        return false;
-      }
-    };
-
-    const shared = await performShare();
-    if (shared) {
-      if (showFeedbackRequest) {
-        setShowFeedbackModal(true);
+    try {
+      if (navigator.share) {
+        await navigator.share({
+          title: 'Girify - Barcelona Street Quiz',
+          text: text,
+        });
       } else {
-        setCuriosityRevealed(true);
+        await navigator.clipboard.writeText(shareUrl);
+        // eslint-disable-next-line no-alert
+        alert('Referral link copied to clipboard!');
       }
+    } catch (e) {
+      console.error('Share failed:', e);
     }
   };
 
@@ -100,144 +63,8 @@ const SummaryScreen = ({
       className={`absolute inset-0 flex flex-col items-center justify-center p-6 text-center backdrop-blur-md transition-colors duration-500 pointer-events-auto overflow-y-auto
             ${theme === 'dark' ? 'bg-slate-900/95 text-white' : 'bg-slate-50/95 text-slate-800'}`}
     >
-      {view === 'summary' && !curiosityRevealed && (
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="flex flex-col items-center w-full max-w-md"
-        >
-          <div className="mb-1">
-            <span className="px-3 py-1 bg-sky-500/10 text-sky-500 rounded-full text-[10px] uppercase font-bold tracking-widest border border-sky-500/20">
-              {t('dailyChallengeComplete')}
-            </span>
-          </div>
-          <h2 className="text-2xl font-black mb-4 tracking-tight">
-            {getCongratsMessage(score, maxPossibleScore, t).replace(
-              '!',
-              `, ${getFirstName(username)}!`
-            )}
-          </h2>
-
-          <div
-            className={`w-full p-4 rounded-2xl border mb-4 ${theme === 'dark' ? 'bg-slate-800/50 border-slate-700' : 'bg-white border-slate-100'}`}
-          >
-            <span className="text-[10px] uppercase tracking-widest text-slate-500 mb-1 font-bold block">
-              {t('yourScore')}
-            </span>
-            <span className="text-3xl font-black text-sky-500">{score}</span>
-            <span className="text-xs text-slate-400 ml-1">/ {maxPossibleScore}</span>
-          </div>
-
-          <div className="w-full mb-4">
-            <h3 className="text-[10px] uppercase tracking-widest text-slate-500 mb-2 font-bold">
-              {t('questionBreakdown')}
-            </h3>
-            <div className="grid grid-cols-5 gap-1.5">
-              {quizResults.map((result, idx) => {
-                const isCorrect = result.status === 'correct';
-                return (
-                  <div
-                    key={idx}
-                    className={`aspect-square rounded-lg flex flex-col items-center justify-center border-2 transition-all
-                      ${
-                        isCorrect
-                          ? theme === 'dark'
-                            ? 'bg-sky-500/20 border-sky-500 text-sky-400'
-                            : 'bg-sky-500/10 border-sky-500 text-sky-600'
-                          : theme === 'dark'
-                            ? 'bg-slate-700/50 border-slate-600 text-slate-400'
-                            : 'bg-slate-100 border-slate-300 text-slate-500'
-                      }`}
-                  >
-                    <span className="text-[8px] font-bold opacity-60">Q{idx + 1}</span>
-                    <span className="text-sm font-black">{Math.round(result.points)}</span>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-
-          <div
-            className={`w-full p-4 rounded-2xl border mb-3 ${theme === 'dark' ? 'bg-sky-500/10 border-sky-500/20' : 'bg-sky-50 border-sky-100'}`}
-          >
-            <p className="text-sky-500 font-bold mb-1 text-sm">{t('cityCuriosityUnlocked')}</p>
-            <p className="text-[10px] mb-3 text-slate-500 font-medium">{t('shareToReveal')}</p>
-            <button
-              onClick={handleShare}
-              className="w-full py-3 bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl shadow-lg font-bold text-sm transition-all transform hover:scale-105 flex items-center justify-center gap-2"
-            >
-              {t('shareAndReveal')}
-            </button>
-          </div>
-
-          <div className="flex gap-2 w-full justify-center">
-            <button
-              onClick={() => setView('rankings')}
-              className={`px-6 py-2 rounded-xl text-xs font-bold uppercase tracking-widest bg-slate-200 dark:bg-slate-800 text-slate-600 dark:text-slate-400`}
-            >
-              Rankings
-            </button>
-          </div>
-        </motion.div>
-      )}
-
-      {view === 'rankings' && (
-        <motion.div
-          initial={{ opacity: 0, x: 20 }}
-          animate={{ opacity: 1, x: 0 }}
-          className="flex flex-col items-center w-full max-w-sm"
-        >
-          <h2 className="text-2xl font-black mb-4">Rankings</h2>
-          <div className="w-full space-y-2 mb-8">
-            {history
-              .filter(record => {
-                // If logged in, show only my records. If guest (no username), show only guest records.
-                return (record.username || '') === (username || '');
-              })
-              .slice(-3)
-              .reverse()
-              .map(record => (
-                <div key={record.timestamp} className="p-3 border rounded-xl flex justify-between">
-                  <span>{new Date(record.timestamp).toLocaleDateString()}</span>
-                  <span className="font-bold">{record.score}</span>
-                </div>
-              ))}
-          </div>
-          <button onClick={() => setView('summary')} className="px-6 py-2 bg-slate-200 rounded-lg">
-            Back
-          </button>
-        </motion.div>
-      )}
-
-      {view === 'breakdown' && (
-        <motion.div
-          initial={{ opacity: 0, x: 20 }}
-          animate={{ opacity: 1, x: 0 }}
-          className="flex flex-col items-center w-full max-w-md h-full pb-20"
-        >
-          <h2 className="text-2xl font-black mb-4">Breakdown</h2>
-          <div className="w-full flex-1 overflow-y-auto space-y-2">
-            {quizResults.map((r, i) => (
-              <div key={i} className="p-2 border rounded text-left">
-                <div className="font-bold">{r.street.name}</div>
-                <div
-                  className={`text-xs ${r.status === 'correct' ? 'text-emerald-500' : 'text-red-500'}`}
-                >
-                  {r.status}
-                </div>
-              </div>
-            ))}
-          </div>
-          <button
-            onClick={() => setView('summary')}
-            className="px-6 py-2 bg-slate-200 rounded-lg mt-4"
-          >
-            Back
-          </button>
-        </motion.div>
-      )}
-
-      {curiosityRevealed && (
+      {/* Curiosity Screen - Shows Immediately */}
+      {view === 'curiosity' && (
         <motion.div
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
@@ -250,7 +77,7 @@ const SummaryScreen = ({
             {curiosity.title}
           </h3>
 
-          <div className="rounded-[2.5rem] overflow-hidden mb-8 shadow-2xl border">
+          <div className="rounded-[2.5rem] overflow-hidden mb-6 shadow-2xl border">
             <img
               src={displayImage}
               alt="Barcelona"
@@ -266,19 +93,61 @@ const SummaryScreen = ({
           </div>
 
           <button
-            onClick={onRestart}
-            className="w-full max-w-sm py-5 bg-sky-500 hover:bg-sky-600 text-white rounded-[2rem] shadow-xl font-black text-xl transition-all transform hover:scale-105"
+            onClick={handleNext}
+            className="w-full max-w-sm py-4 bg-sky-500 hover:bg-sky-600 text-white rounded-2xl shadow-lg font-bold text-lg transition-all transform hover:scale-105"
           >
-            PLAY AGAIN
+            {t('next') || 'Next'}
           </button>
         </motion.div>
       )}
+
+      {/* Actions Screen - Referral & Play Again */}
+      {view === 'actions' && (
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="flex flex-col items-center w-full max-w-md"
+        >
+          <div className="mb-6 text-center">
+            <h2 className="text-3xl font-black mb-2">{t('greatJob') || 'Great Job!'} </h2>
+            <p className="text-sm opacity-60">
+              Score: <span className="font-bold text-sky-500">{score}</span> / {maxPossibleScore}
+            </p>
+          </div>
+
+          {/* Primary: Share Referral Link */}
+          <button
+            onClick={handleShare}
+            className="w-full py-6 bg-gradient-to-r from-emerald-500 to-sky-500 hover:from-emerald-600 hover:to-sky-600 text-white rounded-2xl shadow-2xl font-black text-lg transition-all transform hover:scale-105 mb-4 flex flex-col items-center gap-2"
+          >
+            <span className="text-2xl">🎁</span>
+            <span>{t('shareAndEarnGiuros') || 'Share & Earn Giuros'}</span>
+            <span className="text-xs font-normal opacity-80">
+              {t('inviteFriendsEarnRewards') || 'Invite friends and earn rewards when they play!'}
+            </span>
+          </button>
+
+          {/* Secondary: Play Again */}
+          <button
+            onClick={onRestart}
+            className={`w-full py-3 rounded-xl font-bold text-sm transition-all ${
+              theme === 'dark'
+                ? 'bg-slate-800 hover:bg-slate-700 text-slate-300'
+                : 'bg-slate-100 hover:bg-slate-200 text-slate-700'
+            }`}
+          >
+            🔄 {t('playAgain') || 'Play Again'}
+          </button>
+        </motion.div>
+      )}
+
+      {/* Feedback Modal (1/7 chance) */}
       {showFeedbackModal && (
         <FeedbackModal
           isOpen={true}
           onClose={() => {
             setShowFeedbackModal(false);
-            onRestart(); // Go back to start after feedback
+            handleNext(); // Go to actions screen after feedback
           }}
           username={username}
         />
