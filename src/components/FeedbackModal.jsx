@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion'; // eslint-disable-line no-unused-vars
 import { useTheme } from '../context/ThemeContext';
 import { awardGiuros } from '../utils/giuros';
+import { submitFeedback } from '../utils/social';
 import PropTypes from 'prop-types';
 
 const FeedbackModal = ({ username, onClose }) => {
@@ -16,8 +17,8 @@ const FeedbackModal = ({ username, onClose }) => {
 
     setIsSubmitting(true);
     try {
-      // Simulate API call or save to firestore
-      // await saveFeedback(feedback);
+      // Save feedback to Firestore
+      await submitFeedback(username, feedback);
 
       // Award Giuros for feedback (once per week logic handled by caller or here?)
       // For now, caller handles the "show" logic, we just award.

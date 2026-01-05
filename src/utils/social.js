@@ -30,7 +30,7 @@ const REFERRALS_COLLECTION = 'referrals';
  * const profile = await ensureUserProfile('JohnDoe');
  * // Returns existing profile or creates new one with defaults
  */
-export const ensureUserProfile = async (username, additionalData = {}) => {
+export const ensureUserProfile = async (username, uid = null, additionalData = {}) => {
   if (!username) return null;
 
   const userRef = doc(db, USERS_COLLECTION, username);
@@ -40,6 +40,7 @@ export const ensureUserProfile = async (username, additionalData = {}) => {
     // Create new user profile
     const profileData = {
       username,
+      uid: uid, // Store Firebase Auth UID for permissions
       realName: additionalData.realName || '',
       avatarId: additionalData.avatarId || Math.floor(Math.random() * 20) + 1,
       joinedAt: Timestamp.now(),
@@ -57,8 +58,71 @@ export const ensureUserProfile = async (username, additionalData = {}) => {
     return profileData;
   }
 
-  return { id: userDoc.id, ...userDoc.data() };
+  const data = userDoc.data();
+  // SELF-HEAL: If profile exists but missing UID (legacy), update it if provided
+  if (uid && data.uid !== uid) {
+    await updateDoc(userRef, { uid: uid });
+    data.uid = uid;
+  }
+
+  return { id: userDoc.id, ...data };
 };
+
+// --- ADMIN & FEEDBACK FUNCTIONS ---
+
+const FEEDBACK_COLLECTION = 'feedback';
+
+/**
+ * Submit user feedback
+ */
+export const submitFeedback = async (username, text) => {
+  if (!username || !text) return;
+  await addDoc(collection(db, FEEDBACK_COLLECTION), {
+    username,
+    text,
+    status: 'new', // new, read, archived
+    createdAt: Timestamp.now(),
+  });
+};
+
+/**
+ * Get all feedback (Admin only)
+ */
+export const getFeedbackList = async () => {
+  try {
+    const q = query(collection(db, FEEDBACK_COLLECTION), limit(100)); // Simple limit for now
+    const snapshot = await getDocs(q);
+    return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+  } catch (e) {
+    console.error('Error fetching feedback:', e);
+    return [];
+  }
+};
+
+/**
+ * Get all users for admin table (Paginated or Limited)
+ */
+export const getAllUsers = async (limitCount = 50) => {
+  try {
+    const q = query(collection(db, USERS_COLLECTION), limit(limitCount));
+    const snapshot = await getDocs(q);
+    return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+  } catch (e) {
+    console.error('Error fetching all users:', e);
+    return [];
+  }
+};
+
+/**
+ * Update user data as Admin (bypass usual checks, trust rules)
+ */
+export const updateUserAsAdmin = async (targetUsername, data) => {
+  if (!targetUsername || !data) return;
+  const userRef = doc(db, USERS_COLLECTION, targetUsername);
+  await updateDoc(userRef, data);
+};
+
+// --- END ADMIN FUNCTIONS ---
 
 /**
  * Fetch user profile from Firestore by username.
