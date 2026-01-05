@@ -29,21 +29,55 @@ const sanitize = name => name.replace(/\//g, '_');
 export const searchUsers = async searchText => {
   if (!searchText || searchText.length < 2) return [];
 
+  // Remove @ prefix if user typed it
+  const cleanSearch = searchText.startsWith('@') ? searchText.slice(1) : searchText;
+  const legacySearch = '@' + cleanSearch;
+
   try {
-    const q = query(
+    // Query 1: Clean usernames (New/Migrated format)
+    const q1 = query(
       collection(db, HIGHSCORES_COLLECTION),
       orderBy('username'),
-      startAt(searchText),
-      endAt(searchText + '\uf8ff'),
-      limit(10)
+      startAt(cleanSearch),
+      endAt(cleanSearch + '\uf8ff'),
+      limit(5)
     );
 
-    const snapshot = await getDocs(q);
-    return snapshot.docs.map(doc => ({
-      username: doc.data().username,
-      // We could return high score too if we want
-      bestScore: doc.data().score,
-    }));
+    // Query 2: Legacy usernames (With @ prefix)
+    const q2 = query(
+      collection(db, HIGHSCORES_COLLECTION),
+      orderBy('username'),
+      startAt(legacySearch),
+      endAt(legacySearch + '\uf8ff'),
+      limit(5)
+    );
+
+    // Run parallel queries
+    const [snap1, snap2] = await Promise.all([getDocs(q1), getDocs(q2)]);
+
+    // Merge and deduplicate results
+    const results = new Map();
+
+    const processDoc = doc => {
+      const data = doc.data();
+      const rawUser = data.username;
+      // Normalize to key for deduplication
+      const key = rawUser.replace(/^@/, '').toLowerCase();
+
+      if (!results.has(key)) {
+        // Ensure display format has @ prefix
+        const displayUser = rawUser.startsWith('@') ? rawUser : '@' + rawUser;
+        results.set(key, {
+          username: displayUser,
+          bestScore: data.score,
+        });
+      }
+    };
+
+    snap1.forEach(processDoc);
+    snap2.forEach(processDoc);
+
+    return Array.from(results.values());
   } catch (e) {
     console.error('Error searching users:', e);
     return [];
@@ -169,7 +203,57 @@ export const getFriends = async username => {
 
   try {
     const snapshot = await getDocs(collection(db, USERS_COLLECTION, clean, 'friends'));
-    return snapshot.docs.map(doc => doc.data());
+    const friends = [];
+
+    // Get today's date seed
+    const today = new Date();
+    const todaySeed = parseInt(
+      `${today.getFullYear()}${String(today.getMonth() + 1).padStart(2, '0')}${String(today.getDate()).padStart(2, '0')}`
+    );
+
+    // For each friend, fetch their profile data
+    for (const friendDoc of snapshot.docs) {
+      const friendData = friendDoc.data();
+      const friendUsername = friendData.username;
+      const cleanFriendUsername = friendUsername.startsWith('@')
+        ? friendUsername.slice(1)
+        : friendUsername;
+
+      try {
+        // Fetch user profile for badges
+        const userRef = doc(db, USERS_COLLECTION, sanitize(cleanFriendUsername));
+        const userSnap = await getDoc(userRef);
+
+        let badges = [];
+        let todayGames = 0;
+
+        if (userSnap.exists()) {
+          const profileData = userSnap.data();
+          badges = profileData.equippedBadges || [];
+        }
+
+        // Get today's game count
+        const scoresQuery = query(
+          collection(db, SCORES_COLLECTION),
+          where('username', '==', cleanFriendUsername),
+          where('date', '==', todaySeed)
+        );
+
+        const scoresSnap = await getDocs(scoresQuery);
+        todayGames = scoresSnap.size;
+
+        friends.push({
+          ...friendData,
+          badges,
+          todayGames,
+        });
+      } catch (profileError) {
+        console.warn(`Could not fetch profile for ${friendUsername}:`, profileError);
+        friends.push(friendData);
+      }
+    }
+
+    return friends;
   } catch (e) {
     console.error('Error getting friends:', e);
     return [];
@@ -186,7 +270,12 @@ export const getFriends = async username => {
 export const getFriendFeed = async friendsList => {
   if (!friendsList || friendsList.length === 0) return [];
 
-  const friendNames = friendsList.map(f => f.username);
+  // Ensure all friend usernames are without @ prefix for scores query
+  // (usernames are stored WITHOUT @ in Firebase)
+  const friendNames = friendsList.map(f => {
+    const username = f.username;
+    return username.startsWith('@') ? username.slice(1) : username;
+  });
   const allActivities = [];
 
   // 1. Fetch daily scores

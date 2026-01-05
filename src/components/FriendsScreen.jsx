@@ -335,23 +335,6 @@ const FriendsScreen = ({ onClose, username }) => {
                 key={f.username}
                 className="p-3 rounded-lg border flex justify-between items-center bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 transition-colors relative"
               >
-                <div
-                  className="flex-1 cursor-pointer"
-                  role="button"
-                  tabIndex={0}
-                  onClick={() => navigate(`/user/${encodeURIComponent(f.username)}`)}
-                  onKeyDown={e => {
-                    if (e.key === 'Enter' || e.key === ' ') {
-                      navigate(`/user/${encodeURIComponent(f.username)}`);
-                    }
-                  }}
-                >
-                  <span className="font-bold">{f.username}</span>
-                  <div className="text-xs text-slate-400">
-                    Since {new Date(f.since?.seconds * 1000).getFullYear()}
-                  </div>
-                </div>
-
                 {/* Menu Button */}
                 <div className="relative">
                   <button

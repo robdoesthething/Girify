@@ -39,8 +39,10 @@ export const saveScore = async (username, score, time, isBonus = false) => {
 
   try {
     const now = Timestamp.now();
+    // Strip @ prefix from username before saving (usernames stored WITHOUT @ in Firebase)
+    const cleanUsername = username.startsWith('@') ? username.slice(1) : username;
     const scoreData = {
-      username,
+      username: cleanUsername,
       score,
       time: parseFloat(time),
       date: getTodaySeed(),
@@ -52,7 +54,7 @@ export const saveScore = async (username, score, time, isBonus = false) => {
     await addDoc(collection(db, SCORES_COLLECTION), scoreData);
 
     // 2. Check & Update Personal Best (All Time)
-    const sanitizedUsername = username.replace(/\//g, '_');
+    const sanitizedUsername = cleanUsername.replace(/\//g, '_');
     const userDocRef = doc(db, HIGHSCORES_COLLECTION, sanitizedUsername);
     const userDoc = await getDoc(userDocRef);
     let shouldUpdate = false;
@@ -158,15 +160,10 @@ export const getLeaderboard = async (period = 'all') => {
 
       let include = false;
       // Better username handling - use the username from data, or doc ID as fallback
-      // IMPORTANT: Filter out old format usernames (without @)
-      const loweredUsername =
-        data.username?.toLowerCase() || doc.id.toLowerCase() || 'unknown user';
+      const rawUsername = data.username?.toLowerCase() || doc.id.toLowerCase() || 'unknown user';
 
-      // Skip entries that don't follow @username format
-      if (!loweredUsername.startsWith('@')) {
-        // Try to skip old format entries - they should have migrated
-        return;
-      }
+      // Ensure display format has @ prefix (stored without @ in Firebase)
+      const loweredUsername = rawUsername.startsWith('@') ? rawUsername : '@' + rawUsername;
 
       if (period === 'daily') {
         // Daily: Only today's games
