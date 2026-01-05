@@ -1,4 +1,4 @@
-import { useReducer, useMemo, useEffect } from 'react';
+import { useReducer, useMemo, useEffect, useState } from 'react';
 import { BrowserRouter as Router, Routes, Route, useLocation, useNavigate } from 'react-router-dom';
 import { AnimatePresence } from 'framer-motion';
 import TopBar from './components/TopBar';
@@ -26,17 +26,28 @@ import {
 } from './utils/dailyChallenge';
 import { calculateTimeScore } from './utils/scoring';
 import { saveScore } from './utils/leaderboard';
-import { ensureUserProfile, migrateUser, hasDailyReferral, healMigration } from './utils/social';
+import {
+  ensureUserProfile,
+  migrateUser,
+  hasDailyReferral,
+  healMigration,
+  updateUserProfile,
+} from './utils/social';
 import { claimDailyLoginBonus, awardChallengeBonus } from './utils/giuros';
 import { gameReducer, initialState } from './reducers/gameReducer';
 import { auth } from './firebase';
 import { onAuthStateChanged, signOut, updateProfile } from 'firebase/auth';
+
+import FeedbackModal from './components/FeedbackModal';
 
 const AppRoutes = () => {
   const { deviceMode, theme, t } = useTheme();
   const [state, dispatch] = useReducer(gameReducer, initialState);
   const location = useLocation();
   const navigate = useNavigate();
+
+  // Feedback Modal State
+  const [showFeedback, setShowFeedback] = useState(false);
 
   // Parse referral code from URL on load
   useEffect(() => {
@@ -255,6 +266,14 @@ const AppRoutes = () => {
               // eslint-disable-next-line no-console
               console.log(`[Giuros] Challenge bonus: +${result.bonus}`);
             });
+
+            // FEEDBACK CHECK: Check if we should ask for feedback (weekly)
+            const lastFeedback = localStorage.getItem('girify_last_feedback');
+            const now = Date.now();
+            // 7 days = 7 * 24 * 60 * 60 * 1000 = 604800000
+            if (!lastFeedback || now - parseInt(lastFeedback) > 604800000) {
+              setTimeout(() => setShowFeedback(true), 2000); // Show after short delay
+            }
           }
         } catch (e) {
           console.error('[Game] Error saving game:', e);
@@ -290,64 +309,124 @@ const AppRoutes = () => {
     navigate(page ? `/${page}` : '/');
   };
 
+  // Feedback close handler
+  const handleFeedbackClose = () => {
+    setShowFeedback(false);
+    localStorage.setItem('girify_last_feedback', Date.now().toString());
+  };
+
   // Auth Listener
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async user => {
       if (user) {
         let displayName = user.displayName || user.email?.split('@')[0] || 'User';
 
-        // MIGRATION: Ensure handle format (Name#1234)
-        if (!/.*#\d{4}$/.test(displayName)) {
+        // MIGRATION 2.0: Ensure handle format (@Name1234)
+        // Previous format was Name#1234. New format @Name1234.
+        const oldFormatRegex = /.*#\d{4}$/;
+        const newFormatRegex = /^@[a-zA-Z0-9]+$/;
+
+        let shouldMigrateHandle = false;
+        let newHandle = displayName;
+
+        if (oldFormatRegex.test(displayName)) {
+          // Convert Name#1234 -> @Name1234
+          newHandle = '@' + displayName.replace('#', '');
+          shouldMigrateHandle = true;
+        } else if (!newFormatRegex.test(displayName)) {
+          // Generate new handle if neither
+          const randomId = Math.floor(1000 + Math.random() * 9000);
+          const sanitizedName = displayName.replace(/[^a-zA-Z0-9]/g, '');
+          newHandle = `@${sanitizedName}${randomId}`;
+          shouldMigrateHandle = true;
+        }
+
+        if (shouldMigrateHandle) {
           try {
             // eslint-disable-next-line no-console
-            console.log('[Migration] Promoting user to Handle format...');
-            const randomId = Math.floor(1000 + Math.random() * 9000);
-            const sanitizedName = displayName.replace(/[^a-zA-Z0-9]/g, '');
-            const handle = `${sanitizedName}#${randomId}`;
+            console.log(`[Migration] Update handle: ${displayName} -> ${newHandle}`);
 
             // 1. Update Firebase Auth Profile
-            await updateProfile(user, { displayName: handle });
+            await updateProfile(user, { displayName: newHandle });
 
             // 2. DATA MIGRATION: Copy old profile data to new handle
-            // We pass the OLD displayName as the source to copy from
-            await migrateUser(displayName, handle);
+            await migrateUser(displayName, newHandle);
 
-            displayName = handle;
+            displayName = newHandle;
             // eslint-disable-next-line no-console
             console.log('[Migration] Success! New handle:', displayName);
           } catch (e) {
             console.error('[Migration] Failed to migrate user to handle:', e);
           }
-        } else {
-          // Even if handle exists, ensure Firestore profile matches
-          ensureUserProfile(displayName)
-            .then(profile => {
-              // Self-heal any broken migration links
-              healMigration(displayName).catch(err => console.error(err));
+        }
 
-              // Claim daily login bonus (giuros)
-              claimDailyLoginBonus(displayName).then(result => {
-                if (result.claimed) {
-                  // eslint-disable-next-line no-console
-                  console.log(`[Giuros] Daily login bonus claimed: +${result.bonus}`);
-                }
-              });
+        // Ensure Firestore profile matches
+        ensureUserProfile(displayName)
+          .then(profile => {
+            // Self-heal any broken migration links
+            healMigration(displayName).catch(err => console.error(err));
 
-              // Sync joined date
-              if (profile && profile.joinedAt) {
-                const date = profile.joinedAt.toDate
-                  ? profile.joinedAt.toDate()
-                  : new Date(profile.joinedAt.seconds * 1000);
-                localStorage.setItem('girify_joined', date.toLocaleDateString());
-              } else {
-                // Fallback if no joined date in profile (legacy users)
-                if (!localStorage.getItem('girify_joined')) {
-                  localStorage.setItem('girify_joined', new Date().toLocaleDateString());
+            // Claim daily login bonus (giuros)
+            claimDailyLoginBonus(displayName).then(result => {
+              if (result.claimed) {
+                // eslint-disable-next-line no-console
+                console.log(`[Giuros] Daily login bonus claimed: +${result.bonus}`);
+              }
+            });
+
+            // MIGRATION: Registry Date Backfill
+            // If profile doesn't have a valid joinedAt, OR we want to backfill from history if older
+            let earliestDate = null;
+
+            // Check local history for earliest game
+            try {
+              const history = JSON.parse(localStorage.getItem('girify_history') || '[]');
+              if (history.length > 0) {
+                // Sort by timestamp asc
+                const sorted = [...history].sort((a, b) => (a.timestamp || 0) - (b.timestamp || 0));
+                if (sorted[0].timestamp) {
+                  earliestDate = new Date(sorted[0].timestamp);
                 }
               }
-            })
-            .catch(e => console.error(e));
-        }
+            } catch (e) {
+              console.warn('History parse error', e);
+            }
+
+            // If we found an earlier date than what's stored (or nothing stored), use it
+            // Logic: If profile has date X, and history has date Y < X, update to Y.
+            let profileDate = null;
+            if (profile && profile.joinedAt) {
+              profileDate = profile.joinedAt.toDate
+                ? profile.joinedAt.toDate()
+                : new Date(profile.joinedAt.seconds * 1000);
+            }
+
+            if (earliestDate) {
+              if (!profileDate || earliestDate < profileDate) {
+                // eslint-disable-next-line no-console
+                console.log('[Migration] Backfilling registry date from history:', earliestDate);
+                // Update firestore profile with new date? ensureUserProfile doesn't update if exists usually.
+                // We might need a specific update call or rely on local storage for display.
+                // Ideally we update firestore.
+                updateUserProfile(displayName, { joinedAt: earliestDate }).catch(e =>
+                  console.error(e)
+                );
+
+                localStorage.setItem('girify_joined', earliestDate.toLocaleDateString());
+              }
+            }
+
+            // Sync joined date to local storage for display
+            if (!localStorage.getItem('girify_joined')) {
+              if (profileDate) {
+                localStorage.setItem('girify_joined', profileDate.toLocaleDateString());
+              } else {
+                // Fallback to today if truly new and no history
+                localStorage.setItem('girify_joined', new Date().toLocaleDateString());
+              }
+            }
+          })
+          .catch(e => console.error(e));
 
         const currentUsername = localStorage.getItem('girify_username');
         if (currentUsername !== displayName) {
@@ -382,6 +461,11 @@ const AppRoutes = () => {
         `}
     >
       <TopBar onOpenPage={handleOpenPage} />
+
+      {/* Global Feedback Modal */}
+      <AnimatePresence>
+        {showFeedback && <FeedbackModal username={state.username} onClose={handleFeedbackClose} />}
+      </AnimatePresence>
 
       <AnimatePresence mode="wait">
         <Routes location={location} key={location.pathname}>

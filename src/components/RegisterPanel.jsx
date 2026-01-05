@@ -83,7 +83,7 @@ const RegisterPanel = ({ theme: themeProp }) => {
       // Generate handle
       const randomId = Math.floor(1000 + Math.random() * 9000);
       const sanitizedName = displayName.replace(/[^a-zA-Z0-9]/g, '');
-      const handle = `${sanitizedName}#${randomId}`;
+      const handle = `@${sanitizedName}${randomId}`;
       const avatarId = Math.floor(Math.random() * 20) + 1;
 
       if (user.displayName !== handle) {
@@ -162,7 +162,7 @@ const RegisterPanel = ({ theme: themeProp }) => {
         // Generate handle
         const randomId = Math.floor(1000 + Math.random() * 9000);
         const sanitizedName = name.replace(/[^a-zA-Z0-9]/g, '');
-        const handle = `${sanitizedName}#${randomId}`;
+        const handle = `@${sanitizedName}${randomId}`;
         const avatarId = Math.floor(Math.random() * 20) + 1;
 
         userCredential = await createUserWithEmailAndPassword(auth, email, password);

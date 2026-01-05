@@ -21,10 +21,10 @@ const AboutScreen = ({ onClose: _onClose }) => {
       <div className="flex-1 overflow-y-auto w-full px-4 py-6 pt-16">
         <div className="max-w-2xl mx-auto">
           {/* Header */}
-          <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center justify-between mb-8 relative">
             <button
               onClick={() => navigate(-1)}
-              className="flex items-center gap-2 text-sm font-bold opacity-60 hover:opacity-100 transition-opacity"
+              className="flex items-center gap-2 text-sm font-bold opacity-60 hover:opacity-100 transition-opacity z-10"
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path
@@ -36,36 +36,47 @@ const AboutScreen = ({ onClose: _onClose }) => {
               </svg>
               {t('back')}
             </button>
+
+            <h2 className="text-xl font-black tracking-tight absolute left-1/2 transform -translate-x-1/2">
+              {t('aboutGirify')}
+            </h2>
           </div>
 
-          {/* Content Card */}
-          <div
-            className={`rounded-3xl shadow-xl overflow-hidden ${theme === 'dark' ? 'bg-slate-800' : 'bg-white'}`}
-          >
-            {/* Header */}
-            <div
-              className={`p-6 border-b ${theme === 'dark' ? 'border-slate-700' : 'border-slate-100'}`}
-            >
-              <h2 className="text-2xl font-black tracking-tight">{t('aboutGirify')}</h2>
-            </div>
+          {/* Content */}
+          <div className="space-y-6 text-sm leading-relaxed opacity-90 px-2">
+            <p className="text-base">{t('aboutDescription')}</p>
 
-            {/* Content */}
-            <div className="p-6 space-y-6 text-sm leading-relaxed opacity-90">
-              <p>{t('aboutDescription')}</p>
+            <h3 className="font-bold text-lg mt-6 text-sky-500">{t('howToPlay')}</h3>
+            <ul className="space-y-3">
+              <li className="flex items-start gap-3">
+                <span className="mt-1 w-1.5 h-1.5 rounded-full bg-slate-400 shrink-0"></span>
+                <span>{t('aboutPoint1')}</span>
+              </li>
+              <li className="flex items-start gap-3">
+                <span className="mt-1 w-1.5 h-1.5 rounded-full bg-slate-400 shrink-0"></span>
+                <span>{t('aboutPoint2')}</span>
+              </li>
+              <li className="flex items-start gap-3">
+                <span className="mt-1 w-1.5 h-1.5 rounded-full bg-slate-400 shrink-0"></span>
+                <span>{t('aboutPoint3')}</span>
+              </li>
+              <li className="flex items-start gap-3">
+                <span className="mt-1 w-1.5 h-1.5 rounded-full bg-slate-400 shrink-0"></span>
+                <span>{t('aboutPoint4')}</span>
+              </li>
+              <li className="flex items-start gap-3">
+                <span className="mt-1 w-1.5 h-1.5 rounded-full bg-slate-400 shrink-0"></span>
+                <span>{t('aboutPoint5')}</span>
+              </li>
+            </ul>
 
-              <h3 className="font-bold text-lg mt-4">{t('howToPlay')}</h3>
-              <ul className="list-disc pl-5 space-y-2">
-                <li>{t('aboutPoint1')}</li>
-                <li>{t('aboutPoint2')}</li>
-                <li>{t('aboutPoint3')}</li>
-                <li>{t('aboutPoint4')}</li>
-                <li>{t('aboutPoint5')}</li>
-              </ul>
+            <h3 className="font-bold text-lg mt-6 text-sky-500">{t('aboutCredits')}</h3>
+            <p className="p-4 rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700">
+              {t('aboutFooter')}
+            </p>
 
-              <h3 className="font-bold text-lg mt-4">{t('aboutCredits')}</h3>
-              <p>{t('aboutFooter')}</p>
-
-              <div className="pt-8 text-center opacity-50 text-xs">{t('rightsReserved')}</div>
+            <div className="pt-10 pb-6 text-center opacity-40 text-xs font-mono">
+              {t('rightsReserved')}
             </div>
           </div>
         </div>
