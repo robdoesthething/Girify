@@ -163,7 +163,7 @@ const PublicProfileScreen = ({ currentUser }) => {
     >
       <TopBar onOpenPage={page => navigate(page ? `/${page}` : '/')} />
 
-      <div className="flex-1 overflow-y-auto w-full px-4 py-8">
+      <div className="flex-1 overflow-y-auto w-full px-4 py-8 pt-16">
         <div className="max-w-2xl mx-auto">
           {/* Header Row */}
           <div className="flex items-center justify-between mb-6">

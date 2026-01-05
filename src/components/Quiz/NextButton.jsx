@@ -8,7 +8,8 @@ import PropTypes from 'prop-types';
 const NextButton = ({ onNext, isLastQuestion, feedback, isSubmit }) => {
   const { theme, t } = useTheme();
 
-  if (feedback !== 'transitioning') return null;
+  // Show button when answer is selected (manual mode) or during transition
+  if (feedback !== 'selected' && feedback !== 'transitioning') return null;
 
   const label = isSubmit
     ? t('submit') || 'Submit'
@@ -44,7 +45,7 @@ const NextButton = ({ onNext, isLastQuestion, feedback, isSubmit }) => {
 NextButton.propTypes = {
   onNext: PropTypes.func.isRequired,
   isLastQuestion: PropTypes.bool.isRequired,
-  feedback: PropTypes.oneOf(['idle', 'transitioning']).isRequired,
+  feedback: PropTypes.oneOf(['idle', 'selected', 'transitioning']).isRequired,
   isSubmit: PropTypes.bool,
 };
 

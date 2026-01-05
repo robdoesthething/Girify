@@ -157,7 +157,9 @@ export const getLeaderboard = async (period = 'all') => {
       }
 
       let include = false;
-      const loweredUsername = data.username ? data.username.toLowerCase() : 'unknown';
+      // Better username handling - use the username from data, or doc ID as fallback
+      const loweredUsername =
+        data.username?.toLowerCase() || doc.id.toLowerCase() || 'unknown user';
 
       if (period === 'daily') {
         // Daily: Only today's games

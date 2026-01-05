@@ -307,6 +307,46 @@ const AppRoutes = () => {
   };
 
   const handleOpenPage = page => {
+    // Check if user is in the middle of a game
+    if (state.gameState === 'playing' && state.currentQuestionIndex < state.quizStreets.length) {
+      // eslint-disable-next-line no-alert
+      const confirmed = window.confirm(
+        t('exitGameWarning') ||
+          'You are in the middle of a game. Progress will be lost and your score will be calculated based on current answers. Exit anyway?'
+      );
+      if (!confirmed) return; // Don't navigate if user cancels
+
+      // User confirmed - save current progress before exiting
+      try {
+        const history = JSON.parse(localStorage.getItem('girify_history') || '[]');
+        const avgTime = state.quizResults.length
+          ? (
+              state.quizResults.reduce((acc, curr) => acc + (curr.time || 0), 0) /
+              state.quizResults.length
+            ).toFixed(1)
+          : 0;
+
+        const partialRecord = {
+          date: getTodaySeed(),
+          score: state.score,
+          avgTime: avgTime,
+          timestamp: Date.now(),
+          username: state.username,
+          incomplete: true, // Mark as incomplete
+        };
+        history.push(partialRecord);
+        localStorage.setItem('girify_history', JSON.stringify(history));
+
+        if (state.username) {
+          hasDailyReferral(state.username).then(isBonus => {
+            saveScore(state.username, state.score, partialRecord.avgTime, isBonus);
+          });
+        }
+      } catch (e) {
+        console.error('[Game] Error saving partial progress:', e);
+      }
+    }
+
     // If null/undefined, go home. Else go to page.
     navigate(page ? `/${page}` : '/');
   };

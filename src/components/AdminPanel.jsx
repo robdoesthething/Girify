@@ -246,22 +246,83 @@ const AdminPanel = () => {
                 <h2 className="text-3xl font-black">Feedback Inbox</h2>
                 <div className="space-y-4">
                   {feedback.length === 0 && <p className="opacity-50">No feedback yet.</p>}
-                  {feedback.map(item => (
-                    <div
-                      key={item.id}
-                      className={`p-6 rounded-2xl border ${theme === 'dark' ? 'bg-slate-800 border-slate-700' : 'bg-white border-slate-200'}`}
-                    >
-                      <div className="flex justify-between mb-2">
-                        <span className="font-bold text-sky-500">@{item.username}</span>
-                        <span className="text-xs opacity-50">
-                          {item.createdAt?.toDate
-                            ? item.createdAt.toDate().toLocaleDateString()
-                            : 'Unknown date'}
-                        </span>
+                  {feedback.map(item => {
+                    const handleApproveFeedback = async () => {
+                      const { approveFeedback } = await import('../utils/social');
+                      const result = await approveFeedback(item.id, 50);
+                      if (result.success) {
+                        // eslint-disable-next-line no-alert
+                        alert(`Approved! ${result.username} received ${result.reward} Giuros.`);
+                        fetchData(); // Refresh
+                      } else {
+                        // eslint-disable-next-line no-alert
+                        alert(`Error: ${result.error}`);
+                      }
+                    };
+
+                    const handleRejectFeedback = async () => {
+                      const { rejectFeedback } = await import('../utils/social');
+                      const result = await rejectFeedback(item.id);
+                      if (result.success) {
+                        fetchData(); // Refresh
+                      } else {
+                        // eslint-disable-next-line no-alert
+                        alert(`Error: ${result.error}`);
+                      }
+                    };
+
+                    return (
+                      <div
+                        key={item.id}
+                        className={`p-6 rounded-2xl border ${theme === 'dark' ? 'bg-slate-800 border-slate-700' : 'bg-white border-slate-200'}`}
+                      >
+                        <div className="flex justify-between items-start mb-3">
+                          <div>
+                            <span className="font-bold text-sky-500">@{item.username}</span>
+                            <span className="text-xs opacity-50 ml-3">
+                              {item.createdAt?.toDate
+                                ? item.createdAt.toDate().toLocaleDateString()
+                                : 'Unknown date'}
+                            </span>
+                          </div>
+                          <span
+                            className={`px-3 py-1 rounded-full text-xs font-bold ${
+                              item.status === 'pending'
+                                ? 'bg-yellow-500/20 text-yellow-600'
+                                : item.status === 'approved'
+                                  ? 'bg-emerald-500/20 text-emerald-600'
+                                  : 'bg-red-500/20 text-red-600'
+                            }`}
+                          >
+                            {item.status}
+                          </span>
+                        </div>
+                        <p className="opacity-80 leading-relaxed mb-4">{item.text}</p>
+
+                        {item.status === 'pending' && (
+                          <div className="flex gap-2">
+                            <button
+                              onClick={handleApproveFeedback}
+                              className="px-4 py-2 bg-emerald-500 hover:bg-emerald-600 text-white rounded-lg text-sm font-bold transition-colors"
+                            >
+                              ✓ Approve & Award 50 🪙
+                            </button>
+                            <button
+                              onClick={handleRejectFeedback}
+                              className="px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg text-sm font-bold transition-colors"
+                            >
+                              ✗ Reject
+                            </button>
+                          </div>
+                        )}
+                        {item.status === 'approved' && item.reward && (
+                          <div className="text-sm text-emerald-600 dark:text-emerald-400 font-bold">
+                            ✓ Awarded {item.reward} Giuros
+                          </div>
+                        )}
                       </div>
-                      <p className="opacity-80 leading-relaxed">{item.text}</p>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               </div>
             )}
