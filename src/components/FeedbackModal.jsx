@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion'; // eslint-disable-line no-unused-vars
 import { useTheme } from '../context/ThemeContext';
-import { awardGiuros } from '../utils/giuros';
 import { submitFeedback } from '../utils/social';
 import PropTypes from 'prop-types';
 
@@ -17,15 +16,9 @@ const FeedbackModal = ({ username, onClose }) => {
 
     setIsSubmitting(true);
     try {
-      // Save feedback to Firestore
+      // Save feedback to Firestore with pending status
+      // Admin will review and approve to award Giuros
       await submitFeedback(username, feedback);
-
-      // Award Giuros for feedback (once per week logic handled by caller or here?)
-      // For now, caller handles the "show" logic, we just award.
-      // But typically we should verify on backend.
-      // We will blindly award here for the UI demo as requested.
-      const reward = 50;
-      await awardGiuros(username, reward);
 
       setSubmitted(true);
       setTimeout(() => {
@@ -92,7 +85,7 @@ const FeedbackModal = ({ username, onClose }) => {
                     disabled={isSubmitting || !feedback.trim()}
                     className="flex-1 py-3 rounded-xl font-bold text-sm bg-sky-500 hover:bg-sky-600 text-white shadow-lg shadow-sky-500/20 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    {isSubmitting ? 'Sending...' : t('submitFeedback') || 'Send & Earn 50 🪙'}
+                    {isSubmitting ? 'Sending...' : t('submitFeedback') || 'Submit Feedback'}
                   </button>
                 </div>
               </form>
@@ -106,11 +99,10 @@ const FeedbackModal = ({ username, onClose }) => {
             >
               <div className="text-5xl mb-4">🎉</div>
               <h3 className="text-xl font-bold mb-2">Thank You!</h3>
-              <p className="opacity-70 mb-4">Your feedback has been received.</p>
-              <div className="inline-flex items-center gap-2 bg-yellow-400/20 text-yellow-600 dark:text-yellow-400 px-4 py-2 rounded-full font-black">
-                <img src="/giuro.png" className="w-5 h-5" alt="" />
-                <span>+50 Giuros</span>
-              </div>
+              <p className="opacity-70 mb-4">
+                {t('feedbackPending') ||
+                  "Your feedback is under review. You'll be notified when approved!"}
+              </p>
             </motion.div>
           )}
         </AnimatePresence>

@@ -81,7 +81,8 @@ export const submitFeedback = async (username, text) => {
   await addDoc(collection(db, FEEDBACK_COLLECTION), {
     username,
     text,
-    status: 'new', // new, read, archived
+    status: 'pending', // pending, approved, rejected
+    reward: null, // Set when approved
     createdAt: Timestamp.now(),
   });
 };
@@ -97,6 +98,56 @@ export const getFeedbackList = async () => {
   } catch (e) {
     console.error('Error fetching feedback:', e);
     return [];
+  }
+};
+
+/**
+ * Approve feedback and award Giuros (Admin only)
+ */
+export const approveFeedback = async (feedbackId, giurosAmount = 50) => {
+  try {
+    const feedbackRef = doc(db, FEEDBACK_COLLECTION, feedbackId);
+    const feedbackDoc = await getDoc(feedbackRef);
+
+    if (!feedbackDoc.exists()) {
+      throw new Error('Feedback not found');
+    }
+
+    const feedbackData = feedbackDoc.data();
+    const username = feedbackData.username;
+
+    // Award Giuros using the giuros utility
+    const { awardGiuros } = await import('./giuros');
+    await awardGiuros(username, giurosAmount);
+
+    // Update feedback status
+    await updateDoc(feedbackRef, {
+      status: 'approved',
+      reward: giurosAmount,
+      approvedAt: Timestamp.now(),
+    });
+
+    return { success: true, username, reward: giurosAmount };
+  } catch (e) {
+    console.error('Error approving feedback:', e);
+    return { success: false, error: e.message };
+  }
+};
+
+/**
+ * Reject feedback (Admin only)
+ */
+export const rejectFeedback = async feedbackId => {
+  try {
+    const feedbackRef = doc(db, FEEDBACK_COLLECTION, feedbackId);
+    await updateDoc(feedbackRef, {
+      status: 'rejected',
+      rejectedAt: Timestamp.now(),
+    });
+    return { success: true };
+  } catch (e) {
+    console.error('Error rejecting feedback:', e);
+    return { success: false, error: e.message };
   }
 };
 
