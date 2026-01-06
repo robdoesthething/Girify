@@ -32,7 +32,7 @@ const LeaderboardScreen = ({ onClose, currentUser }) => {
       if (data === null) {
         setScores([]);
       } else {
-        setScores(data);
+        setScores(data.filter(s => s.username && s.username !== 'UNKNOWN'));
       }
     } catch (err) {
       console.error('Failed to load scores:', err);
@@ -175,11 +175,10 @@ const LeaderboardScreen = ({ onClose, currentUser }) => {
                   onClick={() => {
                     // Check if this is the current user
                     const clickedUsername = s.username?.toLowerCase() || '';
-                    const myUsername = currentUser?.toLowerCase().replace('@', '') || '';
-                    if (
-                      clickedUsername === myUsername ||
-                      `@${clickedUsername}` === currentUser?.toLowerCase()
-                    ) {
+                    const myUsername = currentUser?.toLowerCase().replace(/^@/, '') || '';
+                    const cleanClicked = clickedUsername.replace(/^@/, '');
+
+                    if (cleanClicked === myUsername) {
                       navigate('/profile');
                     } else {
                       navigate(`/user/${encodeURIComponent(s.username)}`);

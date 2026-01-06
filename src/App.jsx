@@ -285,7 +285,10 @@ const AppRoutes = () => {
             const now = Date.now();
             // 7 days = 7 * 24 * 60 * 60 * 1000 = 604800000
             if (!lastFeedback || now - parseInt(lastFeedback) > 604800000) {
-              setTimeout(() => setShowFeedback(true), 2000); // Show after short delay
+              // 1/7 chance to show
+              if (Math.random() < 1 / 7) {
+                setTimeout(() => setShowFeedback(true), 2000); // Show after short delay
+              }
             }
           }
         } catch (e) {
