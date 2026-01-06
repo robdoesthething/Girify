@@ -57,10 +57,10 @@ const ShopScreen = ({ username }) => {
     if (result.success) {
       setBalance(result.newBalance);
       setPurchased(prev => [...prev, item.id]);
-      setMessage({ type: 'success', text: `Purchased ${item.name}!` });
+      setMessage({ type: 'success', text: `${t('purchased') || 'Purchased'} ${item.name}!` });
       setTimeout(() => setMessage(null), 2000);
     } else {
-      setMessage({ type: 'error', text: result.error || 'Purchase failed' });
+      setMessage({ type: 'error', text: result.error || t('purchaseFailed') || 'Purchase failed' });
       setTimeout(() => setMessage(null), 2000);
     }
   };
@@ -76,7 +76,7 @@ const ShopScreen = ({ username }) => {
 
     await setEquippedCosmetics(username, newEquipped);
     setEquipped(newEquipped);
-    setMessage({ type: 'success', text: `Equipped ${item.name}!` });
+    setMessage({ type: 'success', text: `${t('equipped')} ${item.name}!` });
     setTimeout(() => setMessage(null), 2000);
   };
 
@@ -195,10 +195,12 @@ const ShopScreen = ({ username }) => {
                         <div className="flex items-center gap-2">
                           {item.emoji && <span className="text-2xl">{item.emoji}</span>}
                           {item.prefix && <span className="text-lg">{item.prefix}</span>}
-                          <h3 className="font-bold">{item.name}</h3>
+                          <h3 className="font-bold">{t(item.name) || item.name}</h3>
                         </div>
                         {item.description && (
-                          <p className="text-xs opacity-60 mt-1">{item.description}</p>
+                          <p className="text-xs opacity-60 mt-1">
+                            {t(item.description) || item.description}
+                          </p>
                         )}
                         {item.cssClass && (
                           <div className="mt-2">

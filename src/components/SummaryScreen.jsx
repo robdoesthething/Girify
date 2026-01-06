@@ -7,7 +7,7 @@ import FeedbackModal from './FeedbackModal';
 
 const SummaryScreen = ({ score, total, theme, username, onRestart, quizStreets, t }) => {
   // 1/7 chance to show feedback instead of curiosity
-  const [showFeedbackRequest] = useState(() => Math.random() < 1 / 7);
+  const [showFeedbackRequest] = useState(() => true); // FORCING FOR VERIFICATION
 
   const [view, setView] = useState(() => (showFeedbackRequest ? 'feedback' : 'curiosity'));
   const [showFeedbackModal, setShowFeedbackModal] = useState(showFeedbackRequest);
@@ -63,12 +63,35 @@ const SummaryScreen = ({ score, total, theme, username, onRestart, quizStreets, 
       className={`absolute inset-0 flex flex-col items-center justify-center p-6 text-center backdrop-blur-md transition-colors duration-500 pointer-events-auto overflow-y-auto
             ${theme === 'dark' ? 'bg-slate-900/95 text-white' : 'bg-slate-50/95 text-slate-800'}`}
     >
-      {/* Curiosity Screen - Shows Immediately */}
+      {/* Feedback Screen (Substitutive of Curiosity) */}
+      {view === 'feedback' && (
+        <motion.div
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          className="flex flex-col items-center max-w-md w-full relative z-20" // z-20 to ensure it sits above map if needed
+        >
+          <FeedbackModal
+            isOpen={true}
+            onClose={() => handleNext()}
+            username={username}
+            inline={true} // New prop to render inline without modal overlay if needed, or just reusing component
+          />
+          {/* Fallback Next button if user wants to skip without interacting with modal form explicitly */}
+          <button
+            onClick={handleNext}
+            className="mt-4 text-sm font-bold opacity-60 hover:opacity-100 underline"
+          >
+            {t('skip') || 'Skip'}
+          </button>
+        </motion.div>
+      )}
+
+      {/* Curiosity Screen - Shows ONLY if Feedback is NOT shown */}
       {view === 'curiosity' && (
         <motion.div
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
-          className="flex flex-col items-center max-w-md"
+          className="flex flex-col items-center max-w-md relative z-20"
         >
           <h2 className="text-xs font-black mb-1 text-sky-500 uppercase tracking-[0.3em]">
             City Curiosity
@@ -127,30 +150,15 @@ const SummaryScreen = ({ score, total, theme, username, onRestart, quizStreets, 
             </span>
           </button>
 
-          {/* Secondary: Play Again */}
+          {/* Secondary: Play Again - STYLED TO BE OBVIOUS */}
           <button
             onClick={onRestart}
-            className={`w-full py-3 rounded-xl font-bold text-sm transition-all ${
-              theme === 'dark'
-                ? 'bg-slate-800 hover:bg-slate-700 text-slate-300'
-                : 'bg-slate-100 hover:bg-slate-200 text-slate-700'
-            }`}
+            className="w-full py-4 rounded-xl font-bold text-lg uppercase tracking-wider transition-all animate-pulse-slow
+               bg-slate-900 text-white hover:bg-black hover:scale-105 shadow-xl border-2 border-slate-700 dark:border-slate-500"
           >
             🔄 {t('playAgain') || 'Play Again'}
           </button>
         </motion.div>
-      )}
-
-      {/* Feedback Modal (1/7 chance) */}
-      {showFeedbackModal && (
-        <FeedbackModal
-          isOpen={true}
-          onClose={() => {
-            setShowFeedbackModal(false);
-            handleNext(); // Go to actions screen after feedback
-          }}
-          username={username}
-        />
       )}
     </div>
   );

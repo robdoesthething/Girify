@@ -141,6 +141,9 @@ const ProfileScreen = ({ username }) => {
   const [editName, setEditName] = useState('');
   const [editAvatarId, setEditAvatarId] = useState(0); // 0-indexed for array
 
+  // Show/Hide Giuros Info
+  const [showGiurosInfo, setShowGiurosInfo] = useState(false);
+
   // Achievements State
   const [selectedAchievement, setSelectedAchievement] = useState(null);
 
@@ -217,13 +220,13 @@ const ProfileScreen = ({ username }) => {
     >
       <TopBar onOpenPage={page => navigate(page ? `/${page}` : '/')} />
 
-      <div className="flex-1 overflow-y-auto w-full px-4 py-6 pt-16">
-        <div className="max-w-2xl mx-auto">
+      <div className="flex-1 w-full px-4 py-8 pt-20 overflow-x-hidden">
+        <div className="max-w-2xl mx-auto w-full">
           {/* Header */}
-          <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center justify-between mb-8 relative">
             <button
               onClick={() => navigate(-1)}
-              className="flex items-center gap-2 text-sm font-bold opacity-60 hover:opacity-100 transition-opacity"
+              className="flex items-center gap-2 text-sm font-bold opacity-60 hover:opacity-100 transition-opacity z-10"
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path
@@ -235,12 +238,15 @@ const ProfileScreen = ({ username }) => {
               </svg>
               {t('back')}
             </button>
-            <h1 className="text-xl font-black absolute left-1/2 transform -translate-x-1/2">
+            <h1 className="text-xl font-black absolute left-1/2 transform -translate-x-1/2 flex items-center gap-2 max-w-[60%] truncate justify-center">
               {t('profile') || 'Profile'}
             </h1>
 
             {/* Giuros Balance */}
-            <button onClick={() => navigate('/shop')} className="flex items-center gap-2">
+            <button
+              onClick={() => setShowGiurosInfo(!showGiurosInfo)}
+              className="flex items-center gap-2 hover:scale-105 transition-transform"
+            >
               <img src="/giuro.png" alt="Giuros" className="h-6 w-auto object-contain" />
               <span className="font-black text-lg text-yellow-600 dark:text-yellow-400">
                 {giuros}
@@ -255,34 +261,42 @@ const ProfileScreen = ({ username }) => {
 
           {profileData && (
             <>
-              {/* Giuros Explainer Callout - Comic Bubble Style */}
-              <div className="relative mb-8 mx-2 filter drop-shadow-md">
-                <div
-                  className={`p-4 rounded-xl border-2 border-slate-900 bg-white dark:bg-slate-800 text-slate-900 dark:text-white relative z-10`}
-                >
-                  <div className="flex items-start gap-3">
-                    <img
-                      src="/giuro.png"
-                      alt=""
-                      className="h-8 w-auto object-contain shrink-0 mt-0.5"
-                    />
-                    <div className="flex-1">
-                      <h3 className="font-black text-lg mb-1">{t('giurosExplainerTitle')}</h3>
-                      <p className="text-sm opacity-80 mb-3 leading-relaxed">
-                        {t('giurosExplainerText')}
-                      </p>
-                      <button
-                        onClick={() => navigate('/shop')}
-                        className="px-4 py-2 bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-lg text-xs font-black uppercase tracking-wider hover:scale-105 transition-transform"
-                      >
-                        {t('goToShop')}
-                      </button>
+              {/* Giuros Explainer Callout - Hidden by default, toggled by clicking icon */}
+              <AnimatePresence>
+                {showGiurosInfo && (
+                  <motion.div
+                    initial={{ opacity: 0, height: 0, y: -20 }}
+                    animate={{ opacity: 1, height: 'auto', y: 0 }}
+                    exit={{ opacity: 0, height: 0, y: -20 }}
+                    className="relative mb-8 mx-2 filter drop-shadow-md overflow-hidden"
+                  >
+                    <div
+                      className={`p-4 rounded-xl border-2 border-slate-900 bg-white dark:bg-slate-800 text-slate-900 dark:text-white relative z-10`}
+                    >
+                      <div className="flex items-start gap-3">
+                        <img
+                          src="/giuro.png"
+                          alt=""
+                          className="h-8 w-auto object-contain shrink-0 mt-0.5"
+                        />
+                        <div className="flex-1">
+                          <h3 className="font-black text-lg mb-1">{t('giurosExplainerTitle')}</h3>
+                          <p className="text-sm opacity-80 mb-3 leading-relaxed">
+                            {t('giurosExplainerText')}
+                          </p>
+                          <button
+                            onClick={() => navigate('/shop')}
+                            className="px-4 py-2 bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-lg text-xs font-black uppercase tracking-wider hover:scale-105 transition-transform"
+                          >
+                            {t('goToShop')}
+                          </button>
+                        </div>
+                      </div>
                     </div>
-                  </div>
-                </div>
-                {/* Speech Bubble Tail */}
-                <div className="absolute -bottom-3 left-10 w-6 h-6 bg-white dark:bg-slate-800 border-b-2 border-r-2 border-slate-900 transform rotate-45 z-0"></div>
-              </div>
+                    {/* Speech Bubble Tail */}
+                  </motion.div>
+                )}
+              </AnimatePresence>
 
               {/* Main Profile Info - Removed Card Style, now cleaner layout */}
               <div className="flex flex-col items-center mb-8">
@@ -379,16 +393,7 @@ const ProfileScreen = ({ username }) => {
                         </button>
                       </div>
                     </div>
-                  ) : (
-                    profileData?.realName && (
-                      <p className="text-sm font-medium opacity-60">
-                        {profileData.realName}{' '}
-                        <span className="text-[10px] opacity-70 uppercase bg-slate-200 dark:bg-slate-700 px-1 rounded ml-1">
-                          Private
-                        </span>
-                      </p>
-                    )
-                  )}
+                  ) : null}
                 </div>
 
                 <p className="text-[10px] font-bold uppercase tracking-widest opacity-40 mt-3">
@@ -444,8 +449,11 @@ const ProfileScreen = ({ username }) => {
 
               {/* Achievements Section */}
               <div className="mb-8">
-                <h3 className="text-xs font-bold uppercase tracking-widest opacity-50 mb-4 ml-1">
-                  {t('achievements')} ({unlockedBadges.length})
+                <h3 className="font-bold text-lg mb-4 text-sky-500 flex items-center gap-2">
+                  {t('achievements')}{' '}
+                  <span className="text-sm opacity-60 text-slate-500 dark:text-slate-400">
+                    ({unlockedBadges.length})
+                  </span>
                 </h3>
 
                 {unlockedBadges.length > 0 ? (
@@ -533,18 +541,21 @@ const ProfileScreen = ({ username }) => {
 
               {/* Recent History */}
               <div className="mb-20">
-                <h3 className="text-xs font-bold uppercase tracking-widest opacity-50 mb-4 ml-1">
-                  {t('recentActivity')}
-                </h3>
+                <h3 className="font-bold text-lg mb-4 text-sky-500">{t('recentActivity')}</h3>
 
                 {allHistory.length === 0 ? (
                   <div className="text-center py-10 opacity-40 text-sm">{t('noGamesYet')}</div>
                 ) : (
                   <div className="space-y-3">
                     {(() => {
-                      const sorted = [...allHistory].sort(
-                        (a, b) => (b.timestamp || 0) - (a.timestamp || 0)
-                      );
+                      const sorted = [...allHistory]
+                        .filter(g => {
+                          // Filter last 7 days
+                          if (!g.timestamp) return false;
+                          const daysDiff = (Date.now() - g.timestamp) / (1000 * 60 * 60 * 24);
+                          return daysDiff <= 7;
+                        })
+                        .sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
                       const dailyEarliest = new Map();
                       // Determine earliest timestamp for each date
                       sorted.forEach(g => {

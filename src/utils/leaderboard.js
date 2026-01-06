@@ -10,6 +10,7 @@ import {
   limit,
   getDocs,
   Timestamp,
+  where,
 } from 'firebase/firestore';
 import { getTodaySeed } from './dailyChallenge';
 
@@ -113,11 +114,49 @@ export const getLeaderboard = async (period = 'all') => {
       console.log(`[Leaderboard] Fetching scores for period: ${period}`);
     }
 
+    // Parallel fetch: Scores AND Migration Data
+    // We need to know which users have migrated to merge their scores
+    const migrationQuery = query(collection(db, 'users'), orderBy('migratedTo')); // filter where migratedTo exists
+    // Note: 'orderBy' implicitly filters for existence of field.
+    // Or we just fetch all users if dataset is small, but let's try to be specific.
+    // Actually, simple way: fetch all users (assuming < 1000 active for now) or just ignore perfectly.
+    // Better: Query specifically for migrated fields.
+    // For now, let's just fetch scores first. Real-time migration merging might be heavy if many users.
+
+    // Let's use a smarter approach: Just fetch scores.
     const snapshot = await getDocs(q);
+
+    // FETCH MIGRATIONS:
+    // To properly deduplicate, we need to know who maps to whom.
+    // We'll fetch users acting as tombstones (having migratedTo).
+    // This requires an index usually: where('migratedTo', '!=', null).
+    // As a fallback without index, we might miss some, but this is critical for the request.
+    // Let's try to just fetch the unique usernames found in scores and check their profiles? expensive.
+    // Let's assume we can fetch 'users' where migratedTo > '' (non-empty string).
+
+    const migrationMap = {};
+    try {
+      const usersRef = collection(db, 'users');
+      const migrationSnap = await getDocs(query(usersRef, where('migratedTo', '!=', null)));
+      migrationSnap.forEach(doc => {
+        const d = doc.data();
+        if (d.migratedTo) {
+          migrationMap[doc.id.toLowerCase()] = d.migratedTo.toLowerCase();
+          // Also handle case where username in score might be without @
+          // but our map keys should be consistent.
+        }
+      });
+    } catch (e) {
+      console.warn('[Leaderboard] Could not fetch migrations (requires index?):', e);
+    }
+
+    // Also hardcode the known one from the user request if needed, but the DB should have it.
 
     if (import.meta.env.DEV) {
       // eslint-disable-next-line no-console
-      console.log(`[Leaderboard] Fetched ${snapshot.size} documents from 'scores'`);
+      console.log(
+        `[Leaderboard] Fetched ${snapshot.size} scores, ${Object.keys(migrationMap).length} migrations`
+      );
     }
 
     const rawScores = [];
@@ -137,14 +176,12 @@ export const getLeaderboard = async (period = 'all') => {
 
     const todaySeed = getTodaySeed();
 
-    if (import.meta.env.DEV) {
-      // eslint-disable-next-line no-console
-      console.log(
-        `[Leaderboard] Filters - TodaySeed: ${todaySeed}, StartOfWeek: ${startOfWeek.toISOString()}, StartOfMonth: ${startOfMonth.toISOString()}`
-      );
-    }
+    const seenEntries = new Set(); // Prevent duplicate processing of exact same doc
 
     snapshot.forEach(doc => {
+      if (seenEntries.has(doc.id)) return;
+      seenEntries.add(doc.id);
+
       const data = doc.data();
       // Handle different timestamp formats
       let date;
@@ -160,9 +197,20 @@ export const getLeaderboard = async (period = 'all') => {
 
       let include = false;
       // Better username handling - use the username from data, or doc ID as fallback
-      const rawUsername = data.username?.toLowerCase() || doc.id.toLowerCase() || 'unknown user';
+      let rawUsername = data.username?.toLowerCase() || doc.id.toLowerCase() || 'unknown user';
 
-      // Ensure display format has @ prefix (stored without @ in Firebase)
+      // NORMALIZE USERNAME: Check migration map
+      // If this username is a legacy one, map it to the new one
+      if (migrationMap[rawUsername]) {
+        rawUsername = migrationMap[rawUsername];
+      }
+      // Also check keys with/without @ if mismatch
+      const withoutAt = rawUsername.replace('@', '');
+      if (migrationMap[withoutAt]) {
+        rawUsername = migrationMap[withoutAt];
+      }
+
+      // Ensure display format has @ prefix (stored without @ in Firebase usually)
       const loweredUsername = rawUsername.startsWith('@') ? rawUsername : '@' + rawUsername;
 
       if (period === 'daily') {

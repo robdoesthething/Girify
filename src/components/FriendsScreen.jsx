@@ -17,6 +17,29 @@ import { useNavigate } from 'react-router-dom';
 // eslint-disable-next-line no-unused-vars
 import { motion, AnimatePresence } from 'framer-motion';
 
+const AVATARS = [
+  '🐶',
+  '🐱',
+  '🐭',
+  '🐹',
+  '🐰',
+  '🦊',
+  '🐻',
+  '🐼',
+  '🐨',
+  '🐯',
+  '🦁',
+  '🐮',
+  '🐷',
+  '🐸',
+  '🐵',
+  '🐔',
+  '🐧',
+  '🐦',
+  '🦆',
+  '🦅',
+];
+
 const FriendsScreen = ({ onClose, username }) => {
   const navigate = useNavigate();
   const { theme, t } = useTheme();
@@ -335,6 +358,28 @@ const FriendsScreen = ({ onClose, username }) => {
                 key={f.username}
                 className="p-3 rounded-lg border flex justify-between items-center bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 transition-colors relative"
               >
+                <div className="flex items-center gap-3">
+                  <div
+                    className={`w-10 h-10 rounded-full flex items-center justify-center text-xl bg-gradient-to-br from-sky-400 to-indigo-600 border-2 border-white dark:border-slate-800 shadow-sm`}
+                  >
+                    {AVATARS[f.avatarId ? f.avatarId - 1 : 0] || '🐼'}
+                  </div>
+                  <div>
+                    <h4 className="font-bold text-sm leading-tight">{f.username}</h4>
+                    {f.badges && f.badges.length > 0 && (
+                      <span className="text-xs mr-2" title="Equipped Badge">
+                        {/* Assuming badges are objects or emojis string */}
+                        {typeof f.badges[0] === 'string' ? f.badges[0] : '🏅'}
+                      </span>
+                    )}
+                    {f.todayGames > 0 && (
+                      <span className="text-[10px] bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 px-1.5 py-0.5 rounded font-bold">
+                        Played Today
+                      </span>
+                    )}
+                  </div>
+                </div>
+
                 {/* Menu Button */}
                 <div className="relative">
                   <button
