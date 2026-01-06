@@ -162,6 +162,53 @@ export const rejectFeedback = async feedbackId => {
 };
 
 /**
+ * Delete feedback (Admin only)
+ */
+export const deleteFeedback = async feedbackId => {
+  try {
+    const feedbackRef = doc(db, FEEDBACK_COLLECTION, feedbackId);
+    const { deleteDoc } = await import('firebase/firestore');
+    await deleteDoc(feedbackRef);
+    return { success: true };
+  } catch (e) {
+    console.error('Error deleting feedback:', e);
+    return { success: false, error: e.message };
+  }
+};
+
+/**
+ * Check for unseen feedback rewards for a user
+ */
+export const checkUnseenFeedbackRewards = async username => {
+  if (!username) return [];
+  try {
+    const q = query(
+      collection(db, FEEDBACK_COLLECTION),
+      where('username', '==', username),
+      where('status', '==', 'approved'),
+      where('notified', '!=', true)
+    );
+    const snapshot = await getDocs(q);
+    return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+  } catch (e) {
+    console.error('Error checking feedback rewards:', e);
+    return [];
+  }
+};
+
+/**
+ * Mark feedback reward as seen
+ */
+export const markFeedbackRewardSeen = async feedbackId => {
+  try {
+    const feedbackRef = doc(db, FEEDBACK_COLLECTION, feedbackId);
+    await updateDoc(feedbackRef, { notified: true });
+  } catch (e) {
+    console.error('Error marking feedback reward seen:', e);
+  }
+};
+
+/**
  * Get all users for admin table (Paginated or Limited)
  */
 export const getAllUsers = async (limitCount = 50) => {

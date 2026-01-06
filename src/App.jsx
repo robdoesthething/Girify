@@ -431,6 +431,22 @@ const AppRoutes = () => {
               }
             });
 
+            // FEEDBACK REWARDS: Check if user has earned rewards
+            import('./utils/social').then(
+              ({ checkUnseenFeedbackRewards, markFeedbackRewardSeen }) => {
+                checkUnseenFeedbackRewards(displayName).then(rewards => {
+                  if (rewards && rewards.length > 0) {
+                    const total = rewards.reduce((acc, r) => acc + (r.reward || 0), 0);
+                    // eslint-disable-next-line no-alert
+                    alert(
+                      `🎉 Your feedback has been approved!\n\nYou earned ${total} Giuros for helping us improve Girify!`
+                    );
+                    rewards.forEach(r => markFeedbackRewardSeen(r.id));
+                  }
+                });
+              }
+            );
+
             // MIGRATION: Registry Date Backfill
             // If profile doesn't have a valid joinedAt, OR we want to backfill from history if older
             let earliestDate = null;
