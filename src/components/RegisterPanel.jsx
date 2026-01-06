@@ -78,11 +78,13 @@ const RegisterPanel = ({ theme: themeProp }) => {
       setError('');
       const result = await signInWithPopup(auth, googleProvider);
       const user = result.user;
-      const displayName = user.displayName || user.email?.split('@')[0] || 'User';
+      const fullName = user.displayName || user.email?.split('@')[0] || 'User';
+      // Extract only first name (not surname)
+      const firstName = fullName.split(' ')[0];
 
-      // Generate handle
+      // Generate handle with 4-digit ID
       const randomId = Math.floor(1000 + Math.random() * 9000);
-      const sanitizedName = displayName.replace(/[^a-zA-Z0-9]/g, '');
+      const sanitizedName = firstName.replace(/[^a-zA-Z0-9]/g, '');
       const handle = `@${sanitizedName}${randomId}`;
       const avatarId = Math.floor(Math.random() * 20) + 1;
 
@@ -91,7 +93,7 @@ const RegisterPanel = ({ theme: themeProp }) => {
       }
 
       // Ensure user profile exists
-      await ensureUserProfile(handle, { realName: displayName, avatarId });
+      await ensureUserProfile(handle, { realName: fullName, avatarId });
 
       // Record referral if exists
       const referrer = localStorage.getItem('girify_referrer');
@@ -159,9 +161,10 @@ const RegisterPanel = ({ theme: themeProp }) => {
           return;
         }
 
-        // Generate handle
+        // Extract only first name (not surname) and generate handle
+        const firstName = name.split(' ')[0];
         const randomId = Math.floor(1000 + Math.random() * 9000);
-        const sanitizedName = name.replace(/[^a-zA-Z0-9]/g, '');
+        const sanitizedName = firstName.replace(/[^a-zA-Z0-9]/g, '');
         const handle = `@${sanitizedName}${randomId}`;
         const avatarId = Math.floor(Math.random() * 20) + 1;
 

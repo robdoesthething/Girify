@@ -163,18 +163,164 @@ const AdminPanel = () => {
                 {/* Data Tools */}
                 <div className="p-6 rounded-2xl bg-white dark:bg-slate-800 shadow-sm border border-slate-100 dark:border-slate-700">
                   <h3 className="text-xl font-bold mb-4">Data Tools</h3>
-                  <div className="flex items-center gap-4">
-                    <button
-                      onClick={handleMigration}
-                      className="px-6 py-3 rounded-xl bg-rose-500 hover:bg-rose-600 text-white font-bold transition-all shadow-lg shadow-rose-500/20"
-                    >
-                      ⚠️ Fix Usernames (Lowercase Migration)
-                    </button>
-                    {migrationStatus && (
-                      <span className="font-mono text-sm opacity-70 bg-slate-100 dark:bg-slate-900 px-3 py-1 rounded">
-                        {migrationStatus}
-                      </span>
-                    )}
+                  <div className="space-y-4">
+                    {/* Lowercase Migration */}
+                    <div className="flex items-center gap-4">
+                      <button
+                        onClick={handleMigration}
+                        className="px-6 py-3 rounded-xl bg-rose-500 hover:bg-rose-600 text-white font-bold transition-all shadow-lg shadow-rose-500/20"
+                      >
+                        ⚠️ Fix Usernames (Lowercase Migration)
+                      </button>
+                      {migrationStatus && (
+                        <span className="font-mono text-sm opacity-70 bg-slate-100 dark:bg-slate-900 px-3 py-1 rounded">
+                          {migrationStatus}
+                        </span>
+                      )}
+                    </div>
+
+                    {/* Leaderboard Deduplication */}
+                    <div className="flex items-center gap-4">
+                      <button
+                        onClick={async () => {
+                          if (
+                            !window.confirm(
+                              'This will remove duplicate scores, keeping only the best per user. Continue?'
+                            )
+                          )
+                            return;
+                          setMigrationStatus('Deduplicating leaderboard...');
+                          try {
+                            const { collection, getDocs, deleteDoc, query, orderBy } =
+                              await import('firebase/firestore');
+                            const { db } = await import('../firebase');
+
+                            // Process highscores collection
+                            const highscoresRef = collection(db, 'highscores');
+                            const snap = await getDocs(
+                              query(highscoresRef, orderBy('score', 'desc'))
+                            );
+
+                            const seenUsers = new Map(); // username -> best doc id
+                            const toDelete = [];
+
+                            snap.docs.forEach(doc => {
+                              const data = doc.data();
+                              const username = (data.username || '').toLowerCase();
+                              if (!username) return;
+
+                              if (!seenUsers.has(username)) {
+                                // First occurrence (best score due to ordering)
+                                seenUsers.set(username, doc.id);
+                              } else {
+                                // Duplicate - mark for deletion
+                                toDelete.push(doc.ref);
+                              }
+                            });
+
+                            // Delete duplicates
+                            for (const ref of toDelete) {
+                              await deleteDoc(ref);
+                            }
+
+                            setMigrationStatus(
+                              `Deduplication complete! Removed ${toDelete.length} duplicate entries.`
+                            );
+                          } catch (e) {
+                            console.error(e);
+                            setMigrationStatus(`Error: ${e.message}`);
+                          }
+                        }}
+                        className="px-6 py-3 rounded-xl bg-amber-500 hover:bg-amber-600 text-white font-bold transition-all shadow-lg shadow-amber-500/20"
+                      >
+                        🧹 Deduplicate Leaderboard
+                      </button>
+                    </div>
+
+                    {/* Username Format Migration (First Name + 4 digits) */}
+                    <div className="flex items-center gap-4">
+                      <button
+                        onClick={async () => {
+                          if (
+                            !window.confirm(
+                              'This will update usernames to use only first name + 4 digits. Users with >4 digit suffixes or full names will be migrated. Continue?'
+                            )
+                          )
+                            return;
+                          setMigrationStatus('Migrating username formats...');
+                          try {
+                            const { collection, getDocs, doc, writeBatch } =
+                              await import('firebase/firestore');
+                            const { db } = await import('../firebase');
+
+                            const usersRef = collection(db, 'users');
+                            const snapshot = await getDocs(usersRef);
+                            let migrated = 0;
+                            let count = 0;
+                            let batch = writeBatch(db);
+                            const batchSize = 200;
+
+                            // Pattern: @FirstName1234 (starts with @, then letters/numbers, ends with exactly 4 digits)
+                            const validPattern = /^@[a-zA-Z][a-zA-Z0-9]*\d{4}$/;
+
+                            for (const userDoc of snapshot.docs) {
+                              const oldId = userDoc.id;
+                              const data = userDoc.data();
+
+                              // Skip if already valid format
+                              if (validPattern.test(oldId)) continue;
+
+                              // Extract name part (remove @ and digits at end)
+                              let namePart = oldId.replace(/^@/, '').replace(/\d+$/, '');
+                              // Take only first "word" (split by spaces or special chars)
+                              namePart = namePart.split(/[\s_-]/)[0];
+                              // Clean to alphanumeric only
+                              namePart = namePart.replace(/[^a-zA-Z0-9]/g, '');
+
+                              if (!namePart || namePart.length < 2) {
+                                namePart = 'User';
+                              }
+
+                              // Generate new 4-digit suffix
+                              const newSuffix = Math.floor(1000 + Math.random() * 9000);
+                              const newId = `@${namePart}${newSuffix}`;
+
+                              // Check if new ID already exists (skip if conflict)
+                              // For simplicity, we'll just set with merge
+                              const targetRef = doc(db, 'users', newId);
+                              batch.set(
+                                targetRef,
+                                { ...data, username: newId, migratedFrom: oldId },
+                                { merge: true }
+                              );
+                              batch.delete(userDoc.ref);
+
+                              migrated++;
+                              count++;
+
+                              if (count >= batchSize) {
+                                await batch.commit();
+                                batch = writeBatch(db);
+                                count = 0;
+                              }
+                            }
+
+                            if (count > 0) await batch.commit();
+
+                            setMigrationStatus(
+                              `Username migration complete! Migrated ${migrated} users to new format.`
+                            );
+                            fetchData();
+                          } catch (e) {
+                            console.error(e);
+                            setMigrationStatus(`Error: ${e.message}`);
+                          }
+                        }}
+                        className="px-6 py-3 rounded-xl bg-purple-500 hover:bg-purple-600 text-white font-bold transition-all shadow-lg shadow-purple-500/20"
+                      >
+                        📝 Fix Username Format (FirstName + 4 digits)
+                      </button>
+                    </div>
                   </div>
                 </div>
               </div>

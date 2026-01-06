@@ -203,6 +203,11 @@ const translations = {
     submitFeedback: 'Submit Feedback',
     feedbackPending: "Your feedback is under review. You'll be notified when approved!",
     cancel: 'Cancel',
+    skip: 'Skip',
+    shapeTheFuture: 'SHAPE THE FUTURE',
+    whatFeaturesTitle: 'What features do you want?',
+    earnForFeedback: 'Earn 50 Giuros for your ideas!',
+    feedbackPlaceholderFeatures: 'I wish the game had...',
   },
 
   es: {
@@ -383,6 +388,11 @@ const translations = {
     submitFeedback: 'Enviar Opinión',
     feedbackPending: '¡Tu opinión está siendo revisada. Te notificaremos cuando sea aprobada!',
     cancel: 'Cancelar',
+    skip: 'Saltar',
+    shapeTheFuture: 'MOLDEA EL FUTURO',
+    whatFeaturesTitle: '¿Qué funciones quieres?',
+    earnForFeedback: '¡Gana 50 Giuros por tus ideas!',
+    feedbackPlaceholderFeatures: 'Me gustaría que el juego tuviera...',
   },
 
   ca: {
@@ -564,6 +574,11 @@ const translations = {
     submitFeedback: 'Enviar Opinió',
     feedbackPending: 'La teva opinió està sent revisada. Et notificarem quan sigui aprovada!',
     cancel: 'Cancel·lar',
+    skip: 'Salta',
+    shapeTheFuture: 'MODELA EL FUTUR',
+    whatFeaturesTitle: 'Quines funcions vols?',
+    earnForFeedback: 'Guanya 50 Giuros per les teves idees!',
+    feedbackPlaceholderFeatures: "M'agradaria que el joc tingués...",
   },
 };
 

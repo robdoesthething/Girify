@@ -32,8 +32,9 @@ import {
   hasDailyReferral,
   healMigration,
   updateUserProfile,
+  getReferrer,
 } from './utils/social';
-import { claimDailyLoginBonus, awardChallengeBonus } from './utils/giuros';
+import { claimDailyLoginBonus, awardChallengeBonus, awardReferralBonus } from './utils/giuros';
 import { gameReducer, initialState } from './reducers/gameReducer';
 import { auth } from './firebase';
 import { onAuthStateChanged, signOut, updateProfile } from 'firebase/auth';
@@ -267,6 +268,16 @@ const AppRoutes = () => {
             awardChallengeBonus(state.username, streak).then(result => {
               // eslint-disable-next-line no-console
               console.log(`[Giuros] Challenge bonus: +${result.bonus}`);
+            });
+
+            // Award referral bonus to whoever referred this user (first game only)
+            getReferrer(state.username).then(referrer => {
+              if (referrer) {
+                awardReferralBonus(referrer).then(() => {
+                  // eslint-disable-next-line no-console
+                  console.log(`[Giuros] Referral bonus awarded to: ${referrer}`);
+                });
+              }
             });
 
             // FEEDBACK CHECK: Check if we should ask for feedback (weekly)
