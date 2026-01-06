@@ -323,7 +323,7 @@ const AppRoutes = () => {
       // eslint-disable-next-line no-alert
       const confirmed = window.confirm(
         t('exitGameWarning') ||
-          'You are in the middle of a game. Progress will be lost and your score will be calculated based on current answers. Exit anyway?'
+          'Exit game? Your current score will be saved. You can play again anytime!'
       );
       if (!confirmed) return; // Don't navigate if user cancels
 
@@ -356,6 +356,9 @@ const AppRoutes = () => {
       } catch (e) {
         console.error('[Game] Error saving partial progress:', e);
       }
+
+      // Reset game state to intro so game can be restarted
+      dispatch({ type: 'SET_GAME_STATE', payload: 'summary' });
     }
 
     // If null/undefined, go home. Else go to page.
