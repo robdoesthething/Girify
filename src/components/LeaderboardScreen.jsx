@@ -6,7 +6,7 @@ import { useNavigate } from 'react-router-dom';
 import { getLeaderboard } from '../utils/leaderboard';
 import PropTypes from 'prop-types';
 
-const LeaderboardScreen = ({ onClose }) => {
+const LeaderboardScreen = ({ onClose, currentUser }) => {
   const { theme, t } = useTheme();
   const navigate = useNavigate();
   const [scores, setScores] = useState([]);
@@ -172,7 +172,19 @@ const LeaderboardScreen = ({ onClose }) => {
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: index * 0.05 }}
                   key={s.id || index}
-                  onClick={() => navigate(`/user/${encodeURIComponent(s.username)}`)}
+                  onClick={() => {
+                    // Check if this is the current user
+                    const clickedUsername = s.username?.toLowerCase() || '';
+                    const myUsername = currentUser?.toLowerCase().replace('@', '') || '';
+                    if (
+                      clickedUsername === myUsername ||
+                      `@${clickedUsername}` === currentUser?.toLowerCase()
+                    ) {
+                      navigate('/profile');
+                    } else {
+                      navigate(`/user/${encodeURIComponent(s.username)}`);
+                    }
+                  }}
                   className={`flex items-center p-4 rounded-2xl border cursor-pointer hover:scale-[1.02] transition-transform
                                     ${theme === 'dark' ? 'bg-neutral-900/50 border-neutral-800 text-neutral-100' : 'bg-white border-slate-100 text-slate-900'}
                                     ${index < 3 ? 'border-sky-500/30 shadow-sm' : ''}
@@ -218,6 +230,7 @@ const LeaderboardScreen = ({ onClose }) => {
 
 LeaderboardScreen.propTypes = {
   onClose: PropTypes.func.isRequired,
+  currentUser: PropTypes.string,
 };
 
 export default LeaderboardScreen;

@@ -35,8 +35,8 @@ const AdminPanel = () => {
 
   const handleMigration = async () => {
     if (
-      // eslint-disable-next-line no-alert
       !window.confirm(
+        // eslint-disable-line no-alert
         'WARNING: This will migrate ALL users to lowercase usernames. This is destructive. Are you sure?'
       )
     )
@@ -212,6 +212,7 @@ const AdminPanel = () => {
                         onClick={async () => {
                           if (
                             !window.confirm(
+                              // eslint-disable-line no-alert
                               'This will remove duplicate scores, keeping only the best per user. Continue?'
                             )
                           )
@@ -270,6 +271,7 @@ const AdminPanel = () => {
                         onClick={async () => {
                           if (
                             !window.confirm(
+                              // eslint-disable-line no-alert
                               'This will update usernames to use only first name + 4 digits. Users with >4 digit suffixes or full names will be migrated. Continue?'
                             )
                           )
@@ -399,6 +401,14 @@ const AdminPanel = () => {
                           </td>
                           <td className="p-4 flex gap-2">
                             <button
+                              onClick={() =>
+                                window.open(`/user/${encodeURIComponent(user.username)}`, '_blank')
+                              }
+                              className="px-3 py-1 bg-emerald-500/10 text-emerald-500 rounded-lg text-xs font-bold hover:bg-emerald-500 hover:text-white transition-colors"
+                            >
+                              View
+                            </button>
+                            <button
                               onClick={() => setEditingUser(user)}
                               className="px-3 py-1 bg-sky-500/10 text-sky-500 rounded-lg text-xs font-bold hover:bg-sky-500 hover:text-white transition-colors"
                             >
@@ -408,6 +418,7 @@ const AdminPanel = () => {
                               onClick={async () => {
                                 if (
                                   !window.confirm(
+                                    // eslint-disable-line no-alert
                                     `Delete user "${user.username}"? This cannot be undone.`
                                   )
                                 )
@@ -419,7 +430,7 @@ const AdminPanel = () => {
                                   fetchData();
                                 } catch (e) {
                                   console.error(e);
-                                  alert(`Error deleting user: ${e.message}`);
+                                  alert(`Error deleting user: ${e.message}`); // eslint-disable-line no-alert
                                 }
                               }}
                               className="px-3 py-1 bg-red-500/10 text-red-500 rounded-lg text-xs font-bold hover:bg-red-500 hover:text-white transition-colors"
@@ -446,12 +457,10 @@ const AdminPanel = () => {
                       const { approveFeedback } = await import('../utils/social');
                       const result = await approveFeedback(item.id, 50);
                       if (result.success) {
-                        // eslint-disable-next-line no-alert
-                        alert(`Approved! ${result.username} received ${result.reward} Giuros.`);
+                        alert(`Approved! ${result.username} received ${result.reward} Giuros.`); // eslint-disable-line no-alert
                         fetchData(); // Refresh
                       } else {
-                        // eslint-disable-next-line no-alert
-                        alert(`Error: ${result.error}`);
+                        alert(`Error: ${result.error}`); // eslint-disable-line no-alert
                       }
                     };
 
@@ -461,8 +470,7 @@ const AdminPanel = () => {
                       if (result.success) {
                         fetchData(); // Refresh
                       } else {
-                        // eslint-disable-next-line no-alert
-                        alert(`Error: ${result.error}`);
+                        alert(`Error: ${result.error}`); // eslint-disable-line no-alert
                       }
                     };
 
@@ -532,6 +540,7 @@ const AdminPanel = () => {
             <motion.div
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.9 }}
               exit={{ opacity: 0, scale: 0.9 }}
               className={`w-full max-w-lg p-6 rounded-3xl shadow-2xl ${theme === 'dark' ? 'bg-slate-800' : 'bg-white'}`}
             >
