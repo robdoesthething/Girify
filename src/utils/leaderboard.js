@@ -116,7 +116,6 @@ export const getLeaderboard = async (period = 'all') => {
 
     // Parallel fetch: Scores AND Migration Data
     // We need to know which users have migrated to merge their scores
-    const migrationQuery = query(collection(db, 'users'), orderBy('migratedTo')); // filter where migratedTo exists
     // Note: 'orderBy' implicitly filters for existence of field.
     // Or we just fetch all users if dataset is small, but let's try to be specific.
     // Actually, simple way: fetch all users (assuming < 1000 active for now) or just ignore perfectly.
