@@ -23,11 +23,13 @@ const REFERRALS_COLLECTION = 'referrals';
  * If user doesn't exist, creates a new profile with default values.
  *
  * @param {string} username - User's display name (used as document ID)
+ * @param {string} uid - Firebase Auth UID
+ * @param {object} additionalData - Additional profile data (realName, avatarId, email)
  * @returns {Promise<{username: string, joinedAt: Timestamp, friendCount: number, gamesPlayed: number, bestScore: number, referralCode: string}|null>}
  *          User profile object or null if username is invalid
  *
  * @example
- * const profile = await ensureUserProfile('JohnDoe');
+ * const profile = await ensureUserProfile('JohnDoe', 'uid123', { email: 'john@example.com' });
  * // Returns existing profile or creates new one with defaults
  */
 export const ensureUserProfile = async (usernameInput, uid = null, additionalData = {}) => {
@@ -42,6 +44,7 @@ export const ensureUserProfile = async (usernameInput, uid = null, additionalDat
     const profileData = {
       username,
       uid: uid, // Store Firebase Auth UID for permissions
+      email: additionalData.email || null, // Store email for admin lookup
       realName: additionalData.realName || '',
       avatarId: additionalData.avatarId || Math.floor(Math.random() * 20) + 1,
       joinedAt: Timestamp.now(),
@@ -60,10 +63,17 @@ export const ensureUserProfile = async (usernameInput, uid = null, additionalDat
   }
 
   const data = userDoc.data();
-  // SELF-HEAL: If profile exists but missing UID (legacy), update it if provided
+  // SELF-HEAL: If profile exists but missing UID or email, update if provided
+  const updates = {};
   if (uid && data.uid !== uid) {
-    await updateDoc(userRef, { uid: uid });
-    data.uid = uid;
+    updates.uid = uid;
+  }
+  if (additionalData.email && !data.email) {
+    updates.email = additionalData.email;
+  }
+  if (Object.keys(updates).length > 0) {
+    await updateDoc(userRef, updates);
+    Object.assign(data, updates);
   }
 
   return { id: userDoc.id, ...data };
