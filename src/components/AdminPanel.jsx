@@ -110,7 +110,7 @@ const AdminPanel = () => {
 
   return (
     <div
-      className={`min-h-screen flex ${theme === 'dark' ? 'bg-slate-900 text-white' : 'bg-slate-50 text-slate-900'}`}
+      className={`min-h-screen flex pt-16 ${theme === 'dark' ? 'bg-slate-900 text-white' : 'bg-slate-50 text-slate-900'}`}
     >
       {/* Sidebar */}
       <div
@@ -146,18 +146,45 @@ const AdminPanel = () => {
             {activeTab === 'dashboard' && (
               <div className="space-y-8">
                 <h2 className="text-3xl font-black">Overview</h2>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
                   <MetricCard title="Total Users" value={users.length} color="text-sky-500" />
                   <MetricCard
-                    title="Total Feedback"
-                    value={feedback.length}
+                    title="New This Week"
+                    value={
+                      users.filter(u => {
+                        if (!u.joinedAt) return false;
+                        const joined = u.joinedAt.toDate
+                          ? u.joinedAt.toDate()
+                          : new Date(u.joinedAt.seconds * 1000);
+                        const weekAgo = new Date();
+                        weekAgo.setDate(weekAgo.getDate() - 7);
+                        return joined > weekAgo;
+                      }).length
+                    }
+                    color="text-emerald-500"
+                  />
+                  <MetricCard
+                    title="Total Games"
+                    value={users.reduce((acc, u) => acc + (u.gamesPlayed || 0), 0)}
                     color="text-purple-500"
                   />
                   <MetricCard
-                    title="Games Played"
-                    value={users.reduce((acc, u) => acc + (u.gamesPlayed || 0), 0)}
-                    color="text-emerald-500"
+                    title="Avg Best Score"
+                    value={
+                      users.length > 0
+                        ? Math.round(
+                            users.reduce((acc, u) => acc + (u.bestScore || 0), 0) / users.length
+                          )
+                        : 0
+                    }
+                    color="text-amber-500"
                   />
+                  <MetricCard
+                    title="Total Giuros"
+                    value={users.reduce((acc, u) => acc + (u.giuros || 0), 0).toLocaleString()}
+                    color="text-yellow-500"
+                  />
+                  <MetricCard title="Feedback" value={feedback.length} color="text-rose-500" />
                 </div>
 
                 {/* Data Tools */}
@@ -370,12 +397,34 @@ const AdminPanel = () => {
                           <td className="p-4 font-mono font-bold text-yellow-500">
                             {user.giuros || 0} 🪙
                           </td>
-                          <td className="p-4">
+                          <td className="p-4 flex gap-2">
                             <button
                               onClick={() => setEditingUser(user)}
                               className="px-3 py-1 bg-sky-500/10 text-sky-500 rounded-lg text-xs font-bold hover:bg-sky-500 hover:text-white transition-colors"
                             >
                               Edit
+                            </button>
+                            <button
+                              onClick={async () => {
+                                if (
+                                  !window.confirm(
+                                    `Delete user "${user.username}"? This cannot be undone.`
+                                  )
+                                )
+                                  return;
+                                try {
+                                  const { doc, deleteDoc } = await import('firebase/firestore');
+                                  const { db } = await import('../firebase');
+                                  await deleteDoc(doc(db, 'users', user.id));
+                                  fetchData();
+                                } catch (e) {
+                                  console.error(e);
+                                  alert(`Error deleting user: ${e.message}`);
+                                }
+                              }}
+                              className="px-3 py-1 bg-red-500/10 text-red-500 rounded-lg text-xs font-bold hover:bg-red-500 hover:text-white transition-colors"
+                            >
+                              Delete
                             </button>
                           </td>
                         </tr>
