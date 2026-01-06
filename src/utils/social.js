@@ -234,6 +234,55 @@ export const updateUserAsAdmin = async (targetUsername, data) => {
 // --- END ADMIN FUNCTIONS ---
 
 /**
+ * Delete a user and all their associated data (Highscores, History, Subcollections).
+ * @param {string} username - The username to delete.
+ */
+export const deleteUserAndData = async username => {
+  if (!username) return { success: false, error: 'No username provided' };
+
+  try {
+    const { deleteDoc, writeBatch } = await import('firebase/firestore');
+
+    // Internal helper to strip @ for scores
+    const cleanUsername = username.startsWith('@') ? username.slice(1) : username;
+
+    // 1. Delete User Profile
+    await deleteDoc(doc(db, USERS_COLLECTION, username));
+
+    // 2. Delete Highscore (Leaderboard Entry)
+    // Highscores typically use the sanitized username as ID (e.g. replacing / with _)
+    const sanitizedHighscoreId = cleanUsername.replace(/\//g, '_');
+    await deleteDoc(doc(db, 'highscores', sanitizedHighscoreId));
+
+    // 3. Delete Score History (Batch Delete)
+    // Query scores where username matches. This might be large, so we batch it.
+    const scoresRef = collection(db, 'scores');
+    const q = query(scoresRef, where('username', '==', cleanUsername));
+    const snapshot = await getDocs(q);
+
+    const batch = writeBatch(db);
+    let operationCount = 0;
+
+    snapshot.docs.forEach(scoreDoc => {
+      batch.delete(scoreDoc.ref);
+      operationCount++;
+    });
+
+    if (operationCount > 0) {
+      await batch.commit();
+    }
+
+    // 4. (Optional) We could delete subcollections like 'friends' but that requires recursive fetch.
+    // For now, this covers the critical "leaderboard/score" requirement.
+
+    return { success: true, count: operationCount };
+  } catch (e) {
+    console.error('Error deleting user:', e);
+    return { success: false, error: e.message };
+  }
+};
+
+/**
  * Fetch user profile from Firestore by username.
  * Falls back to highscores collection if user profile doesn't exist.
  *

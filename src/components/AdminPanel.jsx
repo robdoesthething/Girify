@@ -450,57 +450,18 @@ const AdminPanel = () => {
                                 )
                                   return;
                                 try {
-                                  const {
-                                    doc,
-                                    deleteDoc,
-                                    collection,
-                                    query,
-                                    where,
-                                    getDocs,
-                                    writeBatch,
-                                  } = await import('firebase/firestore');
-                                  const { db } = await import('../firebase');
+                                  const { deleteUserAndData } = await import('../utils/social');
+                                  const result = await deleteUserAndData(user.username);
 
-                                  const username = user.username || '';
-                                  // Scores are stored without the @ prefix
-                                  const cleanUsername = username.startsWith('@')
-                                    ? username.slice(1)
-                                    : username;
-
-                                  // 1. Delete User Profile
-                                  await deleteDoc(doc(db, 'users', user.id));
-
-                                  // 2. Delete Highscore (Leaderboard Entry)
-                                  const sanitizedHighscoreId = cleanUsername.replace(/\//g, '_'); // Sanitization from leaderboard.js
-                                  await deleteDoc(doc(db, 'highscores', sanitizedHighscoreId));
-
-                                  // 3. Delete Score History
-                                  // Note: Scores are stored with 'username' field (usually without @)
-                                  const scoresRef = collection(db, 'scores');
-                                  const q = query(
-                                    scoresRef,
-                                    where('username', '==', cleanUsername)
-                                  );
-                                  const snapshot = await getDocs(q);
-
-                                  const batch = writeBatch(db);
-                                  let operationCount = 0;
-
-                                  snapshot.docs.forEach(scoreDoc => {
-                                    batch.delete(scoreDoc.ref);
-                                    operationCount++;
-                                  });
-
-                                  if (operationCount > 0) {
-                                    await batch.commit();
+                                  if (result.success) {
+                                    // eslint-disable-next-line no-alert
+                                    alert(
+                                      `Deleted user ${user.username} and ${result.count} score records.`
+                                    );
+                                    fetchData();
+                                  } else {
+                                    alert(`Error deleting user: ${result.error}`); // eslint-disable-line no-alert
                                   }
-
-                                  // eslint-disable-next-line no-alert
-                                  alert(
-                                    `Deleted user ${user.username} and ${operationCount} score records.`
-                                  );
-
-                                  fetchData();
                                 } catch (e) {
                                   console.error(e);
                                   alert(`Error deleting user: ${e.message}`); // eslint-disable-line no-alert
