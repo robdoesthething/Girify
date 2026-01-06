@@ -501,13 +501,24 @@ const AdminPanel = () => {
                   {feedback.length === 0 && <p className="opacity-50">No feedback yet.</p>}
                   {feedback.map(item => {
                     const handleApproveFeedback = async () => {
+                      const amountStr = prompt('Enter Giuros reward amount:', '50');
+                      if (amountStr === null) return; // Cancelled
+                      const amount = parseInt(amountStr, 10);
+                      if (isNaN(amount) || amount < 0) {
+                        // eslint-disable-next-line no-alert
+                        alert('Invalid amount. Please enter a positive number.');
+                        return;
+                      }
+
                       const { approveFeedback } = await import('../utils/social');
-                      const result = await approveFeedback(item.id, 50);
+                      const result = await approveFeedback(item.id, amount);
                       if (result.success) {
-                        alert(`Approved! ${result.username} received ${result.reward} Giuros.`); // eslint-disable-line no-alert
+                        // eslint-disable-next-line no-alert
+                        alert(`Approved! ${result.username} received ${result.reward} Giuros.`);
                         fetchData(); // Refresh
                       } else {
-                        alert(`Error: ${result.error}`); // eslint-disable-line no-alert
+                        // eslint-disable-next-line no-alert
+                        alert(`Error: ${result.error}`);
                       }
                     };
 
@@ -517,7 +528,26 @@ const AdminPanel = () => {
                       if (result.success) {
                         fetchData(); // Refresh
                       } else {
-                        alert(`Error: ${result.error}`); // eslint-disable-line no-alert
+                        // eslint-disable-next-line no-alert
+                        alert(`Error: ${result.error}`);
+                      }
+                    };
+
+                    const handleDeleteFeedback = async () => {
+                      if (
+                        !window.confirm(
+                          'Are you sure you want to DELETE this feedback? This cannot be undone.'
+                        )
+                      )
+                        return;
+
+                      const { deleteFeedback } = await import('../utils/social');
+                      const result = await deleteFeedback(item.id);
+                      if (result.success) {
+                        fetchData(); // Refresh
+                      } else {
+                        // eslint-disable-next-line no-alert
+                        alert(`Error: ${result.error}`);
                       }
                     };
 
@@ -535,17 +565,26 @@ const AdminPanel = () => {
                                 : 'Unknown date'}
                             </span>
                           </div>
-                          <span
-                            className={`px-3 py-1 rounded-full text-xs font-bold ${
-                              item.status === 'pending'
-                                ? 'bg-yellow-500/20 text-yellow-600'
-                                : item.status === 'approved'
-                                  ? 'bg-emerald-500/20 text-emerald-600'
-                                  : 'bg-red-500/20 text-red-600'
-                            }`}
-                          >
-                            {item.status}
-                          </span>
+                          <div className="flex items-center gap-2">
+                            <span
+                              className={`px-3 py-1 rounded-full text-xs font-bold ${
+                                item.status === 'pending'
+                                  ? 'bg-yellow-500/20 text-yellow-600'
+                                  : item.status === 'approved'
+                                    ? 'bg-emerald-500/20 text-emerald-600'
+                                    : 'bg-red-500/20 text-red-600'
+                              }`}
+                            >
+                              {item.status}
+                            </span>
+                            <button
+                              onClick={handleDeleteFeedback}
+                              className="w-6 h-6 flex items-center justify-center rounded-full bg-slate-200 dark:bg-slate-700 hover:bg-red-500 hover:text-white transition-colors text-xs opacity-50 hover:opacity-100"
+                              title="Delete Feedback"
+                            >
+                              ✕
+                            </button>
+                          </div>
                         </div>
                         <p className="opacity-80 leading-relaxed mb-4">{item.text}</p>
 
@@ -555,7 +594,7 @@ const AdminPanel = () => {
                               onClick={handleApproveFeedback}
                               className="px-4 py-2 bg-emerald-500 hover:bg-emerald-600 text-white rounded-lg text-sm font-bold transition-colors"
                             >
-                              ✓ Approve & Award 50 🪙
+                              ✓ Approve & Award...
                             </button>
                             <button
                               onClick={handleRejectFeedback}
