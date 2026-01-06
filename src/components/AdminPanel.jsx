@@ -36,7 +36,6 @@ const AdminPanel = () => {
   const handleMigration = async () => {
     if (
       !window.confirm(
-        // eslint-disable-line no-alert
         'WARNING: This will migrate ALL users to lowercase usernames. This is destructive. Are you sure?'
       )
     )
@@ -212,7 +211,6 @@ const AdminPanel = () => {
                         onClick={async () => {
                           if (
                             !window.confirm(
-                              // eslint-disable-line no-alert
                               'This will remove duplicate scores, keeping only the best per user. Continue?'
                             )
                           )
@@ -271,7 +269,6 @@ const AdminPanel = () => {
                         onClick={async () => {
                           if (
                             !window.confirm(
-                              // eslint-disable-line no-alert
                               'This will update usernames to use only first name + 4 digits. Users with >4 digit suffixes or full names will be migrated. Continue?'
                             )
                           )
@@ -375,6 +372,7 @@ const AdminPanel = () => {
                     <thead className={theme === 'dark' ? 'bg-slate-800' : 'bg-slate-100'}>
                       <tr>
                         <th className="p-4 text-xs uppercase opacity-50">User</th>
+                        <th className="p-4 text-xs uppercase opacity-50">Email</th>
                         <th className="p-4 text-xs uppercase opacity-50">Stats</th>
                         <th className="p-4 text-xs uppercase opacity-50">Giuros</th>
                         <th className="p-4 text-xs uppercase opacity-50">Actions</th>
@@ -391,6 +389,9 @@ const AdminPanel = () => {
                           <td className="p-4">
                             <div className="font-bold">{user.username}</div>
                             <div className="text-xs opacity-50">{user.realName}</div>
+                          </td>
+                          <td className="p-4 text-sm font-mono opacity-70">
+                            {user.email || 'No email'}
                           </td>
                           <td className="p-4 text-sm">
                             <div>Games: {user.gamesPlayed || 0}</div>
@@ -418,15 +419,61 @@ const AdminPanel = () => {
                               onClick={async () => {
                                 if (
                                   !window.confirm(
-                                    // eslint-disable-line no-alert
                                     `Delete user "${user.username}"? This cannot be undone.`
                                   )
                                 )
                                   return;
                                 try {
-                                  const { doc, deleteDoc } = await import('firebase/firestore');
+                                  const {
+                                    doc,
+                                    deleteDoc,
+                                    collection,
+                                    query,
+                                    where,
+                                    getDocs,
+                                    writeBatch,
+                                  } = await import('firebase/firestore');
                                   const { db } = await import('../firebase');
+
+                                  const username = user.username || '';
+                                  // Scores are stored without the @ prefix
+                                  const cleanUsername = username.startsWith('@')
+                                    ? username.slice(1)
+                                    : username;
+
+                                  // 1. Delete User Profile
                                   await deleteDoc(doc(db, 'users', user.id));
+
+                                  // 2. Delete Highscore (Leaderboard Entry)
+                                  const sanitizedHighscoreId = cleanUsername.replace(/\//g, '_'); // Sanitization from leaderboard.js
+                                  await deleteDoc(doc(db, 'highscores', sanitizedHighscoreId));
+
+                                  // 3. Delete Score History
+                                  // Note: Scores are stored with 'username' field (usually without @)
+                                  const scoresRef = collection(db, 'scores');
+                                  const q = query(
+                                    scoresRef,
+                                    where('username', '==', cleanUsername)
+                                  );
+                                  const snapshot = await getDocs(q);
+
+                                  const batch = writeBatch(db);
+                                  let operationCount = 0;
+
+                                  snapshot.docs.forEach(scoreDoc => {
+                                    batch.delete(scoreDoc.ref);
+                                    operationCount++;
+                                  });
+
+                                  if (operationCount > 0) {
+                                    await batch.commit();
+                                  }
+
+                                  // eslint-disable-next-line no-alert
+                                  alert(
+                                    `Deleted user ${user.username} and ${operationCount} score records.`
+                                  );
+
                                   fetchData();
                                 } catch (e) {
                                   console.error(e);
@@ -541,7 +588,6 @@ const AdminPanel = () => {
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.9 }}
-              exit={{ opacity: 0, scale: 0.9 }}
               className={`w-full max-w-lg p-6 rounded-3xl shadow-2xl ${theme === 'dark' ? 'bg-slate-800' : 'bg-white'}`}
             >
               <h3 className="text-2xl font-black mb-6">Edit User</h3>
@@ -563,18 +609,33 @@ const AdminPanel = () => {
                   </div>
                   <div>
                     <label
-                      htmlFor="edit-realname"
+                      htmlFor="edit-email"
                       className="text-xs uppercase font-bold opacity-50 block mb-1"
                     >
-                      Real Name
+                      Email (Read Only)
                     </label>
                     <input
-                      id="edit-realname"
-                      value={editingUser.realName || ''}
-                      onChange={e => setEditingUser({ ...editingUser, realName: e.target.value })}
-                      className="w-full p-3 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700"
+                      id="edit-email"
+                      disabled
+                      value={editingUser.email || ''}
+                      className="w-full p-3 rounded-xl bg-slate-100 dark:bg-slate-900 opacity-50 cursor-not-allowed font-mono"
                     />
                   </div>
+                </div>
+
+                <div>
+                  <label
+                    htmlFor="edit-realname"
+                    className="text-xs uppercase font-bold opacity-50 block mb-1"
+                  >
+                    Real Name
+                  </label>
+                  <input
+                    id="edit-realname"
+                    value={editingUser.realName || ''}
+                    onChange={e => setEditingUser({ ...editingUser, realName: e.target.value })}
+                    className="w-full p-3 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700"
+                  />
                 </div>
 
                 <div>
