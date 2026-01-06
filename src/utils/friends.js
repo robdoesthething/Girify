@@ -65,8 +65,11 @@ export const searchUsers = async searchText => {
       const key = rawUser.replace(/^@/, '').toLowerCase();
 
       if (!results.has(key)) {
-        // Ensure display format has @ prefix
-        const displayUser = rawUser.startsWith('@') ? rawUser : '@' + rawUser;
+        // For display: New handles (with #) don't need @. Legacy ones might.
+        // If rawUser has #, leave it. If it starts with @, leave it. Else add @.
+        const isHandle = rawUser.includes('#');
+        const displayUser = isHandle || rawUser.startsWith('@') ? rawUser : '@' + rawUser;
+
         results.set(key, {
           username: displayUser,
           bestScore: data.score,
