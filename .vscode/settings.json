@@ -7,5 +7,11 @@
     },
     "editor.quickSuggestions": {
         "strings": true
-    }
+    },
+    "git.experimental.generateCommitMessageWithCopilot": false,
+    "github.copilot.chat.commitMessageGeneration.instructions": [
+        {
+            "text": "Keep commit messages under 72 characters. Use conventional commit format: type(scope): subject. Subject must be lowercase with no trailing period."
+        }
+    ]
 }
