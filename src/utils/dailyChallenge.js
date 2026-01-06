@@ -6,7 +6,7 @@
  * @param {number} seed - The seed value
  * @returns {number} - Random number between 0 and 1
  */
-function seededRandom(seed) {
+export function seededRandom(seed) {
   const x = Math.sin(seed++) * 10000;
   return x - Math.floor(x);
 }
@@ -48,24 +48,71 @@ function seededShuffle(array, seed) {
  * @param {number} seed - Date seed
  * @returns {Array} - Selected 10 streets for the day
  */
+/**
+ * Get seed for a specific date object
+ * @param {Date} date - Date object
+ * @returns {number} - Seed
+ */
+function getSeedForDate(date) {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return parseInt(`${year}${month}${day}`);
+}
+
+/**
+ * Select daily streets based on date seed
+ * @param {Array} validStreets - All valid streets
+ * @param {number} seed - Date seed
+ * @returns {Array} - Selected 10 streets for the day
+ */
 export function selectDailyStreets(validStreets, seed) {
-  // Shuffle with seed
-  const shuffled = seededShuffle(validStreets, seed);
+  // 1. Identify excluded streets (from last 7 days)
+  const excludedIds = new Set();
 
-  // Select by tiers
-  const tier1 = shuffled.filter(s => s.tier === 1).slice(0, 3);
-  const tier2 = shuffled.filter(s => s.tier === 2).slice(0, 3);
-  const tier3 = shuffled.filter(s => s.tier === 3).slice(0, 2);
-  const tier4 = shuffled.filter(s => s.tier === 4).slice(0, 2);
+  // Parse seed back to date to iterate backwards
+  const year = Math.floor(seed / 10000);
+  const month = Math.floor((seed % 10000) / 100) - 1;
+  const day = seed % 100;
+  const currentDate = new Date(year, month, day);
 
-  let selected = [...tier1, ...tier2, ...tier3, ...tier4];
+  // We need a pure function to select streets for a given seed WITHOUT exclusion recursion
+  // to avoid infinite loops. We'll use a local helper for the raw selection.
+  const getRawSelection = (pool, s) => {
+    const shuffled = seededShuffle(pool, s);
+    const t1 = shuffled.filter(str => str.tier === 1).slice(0, 3);
+    const t2 = shuffled.filter(str => str.tier === 2).slice(0, 3);
+    const t3 = shuffled.filter(str => str.tier === 3).slice(0, 2);
+    const t4 = shuffled.filter(str => str.tier === 4).slice(0, 2);
+    let sel = [...t1, ...t2, ...t3, ...t4];
+    if (sel.length < 10) sel = shuffled.slice(0, 10);
+    return sel;
+  };
 
-  // Fallback if tiers didn't yield enough
-  if (selected.length < 10) {
-    selected = shuffled.slice(0, 10);
+  for (let i = 1; i <= 7; i++) {
+    const d = new Date(currentDate);
+    d.setDate(d.getDate() - i);
+    const pastSeed = getSeedForDate(d);
+
+    // For past days, we assume they were selected from the FULL pool (approximation)
+    // This is "good enough" for exclusion. Exact simulation would require
+    // re-simulating the entire history of the world, which is impossible.
+    // By using the full pool for past days, we might flag a street as used
+    // even if it was theoretically excluded that day, but that's a safe fail-over.
+    const pastStreets = getRawSelection(validStreets, pastSeed);
+    pastStreets.forEach(s => excludedIds.add(s.id));
   }
 
-  // Shuffle again with different seed offset
+  // 2. Filter available streets
+  const availableStreets = validStreets.filter(s => !excludedIds.has(s.id));
+
+  // Fallback: If pool is too small (unlikely), use full pool
+  const pool = availableStreets.length >= 10 ? availableStreets : validStreets;
+
+  // 3. Select today's streets from available pool
+  const selected = getRawSelection(pool, seed);
+
+  // Shuffle again with different seed offset for presentation order
   return seededShuffle(selected, seed + 1000);
 }
 

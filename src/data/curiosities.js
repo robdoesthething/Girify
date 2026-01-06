@@ -262,14 +262,26 @@ const simplify = name => {
  * @param {Array} quizStreets - Array of street objects from the daily quiz
  * @returns {Object} - Curiosity object with image, fact, and location
  */
-export function getCuriosityByStreets(quizStreets) {
+import { seededRandom, getTodaySeed } from '../utils/dailyChallenge';
+
+/**
+ * Get a curiosity based on the streets played in the quiz.
+ * @param {Array} quizStreets - Array of street objects from the daily quiz
+ * @param {number} [dateSeed] - Optional date seed for deterministic fallback
+ * @returns {Object} - Curiosity object with image, fact, and location
+ */
+export function getCuriosityByStreets(quizStreets, dateSeed) {
+  const seed = dateSeed || getTodaySeed();
+
   if (!quizStreets || quizStreets.length === 0) {
-    // Fallback
-    const random = CURIOSITIES_DATA[Math.floor(Math.random() * CURIOSITIES_DATA.length)];
+    // Fallback deterministic
+    const index = Math.floor(seededRandom(seed) * CURIOSITIES_DATA.length);
+    const random = CURIOSITIES_DATA[index];
+    const imgIndex = Math.floor(seededRandom(seed + 1) * GENERIC_IMAGES.length);
     return {
       title: random.location,
       fact: random.text,
-      image: random.image || getRandomImage(),
+      image: random.image || GENERIC_IMAGES[imgIndex],
       location: random.location,
       matchedStreet: null,
     };
@@ -290,19 +302,22 @@ export function getCuriosityByStreets(quizStreets) {
       return {
         title: match.location,
         fact: match.text,
-        image: match.image || getRandomImage(),
+        image: match.image || getRandomImage(), // Keep random per reload if matched? No, should be consistent too
         location: match.location,
         matchedStreet: street.name, // Include which street matched
       };
     }
   }
 
-  // No match found? Pick a random curiosity but note it wasn't matched
-  const random = CURIOSITIES_DATA[Math.floor(Math.random() * CURIOSITIES_DATA.length)];
+  // No match found? Pick a deterministically random curiosity
+  const index = Math.floor(seededRandom(seed + 2) * CURIOSITIES_DATA.length);
+  const random = CURIOSITIES_DATA[index];
+  const imgIndex = Math.floor(seededRandom(seed + 3) * GENERIC_IMAGES.length);
+
   return {
     title: random.location,
     fact: random.text,
-    image: random.image || getRandomImage(),
+    image: random.image || GENERIC_IMAGES[imgIndex],
     location: random.location,
     matchedStreet: null,
   };

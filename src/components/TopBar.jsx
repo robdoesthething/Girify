@@ -37,9 +37,12 @@ backdrop-blur-md border-b ${theme === 'dark' ? 'border-slate-600' : 'border-slat
               />
             </svg>
           </button>
-          <div className="flex items-center">
+          <button
+            onClick={() => onOpenPage(null)}
+            className="flex items-center hover:opacity-80 transition-opacity"
+          >
             <Logo className="h-5 md:h-7 w-auto object-contain" />
-          </div>
+          </button>
         </div>
 
         {/* Right: Controls */}
