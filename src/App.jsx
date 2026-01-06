@@ -414,7 +414,7 @@ const AppRoutes = () => {
         }
 
         // Ensure Firestore profile matches
-        ensureUserProfile(displayName, user.uid)
+        ensureUserProfile(displayName, user.uid, { email: user.email })
           .then(profile => {
             // Self-heal any broken migration links
             healMigration(displayName).catch(err => console.error(err));

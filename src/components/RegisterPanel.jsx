@@ -93,7 +93,11 @@ const RegisterPanel = ({ theme: themeProp }) => {
       }
 
       // Ensure user profile exists
-      await ensureUserProfile(handle, { realName: fullName, avatarId });
+      await ensureUserProfile(handle, user.uid, {
+        realName: fullName,
+        avatarId,
+        email: user.email,
+      });
 
       // Record referral if exists
       const referrer = localStorage.getItem('girify_referrer');
@@ -175,7 +179,11 @@ const RegisterPanel = ({ theme: themeProp }) => {
         await sendEmailVerification(userCredential.user);
 
         // Ensure user profile exists
-        await ensureUserProfile(handle, { realName: name, avatarId });
+        await ensureUserProfile(handle, userCredential.user.uid, {
+          realName: name,
+          avatarId,
+          email: email,
+        });
 
         // Record referral if exists
         const referrer = localStorage.getItem('girify_referrer');
