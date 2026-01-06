@@ -181,6 +181,7 @@ const LeaderboardScreen = ({ onClose, currentUser }) => {
                     if (cleanClicked === myUsername) {
                       navigate('/profile');
                     } else {
+                      // Pass original case username to profile, let PublicProfile handle display
                       navigate(`/user/${encodeURIComponent(s.username)}`);
                     }
                   }}
@@ -207,7 +208,7 @@ const LeaderboardScreen = ({ onClose, currentUser }) => {
 
                   <div className="flex-1 min-w-0">
                     <p className="font-bold truncate text-lg text-sky-500 hover:underline">
-                      {s.username}
+                      {s.username.toLowerCase()}
                     </p>
                     <p className="text-[10px] text-slate-400 uppercase tracking-widest font-bold">
                       {dateStr}

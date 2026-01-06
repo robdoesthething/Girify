@@ -30,7 +30,9 @@ export const searchUsers = async searchText => {
   if (!searchText || searchText.length < 2) return [];
 
   // Remove @ prefix if user typed it
-  const cleanSearch = searchText.startsWith('@') ? searchText.slice(1) : searchText;
+  // Remove @ prefix and normalize to lowercase
+  const searchLower = searchText.toLowerCase();
+  const cleanSearch = searchLower.startsWith('@') ? searchLower.slice(1) : searchLower;
   const legacySearch = '@' + cleanSearch;
 
   try {
@@ -281,39 +283,45 @@ export const getFriendFeed = async friendsList => {
   });
   const allActivities = [];
 
-  // 1. Fetch daily scores
+  // 1. Fetch GLOBAL recent scores (Last 100) and filter client-side
+  // This avoids massive index requirements and handles case-sensitivity robustly
+  // (We check if score.username.toLowerCase() is in our friend list)
+  const friendSet = new Set(friendNames.map(n => n.toLowerCase()));
+
+  try {
+    const q = query(collection(db, SCORES_COLLECTION), orderBy('timestamp', 'desc'), limit(100));
+
+    const snap = await getDocs(q);
+    snap.forEach(docSnap => {
+      const data = docSnap.data();
+      const rawUser = data.username || '';
+      const lowerUser = rawUser.toLowerCase();
+
+      // Check for match (handling potential @ prefix in data if any, though usually stripped)
+      const cleanLower = lowerUser.startsWith('@') ? lowerUser.slice(1) : lowerUser;
+
+      if (friendSet.has(cleanLower)) {
+        allActivities.push({
+          id: docSnap.id,
+          type: 'daily_score',
+          username: data.username, // Keep original display casing
+          score: data.score,
+          time: data.time,
+          timestamp: data.timestamp,
+        });
+      }
+    });
+  } catch (e) {
+    console.error('Feed query failed:', e);
+  }
+
+  // 2. Check for username changes (migratedFrom field in user profiles)
+  // Re-create chunks for this batch operation
   const chunks = [];
   for (let i = 0; i < friendNames.length; i += 10) {
     chunks.push(friendNames.slice(i, i + 10));
   }
 
-  for (const chunk of chunks) {
-    const q = query(
-      collection(db, SCORES_COLLECTION),
-      where('username', 'in', chunk),
-      orderBy('timestamp', 'desc'),
-      limit(20)
-    );
-
-    try {
-      const snap = await getDocs(q);
-      snap.forEach(docSnap => {
-        const data = docSnap.data();
-        allActivities.push({
-          id: docSnap.id,
-          type: 'daily_score',
-          username: data.username,
-          score: data.score,
-          time: data.time,
-          timestamp: data.timestamp,
-        });
-      });
-    } catch (e) {
-      console.warn('Feed query failed (likely missing index):', e);
-    }
-  }
-
-  // 2. Check for username changes (migratedFrom field in user profiles)
   for (const chunk of chunks) {
     try {
       for (const username of chunk) {

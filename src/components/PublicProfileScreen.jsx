@@ -208,7 +208,7 @@ const PublicProfileScreen = ({ currentUser }) => {
                 </div>
               )}
 
-              <h2 className="text-2xl font-black tracking-tight">{username}</h2>
+              <h2 className="text-2xl font-black tracking-tight">{username.toLowerCase()}</h2>
               {profile?.realName && (
                 <p className="text-sm font-bold opacity-50 mt-1">{profile.realName}</p>
               )}
