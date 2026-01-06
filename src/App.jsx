@@ -380,7 +380,8 @@ const AppRoutes = () => {
         // MIGRATION 2.0: Ensure handle format (@Name1234)
         // Previous format was Name#1234. New format @Name1234.
         const oldFormatRegex = /.*#\d{4}$/;
-        const newFormatRegex = /^@[a-zA-Z0-9]+$/;
+        // Enforce ending with 4 digits to ensure uniqueness and consistency
+        const newFormatRegex = /^@[a-zA-Z0-9]+\d{4}$/;
 
         let shouldMigrateHandle = false;
         let newHandle = displayName;

@@ -77,10 +77,11 @@ const GameScreen = ({
             className={`
                   relative z-20 backdrop-blur-sm shadow-xl shrink-0
                   bg-white/95 border-slate-200
-                  ${['mobile', 'tablet'].includes(deviceMode)
-                ? 'w-full h-[40%] order-2 border-t'
-                : 'w-[350px] lg:w-[400px] h-full order-2 border-l'
-              }
+                  ${
+                    ['mobile', 'tablet'].includes(deviceMode)
+                      ? 'w-full h-[40%] order-2 border-t'
+                      : 'w-[350px] lg:w-[400px] h-full order-2 border-l'
+                  }
                `}
           >
             <Quiz>
@@ -157,10 +158,11 @@ const GameScreen = ({
                 }
               }}
               className={`w-full max-w-xs px-8 py-4 rounded-full font-bold text-lg tracking-widest hover:scale-105 transition-all duration-300 shadow-xl animate-bounce-subtle
-                          ${hasPlayedToday()
-                  ? 'bg-[#000080] hover:bg-slate-900 text-white'
-                  : 'bg-sky-500 hover:bg-sky-600 text-white'
-                }
+                          ${
+                            hasPlayedToday()
+                              ? 'bg-[#000080] hover:bg-slate-900 text-white'
+                              : 'bg-sky-500 hover:bg-sky-600 text-white'
+                          }
                       `}
             >
               {hasPlayedToday() ? (
@@ -219,65 +221,7 @@ const GameScreen = ({
         </div>
       )}
 
-      {/* DETAILED BREAKDOWN (Only visible on Home/Intro if logged in) */}
-      {state.gameState === 'intro' && state.username && (
-        <div className="fixed bottom-0 left-0 right-0 z-10 p-4 max-h-[40vh] overflow-y-auto pointer-events-auto bg-gradient-to-t from-slate-50 via-slate-50 to-transparent dark:from-slate-950 dark:via-slate-950">
-          <div className="max-w-md mx-auto">
-            <div className="bg-white/90 dark:bg-slate-900/90 backdrop-blur-md rounded-2xl shadow-xl border border-slate-200 dark:border-slate-800 p-4">
-              <h3 className="text-xs font-bold uppercase tracking-widest opacity-50 mb-3 text-center">
-                {t('recentActivity') || 'Recent Activity'}
-              </h3>
-              <div className="space-y-2">
-                {(() => {
-                  try {
-                    const rawHistory = localStorage.getItem('girify_history');
-                    const history = rawHistory ? JSON.parse(rawHistory) : [];
-                    if (!history || history.length === 0) {
-                      return (
-                        <p className="text-center text-sm opacity-50 py-2">No games played yet</p>
-                      );
-                    }
-                    const sorted = [...history].sort(
-                      (a, b) => (b.timestamp || 0) - (a.timestamp || 0)
-                    );
-                    return sorted.slice(0, 5).map((game, i) => (
-                      <div
-                        key={i}
-                        className="flex items-center justify-between p-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-100 dark:border-slate-700"
-                      >
-                        <div className="flex items-center gap-3">
-                          <div
-                            className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-xs ${game.score >= 1000
-                                ? 'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400'
-                                : 'bg-slate-200 text-slate-600 dark:bg-slate-700 dark:text-slate-300'
-                              }`}
-                          >
-                            {i + 1}
-                          </div>
-                          <div>
-                            <p className="font-bold text-sm">
-                              {new Date(game.timestamp || Date.now()).toLocaleDateString()}
-                            </p>
-                            <p className="text-[10px] text-slate-400">
-                              {game.incomplete ? 'Incomplete' : 'Completed'}
-                            </p>
-                          </div>
-                        </div>
-                        <div className="text-right">
-                          <span className="font-black text-lg text-sky-500">{game.score}</span>
-                          <span className="text-[10px] font-bold text-slate-400 ml-1">PTS</span>
-                        </div>
-                      </div>
-                    ));
-                  } catch {
-                    return null;
-                  }
-                })()}
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
+      {/* DETAILED BREAKDOWN - Removed as per request (only show in Profile) */}
 
       {state.gameState === 'register' && (
         <RegisterPanel theme={theme} onRegister={handleRegister} />
