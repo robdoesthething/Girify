@@ -380,8 +380,11 @@ const AppRoutes = () => {
         // MIGRATION 2.0: Ensure handle format (@Name1234)
         // Previous format was Name#1234. New format @Name1234.
         const oldFormatRegex = /.*#\d{4}$/;
-        // Enforce ending with 4 digits to ensure uniqueness and consistency
+        // Enforce ending with exactly 4 digits to ensure uniqueness and consistency
         const newFormatRegex = /^@[a-zA-Z0-9]+\d{4}$/;
+        // Check for malformed long usernames (e.g. @name12345678)
+        const hasExcessiveDigits = /\d{5,}$/.test(displayName);
+        const isTooLong = displayName.length > 20;
 
         let shouldMigrateHandle = false;
         let newHandle = displayName;
@@ -390,11 +393,16 @@ const AppRoutes = () => {
           // Convert Name#1234 -> @Name1234
           newHandle = '@' + displayName.replace('#', '');
           shouldMigrateHandle = true;
-        } else if (!newFormatRegex.test(displayName)) {
-          // Generate new handle if neither
-          const randomId = Math.floor(1000 + Math.random() * 9000);
-          const sanitizedName = displayName.replace(/[^a-zA-Z0-9]/g, '');
-          newHandle = `@${sanitizedName}${randomId}`;
+        } else if (!newFormatRegex.test(displayName) || hasExcessiveDigits || isTooLong) {
+          // Generate new handle if invalid format, too many digits, or too long
+          const randomId = Math.floor(1000 + Math.random() * 9000); // Always 4 digits
+
+          // Clean name: remove existing digits/special chars, take first part
+          let coreName = displayName.replace(/^@/, '').split(/\d/)[0];
+          // Take only first 10 chars of name to ensure room for suffix
+          coreName = coreName.replace(/[^a-zA-Z]/g, '').slice(0, 10) || 'User';
+
+          newHandle = `@${coreName}${randomId}`;
           shouldMigrateHandle = true;
         }
 

@@ -311,22 +311,22 @@ const AdminPanel = () => {
                             let batch = writeBatch(db);
                             const batchSize = 200;
 
-                            // Pattern: @FirstName1234 (starts with @, then letters/numbers, ends with exactly 4 digits)
-                            const validPattern = /^@[a-zA-Z][a-zA-Z0-9]*\d{4}$/;
+                            // Pattern: @FirstName1234 (letters only + 4 digits to avoid ambiguity)
+                            // We explicitly disallow digits in the name part to prevent "User12345" passing as "User1"+2345
+                            const validPattern = /^@[a-zA-Z]+\d{4}$/;
 
                             for (const userDoc of snapshot.docs) {
                               const oldId = userDoc.id;
                               const data = userDoc.data();
 
-                              // Skip if already valid format
-                              if (validPattern.test(oldId)) continue;
+                              // Skip if truly valid format and reasonable length
+                              if (validPattern.test(oldId) && oldId.length <= 20) continue;
 
-                              // Extract name part (remove @ and digits at end)
-                              let namePart = oldId.replace(/^@/, '').replace(/\d+$/, '');
-                              // Take only first "word" (split by spaces or special chars)
-                              namePart = namePart.split(/[\s_-]/)[0];
-                              // Clean to alphanumeric only
-                              namePart = namePart.replace(/[^a-zA-Z0-9]/g, '');
+                              // Extract name part (remove @ and ALL digits at end)
+                              let namePart = oldId.replace(/^@/, '').split(/\d/)[0];
+
+                              // Clean to letters only and TRUNCATE to 10 chars
+                              namePart = namePart.replace(/[^a-zA-Z]/g, '').slice(0, 10);
 
                               if (!namePart || namePart.length < 2) {
                                 namePart = 'User';
