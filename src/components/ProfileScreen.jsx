@@ -359,7 +359,9 @@ const ProfileScreen = ({ username }) => {
                 </div>
 
                 {/* Handle / Name Display */}
-                <h2 className="text-3xl font-black tracking-tight mb-1">{username}</h2>
+                <h2 className="text-3xl font-black tracking-tight mb-1">
+                  {username.toLowerCase()}
+                </h2>
 
                 {/* Equipped Title + Real Name */}
                 <div className="flex flex-col items-center gap-1">

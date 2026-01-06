@@ -378,7 +378,7 @@ const AppRoutes = () => {
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async user => {
       if (user) {
-        let displayName = user.displayName || user.email?.split('@')[0] || 'User';
+        let displayName = (user.displayName || user.email?.split('@')[0] || 'User').toLowerCase();
 
         // MIGRATION 2.0: Ensure handle format (@Name1234)
         // Previous format was Name#1234. New format @Name1234.
