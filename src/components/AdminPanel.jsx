@@ -24,6 +24,28 @@ const AdminPanel = () => {
   const [loading, setLoading] = useState(false);
   const [editingUser, setEditingUser] = useState(null);
   const [migrationStatus, setMigrationStatus] = useState(null);
+  const [confirmConfig, setConfirmConfig] = useState(null);
+  const [promptConfig, setPromptConfig] = useState(null);
+
+  const showConfirm = (message, title = 'Confirm Action') =>
+    new Promise(resolve => {
+      setConfirmConfig({ message, title, resolve });
+    });
+
+  const showPrompt = (message, defaultValue = '', title = 'Input Required') =>
+    new Promise(resolve => {
+      setPromptConfig({ message, defaultValue, title, resolve });
+    });
+
+  const handleConfirmAction = result => {
+    if (confirmConfig?.resolve) confirmConfig.resolve(result);
+    setConfirmConfig(null);
+  };
+
+  const handlePromptAction = value => {
+    if (promptConfig?.resolve) promptConfig.resolve(value);
+    setPromptConfig(null);
+  };
 
   const fetchData = React.useCallback(async () => {
     setLoading(true);
@@ -35,9 +57,10 @@ const AdminPanel = () => {
 
   const handleMigration = async () => {
     if (
-      !window.confirm(
-        'WARNING: This will migrate ALL users to lowercase usernames. This is destructive. Are you sure?'
-      )
+      !(await showConfirm(
+        'WARNING: This will migrate ALL users to lowercase usernames. This is destructive. Are you sure?',
+        'Start Migration'
+      ))
     )
       return;
 
@@ -210,9 +233,10 @@ const AdminPanel = () => {
                       <button
                         onClick={async () => {
                           if (
-                            !window.confirm(
-                              'This will remove duplicate scores, keeping only the best per user. Continue?'
-                            )
+                            !(await showConfirm(
+                              'This will remove duplicate scores, keeping only the best per user. Continue?',
+                              'Deduplicate Leaderboard'
+                            ))
                           )
                             return;
                           setMigrationStatus('Deduplicating leaderboard...');
@@ -268,9 +292,10 @@ const AdminPanel = () => {
                       <button
                         onClick={async () => {
                           if (
-                            !window.confirm(
-                              'This will update usernames to use only first name + 4 digits. Users with >4 digit suffixes or full names will be migrated. Continue?'
-                            )
+                            !(await showConfirm(
+                              'This will update usernames to use only first name + 4 digits. Users with >4 digit suffixes or full names will be migrated. Continue?',
+                              'Migrate Usernames'
+                            ))
                           )
                             return;
                           setMigrationStatus('Migrating username formats...');
@@ -418,9 +443,10 @@ const AdminPanel = () => {
                             <button
                               onClick={async () => {
                                 if (
-                                  !window.confirm(
-                                    `Delete user "${user.username}"? This cannot be undone.`
-                                  )
+                                  !(await showConfirm(
+                                    `Delete user "${user.username}"? This cannot be undone.`,
+                                    'Delete User'
+                                  ))
                                 )
                                   return;
                                 try {
@@ -501,7 +527,11 @@ const AdminPanel = () => {
                   {feedback.length === 0 && <p className="opacity-50">No feedback yet.</p>}
                   {feedback.map(item => {
                     const handleApproveFeedback = async () => {
-                      const amountStr = prompt('Enter Giuros reward amount:', '50');
+                      const amountStr = await showPrompt(
+                        'Enter Giuros reward amount:',
+                        '50',
+                        'Approve Feedback'
+                      );
                       if (amountStr === null) return; // Cancelled
                       const amount = parseInt(amountStr, 10);
                       if (isNaN(amount) || amount < 0) {
@@ -535,9 +565,10 @@ const AdminPanel = () => {
 
                     const handleDeleteFeedback = async () => {
                       if (
-                        !window.confirm(
-                          'Are you sure you want to DELETE this feedback? This cannot be undone.'
-                        )
+                        !(await showConfirm(
+                          'Are you sure you want to DELETE this feedback? This cannot be undone.',
+                          'Delete Feedback'
+                        ))
                       )
                         return;
 
@@ -651,7 +682,7 @@ const AdminPanel = () => {
                       htmlFor="edit-email"
                       className="text-xs uppercase font-bold opacity-50 block mb-1"
                     >
-                      Email (Read Only)
+                      Email
                     </label>
                     <input
                       id="edit-email"
@@ -741,6 +772,78 @@ const AdminPanel = () => {
                     className="flex-1 py-3 bg-sky-500 hover:bg-sky-600 text-white rounded-xl font-bold shadow-lg"
                   >
                     Save Changes
+                  </button>
+                </div>
+              </form>
+            </motion.div>
+          </div>
+        )}
+
+        {/* Confirmation Modal */}
+        {confirmConfig && (
+          <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.9 }}
+              className={`w-full max-w-sm p-6 rounded-3xl shadow-2xl ${theme === 'dark' ? 'bg-slate-800' : 'bg-white'}`}
+            >
+              <h3 className="text-xl font-black mb-2">{confirmConfig.title}</h3>
+              <p className="opacity-70 mb-6">{confirmConfig.message}</p>
+              <div className="flex gap-3">
+                <button
+                  onClick={() => handleConfirmAction(false)}
+                  className="flex-1 py-3 font-bold opacity-60 hover:opacity-100 bg-slate-100 dark:bg-slate-900 rounded-xl"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={() => handleConfirmAction(true)}
+                  className="flex-1 py-3 bg-sky-500 hover:bg-sky-600 text-white rounded-xl font-bold shadow-lg"
+                >
+                  Confirm
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+
+        {/* Prompt Modal */}
+        {promptConfig && (
+          <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.9 }}
+              className={`w-full max-w-sm p-6 rounded-3xl shadow-2xl ${theme === 'dark' ? 'bg-slate-800' : 'bg-white'}`}
+            >
+              <h3 className="text-xl font-black mb-4">{promptConfig.title}</h3>
+              <p className="opacity-70 mb-4 text-sm">{promptConfig.message}</p>
+              <form
+                onSubmit={e => {
+                  e.preventDefault();
+                  handlePromptAction(e.target.elements.promptInput.value);
+                }}
+              >
+                <input
+                  name="promptInput"
+                  autoFocus
+                  defaultValue={promptConfig.defaultValue}
+                  className="w-full p-3 rounded-xl bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 mb-6"
+                />
+                <div className="flex gap-3">
+                  <button
+                    type="button"
+                    onClick={() => handlePromptAction(null)}
+                    className="flex-1 py-3 font-bold opacity-60 hover:opacity-100 bg-slate-100 dark:bg-slate-900 rounded-xl"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    className="flex-1 py-3 bg-sky-500 hover:bg-sky-600 text-white rounded-xl font-bold shadow-lg"
+                  >
+                    Submit
                   </button>
                 </div>
               </form>
