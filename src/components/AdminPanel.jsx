@@ -125,7 +125,34 @@ const AdminPanel = () => {
       bestScore: Number(editingUser.bestScore),
     };
 
-    await updateUserAsAdmin(editingUser.id, updates);
+    // Check if username changed (requires migration)
+    if (editingUser.username !== editingUser.id) {
+      if (
+        !(await showConfirm(
+          `Changing username from "${editingUser.id}" to "${editingUser.username}" will migrate all data. Continue?`,
+          'Confirm Migration'
+        ))
+      )
+        return;
+
+      try {
+        const { migrateUser } = await import('../utils/social');
+        await migrateUser(editingUser.id, editingUser.username);
+        // After migration, the old doc is deleted (tombstoned) and new one created.
+        // We should then update the *new* doc with any other field changes if needed.
+        // But migrateUser copies old data. So we should apply our form updates to the NEW user.
+        await updateUserAsAdmin(editingUser.username, updates);
+      } catch (e) {
+        console.error(e);
+        // eslint-disable-next-line no-alert
+        alert(`Migration failed: ${e.message}`);
+        return;
+      }
+    } else {
+      // Just update existing
+      await updateUserAsAdmin(editingUser.id, updates);
+    }
+
     setEditingUser(null);
     fetchData(); // Refresh
   };
@@ -370,6 +397,101 @@ const AdminPanel = () => {
                         className="px-6 py-3 rounded-xl bg-purple-500 hover:bg-purple-600 text-white font-bold transition-all shadow-lg shadow-purple-500/20"
                       >
                         📝 Fix Username Format (FirstName + 4 digits)
+                      </button>
+                    </div>
+
+                    {/* Prune Orphans */}
+                    <div className="flex items-center gap-4">
+                      <button
+                        onClick={async () => {
+                          if (
+                            !(await showConfirm(
+                              'This will delete all scores/highscores that do not belong to an active user. Cannot be undone. Continue?',
+                              'Prune Orphans'
+                            ))
+                          )
+                            return;
+                          setMigrationStatus('Pruning orphans...');
+                          try {
+                            const { collection, getDocs, writeBatch } =
+                              await import('firebase/firestore');
+                            const { db } = await import('../firebase');
+
+                            // 1. Get ALL valid users
+                            const usersSnap = await getDocs(collection(db, 'users'));
+                            // Store valid usernames (without @ prefix to match score format)
+                            const validUsernames = new Set();
+                            usersSnap.forEach(doc => {
+                              // Valid User ID: "@Roberto..." or "Roberto..."
+                              // Score Username: "Roberto..."
+                              const cleanId = doc.id.replace(/^@/, '').toLowerCase();
+                              validUsernames.add(cleanId);
+                            });
+
+                            let deletedCount = 0;
+                            let batch = writeBatch(db);
+                            let opCount = 0;
+                            const batchSize = 400;
+
+                            const flushBatch = async () => {
+                              if (opCount > 0) {
+                                await batch.commit();
+                                batch = writeBatch(db);
+                                opCount = 0;
+                              }
+                            };
+
+                            // 2. Scan & Prune 'scores'
+                            const scoresRef = collection(db, 'scores');
+                            const scoresSnap = await getDocs(scoresRef);
+
+                            for (const doc of scoresSnap.docs) {
+                              const data = doc.data();
+                              const u = (data.username || '').toLowerCase();
+                              if (!u || !validUsernames.has(u)) {
+                                batch.delete(doc.ref);
+                                deletedCount++;
+                                opCount++;
+                                if (opCount >= batchSize) await flushBatch();
+                              }
+                            }
+
+                            // 3. Scan & Prune 'highscores'
+                            const highscoresRef = collection(db, 'highscores');
+                            const hsSnap = await getDocs(highscoresRef);
+
+                            for (const doc of hsSnap.docs) {
+                              // Highscore ID is usually the username (sanitized)
+                              // or data.username
+                              const data = doc.data();
+                              const u = (data.username || doc.id).toLowerCase().replace(/^@/, '');
+
+                              // Check against valid set
+                              // Note: highscore IDs might have _ instead of / etc.
+                              // Best to check if we can map it.
+                              // Simplest check: if data.username is present, verify that.
+
+                              if (!u || !validUsernames.has(u)) {
+                                batch.delete(doc.ref);
+                                deletedCount++;
+                                opCount++;
+                                if (opCount >= batchSize) await flushBatch();
+                              }
+                            }
+
+                            await flushBatch();
+
+                            setMigrationStatus(
+                              `Prune complete! Deleted ${deletedCount} orphan records.`
+                            );
+                          } catch (e) {
+                            console.error(e);
+                            setMigrationStatus(`Error: ${e.message}`);
+                          }
+                        }}
+                        className="px-6 py-3 rounded-xl bg-red-500 hover:bg-red-600 text-white font-bold transition-all shadow-lg shadow-red-500/20"
+                      >
+                        🗑️ Prune Orphans (Ghost Records)
                       </button>
                     </div>
                   </div>
@@ -629,13 +751,13 @@ const AdminPanel = () => {
                       htmlFor="edit-username"
                       className="text-xs uppercase font-bold opacity-50 block mb-1"
                     >
-                      Username
+                      Username (Edit to Migrate)
                     </label>
                     <input
                       id="edit-username"
-                      disabled
                       value={editingUser.username}
-                      className="w-full p-3 rounded-xl bg-slate-100 dark:bg-slate-900 opacity-50 cursor-not-allowed"
+                      onChange={e => setEditingUser({ ...editingUser, username: e.target.value })}
+                      className="w-full p-3 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 font-bold"
                     />
                   </div>
                   <div>
