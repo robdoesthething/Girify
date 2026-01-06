@@ -730,3 +730,38 @@ export const hasDailyReferral = async username => {
     return false;
   }
 };
+
+/**
+ * Get the referrer of a user (who sent them the referral link)
+ * Returns null if user was not referred or bonus already awarded
+ * @param {string} username - The referred user's username
+ * @returns {Promise<string|null>} - The referrer's username or null
+ */
+export const getReferrer = async username => {
+  if (!username) return null;
+
+  try {
+    const q = query(
+      collection(db, REFERRALS_COLLECTION),
+      where('referred', '==', username),
+      limit(1)
+    );
+
+    const snap = await getDocs(q);
+    if (snap.empty) return null;
+
+    const referralDoc = snap.docs[0];
+    const data = referralDoc.data();
+
+    // Check if bonus was already awarded
+    if (data.bonusAwarded) return null;
+
+    // Mark bonus as awarded
+    await updateDoc(referralDoc.ref, { bonusAwarded: true });
+
+    return data.referrer;
+  } catch (e) {
+    console.error('Error getting referrer:', e);
+    return null;
+  }
+};

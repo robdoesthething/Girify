@@ -67,23 +67,28 @@ const LeaderboardScreen = ({ onClose }) => {
         className={`fixed inset-0 z-[8000] flex flex-col pt-16 pb-6 px-4 md:px-8 overflow-hidden pointer-events-auto backdrop-blur-md ${theme === 'dark' ? 'bg-neutral-950 text-white' : 'bg-slate-50 text-slate-900'}`}
       >
         {/* Header */}
-        <div className="flex justify-between items-center max-w-2xl mx-auto w-full mb-6 shrink-0">
-          <h2 className="text-3xl font-black tracking-tight text-slate-900 dark:text-white">
-            {t('leaderboard')}
-          </h2>
+        <div className="flex items-center justify-between max-w-2xl mx-auto w-full mb-6 shrink-0 relative">
           <button
             onClick={onClose}
-            className={`p-2 rounded-full transition-colors text-slate-900 dark:text-white hover:bg-black/5 dark:hover:bg-white/10`}
+            className="flex items-center gap-2 text-sm font-bold opacity-60 hover:opacity-100 transition-opacity z-10"
           >
-            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path
                 strokeLinecap="round"
                 strokeLinejoin="round"
                 strokeWidth={2}
-                d="M6 18L18 6M6 6l12 12"
+                d="M15 19l-7-7 7-7"
               />
             </svg>
+            {t('back')}
           </button>
+
+          <h2 className="text-xl font-black tracking-tight absolute left-1/2 transform -translate-x-1/2">
+            {t('leaderboard')}
+          </h2>
+
+          {/* Empty div for flex spacing */}
+          <div className="w-16"></div>
         </div>
 
         {/* Tabs */}
