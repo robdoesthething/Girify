@@ -272,7 +272,7 @@ const GameScreen = ({
                         </div>
                       </div>
                     ));
-                  } catch (e) {
+                  } catch (_e) {
                     return null;
                   }
                 })()}

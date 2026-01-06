@@ -10,7 +10,6 @@ const SummaryScreen = ({ score, total, theme, username, onRestart, quizStreets, 
   const [showFeedbackRequest] = useState(() => true); // FORCING FOR VERIFICATION
 
   const [view, setView] = useState(() => (showFeedbackRequest ? 'feedback' : 'curiosity'));
-  const [showFeedbackModal, setShowFeedbackModal] = useState(showFeedbackRequest);
 
   const maxPossibleScore = total * 100;
   const curiosity = useMemo(() => getCuriosityByStreets(quizStreets), [quizStreets]);
