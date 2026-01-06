@@ -77,11 +77,10 @@ const GameScreen = ({
             className={`
                   relative z-20 backdrop-blur-sm shadow-xl shrink-0
                   bg-white/95 border-slate-200
-                  ${
-                    ['mobile', 'tablet'].includes(deviceMode)
-                      ? 'w-full h-[40%] order-2 border-t'
-                      : 'w-[350px] lg:w-[400px] h-full order-2 border-l'
-                  }
+                  ${['mobile', 'tablet'].includes(deviceMode)
+                ? 'w-full h-[40%] order-2 border-t'
+                : 'w-[350px] lg:w-[400px] h-full order-2 border-l'
+              }
                `}
           >
             <Quiz>
@@ -158,11 +157,10 @@ const GameScreen = ({
                 }
               }}
               className={`w-full max-w-xs px-8 py-4 rounded-full font-bold text-lg tracking-widest hover:scale-105 transition-all duration-300 shadow-xl animate-bounce-subtle
-                          ${
-                            hasPlayedToday()
-                              ? 'bg-[#000080] hover:bg-slate-900 text-white'
-                              : 'bg-sky-500 hover:bg-sky-600 text-white'
-                          }
+                          ${hasPlayedToday()
+                  ? 'bg-[#000080] hover:bg-slate-900 text-white'
+                  : 'bg-sky-500 hover:bg-sky-600 text-white'
+                }
                       `}
             >
               {hasPlayedToday() ? (
@@ -249,11 +247,10 @@ const GameScreen = ({
                       >
                         <div className="flex items-center gap-3">
                           <div
-                            className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-xs ${
-                              game.score >= 1000
+                            className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-xs ${game.score >= 1000
                                 ? 'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400'
                                 : 'bg-slate-200 text-slate-600 dark:bg-slate-700 dark:text-slate-300'
-                            }`}
+                              }`}
                           >
                             {i + 1}
                           </div>
@@ -272,7 +269,7 @@ const GameScreen = ({
                         </div>
                       </div>
                     ));
-                  } catch (_e) {
+                  } catch {
                     return null;
                   }
                 })()}
