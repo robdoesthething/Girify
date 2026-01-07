@@ -756,7 +756,9 @@ const AdminPanel = () => {
                     <input
                       id="edit-username"
                       value={editingUser.username}
-                      onChange={e => setEditingUser({ ...editingUser, username: e.target.value })}
+                      onChange={e =>
+                        setEditingUser({ ...editingUser, username: e.target.value.toLowerCase() })
+                      }
                       className="w-full p-3 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 font-bold"
                     />
                   </div>

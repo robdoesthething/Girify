@@ -90,7 +90,7 @@ backdrop-blur-md border-b ${theme === 'dark' ? 'border-slate-600' : 'border-slat
 
               <nav className="flex flex-col gap-4">
                 <button
-                  onClick={() => handleMenuClick('home')}
+                  onClick={() => handleMenuClick(null)}
                   className="text-left py-2 px-3 rounded-lg hover:bg-slate-500/10 font-medium text-sky-500 bg-sky-500/10"
                 >
                   🏠 {t('home')}
