@@ -220,7 +220,7 @@ const FriendsScreen = ({ onClose, username }) => {
                     key={u.username}
                     className="flex justify-between items-center p-2 bg-white dark:bg-slate-800 rounded"
                   >
-                    <span className="font-bold">{u.username}</span>
+                    <span className="font-bold">{u.username.toLowerCase()}</span>
                     <button
                       onClick={() => handleSendRequest(u.username)}
                       disabled={successfulRequests.has(u.username)}
@@ -270,11 +270,11 @@ const FriendsScreen = ({ onClose, username }) => {
                       <div className="flex justify-between items-start mb-2">
                         <div>
                           <span className="font-black text-lg text-amber-500">
-                            {item.oldUsername}
+                            {item.oldUsername ? item.oldUsername.toLowerCase() : '???'}
                           </span>
                           <span className="text-slate-500 text-sm ml-2">{t('changedNameTo')}</span>
                           <span className="font-black text-lg text-amber-500 ml-2">
-                            {item.username}
+                            {item.username.toLowerCase()}
                           </span>
                         </div>
                         <span className="text-xs text-slate-400">
@@ -296,7 +296,7 @@ const FriendsScreen = ({ onClose, username }) => {
                       <div className="flex justify-between items-start mb-2">
                         <div>
                           <span className="font-black text-lg text-purple-500">
-                            {item.username}
+                            {item.username.toLowerCase()}
                           </span>
                           <span className="text-slate-500 text-sm ml-2">{t('badgeEarned')}</span>
                           {item.badge && (
@@ -324,7 +324,7 @@ const FriendsScreen = ({ onClose, username }) => {
                     <div className="flex justify-between items-start mb-2">
                       <div className="flex items-baseline flex-wrap">
                         <span className="font-black text-lg text-sky-500 mr-2">
-                          {item.username}
+                          {item.username.toLowerCase()}
                         </span>
                         <span className="text-slate-500 text-sm">
                           {t('scored')} <strong>{item.score}</strong> {t('points')}
@@ -336,11 +336,6 @@ const FriendsScreen = ({ onClose, username }) => {
                           : 'Just now'}
                       </span>
                     </div>
-                    {item.time && (
-                      <div className="text-xs text-slate-500 font-mono">
-                        {t('avgTime')}: {item.time}s
-                      </div>
-                    )}
                   </div>
                 );
               })
@@ -365,7 +360,7 @@ const FriendsScreen = ({ onClose, username }) => {
                     {AVATARS[f.avatarId ? f.avatarId - 1 : 0] || '🐼'}
                   </div>
                   <div>
-                    <h4 className="font-bold text-sm leading-tight">{f.username}</h4>
+                    <h4 className="font-bold text-sm leading-tight">{f.username.toLowerCase()}</h4>
                     {f.badges && f.badges.length > 0 && (
                       <span className="text-xs mr-2" title="Equipped Badge">
                         {/* Assuming badges are objects or emojis string */}
@@ -458,7 +453,7 @@ const FriendsScreen = ({ onClose, username }) => {
                   className="p-3 rounded-lg border flex justify-between items-center bg-white dark:bg-slate-900 border-sky-500/30 shadow-sm"
                 >
                   <div className="flex flex-col">
-                    <span className="font-bold text-lg">{req.from}</span>
+                    <span className="font-bold text-lg">{req.from.toLowerCase()}</span>
                     <span className="text-xs text-slate-500">wants to be friends</span>
                   </div>
                   <div className="flex gap-2">
