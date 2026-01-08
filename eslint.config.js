@@ -92,4 +92,16 @@ export default defineConfig([
       'no-unused-vars': 'off',
     },
   },
+  // Script files - allow node globals
+  {
+    files: ['scripts/**/*.js'],
+    languageOptions: {
+      globals: {
+        ...globals.node,
+      },
+    },
+    rules: {
+      'no-console': 'off',
+    },
+  },
 ]);

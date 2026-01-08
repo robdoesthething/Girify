@@ -42,6 +42,7 @@ import { onAuthStateChanged, signOut, updateProfile } from 'firebase/auth';
 import FeedbackModal from './components/FeedbackModal';
 import AdminRoute from './components/AdminRoute';
 import AdminPanel from './components/AdminPanel';
+import StreetsFetcher from './components/StreetsFetcher';
 
 const AppRoutes = () => {
   const { deviceMode, theme, t } = useTheme();
@@ -622,6 +623,7 @@ const AppRoutes = () => {
           {/* Admin Route */}
           <Route element={<AdminRoute />}>
             <Route path="/admin" element={<AdminPanel />} />
+            <Route path="/fetch-streets" element={<StreetsFetcher />} />
           </Route>
         </Routes>
       </AnimatePresence>
