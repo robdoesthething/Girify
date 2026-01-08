@@ -15,6 +15,7 @@ import ShopScreen from './components/ShopScreen';
 
 import { ThemeProvider, useTheme } from './context/ThemeContext';
 import rawStreets from './data/streets.json';
+import quizPlan from './data/quizPlan.json';
 import * as turf from '@turf/turf';
 import {
   getTodaySeed,
@@ -109,7 +110,7 @@ const AppRoutes = () => {
   };
 
   /**
-   * Setup Game
+   * Setup Game - Uses pre-generated quiz plan when available
    */
   function setupGame(freshName) {
     const activeName = freshName || state.username;
@@ -125,11 +126,46 @@ const AppRoutes = () => {
     }
 
     const todaySeed = getTodaySeed();
-    const selected = selectDailyStreets(validStreets, todaySeed);
 
-    let initialOptions = [];
-    if (selected.length > 0) {
-      initialOptions = generateOptionsList(selected[0], validStreets, 0);
+    // Try to use pre-generated quiz plan
+    const todayStr = new Date().toISOString().split('T')[0];
+    const plannedQuiz = quizPlan?.quizzes?.find(q => q.date === todayStr);
+
+    let selected;
+    let initialOptions;
+
+    if (plannedQuiz && plannedQuiz.questions?.length > 0) {
+      // Use pre-generated quiz plan
+      // eslint-disable-next-line no-console
+      console.log('[Quiz] Using pre-generated plan for', todayStr);
+
+      // Map question IDs to street objects
+      const streetMap = new Map(validStreets.map(s => [s.id, s]));
+
+      selected = plannedQuiz.questions.map(q => streetMap.get(q.correctId)).filter(Boolean);
+
+      if (selected.length > 0) {
+        // Build initial options from pre-generated distractors
+        const firstQ = plannedQuiz.questions[0];
+        const correctStreet = streetMap.get(firstQ.correctId);
+        const distractorStreets = firstQ.distractorIds.map(id => streetMap.get(id)).filter(Boolean);
+
+        if (correctStreet && distractorStreets.length >= 3) {
+          const opts = [correctStreet, ...distractorStreets.slice(0, 3)];
+          initialOptions = shuffleOptions(opts, todaySeed + 50);
+        } else {
+          // Fallback to generated distractors
+          initialOptions = generateOptionsList(selected[0], validStreets, 0);
+        }
+      }
+    }
+
+    // Fallback to dynamic generation if plan not available
+    if (!selected || selected.length === 0) {
+      // eslint-disable-next-line no-console
+      console.log('[Quiz] Falling back to dynamic generation');
+      selected = selectDailyStreets(validStreets, todaySeed);
+      initialOptions = selected.length > 0 ? generateOptionsList(selected[0], validStreets, 0) : [];
     }
 
     dispatch({
@@ -137,6 +173,7 @@ const AppRoutes = () => {
       payload: {
         quizStreets: selected,
         initialOptions: initialOptions,
+        plannedQuestions: plannedQuiz?.questions || null, // Store for distractor lookup
       },
     });
   }
@@ -299,7 +336,29 @@ const AppRoutes = () => {
       dispatch({ type: 'NEXT_QUESTION', payload: {} });
     } else {
       const nextStreet = state.quizStreets[nextIndex];
-      const nextOptions = generateOptionsList(nextStreet, validStreets, nextIndex);
+      let nextOptions;
+
+      // Try to use pre-generated distractors from quiz plan
+      if (state.plannedQuestions && state.plannedQuestions[nextIndex]) {
+        const plannedQ = state.plannedQuestions[nextIndex];
+        const streetMap = new Map(validStreets.map(s => [s.id, s]));
+        const distractorStreets = plannedQ.distractorIds
+          .map(id => streetMap.get(id))
+          .filter(Boolean);
+
+        if (distractorStreets.length >= 3) {
+          const todaySeed = getTodaySeed();
+          const opts = [nextStreet, ...distractorStreets.slice(0, 3)];
+          nextOptions = shuffleOptions(opts, todaySeed + nextIndex * 100 + 50);
+        } else {
+          // Fallback to dynamic generation
+          nextOptions = generateOptionsList(nextStreet, validStreets, nextIndex);
+        }
+      } else {
+        // No planned questions, use dynamic generation
+        nextOptions = generateOptionsList(nextStreet, validStreets, nextIndex);
+      }
+
       dispatch({
         type: 'NEXT_QUESTION',
         payload: { options: nextOptions },

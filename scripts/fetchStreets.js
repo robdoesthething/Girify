@@ -63,9 +63,13 @@ async function fetchStreets() {
     data.elements.forEach(element => {
       if (!element.tags || !element.tags.name) return;
 
-      const name = element.tags.name;
+      let name = element.tags.name.trim();
+      // Normalize: remove parentheticals like (central), (lateral) to deduplicate
+      name = name.replace(/\s*\(.*?\)\s*/g, '').trim();
+
       const type = element.tags.highway;
-      const tier = TIER_MAPPING[type] || 4; // Default to 4 if unknown
+      // Initial tier from mapping
+      const tier = TIER_MAPPING[type] || 4;
 
       // Normalize coordinate to [lat, lon] and round to 5 decimals (~1m precision)
       const geometry = element.geometry.map(p => [
@@ -77,23 +81,49 @@ async function fetchStreets() {
         streetsMap.set(name, {
           name: name,
           tier: tier,
-          type: type,
+          type: type, // Store initial type, though it might differ per segment
           segments: [],
         });
+      } else {
+        // If street already exists, check if this segment implies a better (lower) tier
+        const entry = streetsMap.get(name);
+        if (tier < entry.tier) {
+          entry.tier = tier;
+          entry.type = type; // Update type to the more important one
+        }
       }
 
       streetsMap.get(name).segments.push(geometry);
     });
 
     const streetsRaw = Array.from(streetsMap.values());
-    const streets = streetsRaw.filter(s => {
-      if (s.tier <= 2) return true;
+
+    // Recalculate tiers based on full street data (total length)
+    streetsRaw.forEach(street => {
+      const totalPoints = street.segments.reduce((acc, seg) => acc + seg.length, 0);
+
+      // Promote major pedestrian streets
+      if (street.type === 'pedestrian' || street.type === 'living_street') {
+        if (totalPoints > 150) {
+          street.tier = 1; // Major pedestrian hubs (e.g. La Rambla)
+        } else if (totalPoints > 50) {
+          street.tier = 2; // Significant pedestrian streets
+        }
+        // Else remains Tier 4
+      }
+
+      // Optional: Demote very short primary/secondary segments if they are likely noise?
+      // For now, let's stick to promoting pedestrian streets.
+    });
+
+    const streets = streetsRaw.filter(() => {
+      // Keep all streets for now, maybe filter very tiny ones if needed later
       return true;
     });
 
     streets.sort((a, b) => {
       if (a.tier !== b.tier) return a.tier - b.tier;
-      return b.segments.length - a.segments.length;
+      return b.segments.length - a.segments.length; // Secondary sort by size
     });
 
     const finalStreets = [];

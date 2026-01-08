@@ -27,6 +27,8 @@
     "format": "prettier --write \"src/**/*.{js,jsx,json,css,md}\"",
     "format:check": "prettier --check \"src/**/*.{js,jsx,json,css,md}\"",
     "fetch-streets": "node scripts/fetchStreets.js",
+    "export-csv": "node scripts/export_streets_csv.js",
+    "generate-quiz-plan": "node scripts/generateQuizPlan.js",
     "test": "vitest",
     "test:ui": "vitest --ui",
     "test:coverage": "vitest --coverage",
