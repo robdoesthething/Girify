@@ -544,7 +544,14 @@ const AppRoutes = () => {
             bg-slate-50 ${theme === 'dark' ? 'text-white' : 'text-slate-900'}
         `}
     >
-      <TopBar onOpenPage={handleOpenPage} />
+      <TopBar
+        onOpenPage={handleOpenPage}
+        username={state.username}
+        onTriggerLogin={() => {
+          dispatch({ type: 'SET_GAME_STATE', payload: 'register' });
+          navigate('/');
+        }}
+      />
 
       {/* Global Feedback Modal */}
       <AnimatePresence>

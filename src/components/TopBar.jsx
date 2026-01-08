@@ -5,11 +5,23 @@ import { motion, AnimatePresence } from 'framer-motion';
 import Logo from './Logo';
 import PropTypes from 'prop-types';
 
-const TopBar = ({ onOpenPage }) => {
+const TopBar = ({ onOpenPage, username, onTriggerLogin }) => {
   const { theme, t } = useTheme();
   const [menuOpen, setMenuOpen] = useState(false);
+  const [showLoginModal, setShowLoginModal] = useState(false);
 
   const handleMenuClick = page => {
+    const RESTRICTED_PAGES = ['profile', 'friends', 'leaderboard', 'shop', 'admin'];
+
+    if (RESTRICTED_PAGES.includes(page) && !username) {
+      setShowLoginModal(true);
+      // specific logic: if we are closing menu or keeping it open?
+      // Let's keep menu open or close it? User requirement implies prompting.
+      // Usually better to keep menu open or close it. Let's close menu to show modal clearly.
+      setMenuOpen(false);
+      return;
+    }
+
     onOpenPage(page);
     setMenuOpen(false);
   };
@@ -140,12 +152,60 @@ backdrop-blur-md border-b ${theme === 'dark' ? 'border-slate-600' : 'border-slat
           </>
         )}
       </AnimatePresence>
+
+      {/* Login Required Modal */}
+      <AnimatePresence>
+        {showLoginModal && (
+          <div className="fixed inset-0 z-[8000] flex items-center justify-center p-4">
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setShowLoginModal(false)}
+              className="absolute inset-0 bg-black/50 backdrop-blur-sm"
+            />
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              className={`relative z-10 w-full max-w-sm p-6 rounded-2xl shadow-xl text-center
+                        ${theme === 'dark' ? 'bg-slate-800 text-white' : 'bg-white text-slate-800'}
+                    `}
+            >
+              <h3 className="text-xl font-black mb-2">{t('loginRequired') || 'Login Required'}</h3>
+              <p className="mb-6 opacity-70">
+                {t('loginRequiredMessage') ||
+                  'You need to be logged in to view this page. Create a profile or sign in to continue!'}
+              </p>
+              <div className="flex flex-col gap-3">
+                <button
+                  onClick={() => {
+                    setShowLoginModal(false);
+                    onTriggerLogin();
+                  }}
+                  className="w-full py-3 bg-sky-500 hover:bg-sky-600 text-white rounded-xl font-bold shadow-lg shadow-sky-500/20 active:scale-95 transition-all"
+                >
+                  {t('loginOrRegister') || 'Login / Register'}
+                </button>
+                <button
+                  onClick={() => setShowLoginModal(false)}
+                  className="w-full py-3 bg-slate-100 hover:bg-slate-200 dark:bg-slate-700 dark:hover:bg-slate-600 rounded-xl font-bold transition-colors"
+                >
+                  {t('cancel') || 'Cancel'}
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </>
   );
 };
 
 TopBar.propTypes = {
   onOpenPage: PropTypes.func.isRequired,
+  username: PropTypes.string,
+  onTriggerLogin: PropTypes.func,
 };
 
 export default TopBar;
