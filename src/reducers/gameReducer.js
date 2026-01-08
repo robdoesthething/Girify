@@ -18,6 +18,7 @@ export const initialState = {
   questionStartTime: null,
   activePage: null, // 'leaderboard' | 'settings' | 'about' | 'profile' | null
   selectedAnswer: null, // New field for manual selection
+  plannedQuestions: null, // Pre-generated quiz plan questions
 };
 
 export function gameReducer(state, action) {
@@ -48,6 +49,7 @@ export function gameReducer(state, action) {
         quizResults: [],
         options: action.payload.initialOptions || [],
         selectedAnswer: null,
+        plannedQuestions: action.payload.plannedQuestions || null,
       };
 
     case 'SET_OPTIONS':

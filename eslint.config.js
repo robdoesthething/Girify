@@ -104,4 +104,17 @@ export default defineConfig([
       'no-console': 'off',
     },
   },
+  // Root-level node scripts
+  {
+    files: ['analyze_tiers.js', 'vitest.config.js', 'commitlint.config.js'],
+    languageOptions: {
+      globals: {
+        ...globals.node,
+      },
+    },
+    rules: {
+      'no-console': 'off',
+      'no-unused-vars': 'warn',
+    },
+  },
 ]);
