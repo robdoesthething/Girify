@@ -20,8 +20,8 @@ const HIGHSCORES_COLLECTION = 'highscores'; // For searching users
 const SCORES_COLLECTION = 'scores'; // For feed
 const BLOCKS_COLLECTION = 'blocks';
 
-// Helper to match leaderboard sanitization
-const sanitize = name => name.replace(/\//g, '_');
+// Helper to match leaderboard sanitization and ensure consistent IDs (lowercase)
+const sanitize = name => name.toLowerCase().replace(/\//g, '_');
 
 /**
  * Search for users by username prefix (using highscores as user index)
@@ -94,10 +94,13 @@ export const searchUsers = async searchText => {
  */
 export const sendFriendRequest = async (fromUsername, toUsername) => {
   if (!fromUsername || !toUsername) return { error: 'Invalid usernames' };
-  if (fromUsername === toUsername) return { error: 'Cannot add yourself' };
 
+  // SANITIZE BOTH INPUTS STRICTLY
   const fromClean = sanitize(fromUsername);
   let toClean = sanitize(toUsername);
+
+  // STRICT SELF CHECK (after sanitization)
+  if (fromClean === toClean) return { error: 'Cannot add yourself' };
 
   try {
     // 0. Check if target user has migrated
@@ -108,7 +111,8 @@ export const sendFriendRequest = async (fromUsername, toUsername) => {
       if (data.migratedTo) {
         // Redirect request to the new handle
         toClean = sanitize(data.migratedTo);
-        // Note: We don't update toUsername variable, but we use toClean for paths
+        // Re-check self after migration redirect
+        if (fromClean === toClean) return { error: 'Cannot add yourself' };
       }
     }
     // Check if already friends

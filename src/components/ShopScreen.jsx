@@ -179,7 +179,7 @@ const ShopScreen = ({ username }) => {
             <div
               className={
                 activeTab === 'titles'
-                  ? 'grid grid-cols-3 gap-3 md:grid-cols-4'
+                  ? 'grid grid-cols-1 sm:grid-cols-2 gap-4'
                   : 'grid grid-cols-1 sm:grid-cols-2 gap-4'
               }
             >
@@ -187,43 +187,9 @@ const ShopScreen = ({ username }) => {
                 const owned = isOwned(item.id);
                 const active = isEquipped(item.id);
 
-                if (activeTab === 'titles') {
-                  // TITLES / BADGES as CIRCLES
-                  return (
-                    <button
-                      key={item.id}
-                      onClick={() => setFlavorModal(item)}
-                      className={`relative aspect-square rounded-full border-2 flex flex-col items-center justify-center transition-all p-2 ${
-                        active
-                          ? 'border-sky-500 bg-sky-500/10 shadow-md scale-105'
-                          : theme === 'dark'
-                            ? 'border-slate-700 bg-slate-800 hover:bg-slate-700'
-                            : 'border-slate-200 bg-white hover:bg-slate-50'
-                      }`}
-                    >
-                      <span className="text-4xl mb-1">{item.prefix || item.emoji || '🏷️'}</span>
-                      {active && (
-                        <div className="absolute top-0 right-0 bg-sky-500 rounded-full p-1 border-2 border-white dark:border-slate-900 shadow-sm">
-                          <svg
-                            className="w-3 h-3 text-white"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                            stroke="currentColor"
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth={3}
-                              d="M5 13l4 4L19 7"
-                            />
-                          </svg>
-                        </div>
-                      )}
-                    </button>
-                  );
-                }
+                // Titles use the same list/card view as Frames now
+                // But we add specific behavior (clickable icon for flavor text)
 
-                // DEFAULT LIST VIEW (Frames, Special)
                 return (
                   <div
                     key={item.id}
@@ -237,12 +203,22 @@ const ShopScreen = ({ username }) => {
                   >
                     <div className="flex items-start justify-between mb-3">
                       <div className="flex items-center gap-3">
-                        {/* Preview Icon */}
-                        <div className="w-12 h-12 rounded-xl bg-slate-100 dark:bg-slate-700 flex items-center justify-center text-2xl relative overflow-hidden shrink-0">
+                        {/* Preview Icon - Clickable for Titles to show Flavor Text */}
+                        {/* eslint-disable-next-line jsx-a11y/click-events-have-key-events */}
+                        <div
+                          onClick={() => {
+                            if (activeTab === 'titles') setFlavorModal(item);
+                          }}
+                          className={`w-12 h-12 rounded-xl bg-slate-100 dark:bg-slate-700 flex items-center justify-center text-2xl relative overflow-hidden shrink-0 ${
+                            activeTab === 'titles'
+                              ? 'cursor-pointer hover:scale-105 transition-transform'
+                              : ''
+                          }`}
+                        >
                           {item.cssClass ? (
                             <div className={`w-10 h-10 rounded-full ${item.cssClass}`} />
                           ) : (
-                            <span>{item.image ? '🎁' : item.prefix || '✨'}</span>
+                            <span>{item.image ? '🎁' : item.prefix || item.emoji || '✨'}</span>
                           )}
                         </div>
 
@@ -251,7 +227,9 @@ const ShopScreen = ({ username }) => {
                             {t(item.name) || item.name}
                           </h3>
                           <p className="text-xs opacity-60 mt-1 line-clamp-2">
-                            {t(item.description) || item.description}
+                            {activeTab === 'titles' && item.flavorText
+                              ? `"${item.flavorText}"`
+                              : t(item.description) || item.description}
                           </p>
                         </div>
                       </div>
