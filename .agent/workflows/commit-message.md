@@ -16,6 +16,15 @@ type(scope): subject
 
 ## Rules (ENFORCED BY COMMITLINT)
 
+> [!CAUTION]
+> **These 3 rules cause most commit failures - ALWAYS CHECK:**
+>
+> 1. **Header ≤ 100 characters** - Count type(scope): + subject = must be ≤100
+> 2. **Subject is lowercase** - First letter after colon must be lowercase
+> 3. **No trailing period** - Subject must NOT end with `.`
+
+### Full Rule List
+
 1. **Max header length: 100 characters** - The first line (type + scope + subject) must be ≤100 chars
 2. **Subject must be lowercase** - Start with lowercase letter after the colon
 3. **No trailing period** - Subject must NOT end with a period
