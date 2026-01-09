@@ -84,7 +84,6 @@ const ShopScreen = ({ username }) => {
   const tabs = [
     { id: 'frames', label: `🖼️ ${t('frames')}`, items: cosmetics.avatarFrames },
     { id: 'titles', label: `🏷️ ${t('titles')}`, items: cosmetics.titles },
-    { id: 'merits', label: `🎖️ ${t('merits') || 'Merits'}`, items: cosmetics.merits },
     { id: 'special', label: `✨ ${t('special')}`, items: cosmetics.special },
   ];
 
@@ -192,7 +191,7 @@ const ShopScreen = ({ username }) => {
                           : 'border-slate-200 bg-white'
                     }`}
                   >
-                    {activeTab === 'merits' && (
+                    {activeTab === 'titles' && item.flavorText && (
                       <button
                         onClick={() => setFlavorModal(item)}
                         className="w-full mb-3 text-xs font-bold text-sky-500 hover:text-sky-600 underline text-left"
@@ -202,7 +201,17 @@ const ShopScreen = ({ username }) => {
                     )}
 
                     <div className="flex items-start justify-between mb-3">
-                      <div>
+                      <div
+                        className="flex-1 cursor-pointer"
+                        role="button"
+                        tabIndex={0}
+                        onClick={() => item.flavorText && setFlavorModal(item)}
+                        onKeyDown={e =>
+                          (e.key === 'Enter' || e.key === ' ') &&
+                          item.flavorText &&
+                          setFlavorModal(item)
+                        }
+                      >
                         <div className="flex items-center gap-2">
                           {item.emoji && <span className="text-2xl">{item.emoji}</span>}
                           {item.prefix && <span className="text-lg">{item.prefix}</span>}
@@ -242,8 +251,7 @@ const ShopScreen = ({ username }) => {
                     {/* Actions */}
                     <div className="flex gap-2">
                       {owned ? (
-                        activeTab !== 'special' &&
-                        activeTab !== 'merits' && (
+                        activeTab !== 'special' && (
                           <button
                             onClick={() => handleEquip(item, activeTab)}
                             className={`flex-1 py-2 rounded-xl font-bold text-sm transition-all ${

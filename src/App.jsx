@@ -732,7 +732,8 @@ const AppRoutes = () => {
       </AnimatePresence>
 
       {/* Global Copyright Footer */}
-      <div className="fixed bottom-1 left-0 right-0 text-center z-50 pointer-events-none opacity-40 mix-blend-difference">
+      {/* Global Copyright Footer */}
+      <div className="absolute bottom-1 left-0 right-0 text-center pointer-events-none opacity-40 mix-blend-difference pb-4">
         <p className="text-[10px] font-medium text-slate-500 dark:text-slate-400">
           © 2025 Girify. All rights reserved.
         </p>
