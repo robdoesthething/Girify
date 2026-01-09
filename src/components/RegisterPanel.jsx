@@ -9,7 +9,7 @@ import {
   updateProfile,
   sendEmailVerification,
 } from 'firebase/auth';
-import { ensureUserProfile, recordReferral } from '../utils/social';
+import { ensureUserProfile, recordReferral, getUserByEmail } from '../utils/social';
 import { useTheme } from '../context/ThemeContext';
 import PropTypes from 'prop-types';
 
@@ -66,7 +66,8 @@ const RegisterPanel = ({ theme: themeProp }) => {
   const { t } = useTheme();
   const theme = themeProp;
   const [isSignUp, setIsSignUp] = useState(false);
-  const [name, setName] = useState('');
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -78,30 +79,43 @@ const RegisterPanel = ({ theme: themeProp }) => {
       setError('');
       const result = await signInWithPopup(auth, googleProvider);
       const user = result.user;
+
+      let handle = user.displayName;
+      let avatarId = Math.floor(Math.random() * 20) + 1;
       const fullName = user.displayName || user.email?.split('@')[0] || 'User';
-      // Extract only first name (not surname)
-      const firstName = fullName.split(' ')[0];
 
-      // Generate handle with 4-digit ID
-      const randomId = Math.floor(1000 + Math.random() * 9000);
-      const sanitizedName = firstName.replace(/[^a-zA-Z0-9]/g, '');
-      const handle = `@${sanitizedName}${randomId}`;
-      const avatarId = Math.floor(Math.random() * 20) + 1;
+      // CHECK: Does a profile already exist for this email?
+      const existingProfile = await getUserByEmail(user.email);
 
-      if (user.displayName !== handle) {
-        await updateProfile(user, { displayName: handle });
+      if (existingProfile) {
+        // Use existing handle to log in to correct account
+        handle = existingProfile.username;
+        avatarId = existingProfile.avatarId || avatarId;
+        // eslint-disable-next-line no-console
+        console.log(`[Auth] Found existing profile for email ${user.email}: ${handle}`);
+      } else {
+        // Create NEW handle
+        const firstPart = fullName.split(' ')[0];
+        const randomId = Math.floor(1000 + Math.random() * 9000);
+        const sanitizedName = firstPart.replace(/[^a-zA-Z0-9]/g, '');
+        handle = `@${sanitizedName}${randomId}`;
+
+        // Update Firebase Auth profile
+        if (user.displayName !== handle) {
+          await updateProfile(user, { displayName: handle });
+        }
       }
 
-      // Ensure user profile exists
+      // Ensure user profile exists (or update metadata)
       await ensureUserProfile(handle, user.uid, {
         realName: fullName,
         avatarId,
         email: user.email,
       });
 
-      // Record referral if exists
+      // Record referral if exists (only for new users if not caught above)
       const referrer = localStorage.getItem('girify_referrer');
-      if (referrer && referrer !== handle) {
+      if (referrer && referrer !== handle && !existingProfile) {
         await recordReferral(referrer, handle);
         localStorage.removeItem('girify_referrer');
       }
@@ -111,9 +125,6 @@ const RegisterPanel = ({ theme: themeProp }) => {
         localStorage.setItem('girify_joined', new Date().toLocaleDateString());
       }
 
-      // Don't call onRegister here - let the onAuthStateChanged listener in App.jsx handle it
-      // This prevents race conditions and ensures proper auth state management
-      // The auth state listener will automatically call handleRegister
       setLoading(false);
     } catch (err) {
       let errorMessage = 'Google sign-in failed. Please try again.';
@@ -131,12 +142,12 @@ const RegisterPanel = ({ theme: themeProp }) => {
         if (err.message) {
           errorMessage = `Google sign-in failed: ${err.message}`;
         }
-
         setError(errorMessage);
         setLoading(false);
+        return;
       }
-      setError(t('enterEmailAndPassword'));
-      return;
+      setError(errorMessage);
+      setLoading(false);
     }
   };
 
@@ -153,24 +164,24 @@ const RegisterPanel = ({ theme: themeProp }) => {
       let userCredential;
 
       if (isSignUp) {
-        if (!name) {
-          setError(t('enterYourName'));
+        if (!firstName || !lastName) {
+          setError(t('enterYourName') || 'Please enter your first and last name');
           setLoading(false);
           return;
         }
-        const validation = validateUsername(name, t);
+        const validation = validateUsername(firstName, t); // Validate handle base
         if (!validation.valid) {
           setError(validation.error);
           setLoading(false);
           return;
         }
 
-        // Extract only first name (not surname) and generate handle
-        const firstName = name.split(' ')[0];
+        // Generate handle
         const randomId = Math.floor(1000 + Math.random() * 9000);
         const sanitizedName = firstName.replace(/[^a-zA-Z0-9]/g, '');
         const handle = `@${sanitizedName}${randomId}`;
         const avatarId = Math.floor(Math.random() * 20) + 1;
+        const realName = `${firstName} ${lastName}`.trim();
 
         userCredential = await createUserWithEmailAndPassword(auth, email, password);
         await updateProfile(userCredential.user, { displayName: handle });
@@ -180,7 +191,7 @@ const RegisterPanel = ({ theme: themeProp }) => {
 
         // Ensure user profile exists
         await ensureUserProfile(handle, userCredential.user.uid, {
-          realName: name,
+          realName,
           avatarId,
           email: email,
         });
@@ -318,17 +329,30 @@ const RegisterPanel = ({ theme: themeProp }) => {
 
         <form onSubmit={handleEmailAuth} className="space-y-3">
           {isSignUp && (
-            <input
-              type="text"
-              placeholder="Display Name"
-              value={name}
-              onChange={e => setName(e.target.value)}
-              className={`w-full px-4 py-3 rounded-xl border font-medium outline-none focus:ring-2 focus:ring-sky-500 transition-all ${
-                theme === 'dark'
-                  ? 'bg-slate-800 border-slate-700 text-white placeholder-slate-600'
-                  : 'bg-white border-slate-200 text-slate-900 placeholder-slate-400'
-              }`}
-            />
+            <div className="flex gap-3">
+              <input
+                type="text"
+                placeholder={t('firstName') || 'First Name'}
+                value={firstName}
+                onChange={e => setFirstName(e.target.value)}
+                className={`w-1/2 px-4 py-3 rounded-xl border font-medium outline-none focus:ring-2 focus:ring-sky-500 transition-all ${
+                  theme === 'dark'
+                    ? 'bg-slate-800 border-slate-700 text-white placeholder-slate-600'
+                    : 'bg-white border-slate-200 text-slate-900 placeholder-slate-400'
+                }`}
+              />
+              <input
+                type="text"
+                placeholder={t('lastName') || 'Last Name'}
+                value={lastName}
+                onChange={e => setLastName(e.target.value)}
+                className={`w-1/2 px-4 py-3 rounded-xl border font-medium outline-none focus:ring-2 focus:ring-sky-500 transition-all ${
+                  theme === 'dark'
+                    ? 'bg-slate-800 border-slate-700 text-white placeholder-slate-600'
+                    : 'bg-white border-slate-200 text-slate-900 placeholder-slate-400'
+                }`}
+              />
+            </div>
           )}
           <input
             type="email"

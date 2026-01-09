@@ -40,7 +40,7 @@ import { gameReducer, initialState } from './reducers/gameReducer';
 import { auth } from './firebase';
 import { onAuthStateChanged, signOut, updateProfile } from 'firebase/auth';
 
-import FeedbackModal from './components/FeedbackModal';
+import FeedbackScreen from './components/FeedbackScreen';
 import AdminRoute from './components/AdminRoute';
 import AdminPanel from './components/AdminPanel';
 import StreetsFetcher from './components/StreetsFetcher';
@@ -53,9 +53,6 @@ const AppRoutes = () => {
   const [state, dispatch] = useReducer(gameReducer, initialState);
   const location = useLocation();
   const navigate = useNavigate();
-
-  // Feedback Modal State
-  const [showFeedback, setShowFeedback] = useState(false);
 
   // Announcement Modal State
   const [pendingAnnouncement, setPendingAnnouncement] = useState(null);
@@ -331,7 +328,7 @@ const AppRoutes = () => {
             if (!lastFeedback || now - parseInt(lastFeedback) > 604800000) {
               // 1/7 chance to show
               if (Math.random() < 1 / 7) {
-                setTimeout(() => setShowFeedback(true), 2000); // Show after short delay
+                setTimeout(() => navigate('/feedback'), 2000); // Show after short delay
               }
             }
           }
@@ -432,12 +429,6 @@ const AppRoutes = () => {
 
     // If null/undefined, go home. Else go to page.
     navigate(page ? `/${page}` : '/');
-  };
-
-  // Feedback close handler
-  const handleFeedbackClose = () => {
-    setShowFeedback(false);
-    localStorage.setItem('girify_last_feedback', Date.now().toString());
   };
 
   // Auth Listener
@@ -610,7 +601,7 @@ const AppRoutes = () => {
     }
     return () => clearTimeout(timeoutId);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [state.feedback, state.autoAdvance]);
+  }, [state.autoAdvance]);
 
   return (
     <div
@@ -626,11 +617,6 @@ const AppRoutes = () => {
           navigate('/');
         }}
       />
-
-      {/* Global Feedback Modal */}
-      <AnimatePresence>
-        {showFeedback && <FeedbackModal username={state.username} onClose={handleFeedbackClose} />}
-      </AnimatePresence>
 
       {/* Announcement Modal */}
       <AnimatePresence>
@@ -712,13 +698,13 @@ const AppRoutes = () => {
           <Route
             path="/feedback"
             element={
-              <div className="fixed inset-0 z-[5000] pt-12 flex items-center justify-center bg-slate-50 dark:bg-slate-900">
-                <FeedbackModal
-                  username={state.username}
-                  onClose={() => handleOpenPage(null)}
-                  inline={true}
-                />
-              </div>
+              <FeedbackScreen
+                username={state.username}
+                onClose={() => {
+                  localStorage.setItem('girify_last_feedback', Date.now().toString());
+                  handleOpenPage(null);
+                }}
+              />
             }
           />
 

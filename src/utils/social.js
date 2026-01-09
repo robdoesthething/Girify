@@ -79,6 +79,29 @@ export const ensureUserProfile = async (usernameInput, uid = null, additionalDat
   return { id: userDoc.id, ...data };
 };
 
+/**
+ * Look up a user profile by email address.
+ * Used during registration to prevent duplicate accounts.
+ *
+ * @param {string} email
+ * @returns {Promise<{username: string, ...}|null>}
+ */
+export const getUserByEmail = async email => {
+  if (!email) return null;
+  try {
+    const q = query(collection(db, USERS_COLLECTION), where('email', '==', email), limit(1));
+    const snapshot = await getDocs(q);
+    if (!snapshot.empty) {
+      const doc = snapshot.docs[0];
+      return { id: doc.id, ...doc.data() };
+    }
+    return null;
+  } catch (e) {
+    console.error('Error fetching user by email:', e);
+    return null;
+  }
+};
+
 // --- ADMIN & FEEDBACK FUNCTIONS ---
 
 const FEEDBACK_COLLECTION = 'feedback';
