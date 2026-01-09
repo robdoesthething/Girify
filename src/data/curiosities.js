@@ -227,6 +227,41 @@ const CURIOSITIES_DATA = [
     image:
       'https://images.unsplash.com/photo-1563297050-48413b91c828?auto=format&fit=crop&w=800&q=80',
   },
+  {
+    id: 26,
+    location: 'Gran Via de les Corts Catalanes',
+    district: 'Eixample',
+    type: 'History',
+    text: "Spanning 13.1 km, it is the longest street in Catalonia, stretching from L'Hospitalet to Sant Adrià de Besòs.",
+    image:
+      'https://upload.wikimedia.org/wikipedia/commons/e/e0/Gran_Via_de_les_Corts_Catalanes%2C_680_BCN_02.jpg',
+  },
+  {
+    id: 27,
+    location: 'Avinguda Diagonal',
+    district: 'Eixample',
+    type: 'Architecture',
+    text: 'Ildefons Cerdà designed this avenue to cut through the orthogonal grid, facilitating rapid transit across the city.',
+    image:
+      'https://upload.wikimedia.org/wikipedia/commons/a/a2/Barcelona_-_Avinguda_Diagonal_-_View_ENE_I.jpg',
+  },
+  {
+    id: 28,
+    location: 'Rambla del Poblenou',
+    district: 'Sant Martí',
+    type: 'Culture',
+    text: 'The heart of the Poblenou district, leading directly to the Bogatell beach. It retains a village-like atmosphere.',
+    image:
+      'https://upload.wikimedia.org/wikipedia/commons/5/52/Rambla_del_Poblenou_%28Barcelona%29_October_2023.JPG',
+  },
+  {
+    id: 29,
+    location: 'Ronda de Dalt',
+    district: 'Horta-Guinardó',
+    type: 'History',
+    text: 'Built for the 1992 Olympics, this ring road drastically reduced traffic congestion in the city center.',
+    image: 'https://upload.wikimedia.org/wikipedia/commons/2/22/Ronda_de_dalt_Barna.JPG',
+  },
 ];
 
 const GENERIC_IMAGES = [
