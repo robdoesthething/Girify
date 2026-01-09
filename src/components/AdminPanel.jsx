@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useTheme } from '../context/ThemeContext';
 import { getAllUsers, getFeedbackList, updateUserAsAdmin } from '../utils/social';
+import { getAllAnnouncements, createAnnouncement, deleteAnnouncement } from '../utils/news';
 // eslint-disable-next-line no-unused-vars
 import { motion, AnimatePresence } from 'framer-motion';
 import { ACHIEVEMENT_BADGES } from '../data/achievements';
@@ -27,6 +28,13 @@ const AdminPanel = () => {
   const [migrationStatus, setMigrationStatus] = useState(null);
   const [confirmConfig, setConfirmConfig] = useState(null);
   const [promptConfig, setPromptConfig] = useState(null);
+  const [announcements, setAnnouncements] = useState([]);
+  const [newAnnouncement, setNewAnnouncement] = useState({
+    title: '',
+    body: '',
+    publishDate: '',
+    expiryDate: '',
+  });
 
   const showConfirm = (message, title = 'Confirm Action') =>
     new Promise(resolve => {
@@ -50,9 +58,14 @@ const AdminPanel = () => {
 
   const fetchData = React.useCallback(async () => {
     setLoading(true);
-    const [u, f] = await Promise.all([getAllUsers(100), getFeedbackList()]);
+    const [u, f, a] = await Promise.all([
+      getAllUsers(100),
+      getFeedbackList(),
+      getAllAnnouncements(),
+    ]);
     setUsers(u);
     setFeedback(f);
+    setAnnouncements(a);
     setLoading(false);
   }, []);
 
@@ -169,7 +182,7 @@ const AdminPanel = () => {
       >
         <h1 className="text-2xl font-black mb-8 text-sky-500">Girify Admin</h1>
         <nav className="flex flex-col gap-2">
-          {['dashboard', 'users', 'feedback'].map(tab => (
+          {['dashboard', 'users', 'feedback', 'announcements'].map(tab => (
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
@@ -725,6 +738,183 @@ const AdminPanel = () => {
                             ✓ Awarded {item.reward} Giuros
                           </div>
                         )}
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
+            {/* ANNOUNCEMENTS */}
+            {activeTab === 'announcements' && (
+              <div className="space-y-6">
+                <h2 className="text-3xl font-black">Announcements</h2>
+
+                {/* Create New */}
+                <div
+                  className={`p-6 rounded-2xl border ${theme === 'dark' ? 'bg-slate-800 border-slate-700' : 'bg-white border-slate-200'}`}
+                >
+                  <h3 className="text-xl font-bold mb-4">Create New Announcement</h3>
+                  <form
+                    onSubmit={async e => {
+                      e.preventDefault();
+                      const result = await createAnnouncement(newAnnouncement);
+                      if (result.success) {
+                        setNewAnnouncement({
+                          title: '',
+                          body: '',
+                          publishDate: '',
+                          expiryDate: '',
+                        });
+                        fetchData();
+                      } else {
+                        // eslint-disable-next-line no-alert
+                        alert(`Error: ${result.error}`);
+                      }
+                    }}
+                    className="space-y-4"
+                  >
+                    <div>
+                      <label
+                        htmlFor="ann-title"
+                        className="text-xs uppercase font-bold opacity-50 block mb-1"
+                      >
+                        Title
+                      </label>
+                      <input
+                        id="ann-title"
+                        type="text"
+                        value={newAnnouncement.title}
+                        onChange={e =>
+                          setNewAnnouncement({ ...newAnnouncement, title: e.target.value })
+                        }
+                        className="w-full p-3 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700"
+                        required
+                      />
+                    </div>
+                    <div>
+                      <label
+                        htmlFor="ann-body"
+                        className="text-xs uppercase font-bold opacity-50 block mb-1"
+                      >
+                        Body (HTML/text supported)
+                      </label>
+                      <textarea
+                        id="ann-body"
+                        value={newAnnouncement.body}
+                        onChange={e =>
+                          setNewAnnouncement({ ...newAnnouncement, body: e.target.value })
+                        }
+                        rows={4}
+                        className="w-full p-3 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700"
+                        required
+                      />
+                    </div>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <label
+                          htmlFor="ann-publish"
+                          className="text-xs uppercase font-bold opacity-50 block mb-1"
+                        >
+                          Publish Date
+                        </label>
+                        <input
+                          id="ann-publish"
+                          type="datetime-local"
+                          value={newAnnouncement.publishDate}
+                          onChange={e =>
+                            setNewAnnouncement({ ...newAnnouncement, publishDate: e.target.value })
+                          }
+                          className="w-full p-3 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700"
+                          required
+                        />
+                      </div>
+                      <div>
+                        <label
+                          htmlFor="ann-expiry"
+                          className="text-xs uppercase font-bold opacity-50 block mb-1"
+                        >
+                          Expiry Date (optional)
+                        </label>
+                        <input
+                          id="ann-expiry"
+                          type="datetime-local"
+                          value={newAnnouncement.expiryDate}
+                          onChange={e =>
+                            setNewAnnouncement({ ...newAnnouncement, expiryDate: e.target.value })
+                          }
+                          className="w-full p-3 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700"
+                        />
+                      </div>
+                    </div>
+                    <button
+                      type="submit"
+                      className="px-6 py-3 bg-sky-500 hover:bg-sky-600 text-white rounded-xl font-bold transition-all shadow-lg shadow-sky-500/20"
+                    >
+                      Create Announcement
+                    </button>
+                  </form>
+                </div>
+
+                {/* Existing Announcements */}
+                <div className="space-y-4">
+                  <h3 className="text-xl font-bold">
+                    Existing Announcements ({announcements.length})
+                  </h3>
+                  {announcements.length === 0 && (
+                    <p className="opacity-50">No announcements yet.</p>
+                  )}
+                  {announcements.map(ann => {
+                    const publishDate = ann.publishDate?.toDate
+                      ? ann.publishDate.toDate().toLocaleString()
+                      : 'Unknown';
+                    const expiryDate = ann.expiryDate?.toDate
+                      ? ann.expiryDate.toDate().toLocaleString()
+                      : 'Never';
+                    const isActive =
+                      (!ann.publishDate || ann.publishDate.toDate() <= new Date()) &&
+                      (!ann.expiryDate || ann.expiryDate.toDate() > new Date());
+
+                    return (
+                      <div
+                        key={ann.id}
+                        className={`p-4 rounded-xl border ${theme === 'dark' ? 'bg-slate-800 border-slate-700' : 'bg-white border-slate-200'}`}
+                      >
+                        <div className="flex justify-between items-start mb-2">
+                          <div>
+                            <h4 className="font-bold text-lg">{ann.title}</h4>
+                            <p className="text-xs opacity-50">
+                              Publish: {publishDate} | Expires: {expiryDate}
+                            </p>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <span
+                              className={`px-2 py-1 rounded-full text-xs font-bold ${isActive ? 'bg-emerald-500/20 text-emerald-600' : 'bg-slate-500/20 text-slate-500'}`}
+                            >
+                              {isActive ? 'Active' : 'Inactive'}
+                            </span>
+                            <button
+                              onClick={async () => {
+                                if (
+                                  await showConfirm(
+                                    `Delete announcement "${ann.title}"?`,
+                                    'Delete Announcement'
+                                  )
+                                ) {
+                                  await deleteAnnouncement(ann.id);
+                                  fetchData();
+                                }
+                              }}
+                              className="p-1 rounded hover:bg-red-500 hover:text-white transition-colors"
+                              title="Delete"
+                            >
+                              ✕
+                            </button>
+                          </div>
+                        </div>
+                        <p className="text-sm opacity-70 line-clamp-2">
+                          {ann.body.substring(0, 150)}...
+                        </p>
                       </div>
                     );
                   })}

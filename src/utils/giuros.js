@@ -119,6 +119,17 @@ export const spendGiuros = async (username, cost, itemId) => {
       `[Giuros] -${cost} for ${username} (purchased ${itemId}). New balance: ${newBalance}`
     );
 
+    // Publish activity for friend feed (async, don't await)
+    import('./publishActivity').then(({ publishCosmeticPurchase }) => {
+      // Determine item type from ID prefix
+      let itemType = 'item';
+      if (itemId.startsWith('badge_')) itemType = 'badge';
+      else if (itemId.startsWith('frame_')) itemType = 'frame';
+      else if (itemId.startsWith('title_')) itemType = 'title';
+
+      publishCosmeticPurchase(username, itemId, itemId, itemType);
+    });
+
     return { success: true, newBalance };
   } catch (e) {
     console.error('Error spending giuros:', e);

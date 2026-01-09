@@ -44,6 +44,9 @@ import FeedbackModal from './components/FeedbackModal';
 import AdminRoute from './components/AdminRoute';
 import AdminPanel from './components/AdminPanel';
 import StreetsFetcher from './components/StreetsFetcher';
+import NewsScreen from './components/NewsScreen';
+import AnnouncementModal from './components/AnnouncementModal';
+import { getUnreadAnnouncements, markAnnouncementAsRead } from './utils/news';
 
 const AppRoutes = () => {
   const { deviceMode, theme, t } = useTheme();
@@ -53,6 +56,9 @@ const AppRoutes = () => {
 
   // Feedback Modal State
   const [showFeedback, setShowFeedback] = useState(false);
+
+  // Announcement Modal State
+  const [pendingAnnouncement, setPendingAnnouncement] = useState(null);
 
   // Parse referral code from URL on load
   useEffect(() => {
@@ -518,6 +524,14 @@ const AppRoutes = () => {
               }
             );
 
+            // NEWS: Check for unread announcements
+            getUnreadAnnouncements(displayName).then(unread => {
+              if (unread && unread.length > 0) {
+                // Show the most recent unread announcement
+                setPendingAnnouncement(unread[0]);
+              }
+            });
+
             // MIGRATION: Registry Date Backfill
             // If profile doesn't have a valid joinedAt, OR we want to backfill from history if older
             let earliestDate = null;
@@ -618,6 +632,19 @@ const AppRoutes = () => {
         {showFeedback && <FeedbackModal username={state.username} onClose={handleFeedbackClose} />}
       </AnimatePresence>
 
+      {/* Announcement Modal */}
+      <AnimatePresence>
+        {pendingAnnouncement && (
+          <AnnouncementModal
+            announcement={pendingAnnouncement}
+            onDismiss={() => {
+              markAnnouncementAsRead(state.username, pendingAnnouncement.id);
+              setPendingAnnouncement(null);
+            }}
+          />
+        )}
+      </AnimatePresence>
+
       <AnimatePresence mode="wait">
         <Routes location={location} key={location.pathname}>
           <Route
@@ -678,6 +705,22 @@ const AppRoutes = () => {
             }
           />
           <Route path="/shop" element={<ShopScreen username={state.username} />} />
+          <Route
+            path="/news"
+            element={<NewsScreen onClose={() => handleOpenPage(null)} username={state.username} />}
+          />
+          <Route
+            path="/feedback"
+            element={
+              <div className="fixed inset-0 z-[5000] pt-12 flex items-center justify-center bg-slate-50 dark:bg-slate-900">
+                <FeedbackModal
+                  username={state.username}
+                  onClose={() => handleOpenPage(null)}
+                  inline={true}
+                />
+              </div>
+            }
+          />
 
           {/* Admin Route */}
           <Route element={<AdminRoute />}>
