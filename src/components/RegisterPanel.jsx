@@ -62,6 +62,51 @@ const validateUsername = (username, t) => {
   return { valid: true, error: null };
 };
 
+// Helper: Generate a unique handle from a name
+const generateHandle = baseName => {
+  const cleanName = baseName.split(' ')[0].replace(/[^a-zA-Z0-9]/g, '');
+  const randomId = Math.floor(1000 + Math.random() * 9000);
+  return `@${cleanName}${randomId}`;
+};
+
+// Helper: Generate random avatar ID
+const getRandomAvatarId = () => Math.floor(Math.random() * 20) + 1;
+
+// Helper: Map Firebase error codes to user messages
+// Helper: Map Firebase error codes to user messages
+const getAuthErrorMessage = (code, message) => {
+  switch (code) {
+    case 'auth/popup-closed-by-user':
+      return 'Sign-in cancelled. Please try again.';
+    case 'auth/cancelled-popup-request':
+      return 'Multiple sign-in attempts detected. Please try again.';
+    case 'auth/network-request-failed':
+      return 'Network error. Please check your connection and try again.';
+    case 'auth/too-many-requests':
+      return 'Too many attempts. Please wait a moment and try again.';
+    case 'auth/popup-blocked':
+      return message
+        ? `Google sign-in failed: ${message}`
+        : 'Popup blocked by browser. Please allow popups and try again.';
+    case 'auth/invalid-email':
+      return 'Invalid email address format.';
+    case 'auth/user-not-found':
+      return 'No account found with this email. Please sign up first.';
+    case 'auth/wrong-password':
+      return 'Incorrect password. Please try again.';
+    case 'auth/email-already-in-use':
+      return 'This email is already registered. Please sign in instead.';
+    case 'auth/weak-password':
+      return 'Password must be at least 6 characters long.';
+    case 'auth/invalid-credential':
+      return 'Invalid email or password. Please check your credentials.';
+    case 'auth/user-disabled':
+      return 'This account has been disabled. Please contact support.';
+    default:
+      return 'Authentication failed. Please try again.';
+  }
+};
+
 const RegisterPanel = ({ theme: themeProp }) => {
   const { t } = useTheme();
   const theme = themeProp;
@@ -81,74 +126,51 @@ const RegisterPanel = ({ theme: themeProp }) => {
       const user = result.user;
 
       let handle = user.displayName;
-      let avatarId = Math.floor(Math.random() * 20) + 1;
+      let avatarId = getRandomAvatarId();
       const fullName = user.displayName || user.email?.split('@')[0] || 'User';
 
-      // CHECK: Does a profile already exist for this email?
+      // Check for existing profile by email to prevent duplicates
       const existingProfile = await getUserByEmail(user.email);
 
       if (existingProfile) {
-        // Use existing handle to log in to correct account
         handle = existingProfile.username;
         avatarId = existingProfile.avatarId || avatarId;
         // eslint-disable-next-line no-console
         console.log(`[Auth] Found existing profile for email ${user.email}: ${handle}`);
       } else {
-        // Create NEW handle
-        const firstPart = fullName.split(' ')[0];
-        const randomId = Math.floor(1000 + Math.random() * 9000);
-        const sanitizedName = firstPart.replace(/[^a-zA-Z0-9]/g, '');
-        handle = `@${sanitizedName}${randomId}`;
-
-        // Update Firebase Auth profile
+        // Create new handle if no profile exists
+        handle = generateHandle(fullName);
         if (user.displayName !== handle) {
           await updateProfile(user, { displayName: handle });
         }
       }
 
-      // Ensure user profile exists (or update metadata)
       await ensureUserProfile(handle, user.uid, {
         realName: fullName,
         avatarId,
         email: user.email,
       });
 
-      // Record referral if exists (only for new users if not caught above)
-      const referrer = localStorage.getItem('girify_referrer');
-      if (referrer && referrer !== handle && !existingProfile) {
-        await recordReferral(referrer, handle);
-        localStorage.removeItem('girify_referrer');
-      }
-
-      // Save joined date
-      if (!localStorage.getItem('girify_joined')) {
-        localStorage.setItem('girify_joined', new Date().toLocaleDateString());
-      }
-
-      setLoading(false);
+      await handlePostLogin(handle, existingProfile);
     } catch (err) {
-      let errorMessage = 'Google sign-in failed. Please try again.';
-
-      if (err.code === 'auth/popup-closed-by-user') {
-        errorMessage = 'Sign-in cancelled. Please try again.';
-      } else if (err.code === 'auth/cancelled-popup-request') {
-        errorMessage = 'Multiple sign-in attempts detected. Please try again.';
-      } else if (err.code === 'auth/network-request-failed') {
-        errorMessage = 'Network error. Please check your connection and try again.';
-      } else if (err.code === 'auth/too-many-requests') {
-        errorMessage = 'Too many attempts. Please wait a moment and try again.';
-      } else if (err.code === 'auth/popup-blocked') {
-        errorMessage = 'Popup blocked by browser. Please allow popups and try again.';
-        if (err.message) {
-          errorMessage = `Google sign-in failed: ${err.message}`;
-        }
-        setError(errorMessage);
-        setLoading(false);
-        return;
-      }
-      setError(errorMessage);
+      setError(getAuthErrorMessage(err.code, err.message));
       setLoading(false);
     }
+  };
+
+  const handlePostLogin = async (handle, existingProfile) => {
+    // Record referral
+    const referrer = localStorage.getItem('girify_referrer');
+    if (referrer && referrer !== handle && !existingProfile) {
+      await recordReferral(referrer, handle);
+      localStorage.removeItem('girify_referrer');
+    }
+
+    // Save joined date
+    if (!localStorage.getItem('girify_joined')) {
+      localStorage.setItem('girify_joined', new Date().toLocaleDateString());
+    }
+    setLoading(false);
   };
 
   const handleEmailAuth = async e => {
@@ -169,92 +191,51 @@ const RegisterPanel = ({ theme: themeProp }) => {
           setLoading(false);
           return;
         }
-        const validation = validateUsername(firstName, t); // Validate handle base
+
+        const validation = validateUsername(firstName, t);
         if (!validation.valid) {
           setError(validation.error);
           setLoading(false);
           return;
         }
 
-        // Generate handle
-        const randomId = Math.floor(1000 + Math.random() * 9000);
-        const sanitizedName = firstName.replace(/[^a-zA-Z0-9]/g, '');
-        const handle = `@${sanitizedName}${randomId}`;
-        const avatarId = Math.floor(Math.random() * 20) + 1;
+        const handle = generateHandle(firstName);
+        const avatarId = getRandomAvatarId();
         const realName = `${firstName} ${lastName}`.trim();
 
         userCredential = await createUserWithEmailAndPassword(auth, email, password);
         await updateProfile(userCredential.user, { displayName: handle });
-
-        // Send verification email
         await sendEmailVerification(userCredential.user);
 
-        // Ensure user profile exists
         await ensureUserProfile(handle, userCredential.user.uid, {
           realName,
           avatarId,
           email: email,
         });
 
-        // Record referral if exists
-        const referrer = localStorage.getItem('girify_referrer');
-        if (referrer && referrer !== handle) {
-          await recordReferral(referrer, handle);
-          localStorage.removeItem('girify_referrer');
-        }
+        await handlePostLogin(handle, false);
 
-        // Save joined date
-        if (!localStorage.getItem('girify_joined')) {
-          localStorage.setItem('girify_joined', new Date().toLocaleDateString());
-        }
-
-        setError('');
-        setLoading(false);
-        // Alert is fine here for now, or use console.
-        // alert('Verification email sent! Please check your inbox and verify your email before signing in.');
         // eslint-disable-next-line no-console
         console.log('Verification email sent!');
-        setIsSignUp(false);
+        setIsSignUp(false); // Switch to sign in view
         return;
-      } else {
-        userCredential = await signInWithEmailAndPassword(auth, email, password);
+      }
 
-        // Check if email is verified
-        if (!userCredential.user.emailVerified) {
-          setError(
-            'Please verify your email address before signing in. Check your inbox for the verification link.'
-          );
-          // Sign out the user since they're not verified
-          await auth.signOut();
-          setLoading(false);
-          return;
-        }
+      // Sign In Flow
+      userCredential = await signInWithEmailAndPassword(auth, email, password);
+
+      if (!userCredential.user.emailVerified) {
+        setError(
+          'Please verify your email address before signing in. Check your inbox for the verification link.'
+        );
+        await auth.signOut();
+        setLoading(false);
+        return;
       }
 
       setLoading(false);
     } catch (err) {
-      let msg = 'Authentication failed. Please try again.';
-
-      if (err.code === 'auth/invalid-email') {
-        msg = 'Invalid email address format.';
-      } else if (err.code === 'auth/user-not-found') {
-        msg = 'No account found with this email. Please sign up first.';
-      } else if (err.code === 'auth/wrong-password') {
-        msg = 'Incorrect password. Please try again.';
-      } else if (err.code === 'auth/email-already-in-use') {
-        msg = 'This email is already registered. Please sign in instead.';
-      } else if (err.code === 'auth/weak-password') {
-        msg = 'Password must be at least 6 characters long.';
-      } else if (err.code === 'auth/invalid-credential') {
-        msg = 'Invalid email or password. Please check your credentials.';
-      } else if (err.code === 'auth/network-request-failed') {
-        msg = 'Network error. Please check your connection and try again.';
-      } else if (err.code === 'auth/too-many-requests') {
-        msg = 'Too many failed attempts. Please wait a moment and try again.';
-      } else if (err.code === 'auth/user-disabled') {
-        msg = 'This account has been disabled. Please contact support.';
-      }
-      setError(msg);
+      setError(getAuthErrorMessage(err.code));
       setLoading(false);
     }
   };
