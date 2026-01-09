@@ -616,7 +616,7 @@ const AppRoutes = () => {
     }
     return () => clearTimeout(timeoutId);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [state.autoAdvance]);
+  }, [state.autoAdvance, state.feedback]);
 
   return (
     <div
