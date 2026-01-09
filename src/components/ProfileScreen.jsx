@@ -347,7 +347,6 @@ const ProfileScreen = ({ username }) => {
 
               {/* Friend Requests */}
               <div className="text-center mb-6">
-                <h2 className="text-3xl font-black">{username}</h2>
                 {equippedCosmetics.titleId && (
                   <p className="text-sm font-bold text-sky-500 uppercase tracking-widest mt-1">
                     {cosmetics.titles.find(t => t.id === equippedCosmetics.titleId)?.name ||

@@ -39,13 +39,29 @@ export const ensureUserProfile = async (usernameInput, uid = null, additionalDat
   const userRef = doc(db, USERS_COLLECTION, username);
   const userDoc = await getDoc(userRef);
 
+  // CHECK EXISTING BY EMAIL FIRST (if new username provided but email exists)
+  // This prevents creating a duplicate user if they sign in with same email but different provider/name
+  if (additionalData.email && !userDoc.exists()) {
+    const existingUser = await getUserByEmail(additionalData.email);
+    if (existingUser) {
+      // User exists with this email but different username.
+      // We should probably return the EXISTING user profile instead of creating a new one.
+      // Or we could trigger a merge, but for now let's return the existing one to prevent duplication.
+      // eslint-disable-next-line no-console
+      console.log(
+        `[Auth] Found existing user by email ${additionalData.email}: ${existingUser.username}`
+      );
+      return existingUser;
+    }
+  }
+
   if (!userDoc.exists()) {
     // Create new user profile
     const now = Timestamp.now();
     const profileData = {
       username,
       uid: uid, // Store Firebase Auth UID for permissions
-      email: additionalData.email || null, // Store email for admin lookup
+      email: additionalData.email ? additionalData.email.toLowerCase().trim() : null, // Normalize email
       realName: additionalData.realName || '',
       avatarId: additionalData.avatarId || Math.floor(Math.random() * 20) + 1,
       joinedAt: now,
@@ -88,7 +104,8 @@ export const ensureUserProfile = async (usernameInput, uid = null, additionalDat
 
   // 1. Critical Identifiers
   if (uid && data.uid !== uid) updates.uid = uid;
-  if (additionalData.email && !data.email) updates.email = additionalData.email;
+  if (additionalData.email && !data.email)
+    updates.email = additionalData.email.toLowerCase().trim();
 
   // 2. Dates
   if (!data.createdAt && data.joinedAt) updates.createdAt = data.joinedAt;
@@ -111,6 +128,10 @@ export const ensureUserProfile = async (usernameInput, uid = null, additionalDat
     };
   }
 
+  // 5. Init Games Played if missing
+  if (data.gamesPlayed === undefined) updates.gamesPlayed = 0;
+  if (data.bestScore === undefined) updates.bestScore = 0;
+
   // Apply updates if needed
   if (Object.keys(updates).length > 0) {
     await updateDoc(userRef, updates);
@@ -121,16 +142,16 @@ export const ensureUserProfile = async (usernameInput, uid = null, additionalDat
 };
 
 /**
- * Look up a user profile by email address.
- * Used during registration to prevent duplicate accounts.
+ * Look up a user profile by email address, case-insensitive.
  *
  * @param {string} email
  * @returns {Promise<{username: string, ...}|null>}
  */
 export const getUserByEmail = async email => {
   if (!email) return null;
+  const cleanEmail = email.toLowerCase().trim();
   try {
-    const q = query(collection(db, USERS_COLLECTION), where('email', '==', email), limit(1));
+    const q = query(collection(db, USERS_COLLECTION), where('email', '==', cleanEmail), limit(1));
     const snapshot = await getDocs(q);
     if (!snapshot.empty) {
       const doc = snapshot.docs[0];

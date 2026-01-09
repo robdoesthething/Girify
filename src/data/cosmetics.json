@@ -30,19 +30,52 @@
       "id": "title_explorer",
       "name": "Street Explorer",
       "cost": 25,
-      "prefix": "🧭"
+      "prefix": "🧭",
+      "flavorText": "The journey of a thousand miles begins with a single step. Or in this case, a single tap.",
+      "image": "/giuro.png"
     },
     {
       "id": "title_master",
       "name": "Street Master",
       "cost": 100,
-      "prefix": "🎓"
+      "prefix": "🎓",
+      "flavorText": "You don't just know the streets; you are the streets.",
+      "image": "/giuro.png"
     },
     {
       "id": "title_legend",
       "name": "Barcelona Legend",
       "cost": 200,
-      "prefix": "👑"
+      "prefix": "👑",
+      "flavorText": "They'll build statues of you. Or at least name a small alley after you.",
+      "image": "/giuro.png"
+    },
+    {
+      "id": "merit_supporter",
+      "name": "Early Supporter",
+      "cost": 500,
+      "prefix": "💖",
+      "description": "Show your support for the game.",
+      "flavorText": "You were here when we were just a map and a dream. Thank you!",
+      "image": "/giuro.png"
+    },
+    {
+      "id": "merit_contributor",
+      "name": "Top Contributor",
+      "cost": 1000,
+      "prefix": "🏗️",
+      "description": "For those who give back.",
+      "flavorText": "Your feedback shapes the city. You are a true architect of Girify.",
+      "image": "/giuro.png"
+    },
+    {
+      "id": "merit_vip",
+      "name": "VIP Status",
+      "cost": 5000,
+      "prefix": "⚜️",
+      "description": "The ultimate flex.",
+      "flavorText": "Access to absolutely nothing extra, but you look cool doing it.",
+      "image": "/giuro.png"
     }
   ],
   "badges": [
@@ -155,42 +188,9 @@
     {
       "id": "handle_change",
       "name": "Change Handle",
-      "cost": 50,
+      "cost": 10000,
       "description": "Change your username once",
       "consumable": true
-    },
-    {
-      "id": "custom_avatar",
-      "name": "Custom Avatar",
-      "cost": 75,
-      "description": "Upload a custom profile picture",
-      "consumable": false
-    }
-  ],
-  "merits": [
-    {
-      "id": "merit_supporter",
-      "name": "Early Supporter",
-      "cost": 500,
-      "description": "Show your support for the game.",
-      "flavorText": "You were here when we were just a map and a dream. Thank you!",
-      "image": "/giuro.png"
-    },
-    {
-      "id": "merit_contributor",
-      "name": "Top Contributor",
-      "cost": 1000,
-      "description": "For those who give back.",
-      "flavorText": "Your feedback shapes the city. You are a true architect of Girify.",
-      "image": "/giuro.png"
-    },
-    {
-      "id": "merit_vip",
-      "name": "VIP Status",
-      "cost": 5000,
-      "description": "The ultimate flex.",
-      "flavorText": "Access to absolutely nothing extra, but you look cool doing it.",
-      "image": "/giuro.png"
     }
   ]
 }
