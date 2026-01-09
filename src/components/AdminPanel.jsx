@@ -3,6 +3,7 @@ import { useTheme } from '../context/ThemeContext';
 import { getAllUsers, getFeedbackList, updateUserAsAdmin } from '../utils/social';
 // eslint-disable-next-line no-unused-vars
 import { motion, AnimatePresence } from 'framer-motion';
+import { ACHIEVEMENT_BADGES } from '../data/achievements';
 
 const MetricCard = ({ title, value, color }) => {
   const { theme } = useTheme();
@@ -123,6 +124,7 @@ const AdminPanel = () => {
       giuros: Number(editingUser.giuros),
       gamesPlayed: Number(editingUser.gamesPlayed),
       bestScore: Number(editingUser.bestScore),
+      purchasedCosmetics: editingUser.purchasedCosmetics || [],
     };
 
     // Check if username changed (requires migration)
@@ -842,6 +844,91 @@ const AdminPanel = () => {
                       className="w-full p-3 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700"
                     />
                   </div>
+                </div>
+
+                {/* Badge Management */}
+                <div>
+                  <label
+                    htmlFor="badge-list"
+                    className="text-xs uppercase font-bold opacity-50 block mb-2"
+                  >
+                    Badges (click to remove)
+                  </label>
+                  <div
+                    id="badge-list"
+                    role="group"
+                    aria-label="Current badges"
+                    className="flex flex-wrap gap-2 mb-3 min-h-[40px] p-2 bg-slate-100 dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700"
+                  >
+                    {(editingUser.purchasedCosmetics || [])
+                      .filter(id => id.startsWith('badge_'))
+                      .map(badgeId => {
+                        const badge = ACHIEVEMENT_BADGES.find(b => b.id === badgeId);
+                        return (
+                          <button
+                            key={badgeId}
+                            type="button"
+                            onClick={() => {
+                              const newCosmetics = (editingUser.purchasedCosmetics || []).filter(
+                                id => id !== badgeId
+                              );
+                              setEditingUser({ ...editingUser, purchasedCosmetics: newCosmetics });
+                            }}
+                            className="px-3 py-1 bg-amber-500/20 text-amber-600 dark:text-amber-400 rounded-full text-xs font-bold hover:bg-red-500 hover:text-white transition-colors flex items-center gap-1"
+                            title={`Remove ${badge?.name || badgeId}`}
+                          >
+                            <span>{badge?.emoji || '🏅'}</span>
+                            <span>{badge?.name || badgeId}</span>
+                            <span className="ml-1 opacity-50">×</span>
+                          </button>
+                        );
+                      })}
+                    {!(editingUser.purchasedCosmetics || []).some(id =>
+                      id.startsWith('badge_')
+                    ) && <span className="text-sm opacity-50 italic">No badges</span>}
+                  </div>
+
+                  <label
+                    htmlFor="add-badge-select"
+                    className="text-xs uppercase font-bold opacity-50 block mb-2"
+                  >
+                    Add Badge
+                  </label>
+                  <select
+                    id="add-badge-select"
+                    onChange={e => {
+                      const badgeId = e.target.value;
+                      if (!badgeId) return;
+                      const current = editingUser.purchasedCosmetics || [];
+                      if (!current.includes(badgeId)) {
+                        setEditingUser({
+                          ...editingUser,
+                          purchasedCosmetics: [...current, badgeId],
+                        });
+                      }
+                      e.target.value = ''; // Reset dropdown
+                    }}
+                    className="w-full p-3 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700"
+                    defaultValue=""
+                  >
+                    <option value="">Select a badge to add...</option>
+                    {ACHIEVEMENT_BADGES.filter(
+                      b =>
+                        b.type === 'shop' && !(editingUser.purchasedCosmetics || []).includes(b.id)
+                    ).map(badge => (
+                      <option key={badge.id} value={badge.id}>
+                        {badge.emoji} {badge.name} ({badge.cost} Giuros)
+                      </option>
+                    ))}
+                    {ACHIEVEMENT_BADGES.filter(
+                      b =>
+                        b.type === 'merit' && !(editingUser.purchasedCosmetics || []).includes(b.id)
+                    ).map(badge => (
+                      <option key={badge.id} value={badge.id}>
+                        {badge.emoji} {badge.name} (Merit)
+                      </option>
+                    ))}
+                  </select>
                 </div>
 
                 <div className="flex gap-3 pt-4">
