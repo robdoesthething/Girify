@@ -41,41 +41,37 @@ const NewsScreen = ({ onClose, username }) => {
   };
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: -20 }}
-      className={`fixed inset-0 z-[5000] pt-12 overflow-y-auto ${
-        theme === 'dark' ? 'bg-slate-900 text-white' : 'bg-slate-50 text-slate-900'
+    <div
+      className={`fixed inset-0 z-[8000] flex flex-col pt-16 pb-6 px-4 md:px-8 overflow-hidden pointer-events-auto backdrop-blur-md ${
+        theme === 'dark' ? 'bg-neutral-950 text-white' : 'bg-slate-50 text-slate-900'
       }`}
     >
-      <div className="max-w-2xl mx-auto p-6">
-        {/* Header */}
-        <div className="flex items-center justify-between mb-8">
-          <div>
-            <h1 className="text-3xl font-black">{t('news') || 'News'}</h1>
-            <p className="text-sm opacity-60">
-              {t('latestUpdates') || 'Latest updates and announcements'}
-            </p>
-          </div>
-          <button
-            onClick={onClose}
-            className={`p-2 rounded-xl ${
-              theme === 'dark' ? 'hover:bg-slate-800' : 'hover:bg-slate-200'
-            } transition-colors`}
-          >
-            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M6 18L18 6M6 6l12 12"
-              />
-            </svg>
-          </button>
-        </div>
+      {/* Header */}
+      <div className="flex items-center justify-between max-w-2xl mx-auto w-full mb-8 shrink-0 relative">
+        <button
+          onClick={onClose}
+          className="flex items-center gap-2 text-sm font-bold opacity-60 hover:opacity-100 transition-opacity z-10"
+        >
+          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M15 19l-7-7 7-7"
+            />
+          </svg>
+          {t('back') || 'Back'}
+        </button>
 
-        {/* Content */}
+        <h2 className="text-xl font-black tracking-tight absolute left-1/2 transform -translate-x-1/2">
+          {t('news') || 'News'}
+        </h2>
+
+        {/* Empty div for flex spacing */}
+        <div className="w-16"></div>
+      </div>
+
+      <div className="flex-1 overflow-y-auto max-w-2xl mx-auto w-full pb-8">
         {loading ? (
           <div className="flex items-center justify-center py-20">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-sky-500" />
@@ -88,23 +84,26 @@ const NewsScreen = ({ onClose, username }) => {
           </div>
         ) : (
           <div className="space-y-6">
+            <p className="text-center text-sm opacity-50 mb-6 uppercase tracking-widest font-bold">
+              {t('latestUpdates') || 'Latest updates and announcements'}
+            </p>
             {announcements.map(announcement => (
               <motion.article
                 key={announcement.id}
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 className={`p-6 rounded-2xl border ${
-                  theme === 'dark' ? 'bg-slate-800 border-slate-700' : 'bg-white border-slate-200'
+                  theme === 'dark' ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200'
                 } shadow-sm`}
               >
                 <div className="flex items-start justify-between mb-3">
                   <h2 className="text-xl font-bold">{announcement.title}</h2>
-                  <span className="text-xs opacity-50 whitespace-nowrap ml-4">
+                  <span className="text-xs opacity-50 whitespace-nowrap ml-4 font-bold uppercase tracking-wider">
                     {formatDate(announcement.publishDate)}
                   </span>
                 </div>
                 <div
-                  className="prose prose-sm dark:prose-invert max-w-none opacity-80"
+                  className="prose prose-sm dark:prose-invert max-w-none opacity-80 leading-relaxed"
                   dangerouslySetInnerHTML={{ __html: announcement.body.replace(/\n/g, '<br />') }}
                 />
               </motion.article>
@@ -112,7 +111,7 @@ const NewsScreen = ({ onClose, username }) => {
           </div>
         )}
       </div>
-    </motion.div>
+    </div>
   );
 };
 
