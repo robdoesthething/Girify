@@ -143,6 +143,40 @@ export const getUserByEmail = async email => {
   }
 };
 
+/**
+ * Update user stats after a game (Streak, Total Score, etc.)
+ * @param {string} username
+ * @param {object} stats - { streak, totalScore, lastPlayDate }
+ */
+export const updateUserGameStats = async (username, { streak, totalScore, lastPlayDate }) => {
+  if (!username) return;
+  const lowername = username.toLowerCase();
+  const userRef = doc(db, USERS_COLLECTION, lowername);
+
+  try {
+    const userDoc = await getDoc(userRef);
+    if (!userDoc.exists()) return;
+
+    const currentData = userDoc.data();
+    const updates = {
+      gamesPlayed: (currentData.gamesPlayed || 0) + 1,
+      totalScore: totalScore,
+      streak: streak,
+      lastPlayDate: lastPlayDate,
+      updatedAt: Timestamp.now(),
+    };
+
+    // Update Max Streak if current is higher
+    if (streak > (currentData.maxStreak || 0)) {
+      updates.maxStreak = streak;
+    }
+
+    await updateDoc(userRef, updates);
+  } catch (e) {
+    console.error('Error updating game stats:', e);
+  }
+};
+
 // --- ADMIN & FEEDBACK FUNCTIONS ---
 
 const FEEDBACK_COLLECTION = 'feedback';
