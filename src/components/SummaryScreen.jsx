@@ -3,13 +3,12 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { getCuriosityByStreets } from '../data/curiosities';
 import { fetchWikiImage } from '../utils/wiki';
-import FeedbackModal from './FeedbackModal';
+import { useNavigate } from 'react-router-dom';
 
 const SummaryScreen = ({ score, total, theme, username, onRestart, quizStreets, t }) => {
-  // 1/7 chance to show feedback instead of curiosity
-  const [showFeedbackRequest] = useState(() => true); // FORCING FOR VERIFICATION
-
-  const [view, setView] = useState(() => (showFeedbackRequest ? 'feedback' : 'curiosity'));
+  const navigate = useNavigate();
+  // Always show curiosities first, then actions
+  const [view, setView] = useState('curiosity');
 
   const maxPossibleScore = total * 100;
   const curiosity = useMemo(() => getCuriosityByStreets(quizStreets), [quizStreets]);
@@ -62,30 +61,7 @@ const SummaryScreen = ({ score, total, theme, username, onRestart, quizStreets, 
       className={`absolute inset-0 flex flex-col items-center justify-center p-6 text-center backdrop-blur-md transition-colors duration-500 pointer-events-auto overflow-y-auto
             ${theme === 'dark' ? 'bg-slate-900/95 text-white' : 'bg-slate-50/95 text-slate-800'}`}
     >
-      {/* Feedback Screen (Substitutive of Curiosity) */}
-      {view === 'feedback' && (
-        <motion.div
-          initial={{ opacity: 0, scale: 0.9 }}
-          animate={{ opacity: 1, scale: 1 }}
-          className="flex flex-col items-center max-w-md w-full relative z-20" // z-20 to ensure it sits above map if needed
-        >
-          <FeedbackModal
-            isOpen={true}
-            onClose={() => handleNext()}
-            username={username}
-            inline={true} // New prop to render inline without modal overlay if needed, or just reusing component
-          />
-          {/* Fallback Next button if user wants to skip without interacting with modal form explicitly */}
-          <button
-            onClick={handleNext}
-            className="mt-4 text-sm font-bold opacity-60 hover:opacity-100 underline"
-          >
-            {t('skip') || 'Skip'}
-          </button>
-        </motion.div>
-      )}
-
-      {/* Curiosity Screen - Shows ONLY if Feedback is NOT shown */}
+      {/* Curiosity Screen */}
       {view === 'curiosity' && (
         <motion.div
           initial={{ opacity: 0, scale: 0.9 }}
@@ -156,6 +132,14 @@ const SummaryScreen = ({ score, total, theme, username, onRestart, quizStreets, 
                bg-slate-900 text-white hover:bg-black hover:scale-105 shadow-xl border-2 border-slate-700 dark:border-slate-500"
           >
             🔄 {t('playAgain') || 'Play Again'}
+          </button>
+
+          {/* Feedback Link */}
+          <button
+            onClick={() => navigate('/feedback')}
+            className="mt-4 text-sm opacity-60 hover:opacity-100 hover:text-sky-500 transition-all"
+          >
+            📝 {t('haveFeedback') || 'Have feedback? Share your ideas'}
           </button>
         </motion.div>
       )}
