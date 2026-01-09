@@ -7,6 +7,7 @@ import { getFriendCount, getUserProfile, updateUserProfile } from '../utils/soci
 import { getGiuros, getEquippedCosmetics } from '../utils/giuros';
 import cosmetics from '../data/cosmetics.json';
 import { getUnlockedAchievements, getNextAchievement } from '../data/achievements';
+import { calculateStreak } from '../utils/stats';
 import FriendRequests from './FriendRequests';
 import TopBar from './TopBar';
 import PropTypes from 'prop-types';
@@ -33,68 +34,6 @@ const AVATARS = [
   '🦆',
   '🦅',
 ];
-
-const calculateStreak = history => {
-  if (!history || history.length === 0) return 0;
-
-  // Sort by date descending
-  const sorted = [...history].sort((a, b) => b.date - a.date);
-
-  // Get today's date seed (YYYYMMDD format)
-  const today = new Date();
-  const getSeed = d =>
-    parseInt(
-      `${d.getFullYear()}${String(d.getMonth() + 1).padStart(2, '0')}${String(d.getDate()).padStart(2, '0')}`
-    );
-
-  const todaySeed = getSeed(today);
-
-  // Calculate yesterday seed for grace period check
-  const yesterday = new Date(today);
-  yesterday.setDate(yesterday.getDate() - 1);
-  const yesterdaySeed = getSeed(yesterday);
-
-  let streak = 0;
-  // If we haven't played today, we check if we played yesterday to continue streak
-  // But if we played today, we start counting from today
-  const lastPlayed = sorted[0].date;
-
-  // Grace period logic:
-  // If last game was today, streak is valid.
-  // If last game was yesterday, streak is valid (but current streak count doesn't increase until today is played,
-  // OR we count yesterday's streak. The user wants to NOT lose streak.
-  // Usually streak = consecutive days up to now.
-  // If I played yesterday, my streak is N. If I play today, it becomes N+1.
-  // If I don't play today, it remains N until midnight, then becomes 0?
-  // The request says "Streak should only be lost after a day has passed without completing".
-  // So if I played yesterday (Seed Y), and today is Seed T.
-  // If I haven't played T yet, my streak is determined by the chain ending at Y.
-
-  let expectedDate = lastPlayed === todaySeed ? todaySeed : yesterdaySeed;
-
-  // If the last played game is OLDER than yesterday, streak is broken -> 0
-  if (lastPlayed < yesterdaySeed) return 0;
-
-  // Otherwise, count backwards from the last valid game (today or yesterday)
-  for (const record of sorted) {
-    if (record.date === expectedDate) {
-      streak++;
-      // Move expected to previous day
-      // We need to decode the seed to subtract a day safely
-      const year = Math.floor(expectedDate / 10000);
-      const month = Math.floor((expectedDate % 10000) / 100);
-      const day = expectedDate % 100;
-      const d = new Date(year, month - 1, day); // month is 0-indexed in Date
-      d.setDate(d.getDate() - 1);
-      expectedDate = getSeed(d);
-    } else if (record.date < expectedDate) {
-      // Gap found
-      break;
-    }
-  }
-
-  return streak;
-};
 
 const ProfileScreen = ({ username }) => {
   const { theme, t } = useTheme();
@@ -189,7 +128,7 @@ const ProfileScreen = ({ username }) => {
   const totalGames = allHistory.length; // Use ALL games, not just unique days
   const bestScore = totalGames > 0 ? Math.max(...allHistory.map(h => (h && h.score) || 0)) : 0;
   const totalScore = allHistory.reduce((acc, curr) => acc + ((curr && curr.score) || 0), 0);
-  const avgScore = totalGames > 0 ? Math.round(totalScore / totalGames) : 0;
+  // const avgScore = totalGames > 0 ? Math.round(totalScore / totalGames) : 0; // Unused
   const dailyStreak = calculateStreak(uniqueHistory); // Use unique days for streak
 
   // Achievement badges
@@ -412,15 +351,20 @@ const ProfileScreen = ({ username }) => {
               <div className="grid grid-cols-5 gap-4 mb-8">
                 <div className="flex flex-col items-center p-3 rounded-2xl bg-orange-500/10 dark:bg-orange-500/5">
                   <span className="text-2xl mb-1">🔥</span>
-                  <span className="text-xl font-black text-orange-500">{dailyStreak}</span>
-                  <span className="text-[9px] uppercase font-bold text-slate-400 tracking-wider">
+                  <div className="flex flex-col items-center leading-none">
+                    <span className="text-xl font-black text-orange-500">{dailyStreak}</span>
+                    <span className="text-[10px] font-bold opacity-50">
+                      Max: {Math.max(dailyStreak, profileData?.maxStreak || 0)}
+                    </span>
+                  </div>
+                  <span className="text-[9px] uppercase font-bold text-slate-400 tracking-wider mt-1">
                     {t('streak')}
                   </span>
                 </div>
                 <div className="flex flex-col items-center p-3 rounded-2xl bg-purple-500/10 dark:bg-purple-500/5">
                   <span className="text-2xl mb-1">👥</span>
                   <span className="text-xl font-black text-purple-500">{friendCount}</span>
-                  <span className="text-[9px] uppercase font-bold text-slate-400 tracking-wider">
+                  <span className="text-[9px] uppercase font-bold text-slate-400 tracking-wider mt-1">
                     {t('friends')}
                   </span>
                 </div>
@@ -429,22 +373,24 @@ const ProfileScreen = ({ username }) => {
                   <span className="text-xl font-black text-slate-700 dark:text-slate-200">
                     {totalGames}
                   </span>
-                  <span className="text-[9px] uppercase font-bold text-slate-400 tracking-wider">
+                  <span className="text-[9px] uppercase font-bold text-slate-400 tracking-wider mt-1">
                     {t('games')}
                   </span>
                 </div>
                 <div className="flex flex-col items-center p-3 rounded-2xl bg-emerald-500/10 dark:bg-emerald-500/5">
                   <span className="text-2xl mb-1">🏆</span>
                   <span className="text-xl font-black text-emerald-500">{bestScore}</span>
-                  <span className="text-[9px] uppercase font-bold text-slate-400 tracking-wider">
+                  <span className="text-[9px] uppercase font-bold text-slate-400 tracking-wider mt-1">
                     {t('best')}
                   </span>
                 </div>
                 <div className="flex flex-col items-center p-3 rounded-2xl bg-sky-500/10 dark:bg-sky-500/5">
-                  <span className="text-2xl mb-1">📊</span>
-                  <span className="text-xl font-black text-sky-500">{avgScore}</span>
-                  <span className="text-[9px] uppercase font-bold text-slate-400 tracking-wider">
-                    {t('avg')}
+                  <span className="text-2xl mb-1">⚡️</span>
+                  <span className="text-xl font-black text-sky-500">
+                    {totalScore >= 1000 ? `${(totalScore / 1000).toFixed(1)}k` : totalScore}
+                  </span>
+                  <span className="text-[9px] uppercase font-bold text-slate-400 tracking-wider mt-1">
+                    Total
                   </span>
                 </div>
               </div>

@@ -3,20 +3,50 @@ import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTheme } from '../context/ThemeContext';
 import { useNotifications } from '../hooks/useNotifications';
+import { getUserProfile, updateUserProfile } from '../utils/social';
 import PropTypes from 'prop-types';
 
 const SettingsScreen = ({ onClose, onLogout, autoAdvance, setAutoAdvance, username }) => {
-  const { theme, language, changeLanguage, languages, t } = useTheme();
+  const { theme, themeMode, changeTheme, language, changeLanguage, languages, t } = useTheme();
 
   // Use Notifications Hook
-  const { isSupported, isIOS, permission, requestPermission } = useNotifications();
-  const [notificationsEnabled, setNotificationsEnabled] = React.useState(permission === 'granted');
+  const { isSupported, isIOS, requestPermission } = useNotifications();
+  // const [notificationsEnabled, setNotificationsEnabled] = React.useState(permission === 'granted'); // Unused
   const [isAdmin, setIsAdmin] = React.useState(false);
   const [devTapCount, setDevTapCount] = React.useState(0);
 
-  React.useEffect(() => {
+  // User Profile Settings
+  const [profileSettings, setProfileSettings] = React.useState({
+    notificationSettings: {
+      dailyReminder: true,
+      friendActivity: true,
+      newsUpdates: true,
+    },
+  });
+
+  /* React.useEffect(() => {
     setNotificationsEnabled(permission === 'granted');
-  }, [permission]);
+  }, [permission]); */
+
+  // Load Profile Settings
+  React.useEffect(() => {
+    if (username) {
+      getUserProfile(username).then(profile => {
+        if (profile) {
+          setProfileSettings({
+            notificationSettings: profile.notificationSettings || {
+              dailyReminder: true,
+              friendActivity: true,
+              newsUpdates: true,
+            },
+          });
+          // Also sync theme if different? ThemeContext handles local preference,
+          // but valid to sync if user logs in on new device.
+          // For now we let local preference override OR sync if explicitly set.
+        }
+      });
+    }
+  }, [username]);
 
   const handleVersionClick = () => {
     if (isAdmin) return;
@@ -178,6 +208,40 @@ const SettingsScreen = ({ onClose, onLogout, autoAdvance, setAutoAdvance, userna
           </div>
 
           {/* Appearance */}
+          <div className="space-y-4">
+            <h3 className="text-sm font-bold uppercase tracking-wider opacity-50">
+              {t('appearance') || 'Appearance'}
+            </h3>
+            <div
+              className={`p-1.5 rounded-xl border flex ${theme === 'dark' ? 'border-slate-800 bg-slate-800/50' : 'border-slate-100 bg-slate-50'}`}
+            >
+              {[
+                { id: 'light', icon: '☀️', label: 'Light' },
+                { id: 'dark', icon: '🌙', label: 'Dark' },
+                { id: 'auto', icon: '⚙️', label: 'System' },
+              ].map(mode => (
+                <button
+                  key={mode.id}
+                  onClick={() => {
+                    changeTheme(mode.id);
+                    if (username) {
+                      updateUserProfile(username, { theme: mode.id });
+                    }
+                  }}
+                  className={`flex-1 py-2 rounded-lg text-sm font-bold flex items-center justify-center gap-2 transition-all
+                    ${
+                      themeMode === mode.id
+                        ? 'bg-white dark:bg-slate-700 text-sky-500 shadow-sm'
+                        : 'text-slate-500 hover:text-slate-900 dark:hover:text-slate-300'
+                    }
+                  `}
+                >
+                  <span className="text-lg">{mode.icon}</span>
+                  {mode.label}
+                </button>
+              ))}
+            </div>
+          </div>
 
           {/* Gameplay */}
           <div className="space-y-4">
@@ -216,70 +280,122 @@ const SettingsScreen = ({ onClose, onLogout, autoAdvance, setAutoAdvance, userna
 
           {/* Notifications - Mobile Only */}
 
+          {/* Notifications */}
           <div className="space-y-4">
             <h3 className="text-sm font-bold uppercase tracking-wider opacity-50">Notifications</h3>
             <div
-              className={`flex items-center justify-between p-4 rounded-xl border ${theme === 'dark' ? 'border-slate-800 bg-slate-800/50' : 'border-slate-100 bg-slate-50'}`}
+              className={`flex flex-col gap-1 p-2 rounded-xl border ${theme === 'dark' ? 'border-slate-800 bg-slate-800/50' : 'border-slate-100 bg-slate-50'}`}
             >
-              <div className="flex items-center gap-3">
-                <div
-                  className={`p-2 rounded-full ${theme === 'dark' ? 'bg-amber-500/20 text-amber-400' : 'bg-amber-100 text-amber-600'}`}
-                >
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              {[
+                {
+                  id: 'dailyReminder',
+                  label: 'Daily Reminders',
+                  icon: (
                     <path
                       strokeLinecap="round"
                       strokeLinejoin="round"
                       strokeWidth={2}
                       d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"
                     />
-                  </svg>
-                </div>
-                <span className="font-medium">Daily Reminders</span>
-              </div>
-              <button
-                onClick={async () => {
-                  if (!isSupported) {
-                    if (isIOS) {
+                  ),
+                  color: 'amber',
+                },
+                {
+                  id: 'friendActivity',
+                  label: 'Friend Activity',
+                  icon: (
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"
+                    />
+                  ),
+                  color: 'purple',
+                },
+                {
+                  id: 'newsUpdates',
+                  label: 'News & Updates',
+                  icon: (
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z"
+                    />
+                  ),
+                  color: 'blue',
+                },
+              ].map(item => {
+                const isEnabled = profileSettings.notificationSettings?.[item.id] ?? true;
+
+                const handleToggle = async () => {
+                  // Special logic for Daily Reminder (Permission)
+                  if (item.id === 'dailyReminder') {
+                    if (!isSupported) {
                       // eslint-disable-next-line no-alert
-                      alert('Notifications are not available on iPhone for this web app.');
-                    } else {
-                      // eslint-disable-next-line no-alert
-                      alert('Notifications are not supported in this browser.');
+                      alert('Notifications not supported on this device.');
+                      return;
                     }
-                    return;
-                  }
-                  if (notificationsEnabled) {
-                    // We cannot really "unsubscribe" easily from client without backend,
-                    // but we can toggle UI state or reset permission (not possible in JS).
-                    // Best we can do is just tell them content.
-                    // eslint-disable-next-line no-alert
-                    alert(
-                      'To disable notifications, please reset permissions in your browser settings.'
-                    );
-                  } else {
-                    const granted = await requestPermission();
-                    if (granted) {
-                      setNotificationsEnabled(true);
-                      // eslint-disable-next-line no-alert
-                      alert('Notifications enabled! You will receive daily reminders.');
+                    if (!isEnabled) {
+                      // Turning ON
+                      const granted = await requestPermission();
+                      if (!granted) {
+                        // eslint-disable-next-line no-alert
+                        alert('Permission blocked. Please enable in browser settings.');
+                        return;
+                      }
+                      // setNotificationsEnabled(true);
                     } else {
-                      // eslint-disable-next-line no-alert
-                      alert(
-                        'Notifications were blocked. Please enable them in your browser settings.'
-                      );
+                      // Turning OFF (just update pref)
+                      // setNotificationsEnabled(false);
+                      // Since we can't revoke perm, we just stop sending via backend logic check
                     }
                   }
-                }}
-                className={`w-12 h-7 rounded-full transition-colors relative ${notificationsEnabled ? 'bg-emerald-500' : 'bg-slate-300'} ${!isSupported ? 'opacity-50 cursor-not-allowed' : ''}`}
-              >
-                <div
-                  className={`absolute top-1 w-5 h-5 rounded-full bg-white transition-all shadow-sm ${notificationsEnabled ? 'left-6' : 'left-1'}`}
-                />
-              </button>
+
+                  // Update State & Profile
+                  const newSettings = {
+                    ...profileSettings.notificationSettings,
+                    [item.id]: !isEnabled,
+                  };
+                  setProfileSettings(prev => ({ ...prev, notificationSettings: newSettings }));
+                  if (username) {
+                    await updateUserProfile(username, { notificationSettings: newSettings });
+                  }
+                };
+
+                return (
+                  <div key={item.id} className="flex items-center justify-between p-2">
+                    <div className="flex items-center gap-3">
+                      <div
+                        className={`p-2 rounded-full ${theme === 'dark' ? `bg-${item.color}-500/20 text-${item.color}-400` : `bg-${item.color}-100 text-${item.color}-600`}`}
+                      >
+                        <svg
+                          className="w-5 h-5"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          {item.icon}
+                        </svg>
+                      </div>
+                      <span className="font-medium">{item.label}</span>
+                    </div>
+                    <button
+                      onClick={handleToggle}
+                      className={`w-12 h-7 rounded-full transition-colors relative ${isEnabled ? 'bg-emerald-500' : 'bg-slate-300'}`}
+                    >
+                      <div
+                        className={`absolute top-1 w-5 h-5 rounded-full bg-white transition-all shadow-sm ${isEnabled ? 'left-6' : 'left-1'}`}
+                      />
+                    </button>
+                  </div>
+                );
+              })}
             </div>
             {isIOS && (
               <p className="px-4 pb-2 text-xs text-rose-500 text-right -mt-3">
-                Not available on iPhone
+                Daily reminders not reliable on iPhone PWA
               </p>
             )}
           </div>

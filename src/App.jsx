@@ -34,7 +34,9 @@ import {
   healMigration,
   updateUserProfile,
   getReferrer,
+  updateUserGameStats,
 } from './utils/social';
+import { calculateStreak } from './utils/stats';
 import { claimDailyLoginBonus, awardChallengeBonus, awardReferralBonus } from './utils/giuros';
 import { gameReducer, initialState } from './reducers/gameReducer';
 import { auth } from './firebase';
@@ -306,10 +308,15 @@ const AppRoutes = () => {
 
             // Award giuros for completing the daily challenge
             const historyForStreak = JSON.parse(localStorage.getItem('girify_history') || '[]');
-            const streak = historyForStreak.filter((h, i, arr) => {
-              // Simple streak calculation for bonus
-              return arr.findIndex(x => x.date === h.date) === i;
-            }).length;
+            const streak = calculateStreak(historyForStreak);
+
+            // Sync stats to Firestore
+            const totalScore = historyForStreak.reduce((acc, h) => acc + (h.score || 0), 0);
+            updateUserGameStats(state.username, {
+              streak,
+              totalScore,
+              lastPlayDate: getTodaySeed(),
+            });
             awardChallengeBonus(state.username, streak).then(result => {
               // eslint-disable-next-line no-console
               console.log(`[Giuros] Challenge bonus: +${result.bonus}`);

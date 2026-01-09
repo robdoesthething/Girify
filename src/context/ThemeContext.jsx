@@ -24,8 +24,46 @@ export const useTheme = () => {
 };
 
 export const ThemeProvider = ({ children }) => {
-  // Theme: 'light' | 'dark' - Forced to light for now
-  const [theme, setTheme] = useState('light');
+  // Theme: 'light' | 'dark' | 'auto'
+  const [themeMode, setThemeMode] = useState(() => {
+    return localStorage.getItem('girify_theme_mode') || 'auto';
+  });
+
+  const [theme, setTheme] = useState('light'); // Actual resolved theme
+
+  // Resolve Auto theme
+  useEffect(() => {
+    const resolveTheme = () => {
+      if (themeMode === 'auto') {
+        return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+      }
+      return themeMode;
+    };
+
+    const newTheme = resolveTheme();
+    // Only update if changed to avoid cascading renders warning
+    if (newTheme !== theme) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setTheme(newTheme);
+    }
+    document.documentElement.setAttribute('class', newTheme);
+    localStorage.setItem('girify_theme_mode', themeMode); // Persist preference
+  }, [themeMode, theme]);
+
+  // Listen for system changes if auto
+  useEffect(() => {
+    if (themeMode !== 'auto') return;
+    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+    const handleChange = e => {
+      if (themeMode === 'auto') {
+        const newTheme = e.matches ? 'dark' : 'light';
+        setTheme(newTheme);
+        document.documentElement.setAttribute('class', newTheme);
+      }
+    };
+    mediaQuery.addEventListener('change', handleChange);
+    return () => mediaQuery.removeEventListener('change', handleChange);
+  }, [themeMode]);
 
   // Language: 'en' | 'es' | 'ca'
   const [language, setLanguage] = useState(() => {
@@ -59,9 +97,13 @@ export const ThemeProvider = ({ children }) => {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
+  const changeTheme = mode => {
+    setThemeMode(mode);
+  };
+
+  // Deprecated single toggle, mapped to cycle
   const toggleTheme = () => {
-    // Disabled dark mode for now
-    setTheme('light');
+    setThemeMode(prev => (prev === 'light' ? 'dark' : 'light'));
   };
 
   const changeLanguage = lang => {
@@ -81,6 +123,8 @@ export const ThemeProvider = ({ children }) => {
     <ThemeContext.Provider
       value={{
         theme,
+        themeMode,
+        changeTheme,
         toggleTheme,
         deviceMode,
         zoom,

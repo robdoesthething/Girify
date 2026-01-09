@@ -558,6 +558,12 @@ const AdminPanel = () => {
                           <td className="p-4 text-sm">
                             <div>Games: {user.gamesPlayed || 0}</div>
                             <div>Best: {user.bestScore || 0}</div>
+                            <div className="text-orange-500 font-bold">
+                              Streak: {user.streak || 0}
+                            </div>
+                            <div className="opacity-70 text-xs mt-1">
+                              Total: {(user.totalScore || 0).toLocaleString()}
+                            </div>
                           </td>
                           <td className="p-4 font-mono font-bold text-yellow-500">
                             {user.giuros || 0} 🪙
@@ -765,6 +771,9 @@ const AdminPanel = () => {
                           body: '',
                           publishDate: '',
                           expiryDate: '',
+                          priority: 'normal',
+                          targetAudience: 'all',
+                          isActive: true,
                         });
                         fetchData();
                       } else {
@@ -774,24 +783,72 @@ const AdminPanel = () => {
                     }}
                     className="space-y-4"
                   >
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <label
+                          htmlFor="ann-title"
+                          className="text-xs uppercase font-bold opacity-50 block mb-1"
+                        >
+                          Title
+                        </label>
+                        <input
+                          id="ann-title"
+                          type="text"
+                          value={newAnnouncement.title}
+                          onChange={e =>
+                            setNewAnnouncement({ ...newAnnouncement, title: e.target.value })
+                          }
+                          className="w-full p-3 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700"
+                          required
+                        />
+                      </div>
+                      <div>
+                        <label
+                          htmlFor="ann-priority"
+                          className="text-xs uppercase font-bold opacity-50 block mb-1"
+                        >
+                          Priority
+                        </label>
+                        <select
+                          id="ann-priority"
+                          value={newAnnouncement.priority || 'normal'}
+                          onChange={e =>
+                            setNewAnnouncement({ ...newAnnouncement, priority: e.target.value })
+                          }
+                          className="w-full p-3 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700"
+                        >
+                          <option value="low">Low</option>
+                          <option value="normal">Normal</option>
+                          <option value="high">High</option>
+                          <option value="urgent">Urgent</option>
+                        </select>
+                      </div>
+                    </div>
+
                     <div>
                       <label
-                        htmlFor="ann-title"
+                        htmlFor="ann-target"
                         className="text-xs uppercase font-bold opacity-50 block mb-1"
                       >
-                        Title
+                        Target Audience
                       </label>
-                      <input
-                        id="ann-title"
-                        type="text"
-                        value={newAnnouncement.title}
+                      <select
+                        id="ann-target"
+                        value={newAnnouncement.targetAudience || 'all'}
                         onChange={e =>
-                          setNewAnnouncement({ ...newAnnouncement, title: e.target.value })
+                          setNewAnnouncement({
+                            ...newAnnouncement,
+                            targetAudience: e.target.value,
+                          })
                         }
-                        className="w-full p-3 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700"
-                        required
-                      />
+                        className="w-full p-3 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 mb-4"
+                      >
+                        <option value="all">All Users</option>
+                        <option value="new_users">New Users (Last 7 Days)</option>
+                        <option value="returning">Returning Users</option>
+                      </select>
                     </div>
+
                     <div>
                       <label
                         htmlFor="ann-body"
@@ -810,16 +867,16 @@ const AdminPanel = () => {
                         required
                       />
                     </div>
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="grid grid-cols-3 gap-4">
                       <div>
                         <label
-                          htmlFor="ann-publish"
+                          htmlFor="ann-pub"
                           className="text-xs uppercase font-bold opacity-50 block mb-1"
                         >
                           Publish Date
                         </label>
                         <input
-                          id="ann-publish"
+                          id="ann-pub"
                           type="datetime-local"
                           value={newAnnouncement.publishDate}
                           onChange={e =>
@@ -831,13 +888,13 @@ const AdminPanel = () => {
                       </div>
                       <div>
                         <label
-                          htmlFor="ann-expiry"
+                          htmlFor="ann-exp"
                           className="text-xs uppercase font-bold opacity-50 block mb-1"
                         >
-                          Expiry Date (optional)
+                          Expiry Date (Optional)
                         </label>
                         <input
-                          id="ann-expiry"
+                          id="ann-exp"
                           type="datetime-local"
                           value={newAnnouncement.expiryDate}
                           onChange={e =>
@@ -845,6 +902,19 @@ const AdminPanel = () => {
                           }
                           className="w-full p-3 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700"
                         />
+                      </div>
+                      <div className="flex items-end">
+                        <label className="flex items-center gap-2 p-3 w-full rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 cursor-pointer">
+                          <input
+                            type="checkbox"
+                            checked={newAnnouncement.isActive !== false}
+                            onChange={e =>
+                              setNewAnnouncement({ ...newAnnouncement, isActive: e.target.checked })
+                            }
+                            className="w-5 h-5 rounded text-sky-500"
+                          />
+                          <span className="font-bold">Active</span>
+                        </label>
                       </div>
                     </div>
                     <button
@@ -882,8 +952,31 @@ const AdminPanel = () => {
                       >
                         <div className="flex justify-between items-start mb-2">
                           <div>
-                            <h4 className="font-bold text-lg">{ann.title}</h4>
+                            <h4 className="font-bold text-lg flex items-center gap-2">
+                              {ann.title}
+                              <span
+                                className={`text-[10px] uppercase px-2 py-0.5 rounded-full ${
+                                  ann.priority === 'urgent'
+                                    ? 'bg-red-500 text-white'
+                                    : ann.priority === 'high'
+                                      ? 'bg-orange-500 text-white'
+                                      : 'bg-slate-200 text-slate-700 dark:bg-slate-700 dark:text-slate-300'
+                                }`}
+                              >
+                                {ann.priority || 'normal'}
+                              </span>
+                              {!isActive && (
+                                <span className="text-[10px] uppercase px-2 py-0.5 rounded-full bg-slate-500 text-white">
+                                  Inactive
+                                </span>
+                              )}
+                            </h4>
                             <p className="text-xs opacity-50">
+                              {ann.targetAudience && ann.targetAudience !== 'all' && (
+                                <span className="mr-2 font-bold text-sky-500 uppercase">
+                                  [{ann.targetAudience}]
+                                </span>
+                              )}
                               Publish: {publishDate} | Expires: {expiryDate}
                             </p>
                           </div>
