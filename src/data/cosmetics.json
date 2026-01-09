@@ -76,112 +76,123 @@
       "description": "The ultimate flex.",
       "flavorText": "Access to absolutely nothing extra, but you look cool doing it.",
       "image": "/giuro.png"
-    }
-  ],
-  "badges": [
+    },
     {
       "id": "badge_paellador",
       "name": "Paellador Connoisseur",
       "cost": 50,
-      "emoji": "🥘",
+      "prefix": "🥘",
       "category": "guiri_path",
-      "description": "Authentic cultural experience! Best served with neon yellow rice and frozen peas."
+      "description": "Authentic cultural experience!",
+      "flavorText": "Best served with neon yellow rice and frozen peas."
     },
     {
       "id": "badge_sangria_bucket",
       "name": "Sangria Bucket",
       "cost": 100,
-      "emoji": "🍷",
+      "prefix": "🍷",
       "category": "guiri_path",
-      "description": "1 liter of sugar and cheap wine. A sophisticated choice for a sophisticated traveler."
+      "description": "Sophisticated choice.",
+      "flavorText": "1 liter of sugar and cheap wine. A sophisticated choice for a sophisticated traveler."
     },
     {
       "id": "badge_tcasual_hoarder",
       "name": "T-Casual Hoarder",
       "cost": 200,
-      "emoji": "🎫",
+      "prefix": "🎫",
       "category": "local_path",
-      "description": "You know the struggle of the magnetic strip failing at the turnstile."
+      "description": "Metro veteran.",
+      "flavorText": "You know the struggle of the magnetic strip failing at the turnstile."
     },
     {
       "id": "badge_pigeon_whisperer",
       "name": "Pigeon Whisperer",
       "cost": 300,
-      "emoji": "🐦",
+      "prefix": "🐦",
       "category": "local_path",
-      "description": "They are the true owners of the city. You have earned their respect."
+      "description": "City wildlife expert.",
+      "flavorText": "They are the true owners of the city. You have earned their respect."
     },
     {
       "id": "badge_balcony_grandma",
       "name": "The Balcony Grandma",
       "cost": 150,
-      "emoji": "👵",
+      "prefix": "👵",
       "category": "urban_survival",
-      "description": "She sees everything. She judges everything. The ultimate security camera."
+      "description": "Neighborhood watch.",
+      "flavorText": "She sees everything. She judges everything. The ultimate security camera."
     },
     {
       "id": "badge_water_gun",
       "name": "The Water Gun Avenger",
       "cost": 500,
-      "emoji": "🔫",
+      "prefix": "🔫",
       "category": "urban_survival",
-      "description": "For when the terrace noise gets too loud. A playful weapon of distraction."
+      "description": "Terrace defender.",
+      "flavorText": "For when the terrace noise gets too loud. A playful weapon of distraction."
     },
     {
       "id": "badge_vermut_sunday",
       "name": "Vermut Sunday",
       "cost": 300,
-      "emoji": "🍸",
+      "prefix": "🍸",
       "category": "gastronomy",
-      "description": "The sacred ritual. Must be consumed standing up in a crowded doorway."
+      "description": "Sunday ritual.",
+      "flavorText": "The sacred ritual. Must be consumed standing up in a crowded doorway."
     },
     {
       "id": "badge_inflation_breakfast",
       "name": "The Inflation Breakfast",
       "cost": 800,
-      "emoji": "🥐",
+      "prefix": "🥐",
       "category": "gastronomy",
-      "description": "It costs 25 Euros, but the sourdough is artisan. You hipster."
+      "description": "Modern dining.",
+      "flavorText": "It costs 25 Euros, but the sourdough is artisan. You hipster."
     },
     {
       "id": "badge_rooftop_yoga",
       "name": "Rooftop Yoga",
       "cost": 400,
-      "emoji": "🧘",
+      "prefix": "🧘",
       "category": "digital_nomad",
-      "description": "Namaste on the terrace. Please ignore the construction noise next door."
+      "description": "Zen mode.",
+      "flavorText": "Namaste on the terrace. Please ignore the construction noise next door."
     },
     {
       "id": "badge_coworking_king",
       "name": "Coworking King",
       "cost": 1200,
-      "emoji": "💻",
+      "prefix": "💻",
       "category": "digital_nomad",
-      "description": "You work in 'Tech'. You have calls at 10. You need fast WiFi."
+      "description": "Remote worker.",
+      "flavorText": "You work in 'Tech'. You have calls at 10. You need fast WiFi."
     },
     {
       "id": "badge_pickpocket_proof",
       "name": "Pickpocket Proof",
       "cost": 1000,
-      "emoji": "💼",
+      "prefix": "💼",
       "category": "high_roller",
-      "description": "Your wallet is safe. Your dignity? Debatable."
+      "description": "Secure belongings.",
+      "flavorText": "Your wallet is safe. Your dignity? Debatable."
     },
     {
       "id": "badge_scooter_menace",
       "name": "Electric Scooter Menace",
       "cost": 2500,
-      "emoji": "🛴",
+      "prefix": "🛴",
       "category": "high_roller",
-      "description": "Sidewalks, roads, bike lanes... the world is your highway."
+      "description": "Urban mobility.",
+      "flavorText": "Sidewalks, roads, bike lanes... the world is your highway."
     },
     {
       "id": "badge_yacht_parking",
       "name": "Yacht Parking Only",
       "cost": 10000,
-      "emoji": "🛥️",
+      "prefix": "🛥️",
       "category": "high_roller",
-      "description": "You don't guess streets anymore; you buy them."
+      "description": "Luxury living.",
+      "flavorText": "You don't guess streets anymore; you buy them."
     }
   ],
   "special": [

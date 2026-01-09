@@ -175,11 +175,54 @@ const ShopScreen = ({ username }) => {
               <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-sky-500"></div>
             </div>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div
+              className={
+                activeTab === 'titles'
+                  ? 'grid grid-cols-3 gap-3 md:grid-cols-4'
+                  : 'grid grid-cols-1 sm:grid-cols-2 gap-4'
+              }
+            >
               {activeItems.map(item => {
                 const owned = isOwned(item.id);
                 const active = isEquipped(item.id);
 
+                if (activeTab === 'titles') {
+                  // TITLES / BADGES as CIRCLES
+                  return (
+                    <button
+                      key={item.id}
+                      onClick={() => setFlavorModal(item)}
+                      className={`relative aspect-square rounded-full border-2 flex flex-col items-center justify-center transition-all p-2 ${
+                        active
+                          ? 'border-sky-500 bg-sky-500/10 shadow-md scale-105'
+                          : theme === 'dark'
+                            ? 'border-slate-700 bg-slate-800 hover:bg-slate-700'
+                            : 'border-slate-200 bg-white hover:bg-slate-50'
+                      }`}
+                    >
+                      <span className="text-4xl mb-1">{item.prefix || item.emoji || '🏷️'}</span>
+                      {active && (
+                        <div className="absolute top-0 right-0 bg-sky-500 rounded-full p-1 border-2 border-white dark:border-slate-900 shadow-sm">
+                          <svg
+                            className="w-3 h-3 text-white"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={3}
+                              d="M5 13l4 4L19 7"
+                            />
+                          </svg>
+                        </div>
+                      )}
+                    </button>
+                  );
+                }
+
+                // DEFAULT LIST VIEW (Frames, Special)
                 return (
                   <div
                     key={item.id}
@@ -191,56 +234,37 @@ const ShopScreen = ({ username }) => {
                           : 'border-slate-200 bg-white'
                     }`}
                   >
-                    {activeTab === 'titles' && item.flavorText && (
-                      <button
-                        onClick={() => setFlavorModal(item)}
-                        className="w-full mb-3 text-xs font-bold text-sky-500 hover:text-sky-600 underline text-left"
-                      >
-                        {t('readFlavor') || 'Read Inscription'}
-                      </button>
-                    )}
-
                     <div className="flex items-start justify-between mb-3">
-                      <div
-                        className="flex-1 cursor-pointer"
-                        role="button"
-                        tabIndex={0}
-                        onClick={() => item.flavorText && setFlavorModal(item)}
-                        onKeyDown={e =>
-                          (e.key === 'Enter' || e.key === ' ') &&
-                          item.flavorText &&
-                          setFlavorModal(item)
-                        }
-                      >
-                        <div className="flex items-center gap-2">
-                          {item.emoji && <span className="text-2xl">{item.emoji}</span>}
-                          {item.prefix && <span className="text-lg">{item.prefix}</span>}
-                          <h3 className="font-bold">{t(item.name) || item.name}</h3>
+                      <div className="flex items-center gap-3">
+                        {/* Preview Icon */}
+                        <div className="w-12 h-12 rounded-xl bg-slate-100 dark:bg-slate-700 flex items-center justify-center text-2xl relative overflow-hidden shrink-0">
+                          {item.cssClass ? (
+                            <div className={`w-10 h-10 rounded-full ${item.cssClass}`} />
+                          ) : (
+                            <span>{item.image ? '🎁' : item.prefix || '✨'}</span>
+                          )}
                         </div>
-                        {item.description && (
-                          <p className="text-xs opacity-60 mt-1">
+
+                        <div>
+                          <h3 className="font-bold text-sm leading-tight">
+                            {t(item.name) || item.name}
+                          </h3>
+                          <p className="text-xs opacity-60 mt-1 line-clamp-2">
                             {t(item.description) || item.description}
                           </p>
-                        )}
-                        {item.cssClass && (
-                          <div className="mt-2">
-                            <div
-                              className={`w-10 h-10 rounded-full bg-slate-200 dark:bg-slate-600 ${item.cssClass}`}
-                            ></div>
-                          </div>
-                        )}
+                        </div>
                       </div>
 
                       {/* Price / Status */}
-                      <div className="text-right">
+                      <div className="text-right ml-2 shrink-0">
                         {owned ? (
-                          <span className="text-xs font-bold text-emerald-500 bg-emerald-500/20 px-2 py-1 rounded-full">
+                          <span className="text-xs font-bold text-emerald-500 bg-emerald-500/20 px-2 py-1 rounded-full whitespace-nowrap">
                             ✓ {t('owned')}
                           </span>
                         ) : (
-                          <div className="flex items-center gap-1">
+                          <div className="flex items-center gap-1 justify-end">
                             <img src="/giuro.png" alt="" className="h-4 w-auto object-contain" />
-                            <span className="font-black text-yellow-600 dark:text-yellow-400">
+                            <span className="font-black text-yellow-600 dark:text-yellow-400 text-sm">
                               {item.cost}
                             </span>
                           </div>
@@ -249,12 +273,12 @@ const ShopScreen = ({ username }) => {
                     </div>
 
                     {/* Actions */}
-                    <div className="flex gap-2">
+                    <div className="flex gap-2 mt-3">
                       {owned ? (
                         activeTab !== 'special' && (
                           <button
                             onClick={() => handleEquip(item, activeTab)}
-                            className={`flex-1 py-2 rounded-xl font-bold text-sm transition-all ${
+                            className={`flex-1 py-2 rounded-xl font-bold text-xs transition-all ${
                               active
                                 ? 'bg-sky-500 text-white'
                                 : theme === 'dark'
@@ -269,7 +293,7 @@ const ShopScreen = ({ username }) => {
                         <button
                           onClick={() => handlePurchase(item, activeTab)}
                           disabled={balance < item.cost}
-                          className={`flex-1 py-2 rounded-xl font-bold text-sm transition-all ${
+                          className={`flex-1 py-2 rounded-xl font-bold text-xs transition-all ${
                             balance >= item.cost
                               ? 'bg-yellow-500 hover:bg-yellow-600 text-white shadow-lg shadow-yellow-500/20'
                               : 'bg-slate-300 text-slate-500 cursor-not-allowed'
@@ -287,41 +311,107 @@ const ShopScreen = ({ username }) => {
         </div>
       </div>
 
-      {flavorModal && (
-        // eslint-disable-next-line jsx-a11y/click-events-have-key-events
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
-          onClick={() => setFlavorModal(null)}
-        >
-          {/* eslint-disable-next-line jsx-a11y/click-events-have-key-events */}
+      <AnimatePresence>
+        {flavorModal && (
+          // eslint-disable-next-line jsx-a11y/click-events-have-key-events
           <div
-            className={`p-6 rounded-2xl max-w-sm w-full shadow-2xl transform scale-100 transition-all ${theme === 'dark' ? 'bg-slate-800 text-white' : 'bg-white text-slate-900'}`}
-            onClick={e => e.stopPropagation()}
+            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
+            onClick={() => setFlavorModal(null)}
           >
-            <div className="text-center">
-              <div className="text-4xl mb-4">
-                {flavorModal.image ? (
-                  <img
-                    src={flavorModal.image}
-                    alt="Flavor"
-                    className="h-16 w-16 mx-auto object-contain"
-                  />
-                ) : (
-                  '🎖️'
-                )}
+            {/* eslint-disable-next-line jsx-a11y/click-events-have-key-events */}
+            <div
+              className={`p-6 rounded-3xl w-full max-w-sm shadow-2xl transform transition-all relative ${theme === 'dark' ? 'bg-slate-800 text-white' : 'bg-white text-slate-900'}`}
+              onClick={e => e.stopPropagation()}
+            >
+              {/* Header */}
+              <div className="text-center mb-6">
+                <div className="w-20 h-20 mx-auto bg-slate-100 dark:bg-slate-700 rounded-full flex items-center justify-center text-5xl mb-4 shadow-inner">
+                  {flavorModal.prefix || flavorModal.emoji || '✨'}
+                </div>
+                <h3 className="text-xl font-bold mb-1">
+                  {t(flavorModal.name) || flavorModal.name}
+                </h3>
+                <div className="text-sm opacity-60 italic px-4">
+                  "
+                  {t(flavorModal.flavorText) ||
+                    flavorModal.flavorText ||
+                    t(flavorModal.description) ||
+                    flavorModal.description}
+                  "
+                </div>
               </div>
-              <h3 className="text-xl font-black mb-2">{flavorModal.name}</h3>
-              <p className="opacity-80 italic mb-6">"{flavorModal.flavorText}"</p>
-              <button
-                onClick={() => setFlavorModal(null)}
-                className="w-full py-3 bg-sky-500 hover:bg-sky-600 text-white font-bold rounded-xl transition-colors"
-              >
-                {t('close') || 'Close'}
-              </button>
+
+              {/* Cost Badge */}
+              <div className="flex justify-center mb-6">
+                {(() => {
+                  const owned = isOwned(flavorModal.id);
+                  if (owned)
+                    return (
+                      <span className="px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-500 font-bold text-sm">
+                        {t('owned')}
+                      </span>
+                    );
+                  return (
+                    <div className="flex items-center gap-2 bg-yellow-500/10 px-3 py-1 rounded-full">
+                      <img src="/giuro.png" alt="" className="w-5 h-5" />
+                      <span className="font-bold text-yellow-600 dark:text-yellow-400">
+                        {flavorModal.cost}
+                      </span>
+                    </div>
+                  );
+                })()}
+              </div>
+
+              {/* Actions */}
+              <div className="flex gap-2">
+                {(() => {
+                  const owned = isOwned(flavorModal.id);
+                  const active = isEquipped(flavorModal.id);
+
+                  if (owned) {
+                    return (
+                      <button
+                        onClick={() => {
+                          handleEquip(flavorModal, 'titles');
+                          setFlavorModal(null);
+                        }}
+                        className={`flex-1 py-3 rounded-xl font-bold text-sm transition-all ${
+                          active
+                            ? 'bg-emerald-500 text-white'
+                            : 'bg-sky-500 hover:bg-sky-600 text-white shadow-lg'
+                        }`}
+                      >
+                        {active ? `✓ ${t('equipped')}` : t('equip')}
+                      </button>
+                    );
+                  } else {
+                    return (
+                      <button
+                        onClick={() => handlePurchase(flavorModal, 'titles')}
+                        disabled={balance < flavorModal.cost}
+                        className={`flex-1 py-3 rounded-xl font-bold text-sm transition-all ${
+                          balance >= flavorModal.cost
+                            ? 'bg-yellow-500 hover:bg-yellow-600 text-white shadow-lg'
+                            : 'bg-slate-300 text-slate-500 cursor-not-allowed'
+                        }`}
+                      >
+                        {t('buy')}
+                      </button>
+                    );
+                  }
+                })()}
+
+                <button
+                  onClick={() => setFlavorModal(null)}
+                  className="px-4 py-3 rounded-xl font-bold text-sm bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors"
+                >
+                  {t('close')}
+                </button>
+              </div>
             </div>
           </div>
-        </div>
-      )}
+        )}
+      </AnimatePresence>
     </div>
   );
 };
