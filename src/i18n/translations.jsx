@@ -217,6 +217,10 @@ const translations = {
     gotIt: 'Got it!',
     feedback: 'Feedback',
     unlockedCosmetic: 'unlocked',
+
+    // Game flow
+    exitGameWarning: "Leave game? Your progress won't be lost—come back anytime!",
+    haveFeedback: 'Have feedback? Share your ideas',
   },
 
   es: {
@@ -411,6 +415,10 @@ const translations = {
     gotIt: '¡Entendido!',
     feedback: 'Opinión',
     unlockedCosmetic: 'desbloqueó',
+
+    // Game flow
+    exitGameWarning: '¿Salir del juego? Tu progreso no se perderá,¡vuelve cuando quieras!',
+    haveFeedback: '¿Tienes sugerencias? Comparte tus ideas',
   },
 
   ca: {
@@ -606,6 +614,10 @@ const translations = {
     gotIt: 'Entès!',
     feedback: 'Opinió',
     unlockedCosmetic: 'ha desbloquejat',
+
+    // Game flow
+    exitGameWarning: 'Sortir del joc? El teu progrés no es perdrà—torna quan vulguis!',
+    haveFeedback: 'Tens suggeriments? Comparteix les teves idees',
   },
 };
 
