@@ -25,10 +25,20 @@ const SCORES_COLLECTION = 'scores'; // Full History
  * @param {string} username - User's display name
  * @param {number} score - Total points earned (0-2000 for 20 questions)
  * @param {number|string} time - Average time per question in seconds
- * @param {boolean} isBonus - If true, this score is a "Retry" allowed by referral
+ * @param {Object} options - Additional options
+ * @param {boolean} options.isBonus - If true, this score is a "Retry" allowed by referral
+ * @param {number} options.correctAnswers - Number of correct answers
+ * @param {number} options.questionCount - Total questions attempted
+ * @param {number} options.streakAtPlay - User's streak value at time of play
  * @returns {Promise<void>}
  */
-export const saveScore = async (username, score, time, isBonus = false) => {
+export const saveScore = async (username, score, time, options = {}) => {
+  const {
+    isBonus = false,
+    correctAnswers = null,
+    questionCount = 10,
+    streakAtPlay = null,
+  } = options;
   // eslint-disable-next-line no-console
   console.log(
     `[Leaderboard] saveScore called for ${username}. Score: ${score}, Time: ${time}, Bonus: ${isBonus}`
@@ -50,6 +60,9 @@ export const saveScore = async (username, score, time, isBonus = false) => {
       timestamp: now,
       platform: 'web',
       isBonus, // Store bonus flag
+      correctAnswers, // Number of correct responses
+      questionCount, // Total questions (for partial games)
+      streakAtPlay, // Streak value at time of game
     };
 
     await addDoc(collection(db, SCORES_COLLECTION), scoreData);

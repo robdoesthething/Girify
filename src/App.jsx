@@ -297,7 +297,11 @@ const AppRoutes = () => {
           if (state.username) {
             // Check for referral bonus (allows retry)
             hasDailyReferral(state.username).then(isBonus => {
-              saveScore(state.username, state.score, newRecord.avgTime, isBonus);
+              saveScore(state.username, state.score, newRecord.avgTime, {
+                isBonus,
+                correctAnswers: state.correct,
+                questionCount: state.questions.length,
+              });
             });
 
             // Award giuros for completing the daily challenge
@@ -416,7 +420,11 @@ const AppRoutes = () => {
 
         if (state.username) {
           hasDailyReferral(state.username).then(isBonus => {
-            saveScore(state.username, state.score, partialRecord.avgTime, isBonus);
+            saveScore(state.username, state.score, partialRecord.avgTime, {
+              isBonus,
+              correctAnswers: state.correct,
+              questionCount: state.questionIndex + 1,
+            });
           });
         }
       } catch (e) {
