@@ -83,6 +83,23 @@ service cloud.firestore {
       allow update, delete: if request.auth != null;
     }
 
+    // Announcements: Public Read, Admin Write
+    match /announcements/{announcementId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // User Read Announcements: Auth Read/Write (own tracking)
+    match /userReadAnnouncements/{userId} {
+      allow read, write: if request.auth != null;
+    }
+
+    // Activity Feed: Public Read, Auth Write
+    match /activityFeed/{activityId} {
+      allow read: if true;
+      allow write: if request.auth != null;
+    }
+
     // Default Fallback (Block others)
     match /{document=**} {
       allow read, write: if false; 

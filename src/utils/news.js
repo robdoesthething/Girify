@@ -132,12 +132,20 @@ export const markAnnouncementAsRead = async (username, announcementId) => {
 
 /**
  * Create a new announcement (admin only)
- * @param {Object} announcement - { title, body, publishDate, expiryDate? }
+ * @param {Object} announcement - { title, body, publishDate, expiryDate?, isActive?, priority?, targetAudience? }
  * @returns {Promise<{success: boolean, id?: string, error?: string}>}
  */
 export const createAnnouncement = async announcement => {
   try {
-    const { title, body, publishDate, expiryDate } = announcement;
+    const {
+      title,
+      body,
+      publishDate,
+      expiryDate,
+      isActive = true,
+      priority = 'normal',
+      targetAudience = 'all',
+    } = announcement;
 
     if (!title || !body || !publishDate) {
       return { success: false, error: 'Missing required fields' };
@@ -156,6 +164,9 @@ export const createAnnouncement = async announcement => {
           ? Timestamp.fromDate(expiryDate)
           : Timestamp.fromDate(new Date(expiryDate))
         : null,
+      isActive, // Manual toggle for visibility
+      priority, // 'low' | 'normal' | 'high' | 'urgent'
+      targetAudience, // 'all' | 'new_users' | 'returning'
       createdAt: Timestamp.now(),
     });
 

@@ -41,22 +41,38 @@ export const ensureUserProfile = async (usernameInput, uid = null, additionalDat
 
   if (!userDoc.exists()) {
     // Create new user profile
+    const now = Timestamp.now();
     const profileData = {
       username,
       uid: uid, // Store Firebase Auth UID for permissions
       email: additionalData.email || null, // Store email for admin lookup
       realName: additionalData.realName || '',
       avatarId: additionalData.avatarId || Math.floor(Math.random() * 20) + 1,
-      joinedAt: Timestamp.now(),
+      joinedAt: now,
+      createdAt: now,
+      updatedAt: now,
       friendCount: 0,
       gamesPlayed: 0,
       bestScore: 0,
+      totalScore: 0, // Cumulative score (sum of first daily games)
       referralCode: username.toLowerCase().replace(/[^a-z0-9]/g, ''),
+      // Streak tracking
+      streak: 0,
+      maxStreak: 0,
+      lastPlayDate: null, // YYYYMMDD format
       // Giuros currency system
       giuros: 10,
       purchasedCosmetics: [],
       equippedCosmetics: {},
       lastLoginDate: null,
+      // User preferences
+      language: additionalData.language || 'en',
+      theme: 'auto', // 'dark' | 'light' | 'auto'
+      notificationSettings: {
+        dailyReminder: true,
+        friendActivity: true,
+        newsUpdates: true,
+      },
     };
     await setDoc(userRef, profileData);
     return profileData;
