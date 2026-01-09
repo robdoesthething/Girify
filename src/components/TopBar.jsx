@@ -138,6 +138,18 @@ backdrop-blur-md border-b ${theme === 'dark' ? 'border-slate-600' : 'border-slat
                   ℹ️ {t('about')}
                 </button>
                 <button
+                  onClick={() => handleMenuClick('news')}
+                  className="text-left py-2 px-3 rounded-lg hover:bg-slate-500/10 font-medium"
+                >
+                  📰 {t('news') || 'News'}
+                </button>
+                <button
+                  onClick={() => handleMenuClick('feedback')}
+                  className="text-left py-2 px-3 rounded-lg hover:bg-slate-500/10 font-medium"
+                >
+                  📝 {t('feedback') || 'Feedback'}
+                </button>
+                <button
                   onClick={() => handleMenuClick('settings')}
                   className="text-left py-2 px-3 rounded-lg hover:bg-slate-500/10 font-medium"
                 >

@@ -208,6 +208,15 @@ const translations = {
     whatFeaturesTitle: 'What features do you want?',
     earnForFeedback: 'Earn 50 Giuros for your ideas!',
     feedbackPlaceholderFeatures: 'I wish the game had...',
+
+    // News
+    news: 'News',
+    latestUpdates: 'Latest updates and announcements',
+    noNews: 'No announcements yet',
+    checkBackLater: 'Check back later for updates!',
+    gotIt: 'Got it!',
+    feedback: 'Feedback',
+    unlockedCosmetic: 'unlocked',
   },
 
   es: {
@@ -393,6 +402,15 @@ const translations = {
     whatFeaturesTitle: '¿Qué funciones quieres?',
     earnForFeedback: '¡Gana 50 Giuros por tus ideas!',
     feedbackPlaceholderFeatures: 'Me gustaría que el juego tuviera...',
+
+    // News
+    news: 'Noticias',
+    latestUpdates: 'Últimas actualizaciones y anuncios',
+    noNews: 'No hay anuncios todavía',
+    checkBackLater: '¡Vuelve más tarde para ver actualizaciones!',
+    gotIt: '¡Entendido!',
+    feedback: 'Opinión',
+    unlockedCosmetic: 'desbloqueó',
   },
 
   ca: {
@@ -579,6 +597,15 @@ const translations = {
     whatFeaturesTitle: 'Quines funcions vols?',
     earnForFeedback: 'Guanya 50 Giuros per les teves idees!',
     feedbackPlaceholderFeatures: "M'agradaria que el joc tingués...",
+
+    // News
+    news: 'Notícies',
+    latestUpdates: 'Últimes actualitzacions i anuncis',
+    noNews: 'Encara no hi ha anuncis',
+    checkBackLater: 'Torna més tard per veure actualitzacions!',
+    gotIt: 'Entès!',
+    feedback: 'Opinió',
+    unlockedCosmetic: 'ha desbloquejat',
   },
 };
 

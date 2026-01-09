@@ -315,6 +315,36 @@ const FriendsScreen = ({ onClose, username }) => {
                   );
                 }
 
+                if (item.type === ACTIVITY_TYPES.COSMETIC_PURCHASED) {
+                  return (
+                    <div
+                      key={item.id}
+                      className="p-4 rounded-xl border bg-white dark:bg-slate-900 border-cyan-200 dark:border-cyan-900/30 shadow-sm"
+                    >
+                      <div className="flex justify-between items-start mb-2">
+                        <div>
+                          <span className="font-black text-lg text-cyan-500">
+                            {item.username.toLowerCase()}
+                          </span>
+                          <span className="text-slate-500 text-sm ml-2">
+                            {t('unlockedCosmetic') || 'unlocked'}
+                          </span>
+                          <span className="ml-2 font-bold text-cyan-600 dark:text-cyan-400">
+                            {item.itemName
+                              ?.replace(/_/g, ' ')
+                              .replace(/^(badge|frame|title)/, '') || 'an item'}
+                          </span>
+                        </div>
+                        <span className="text-xs text-slate-400">
+                          {item.timestamp?.seconds
+                            ? new Date(item.timestamp.seconds * 1000).toLocaleDateString()
+                            : 'Just now'}
+                        </span>
+                      </div>
+                    </div>
+                  );
+                }
+
                 // Default: Score
                 return (
                   <div
