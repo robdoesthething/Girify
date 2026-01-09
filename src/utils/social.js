@@ -79,14 +79,39 @@ export const ensureUserProfile = async (usernameInput, uid = null, additionalDat
   }
 
   const data = userDoc.data();
-  // SELF-HEAL: If profile exists but missing UID or email, update if provided
+  /*
+   * SELF-HEAL: Update existing users with new schema fields
+   * Checks for missing UID, email, streak, language, etc.
+   */
   const updates = {};
-  if (uid && data.uid !== uid) {
-    updates.uid = uid;
+  const now = Timestamp.now();
+
+  // 1. Critical Identifiers
+  if (uid && data.uid !== uid) updates.uid = uid;
+  if (additionalData.email && !data.email) updates.email = additionalData.email;
+
+  // 2. Dates
+  if (!data.createdAt && data.joinedAt) updates.createdAt = data.joinedAt;
+  if (!data.updatedAt) updates.updatedAt = now;
+
+  // 3. New Streak & Score Fields
+  if (data.streak === undefined) updates.streak = 0;
+  if (data.maxStreak === undefined) updates.maxStreak = 0;
+  if (data.lastPlayDate === undefined) updates.lastPlayDate = null;
+  if (data.totalScore === undefined) updates.totalScore = 0;
+
+  // 4. Preferences
+  if (data.language === undefined) updates.language = additionalData.language || 'en';
+  if (data.theme === undefined) updates.theme = 'auto';
+  if (data.notificationSettings === undefined) {
+    updates.notificationSettings = {
+      dailyReminder: true,
+      friendActivity: true,
+      newsUpdates: true,
+    };
   }
-  if (additionalData.email && !data.email) {
-    updates.email = additionalData.email;
-  }
+
+  // Apply updates if needed
   if (Object.keys(updates).length > 0) {
     await updateDoc(userRef, updates);
     Object.assign(data, updates);
