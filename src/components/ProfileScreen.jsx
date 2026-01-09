@@ -46,6 +46,9 @@ const ProfileScreen = ({ username }) => {
     try {
       const rawHistory = localStorage.getItem('girify_history');
       const parsedHistory = rawHistory ? JSON.parse(rawHistory) : [];
+      // Limit to latest 7 items for display logic if needed broadly,
+      // but usually we want to keep all data for stats.
+      // We will slice in the render method instead.
       return Array.isArray(parsedHistory) ? parsedHistory : [];
     } catch (e) {
       console.error('Profile data load error:', e);
@@ -343,10 +346,21 @@ const ProfileScreen = ({ username }) => {
               </div>
 
               {/* Friend Requests */}
-              <div className="mb-6">
-                <FriendRequests username={username} />
+              <div className="text-center mb-6">
+                <h2 className="text-3xl font-black">{username}</h2>
+                {equippedCosmetics.titleId && (
+                  <p className="text-sm font-bold text-sky-500 uppercase tracking-widest mt-1">
+                    {cosmetics.titles.find(t => t.id === equippedCosmetics.titleId)?.name ||
+                      'Street Explorer'}
+                  </p>
+                )}
+                {!equippedCosmetics.titleId && (
+                  <p className="text-sm font-bold text-slate-400 uppercase tracking-widest mt-1">
+                    Street Explorer
+                  </p>
+                )}
+                <p className="text-xs opacity-50 mt-1">Joined {joinedDate}</p>
               </div>
-
               {/* Stats Grid - Clean, no borders, just icons */}
               <div className="grid grid-cols-5 gap-4 mb-8">
                 <div className="flex flex-col items-center p-3 rounded-2xl bg-orange-500/10 dark:bg-orange-500/5">
@@ -496,14 +510,9 @@ const ProfileScreen = ({ username }) => {
                 ) : (
                   <div className="space-y-3">
                     {(() => {
-                      const sorted = [...allHistory]
-                        .filter(g => {
-                          // Filter last 7 days
-                          if (!g.timestamp) return false;
-                          const daysDiff = (Date.now() - g.timestamp) / (1000 * 60 * 60 * 24);
-                          return daysDiff <= 7;
-                        })
-                        .sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+                      const sorted = [...allHistory].sort(
+                        (a, b) => (b.timestamp || 0) - (a.timestamp || 0)
+                      );
                       const dailyEarliest = new Map();
                       // Determine earliest timestamp for each date
                       sorted.forEach(g => {
@@ -517,7 +526,8 @@ const ProfileScreen = ({ username }) => {
                         }
                       });
 
-                      return sorted.slice(0, 50).map((game, i) => {
+                      // Display latest 7
+                      return sorted.slice(0, 7).map((game, i) => {
                         // It is the daily result if its timestamp matches the earliest for that date
                         const isDaily =
                           game.timestamp && dailyEarliest.get(game.date) === game.timestamp;
@@ -526,15 +536,15 @@ const ProfileScreen = ({ username }) => {
                           <div
                             key={i}
                             className={`flex items-center justify-between p-4 rounded-2xl border transition-colors
-                                  ${
-                                    isDaily
-                                      ? theme === 'dark'
-                                        ? 'bg-emerald-900/10 border-emerald-500/20'
-                                        : 'bg-emerald-50 border-emerald-100'
-                                      : theme === 'dark'
-                                        ? 'bg-slate-800/50 border-slate-700'
-                                        : 'bg-white border-slate-100'
-                                  }`}
+                              ${
+                                isDaily
+                                  ? theme === 'dark'
+                                    ? 'bg-emerald-900/10 border-emerald-500/20'
+                                    : 'bg-emerald-50 border-emerald-100'
+                                  : theme === 'dark'
+                                    ? 'bg-slate-800/50 border-slate-700'
+                                    : 'bg-white border-slate-100'
+                              }`}
                           >
                             <div>
                               <p className="font-bold text-sm">{t('dailyChallenge')}</p>

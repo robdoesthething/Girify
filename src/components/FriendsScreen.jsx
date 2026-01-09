@@ -261,6 +261,22 @@ const FriendsScreen = ({ onClose, username }) => {
               </div>
             ) : (
               feed.map(item => {
+                const friend = friends.find(f => f.username === item.username);
+                const avatarId = friend?.avatarId ? friend.avatarId - 1 : 0;
+                const avatar = AVATARS[avatarId] || '🐼';
+
+                const UserLink = ({ name, children }) => (
+                  <button
+                    onClick={() => navigate(`/user/${encodeURIComponent(name)}`)}
+                    className="flex items-center gap-2 hover:opacity-80 transition-opacity text-left group"
+                  >
+                    <div className="w-8 h-8 rounded-full bg-slate-200 dark:bg-slate-700 flex items-center justify-center text-lg border border-slate-300 dark:border-slate-600">
+                      {avatar}
+                    </div>
+                    <div>{children}</div>
+                  </button>
+                );
+
                 if (item.type === ACTIVITY_TYPES.USERNAME_CHANGED) {
                   return (
                     <div
@@ -268,13 +284,15 @@ const FriendsScreen = ({ onClose, username }) => {
                       className="p-4 rounded-xl border bg-white dark:bg-slate-900 border-amber-200 dark:border-amber-900/30 shadow-sm"
                     >
                       <div className="flex justify-between items-start mb-2">
-                        <div>
-                          <span className="font-black text-lg text-amber-500">
-                            {item.oldUsername ? item.oldUsername.toLowerCase() : '???'}
+                        <div className="flex flex-col">
+                          <span className="font-black text-lg text-amber-500 mb-1">
+                            <UserLink name={item.username}>
+                              <span>{item.username.toLowerCase()}</span>
+                            </UserLink>
                           </span>
-                          <span className="text-slate-500 text-sm ml-2">{t('changedNameTo')}</span>
-                          <span className="font-black text-lg text-amber-500 ml-2">
-                            {item.username.toLowerCase()}
+                          <span className="text-slate-500 text-sm ml-10">
+                            {t('changedNameTo')}{' '}
+                            <span className="font-bold">{item.oldUsername || '???'}</span>
                           </span>
                         </div>
                         <span className="text-xs text-slate-400">
@@ -294,18 +312,20 @@ const FriendsScreen = ({ onClose, username }) => {
                       className="p-4 rounded-xl border bg-white dark:bg-slate-900 border-purple-200 dark:border-purple-900/30 shadow-sm"
                     >
                       <div className="flex justify-between items-start mb-2">
-                        <div>
-                          <span className="font-black text-lg text-purple-500">
-                            {item.username.toLowerCase()}
-                          </span>
-                          <span className="text-slate-500 text-sm ml-2">{t('badgeEarned')}</span>
-                          {item.badge && (
-                            <span className="ml-2 text-xl" title={item.badge.name}>
-                              {item.badge.emoji}
+                        <UserLink name={item.username}>
+                          <div>
+                            <span className="font-black text-lg text-purple-500 block leading-none">
+                              {item.username.toLowerCase()}
                             </span>
-                          )}
-                        </div>
-                        <span className="text-xs text-slate-400">
+                            <span className="text-slate-500 text-xs">{t('badgeEarned')}</span>
+                          </div>
+                        </UserLink>
+                        {item.badge && (
+                          <span className="text-2xl" title={item.badge.name}>
+                            {item.badge.emoji}
+                          </span>
+                        )}
+                        <span className="text-xs text-slate-400 absolute top-4 right-4">
                           {item.timestamp?.seconds
                             ? new Date(item.timestamp.seconds * 1000).toLocaleDateString()
                             : 'Just now'}
@@ -322,19 +342,19 @@ const FriendsScreen = ({ onClose, username }) => {
                       className="p-4 rounded-xl border bg-white dark:bg-slate-900 border-cyan-200 dark:border-cyan-900/30 shadow-sm"
                     >
                       <div className="flex justify-between items-start mb-2">
-                        <div>
-                          <span className="font-black text-lg text-cyan-500">
-                            {item.username.toLowerCase()}
-                          </span>
-                          <span className="text-slate-500 text-sm ml-2">
-                            {t('unlockedCosmetic') || 'unlocked'}
-                          </span>
-                          <span className="ml-2 font-bold text-cyan-600 dark:text-cyan-400">
-                            {item.itemName
-                              ?.replace(/_/g, ' ')
-                              .replace(/^(badge|frame|title)/, '') || 'an item'}
-                          </span>
-                        </div>
+                        <UserLink name={item.username}>
+                          <div>
+                            <span className="font-black text-lg text-cyan-500 block leading-none">
+                              {item.username.toLowerCase()}
+                            </span>
+                            <span className="text-slate-500 text-xs">
+                              {t('unlockedCosmetic') || 'unlocked'}{' '}
+                              <span className="font-bold text-cyan-600">
+                                {item.itemName?.replace(/_/g, ' ') || 'item'}
+                              </span>
+                            </span>
+                          </div>
+                        </UserLink>
                         <span className="text-xs text-slate-400">
                           {item.timestamp?.seconds
                             ? new Date(item.timestamp.seconds * 1000).toLocaleDateString()
@@ -352,13 +372,17 @@ const FriendsScreen = ({ onClose, username }) => {
                     className="p-4 rounded-xl border bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 shadow-sm"
                   >
                     <div className="flex justify-between items-start mb-2">
-                      <div className="flex items-baseline flex-wrap">
-                        <span className="font-black text-lg text-sky-500 mr-2">
-                          {item.username.toLowerCase()}
-                        </span>
-                        <span className="text-slate-500 text-sm">
-                          {t('scored')} <strong>{item.score}</strong> {t('points')}
-                        </span>
+                      <div className="flex items-center gap-3">
+                        <UserLink name={item.username}>
+                          <div>
+                            <span className="font-black text-lg text-sky-500 block leading-none">
+                              {item.username.toLowerCase()}
+                            </span>
+                            <span className="text-slate-500 text-xs">
+                              {t('scored')} <strong>{item.score}</strong> {t('points')}
+                            </span>
+                          </div>
+                        </UserLink>
                       </div>
                       <span className="text-xs text-slate-400 whitespace-nowrap ml-2">
                         {item.timestamp?.seconds

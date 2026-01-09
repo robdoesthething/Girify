@@ -166,5 +166,31 @@
       "description": "Upload a custom profile picture",
       "consumable": false
     }
+  ],
+  "merits": [
+    {
+      "id": "merit_supporter",
+      "name": "Early Supporter",
+      "cost": 500,
+      "description": "Show your support for the game.",
+      "flavorText": "You were here when we were just a map and a dream. Thank you!",
+      "image": "/giuro.png"
+    },
+    {
+      "id": "merit_contributor",
+      "name": "Top Contributor",
+      "cost": 1000,
+      "description": "For those who give back.",
+      "flavorText": "Your feedback shapes the city. You are a true architect of Girify.",
+      "image": "/giuro.png"
+    },
+    {
+      "id": "merit_vip",
+      "name": "VIP Status",
+      "cost": 5000,
+      "description": "The ultimate flex.",
+      "flavorText": "Access to absolutely nothing extra, but you look cool doing it.",
+      "image": "/giuro.png"
+    }
   ]
 }

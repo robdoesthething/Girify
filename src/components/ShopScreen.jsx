@@ -22,6 +22,7 @@ const ShopScreen = ({ username }) => {
   const [activeTab, setActiveTab] = useState('frames');
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState(null);
+  const [flavorModal, setFlavorModal] = useState(null);
 
   useEffect(() => {
     const loadData = async () => {
@@ -83,6 +84,7 @@ const ShopScreen = ({ username }) => {
   const tabs = [
     { id: 'frames', label: `🖼️ ${t('frames')}`, items: cosmetics.avatarFrames },
     { id: 'titles', label: `🏷️ ${t('titles')}`, items: cosmetics.titles },
+    { id: 'merits', label: `🎖️ ${t('merits') || 'Merits'}`, items: cosmetics.merits },
     { id: 'special', label: `✨ ${t('special')}`, items: cosmetics.special },
   ];
 
@@ -190,6 +192,15 @@ const ShopScreen = ({ username }) => {
                           : 'border-slate-200 bg-white'
                     }`}
                   >
+                    {activeTab === 'merits' && (
+                      <button
+                        onClick={() => setFlavorModal(item)}
+                        className="w-full mb-3 text-xs font-bold text-sky-500 hover:text-sky-600 underline text-left"
+                      >
+                        {t('readFlavor') || 'Read Inscription'}
+                      </button>
+                    )}
+
                     <div className="flex items-start justify-between mb-3">
                       <div>
                         <div className="flex items-center gap-2">
@@ -231,7 +242,8 @@ const ShopScreen = ({ username }) => {
                     {/* Actions */}
                     <div className="flex gap-2">
                       {owned ? (
-                        activeTab !== 'special' && (
+                        activeTab !== 'special' &&
+                        activeTab !== 'merits' && (
                           <button
                             onClick={() => handleEquip(item, activeTab)}
                             className={`flex-1 py-2 rounded-xl font-bold text-sm transition-all ${
@@ -266,6 +278,42 @@ const ShopScreen = ({ username }) => {
           )}
         </div>
       </div>
+
+      {flavorModal && (
+        // eslint-disable-next-line jsx-a11y/click-events-have-key-events
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
+          onClick={() => setFlavorModal(null)}
+        >
+          {/* eslint-disable-next-line jsx-a11y/click-events-have-key-events */}
+          <div
+            className={`p-6 rounded-2xl max-w-sm w-full shadow-2xl transform scale-100 transition-all ${theme === 'dark' ? 'bg-slate-800 text-white' : 'bg-white text-slate-900'}`}
+            onClick={e => e.stopPropagation()}
+          >
+            <div className="text-center">
+              <div className="text-4xl mb-4">
+                {flavorModal.image ? (
+                  <img
+                    src={flavorModal.image}
+                    alt="Flavor"
+                    className="h-16 w-16 mx-auto object-contain"
+                  />
+                ) : (
+                  '🎖️'
+                )}
+              </div>
+              <h3 className="text-xl font-black mb-2">{flavorModal.name}</h3>
+              <p className="opacity-80 italic mb-6">"{flavorModal.flavorText}"</p>
+              <button
+                onClick={() => setFlavorModal(null)}
+                className="w-full py-3 bg-sky-500 hover:bg-sky-600 text-white font-bold rounded-xl transition-colors"
+              >
+                {t('close') || 'Close'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
