@@ -9,10 +9,22 @@ const FeedbackModal = ({ username, onClose, inline = false }) => {
   const [feedback, setFeedback] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const [captcha] = useState(() => ({
+    a: Math.floor(Math.random() * 10) + 1,
+    b: Math.floor(Math.random() * 10) + 1,
+  }));
+  const [captchaAnswer, setCaptchaAnswer] = useState('');
 
   const handleSubmit = async e => {
     e.preventDefault();
     if (!feedback.trim()) return;
+
+    // Verify Captcha
+    if (parseInt(captchaAnswer) !== captcha.a + captcha.b) {
+      // eslint-disable-next-line no-alert
+      alert('Incorrect math answer. Please try again.');
+      return;
+    }
 
     setIsSubmitting(true);
     await submitFeedback(username, feedback);
@@ -66,7 +78,7 @@ const FeedbackModal = ({ username, onClose, inline = false }) => {
                 <div className="bg-yellow-100 dark:bg-yellow-900/30 px-3 py-1 rounded-full border border-yellow-200 dark:border-yellow-700/50">
                   <p className="text-xs font-bold text-yellow-700 dark:text-yellow-400 flex items-center gap-1">
                     <img src="/giuro.png" className="w-4 h-4" alt="G" />
-                    {t('earnForFeedback') || 'Earn 50 Giuros for your ideas!'}
+                    {t('earnForFeedback') || 'Payout depends on quality'}
                   </p>
                 </div>
               </div>
@@ -82,6 +94,21 @@ const FeedbackModal = ({ username, onClose, inline = false }) => {
                       : 'bg-slate-50 border-slate-200 placeholder-slate-400'
                   }`}
                 />
+
+                {/* Math Captcha */}
+                <div className="flex items-center gap-2 mb-4 bg-slate-50 dark:bg-slate-900/50 p-2 rounded-lg border border-slate-200 dark:border-slate-700">
+                  <div className="px-3 py-2 bg-slate-200 dark:bg-slate-700 rounded-md font-bold text-slate-700 dark:text-slate-200 select-none">
+                    {captcha.a} + {captcha.b} = ?
+                  </div>
+                  <input
+                    type="number"
+                    value={captchaAnswer}
+                    onChange={e => setCaptchaAnswer(e.target.value)}
+                    placeholder="?"
+                    className="w-16 p-2 rounded-md border text-center font-bold outline-none focus:ring-2 focus:ring-sky-500 dark:bg-slate-800 dark:border-slate-600 dark:text-white"
+                  />
+                  <span className="text-xs opacity-50 ml-auto">Prove you are human</span>
+                </div>
 
                 <div className="flex gap-3">
                   {/* For inline, we just show Submit. The skip/close button is handled by parent or secondary action */}
@@ -101,7 +128,7 @@ const FeedbackModal = ({ username, onClose, inline = false }) => {
 
                   <button
                     type="submit"
-                    disabled={isSubmitting || !feedback.trim()}
+                    disabled={isSubmitting || !feedback.trim() || !captchaAnswer}
                     className={`w-full py-3 rounded-xl font-bold text-sm bg-sky-500 hover:bg-sky-600 text-white shadow-lg shadow-sky-500/20 disabled:opacity-50 disabled:cursor-not-allowed`}
                   >
                     {isSubmitting ? 'Sending...' : t('submitFeedback') || 'Submit Feedback'}
@@ -123,7 +150,7 @@ const FeedbackModal = ({ username, onClose, inline = false }) => {
                   "Your feedback is under review. You'll specify your reward soon!"}
               </p>
               <div className="text-xs font-bold text-yellow-600 dark:text-yellow-400 bg-yellow-50 dark:bg-yellow-900/20 p-2 rounded-lg inline-block">
-                +50 Giuros (Pending Approval)
+                Reward pending quality check
               </div>
             </motion.div>
           )}
