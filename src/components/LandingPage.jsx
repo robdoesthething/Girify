@@ -30,20 +30,21 @@ const LandingPage = ({ onStart, onLogin, theme }) => {
 
   return (
     <div
-      className={`min-h-screen flex flex-col ${theme === 'dark' ? 'bg-slate-950 text-white' : 'bg-slate-50 text-slate-900'} font-inter overflow-x-hidden`}
+      className={`min-h-screen flex flex-col relative ${theme === 'dark' ? 'bg-slate-950 text-white' : 'bg-slate-50 text-slate-900'} font-inter overflow-x-hidden`}
     >
       <SeoHead
-        title="Girify - Guiris vs Locals"
-        description="Defend Barcelona from the tourist invasion. Guess streets, earn Giuros, and prove you are a true local."
+        title="Girify - Become a Local"
+        description="Master the streets of Barcelona. Guess streets, earn Giuros, and prove you know the real city."
       />
 
       {/* Hero Section */}
-      <main className="flex-1 flex flex-col items-center pt-10 px-4 pb-12 w-full max-w-7xl mx-auto">
-        <div className="w-full flex justify-between items-center mb-8 px-4">
-          <Logo className="h-16 w-auto object-contain" />
-          <button onClick={onLogin} className="px-6 py-2 rounded-xl text-sm font-bold glass-button">
-            {t('login') || 'Login'}
-          </button>
+      <main className="flex-1 flex flex-col items-center pt-24 px-4 pb-12 w-full max-w-7xl mx-auto z-10">
+        <div className="w-full flex justify-between items-center mb-8 px-4 absolute top-6 left-0 right-0 max-w-7xl mx-auto pointer-events-none">
+          {/* Logo is placed by layout usually, but if independent: */}
+          <div className="pointer-events-auto">
+            <Logo className="h-16 w-auto object-contain" />
+          </div>
+          {/* Login removed from here as requested */}
         </div>
 
         <motion.div
@@ -56,38 +57,63 @@ const LandingPage = ({ onStart, onLogin, theme }) => {
           <div className="relative w-full max-w-2xl aspect-video rounded-3xl overflow-hidden shadow-2xl border-4 border-slate-900 dark:border-white/10 mb-8 group">
             <img
               src="/images/guiri_invasion.png"
-              alt="Guiris invading Barcelona"
+              alt="Barcelona Streets"
               className="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-700"
             />
             <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/80 to-transparent p-6 pt-20">
               <h2 className="text-white text-xl md:text-3xl font-black tracking-tight text-balance shadow-black drop-shadow-lg">
-                THE INVASION HAS BEGUN.
+                BECOME THE ULTIMATE LOCAL.
               </h2>
               <p className="text-white/80 text-sm md:text-base mt-2 font-mono">
-                Only true locals can save the city... by guessing streets correctly.
+                Show you know the real Barcelona... street by street.
               </p>
             </div>
           </div>
 
-          <h1 className="heading-xl mb-6 max-w-2xl mx-auto text-balance">Reclaim the Streets!</h1>
+          <h1 className="heading-xl mb-6 max-w-2xl mx-auto text-balance">
+            Master Selected Streets!
+          </h1>
 
           <p className="text-lg md:text-xl font-medium opacity-70 mb-10 max-w-xl leading-relaxed text-balance">
-            Prove you know your city better than a tourist with a map. Earn{' '}
-            <span className="text-yellow-500 font-bold">Giuros</span>, collect badges, and defend
-            your neighborhood.
+            Navigate the city without a map. Earn{' '}
+            <span className="text-yellow-500 font-bold">Giuros</span>, climb the rankings, and
+            celebrate your neighborhood.
           </p>
 
           <div className="flex flex-col sm:flex-row gap-4 w-full max-w-md justify-center mb-16">
             <button
-              onClick={onStart}
+              onClick={onLogin} // CTAs usually go to Register/Login flow if not logged in
               className="flex-1 px-8 py-4 rounded-xl font-black text-xl bg-sky-500 hover:bg-sky-400 text-white shadow-lg shadow-sky-500/30 transform hover:-translate-y-1 transition-all duration-300"
             >
-              Start Mission
+              Sign Up to Play
             </button>
           </div>
 
+          {/* Features Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 w-full mb-12 text-left">
+            <div className="glass-panel p-6">
+              <div className="text-4xl mb-4">🏆</div>
+              <h3 className="font-bold text-lg mb-2">Rankings</h3>
+              <p className="text-sm opacity-60">
+                Compete with friends and neighbors for the top spot.
+              </p>
+            </div>
+            <div className="glass-panel p-6">
+              <div className="text-4xl mb-4">🤝</div>
+              <h3 className="font-bold text-lg mb-2">Friendship</h3>
+              <p className="text-sm opacity-60">Challenge your friends and track their progress.</p>
+            </div>
+            <div className="glass-panel p-6">
+              <div className="text-4xl mb-4">💰</div>
+              <h3 className="font-bold text-lg mb-2">Rewards</h3>
+              <p className="text-sm opacity-60">
+                Earn Giuros to customize your profile and unlock badges.
+              </p>
+            </div>
+          </div>
+
           {/* Social / Mayor Section */}
-          <div className="w-full grid grid-cols-1 md:grid-cols-2 gap-6 p-4">
+          <div className="w-full grid grid-cols-1 gap-6 p-4">
             {/* Character Card */}
             <div className="bg-slate-100 dark:bg-slate-900 rounded-3xl p-6 flex items-center gap-4 text-left border border-slate-200 dark:border-slate-800 relative overflow-hidden">
               <div className="absolute top-0 right-0 p-2 opacity-10 font-black text-6xl">NEWS</div>
@@ -115,33 +141,12 @@ const LandingPage = ({ onStart, onLogin, theme }) => {
                 </div>
               </div>
             </div>
-
-            {/* Features Card */}
-            <div className="bg-slate-100 dark:bg-slate-900 rounded-3xl p-6 flex flex-col justify-center text-left border border-slate-200 dark:border-slate-800">
-              <div className="flex gap-4 mb-4">
-                <div className="flex-1 text-center p-2 rounded-xl bg-slate-200 dark:bg-slate-800">
-                  <div className="text-2xl">🏆</div>
-                  <div className="text-[10px] uppercase font-bold opacity-60 mt-1">Rank Up</div>
-                </div>
-                <div className="flex-1 text-center p-2 rounded-xl bg-slate-200 dark:bg-slate-800">
-                  <div className="text-2xl">🦐</div>
-                  <div className="text-[10px] uppercase font-bold opacity-60 mt-1">No Guiris</div>
-                </div>
-                <div className="flex-1 text-center p-2 rounded-xl bg-slate-200 dark:bg-slate-800">
-                  <div className="text-2xl">💰</div>
-                  <div className="text-[10px] uppercase font-bold opacity-60 mt-1">Get Rich</div>
-                </div>
-              </div>
-              <p className="text-xs opacity-60 text-center">
-                Join {dailyPlayers} locals playing today.
-              </p>
-            </div>
           </div>
         </motion.div>
       </main>
 
       {/* Footer */}
-      <footer className="p-8 text-center text-sm opacity-40 font-mono">
+      <footer className="relative mt-auto p-8 text-center text-sm opacity-40 font-mono z-10 bg-slate-100/50 dark:bg-slate-900/50 backdrop-blur-sm">
         <p className="mb-2">&copy; {new Date().getFullYear()} Girify · Barcelona</p>
         <div className="flex justify-center gap-4">
           <Link to="/privacy" className="hover:text-white underline decoration-dotted">
