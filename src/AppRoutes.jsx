@@ -392,7 +392,12 @@ const AppRoutes = () => {
   };
 
   const handleLogout = () => {
-    signOut(auth).catch(err => console.error('Sign out error', err));
+    signOut(auth)
+      .then(() => {
+        // eslint-disable-next-line no-alert
+        alert('You have been logged out successfully. See you soon!');
+      })
+      .catch(err => console.error('Sign out error', err));
     localStorage.removeItem('girify_username');
     localStorage.removeItem('lastPlayedDate');
     dispatch({ type: 'LOGOUT' });
