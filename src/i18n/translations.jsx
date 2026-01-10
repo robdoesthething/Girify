@@ -230,6 +230,26 @@ const translations = {
     landingSubheadline:
       'Join thousands of locals and explorers in the ultimate daily street trivia challenge.',
     login: 'Login',
+    howItWorks: 'How it Works',
+    explore: 'Explore',
+    exploreDesc:
+      'We highlight a random street in Barcelona on the map. Zoom, pan, and investigate.',
+    guess: 'Guess',
+    guessDesc: 'Type the street name. No multiple choice. Pure local knowledge (or good research).',
+    rankUp: 'Rank Up',
+    rankUpDesc: 'Earn Giuros, buy upgrades, and climb the daily leaderboard. Become a legend.',
+    dailyChallengeTitle: 'Daily Challenge',
+    dailyChallengeDesc:
+      'Every day, 5 new streets. Compete with the whole city for the top spot. Can you get 5/5?',
+    buildStreaks: 'Build Streaks',
+    buildStreaksDesc: 'Consistency is key. Play daily to keep your flame alive and earn 2x Giuros.',
+    rankUpTitle: 'Rank Up',
+    rankUpFeatureDesc: 'Climb the local leaderboards. See how you compare to neighbors.',
+    earnAndCustomize: 'Earn & Customize',
+    earnAndCustomizeDesc:
+      'Win Giuros to unlock exclusive badges, frames, and titles. Show off your expertise with style.',
+    joinPlayers: 'Join',
+    playersMastering: 'players mastering the city',
   },
 
   es: {

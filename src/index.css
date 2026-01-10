@@ -27,7 +27,7 @@
   body {
     @apply m-0 min-h-screen min-w-[320px] antialiased;
     /* Deep slate background */
-    @apply bg-slate-950 text-slate-50;
+    @apply bg-slate-950 text-slate-300 selection:bg-sky-500/30;
   }
 
   /* Reset outline but keep accessibility via other means if needed, 
@@ -41,24 +41,24 @@
 @layer components {
   /* Glassmorphism Utilities */
   .glass {
-    @apply bg-white/5 backdrop-blur-md border border-white/10 shadow-xl;
+    @apply bg-gradient-to-b from-white/10 to-white/5 backdrop-blur-xl border border-white/10 shadow-xl shadow-black/20 ring-1 ring-white/5;
   }
 
   .glass-panel {
-    @apply glass rounded-2xl;
+    @apply glass rounded-3xl;
   }
 
   .glass-button {
-    @apply glass hover:bg-white/10 transition-all duration-300 active:scale-95;
+    @apply glass hover:bg-white/10 hover:border-white/20 transition-all duration-300 active:scale-95 flex items-center justify-center gap-2;
   }
 
   /* Bento Grid Utilities */
   .bento-grid {
-    @apply grid grid-cols-1 md:grid-cols-3 gap-4;
+    @apply grid grid-cols-1 md:grid-cols-3 gap-6;
   }
 
   .bento-item {
-    @apply glass-panel p-6 flex flex-col items-center justify-center text-center hover:border-white/20 transition-colors;
+    @apply glass-panel p-8 flex flex-col items-center justify-center text-center hover:bg-white/10 transition-colors group;
   }
 
   /* Typography Utilities */

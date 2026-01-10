@@ -1,12 +1,12 @@
 import React from 'react';
-import { useTranslation } from 'react-i18next';
+import { useTheme } from '../context/ThemeContext';
 // eslint-disable-next-line no-unused-vars
 import { motion } from 'framer-motion';
 import Logo from './Logo';
 import SeoHead from './SeoHead';
 
 const LandingPage = ({ onStart, onLogin, theme, hasPlayedToday }) => {
-  const { t } = useTranslation();
+  const { t } = useTheme();
 
   return (
     <div
@@ -161,6 +161,53 @@ const LandingPage = ({ onStart, onLogin, theme, hasPlayedToday }) => {
             </p>
           </motion.div>
         </div>
+
+        {/* How It Works Section */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          whileInView={{ opacity: 1 }}
+          viewport={{ once: true }}
+          className="w-full max-w-4xl mx-auto mt-24 mb-12 text-center"
+        >
+          <h2 className="heading-xl bg-gradient-to-r from-slate-200 to-slate-400 bg-clip-text text-transparent mb-12 text-3xl md:text-4xl">
+            How it Works
+          </h2>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 relative">
+            {/* Connecting Line (Desktop) */}
+            <div className="hidden md:block absolute top-12 left-0 w-full h-0.5 bg-gradient-to-r from-transparent via-sky-500/20 to-transparent"></div>
+
+            <div className="relative z-10 flex flex-col items-center">
+              <div className="w-24 h-24 rounded-2xl glass flex items-center justify-center text-4xl mb-6 shadow-lg shadow-sky-500/10 ring-1 ring-white/10">
+                🗺️
+              </div>
+              <h3 className="text-xl font-bold mb-2">Explore</h3>
+              <p className="opacity-60 text-sm px-4">
+                We highlight a random street in Barcelona on the map. Zoom, pan, and investigate.
+              </p>
+            </div>
+
+            <div className="relative z-10 flex flex-col items-center">
+              <div className="w-24 h-24 rounded-2xl glass flex items-center justify-center text-4xl mb-6 shadow-lg shadow-pink-500/10 ring-1 ring-white/10">
+                🧠
+              </div>
+              <h3 className="text-xl font-bold mb-2">Guess</h3>
+              <p className="opacity-60 text-sm px-4">
+                Type the street name. No multiple choice. Pure local knowledge (or good research).
+              </p>
+            </div>
+
+            <div className="relative z-10 flex flex-col items-center">
+              <div className="w-24 h-24 rounded-2xl glass flex items-center justify-center text-4xl mb-6 shadow-lg shadow-emerald-500/10 ring-1 ring-white/10">
+                🚀
+              </div>
+              <h3 className="text-xl font-bold mb-2">Rank Up</h3>
+              <p className="opacity-60 text-sm px-4">
+                Earn Giuros, buy upgrades, and climb the daily leaderboard. Become a legend.
+              </p>
+            </div>
+          </div>
+        </motion.div>
       </main>
 
       {/* Footer */}
