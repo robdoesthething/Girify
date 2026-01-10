@@ -44,7 +44,14 @@ const LandingPage = ({ onStart, onLogin, theme }) => {
           <div className="pointer-events-auto">
             <Logo className="h-16 w-auto object-contain" />
           </div>
-          {/* Login removed from here as requested */}
+          <div className="pointer-events-auto">
+            <button
+              onClick={onLogin}
+              className="px-4 py-2 font-bold text-sm bg-white/10 hover:bg-white/20 rounded-lg backdrop-blur-md transition-colors border border-white/10"
+            >
+              Log In
+            </button>
+          </div>
         </div>
 
         <motion.div

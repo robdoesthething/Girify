@@ -25,8 +25,8 @@ const ChangeView = ({ coords }) => {
     if (coords && coords.length > 0) {
       // Flatten to get bounds of all segments
       const allPoints = coords.flat();
-      // maxZoom 18 ensures tiny streets (alleys) are visible
-      map.flyToBounds(allPoints, { padding: [100, 100], maxZoom: 18, duration: 1.5 });
+      // Relaxed padding (50) and maxZoom 18
+      map.flyToBounds(allPoints, { padding: [50, 50], maxZoom: 18, duration: 1.5 });
     } else {
       // Default view to Barcelona center
       map.setView([41.3879, 2.1699], 13);
@@ -63,7 +63,7 @@ const RecenterControl = ({ center, zoom, bounds }) => {
     if (bounds && bounds.length > 0) {
       // Increase padding on mobile for better fit
       const isMobile = window.innerWidth < 768;
-      const padding = isMobile ? [80, 80] : [50, 50];
+      const padding = isMobile ? [40, 40] : [50, 50]; // Relaxed padding
       map.fitBounds(bounds, { padding, maxZoom: 18 });
     } else if (center) {
       map.setView(center, zoom || 13);
@@ -183,18 +183,11 @@ const createEmojiIcon = emoji => {
  * @param {'dark'|'light'} props.theme - Current theme
  */
 const MapArea = ({ currentStreet, hintStreets = [], theme = 'dark' }) => {
-  // ... params
   const [boundary, setBoundary] = useState(null);
   const [currentZoom, setCurrentZoom] = useState(13);
   const [_mapLoaded, setMapLoaded] = useState(false);
   const [mapError, setMapError] = useState(false);
-  // const mapRef = useRef(null); // Unused
   const geometry = currentStreet ? currentStreet.geometry : [];
-
-  // Validate geometry
-  // const hasValidGeometry = geometry && Array.isArray(geometry) && geometry.length > 0; // Unused
-
-  // Changing approach: Use a state for boundary and fetch/import it.
 
   useEffect(() => {
     // Dynamic import to avoid build errors if file is missing
@@ -242,10 +235,10 @@ const MapArea = ({ currentStreet, hintStreets = [], theme = 'dark' }) => {
           attributionControl={false}
           touchZoom={true}
           maxBounds={[
-            [41.25, 2.0], // Expanded South-West
-            [41.55, 2.3], // Expanded North-East
-          ]} // Loose Barcelona bounds
-          maxBoundsViscosity={0.9} // Firmer edges
+            [41.2, 2.0], // Expanded South-West
+            [41.6, 2.45], // Expanded North-East
+          ]}
+          maxBoundsViscosity={0.5} // More relaxed bounce
           className="h-full w-full outline-none"
         >
           <TileLayer
