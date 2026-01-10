@@ -71,7 +71,7 @@ const FeedbackScreen = ({ username, onClose }) => {
                 <div className="bg-yellow-100 dark:bg-yellow-900/30 px-4 py-2 rounded-full border border-yellow-200 dark:border-yellow-700/50 inline-flex items-center gap-2 transform hover:scale-105 transition-transform">
                   <img src="/giuro.png" className="w-5 h-5" alt="G" />
                   <p className="text-xs font-bold text-yellow-700 dark:text-yellow-400">
-                    {t('earnForFeedback') || 'Earn 50 Giuros for your ideas!'}
+                    {t('earnForFeedback') || 'Earn up to 50 Giuros (subject to evaluation)'}
                   </p>
                 </div>
               </div>
