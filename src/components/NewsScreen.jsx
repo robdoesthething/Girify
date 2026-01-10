@@ -84,9 +84,17 @@ const NewsScreen = ({ onClose, username }) => {
           </div>
         ) : (
           <div className="space-y-6">
-            <p className="text-center text-sm opacity-50 mb-6 uppercase tracking-widest font-bold">
-              {t('latestUpdates') || 'Latest updates and announcements'}
-            </p>
+            <div className="flex flex-col items-center mb-6">
+              <img
+                src="/mejur_jouma.png"
+                alt="Mejur Jouma"
+                className="w-32 h-32 object-contain hover:scale-110 transition-transform cursor-pointer"
+                title="Mejur Jouma delivering the news"
+              />
+              <p className="text-center text-sm opacity-50 uppercase tracking-widest font-bold mt-2">
+                {t('latestUpdates') || 'Latest updates and announcements'}
+              </p>
+            </div>
             {announcements.map(announcement => (
               <motion.article
                 key={announcement.id}

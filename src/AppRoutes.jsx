@@ -301,6 +301,7 @@ const AppRoutes = () => {
                 isBonus,
                 correctAnswers: state.correct,
                 questionCount: state.questions.length,
+                email: auth.currentUser?.email,
               });
             });
 
@@ -429,6 +430,7 @@ const AppRoutes = () => {
               isBonus,
               correctAnswers: state.correct,
               questionCount: state.questionIndex + 1,
+              email: auth.currentUser?.email,
             });
           });
         }

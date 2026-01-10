@@ -63,6 +63,7 @@ export const saveScore = async (username, score, time, options = {}) => {
       correctAnswers, // Number of correct responses
       questionCount, // Total questions (for partial games)
       streakAtPlay, // Streak value at time of game
+      email: options.email || null, // Store email for integrity/contact
     };
 
     await addDoc(collection(db, SCORES_COLLECTION), scoreData);

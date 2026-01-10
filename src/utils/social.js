@@ -182,7 +182,8 @@ export const updateUserGameStats = async (username, { streak, totalScore, lastPl
     const updates = {
       gamesPlayed: (currentData.gamesPlayed || 0) + 1,
       totalScore: totalScore,
-      streak: streak,
+      // Streak cannot be higher than total games played (logic fix)
+      streak: Math.min(streak, (currentData.gamesPlayed || 0) + 1),
       lastPlayDate: lastPlayDate,
       updatedAt: Timestamp.now(),
     };
@@ -545,7 +546,9 @@ export const updateUserStats = async (username, score) => {
   if (userDoc.exists()) {
     const data = userDoc.data();
     const newGamesPlayed = (data.gamesPlayed || 0) + 1;
-    const newBestScore = Math.max(data.bestScore || 0, score);
+    const currentBest = Number(data.bestScore) || 0;
+    const currentScore = Number(score) || 0;
+    const newBestScore = Math.max(currentBest, currentScore);
 
     await updateDoc(userRef, {
       gamesPlayed: newGamesPlayed,
@@ -575,15 +578,46 @@ export const updateUserStats = async (username, score) => {
 export const sendFriendRequest = async (fromUser, toUser) => {
   if (!fromUser || !toUser || fromUser === toUser) return;
 
-  // Check if friendship already exists
-  const existing = await getFriendshipStatus(fromUser, toUser);
-  if (existing !== 'none') return;
+  // Use composite key to prevent duplicates: [user1, user2].sort().join('_')
+  // This physically ensures only ONE document can exist for this pair.
+  const users = [fromUser, toUser].sort();
+  const friendshipId = `${users[0]}_${users[1]}`;
+  const friendshipRef = doc(db, FRIENDSHIPS_COLLECTION, friendshipId);
 
-  await addDoc(collection(db, FRIENDSHIPS_COLLECTION), {
-    user1: fromUser,
+  // Check if it exists first (to avoid overwriting status if already exists)
+  const docSnap = await getDoc(friendshipRef);
+
+  if (docSnap.exists()) {
+    const data = docSnap.data();
+    // If already friends or pending, do nothing
+    if (data.status === 'accepted' || data.status === 'pending') {
+      return;
+    }
+  }
+
+  // Fetch emails for identity integrity
+  let user1Email = null;
+  let user2Email = null;
+  try {
+    const [u1Doc, u2Doc] = await Promise.all([
+      getDoc(doc(db, USERS_COLLECTION, fromUser)),
+      getDoc(doc(db, USERS_COLLECTION, toUser)),
+    ]);
+    if (u1Doc.exists()) user1Email = u1Doc.data().email || null;
+    if (u2Doc.exists()) user2Email = u2Doc.data().email || null;
+  } catch (e) {
+    console.error('Error fetching emails for friend request:', e);
+  }
+
+  await setDoc(friendshipRef, {
+    user1: fromUser, // Keep original requester distinction if needed
     user2: toUser,
+    user1Email,
+    user2Email,
+    participants: users, // Helpful for querying
     status: 'pending',
     createdAt: Timestamp.now(),
+    updatedAt: Timestamp.now(),
   });
 };
 
@@ -684,9 +718,25 @@ export const getFriendCount = async username => {
 export const recordReferral = async (referrer, referred) => {
   if (!referrer || !referred || referrer === referred) return;
 
+  // Fetch emails
+  let referrerEmail = null;
+  let referredEmail = null;
+  try {
+    const [r1Doc, r2Doc] = await Promise.all([
+      getDoc(doc(db, USERS_COLLECTION, referrer)),
+      getDoc(doc(db, USERS_COLLECTION, referred)),
+    ]);
+    if (r1Doc.exists()) referrerEmail = r1Doc.data().email || null;
+    if (r2Doc.exists()) referredEmail = r2Doc.data().email || null;
+  } catch (e) {
+    console.error('Error fetching emails for referral:', e);
+  }
+
   await addDoc(collection(db, REFERRALS_COLLECTION), {
     referrer,
     referred,
+    referrerEmail,
+    referredEmail,
     createdAt: Timestamp.now(),
   });
 };
@@ -752,9 +802,6 @@ export const getBlockStatus = async (user1, user2) => {
   }
 };
 
-/**
- * Update user profile with avatar URL
- */
 /**
  * Update user profile data
  */
