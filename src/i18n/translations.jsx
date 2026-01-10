@@ -221,6 +221,15 @@ const translations = {
     // Game flow
     exitGameWarning: "Leave game? Your progress won't be lost—come back anytime!",
     haveFeedback: 'Have feedback? Share your ideas',
+
+    // Landing Page
+    landingTitle: 'Play Barcelona Streets Quiz',
+    landingDescription:
+      "Test your knowledge of Barcelona's streets. Compete in daily challenges, earn badges, and climb the leaderboard.",
+    landingHeadline: 'Master the Streets of Barcelona',
+    landingSubheadline:
+      'Join thousands of locals and explorers in the ultimate daily street trivia challenge.',
+    login: 'Login',
   },
 
   es: {
@@ -419,6 +428,15 @@ const translations = {
     // Game flow
     exitGameWarning: '¿Salir del juego? Tu progreso no se perderá,¡vuelve cuando quieras!',
     haveFeedback: '¿Tienes sugerencias? Comparte tus ideas',
+
+    // Landing Page
+    landingTitle: 'Juega al Quiz de Calles de Barcelona',
+    landingDescription:
+      'Pon a prueba tu conocimiento de las calles de Barcelona. Compite en retos diarios, gana insignias y sube en la clasificación.',
+    landingHeadline: 'Domina las Calles de Barcelona',
+    landingSubheadline:
+      'Únete a miles de locales y exploradores en el reto diario definitivo de trivia callejera.',
+    login: 'Iniciar sesión',
   },
 
   ca: {
@@ -618,6 +636,15 @@ const translations = {
     // Game flow
     exitGameWarning: 'Sortir del joc? El teu progrés no es perdrà—torna quan vulguis!',
     haveFeedback: 'Tens suggeriments? Comparteix les teves idees',
+
+    // Landing Page
+    landingTitle: 'Juga al Quiz de Carrers de Barcelona',
+    landingDescription:
+      'Posa a prova el teu coneixement dels carrers de Barcelona. Competeix en reptes diaris, guanya insígnies i puja a la classificació.',
+    landingHeadline: 'Domina els Carrers de Barcelona',
+    landingSubheadline:
+      'Uneix-te a milers de locals i exploradors en el repte diari definitiu de trivia de carrer.',
+    login: 'Iniciar sessió',
   },
 };
 

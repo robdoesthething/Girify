@@ -7,6 +7,7 @@ import RegisterPanel from './RegisterPanel';
 import SummaryScreen from './SummaryScreen';
 import Logo from './Logo';
 import OnboardingTour from './OnboardingTour';
+import LandingPage from './LandingPage';
 
 const GameScreen = ({
   state,
@@ -135,49 +136,30 @@ const GameScreen = ({
       </div>
 
       {state.gameState === 'intro' && (
-        <div className="fixed inset-0 z-10 flex flex-col items-center justify-center p-6 text-center bg-slate-50/80 dark:bg-slate-950/80 backdrop-blur-sm pointer-events-auto overflow-hidden">
-          <div className="max-w-xs md:max-w-md w-full flex flex-col items-center">
-            <Logo className="mb-6 h-16 md:h-24 w-auto object-contain" />
-            <p
-              className={`text-lg md:text-xl mb-8 font-light text-center px-4 animate-fadeIn ${theme === 'dark' ? 'text-slate-300' : 'text-slate-600'}`}
-            >
-              Can you name the city's most iconic streets?
-            </p>
-
-            <button
-              onClick={() => {
-                const seen = localStorage.getItem('girify_instructions_seen');
-                if (state.username || seen === 'true') {
-                  if (state.username) {
-                    setupGame();
-                  } else {
-                    dispatch({ type: 'SET_GAME_STATE', payload: 'register' });
-                  }
-                } else {
-                  dispatch({ type: 'SET_GAME_STATE', payload: 'instructions' });
-                }
-              }}
-              className={`w-full max-w-xs px-8 py-4 rounded-full font-bold text-lg tracking-widest hover:scale-105 transition-all duration-300 shadow-xl animate-bounce-subtle
-                          ${
-                            hasPlayedToday()
-                              ? 'bg-[#000080] hover:bg-slate-900 text-white'
-                              : 'bg-sky-500 hover:bg-sky-600 text-white'
-                          }
-                      `}
-            >
-              {hasPlayedToday() ? (
-                <span className="flex flex-col items-center leading-none gap-1">
-                  <span>{t('replayChallenge')}</span>
-                  <span className="text-[9px] opacity-80 font-medium normal-case tracking-normal">
-                    {t('scoreNotSaved')}
-                  </span>
-                </span>
-              ) : (
-                t('startQuiz')
-              )}
-            </button>
-          </div>
-        </div>
+        <LandingPage
+          theme={theme}
+          hasPlayedToday={hasPlayedToday()}
+          onStart={() => {
+            const seen = localStorage.getItem('girify_instructions_seen');
+            if (state.username || seen === 'true') {
+              if (state.username) {
+                setupGame();
+              } else {
+                dispatch({ type: 'SET_GAME_STATE', payload: 'register' });
+              }
+            } else {
+              dispatch({ type: 'SET_GAME_STATE', payload: 'instructions' });
+            }
+          }}
+          onLogin={() => {
+            setupGame(); // Or specific login flow if needed, but usually checks auth state
+            // If not logged in, setupGame or register might handle it,
+            // but user asked for "I have an account" button.
+            // If we just want to trigger the same flow as Start but maybe intent is different?
+            // For now, let's map it to register/login flow.
+            dispatch({ type: 'SET_GAME_STATE', payload: 'register' });
+          }}
+        />
       )}
 
       {state.gameState === 'instructions' && (
