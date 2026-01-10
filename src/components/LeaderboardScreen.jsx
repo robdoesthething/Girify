@@ -63,7 +63,8 @@ const LeaderboardScreen = ({ onClose, currentUser }) => {
 
   return (
     <div
-      className={`fixed inset-0 z-[8000] flex flex-col items-center justify-center p-4 md:p-8 backdrop-blur-md pointer-events-auto ${theme === 'dark' ? 'bg-slate-950/90 text-slate-50' : 'bg-slate-50/95 text-slate-900'}`}
+      className={`fixed inset-0 z-[8000] flex flex-col items-center justify-center p-4 md:p-8 backdrop-blur-md pointer-events-auto transition-colors duration-500 font-inter
+        ${theme === 'dark' ? 'bg-slate-950/95 text-white' : 'bg-slate-50/95 text-slate-800'}`}
     >
       <div className="w-full max-w-4xl h-full md:h-auto md:max-h-[85vh] flex flex-col glass-panel overflow-hidden shadow-2xl ring-1 ring-white/10">
         {/* Header */}
