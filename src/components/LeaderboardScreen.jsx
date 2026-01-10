@@ -68,8 +68,8 @@ const LeaderboardScreen = ({ onClose, currentUser }) => {
       <div className="w-full max-w-4xl h-full md:h-auto md:max-h-[85vh] flex flex-col glass-panel overflow-hidden shadow-2xl ring-1 ring-white/10">
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b border-white/5 bg-white/5">
-          <h2 className="heading-lg text-2xl flex items-center gap-2">
-            <span className="text-sky-500">🏆</span> {t('leaderboard')}
+          <h2 className="text-3xl font-black tracking-tight flex items-center gap-3">
+            <span className="text-4xl">🏆</span> {t('leaderboard')}
           </h2>
           <button
             onClick={onClose}

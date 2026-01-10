@@ -48,8 +48,11 @@ import { auth } from './firebase';
 import { onAuthStateChanged, signOut, updateProfile } from 'firebase/auth';
 import { getUnreadAnnouncements, markAnnouncementAsRead } from './utils/news';
 
+import PrivacyPolicy from './components/PrivacyPolicy';
+import TermsOfService from './components/TermsOfService';
+
 const AppRoutes = () => {
-  const { deviceMode, theme, t } = useTheme();
+  const { theme, t, deviceMode } = useTheme();
   const [state, dispatch] = useReducer(gameReducer, initialState);
   const location = useLocation();
   const navigate = useNavigate();
@@ -648,6 +651,8 @@ const AppRoutes = () => {
 
       <AnimatePresence mode="wait">
         <Routes location={location} key={location.pathname}>
+          <Route path="/privacy" element={<PrivacyPolicy />} />
+          <Route path="/terms" element={<TermsOfService />} />
           <Route
             path="/"
             element={

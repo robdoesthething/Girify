@@ -76,7 +76,8 @@ const AboutScreen = ({ onClose: _onClose }) => {
             </p>
 
             <div className="pt-10 pb-6 text-center opacity-40 text-xs font-mono">
-              {t('rightsReserved')}
+              <p>{t('rightsReserved')}</p>
+              <p className="mt-2">Vibe Coded by Roberto using React, Tailwind, and Firebase.</p>
             </div>
           </div>
         </div>
