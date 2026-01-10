@@ -456,7 +456,18 @@ const AppRoutes = () => {
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async user => {
       if (user) {
-        setEmailVerified(user.emailVerified);
+        // Force refresh user data to get latest emailVerified status
+        // This handles the case where user verified email in another tab
+        try {
+          await user.reload();
+          // Get fresh user data after reload
+          const freshUser = auth.currentUser;
+          setEmailVerified(freshUser?.emailVerified ?? false);
+        } catch (e) {
+          console.warn('[Auth] Failed to reload user:', e);
+          setEmailVerified(user.emailVerified);
+        }
+
         let displayName = (user.displayName || user.email?.split('@')[0] || 'User').toLowerCase();
 
         // MIGRATION 2.0: Ensure handle format (@Name1234)
