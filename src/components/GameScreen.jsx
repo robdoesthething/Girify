@@ -119,21 +119,65 @@ const GameScreen = ({
         )}
       </div>
 
-      {state.gameState === 'intro' && (
+      {/* For logged-in users in intro state: show map with play overlay */}
+      {state.gameState === 'intro' && state.username && (
+        <>
+          {/* Map Background */}
+          <div className="absolute inset-0 z-0">
+            <MapArea currentStreet={null} hintStreets={[]} theme={theme} />
+          </div>
+
+          {/* Translucent Play Overlay */}
+          <div
+            className={`absolute inset-0 z-[500] flex flex-col items-center justify-center backdrop-blur-sm ${theme === 'dark' ? 'bg-slate-950/70' : 'bg-white/70'}`}
+          >
+            <div className="text-center">
+              <h2
+                className={`text-3xl md:text-4xl font-black mb-4 ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}
+              >
+                Ready to Play?
+              </h2>
+              <p
+                className={`text-lg mb-8 opacity-70 ${theme === 'dark' ? 'text-slate-300' : 'text-slate-600'}`}
+              >
+                Welcome back, {state.username.replace('@', '')}!
+              </p>
+              <button
+                onClick={() => setupGame()}
+                className="group w-32 h-32 rounded-full bg-sky-500 hover:bg-sky-400 text-white shadow-2xl shadow-sky-500/50 transform hover:scale-110 transition-all duration-300 flex items-center justify-center mx-auto"
+              >
+                <svg
+                  className="w-16 h-16 ml-2 group-hover:scale-110 transition-transform"
+                  fill="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path d="M8 5v14l11-7z" />
+                </svg>
+              </button>
+              <p
+                className={`mt-6 text-sm opacity-50 ${theme === 'dark' ? 'text-slate-400' : 'text-slate-500'}`}
+              >
+                Click to start today's challenge
+              </p>
+            </div>
+          </div>
+        </>
+      )}
+
+      {/* For non-logged users: show full LandingPage */}
+      {state.gameState === 'intro' && !state.username && (
         <LandingPage
           theme={theme}
           hasPlayedToday={hasPlayedToday()}
           onStart={() => {
             const seen = localStorage.getItem('girify_instructions_seen');
-            if (state.username || seen === 'true') {
-              if (state.username) setupGame();
-              else dispatch({ type: 'SET_GAME_STATE', payload: 'register' });
+            if (seen === 'true') {
+              dispatch({ type: 'SET_GAME_STATE', payload: 'register' });
             } else {
               dispatch({ type: 'SET_GAME_STATE', payload: 'instructions' });
             }
           }}
           onLogin={() => {
-            setupGame();
             dispatch({ type: 'SET_GAME_STATE', payload: 'register' });
           }}
         />
