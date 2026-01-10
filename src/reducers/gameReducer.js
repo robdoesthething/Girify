@@ -1,10 +1,7 @@
 export const initialState = {
-  // If user is logged in (has username), skip intro and go to 'ready' state
-  // 'ready' means we'll auto-start the game in AppRoutes
-  gameState:
-    typeof localStorage !== 'undefined' && localStorage.getItem('girify_username')
-      ? 'ready'
-      : 'intro',
+  // All users start at 'intro' - the landing/play screen
+  // Logged-in users will see a "Play" button, not auto-start
+  gameState: 'intro',
   username:
     typeof localStorage !== 'undefined' ? localStorage.getItem('girify_username') || '' : '',
   quizStreets: [],
