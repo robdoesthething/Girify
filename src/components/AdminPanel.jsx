@@ -2,9 +2,11 @@ import React, { useState, useEffect } from 'react';
 import { useTheme } from '../context/ThemeContext';
 import { getAllUsers, getFeedbackList, updateUserAsAdmin } from '../utils/social';
 import { getAllAnnouncements, createAnnouncement, deleteAnnouncement } from '../utils/news';
+import { getShopItems, createShopItem, updateShopItem, deleteShopItem } from '../utils/shop';
 // eslint-disable-next-line no-unused-vars
 import { motion, AnimatePresence } from 'framer-motion';
 import { ACHIEVEMENT_BADGES } from '../data/achievements';
+import quizPlan from '../data/quizPlan.json';
 
 const MetricCard = ({ title, value, color }) => {
   const { theme } = useTheme();
@@ -29,6 +31,17 @@ const AdminPanel = () => {
   const [confirmConfig, setConfirmConfig] = useState(null);
   const [promptConfig, setPromptConfig] = useState(null);
   const [announcements, setAnnouncements] = useState([]);
+  const [shopItems, setShopItems] = useState({ all: [] });
+  const [newShopItem, setNewShopItem] = useState({
+    id: '',
+    name: '',
+    type: 'title',
+    cost: 100,
+    emoji: '',
+    flavorText: '',
+    description: '',
+    cssClass: '',
+  });
   const [newAnnouncement, setNewAnnouncement] = useState({
     title: '',
     body: '',
@@ -58,14 +71,16 @@ const AdminPanel = () => {
 
   const fetchData = React.useCallback(async () => {
     setLoading(true);
-    const [u, f, a] = await Promise.all([
+    const [u, f, a, shop] = await Promise.all([
       getAllUsers(100),
       getFeedbackList(),
       getAllAnnouncements(),
+      getShopItems(true),
     ]);
     setUsers(u);
     setFeedback(f);
     setAnnouncements(a);
+    setShopItems(shop);
     setLoading(false);
   }, []);
 
@@ -182,7 +197,7 @@ const AdminPanel = () => {
       >
         <h1 className="text-2xl font-black mb-8 text-sky-500">Girify Admin</h1>
         <nav className="flex flex-col gap-2">
-          {['dashboard', 'users', 'feedback', 'announcements'].map(tab => (
+          {['dashboard', 'users', 'shop', 'feedback', 'announcements', 'analytics'].map(tab => (
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
@@ -1017,6 +1032,322 @@ const AdminPanel = () => {
           </div>
         )}
       </div>
+
+      {/* SHOP */}
+      {activeTab === 'shop' && (
+        <div className="space-y-6">
+          <h2 className="text-3xl font-black">Shop Management</h2>
+          {/* Add/Edit Form */}
+          <div
+            className={`p-6 rounded-2xl border ${theme === 'dark' ? 'bg-slate-800 border-slate-700' : 'bg-white border-slate-200'}`}
+          >
+            <h3 className="text-xl font-bold mb-4">Add / Update Item</h3>
+            <form
+              onSubmit={async e => {
+                e.preventDefault();
+                const res = await createShopItem(newShopItem);
+                if (res.success) {
+                  // eslint-disable-next-line no-alert
+                  alert('Item saved successfully!');
+                  setNewShopItem({
+                    id: '',
+                    name: '',
+                    type: 'title',
+                    cost: 100,
+                    emoji: '',
+                    flavorText: '',
+                    description: '',
+                    cssClass: '',
+                  });
+                  fetchData();
+                } else {
+                  // eslint-disable-next-line no-alert
+                  alert('Error: ' + res.error);
+                }
+              }}
+              className="space-y-4"
+            >
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label
+                    htmlFor="shop-id"
+                    className="text-xs uppercase font-bold opacity-50 block mb-1"
+                  >
+                    ID (leave empty to auto-gen)
+                  </label>
+                  <input
+                    id="shop-id"
+                    value={newShopItem.id}
+                    onChange={e => setNewShopItem({ ...newShopItem, id: e.target.value })}
+                    className="w-full p-3 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700"
+                    placeholder="e.g. frame_gold"
+                  />
+                </div>
+                <div>
+                  <label
+                    htmlFor="shop-type"
+                    className="text-xs uppercase font-bold opacity-50 block mb-1"
+                  >
+                    Type
+                  </label>
+                  <select
+                    id="shop-type"
+                    value={newShopItem.type}
+                    onChange={e => setNewShopItem({ ...newShopItem, type: e.target.value })}
+                    className="w-full p-3 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700"
+                  >
+                    <option value="frame">Frame</option>
+                    <option value="title">Title</option>
+                    <option value="special">Special</option>
+                  </select>
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label
+                    htmlFor="shop-name"
+                    className="text-xs uppercase font-bold opacity-50 block mb-1"
+                  >
+                    Name
+                  </label>
+                  <input
+                    id="shop-name"
+                    value={newShopItem.name}
+                    onChange={e => setNewShopItem({ ...newShopItem, name: e.target.value })}
+                    className="w-full p-3 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700"
+                    required
+                  />
+                </div>
+                <div>
+                  <label
+                    htmlFor="shop-cost"
+                    className="text-xs uppercase font-bold opacity-50 block mb-1"
+                  >
+                    Cost
+                  </label>
+                  <input
+                    id="shop-cost"
+                    type="number"
+                    value={newShopItem.cost}
+                    onChange={e =>
+                      setNewShopItem({ ...newShopItem, cost: parseInt(e.target.value) })
+                    }
+                    className="w-full p-3 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700"
+                    required
+                  />
+                </div>
+              </div>
+              {newShopItem.type === 'title' && (
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label
+                      htmlFor="shop-emoji"
+                      className="text-xs uppercase font-bold opacity-50 block mb-1"
+                    >
+                      Prefix / Emoji
+                    </label>
+                    <input
+                      id="shop-emoji"
+                      value={newShopItem.emoji || newShopItem.prefix || ''}
+                      onChange={e =>
+                        setNewShopItem({
+                          ...newShopItem,
+                          emoji: e.target.value,
+                          prefix: e.target.value,
+                        })
+                      }
+                      className="w-full p-3 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700"
+                    />
+                  </div>
+                  <div>
+                    <label
+                      htmlFor="shop-flavor"
+                      className="text-xs uppercase font-bold opacity-50 block mb-1"
+                    >
+                      Flavor Text
+                    </label>
+                    <input
+                      id="shop-flavor"
+                      value={newShopItem.flavorText || ''}
+                      onChange={e => setNewShopItem({ ...newShopItem, flavorText: e.target.value })}
+                      className="w-full p-3 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700"
+                    />
+                  </div>
+                </div>
+              )}
+              {newShopItem.type === 'frame' && (
+                <div>
+                  <label
+                    htmlFor="shop-css"
+                    className="text-xs uppercase font-bold opacity-50 block mb-1"
+                  >
+                    CSS Class (Tailwind)
+                  </label>
+                  <input
+                    id="shop-css"
+                    value={newShopItem.cssClass || ''}
+                    onChange={e => setNewShopItem({ ...newShopItem, cssClass: e.target.value })}
+                    className="w-full p-3 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700"
+                    placeholder="ring-4 ring-yellow-500..."
+                  />
+                </div>
+              )}
+              <div>
+                <label
+                  htmlFor="shop-desc"
+                  className="text-xs uppercase font-bold opacity-50 block mb-1"
+                >
+                  Description
+                </label>
+                <textarea
+                  id="shop-desc"
+                  value={newShopItem.description || ''}
+                  onChange={e => setNewShopItem({ ...newShopItem, description: e.target.value })}
+                  className="w-full p-3 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700"
+                  rows={2}
+                />
+              </div>
+              <button
+                type="submit"
+                className="w-full py-3 bg-sky-500 hover:bg-sky-600 text-white rounded-xl font-bold shadow-lg"
+              >
+                Save / Create Item
+              </button>
+            </form>
+          </div>
+
+          {/* List Items */}
+          <div className="grid grid-cols-1 gap-6">
+            {['frame', 'title', 'special'].map(type => {
+              const items = shopItems.all?.filter(i => i.type === type) || [];
+              if (items.length === 0) return null;
+              return (
+                <div key={type} className="space-y-4">
+                  <h3 className="text-xl font-bold capitalize">{type}s</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {items.map(item => (
+                      <div
+                        key={item.id}
+                        className={`p-4 rounded-xl border flex justify-between items-start ${theme === 'dark' ? 'bg-slate-800 border-slate-700' : 'bg-white border-slate-200'}`}
+                      >
+                        <div>
+                          <div className="font-bold mb-1 flex items-center gap-2">
+                            {item.emoji ||
+                              item.prefix ||
+                              (item.cssClass ? (
+                                <div className={`w-4 h-4 rounded-full ${item.cssClass}`} />
+                              ) : (
+                                '🛍️'
+                              ))}
+                            {item.name}
+                          </div>
+                          <div className="text-xs opacity-50 font-mono mb-2">{item.id}</div>
+                          <div className="text-yellow-500 font-bold text-sm">
+                            {item.cost} Giuros
+                          </div>
+                        </div>
+                        <div className="flex flex-col gap-2">
+                          <button
+                            onClick={() => setNewShopItem(item)}
+                            className="px-3 py-1 bg-sky-500/10 text-sky-500 rounded-lg text-xs font-bold hover:bg-sky-500 hover:text-white"
+                          >
+                            Edit
+                          </button>
+                          <button
+                            onClick={async () => {
+                              if (confirm('Delete ' + item.name + '?')) {
+                                await deleteShopItem(item.id);
+                                fetchData();
+                              }
+                            }}
+                            className="px-3 py-1 bg-red-500/10 text-red-500 rounded-lg text-xs font-bold hover:bg-red-500 hover:text-white"
+                          >
+                            Delete
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {/* ANALYTICS */}
+      {activeTab === 'analytics' && (
+        <div className="space-y-8">
+          <h2 className="text-3xl font-black">Analytics</h2>
+
+          {/* Daily Users */}
+          <div
+            className={`p-6 rounded-2xl border ${theme === 'dark' ? 'bg-slate-800 border-slate-700' : 'bg-white border-slate-200'}`}
+          >
+            <h3 className="text-xl font-bold mb-4">Daily New Users (Last 7 Days)</h3>
+            <div className="h-64 flex items-end gap-2">
+              {/* Simple Bar Chart Calculation */}
+              {(() => {
+                const last7Days = [...Array(7)]
+                  .map((_, i) => {
+                    const d = new Date();
+                    d.setDate(d.getDate() - i);
+                    return d.toISOString().split('T')[0];
+                  })
+                  .reverse();
+
+                const counts = last7Days.map(dateStr => {
+                  return users.filter(u => {
+                    if (!u.joinedAt) return false;
+                    const d = u.joinedAt.toDate
+                      ? u.joinedAt.toDate()
+                      : new Date(u.joinedAt.seconds * 1000);
+                    return d.toISOString().split('T')[0] === dateStr;
+                  }).length;
+                });
+
+                const max = Math.max(...counts, 1);
+
+                return last7Days.map((date, i) => (
+                  <div key={date} className="flex-1 flex flex-col justify-end items-center group">
+                    <div className="mb-2 font-bold text-sky-500 opacity-0 group-hover:opacity-100 transition-opacity">
+                      {counts[i]}
+                    </div>
+                    <div
+                      style={{ height: `${(counts[i] / max) * 100}%` }}
+                      className="w-full bg-sky-500/50 rounded-t-lg hover:bg-sky-500 transition-colors relative min-h-[4px]"
+                    ></div>
+                    <div className="mt-2 text-xs opacity-50 rotate-45 origin-left translate-y-2">
+                      {date.slice(5)}
+                    </div>
+                  </div>
+                ));
+              })()}
+            </div>
+          </div>
+
+          {/* Upcoming Quizzes */}
+          <div
+            className={`p-6 rounded-2xl border ${theme === 'dark' ? 'bg-slate-800 border-slate-700' : 'bg-white border-slate-200'}`}
+          >
+            <h3 className="text-xl font-bold mb-4">Upcoming Quizzes (Content Plan)</h3>
+            <div className="space-y-2 overflow-y-auto max-h-96">
+              {Object.entries(quizPlan)
+                .sort()
+                .map(([date, data]) => (
+                  <div
+                    key={date}
+                    className={`p-3 rounded-xl border flex justify-between items-center ${theme === 'dark' ? 'bg-slate-900 border-slate-700' : 'bg-slate-50 border-slate-200'}`}
+                  >
+                    <div className="font-mono text-sm opacity-70">{date}</div>
+                    <div className="font-bold">{data.topic || 'Unknown Topic'}</div>
+                    <div className="text-xs opacity-50">{data.streets?.length || 0} streets</div>
+                  </div>
+                ))}
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* EDIT MODAL */}
       <AnimatePresence>

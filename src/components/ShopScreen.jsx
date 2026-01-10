@@ -9,7 +9,7 @@ import {
   setEquippedCosmetics,
   getEquippedCosmetics,
 } from '../utils/giuros';
-import cosmetics from '../data/cosmetics.json';
+import { getShopItems } from '../utils/shop';
 import TopBar from './TopBar';
 import PropTypes from 'prop-types';
 
@@ -24,19 +24,22 @@ const ShopScreen = ({ username }) => {
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState(null);
   const [flavorModal, setFlavorModal] = useState(null);
+  const [shopItems, setShopItems] = useState({ avatarFrames: [], titles: [], special: [] });
 
   useEffect(() => {
     const loadData = async () => {
       if (!username) return;
       setLoading(true);
-      const [bal, owned, eq] = await Promise.all([
+      const [bal, owned, eq, items] = await Promise.all([
         getGiuros(username),
         getPurchasedCosmetics(username),
         getEquippedCosmetics(username),
+        getShopItems(),
       ]);
       setBalance(bal);
       setPurchased(owned);
       setEquipped(eq);
+      setShopItems(items);
       setLoading(false);
     };
     loadData();
@@ -83,9 +86,9 @@ const ShopScreen = ({ username }) => {
   };
 
   const tabs = [
-    { id: 'frames', label: `🖼️ ${t('frames')}`, items: cosmetics.avatarFrames },
-    { id: 'titles', label: `🏷️ ${t('titles')}`, items: cosmetics.titles },
-    { id: 'special', label: `✨ ${t('special')}`, items: cosmetics.special },
+    { id: 'frames', label: `🖼️ ${t('frames')}`, items: shopItems.avatarFrames },
+    { id: 'titles', label: `🏷️ ${t('titles')}`, items: shopItems.titles },
+    { id: 'special', label: `✨ ${t('special')}`, items: shopItems.special },
   ];
 
   const activeItems = tabs.find(t => t.id === activeTab)?.items || [];
