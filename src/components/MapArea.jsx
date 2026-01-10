@@ -30,7 +30,8 @@ const ChangeView = ({ coords }) => {
       const handleLoad = () => {
         // Small delay to ensure tiles are rendered
         setTimeout(() => {
-          map.flyToBounds(allPoints, { padding: [50, 50], maxZoom: 17, duration: 2 });
+          // Slower animation (3.5s) for comfortable viewing
+          map.flyToBounds(allPoints, { padding: [50, 50], maxZoom: 16, duration: 3.5 });
         }, 300);
       };
 

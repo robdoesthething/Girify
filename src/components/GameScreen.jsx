@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 // eslint-disable-next-line no-unused-vars
 import { motion, AnimatePresence } from 'framer-motion';
 import MapArea from './MapArea';
@@ -26,6 +26,13 @@ const GameScreen = ({
     const completed = localStorage.getItem('girify_onboarding_completed');
     return !completed && !state.username;
   });
+
+  // Auto-start game for logged-in users (skip landing page)
+  useEffect(() => {
+    if (state.gameState === 'ready' && state.username) {
+      setupGame();
+    }
+  }, [state.gameState, state.username, setupGame]);
 
   const handleManualNext = () => {
     if (state.feedback === 'selected') {
