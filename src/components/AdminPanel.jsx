@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useTheme } from '../context/ThemeContext';
 import { getAllUsers, getFeedbackList, updateUserAsAdmin } from '../utils/social';
 import { getAllAnnouncements, createAnnouncement, deleteAnnouncement } from '../utils/news';
-import { getShopItems, createShopItem, deleteShopItem } from '../utils/shop';
+import { getShopItems, createShopItem, deleteShopItem, updateShopItem } from '../utils/shop';
 // eslint-disable-next-line no-unused-vars
 import { motion, AnimatePresence } from 'framer-motion';
 import { ACHIEVEMENT_BADGES } from '../data/achievements';
@@ -1045,7 +1045,12 @@ const AdminPanel = () => {
             <form
               onSubmit={async e => {
                 e.preventDefault();
-                const res = await createShopItem(newShopItem);
+                let res;
+                if (newShopItem.id && shopItems.all.some(i => i.id === newShopItem.id)) {
+                  res = await updateShopItem(newShopItem.id, newShopItem);
+                } else {
+                  res = await createShopItem(newShopItem);
+                }
                 if (res.success) {
                   // eslint-disable-next-line no-alert
                   alert('Item saved successfully!');
@@ -1553,14 +1558,19 @@ const AdminPanel = () => {
                     defaultValue=""
                   >
                     <option value="">Select a badge to add...</option>
-                    {ACHIEVEMENT_BADGES.filter(
-                      b =>
-                        b.type === 'shop' && !(editingUser.purchasedCosmetics || []).includes(b.id)
-                    ).map(badge => (
-                      <option key={badge.id} value={badge.id}>
-                        {badge.emoji} {badge.name} ({badge.cost} Giuros)
-                      </option>
-                    ))}
+                    {/* Dynamic Shop Badges */}
+                    {(shopItems.all || [])
+                      .filter(
+                        item =>
+                          item.id.startsWith('badge_') &&
+                          !(editingUser.purchasedCosmetics || []).includes(item.id)
+                      )
+                      .map(badge => (
+                        <option key={badge.id} value={badge.id}>
+                          {badge.emoji} {badge.name} ({badge.cost} Giuros)
+                        </option>
+                      ))}
+                    {/* Static Merit Badges */}
                     {ACHIEVEMENT_BADGES.filter(
                       b =>
                         b.type === 'merit' && !(editingUser.purchasedCosmetics || []).includes(b.id)
