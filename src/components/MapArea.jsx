@@ -25,8 +25,22 @@ const ChangeView = ({ coords }) => {
     if (coords && coords.length > 0) {
       // Flatten to get bounds of all segments
       const allPoints = coords.flat();
-      // Relaxed padding (50) and maxZoom 18
-      map.flyToBounds(allPoints, { padding: [50, 50], maxZoom: 18, duration: 1.5 });
+
+      // Wait for tiles to load before zooming to avoid blank map during animation
+      const handleLoad = () => {
+        // Small delay to ensure tiles are rendered
+        setTimeout(() => {
+          map.flyToBounds(allPoints, { padding: [50, 50], maxZoom: 17, duration: 2 });
+        }, 300);
+      };
+
+      // If map already has tiles loaded, zoom immediately with small delay
+      // Otherwise wait for load event
+      if (map._loaded) {
+        handleLoad();
+      } else {
+        map.once('load', handleLoad);
+      }
     } else {
       // Default view to Barcelona center
       map.setView([41.3879, 2.1699], 13);
