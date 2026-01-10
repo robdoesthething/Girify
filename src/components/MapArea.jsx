@@ -200,11 +200,18 @@ const MapArea = ({ currentStreet, hintStreets = [], theme = 'dark' }) => {
     return () => clearTimeout(timer);
   }, []);
 
-  // Tile Layer based on theme
-  const tileUrl =
+  // Tile Layer based on theme - with fallback
+  const [useFallbackTiles, setUseFallbackTiles] = useState(false);
+
+  const cartoUrl =
     theme === 'dark'
       ? 'https://{s}.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}{r}.png'
       : 'https://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}{r}.png';
+
+  // Fallback to OpenStreetMap if CARTO fails
+  const fallbackUrl = 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
+
+  const tileUrl = useFallbackTiles ? fallbackUrl : cartoUrl;
 
   // Error fallback
   if (mapError) {
@@ -244,6 +251,14 @@ const MapArea = ({ currentStreet, hintStreets = [], theme = 'dark' }) => {
           <TileLayer
             attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
             url={tileUrl}
+            eventHandlers={{
+              tileerror: () => {
+                if (!useFallbackTiles) {
+                  console.warn('[Map] CARTO tiles failed, switching to OSM fallback');
+                  setUseFallbackTiles(true);
+                }
+              },
+            }}
           />
 
           {/* Helper to re-center */}

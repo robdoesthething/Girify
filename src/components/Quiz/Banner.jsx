@@ -6,7 +6,7 @@ const Banner = ({ currentQuestionIndex, totalQuestions }) => {
   const { theme, t } = useTheme();
 
   return (
-    <div className="w-full z-[800] pointer-events-none sticky top-0">
+    <div className="w-full z-[800] pointer-events-none fixed top-12 left-0 right-0">
       <div className="mx-auto w-full max-w-xl px-4 pt-2">
         <div className="glass-panel rounded-b-xl rounded-t-none border-t-0 flex flex-col overflow-hidden shadow-xl ring-1 ring-white/10 pointer-events-auto">
           <div className="flex items-center justify-between px-6 py-2 bg-[#000080]/90 backdrop-blur-md text-white">
