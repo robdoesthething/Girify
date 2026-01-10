@@ -6,7 +6,7 @@ const Banner = ({ currentQuestionIndex, totalQuestions }) => {
   const { theme, t } = useTheme();
 
   return (
-    <div className="absolute top-4 left-4 right-4 md:left-1/2 md:-translate-x-1/2 md:max-w-xl z-[1000]">
+    <div className="absolute top-20 left-4 right-4 md:left-1/2 md:-translate-x-1/2 md:max-w-xl z-[1000]">
       <div className="glass-panel rounded-xl flex flex-col overflow-hidden shadow-2xl ring-1 ring-white/20">
         <div className="flex items-center justify-between px-6 py-3 bg-[#000080]/80 backdrop-blur-md text-white">
           <span className="text-xs font-bold uppercase tracking-widest opacity-90">

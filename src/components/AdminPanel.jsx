@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useTheme } from '../context/ThemeContext';
 import { getAllUsers, getFeedbackList, updateUserAsAdmin } from '../utils/social';
 import { getAllAnnouncements, createAnnouncement, deleteAnnouncement } from '../utils/news';
-import { getShopItems, createShopItem, updateShopItem, deleteShopItem } from '../utils/shop';
+import { getShopItems, createShopItem, deleteShopItem } from '../utils/shop';
 // eslint-disable-next-line no-unused-vars
 import { motion, AnimatePresence } from 'framer-motion';
 import { ACHIEVEMENT_BADGES } from '../data/achievements';
@@ -1216,61 +1216,88 @@ const AdminPanel = () => {
             </form>
           </div>
 
-          {/* List Items */}
-          <div className="grid grid-cols-1 gap-6">
-            {['frame', 'title', 'special'].map(type => {
-              const items = shopItems.all?.filter(i => i.type === type) || [];
-              if (items.length === 0) return null;
-              return (
-                <div key={type} className="space-y-4">
-                  <h3 className="text-xl font-bold capitalize">{type}s</h3>
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    {items.map(item => (
-                      <div
-                        key={item.id}
-                        className={`p-4 rounded-xl border flex justify-between items-start ${theme === 'dark' ? 'bg-slate-800 border-slate-700' : 'bg-white border-slate-200'}`}
-                      >
-                        <div>
-                          <div className="font-bold mb-1 flex items-center gap-2">
-                            {item.emoji ||
-                              item.prefix ||
-                              (item.cssClass ? (
-                                <div className={`w-4 h-4 rounded-full ${item.cssClass}`} />
-                              ) : (
-                                '🛍️'
-                              ))}
-                            {item.name}
-                          </div>
-                          <div className="text-xs opacity-50 font-mono mb-2">{item.id}</div>
-                          <div className="text-yellow-500 font-bold text-sm">
-                            {item.cost} Giuros
-                          </div>
+          {/* Shop Items Table */}
+          <div
+            className={`rounded-2xl overflow-hidden border ${theme === 'dark' ? 'border-slate-700' : 'border-slate-200'}`}
+          >
+            <table className="w-full text-left">
+              <thead className={theme === 'dark' ? 'bg-slate-800' : 'bg-slate-100'}>
+                <tr>
+                  <th className="p-4 text-xs uppercase opacity-50">Preview</th>
+                  <th className="p-4 text-xs uppercase opacity-50">ID</th>
+                  <th className="p-4 text-xs uppercase opacity-50">Type</th>
+                  <th className="p-4 text-xs uppercase opacity-50">Name</th>
+                  <th className="p-4 text-xs uppercase opacity-50">Cost</th>
+                  <th className="p-4 text-xs uppercase opacity-50">Actions</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-200 dark:divide-slate-700">
+                {(shopItems.all || [])
+                  .sort((a, b) => a.type.localeCompare(b.type) || a.cost - b.cost)
+                  .map(item => (
+                    <tr
+                      key={item.id}
+                      className={theme === 'dark' ? 'hover:bg-slate-800/50' : 'hover:bg-slate-50'}
+                    >
+                      <td className="p-4">
+                        <div className="flex items-center justify-center w-10 h-10 rounded-lg bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-700">
+                          {item.emoji ||
+                            item.prefix ||
+                            (item.cssClass ? (
+                              <div className={`w-4 h-4 rounded-full ${item.cssClass}`} />
+                            ) : (
+                              '🛍️'
+                            ))}
                         </div>
-                        <div className="flex flex-col gap-2">
-                          <button
-                            onClick={() => setNewShopItem(item)}
-                            className="px-3 py-1 bg-sky-500/10 text-sky-500 rounded-lg text-xs font-bold hover:bg-sky-500 hover:text-white"
-                          >
-                            Edit
-                          </button>
-                          <button
-                            onClick={async () => {
-                              if (confirm('Delete ' + item.name + '?')) {
-                                await deleteShopItem(item.id);
-                                fetchData();
-                              }
-                            }}
-                            className="px-3 py-1 bg-red-500/10 text-red-500 rounded-lg text-xs font-bold hover:bg-red-500 hover:text-white"
-                          >
-                            Delete
-                          </button>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              );
-            })}
+                      </td>
+                      <td className="p-4 text-xs font-mono opacity-60">{item.id}</td>
+                      <td className="p-4">
+                        <span
+                          className={`px-2 py-1 rounded-full text-[10px] font-bold uppercase ${
+                            item.type === 'title'
+                              ? 'bg-purple-500/10 text-purple-500'
+                              : item.type === 'frame'
+                                ? 'bg-amber-500/10 text-amber-500'
+                                : 'bg-sky-500/10 text-sky-500'
+                          }`}
+                        >
+                          {item.type}
+                        </span>
+                      </td>
+                      <td className="p-4 font-bold">{item.name}</td>
+                      <td className="p-4 font-mono font-bold text-yellow-500">{item.cost} 🪙</td>
+                      <td className="p-4 flex gap-2">
+                        <button
+                          onClick={() => setNewShopItem(item)}
+                          className="px-3 py-1 bg-sky-500/10 text-sky-500 rounded-lg text-xs font-bold hover:bg-sky-500 hover:text-white transition-colors"
+                        >
+                          Edit
+                        </button>
+                        <button
+                          onClick={async () => {
+                            if (
+                              await showConfirm('Delete ' + item.name + '?', 'Delete Shop Item')
+                            ) {
+                              await deleteShopItem(item.id);
+                              fetchData();
+                            }
+                          }}
+                          className="px-3 py-1 bg-red-500/10 text-red-500 rounded-lg text-xs font-bold hover:bg-red-500 hover:text-white transition-colors"
+                        >
+                          Delete
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                {(!shopItems.all || shopItems.all.length === 0) && (
+                  <tr>
+                    <td colSpan="6" className="p-8 text-center opacity-50">
+                      No items found. Add one above!
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
           </div>
         </div>
       )}
