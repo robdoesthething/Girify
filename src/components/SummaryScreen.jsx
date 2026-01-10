@@ -71,7 +71,9 @@ const SummaryScreen = ({ score, total, theme, username, onRestart, quizStreets, 
           <h2 className="text-xs font-black mb-2 text-sky-500 uppercase tracking-[0.3em]">
             City Curiosity
           </h2>
-          <h3 className="heading-lg mb-6 text-balance">{curiosity.title}</h3>
+          <h3 className="text-2xl md:text-3xl font-bold tracking-tight mb-6 text-balance text-white drop-shadow-lg">
+            {curiosity.title}
+          </h3>
 
           <div className="glass-panel w-full overflow-hidden mb-8 shadow-2xl group">
             <div className="overflow-hidden h-64 w-full relative">
@@ -84,7 +86,7 @@ const SummaryScreen = ({ score, total, theme, username, onRestart, quizStreets, 
             </div>
 
             <div className="p-8 text-left">
-              <p className="text-xl leading-relaxed font-medium text-slate-200">
+              <p className="text-xl leading-relaxed font-medium text-slate-700">
                 "{curiosity.fact}"
               </p>
             </div>
