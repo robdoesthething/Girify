@@ -86,6 +86,12 @@
     "vite": "^7.2.4",
     "vitest": "^4.0.16"
   },
+  "overrides": {
+    "react-helmet-async": {
+      "react": "$react",
+      "react-dom": "$react-dom"
+    }
+  },
   "lint-staged": {
     "*.{js,jsx}": [
       "eslint --fix",
