@@ -25,8 +25,8 @@ const ChangeView = ({ coords }) => {
     if (coords && coords.length > 0) {
       // Flatten to get bounds of all segments
       const allPoints = coords.flat();
-      // maxZoom 15 covers "nearbies" better than 16 (too close)
-      map.flyToBounds(allPoints, { padding: [100, 100], maxZoom: 15, duration: 1.5 });
+      // maxZoom 18 ensures tiny streets (alleys) are visible
+      map.flyToBounds(allPoints, { padding: [100, 100], maxZoom: 18, duration: 1.5 });
     } else {
       // Default view to Barcelona center
       map.setView([41.3879, 2.1699], 13);
@@ -64,7 +64,7 @@ const RecenterControl = ({ center, zoom, bounds }) => {
       // Increase padding on mobile for better fit
       const isMobile = window.innerWidth < 768;
       const padding = isMobile ? [80, 80] : [50, 50];
-      map.fitBounds(bounds, { padding });
+      map.fitBounds(bounds, { padding, maxZoom: 18 });
     } else if (center) {
       map.setView(center, zoom || 13);
     }
@@ -194,11 +194,6 @@ const MapArea = ({ currentStreet, hintStreets = [], theme = 'dark' }) => {
   // Validate geometry
   // const hasValidGeometry = geometry && Array.isArray(geometry) && geometry.length > 0; // Unused
 
-  // Import boundary data (simulated dynamic import if possible, or static if file exists)
-  // For now, let's assume we can import it. If it doesn't exist, it might break the build unless we handle it gracefully.
-  // In Vite/React, static imports are preferred. We can try to import it, but if it doesn't exist, it's tricky.
-  // Best practice: Import it at top level with a catch or use a dynamic import in useEffect.
-
   // Changing approach: Use a state for boundary and fetch/import it.
 
   useEffect(() => {
@@ -320,12 +315,11 @@ const MapArea = ({ currentStreet, hintStreets = [], theme = 'dark' }) => {
             <Polyline
               positions={geometry}
               pathOptions={{
-                color: '#000080',
-                weight: 5,
-                opacity: 0.8,
+                color: '#0000FF', // Stark Blue for maximum visibility
+                weight: 8, // Thicker line
+                opacity: 1.0,
                 lineCap: 'round',
                 lineJoin: 'round',
-                className: 'blinking-highlight',
               }}
             />
           )}
