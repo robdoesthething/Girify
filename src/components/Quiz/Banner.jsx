@@ -1,5 +1,4 @@
 import React from 'react';
-
 import { useTheme } from '../../context/ThemeContext';
 import PropTypes from 'prop-types';
 
@@ -7,19 +6,22 @@ const Banner = ({ currentQuestionIndex, totalQuestions }) => {
   const { theme, t } = useTheme();
 
   return (
-    <div className="absolute top-12 left-0 right-0 z-[1000] flex flex-col shadow-lg">
-      <div className="bg-[#000080] text-white font-bold py-3 px-4 uppercase tracking-wider text-xs sm:text-sm flex items-center justify-between">
-        <span className="opacity-90">{t('whichStreet')}</span>
-        <span className="opacity-90">
-          {t('question')} {currentQuestionIndex + 1} <span className="opacity-50">{t('of')}</span>{' '}
-          {totalQuestions}
-        </span>
-      </div>
-      <div className={`w-full h-1.5 ${theme === 'dark' ? 'bg-slate-700' : 'bg-slate-200'}`}>
-        <div
-          className="bg-sky-500 h-1.5 transition-all duration-500 shadow-[0_0_8px_rgba(14,165,233,0.5)]"
-          style={{ width: `${((currentQuestionIndex + 1) / totalQuestions) * 100}%` }}
-        />
+    <div className="absolute top-4 left-4 right-4 md:left-1/2 md:-translate-x-1/2 md:max-w-xl z-[1000]">
+      <div className="glass-panel rounded-xl flex flex-col overflow-hidden shadow-2xl ring-1 ring-white/20">
+        <div className="flex items-center justify-between px-6 py-3 bg-[#000080]/80 backdrop-blur-md text-white">
+          <span className="text-xs font-bold uppercase tracking-widest opacity-90">
+            {t('whichStreet')}
+          </span>
+          <span className="text-xs font-mono font-bold opacity-80 bg-white/10 px-2 py-1 rounded">
+            {currentQuestionIndex + 1} / {totalQuestions}
+          </span>
+        </div>
+        <div className={`w-full h-1 ${theme === 'dark' ? 'bg-slate-800' : 'bg-slate-200'}`}>
+          <div
+            className="bg-sky-500 h-full transition-all duration-500 shadow-[0_0_10px_#0ea5e9]"
+            style={{ width: `${((currentQuestionIndex + 1) / totalQuestions) * 100}%` }}
+          />
+        </div>
       </div>
     </div>
   );
