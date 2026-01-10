@@ -51,12 +51,14 @@ import { getUnreadAnnouncements, markAnnouncementAsRead } from './utils/news';
 
 import PrivacyPolicy from './components/PrivacyPolicy';
 import TermsOfService from './components/TermsOfService';
+import VerifyEmailScreen from './components/VerifyEmailScreen';
 
 const AppRoutes = () => {
   const { theme, t, deviceMode } = useTheme();
   const [state, dispatch] = useReducer(gameReducer, initialState);
   const location = useLocation();
   const navigate = useNavigate();
+  const [emailVerified, setEmailVerified] = useState(true); // Default true to not block guests unless auth'd
 
   // Announcement Modal State
   const [pendingAnnouncement, setPendingAnnouncement] = useState(null);
@@ -454,6 +456,7 @@ const AppRoutes = () => {
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async user => {
       if (user) {
+        setEmailVerified(user.emailVerified);
         let displayName = (user.displayName || user.email?.split('@')[0] || 'User').toLowerCase();
 
         // MIGRATION 2.0: Ensure handle format (@Name1234)
@@ -664,6 +667,8 @@ const AppRoutes = () => {
                   theme={theme}
                   hasPlayedToday={hasPlayedToday}
                 />
+              ) : !emailVerified ? (
+                <VerifyEmailScreen theme={theme} />
               ) : (
                 <GameScreen
                   state={state}
