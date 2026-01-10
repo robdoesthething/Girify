@@ -17,6 +17,7 @@ import AdminPanel from './components/AdminPanel';
 import StreetsFetcher from './components/StreetsFetcher';
 import NewsScreen from './components/NewsScreen';
 import AnnouncementModal from './components/AnnouncementModal';
+import LandingPage from './components/LandingPage';
 
 import { useTheme } from './context/ThemeContext';
 import rawStreets from './data/streets.json';
@@ -656,20 +657,29 @@ const AppRoutes = () => {
           <Route
             path="/"
             element={
-              <GameScreen
-                state={state}
-                dispatch={dispatch}
-                theme={theme}
-                deviceMode={deviceMode}
-                t={t}
-                currentStreet={currentStreet}
-                handleSelectAnswer={handleSelectAnswer}
-                handleNext={handleNext}
-                processAnswer={processAnswer}
-                setupGame={setupGame}
-                handleRegister={handleRegister}
-                hasPlayedToday={hasPlayedToday}
-              />
+              !state.username ? (
+                <LandingPage
+                  onStart={() => dispatch({ type: 'SET_GAME_STATE', payload: 'register' })}
+                  onLogin={() => dispatch({ type: 'SET_GAME_STATE', payload: 'register' })}
+                  theme={theme}
+                  hasPlayedToday={hasPlayedToday}
+                />
+              ) : (
+                <GameScreen
+                  state={state}
+                  dispatch={dispatch}
+                  theme={theme}
+                  deviceMode={deviceMode}
+                  t={t}
+                  currentStreet={currentStreet}
+                  handleSelectAnswer={handleSelectAnswer}
+                  handleNext={handleNext}
+                  processAnswer={processAnswer}
+                  setupGame={setupGame}
+                  handleRegister={handleRegister}
+                  hasPlayedToday={hasPlayedToday}
+                />
+              )
             }
           />
           <Route

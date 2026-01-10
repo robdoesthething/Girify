@@ -26,7 +26,7 @@ const ChangeView = ({ coords }) => {
       // Flatten to get bounds of all segments
       const allPoints = coords.flat();
       // maxZoom 15 covers "nearbies" better than 16 (too close)
-      map.flyToBounds(allPoints, { padding: [100, 100], maxZoom: 15, duration: 2.5 });
+      map.flyToBounds(allPoints, { padding: [100, 100], maxZoom: 15, duration: 1.5 });
     } else {
       // Default view to Barcelona center
       map.setView([41.3879, 2.1699], 13);
@@ -325,7 +325,7 @@ const MapArea = ({ currentStreet, hintStreets = [], theme = 'dark' }) => {
                 opacity: 0.8,
                 lineCap: 'round',
                 lineJoin: 'round',
-                className: 'pulse-slow',
+                className: 'blinking-highlight',
               }}
             />
           )}

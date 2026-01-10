@@ -1,97 +1,143 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useTheme } from '../context/ThemeContext';
 // eslint-disable-next-line no-unused-vars
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import Logo from './Logo';
 import SeoHead from './SeoHead';
 import { Link } from 'react-router-dom';
 
-const LandingPage = ({ onStart, onLogin, theme, hasPlayedToday }) => {
+const NEWS_HEADLINES = [
+  'BREAKING: Local man finds parking in Gràcia on first try.',
+  "ALERT: Guiri asks for 'Sangria' at classic Bodega.",
+  'UPDATE: Rent prices drop by 0.00% this month.',
+  'SCANDAL: Pidgeon steals whole croissant from tourist.',
+];
+
+const LandingPage = ({ onStart, onLogin, theme }) => {
   const { t } = useTheme();
+  // Simple ticker for "Mejur Jouma" news
+  const [newsIndex, setNewsIndex] = useState(0);
+
+  // Use lazy state initialization for stable random number (pure and efficient)
+  const [dailyPlayers] = useState(() => Math.floor(Math.random() * 500) + 1200);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setNewsIndex(prev => (prev + 1) % NEWS_HEADLINES.length);
+    }, 4000);
+    return () => clearInterval(interval);
+  }, []);
 
   return (
     <div
       className={`min-h-screen flex flex-col ${theme === 'dark' ? 'bg-slate-950 text-white' : 'bg-slate-50 text-slate-900'} font-inter overflow-x-hidden`}
     >
       <SeoHead
-        title={t('landingTitle') || 'Play Barcelona Streets Quiz'}
-        description={
-          t('landingDescription') ||
-          "Test your knowledge of Barcelona's streets. Compete in daily challenges, earn badges, and climb the leaderboard."
-        }
+        title="Girify - Guiris vs Locals"
+        description="Defend Barcelona from the tourist invasion. Guess streets, earn Giuros, and prove you are a true local."
       />
 
       {/* Hero Section */}
-      <main className="flex-1 flex flex-col items-center justify-center pt-20 px-6 pb-12 text-center relative w-full max-w-7xl mx-auto">
-        {/* Background Elements */}
-        <div className="absolute inset-0 pointer-events-none overflow-hidden opacity-30 dark:opacity-20 top-[-20%]">
-          <div className="absolute top-0 left-1/4 w-96 h-96 bg-sky-500 rounded-full blur-[100px] -translate-x-1/2 -translate-y-1/2" />
-          <div className="absolute top-1/3 right-1/4 w-96 h-96 bg-emerald-500 rounded-full blur-[100px] translate-x-1/2 translate-y-1/2" />
+      <main className="flex-1 flex flex-col items-center pt-10 px-4 pb-12 w-full max-w-7xl mx-auto">
+        <div className="w-full flex justify-between items-center mb-8 px-4">
+          <Logo className="h-16 w-auto object-contain" />
+          <button onClick={onLogin} className="px-6 py-2 rounded-xl text-sm font-bold glass-button">
+            {t('login') || 'Login'}
+          </button>
         </div>
 
         <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.8 }}
-          className="relative z-10 w-full flex flex-col items-center mb-16"
+          className="relative z-10 w-full flex flex-col items-center text-center max-w-4xl"
         >
-          <Logo className="h-32 md:h-40 w-auto object-contain mb-8 hover:scale-105 transition-transform duration-500 drop-shadow-[0_0_15px_rgba(255,255,255,0.2)]" />
+          {/* Pixel Art Hero */}
+          <div className="relative w-full max-w-2xl aspect-video rounded-3xl overflow-hidden shadow-2xl border-4 border-slate-900 dark:border-white/10 mb-8 group">
+            <img
+              src="/images/guiri_invasion.png"
+              alt="Guiris invading Barcelona"
+              className="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-700"
+            />
+            <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/80 to-transparent p-6 pt-20">
+              <h2 className="text-white text-xl md:text-3xl font-black tracking-tight text-balance shadow-black drop-shadow-lg">
+                THE INVASION HAS BEGUN.
+              </h2>
+              <p className="text-white/80 text-sm md:text-base mt-2 font-mono">
+                Only true locals can save the city... by guessing streets correctly.
+              </p>
+            </div>
+          </div>
 
-          <h1 className="heading-xl mb-6 max-w-4xl mx-auto text-balance">
-            {t('landingHeadline') || 'Master the Streets of Barcelona'}
-          </h1>
+          <h1 className="heading-xl mb-6 max-w-2xl mx-auto text-balance">Reclaim the Streets!</h1>
 
-          <p className="text-lg md:text-2xl font-light opacity-80 mb-10 max-w-2xl leading-relaxed text-balance">
-            {t('landingSubheadline') ||
-              'Join locals and explorers in the ultimate daily street trivia challenge.'}
+          <p className="text-lg md:text-xl font-medium opacity-70 mb-10 max-w-xl leading-relaxed text-balance">
+            Prove you know your city better than a tourist with a map. Earn{' '}
+            <span className="text-yellow-500 font-bold">Giuros</span>, collect badges, and defend
+            your neighborhood.
           </p>
 
-          <div className="flex flex-col sm:flex-row gap-4 w-full max-w-md justify-center">
+          <div className="flex flex-col sm:flex-row gap-4 w-full max-w-md justify-center mb-16">
             <button
               onClick={onStart}
-              className="flex-1 px-8 py-5 rounded-2xl font-black text-xl bg-sky-500 hover:bg-sky-400 text-white shadow-sky-500/30 ring-4 ring-sky-500/20 transform hover:scale-105 transition-all duration-300 shadow-2xl"
+              className="flex-1 px-8 py-4 rounded-xl font-black text-xl bg-sky-500 hover:bg-sky-400 text-white shadow-lg shadow-sky-500/30 transform hover:-translate-y-1 transition-all duration-300"
             >
-              {hasPlayedToday ? t('playAgain') || 'Play Again' : t('startQuiz') || 'Play Now'}
-            </button>
-            <button
-              onClick={onLogin}
-              className={`flex-1 px-8 py-5 rounded-2xl font-bold text-xl transform hover:scale-105 transition-all duration-300 glass-button
-                ${
-                  theme === 'dark'
-                    ? 'text-slate-300 border-slate-700 hover:border-slate-500'
-                    : 'text-slate-700 border-slate-300 hover:border-slate-400'
-                }`}
-            >
-              {t('login') || 'Login'}
+              Start Mission
             </button>
           </div>
 
-          {/* Social Proof Text */}
-          <p className="mt-8 text-sm opacity-60 font-medium tracking-wide">
-            Compete, Earn Badges, and Rank Up!
-          </p>
+          {/* Social / Mayor Section */}
+          <div className="w-full grid grid-cols-1 md:grid-cols-2 gap-6 p-4">
+            {/* Character Card */}
+            <div className="bg-slate-100 dark:bg-slate-900 rounded-3xl p-6 flex items-center gap-4 text-left border border-slate-200 dark:border-slate-800 relative overflow-hidden">
+              <div className="absolute top-0 right-0 p-2 opacity-10 font-black text-6xl">NEWS</div>
+              <img
+                src="/images/mejur_jouma.png"
+                alt="Mejur Jouma"
+                className="w-24 h-24 rounded-full border-4 border-yellow-500 shadow-lg bg-indigo-900 object-cover"
+              />
+              <div>
+                <div className="text-yellow-500 font-bold text-xs uppercase mb-1">
+                  Mejur Jouma Reports
+                </div>
+                <div className="font-bold text-sm h-12 flex items-center">
+                  <AnimatePresence mode="wait">
+                    <motion.p
+                      key={newsIndex}
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -10 }}
+                      className="line-clamp-2"
+                    >
+                      "{NEWS_HEADLINES[newsIndex]}"
+                    </motion.p>
+                  </AnimatePresence>
+                </div>
+              </div>
+            </div>
+
+            {/* Features Card */}
+            <div className="bg-slate-100 dark:bg-slate-900 rounded-3xl p-6 flex flex-col justify-center text-left border border-slate-200 dark:border-slate-800">
+              <div className="flex gap-4 mb-4">
+                <div className="flex-1 text-center p-2 rounded-xl bg-slate-200 dark:bg-slate-800">
+                  <div className="text-2xl">🏆</div>
+                  <div className="text-[10px] uppercase font-bold opacity-60 mt-1">Rank Up</div>
+                </div>
+                <div className="flex-1 text-center p-2 rounded-xl bg-slate-200 dark:bg-slate-800">
+                  <div className="text-2xl">🦐</div>
+                  <div className="text-[10px] uppercase font-bold opacity-60 mt-1">No Guiris</div>
+                </div>
+                <div className="flex-1 text-center p-2 rounded-xl bg-slate-200 dark:bg-slate-800">
+                  <div className="text-2xl">💰</div>
+                  <div className="text-[10px] uppercase font-bold opacity-60 mt-1">Get Rich</div>
+                </div>
+              </div>
+              <p className="text-xs opacity-60 text-center">
+                Join {dailyPlayers} locals playing today.
+              </p>
+            </div>
+          </div>
         </motion.div>
-
-        {/* Features Minimal */}
-        <div className="w-full grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto mt-8">
-          <div className="p-6 rounded-2xl glass-panel text-left">
-            <div className="text-3xl mb-2">🗺️</div>
-            <h3 className="font-bold text-lg">Explore</h3>
-            <p className="text-sm opacity-70">Discover new corners of the city every day.</p>
-          </div>
-          <div className="p-6 rounded-2xl glass-panel text-left">
-            <div className="text-3xl mb-2">🧠</div>
-            <h3 className="font-bold text-lg">Guess</h3>
-            <p className="text-sm opacity-70">Test your knowledge without multiple choice.</p>
-          </div>
-          <div className="p-6 rounded-2xl glass-panel text-left">
-            <div className="text-3xl mb-2">🏅</div>
-            <h3 className="font-bold text-lg">Earn Badges</h3>
-            <p className="text-sm opacity-70">
-              Collect exclusive rewards and show off your status.
-            </p>
-          </div>
-        </div>
       </main>
 
       {/* Footer */}
