@@ -2,7 +2,6 @@ import React, { useEffect, useState } from 'react';
 import { useTheme } from '../context/ThemeContext';
 // eslint-disable-next-line no-unused-vars
 import { motion, AnimatePresence } from 'framer-motion';
-import Logo from './Logo';
 import SeoHead from './SeoHead';
 import { Link } from 'react-router-dom';
 
@@ -17,9 +16,6 @@ const LandingPage = ({ onStart, onLogin, theme }) => {
   const { t } = useTheme();
   // Simple ticker for "Mejur Jouma" news
   const [newsIndex, setNewsIndex] = useState(0);
-
-  // Use lazy state initialization for stable random number (pure and efficient)
-  const [dailyPlayers] = useState(() => Math.floor(Math.random() * 500) + 1200);
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -37,28 +33,13 @@ const LandingPage = ({ onStart, onLogin, theme }) => {
         description="Master the streets of Barcelona. Guess streets, earn Giuros, and prove you know the real city."
       />
 
-      {/* Hero Section */}
-      <main className="flex-1 flex flex-col items-center pt-24 px-4 pb-12 w-full max-w-7xl mx-auto z-10">
-        <div className="w-full flex justify-between items-center mb-8 px-4 absolute top-6 left-0 right-0 max-w-7xl mx-auto pointer-events-none">
-          {/* Logo is placed by layout usually, but if independent: */}
-          <div className="pointer-events-auto">
-            <Logo className="h-16 w-auto object-contain" />
-          </div>
-          <div className="pointer-events-auto">
-            <button
-              onClick={onLogin}
-              className="px-4 py-2 font-bold text-sm bg-white/10 hover:bg-white/20 rounded-lg backdrop-blur-md transition-colors border border-white/10"
-            >
-              Log In
-            </button>
-          </div>
-        </div>
-
+      {/* Hero Section - pt-16 to account for fixed TopBar */}
+      <main className="flex-1 flex flex-col items-center pt-16 px-4 pb-12 w-full max-w-7xl mx-auto z-10">
         <motion.div
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.8 }}
-          className="relative z-10 w-full flex flex-col items-center text-center max-w-4xl"
+          className="relative z-10 w-full flex flex-col items-center text-center max-w-4xl pt-8"
         >
           {/* Pixel Art Hero */}
           <div className="relative w-full max-w-2xl aspect-video rounded-3xl overflow-hidden shadow-2xl border-4 border-slate-900 dark:border-white/10 mb-8 group">
@@ -89,7 +70,7 @@ const LandingPage = ({ onStart, onLogin, theme }) => {
 
           <div className="flex flex-col sm:flex-row gap-4 w-full max-w-md justify-center mb-16">
             <button
-              onClick={onLogin} // CTAs usually go to Register/Login flow if not logged in
+              onClick={onLogin}
               className="flex-1 px-8 py-4 rounded-xl font-black text-xl bg-sky-500 hover:bg-sky-400 text-white shadow-lg shadow-sky-500/30 transform hover:-translate-y-1 transition-all duration-300"
             >
               Sign Up to Play
@@ -152,7 +133,7 @@ const LandingPage = ({ onStart, onLogin, theme }) => {
         </motion.div>
       </main>
 
-      {/* Footer */}
+      {/* Footer - Single copyright notice */}
       <footer className="relative mt-auto p-8 text-center text-sm opacity-40 font-mono z-10 bg-slate-100/50 dark:bg-slate-900/50 backdrop-blur-sm">
         <p className="mb-2">&copy; {new Date().getFullYear()} Girify · Barcelona</p>
         <div className="flex justify-center gap-4">
@@ -163,7 +144,6 @@ const LandingPage = ({ onStart, onLogin, theme }) => {
             Terms
           </Link>
         </div>
-        <p className="mt-4 text-xs">Vibe Coded with React & Firebase</p>
       </footer>
     </div>
   );
