@@ -220,7 +220,7 @@ const AdminPanel = () => {
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-sky-500"></div>
           </div>
         ) : (
-          <div className="max-w-5xl mx-auto">
+          <div className="max-w-5xl w-full">
             {/* DASHBOARD */}
             {activeTab === 'dashboard' && (
               <div className="space-y-8">

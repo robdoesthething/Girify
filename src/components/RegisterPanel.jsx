@@ -107,7 +107,7 @@ const getAuthErrorMessage = (code, message) => {
   }
 };
 
-const RegisterPanel = ({ theme: themeProp }) => {
+const RegisterPanel = ({ theme: themeProp, onRegister }) => {
   const { t } = useTheme();
   const theme = themeProp;
   const [isSignUp, setIsSignUp] = useState(false);
@@ -170,6 +170,9 @@ const RegisterPanel = ({ theme: themeProp }) => {
     if (!localStorage.getItem('girify_joined')) {
       localStorage.setItem('girify_joined', new Date().toLocaleDateString());
     }
+    // Callback to parent to close modal / start game
+    if (onRegister) onRegister(handle);
+
     setLoading(false);
   };
 
@@ -213,11 +216,12 @@ const RegisterPanel = ({ theme: themeProp }) => {
           email: email,
         });
 
-        await handlePostLogin(handle, false);
-
+        await auth.signOut();
         // eslint-disable-next-line no-console
         console.log('Verification email sent!');
+        setError(t('verificationSent') || 'Verification email sent! Please check your inbox.');
         setIsSignUp(false); // Switch to sign in view
+        setLoading(false);
         return;
       }
 
@@ -233,7 +237,16 @@ const RegisterPanel = ({ theme: themeProp }) => {
         return;
       }
 
-      setLoading(false);
+      // Fetch profile to get handle
+      const profile = await ensureUserProfile(
+        userCredential.user.displayName, // Fallback if needed, but ensureUserProfile handles extraction
+        userCredential.user.uid,
+        { email: email }
+      );
+
+      const handle = profile?.username || userCredential.user.displayName || 'User';
+
+      await handlePostLogin(handle, profile);
     } catch (err) {
       setError(getAuthErrorMessage(err.code));
       setLoading(false);
@@ -383,6 +396,7 @@ const RegisterPanel = ({ theme: themeProp }) => {
 
 RegisterPanel.propTypes = {
   theme: PropTypes.oneOf(['dark', 'light']).isRequired,
+  onRegister: PropTypes.func,
 };
 
 export default RegisterPanel;
