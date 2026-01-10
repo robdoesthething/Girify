@@ -31,3 +31,4 @@ dist-ssr
 *storybook.log
 storybook-static
 .env.development
+service-account.json
