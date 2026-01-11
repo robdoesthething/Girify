@@ -207,7 +207,7 @@ const translations = {
     skip: 'Skip',
     shapeTheFuture: 'SHAPE THE FUTURE',
     whatFeaturesTitle: 'What features do you want?',
-    earnForFeedback: 'Earn 50 Giuros for your ideas!',
+    earnForFeedback: 'Earn Giuros for useful ideas!',
     feedbackPlaceholderFeatures: 'I wish the game had...',
 
     // News
@@ -448,7 +448,7 @@ const translations = {
     skip: 'Saltar',
     shapeTheFuture: 'MOLDEA EL FUTURO',
     whatFeaturesTitle: '¿Qué funciones quieres?',
-    earnForFeedback: '¡Gana 50 Giuros por tus ideas!',
+    earnForFeedback: '¡Gana Giuros por tus ideas útiles!',
     feedbackPlaceholderFeatures: 'Me gustaría que el juego tuviera...',
 
     // News
@@ -670,7 +670,7 @@ const translations = {
     skip: 'Salta',
     shapeTheFuture: 'MODELA EL FUTUR',
     whatFeaturesTitle: 'Quines funcions vols?',
-    earnForFeedback: 'Guanya 50 Giuros per les teves idees!',
+    earnForFeedback: 'Guanya Giuros per les teves idees útils!',
     feedbackPlaceholderFeatures: "M'agradaria que el joc tingués...",
 
     // News

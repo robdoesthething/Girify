@@ -5,6 +5,7 @@ export const initialState = {
   username:
     typeof localStorage !== 'undefined' ? localStorage.getItem('girify_username') || '' : '',
   realName: localStorage.getItem('girify_realName') || '', // New field for user's real name
+  profileLoaded: false, // True once profile is fetched from Firestore
   streak: 0, // Streak from DB
   quizStreets: [],
   currentQuestionIndex: 0,
@@ -39,12 +40,19 @@ export function gameReducer(state, action) {
       return {
         ...state,
         realName: action.payload,
+        profileLoaded: true,
       };
 
     case 'SET_STREAK':
       return {
         ...state,
         streak: action.payload,
+      };
+
+    case 'SET_PROFILE_LOADED':
+      return {
+        ...state,
+        profileLoaded: true,
       };
 
     case 'SET_GAME_STATE':
@@ -163,6 +171,8 @@ export function gameReducer(state, action) {
       return {
         ...state,
         username: '',
+        realName: '',
+        profileLoaded: false,
         gameState: 'intro',
         activePage: null,
       };

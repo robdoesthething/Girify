@@ -76,7 +76,7 @@ const AboutScreen = ({ onClose: _onClose }) => {
                   Built with love (and too much caffeine) by a local developer who got tired of
                   getting lost in Eixample.
                 </p>
-                <p className="text-xs opacity-60">Roberto Sánchez Gallego</p>
+                <p className="text-xs opacity-60">Anonymous Developer</p>
               </div>
             </div>
 

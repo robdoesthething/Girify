@@ -32,7 +32,9 @@ export const getShopItems = async (forceRefresh = false) => {
       avatarFrames: items.filter(i => i.type === 'frame'),
       titles: items.filter(i => i.type === 'title'),
       special: items.filter(i => i.type === 'special'),
-      avatars: items.filter(i => i.type === 'avatar' || (i.id && i.id.startsWith('avatar_'))),
+      avatars: items.filter(
+        i => i.type === 'avatar' || i.type === 'avatars' || (i.id && i.id.startsWith('avatar_'))
+      ),
       all: items,
     };
 
