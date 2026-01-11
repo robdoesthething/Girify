@@ -3,6 +3,7 @@ import { useTheme } from '../context/ThemeContext';
 import { getAllUsers, getFeedbackList, updateUserAsAdmin } from '../utils/social';
 import { getAllAnnouncements, createAnnouncement, deleteAnnouncement } from '../utils/news';
 import { getShopItems, createShopItem, deleteShopItem, updateShopItem } from '../utils/shop';
+import AdminGiuros from './AdminGiuros';
 // eslint-disable-next-line no-unused-vars
 import { motion, AnimatePresence } from 'framer-motion';
 import { ACHIEVEMENT_BADGES } from '../data/achievements';
@@ -197,19 +198,21 @@ const AdminPanel = () => {
       >
         <h1 className="text-2xl font-black mb-8 text-sky-500">Girify Admin</h1>
         <nav className="flex flex-col gap-2">
-          {['dashboard', 'users', 'shop', 'feedback', 'announcements', 'analytics'].map(tab => (
-            <button
-              key={tab}
-              onClick={() => setActiveTab(tab)}
-              className={`text-left px-4 py-3 rounded-xl font-bold transition-all ${
-                activeTab === tab
-                  ? 'bg-sky-500 text-white shadow-lg shadow-sky-500/20'
-                  : 'hover:bg-slate-100 dark:hover:bg-slate-800 opacity-60 hover:opacity-100'
-              }`}
-            >
-              {tab.charAt(0).toUpperCase() + tab.slice(1)}
-            </button>
-          ))}
+          {['dashboard', 'users', 'shop', 'feedback', 'announcements', 'analytics', 'giuros'].map(
+            tab => (
+              <button
+                key={tab}
+                onClick={() => setActiveTab(tab)}
+                className={`text-left px-4 py-3 rounded-xl font-bold transition-all ${
+                  activeTab === tab
+                    ? 'bg-sky-500 text-white shadow-lg shadow-sky-500/20'
+                    : 'hover:bg-slate-100 dark:hover:bg-slate-800 opacity-60 hover:opacity-100'
+                }`}
+              >
+                {tab.charAt(0).toUpperCase() + tab.slice(1)}
+              </button>
+            )
+          )}
         </nav>
       </div>
 
@@ -221,6 +224,11 @@ const AdminPanel = () => {
           </div>
         ) : (
           <div className="max-w-5xl w-full mx-auto">
+            {/* GIUROS ECONOMICS */}
+            {activeTab === 'giuros' && (
+              <AdminGiuros users={users} shopItems={shopItems} theme={theme} />
+            )}
+
             {/* DASHBOARD */}
             {activeTab === 'dashboard' && (
               <div className="space-y-8">

@@ -144,20 +144,18 @@ const GameScreen = ({
               </p>
               <button
                 onClick={() => setupGame()}
-                className="group w-32 h-32 rounded-full bg-sky-500 hover:bg-sky-400 text-white shadow-2xl shadow-sky-500/50 transform hover:scale-110 transition-all duration-300 flex items-center justify-center mx-auto"
+                className="px-12 py-4 rounded-full bg-blue-700 hover:bg-blue-600 text-white shadow-2xl shadow-blue-900/50 transform hover:scale-105 transition-all duration-300 flex items-center justify-center mx-auto"
               >
-                <svg
-                  className="w-16 h-16 ml-2 group-hover:scale-110 transition-transform"
-                  fill="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path d="M8 5v14l11-7z" />
-                </svg>
+                <span className="font-black text-xl tracking-wider">
+                  {state.quizResults?.length > 0
+                    ? t('playAgain') || 'REPETIR REPTE'
+                    : t('playChallenge') || 'PLAY CHALLENGE'}
+                </span>
               </button>
               <p
-                className={`mt-6 text-sm opacity-50 ${theme === 'dark' ? 'text-slate-400' : 'text-slate-500'}`}
+                className={`mt-8 text-sm opacity-60 font-medium tracking-wide ${theme === 'dark' ? 'text-slate-400' : 'text-slate-500'}`}
               >
-                Click to start today's challenge
+                {t('clickToStart') || "Click to start today's challenge"}
               </p>
             </div>
           </div>

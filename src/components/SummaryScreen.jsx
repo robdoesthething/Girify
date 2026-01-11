@@ -61,43 +61,59 @@ const SummaryScreen = ({ score, total, theme, username, onRestart, quizStreets, 
       className={`absolute inset-0 flex flex-col items-center justify-center p-6 text-center backdrop-blur-md transition-colors duration-500 pointer-events-auto overflow-y-auto font-inter
             ${theme === 'dark' ? 'bg-slate-950/95 text-white' : 'bg-slate-50/95 text-slate-800'}`}
     >
-      {/* Curiosity Screen */}
       {view === 'curiosity' && (
         <motion.div
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
           className="flex flex-col items-center max-w-md relative z-20 w-full"
         >
-          <h2 className="text-xs font-black mb-2 text-sky-500 uppercase tracking-[0.3em]">
+          <h2 className="text-xs font-black mb-2 text-sky-400 uppercase tracking-[0.3em] drop-shadow-md">
             City Curiosity
           </h2>
-          <h3 className="text-2xl md:text-3xl font-bold tracking-tight mb-6 text-balance text-white drop-shadow-lg">
+          <h3 className="text-3xl md:text-4xl font-black tracking-tight mb-6 text-balance text-white drop-shadow-[0_2px_10px_rgba(0,0,0,0.8)] leading-tight">
             {curiosity.title}
           </h3>
 
-          <div className="glass-panel w-full overflow-hidden mb-8 shadow-2xl group">
+          <div className="glass-panel w-full overflow-hidden mb-6 shadow-2xl group border border-white/10 relative">
             <div className="overflow-hidden h-64 w-full relative">
               <img
                 src={displayImage}
                 alt="Barcelona"
                 className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 to-transparent" />
+              <div className="absolute inset-0 bg-gradient-to-t from-slate-900/90 via-transparent to-transparent" />
+              <div className="absolute bottom-4 right-4">
+                <button
+                  onClick={handleShare}
+                  className="p-2 rounded-full bg-white/10 backdrop-blur-md border border-white/20 hover:bg-white/20 transition-all active:scale-95"
+                  title="Share this curiosity"
+                >
+                  🎁
+                </button>
+              </div>
             </div>
 
-            <div className="p-8 text-left">
-              <p className="text-xl leading-relaxed font-medium text-slate-700">
+            <div className="p-6 text-left relative z-10 bg-slate-900/40 backdrop-blur-sm">
+              <p className="text-lg leading-relaxed font-medium text-slate-100 drop-shadow-sm">
                 "{curiosity.fact}"
               </p>
             </div>
           </div>
 
-          <button
-            onClick={handleNext}
-            className="w-full py-4 bg-sky-500 hover:bg-sky-400 text-white rounded-2xl shadow-xl shadow-sky-500/20 font-bold text-lg transition-all transform hover:scale-[1.02]"
-          >
-            {t('next') || 'Next'}
-          </button>
+          <div className="flex gap-3 w-full">
+            <button
+              onClick={handleShare}
+              className="flex-1 py-4 bg-white/5 hover:bg-white/10 border border-white/10 text-white rounded-2xl font-bold text-sm transition-all"
+            >
+              🎁 {t('share') || 'Share & Earn'}
+            </button>
+            <button
+              onClick={handleNext}
+              className="flex-[2] py-4 bg-sky-500 hover:bg-sky-400 text-white rounded-2xl shadow-xl shadow-sky-500/20 font-bold text-lg transition-all transform hover:scale-[1.02]"
+            >
+              {t('next') || 'Next'}
+            </button>
+          </div>
         </motion.div>
       )}
 
@@ -125,15 +141,8 @@ const SummaryScreen = ({ score, total, theme, username, onRestart, quizStreets, 
               </span>
             </div>
 
-            {/* Rank Card (Placeholder logic) */}
-            <div className="glass-panel p-4 flex flex-col items-center justify-center bg-emerald-500/10 border-emerald-500/20">
-              <span className="text-2xl mb-1">🌟</span>
-              <span className="text-sm font-bold text-emerald-400">Top 10%</span>
-              <span className="text-[10px] opacity-40">Estimated</span>
-            </div>
-
-            {/* Streak Card */}
-            <div className="glass-panel p-4 flex flex-col items-center justify-center bg-orange-500/10 border-orange-500/20">
+            {/* Streak Card - Full Width */}
+            <div className="glass-panel p-4 flex flex-col items-center justify-center bg-orange-500/10 border-orange-500/20 col-span-2">
               <span className="text-2xl mb-1">🔥</span>
               <span className="text-sm font-bold text-orange-400">Streak</span>
               <span className="text-[10px] opacity-40">Kept Alive</span>
