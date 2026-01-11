@@ -14,6 +14,43 @@ const SummaryScreen = ({ score, total, theme, username, onRestart, quizStreets, 
   const curiosity = useMemo(() => getCuriosityByStreets(quizStreets), [quizStreets]);
   const [displayImage, setDisplayImage] = useState(curiosity.image);
 
+  // Calculate streak using useMemo to avoid impure function during render
+  const streakValue = useMemo(() => {
+    try {
+      const history = JSON.parse(localStorage.getItem('girify_history') || '[]');
+      if (history.length === 0) return 1;
+
+      // Get unique dates (first game of each day)
+      const uniqueDates = [...new Set(history.map(h => h.date))].sort().reverse();
+      if (uniqueDates.length === 0) return 1;
+
+      // Count consecutive days from today/yesterday
+      const now = new Date();
+      const today = now.toISOString().split('T')[0].replace(/-/g, '');
+      const yesterdayDate = new Date(now);
+      yesterdayDate.setDate(yesterdayDate.getDate() - 1);
+      const yesterday = yesterdayDate.toISOString().split('T')[0].replace(/-/g, '');
+
+      // If last play wasn't today or yesterday, streak is broken
+      if (uniqueDates[0] !== today && uniqueDates[0] !== yesterday) return 1;
+
+      let streak = 0;
+      const expectedDate = new Date(now);
+
+      for (const dateStr of uniqueDates) {
+        const expected = expectedDate.toISOString().split('T')[0].replace(/-/g, '');
+        if (dateStr === expected) {
+          streak++;
+          expectedDate.setDate(expectedDate.getDate() - 1);
+        } else {
+          break;
+        }
+      }
+      return Math.max(streak, 1);
+    } catch {
+      return 1;
+    }
+  }, []);
   // Dynamic Greeting based on score percentage
   const getGreeting = () => {
     const percentage = score / maxPossibleScore;
@@ -163,21 +200,10 @@ const SummaryScreen = ({ score, total, theme, username, onRestart, quizStreets, 
             <div className="glass-panel p-4 flex flex-col items-center justify-center col-span-1 asp-square bg-orange-500/10 border-orange-500/20 relative overflow-hidden">
               <div className="absolute -right-4 -top-4 opacity-10 text-6xl">🔥</div>
               <span className="text-xs font-bold text-orange-400 uppercase tracking-wider mb-1">
-                Streak
+                {t('streak') || 'Streak'}
               </span>
-              <span className="text-3xl md:text-4xl font-black text-white">
-                {/* Placeholder streak calc - ideally passed in props or from localStorage */}
-                {(() => {
-                  try {
-                    const history = JSON.parse(localStorage.getItem('girify_history') || '[]');
-                    // Simple streak calculation
-                    return history.length; // Simplified for now, real streak logic is complex
-                  } catch {
-                    return 1;
-                  }
-                })()}
-              </span>
-              <span className="text-[10px] opacity-60 uppercase">Days Streak</span>
+              <span className="text-3xl md:text-4xl font-black text-white">{streakValue}</span>
+              <span className="text-[10px] opacity-60 uppercase">{t('daysStreak') || 'Days'}</span>
             </div>
           </div>
 

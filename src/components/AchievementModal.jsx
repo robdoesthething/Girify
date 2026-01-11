@@ -1,4 +1,5 @@
 import React from 'react';
+// eslint-disable-next-line no-unused-vars
 import { motion } from 'framer-motion';
 import { useTheme } from '../context/ThemeContext';
 import PropTypes from 'prop-types';
@@ -35,8 +36,11 @@ const AchievementModal = ({ achievement, onDismiss }) => {
         </div>
 
         <div className="relative z-10">
-          <h3 className="text-sm font-black text-yellow-500 uppercase tracking-widest mb-4">
-            {t('newAchievement') || 'NEW BADGE UNLOCKED!'}
+          <h3 className="text-xs font-black text-yellow-500/80 uppercase tracking-widest mb-1">
+            {t('new') || 'NEW'}
+          </h3>
+          <h3 className="text-lg font-black text-yellow-500 uppercase tracking-wider mb-4">
+            {t('achievementUnlocked') || 'Achievement Unlocked!'}
           </h3>
 
           <div className="mb-6 flex justify-center">
@@ -72,7 +76,7 @@ const AchievementModal = ({ achievement, onDismiss }) => {
             onClick={onDismiss}
             className="w-full py-4 bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-400 hover:to-orange-400 text-white rounded-xl font-black text-lg shadow-lg shadow-yellow-500/30 transform hover:scale-[1.02] transition-all"
           >
-            {t('awesome') || 'AWESOME!'}
+            {t('okay') || 'Okay'}
           </button>
         </div>
       </motion.div>

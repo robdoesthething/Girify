@@ -221,6 +221,12 @@ const translations = {
     // Game flow
     exitGameWarning: "Leave game? Your progress won't be lost—come back anytime!",
     haveFeedback: 'Have feedback? Share your ideas',
+    play: 'Play',
+    replay: 'Replay',
+    new: 'NEW',
+    achievementUnlocked: 'Achievement Unlocked!',
+    okay: 'Okay',
+    daysStreak: 'Days',
 
     // Landing Page
     landingTitle: 'Play Barcelona Streets Quiz',
@@ -448,6 +454,12 @@ const translations = {
     // Game flow
     exitGameWarning: '¿Salir del juego? Tu progreso no se perderá,¡vuelve cuando quieras!',
     haveFeedback: '¿Tienes sugerencias? Comparte tus ideas',
+    play: 'Jugar',
+    replay: 'Repetir',
+    new: 'NUEVO',
+    achievementUnlocked: '¡Logro Desbloqueado!',
+    okay: 'Vale',
+    daysStreak: 'Días',
 
     // Landing Page
     landingTitle: 'Juega al Quiz de Calles de Barcelona',
@@ -656,6 +668,12 @@ const translations = {
     // Game flow
     exitGameWarning: 'Sortir del joc? El teu progrés no es perdrà—torna quan vulguis!',
     haveFeedback: 'Tens suggeriments? Comparteix les teves idees',
+    play: 'Jugar',
+    replay: 'Repetir',
+    new: 'NOU',
+    achievementUnlocked: 'Assoliment Desbloquejat!',
+    okay: "D'acord",
+    daysStreak: 'Dies',
 
     // Landing Page
     landingTitle: 'Juga al Quiz de Carrers de Barcelona',
