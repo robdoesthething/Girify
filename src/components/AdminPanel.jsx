@@ -189,7 +189,7 @@ const AdminPanel = () => {
 
   return (
     <div
-      className={`h-screen flex pt-16 overflow-hidden ${theme === 'dark' ? 'bg-slate-900 text-white' : 'bg-slate-50 text-slate-900'}`}
+      className={`h-full flex pt-16 overflow-hidden ${theme === 'dark' ? 'bg-slate-900 text-white' : 'bg-slate-50 text-slate-900'}`}
     >
       {/* Sidebar - Narrower and fixed */}
       <div
