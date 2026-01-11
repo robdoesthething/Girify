@@ -23,7 +23,7 @@ export const getShopItems = async (forceRefresh = false) => {
     querySnapshot.forEach(doc => {
       items.push({ id: doc.id, ...doc.data() });
     });
-    console.log('Shop Fetch Success:', items.length, 'items');
+    console.warn('Shop Fetch Success:', items.length, 'items');
 
     // Group items
     const grouped = {

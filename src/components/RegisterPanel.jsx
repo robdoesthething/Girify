@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 // eslint-disable-next-line no-unused-vars
 import { motion } from 'framer-motion';
 import { auth, googleProvider } from '../firebase';
@@ -107,10 +107,15 @@ const getAuthErrorMessage = (code, message) => {
   }
 };
 
-const RegisterPanel = ({ theme: themeProp, onRegister }) => {
-  const { t } = useTheme();
-  const theme = themeProp;
-  const [isSignUp, setIsSignUp] = useState(false);
+const RegisterPanel = ({ theme: themeProp, onRegister, initialMode = 'signin' }) => {
+  const { theme: contextTheme, t } = useTheme();
+  const theme = themeProp || contextTheme; // Use prop if provided (GameScreen), else context (standalone)
+  const [isSignUp, setIsSignUp] = useState(initialMode === 'signup');
+
+  // Sync state with prop if it changes
+  useEffect(() => {
+    setIsSignUp(initialMode === 'signup');
+  }, [initialMode]);
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
   const [email, setEmail] = useState('');
@@ -134,12 +139,21 @@ const RegisterPanel = ({ theme: themeProp, onRegister }) => {
 
       if (existingProfile) {
         handle = existingProfile.username;
+        // Enforce @ if missing in existing profile (migration check)
+        if (!handle.startsWith('@')) {
+          handle = '@' + handle;
+        }
         avatarId = existingProfile.avatarId || avatarId;
         // eslint-disable-next-line no-console
         console.log(`[Auth] Found existing profile for email ${user.email}: ${handle}`);
       } else {
         // Create new handle if no profile exists
         handle = generateHandle(fullName);
+        // Ensure handle starts with @
+        if (!handle.startsWith('@')) {
+          handle = '@' + handle;
+        }
+
         if (user.displayName !== handle) {
           await updateProfile(user, { displayName: handle });
         }
@@ -244,7 +258,10 @@ const RegisterPanel = ({ theme: themeProp, onRegister }) => {
         { email: email }
       );
 
-      const handle = profile?.username || userCredential.user.displayName || 'User';
+      let handle = profile?.username || userCredential.user.displayName || 'User';
+      if (!handle.startsWith('@')) {
+        handle = '@' + handle;
+      }
 
       await handlePostLogin(handle, profile);
     } catch (err) {

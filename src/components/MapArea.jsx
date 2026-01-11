@@ -18,8 +18,9 @@ import PropTypes from 'prop-types';
  * Component to update map view when street changes
  * @param {Object} props
  * @param {number[][][]} props.coords - Coordinates of the street to focus on
+ * @param {Function} [props.onAnimationComplete] - Callback function to be called after the map animation completes
  */
-const ChangeView = ({ coords }) => {
+const ChangeView = ({ coords, onAnimationComplete }) => {
   const map = useMap();
   useEffect(() => {
     if (coords && coords.length > 0) {
@@ -32,11 +33,17 @@ const ChangeView = ({ coords }) => {
         setTimeout(() => {
           // Slower animation (3.5s) for comfortable viewing
           map.flyToBounds(allPoints, { padding: [50, 50], maxZoom: 16, duration: 3.5 });
+
+          // Trigger completion callback after animation duration + buffer
+          if (onAnimationComplete) {
+            setTimeout(() => {
+              onAnimationComplete();
+            }, 3600);
+          }
         }, 300);
       };
 
-      // If map already has tiles loaded, zoom immediately with small delay
-      // Otherwise wait for load event
+      // If map already has tiles loaded, use immediate logic
       if (map._loaded) {
         handleLoad();
       } else {
@@ -46,7 +53,7 @@ const ChangeView = ({ coords }) => {
       // Default view to Barcelona center
       map.setView([41.3879, 2.1699], 13);
     }
-  }, [coords, map]);
+  }, [coords, map, onAnimationComplete]);
   return null;
 };
 
@@ -277,7 +284,7 @@ const MapArea = ({ currentStreet, hintStreets = [], theme = 'dark' }) => {
           />
 
           {/* Helper to re-center */}
-          <ChangeView coords={geometry} />
+          <ChangeView coords={geometry} onAnimationComplete={props.onAnimationComplete} />
 
           {/* Manual Recenter Control */}
           <RecenterControl center={[41.3879, 2.1699]} zoom={13} bounds={geometry} />
@@ -338,7 +345,7 @@ const MapArea = ({ currentStreet, hintStreets = [], theme = 'dark' }) => {
             <Polyline
               positions={geometry}
               pathOptions={{
-                color: '#0000FF', // Stark Blue for maximum visibility
+                color: '#0f172a', // Dark Blue (Slate 900) matching question bar
                 weight: 8, // Thicker line
                 opacity: 1.0,
                 lineCap: 'round',
@@ -385,12 +392,14 @@ MapArea.propTypes = {
     })
   ),
   theme: PropTypes.oneOf(['dark', 'light']),
+  onAnimationComplete: PropTypes.func,
 };
 
 MapArea.defaultProps = {
   currentStreet: null,
   hintStreets: [],
   theme: 'dark',
+  onAnimationComplete: () => {},
 };
 
 export default MapArea;

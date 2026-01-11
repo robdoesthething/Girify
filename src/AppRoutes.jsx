@@ -650,10 +650,12 @@ const AppRoutes = () => {
       <TopBar
         onOpenPage={handleOpenPage}
         username={state.username}
-        onTriggerLogin={() => {
+        onTriggerLogin={(mode = 'signin') => {
+          dispatch({ type: 'SET_REGISTER_MODE', payload: mode });
           dispatch({ type: 'SET_GAME_STATE', payload: 'register' });
           navigate('/');
         }}
+        onLogout={handleLogout}
       />
 
       {/* Announcement Modal */}

@@ -231,7 +231,7 @@ const AdminPanel = () => {
 
             {/* DASHBOARD */}
             {activeTab === 'dashboard' && (
-              <div className="space-y-8">
+              <div className="space-y-8 max-w-7xl mx-auto">
                 <h2 className="text-3xl font-black">Overview</h2>
                 <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
                   <MetricCard title="Total Users" value={users.length} color="text-sky-500" />

@@ -21,6 +21,8 @@ export const initialState = {
   activePage: null, // 'leaderboard' | 'settings' | 'about' | 'profile' | null
   selectedAnswer: null, // New field for manual selection
   plannedQuestions: null, // Pre-generated quiz plan questions
+  registerMode: 'signin', // 'signin' | 'signup'
+  isInputLocked: false,
 };
 
 export function gameReducer(state, action) {
@@ -47,9 +49,10 @@ export function gameReducer(state, action) {
         feedback: 'idle',
         hintsRevealedCount: 0,
         startTime: Date.now(),
-        questionStartTime: Date.now(),
+        questionStartTime: null, // Will be set when animation completes (UNLOCK_INPUT)
         quizResults: [],
         options: action.payload.initialOptions || [],
+        isInputLocked: true, // Lock input until animation finishes
         selectedAnswer: null,
         plannedQuestions: action.payload.plannedQuestions || null,
       };
@@ -108,7 +111,8 @@ export function gameReducer(state, action) {
         feedback: 'idle',
         selectedAnswer: null,
         hintsRevealedCount: 0,
-        questionStartTime: Date.now(),
+        questionStartTime: null, // Wait for animation
+        isInputLocked: true,
         // Options should be set via SET_OPTIONS shortly after or in the same tick if possible,
         // but often we might need to calc them.
         // Ideally we pass them here if we pre-calc them.
@@ -126,6 +130,19 @@ export function gameReducer(state, action) {
       return {
         ...state,
         autoAdvance: action.payload,
+      };
+
+    case 'SET_REGISTER_MODE':
+      return {
+        ...state,
+        registerMode: action.payload,
+      };
+
+    case 'UNLOCK_INPUT':
+      return {
+        ...state,
+        isInputLocked: false,
+        questionStartTime: Date.now(), // Start timer now
       };
 
     case 'LOGOUT':

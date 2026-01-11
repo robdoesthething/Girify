@@ -5,6 +5,7 @@ import MapArea from './MapArea';
 import Quiz from './Quiz';
 import RegisterPanel from './RegisterPanel';
 import SummaryScreen from './SummaryScreen';
+import Logo from './Logo';
 import OnboardingTour from './OnboardingTour';
 import LandingPage from './LandingPage';
 
@@ -64,6 +65,7 @@ const GameScreen = ({
                 : []
             }
             theme={theme}
+            onAnimationComplete={() => dispatch({ type: 'UNLOCK_INPUT' })}
           />
         </div>
 
@@ -94,6 +96,7 @@ const GameScreen = ({
                     feedback={state.feedback}
                     correctName={currentStreet?.name}
                     autoAdvance={state.autoAdvance}
+                    disabled={state.isInputLocked}
                   />
                 </Quiz.Content>
 
@@ -131,20 +134,23 @@ const GameScreen = ({
           <div
             className={`absolute inset-0 z-[500] flex flex-col items-center justify-center backdrop-blur-sm ${theme === 'dark' ? 'bg-slate-950/70' : 'bg-white/70'}`}
           >
-            <div className="text-center">
+            <div className="text-center animate-fade-in-up">
+              <div className="mb-6 flex justify-center">
+                <Logo className="h-16 w-auto" />
+              </div>
               <h2
-                className={`text-3xl md:text-4xl font-black mb-4 ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}
+                className={`text-3xl md:text-5xl font-black mb-4 ${theme === 'dark' ? 'text-white' : 'text-slate-900'} tracking-tight`}
               >
-                Ready to Play?
+                PROVE YOU ARE A LOCAL
               </h2>
               <p
-                className={`text-lg mb-8 opacity-70 ${theme === 'dark' ? 'text-slate-300' : 'text-slate-600'}`}
+                className={`text-lg mb-10 font-medium ${theme === 'dark' ? 'text-slate-300' : 'text-slate-600'}`}
               >
                 Welcome back, {state.username.replace('@', '')}!
               </p>
               <button
                 onClick={() => setupGame()}
-                className="px-12 py-4 rounded-full bg-blue-700 hover:bg-blue-600 text-white shadow-2xl shadow-blue-900/50 transform hover:scale-105 transition-all duration-300 flex items-center justify-center mx-auto"
+                className="px-12 py-5 rounded-full bg-sky-500 hover:bg-sky-400 text-white shadow-xl shadow-sky-500/30 transform hover:scale-105 transition-all duration-300 flex items-center justify-center mx-auto ring-4 ring-sky-500/20"
               >
                 <span className="font-black text-xl tracking-wider">
                   {state.quizResults?.length > 0
@@ -218,7 +224,7 @@ const GameScreen = ({
       )}
 
       {state.gameState === 'register' && (
-        <RegisterPanel theme={theme} onRegister={handleRegister} />
+        <RegisterPanel theme={theme} onRegister={handleRegister} initialMode={state.registerMode} />
       )}
 
       {state.gameState === 'summary' && (
