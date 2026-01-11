@@ -654,8 +654,8 @@ const AdminPanel = () => {
                   {feedback.map(item => {
                     const handleApproveFeedback = async () => {
                       const amountStr = await showPrompt(
-                        'Enter Giuros reward amount:',
-                        '50',
+                        'Enter Giuros reward amount (e.g. 50, 100):',
+                        '',
                         'Approve Feedback'
                       );
                       if (amountStr === null) return; // Cancelled
@@ -1070,6 +1070,7 @@ const AdminPanel = () => {
                     flavorText: '',
                     description: '',
                     cssClass: '',
+                    image: '',
                   });
                   fetchData();
                 } else {
@@ -1111,6 +1112,7 @@ const AdminPanel = () => {
                     <option value="frame">Frame</option>
                     <option value="title">Title</option>
                     <option value="special">Special</option>
+                    <option value="avatars">Avatar</option>
                   </select>
                 </div>
               </div>
@@ -1201,6 +1203,23 @@ const AdminPanel = () => {
                     onChange={e => setNewShopItem({ ...newShopItem, cssClass: e.target.value })}
                     className="w-full p-3 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700"
                     placeholder="ring-4 ring-yellow-500..."
+                  />
+                </div>
+              )}
+              {newShopItem.type === 'avatars' && (
+                <div>
+                  <label
+                    htmlFor="shop-image"
+                    className="text-xs uppercase font-bold opacity-50 block mb-1"
+                  >
+                    Image URL
+                  </label>
+                  <input
+                    id="shop-image"
+                    value={newShopItem.image || ''}
+                    onChange={e => setNewShopItem({ ...newShopItem, image: e.target.value })}
+                    className="w-full p-3 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700"
+                    placeholder="https://..."
                   />
                 </div>
               )}

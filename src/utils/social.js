@@ -856,7 +856,25 @@ export const migrateUser = async (oldUsername, newHandle) => {
       username: newHandle,
       realName: profileData.realName || oldUsername,
       avatarId: profileData.avatarId || Math.floor(Math.random() * 20) + 1,
-      // Preserve joinedAt strictly
+      // Critical: Ensure cosmetics and currency are migrated even if undefined in source (fallback to defaults if needed)
+      purchasedCosmetics: profileData.purchasedCosmetics || [],
+      equippedCosmetics: profileData.equippedCosmetics || {},
+      giuros: profileData.giuros ?? 10,
+
+      // Stats & Preferences
+      streak: profileData.streak || 0,
+      maxStreak: profileData.maxStreak || 0,
+      totalScore: profileData.totalScore || 0,
+      lastPlayDate: profileData.lastPlayDate || null,
+      notificationSettings: profileData.notificationSettings || {
+        dailyReminder: true,
+        friendActivity: true,
+        newsUpdates: true,
+      },
+      theme: profileData.theme || 'auto',
+      language: profileData.language || 'en',
+
+      // Preserve confirmed data
       joinedAt: profileData.joinedAt || Timestamp.now(),
       migratedFrom: oldUsername,
       updatedAt: Timestamp.now(),
@@ -908,8 +926,8 @@ export const migrateUser = async (oldUsername, newHandle) => {
       console.warn('[Migration] Failed to migrate scores (non-critical):', e);
     }
 
-    // 4. Migrate Subcollections (Requests & Friends)
-    const subcollections = ['requests', 'friends'];
+    // 4. Migrate Subcollections (Requests, Friends, Games)
+    const subcollections = ['requests', 'friends', 'games'];
     for (const sub of subcollections) {
       try {
         const subQ = query(collection(db, USERS_COLLECTION, oldUsername, sub));
