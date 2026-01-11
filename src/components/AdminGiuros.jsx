@@ -101,7 +101,7 @@ const AdminGiuros = ({ users = [], shopItems = [], theme, onUpdateShopItem }) =>
         />
       </div>
 
-      <div className="grid grid-cols-1 xl:grid-cols-2 gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Income Sources (Editable) */}
         <div
           className={`p-6 rounded-2xl border ${theme === 'dark' ? 'bg-slate-800 border-slate-700' : 'bg-white border-slate-200'}`}
