@@ -48,10 +48,13 @@ import { gameReducer, initialState } from './reducers/gameReducer';
 import { auth } from './firebase';
 import { onAuthStateChanged, signOut, updateProfile } from 'firebase/auth';
 import { getUnreadAnnouncements, markAnnouncementAsRead } from './utils/news';
+import { getUnlockedAchievements } from './data/achievements';
+import { getUserProfile } from './utils/social';
 
 import PrivacyPolicy from './components/PrivacyPolicy';
 import TermsOfService from './components/TermsOfService';
 import VerifyEmailScreen from './components/VerifyEmailScreen';
+import AchievementModal from './components/AchievementModal';
 
 const AppRoutes = () => {
   const { theme, t, deviceMode } = useTheme();
@@ -62,6 +65,48 @@ const AppRoutes = () => {
 
   // Announcement Modal State
   const [pendingAnnouncement, setPendingAnnouncement] = useState(null);
+
+  // Achievement Modal State
+  const [newlyUnlockedBadge, setNewlyUnlockedBadge] = useState(null);
+  const prevUnlockedRef = React.useRef(new Set());
+
+  // Check for Achievements
+  useEffect(() => {
+    const checkAchievements = async () => {
+      if (!state.username) return;
+
+      try {
+        const profile = await getUserProfile(state.username);
+        const unlocked = getUnlockedAchievements(profile); // Works if profile matches stats shape
+
+        // Initialize Ref on first load
+        if (prevUnlockedRef.current.size === 0) {
+          unlocked.forEach(b => prevUnlockedRef.current.add(b.id));
+          return;
+        }
+
+        // Check for new ones
+        for (const badge of unlocked) {
+          if (!prevUnlockedRef.current.has(badge.id)) {
+            // New badge!
+            setNewlyUnlockedBadge(badge);
+            prevUnlockedRef.current.add(badge.id);
+            // Break to show one at a time (render loop will catch next one if we supported queue,
+            // but simple 'set' shows latest or first new found.
+            // Better to just show one for now to avoid spam.)
+            break;
+          }
+        }
+      } catch (err) {
+        console.warn('Achievement check failed', err);
+      }
+    };
+
+    // Check periodically or when game state changes to 'summary' (game end)
+    if (state.gameState === 'summary' || location.pathname === '/profile') {
+      checkAchievements();
+    }
+  }, [state.username, state.gameState, location.pathname]);
 
   // Parse referral code from URL on load
   useEffect(() => {
@@ -667,6 +712,16 @@ const AppRoutes = () => {
               markAnnouncementAsRead(state.username, pendingAnnouncement.id);
               setPendingAnnouncement(null);
             }}
+          />
+        )}
+      </AnimatePresence>
+
+      {/* Achievement Modal */}
+      <AnimatePresence>
+        {newlyUnlockedBadge && (
+          <AchievementModal
+            achievement={newlyUnlockedBadge}
+            onDismiss={() => setNewlyUnlockedBadge(null)}
           />
         )}
       </AnimatePresence>

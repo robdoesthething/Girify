@@ -8,7 +8,7 @@ import {
   REFERRAL_BONUS,
 } from '../utils/giuros';
 
-const AdminGiuros = ({ users = [], shopItems = [], theme }) => {
+const AdminGiuros = ({ users = [], shopItems = [], theme, onUpdateShopItem }) => {
   // Calculate Economy Stats
   const stats = useMemo(() => {
     const totalCirculation = users.reduce((acc, u) => acc + (u.giuros || 0), 0);
@@ -23,6 +23,17 @@ const AdminGiuros = ({ users = [], shopItems = [], theme }) => {
       richest,
     };
   }, [users]);
+
+  // Helper to edit price
+  const handleEditPrice = async item => {
+    // eslint-disable-next-line no-alert
+    const newPrice = prompt(`Enter new price for ${item.name}:`, item.cost);
+    if (newPrice !== null && !isNaN(newPrice)) {
+      if (onUpdateShopItem) {
+        await onUpdateShopItem(item.id, { cost: parseInt(newPrice, 10) });
+      }
+    }
+  };
 
   return (
     <div className="space-y-8 animate-fadeIn">
@@ -56,7 +67,7 @@ const AdminGiuros = ({ users = [], shopItems = [], theme }) => {
         />
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+      <div className="grid grid-cols-1 xl:grid-cols-2 gap-8">
         {/* Income Sources (Constants) */}
         <div
           className={`p-6 rounded-2xl border ${theme === 'dark' ? 'bg-slate-800 border-slate-700' : 'bg-white border-slate-200'}`}
@@ -72,6 +83,9 @@ const AdminGiuros = ({ users = [], shopItems = [], theme }) => {
             <SourceRow label="Perfect Score" value={`+${PERFECT_SCORE_BONUS}`} />
             <SourceRow label="Feedback Approval" value="Variable (avg 50)" isVariable />
           </div>
+          <p className="text-xs opacity-50 mt-4 italic">
+            * Reward values are currently hardcoded constants. Code update required to change.
+          </p>
         </div>
 
         {/* Sinks (Shop Prices) */}
@@ -87,7 +101,7 @@ const AdminGiuros = ({ users = [], shopItems = [], theme }) => {
               .map(item => (
                 <div
                   key={item.id}
-                  className="flex justify-between items-center bg-slate-100 dark:bg-slate-700/50 p-2 rounded-lg"
+                  className="flex justify-between items-center bg-slate-100 dark:bg-slate-700/50 p-2 rounded-lg group"
                 >
                   <div className="flex items-center gap-2">
                     <span className="text-xl">{item.emoji || '📦'}</span>
@@ -96,7 +110,14 @@ const AdminGiuros = ({ users = [], shopItems = [], theme }) => {
                       <span className="text-[10px] opacity-60 uppercase">{item.type}</span>
                     </div>
                   </div>
-                  <span className="font-mono font-bold text-red-400">-{item.cost}</span>
+                  <button
+                    onClick={() => handleEditPrice(item)}
+                    className="flex items-center gap-2 px-2 py-1 rounded hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors"
+                    title="Click to edit price"
+                  >
+                    <span className="font-mono font-bold text-red-400">-{item.cost}</span>
+                    <span className="opacity-0 group-hover:opacity-100 text-xs">✏️</span>
+                  </button>
                 </div>
               ))}
             {(!shopItems.all || shopItems.all.length === 0) && (

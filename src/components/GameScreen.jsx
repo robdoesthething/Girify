@@ -126,9 +126,7 @@ const GameScreen = ({
       {state.gameState === 'intro' && state.username && (
         <>
           {/* Map Background */}
-          <div className="absolute inset-0 z-0">
-            <MapArea currentStreet={null} hintStreets={[]} theme={theme} />
-          </div>
+          {/* Map Background Removed - reusing underlay */}
 
           {/* Translucent Play Overlay */}
           <div

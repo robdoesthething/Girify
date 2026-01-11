@@ -204,7 +204,7 @@ const createEmojiIcon = emoji => {
  * @param {Object[]} props.hintStreets - Array of hint street objects
  * @param {'dark'|'light'} props.theme - Current theme
  */
-const MapArea = ({ currentStreet, hintStreets = [], theme = 'dark' }) => {
+const MapArea = ({ currentStreet, hintStreets = [], theme = 'dark', onAnimationComplete }) => {
   const [boundary, setBoundary] = useState(null);
   const [currentZoom, setCurrentZoom] = useState(13);
   const [_mapLoaded, setMapLoaded] = useState(false);
@@ -284,7 +284,7 @@ const MapArea = ({ currentStreet, hintStreets = [], theme = 'dark' }) => {
           />
 
           {/* Helper to re-center */}
-          <ChangeView coords={geometry} onAnimationComplete={props.onAnimationComplete} />
+          <ChangeView coords={geometry} onAnimationComplete={onAnimationComplete} />
 
           {/* Manual Recenter Control */}
           <RecenterControl center={[41.3879, 2.1699]} zoom={13} bounds={geometry} />
