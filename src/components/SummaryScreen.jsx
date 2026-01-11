@@ -5,7 +5,17 @@ import { getCuriosityByStreets } from '../data/curiosities';
 import { fetchWikiImage } from '../utils/wiki';
 import { useNavigate } from 'react-router-dom';
 
-const SummaryScreen = ({ score, total, theme, username, realName, onRestart, quizStreets, t }) => {
+const SummaryScreen = ({
+  score,
+  total,
+  theme,
+  username,
+  realName,
+  streak,
+  onRestart,
+  quizStreets,
+  t,
+}) => {
   const navigate = useNavigate();
   // Always show curiosities first, then actions
   const [view, setView] = useState('curiosity');
@@ -16,6 +26,7 @@ const SummaryScreen = ({ score, total, theme, username, realName, onRestart, qui
 
   // Calculate streak using useMemo to avoid impure function during render
   const streakValue = useMemo(() => {
+    if (streak && streak > 0) return streak;
     try {
       const history = JSON.parse(localStorage.getItem('girify_history') || '[]');
       if (history.length === 0) return 1;
@@ -107,7 +118,7 @@ const SummaryScreen = ({ score, total, theme, username, realName, onRestart, qui
 
   return (
     <div
-      className={`absolute inset-0 flex flex-col items-center justify-center p-6 text-center backdrop-blur-md transition-colors duration-500 pointer-events-auto overflow-y-auto font-inter
+      className={`absolute inset-0 flex flex-col items-center justify-center p-6 text-center backdrop-blur-md transition-colors duration-500 pointer-events-auto overflow-y-auto font-inter z-[5000]
             ${theme === 'dark' ? 'bg-slate-950/95 text-white' : 'bg-slate-50/95 text-slate-800'}`}
     >
       {view === 'curiosity' && (

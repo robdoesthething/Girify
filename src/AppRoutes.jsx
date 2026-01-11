@@ -575,6 +575,9 @@ const AppRoutes = () => {
             if (profile && profile.realName) {
               dispatch({ type: 'SET_REAL_NAME', payload: profile.realName });
             }
+            if (profile && profile.streak) {
+              dispatch({ type: 'SET_STREAK', payload: profile.streak });
+            }
 
             // Self-heal any broken migration links
             healMigration(displayName).catch(err => console.error(err));
@@ -670,13 +673,12 @@ const AppRoutes = () => {
           localStorage.setItem('girify_username', displayName);
           dispatch({ type: 'SET_USERNAME', payload: displayName });
           if (state.gameState === 'register') {
-            setupGame(displayName);
+            dispatch({ type: 'SET_GAME_STATE', payload: 'intro' });
           }
         }
       }
     });
     return () => unsubscribe();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [state.gameState]);
 
   // Auto-Advance

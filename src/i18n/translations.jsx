@@ -37,8 +37,9 @@ const translations = {
     signUp: 'Sign Up',
     createAccount: 'Create Account',
     continueWithGoogle: 'Continue with Google',
-    continueAsGuest: 'Continue as Guest',
-    orWithEmail: 'Or with email',
+    loginRequired: 'Login Required',
+    loginRequiredMessage:
+      'Join the Girify community! Create a profile to track your progress, earn badges, and collect Giuros.',
     displayName: 'Display Name',
     email: 'Email address',
     password: 'Password',

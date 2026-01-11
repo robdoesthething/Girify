@@ -423,6 +423,13 @@ const ProfileScreen = ({ username }) => {
                             src={selectedAchievement.image}
                             alt={selectedAchievement.name}
                             className="w-16 h-16 object-contain drop-shadow-md"
+                            onError={e => {
+                              e.target.style.display = 'none';
+                              if (e.target.parentElement.querySelector('span')) {
+                                e.target.parentElement.querySelector('span').style.display =
+                                  'block';
+                              }
+                            }}
                           />
                         ) : (
                           <span className="text-4xl">{selectedAchievement.emoji}</span>
