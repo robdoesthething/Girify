@@ -155,14 +155,9 @@ const GameScreen = ({
                 }`}
               >
                 <span className="font-black text-xl tracking-wider">
-                  {hasPlayedToday() ? 'Replay' : 'Play'}
+                  {hasPlayedToday() ? t('replay') || 'Replay' : t('play') || 'Play'}
                 </span>
               </button>
-              <p
-                className={`mt-8 text-sm opacity-60 font-medium tracking-wide ${theme === 'dark' ? 'text-slate-400' : 'text-slate-500'}`}
-              >
-                {t('clickToStart') || "Click to start today's challenge"}
-              </p>
             </div>
           </div>
         </>
