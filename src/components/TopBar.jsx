@@ -5,13 +5,30 @@ import { motion, AnimatePresence } from 'framer-motion';
 import Logo from './Logo';
 import PropTypes from 'prop-types';
 
-const TopBar = ({ onOpenPage, username, onTriggerLogin }) => {
+const TopBar = ({ onOpenPage, username, onTriggerLogin, onLogout }) => {
   const { theme, t } = useTheme();
   const [menuOpen, setMenuOpen] = useState(false);
   const [showLoginModal, setShowLoginModal] = useState(false);
 
   const handleMenuClick = page => {
     const RESTRICTED_PAGES = ['profile', 'friends', 'leaderboard', 'shop', 'admin'];
+
+    // Auth actions (no restriction check needed)
+    if (page === 'login') {
+      onTriggerLogin('signin');
+      setMenuOpen(false);
+      return;
+    }
+    if (page === 'signup') {
+      onTriggerLogin('signup');
+      setMenuOpen(false);
+      return;
+    }
+    if (page === 'logout') {
+      if (onLogout) onLogout();
+      setMenuOpen(false);
+      return;
+    }
 
     if (RESTRICTED_PAGES.includes(page) && !username) {
       setShowLoginModal(true);
@@ -103,58 +120,105 @@ backdrop-blur-md border-b ${theme === 'dark' ? 'border-slate-600' : 'border-slat
               <nav className="flex flex-col gap-4">
                 <button
                   onClick={() => handleMenuClick(null)}
-                  className="text-left py-2 px-3 rounded-lg hover:bg-slate-500/10 font-medium text-sky-500 bg-sky-500/10"
+                  className="text-left py-2 px-3 rounded-lg hover:bg-slate-500/10 font-medium text-sky-500 bg-sky-500/10 flex items-center gap-3"
                 >
-                  🏠 {t('home')}
+                  <img
+                    src="/menu_home_1768127022290.png"
+                    alt=""
+                    className="w-6 h-6 object-contain"
+                  />{' '}
+                  {t('home')}
                 </button>
                 <button
                   onClick={() => handleMenuClick('profile')}
-                  className="text-left py-2 px-3 rounded-lg hover:bg-slate-500/10 font-medium"
+                  className="text-left py-2 px-3 rounded-lg hover:bg-slate-500/10 font-medium flex items-center gap-3"
                 >
-                  👤 {t('myProfile')}
+                  <img
+                    src="/menu_profile_1768127034052.png"
+                    alt=""
+                    className="w-6 h-6 object-contain"
+                  />{' '}
+                  {t('myProfile')}
                 </button>
                 <button
                   onClick={() => handleMenuClick('friends')}
-                  className="text-left py-2 px-3 rounded-lg hover:bg-slate-500/10 font-medium"
+                  className="text-left py-2 px-3 rounded-lg hover:bg-slate-500/10 font-medium flex items-center gap-3"
                 >
-                  👥 {t('friends')}
+                  <img
+                    src="/menu_friends_1768127046678.png"
+                    alt=""
+                    className="w-6 h-6 object-contain"
+                  />{' '}
+                  {t('friends')}
                 </button>
                 <button
                   onClick={() => handleMenuClick('leaderboard')}
-                  className="text-left py-2 px-3 rounded-lg hover:bg-slate-500/10 font-medium"
+                  className="text-left py-2 px-3 rounded-lg hover:bg-slate-500/10 font-medium flex items-center gap-3"
                 >
-                  🏆 {t('leaderboard')}
+                  <img
+                    src="/menu_leaderboard_1768127061898.png"
+                    alt=""
+                    className="w-6 h-6 object-contain"
+                  />{' '}
+                  {t('leaderboard')}
                 </button>
                 <button
                   onClick={() => handleMenuClick('shop')}
-                  className="text-left py-2 px-3 rounded-lg hover:bg-slate-500/10 font-medium"
+                  className="text-left py-2 px-3 rounded-lg hover:bg-slate-500/10 font-medium flex items-center gap-3"
                 >
-                  🛒 {t('shop')}
+                  <span className="text-xl">🛒</span> {t('shop')}
                 </button>
                 <button
                   onClick={() => handleMenuClick('about')}
-                  className="text-left py-2 px-3 rounded-lg hover:bg-slate-500/10 font-medium"
+                  className="text-left py-2 px-3 rounded-lg hover:bg-slate-500/10 font-medium flex items-center gap-3"
                 >
-                  ℹ️ {t('about')}
+                  <span className="text-xl">ℹ️</span> {t('about')}
                 </button>
                 <button
                   onClick={() => handleMenuClick('news')}
-                  className="text-left py-2 px-3 rounded-lg hover:bg-slate-500/10 font-medium"
+                  className="text-left py-2 px-3 rounded-lg hover:bg-slate-500/10 font-medium flex items-center gap-3"
                 >
-                  📰 {t('news') || 'News'}
+                  <span className="text-xl">📰</span> {t('news') || 'News'}
                 </button>
                 <button
                   onClick={() => handleMenuClick('feedback')}
-                  className="text-left py-2 px-3 rounded-lg hover:bg-slate-500/10 font-medium"
+                  className="text-left py-2 px-3 rounded-lg hover:bg-slate-500/10 font-medium flex items-center gap-3"
                 >
-                  📝 {t('feedback') || 'Feedback'}
+                  <span className="text-xl">📝</span> {t('feedback') || 'Feedback'}
                 </button>
                 <button
                   onClick={() => handleMenuClick('settings')}
-                  className="text-left py-2 px-3 rounded-lg hover:bg-slate-500/10 font-medium"
+                  className="text-left py-2 px-3 rounded-lg hover:bg-slate-500/10 font-medium flex items-center gap-3"
                 >
-                  ⚙️ {t('settings')}
+                  <span className="text-xl">⚙️</span> {t('settings')}
                 </button>
+
+                {/* Auth Actions in Menu */}
+                <div className="h-px bg-slate-200 dark:bg-slate-700 my-2" />
+
+                {!username ? (
+                  <>
+                    <button
+                      onClick={() => handleMenuClick('login')}
+                      className="text-left py-2 px-3 rounded-lg hover:bg-emerald-500/10 font-bold text-emerald-600 dark:text-emerald-400 flex items-center gap-3"
+                    >
+                      <span className="text-xl">🔑</span> Sign In
+                    </button>
+                    <button
+                      onClick={() => handleMenuClick('signup')}
+                      className="text-left py-2 px-3 rounded-lg hover:bg-sky-500/10 font-bold text-sky-500 flex items-center gap-3"
+                    >
+                      <span className="text-xl">✨</span> Sign Up
+                    </button>
+                  </>
+                ) : (
+                  <button
+                    onClick={() => handleMenuClick('logout')}
+                    className="text-left py-2 px-3 rounded-lg hover:bg-red-500/10 font-bold text-red-500 flex items-center gap-3"
+                  >
+                    <span className="text-xl">🚪</span> Log Out
+                  </button>
+                )}
               </nav>
 
               <div className="absolute bottom-6 left-6 right-6 text-xs text-slate-500 text-center">
@@ -193,15 +257,24 @@ backdrop-blur-md border-b ${theme === 'dark' ? 'border-slate-600' : 'border-slat
                 <button
                   onClick={() => {
                     setShowLoginModal(false);
-                    onTriggerLogin();
+                    onTriggerLogin('signup');
                   }}
                   className="w-full py-3 bg-sky-500 hover:bg-sky-600 text-white rounded-xl font-bold shadow-lg shadow-sky-500/20 active:scale-95 transition-all"
                 >
-                  {t('loginOrRegister') || 'Login / Register'}
+                  Sign Up
+                </button>
+                <button
+                  onClick={() => {
+                    setShowLoginModal(false);
+                    onTriggerLogin('signin');
+                  }}
+                  className="w-full py-3 bg-white border-2 border-slate-200 hover:bg-slate-50 dark:bg-slate-800 dark:border-slate-700 text-slate-900 dark:text-white rounded-xl font-bold transition-all"
+                >
+                  Sign In
                 </button>
                 <button
                   onClick={() => setShowLoginModal(false)}
-                  className="w-full py-3 bg-slate-100 hover:bg-slate-200 dark:bg-slate-700 dark:hover:bg-slate-600 rounded-xl font-bold transition-colors"
+                  className="w-full py-3 text-slate-500 hover:text-slate-800 dark:hover:text-white font-medium transition-colors"
                 >
                   {t('cancel') || 'Cancel'}
                 </button>

@@ -2,7 +2,7 @@ import React from 'react';
 
 import PropTypes from 'prop-types';
 
-const Options = ({ options, onSelect, selectedAnswer, feedback, autoAdvance }) => {
+const Options = ({ options, onSelect, selectedAnswer, feedback, autoAdvance, disabled }) => {
   return (
     <div className="flex-1 min-h-0 flex flex-col justify-center px-4 pb-2">
       <div className="grid grid-cols-2 sm:flex sm:flex-col gap-2 sm:gap-3 w-full max-w-lg mx-auto h-full sm:h-auto">
@@ -44,7 +44,7 @@ const Options = ({ options, onSelect, selectedAnswer, feedback, autoAdvance }) =
                 e.currentTarget.blur();
                 onSelect(opt);
               }}
-              disabled={feedback === 'transitioning'}
+              disabled={disabled || feedback === 'transitioning'}
               className={`w-full min-h-[2.75rem] sm:min-h-[3.5rem] flex-shrink-0 flex items-center justify-center sm:justify-start px-2 sm:px-4 rounded-xl text-center sm:text-left transition-all duration-200 relative overflow-hidden group border focus:outline-none focus:ring-0
                                 ${btnClass}
                             `}
@@ -75,6 +75,7 @@ Options.propTypes = {
   feedback: PropTypes.oneOf(['idle', 'transitioning']).isRequired,
   correctName: PropTypes.string,
   autoAdvance: PropTypes.bool.isRequired,
+  disabled: PropTypes.bool,
 };
 
 export default Options;
