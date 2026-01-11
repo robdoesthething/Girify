@@ -651,6 +651,40 @@ const AppRoutes = () => {
               }
             }
 
+            // MIGRATION: Sync Local Cosmetics/Currency to Firestore (One-time)
+            if (!localStorage.getItem('girify_cosmetics_synced')) {
+              try {
+                const purchasedStr = localStorage.getItem('girify_purchased');
+                const equippedStr = localStorage.getItem('girify_equipped');
+                const giurosStr = localStorage.getItem('girify_giuros');
+
+                if (purchasedStr || equippedStr || giurosStr) {
+                  const purchased = purchasedStr ? JSON.parse(purchasedStr) : undefined;
+                  const equipped = equippedStr ? JSON.parse(equippedStr) : undefined;
+                  const giuros = giurosStr ? parseInt(giurosStr, 10) : undefined;
+
+                  if (
+                    (purchased && purchased.length > 0) ||
+                    (equipped && Object.keys(equipped).length > 0) ||
+                    (giuros !== undefined && giuros > 10)
+                  ) {
+                    // eslint-disable-next-line no-console
+                    console.log('[Migration] Syncing cosmetics and giuros to Firestore...');
+                    import('./utils/social').then(({ updateUserProfile }) => {
+                      updateUserProfile(displayName, {
+                        purchasedCosmetics: purchased,
+                        equippedCosmetics: equipped,
+                        giuros: giuros,
+                      });
+                    });
+                  }
+                }
+                localStorage.setItem('girify_cosmetics_synced', 'true');
+              } catch (e) {
+                console.error('[Migration] Failed to sync cosmetics:', e);
+              }
+            }
+
             // MIGRATION: Registry Date Backfill
             // If profile doesn't have a valid joinedAt, OR we want to backfill from history if older
             let earliestDate = null;

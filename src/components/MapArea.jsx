@@ -34,7 +34,7 @@ const ChangeView = ({ coords, onAnimationComplete }) => {
         // Small delay to ensure tiles are rendered
         setTimeout(() => {
           // Faster animation for better flow
-          map.flyToBounds(allPoints, { padding: [50, 50], maxZoom: 16, duration: 2.0 });
+          map.flyToBounds(allPoints, { padding: [80, 80], maxZoom: 15, duration: 2.0 });
 
           // Trigger completion callback
           if (onAnimationComplete) {
@@ -87,7 +87,7 @@ const RecenterControl = ({ center, zoom, bounds }) => {
     if (bounds && bounds.length > 0) {
       // Increase padding on mobile for better fit
       const isMobile = window.innerWidth < 768;
-      const padding = isMobile ? [40, 40] : [50, 50]; // Relaxed padding
+      const padding = isMobile ? [40, 40] : [80, 80]; // Relaxed padding
       map.fitBounds(bounds, { padding, maxZoom: 18 });
     } else if (center) {
       map.setView(center, zoom || 13);
@@ -330,7 +330,7 @@ const MapArea = ({ currentStreet, hintStreets = [], theme = 'dark', onAnimationC
             onEachFeature={(feature, layer) => {
               if (feature.properties && feature.properties.name) {
                 layer.bindTooltip(feature.properties.name, {
-                  permanent: false,
+                  permanent: true,
                   direction: 'center',
                   className:
                     'font-bold text-xs uppercase tracking-widest opacity-70 bg-transparent border-none shadow-none text-slate-500',

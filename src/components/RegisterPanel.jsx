@@ -230,6 +230,13 @@ const RegisterPanel = ({ theme: themeProp, onRegister, initialMode = 'signin' })
           email: email,
         });
 
+        // Record Referral for Email Signups
+        const referrer = localStorage.getItem('girify_referrer');
+        if (referrer && referrer !== handle) {
+          await recordReferral(referrer, handle);
+          localStorage.removeItem('girify_referrer');
+        }
+
         await auth.signOut();
         // eslint-disable-next-line no-console
         console.log('Verification email sent!');
