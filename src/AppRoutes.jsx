@@ -41,6 +41,8 @@ import {
   updateUserProfile,
   getReferrer,
   updateUserGameStats,
+  saveUserGameResult,
+  getUserGameHistory,
 } from './utils/social';
 import { calculateStreak } from './utils/stats';
 import { claimDailyLoginBonus, awardChallengeBonus, awardReferralBonus } from './utils/giuros';
@@ -346,6 +348,9 @@ const AppRoutes = () => {
           localStorage.setItem('girify_history', JSON.stringify(history));
 
           if (state.username) {
+            // Save to Firestore History
+            saveUserGameResult(state.username, newRecord);
+
             // Check for referral bonus (allows retry)
             hasDailyReferral(state.username).then(isBonus => {
               saveScore(state.username, state.score, newRecord.avgTime, {
@@ -574,7 +579,7 @@ const AppRoutes = () => {
             // Update Real Name in state
             if (profile && profile.realName) {
               dispatch({ type: 'SET_REAL_NAME', payload: profile.realName });
-              localStorage.setItem('girify_realName', profile.realName);
+              // REMOVED local storage persistence as requested
             }
             if (profile && profile.streak) {
               dispatch({ type: 'SET_STREAK', payload: profile.streak });
@@ -614,6 +619,37 @@ const AppRoutes = () => {
                 setPendingAnnouncement(unread[0]);
               }
             });
+
+            // MIGRATION: Sync Local History to Firestore (One-time)
+            if (!localStorage.getItem('girify_history_synced')) {
+              try {
+                const localHistoryStr = localStorage.getItem('girify_history');
+                if (localHistoryStr) {
+                  const localHistory = JSON.parse(localHistoryStr);
+                  if (Array.isArray(localHistory) && localHistory.length > 0) {
+                    getUserGameHistory(displayName).then(existing => {
+                      if (existing.length === 0) {
+                        // eslint-disable-next-line no-console
+                        console.log(
+                          `[Migration] Syncing ${localHistory.length} games to Firestore...`
+                        );
+                        // Limit to last 500 to avoid rate limits/spam
+                        const toUpload = localHistory.slice(-500);
+                        toUpload.forEach(game => saveUserGameResult(displayName, game));
+                      }
+                      localStorage.setItem('girify_history_synced', 'true');
+                    });
+                  } else {
+                    localStorage.setItem('girify_history_synced', 'true');
+                  }
+                } else {
+                  localStorage.setItem('girify_history_synced', 'true');
+                }
+              } catch (e) {
+                console.error('History sync failed', e);
+                // Don't set synced true if error, try again next time
+              }
+            }
 
             // MIGRATION: Registry Date Backfill
             // If profile doesn't have a valid joinedAt, OR we want to backfill from history if older

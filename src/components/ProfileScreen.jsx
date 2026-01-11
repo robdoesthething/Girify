@@ -1,8 +1,14 @@
+/* eslint-disable jsx-a11y/no-noninteractive-element-interactions */
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AnimatePresence } from 'framer-motion';
 import { useTheme } from '../context/ThemeContext';
-import { getFriendCount, getUserProfile, updateUserProfile } from '../utils/social';
+import {
+  getFriendCount,
+  getUserProfile,
+  updateUserProfile,
+  getUserGameHistory,
+} from '../utils/social';
 import { getGiuros, getEquippedCosmetics } from '../utils/giuros';
 import cosmetics from '../data/cosmetics.json';
 import { getUnlockedAchievements, getNextAchievement } from '../data/achievements';
@@ -38,16 +44,7 @@ const ProfileScreen = ({ username }) => {
   const { theme, t } = useTheme();
   const navigate = useNavigate();
 
-  const [allHistory] = useState(() => {
-    try {
-      const rawHistory = localStorage.getItem('girify_history');
-      const parsedHistory = rawHistory ? JSON.parse(rawHistory) : [];
-      return Array.isArray(parsedHistory) ? parsedHistory : [];
-    } catch (e) {
-      console.error('Profile data load error:', e);
-      return [];
-    }
-  });
+  const [allHistory, setAllHistory] = useState([]);
 
   const uniqueHistory = React.useMemo(() => {
     const seenDates = new Set();
@@ -61,9 +58,7 @@ const ProfileScreen = ({ username }) => {
     return uniqueList;
   }, [allHistory]);
 
-  const [joinedDate] = useState(() => {
-    return localStorage.getItem('girify_joined') || new Date().toLocaleDateString();
-  });
+  const [joinedDate, setJoinedDate] = useState('');
 
   const [friendCount, setFriendCount] = useState(0);
   const [giuros, setGiuros] = useState(0);
@@ -83,19 +78,32 @@ const ProfileScreen = ({ username }) => {
   useEffect(() => {
     const loadProfile = async () => {
       if (username) {
-        const [count, bal, equipped] = await Promise.all([
+        const [count, bal, equipped, history, profile] = await Promise.all([
           getFriendCount(username),
           getGiuros(username),
           getEquippedCosmetics(username),
+          getUserGameHistory(username),
+          getUserProfile(username),
         ]);
+
         setFriendCount(count);
         setGiuros(bal);
         setEquippedCosmetics(equipped);
+        setAllHistory(history || []); // history might be empty
 
-        const profile = await getUserProfile(username);
         if (profile) {
           setProfileData(profile);
           setEditName(profile.realName || '');
+
+          if (profile.joinedAt) {
+            const dateObj = profile.joinedAt.toDate
+              ? profile.joinedAt.toDate()
+              : new Date(profile.joinedAt.seconds * 1000);
+            setJoinedDate(dateObj.toLocaleDateString());
+          } else {
+            // Fallback to local storage if available or current date
+            setJoinedDate(localStorage.getItem('girify_joined') || new Date().toLocaleDateString());
+          }
         }
       }
     };

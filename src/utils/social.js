@@ -1052,3 +1052,41 @@ export const getReferrer = async username => {
     return null;
   }
 };
+// --- User Game History ---
+const GAMES_SUBCOLLECTION = 'games';
+
+/**
+ * Save game result to user's personal history subcollection
+ * @param {string} username
+ * @param {object} gameData
+ */
+export const saveUserGameResult = async (username, gameData) => {
+  if (!username) return;
+  try {
+    const gamesRef = collection(db, USERS_COLLECTION, username.toLowerCase(), GAMES_SUBCOLLECTION);
+    await addDoc(gamesRef, {
+      ...gameData,
+      savedAt: Timestamp.now(),
+    });
+  } catch (e) {
+    console.error('Error saving user game result:', e);
+  }
+};
+
+/**
+ * Get user's game history
+ * @param {string} username
+ * @returns {Promise<Array>}
+ */
+export const getUserGameHistory = async username => {
+  if (!username) return [];
+  try {
+    const gamesRef = collection(db, USERS_COLLECTION, username.toLowerCase(), GAMES_SUBCOLLECTION);
+    const q = query(gamesRef, limit(100)); // Limit to last 100 for now
+    const snapshot = await getDocs(q);
+    return snapshot.docs.map(d => d.data());
+  } catch (e) {
+    console.error('Error fetching user game history:', e);
+    return [];
+  }
+};

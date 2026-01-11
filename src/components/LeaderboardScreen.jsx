@@ -1,12 +1,13 @@
 import React, { useEffect, useState } from 'react';
-import { AnimatePresence, motion } from 'framer-motion';
+// eslint-disable-next-line no-unused-vars
+import { motion } from 'framer-motion';
 import { useTheme } from '../context/ThemeContext';
 import { useNavigate } from 'react-router-dom';
 import { getLeaderboard } from '../utils/leaderboard';
 import PropTypes from 'prop-types';
 import TopBar from './TopBar';
 
-const LeaderboardScreen = ({ onClose, currentUser }) => {
+const LeaderboardScreen = ({ currentUser }) => {
   const { theme, t } = useTheme();
   const navigate = useNavigate();
   const [scores, setScores] = useState([]);
