@@ -585,6 +585,9 @@ const AppRoutes = () => {
               dispatch({ type: 'SET_STREAK', payload: profile.streak });
             }
 
+            // Mark profile as loaded (even if realName is empty)
+            dispatch({ type: 'SET_PROFILE_LOADED' });
+
             // Self-heal any broken migration links
             healMigration(displayName).catch(err => console.error(err));
 

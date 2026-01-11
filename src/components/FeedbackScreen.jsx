@@ -10,10 +10,22 @@ const FeedbackScreen = ({ username, onClose }) => {
   const [feedback, setFeedback] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const [captcha] = useState(() => ({
+    a: Math.floor(Math.random() * 10) + 1,
+    b: Math.floor(Math.random() * 10) + 1,
+  }));
+  const [captchaAnswer, setCaptchaAnswer] = useState('');
 
   const handleSubmit = async e => {
     e.preventDefault();
     if (!feedback.trim()) return;
+
+    // Verify Captcha
+    if (parseInt(captchaAnswer) !== captcha.a + captcha.b) {
+      // eslint-disable-next-line no-alert
+      alert('Incorrect math answer. Please try again.');
+      return;
+    }
 
     setIsSubmitting(true);
     await submitFeedback(username, feedback);
@@ -93,9 +105,24 @@ const FeedbackScreen = ({ username, onClose }) => {
                     }`}
                   />
 
+                  {/* Math Captcha */}
+                  <div className="flex items-center gap-2 mb-4 bg-slate-50 dark:bg-slate-800/50 p-3 rounded-xl border border-slate-200 dark:border-slate-700">
+                    <div className="px-4 py-2 bg-slate-200 dark:bg-slate-700 rounded-lg font-bold text-slate-700 dark:text-slate-200 select-none">
+                      {captcha.a} + {captcha.b} = ?
+                    </div>
+                    <input
+                      type="number"
+                      value={captchaAnswer}
+                      onChange={e => setCaptchaAnswer(e.target.value)}
+                      placeholder="?"
+                      className="w-20 p-2 rounded-lg border text-center font-bold outline-none focus:ring-2 focus:ring-sky-500 dark:bg-slate-800 dark:border-slate-600 dark:text-white"
+                    />
+                    <span className="text-xs opacity-50 ml-auto">Prove you are human</span>
+                  </div>
+
                   <button
                     type="submit"
-                    disabled={isSubmitting || !feedback.trim()}
+                    disabled={isSubmitting || !feedback.trim() || !captchaAnswer}
                     className={`w-full py-4 rounded-xl font-bold text-lg bg-sky-500 hover:bg-sky-600 text-white shadow-lg shadow-sky-500/20 disabled:opacity-50 disabled:cursor-not-allowed transition-all transform active:scale-95`}
                   >
                     {isSubmitting ? 'Sending...' : t('submitFeedback') || 'Submit Feedback'}

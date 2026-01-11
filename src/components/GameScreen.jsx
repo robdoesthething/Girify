@@ -159,7 +159,7 @@ const GameScreen = ({
                 className={`text-lg mb-10 font-medium ${theme === 'dark' ? 'text-slate-300' : 'text-slate-600'}`}
               >
                 {t('welcomeBack') || 'Welcome back'},{' '}
-                {state.realName || state.username.replace('@', '')}!
+                {state.profileLoaded ? state.realName || state.username.replace('@', '') : '...'}!
               </p>
               <button
                 onClick={() => setupGame()}

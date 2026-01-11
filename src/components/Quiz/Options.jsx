@@ -45,7 +45,7 @@ const Options = ({ options, onSelect, selectedAnswer, feedback, autoAdvance, dis
                 onSelect(opt);
               }}
               disabled={disabled || feedback === 'transitioning'}
-              className={`w-full min-h-[2.75rem] sm:min-h-[3.5rem] flex-shrink-0 flex items-center justify-center sm:justify-start px-2 sm:px-4 rounded-xl text-center sm:text-left transition-all duration-200 relative overflow-hidden group border focus:outline-none focus:ring-0
+              className={`w-full min-h-[2.25rem] sm:min-h-[3.5rem] flex-shrink-0 flex items-center justify-center sm:justify-start px-2 sm:px-4 rounded-xl text-center sm:text-left transition-all duration-200 relative overflow-hidden group border focus:outline-none focus:ring-0
                                 ${btnClass}
                             `}
             >
