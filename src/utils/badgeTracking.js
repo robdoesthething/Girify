@@ -47,6 +47,7 @@ export async function getBadgeStats(username) {
       foodStreetsPerfect: 0,
       fastLoss: false,
       speedModeHighScore: false,
+      inviteCount: 0,
       lastPlayDate: null,
     };
   } catch (e) {

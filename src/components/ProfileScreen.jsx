@@ -436,7 +436,15 @@ const ProfileScreen = ({ username }) => {
                         }`}
                         title={badge.description}
                       >
-                        <span className="text-3xl mb-1">{badge.emoji}</span>
+                        {badge.image ? (
+                          <img
+                            src={badge.image}
+                            alt={badge.name}
+                            className="w-10 h-10 object-contain mb-1 drop-shadow-sm"
+                          />
+                        ) : (
+                          <span className="text-3xl mb-1">{badge.emoji}</span>
+                        )}
                         <span className="text-[10px] text-center font-bold opacity-70 leading-tight">
                           {badge.name}
                         </span>
@@ -459,7 +467,15 @@ const ProfileScreen = ({ username }) => {
                       className="mt-4 p-4 rounded-xl bg-sky-500/10 border border-sky-500/30 overflow-hidden"
                     >
                       <div className="flex items-center gap-4">
-                        <span className="text-4xl">{selectedAchievement.emoji}</span>
+                        {selectedAchievement.image ? (
+                          <img
+                            src={selectedAchievement.image}
+                            alt={selectedAchievement.name}
+                            className="w-16 h-16 object-contain drop-shadow-md"
+                          />
+                        ) : (
+                          <span className="text-4xl">{selectedAchievement.emoji}</span>
+                        )}
                         <div>
                           <h4 className="font-bold text-sky-600 dark:text-sky-400">
                             {selectedAchievement.name}
@@ -478,7 +494,15 @@ const ProfileScreen = ({ username }) => {
                   >
                     <div className="flex items-center justify-between mb-2">
                       <span className="text-xs font-bold opacity-60">{t('nextAchievement')}</span>
-                      <span className="text-lg">{nextBadge.emoji}</span>
+                      {nextBadge.image ? (
+                        <img
+                          src={nextBadge.image}
+                          alt={nextBadge.name}
+                          className="w-8 h-8 object-contain"
+                        />
+                      ) : (
+                        <span className="text-lg">{nextBadge.emoji}</span>
+                      )}
                     </div>
                     <div className="flex items-center gap-3">
                       <div

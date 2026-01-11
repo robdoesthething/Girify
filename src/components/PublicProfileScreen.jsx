@@ -230,7 +230,15 @@ const PublicProfileScreen = ({ currentUser }) => {
                       className="text-xl"
                       title={`${badge.name}: ${badge.description}`}
                     >
-                      {badge.emoji}
+                      {badge.image ? (
+                        <img
+                          src={badge.image}
+                          alt={badge.name}
+                          className="w-6 h-6 object-contain drop-shadow-sm"
+                        />
+                      ) : (
+                        badge.emoji
+                      )}
                     </span>
                   ))}
                   {unlockedBadges.length > 6 && (
@@ -309,7 +317,15 @@ const PublicProfileScreen = ({ currentUser }) => {
                             }`}
                             title={badge.description}
                           >
-                            <span className="text-2xl mb-1">{badge.emoji}</span>
+                            {badge.image ? (
+                              <img
+                                src={badge.image}
+                                alt={badge.name}
+                                className="w-10 h-10 object-contain mb-1 drop-shadow-sm"
+                              />
+                            ) : (
+                              <span className="text-2xl mb-1">{badge.emoji}</span>
+                            )}
                             <span className="text-[10px] text-center font-bold opacity-70 leading-tight">
                               {badge.name}
                             </span>

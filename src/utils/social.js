@@ -732,13 +732,28 @@ export const recordReferral = async (referrer, referred) => {
     console.error('Error fetching emails for referral:', e);
   }
 
-  await addDoc(collection(db, REFERRALS_COLLECTION), {
+  const { increment } = await import('firebase/firestore');
+
+  const batch = (await import('firebase/firestore')).writeBatch(db);
+  const referralRef = doc(collection(db, REFERRALS_COLLECTION));
+  batch.set(referralRef, {
     referrer,
     referred,
     referrerEmail,
     referredEmail,
     createdAt: Timestamp.now(),
   });
+
+  // Increment invite count for referrer in their badgeStats
+  const referrerStatsRef = doc(db, USERS_COLLECTION, referrer, 'badgeStats', 'current');
+  // We use set with merge to ensure it exists if it doesn't
+  batch.set(referrerStatsRef, { inviteCount: increment(1) }, { merge: true });
+
+  // Mark the new user as referred (so we can award bonus later if needed)
+  const referredUserRef = doc(db, USERS_COLLECTION, referred);
+  batch.update(referredUserRef, { referredBy: referrer });
+
+  await batch.commit();
 };
 
 /**
