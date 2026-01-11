@@ -345,7 +345,7 @@ const MapArea = ({ currentStreet, hintStreets = [], theme = 'dark', onAnimationC
             <Polyline
               positions={geometry}
               pathOptions={{
-                color: '#0f172a', // Dark Blue (Slate 900) matching question bar
+                color: '#000080', // Navy Blue matching question bar
                 weight: 8, // Thicker line
                 opacity: 1.0,
                 lineCap: 'round',

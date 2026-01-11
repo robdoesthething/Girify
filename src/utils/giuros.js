@@ -1,9 +1,10 @@
 import { db } from '../firebase';
 import { doc, getDoc, updateDoc, Timestamp } from 'firebase/firestore';
+import { getPayoutConfig } from './configService';
 
 const USERS_COLLECTION = 'users';
 
-// Constants
+// Default Constants (used as fallback, actual values come from config)
 export const STARTING_GIUROS = 10;
 export const DAILY_LOGIN_BONUS = 2;
 export const DAILY_CHALLENGE_BONUS = 5;
@@ -146,6 +147,11 @@ export const claimDailyLoginBonus = async username => {
   if (!username) return { claimed: false, bonus: 0, newBalance: 0 };
 
   try {
+    // Fetch dynamic config
+    const config = await getPayoutConfig();
+    const dailyBonus = config.DAILY_LOGIN_BONUS;
+    const startingGiuros = config.STARTING_GIUROS;
+
     const userRef = doc(db, USERS_COLLECTION, username);
     const userDoc = await getDoc(userRef);
 
@@ -159,11 +165,11 @@ export const claimDailyLoginBonus = async username => {
 
     // Already claimed today
     if (lastLogin === today) {
-      return { claimed: false, bonus: 0, newBalance: data.giuros ?? STARTING_GIUROS };
+      return { claimed: false, bonus: 0, newBalance: data.giuros ?? startingGiuros };
     }
 
-    const currentBalance = data.giuros ?? STARTING_GIUROS;
-    const newBalance = currentBalance + DAILY_LOGIN_BONUS;
+    const currentBalance = data.giuros ?? startingGiuros;
+    const newBalance = currentBalance + dailyBonus;
 
     await updateDoc(userRef, {
       giuros: newBalance,
@@ -171,9 +177,9 @@ export const claimDailyLoginBonus = async username => {
     });
 
     // eslint-disable-next-line no-console
-    console.log(`[Giuros] Daily login bonus +${DAILY_LOGIN_BONUS} for ${username}`);
+    console.log(`[Giuros] Daily login bonus +${dailyBonus} for ${username}`);
 
-    return { claimed: true, bonus: DAILY_LOGIN_BONUS, newBalance };
+    return { claimed: true, bonus: dailyBonus, newBalance };
   } catch (e) {
     console.error('Error claiming daily login:', e);
     return { claimed: false, bonus: 0, newBalance: 0 };
@@ -189,11 +195,13 @@ export const claimDailyLoginBonus = async username => {
 export const awardChallengeBonus = async (username, streak = 0) => {
   if (!username) return { bonus: 0, newBalance: 0 };
 
-  let bonus = DAILY_CHALLENGE_BONUS;
+  // Fetch dynamic config
+  const config = await getPayoutConfig();
+  let bonus = config.DAILY_CHALLENGE_BONUS;
 
   // Weekly streak bonus
   if (streak > 0 && streak % 7 === 0) {
-    bonus += STREAK_WEEK_BONUS;
+    bonus += config.STREAK_WEEK_BONUS;
   }
 
   const result = await addGiuros(username, bonus, `daily challenge (streak: ${streak})`);
@@ -208,7 +216,9 @@ export const awardChallengeBonus = async (username, streak = 0) => {
 export const awardReferralBonus = async referrerUsername => {
   if (!referrerUsername) return { success: false, newBalance: 0 };
 
-  const result = await addGiuros(referrerUsername, REFERRAL_BONUS, 'referral completed');
+  // Fetch dynamic config
+  const config = await getPayoutConfig();
+  const result = await addGiuros(referrerUsername, config.REFERRAL_BONUS, 'referral completed');
   return { success: result.success, newBalance: result.newBalance };
 };
 

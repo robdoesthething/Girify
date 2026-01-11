@@ -148,12 +148,14 @@ const GameScreen = ({
               </p>
               <button
                 onClick={() => setupGame()}
-                className="px-12 py-5 rounded-full bg-sky-500 hover:bg-sky-400 text-white shadow-xl shadow-sky-500/30 transform hover:scale-105 transition-all duration-300 flex items-center justify-center mx-auto ring-4 ring-sky-500/20"
+                className={`px-12 py-5 rounded-full text-white shadow-xl transform hover:scale-105 transition-all duration-300 flex items-center justify-center mx-auto ring-4 ${
+                  hasPlayedToday()
+                    ? 'bg-[#000080] hover:bg-[#000060] shadow-[#000080]/30 ring-[#000080]/20'
+                    : 'bg-sky-500 hover:bg-sky-400 shadow-sky-500/30 ring-sky-500/20'
+                }`}
               >
                 <span className="font-black text-xl tracking-wider">
-                  {state.quizResults?.length > 0
-                    ? t('playAgain') || 'REPETIR REPTE'
-                    : t('playChallenge') || 'PLAY CHALLENGE'}
+                  {hasPlayedToday() ? 'Replay' : 'Play'}
                 </span>
               </button>
               <p
