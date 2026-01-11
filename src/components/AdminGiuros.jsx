@@ -1,14 +1,21 @@
-import React, { useMemo } from 'react';
-import {
-  STARTING_GIUROS,
-  DAILY_LOGIN_BONUS,
-  DAILY_CHALLENGE_BONUS,
-  STREAK_WEEK_BONUS,
-  PERFECT_SCORE_BONUS,
-  REFERRAL_BONUS,
-} from '../utils/giuros';
+import React, { useMemo, useState, useEffect } from 'react';
+import { getPayoutConfig, updatePayoutConfig } from '../utils/configService';
+import PropTypes from 'prop-types';
 
 const AdminGiuros = ({ users = [], shopItems = [], theme, onUpdateShopItem }) => {
+  // Payout config state
+  const [payouts, setPayouts] = useState(null);
+  const [editingPayouts, setEditingPayouts] = useState({});
+  const [savingPayouts, setSavingPayouts] = useState(false);
+
+  // Fetch payout config on mount
+  useEffect(() => {
+    getPayoutConfig().then(config => {
+      setPayouts(config);
+      setEditingPayouts(config);
+    });
+  }, []);
+
   // Calculate Economy Stats
   const stats = useMemo(() => {
     const totalCirculation = users.reduce((acc, u) => acc + (u.giuros || 0), 0);
@@ -35,6 +42,33 @@ const AdminGiuros = ({ users = [], shopItems = [], theme, onUpdateShopItem }) =>
     }
   };
 
+  // Handle payout value change
+  const handlePayoutChange = (key, value) => {
+    const numValue = parseInt(value, 10);
+    if (!isNaN(numValue) && numValue >= 0) {
+      setEditingPayouts(prev => ({ ...prev, [key]: numValue }));
+    }
+  };
+
+  // Save payout changes
+  const handleSavePayouts = async () => {
+    setSavingPayouts(true);
+    const result = await updatePayoutConfig(editingPayouts);
+    setSavingPayouts(false);
+
+    if (result.success) {
+      setPayouts(editingPayouts);
+      // eslint-disable-next-line no-alert
+      alert('Payout configuration saved successfully!');
+    } else {
+      // eslint-disable-next-line no-alert
+      alert('Failed to save: ' + (result.error || 'Unknown error'));
+    }
+  };
+
+  // Check if payouts have changed
+  const payoutsChanged = payouts && JSON.stringify(payouts) !== JSON.stringify(editingPayouts);
+
   return (
     <div className="space-y-8 animate-fadeIn">
       <h2 className="text-3xl font-black">Giuros Economics</h2>
@@ -55,7 +89,7 @@ const AdminGiuros = ({ users = [], shopItems = [], theme, onUpdateShopItem }) =>
         />
         <MetricCard
           title="Starting Amount"
-          value={STARTING_GIUROS}
+          value={payouts?.STARTING_GIUROS ?? '...'}
           color="text-slate-500"
           theme={theme}
         />
@@ -68,24 +102,65 @@ const AdminGiuros = ({ users = [], shopItems = [], theme, onUpdateShopItem }) =>
       </div>
 
       <div className="grid grid-cols-1 xl:grid-cols-2 gap-8">
-        {/* Income Sources (Constants) */}
+        {/* Income Sources (Editable) */}
         <div
           className={`p-6 rounded-2xl border ${theme === 'dark' ? 'bg-slate-800 border-slate-700' : 'bg-white border-slate-200'}`}
         >
           <h3 className="text-xl font-bold mb-4 flex items-center gap-2">
             <span>📈</span> Income Sources (Rewards)
           </h3>
-          <div className="space-y-3">
-            <SourceRow label="Daily Login" value={`+${DAILY_LOGIN_BONUS}`} />
-            <SourceRow label="Daily Challenge" value={`+${DAILY_CHALLENGE_BONUS}`} />
-            <SourceRow label="Week Streak Bonus" value={`+${STREAK_WEEK_BONUS}`} />
-            <SourceRow label="Referral Bonus" value={`+${REFERRAL_BONUS}`} />
-            <SourceRow label="Perfect Score" value={`+${PERFECT_SCORE_BONUS}`} />
-            <SourceRow label="Feedback Approval" value="Variable (avg 50)" isVariable />
-          </div>
-          <p className="text-xs opacity-50 mt-4 italic">
-            * Reward values are currently hardcoded constants. Code update required to change.
-          </p>
+          {payouts ? (
+            <div className="space-y-3">
+              <EditableSourceRow
+                label="Starting Giuros"
+                value={editingPayouts.STARTING_GIUROS}
+                onChange={v => handlePayoutChange('STARTING_GIUROS', v)}
+                theme={theme}
+              />
+              <EditableSourceRow
+                label="Daily Login"
+                value={editingPayouts.DAILY_LOGIN_BONUS}
+                onChange={v => handlePayoutChange('DAILY_LOGIN_BONUS', v)}
+                theme={theme}
+              />
+              <EditableSourceRow
+                label="Daily Challenge"
+                value={editingPayouts.DAILY_CHALLENGE_BONUS}
+                onChange={v => handlePayoutChange('DAILY_CHALLENGE_BONUS', v)}
+                theme={theme}
+              />
+              <EditableSourceRow
+                label="Week Streak Bonus"
+                value={editingPayouts.STREAK_WEEK_BONUS}
+                onChange={v => handlePayoutChange('STREAK_WEEK_BONUS', v)}
+                theme={theme}
+              />
+              <EditableSourceRow
+                label="Referral Bonus"
+                value={editingPayouts.REFERRAL_BONUS}
+                onChange={v => handlePayoutChange('REFERRAL_BONUS', v)}
+                theme={theme}
+              />
+              <EditableSourceRow
+                label="Perfect Score"
+                value={editingPayouts.PERFECT_SCORE_BONUS}
+                onChange={v => handlePayoutChange('PERFECT_SCORE_BONUS', v)}
+                theme={theme}
+              />
+              <SourceRow label="Feedback Approval" value="Variable (set per feedback)" isVariable />
+            </div>
+          ) : (
+            <p className="text-center opacity-50">Loading configuration...</p>
+          )}
+          {payoutsChanged && (
+            <button
+              onClick={handleSavePayouts}
+              disabled={savingPayouts}
+              className="mt-4 w-full py-3 bg-emerald-500 hover:bg-emerald-600 disabled:bg-emerald-300 text-white rounded-xl font-bold shadow-lg transition-colors"
+            >
+              {savingPayouts ? 'Saving...' : 'Save Payout Changes'}
+            </button>
+          )}
         </div>
 
         {/* Sinks (Shop Prices) */}
@@ -175,6 +250,13 @@ const MetricCard = ({ title, value, color, theme }) => (
   </div>
 );
 
+MetricCard.propTypes = {
+  title: PropTypes.string.isRequired,
+  value: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
+  color: PropTypes.string,
+  theme: PropTypes.string,
+};
+
 const SourceRow = ({ label, value, isVariable }) => (
   <div className="flex justify-between items-center p-2 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors">
     <span className="font-medium text-sm text-slate-700 dark:text-slate-300">{label}</span>
@@ -183,5 +265,45 @@ const SourceRow = ({ label, value, isVariable }) => (
     </span>
   </div>
 );
+
+SourceRow.propTypes = {
+  label: PropTypes.string.isRequired,
+  value: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
+  isVariable: PropTypes.bool,
+};
+
+const EditableSourceRow = ({ label, value, onChange, theme }) => (
+  <div className="flex justify-between items-center p-2 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors">
+    <span className="font-medium text-sm text-slate-700 dark:text-slate-300">{label}</span>
+    <div className="flex items-center gap-1">
+      <span className="text-emerald-500 font-bold">+</span>
+      <input
+        type="number"
+        value={value}
+        onChange={e => onChange(e.target.value)}
+        className={`w-20 p-1 rounded text-right font-mono font-bold ${
+          theme === 'dark'
+            ? 'bg-slate-700 text-emerald-400 border-slate-600'
+            : 'bg-slate-100 text-emerald-600 border-slate-200'
+        } border`}
+        min="0"
+      />
+    </div>
+  </div>
+);
+
+EditableSourceRow.propTypes = {
+  label: PropTypes.string.isRequired,
+  value: PropTypes.number,
+  onChange: PropTypes.func.isRequired,
+  theme: PropTypes.string,
+};
+
+AdminGiuros.propTypes = {
+  users: PropTypes.array,
+  shopItems: PropTypes.object,
+  theme: PropTypes.string,
+  onUpdateShopItem: PropTypes.func,
+};
 
 export default AdminGiuros;
