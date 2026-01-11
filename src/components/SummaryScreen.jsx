@@ -61,7 +61,7 @@ const SummaryScreen = ({
     } catch {
       return 1;
     }
-  }, []);
+  }, [streak]);
   // Dynamic Greeting based on score percentage
   const getGreeting = () => {
     const percentage = score / maxPossibleScore;
