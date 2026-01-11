@@ -4,7 +4,7 @@ export const initialState = {
   gameState: 'intro',
   username:
     typeof localStorage !== 'undefined' ? localStorage.getItem('girify_username') || '' : '',
-  realName: '', // New field for user's real name
+  realName: localStorage.getItem('girify_realName') || '', // New field for user's real name
   streak: 0, // Streak from DB
   quizStreets: [],
   currentQuestionIndex: 0,

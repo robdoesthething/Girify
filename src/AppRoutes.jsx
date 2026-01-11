@@ -574,6 +574,7 @@ const AppRoutes = () => {
             // Update Real Name in state
             if (profile && profile.realName) {
               dispatch({ type: 'SET_REAL_NAME', payload: profile.realName });
+              localStorage.setItem('girify_realName', profile.realName);
             }
             if (profile && profile.streak) {
               dispatch({ type: 'SET_STREAK', payload: profile.streak });
