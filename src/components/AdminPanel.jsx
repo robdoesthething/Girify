@@ -191,18 +191,18 @@ const AdminPanel = () => {
     <div
       className={`min-h-screen flex pt-16 ${theme === 'dark' ? 'bg-slate-900 text-white' : 'bg-slate-50 text-slate-900'}`}
     >
-      {/* Sidebar */}
+      {/* Sidebar - Narrower and fixed */}
       <div
-        className={`w-64 p-6 border-r flex flex-col ${theme === 'dark' ? 'border-slate-800' : 'border-slate-200'}`}
+        className={`w-48 shrink-0 p-4 border-r flex flex-col ${theme === 'dark' ? 'border-slate-800 bg-slate-900' : 'border-slate-200 bg-white'}`}
       >
-        <h1 className="text-2xl font-black mb-8 text-sky-500">Girify Admin</h1>
-        <nav className="flex flex-col gap-2">
+        <h1 className="text-xl font-black mb-6 text-sky-500">Girify Admin</h1>
+        <nav className="flex flex-col gap-1">
           {['dashboard', 'users', 'shop', 'feedback', 'announcements', 'analytics', 'giuros'].map(
             tab => (
               <button
                 key={tab}
                 onClick={() => setActiveTab(tab)}
-                className={`text-left px-4 py-3 rounded-xl font-bold transition-all ${
+                className={`text-left px-3 py-2 rounded-lg font-bold text-sm transition-all ${
                   activeTab === tab
                     ? 'bg-sky-500 text-white shadow-lg shadow-sky-500/20'
                     : 'hover:bg-slate-100 dark:hover:bg-slate-800 opacity-60 hover:opacity-100'
@@ -215,14 +215,14 @@ const AdminPanel = () => {
         </nav>
       </div>
 
-      {/* Main Content */}
-      <div className="flex-1 p-8 overflow-y-auto">
+      {/* Main Content - Full width */}
+      <div className="flex-1 p-6 overflow-y-auto">
         {loading ? (
           <div className="flex items-center justify-center h-full">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-sky-500"></div>
           </div>
         ) : (
-          <div className="max-w-5xl w-full mx-auto">
+          <div className="w-full">
             {/* GIUROS ECONOMICS */}
             {activeTab === 'giuros' && (
               <AdminGiuros users={users} shopItems={shopItems} theme={theme} />
