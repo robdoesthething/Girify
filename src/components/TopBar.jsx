@@ -231,7 +231,7 @@ backdrop-blur-md border-b ${theme === 'dark' ? 'border-slate-600' : 'border-slat
               <h3 className="text-xl font-black mb-2">{t('loginRequired') || 'Login Required'}</h3>
               <p className="mb-6 opacity-70">
                 {t('loginRequiredMessage') ||
-                  'You need to be logged in to view this page. Create a profile or sign in to continue!'}
+                  'Join the Girify community! Create a profile to track your progress, earn badges, and compete on the leaderboard.'}
               </p>
               <div className="flex flex-col gap-3">
                 <button

@@ -1,0 +1,64 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Ciutat Vella",
+        "color": "#eab308"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [2.165, 41.385],
+            [2.175, 41.387],
+            [2.185, 41.385],
+            [2.19, 41.378],
+            [2.178, 41.375],
+            [2.165, 41.385]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Eixample",
+        "color": "#ef4444"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [2.145, 41.38],
+            [2.165, 41.395],
+            [2.185, 41.405],
+            [2.195, 41.395],
+            [2.165, 41.375],
+            [2.145, 41.38]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Gràcia",
+        "color": "#22c55e"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [2.15, 41.4],
+            [2.165, 41.415],
+            [2.175, 41.41],
+            [2.16, 41.395],
+            [2.15, 41.4]
+          ]
+        ]
+      }
+    }
+  ]
+}

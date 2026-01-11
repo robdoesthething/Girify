@@ -28,6 +28,20 @@ const GameScreen = ({
     return !completed && !state.username;
   });
 
+  // Exit Warning
+  React.useEffect(() => {
+    const handleBeforeUnload = e => {
+      if (state.gameState === 'playing') {
+        const msg = t('exitGameWarning') || 'Exit game?';
+        e.preventDefault();
+        e.returnValue = msg;
+        return msg;
+      }
+    };
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+  }, [state.gameState, t]);
+
   const handleManualNext = () => {
     if (state.feedback === 'selected') {
       processAnswer(state.selectedAnswer);
@@ -231,6 +245,7 @@ const GameScreen = ({
             theme={theme}
             username={state.username}
             realName={state.realName} // Pass real name
+            streak={state.streak} // Pass streak
             onRestart={() => setupGame()}
             quizResults={state.quizResults}
             quizStreets={state.quizStreets}

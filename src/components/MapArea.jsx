@@ -8,10 +8,12 @@ import {
   useMapEvents,
   Marker,
   Tooltip,
+  GeoJSON,
 } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import PropTypes from 'prop-types';
+import districtsData from '../data/districts.json';
 
 // Component to update map view when street changes
 /**
@@ -313,6 +315,29 @@ const MapArea = ({ currentStreet, hintStreets = [], theme = 'dark', onAnimationC
               }}
             />
           )}
+
+          {/* Districts Layer */}
+          <GeoJSON
+            data={districtsData}
+            style={feature => ({
+              color: feature.properties.color || '#3388ff',
+              weight: 1,
+              opacity: 0.4,
+              fillColor: feature.properties.color,
+              fillOpacity: 0.05,
+              dashArray: '4, 8',
+            })}
+            onEachFeature={(feature, layer) => {
+              if (feature.properties && feature.properties.name) {
+                layer.bindTooltip(feature.properties.name, {
+                  permanent: false,
+                  direction: 'center',
+                  className:
+                    'font-bold text-xs uppercase tracking-widest opacity-70 bg-transparent border-none shadow-none text-slate-500',
+                });
+              }
+            }}
+          />
 
           {/* Landmarks Layer - Only show when zoomed in to avoid overcrowding */}
           {currentZoom >= 13 &&
