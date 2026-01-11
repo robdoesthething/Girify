@@ -5,7 +5,7 @@ import { getCuriosityByStreets } from '../data/curiosities';
 import { fetchWikiImage } from '../utils/wiki';
 import { useNavigate } from 'react-router-dom';
 
-const SummaryScreen = ({ score, total, theme, username, onRestart, quizStreets, t }) => {
+const SummaryScreen = ({ score, total, theme, username, realName, onRestart, quizStreets, t }) => {
   const navigate = useNavigate();
   // Always show curiosities first, then actions
   const [view, setView] = useState('curiosity');
@@ -54,12 +54,13 @@ const SummaryScreen = ({ score, total, theme, username, onRestart, quizStreets, 
   // Dynamic Greeting based on score percentage
   const getGreeting = () => {
     const percentage = score / maxPossibleScore;
-    const firstName = username ? username.replace('@', '').split(/\d/)[0] : 'Explorer';
+    const displayName =
+      realName || (username ? username.replace('@', '').split(/\d/)[0] : 'Explorer');
 
-    if (percentage >= 0.9) return `Incredible, ${firstName}!`;
-    if (percentage >= 0.7) return `Great job, ${firstName}!`;
-    if (percentage >= 0.5) return `Good effort, ${firstName}!`;
-    return `Keep exploring, ${firstName}!`;
+    if (percentage >= 0.9) return `Incredible, ${displayName}!`;
+    if (percentage >= 0.7) return `Great job, ${displayName}!`;
+    if (percentage >= 0.5) return `Good effort, ${displayName}!`;
+    return `Keep exploring, ${displayName}!`;
   };
 
   useEffect(() => {
@@ -116,24 +117,24 @@ const SummaryScreen = ({ score, total, theme, username, onRestart, quizStreets, 
           className="flex flex-col items-center max-w-md relative z-20 w-full"
         >
           <h2 className="text-xs font-black mb-2 text-sky-400 uppercase tracking-[0.3em] drop-shadow-md">
-            City Curiosity
+            {t('cityCuriosity') || 'City Curiosity'}
           </h2>
           <h3 className="text-3xl md:text-4xl font-black tracking-tight mb-6 text-balance text-white drop-shadow-[0_2px_10px_rgba(0,0,0,0.8)] leading-tight">
             {curiosity.title}
           </h3>
 
-          <div className="glass-panel w-full overflow-hidden mb-6 shadow-2xl group border border-white/10 relative rounded-3xl">
-            <div className="overflow-hidden h-56 w-full relative">
+          <div className="glass-panel w-full overflow-hidden mb-8 shadow-2xl group border border-white/10 relative rounded-3xl">
+            <div className="overflow-hidden h-64 md:h-72 w-full relative">
               <img
                 src={displayImage}
                 alt="Barcelona"
                 className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-slate-900/80 via-transparent to-transparent" />
+              <div className="absolute inset-0 bg-gradient-to-t from-slate-900/90 via-transparent to-transparent" />
               <div className="absolute bottom-3 right-3">
                 <button
                   onClick={handleShare}
-                  className="p-2 rounded-full bg-white/20 backdrop-blur-md border border-white/30 hover:bg-white/30 transition-all active:scale-95"
+                  className="p-2 rounded-full bg-black/40 backdrop-blur-md border border-white/30 hover:bg-black/60 transition-all active:scale-95"
                   title="Share this curiosity"
                 >
                   🎁
@@ -141,8 +142,11 @@ const SummaryScreen = ({ score, total, theme, username, onRestart, quizStreets, 
               </div>
             </div>
 
-            <div className="p-5 text-left relative z-10 bg-slate-900/60 backdrop-blur-md border-t border-white/5">
-              <p className="text-base leading-relaxed font-medium text-slate-100 drop-shadow-sm">
+            <div className="p-6 text-left relative z-10 bg-slate-950/80 backdrop-blur-md border-t border-white/10">
+              <span className="text-xs font-bold text-sky-400 uppercase tracking-wider mb-2 block">
+                {t('didYouKnow') || 'Did you know?'}
+              </span>
+              <p className="text-lg leading-relaxed font-medium text-white drop-shadow-sm">
                 "{curiosity.fact}"
               </p>
             </div>
@@ -177,7 +181,7 @@ const SummaryScreen = ({ score, total, theme, username, onRestart, quizStreets, 
               {getGreeting()}
             </h2>
             <p className="text-sm opacity-60 uppercase tracking-widest font-bold">
-              Today's Challenge
+              {t('todaysChallenge') || "Today's Challenge"}
             </p>
           </div>
 
@@ -188,12 +192,14 @@ const SummaryScreen = ({ score, total, theme, username, onRestart, quizStreets, 
               <span className="text-xs opacity-50 uppercase tracking-wider font-bold mb-1">
                 Score
               </span>
-              <span className="text-3xl md:text-4xl font-black text-emerald-400">
-                {score}{' '}
-                <span className="text-sm opacity-50 font-normal text-white">
-                  / {maxPossibleScore}
+              <div className="flex flex-col items-center">
+                <span className="text-4xl md:text-5xl font-black text-emerald-400 leading-none">
+                  {score}
                 </span>
-              </span>
+                <span className="text-sm font-bold text-slate-400 mt-1">
+                  / {maxPossibleScore} {t('pts')}
+                </span>
+              </div>
             </div>
 
             {/* Streak Card */}

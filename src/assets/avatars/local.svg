@@ -1,0 +1,6 @@
+<svg width="200" height="200" xmlns="http://www.w3.org/2000/svg">
+  <rect width="200" height="200" fill="#f0f9ff" />
+  <circle cx="100" cy="100" r="80" fill="#38bdf8" />
+  <text x="100" y="160" font-family="Arial" font-size="24" text-anchor="middle" fill="#fff">LOCAL</text>
+  <text x="100" y="100" font-size="40" text-anchor="middle">☕</text>
+</svg>

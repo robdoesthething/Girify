@@ -4,6 +4,7 @@ export const initialState = {
   gameState: 'intro',
   username:
     typeof localStorage !== 'undefined' ? localStorage.getItem('girify_username') || '' : '',
+  realName: '', // New field for user's real name
   quizStreets: [],
   currentQuestionIndex: 0,
   score: 0,
@@ -31,6 +32,12 @@ export function gameReducer(state, action) {
       return {
         ...state,
         username: action.payload,
+      };
+
+    case 'SET_REAL_NAME':
+      return {
+        ...state,
+        realName: action.payload,
       };
 
     case 'SET_GAME_STATE':

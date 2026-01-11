@@ -571,6 +571,11 @@ const AppRoutes = () => {
         // Ensure Firestore profile matches
         ensureUserProfile(displayName, user.uid, { email: user.email })
           .then(profile => {
+            // Update Real Name in state
+            if (profile && profile.realName) {
+              dispatch({ type: 'SET_REAL_NAME', payload: profile.realName });
+            }
+
             // Self-heal any broken migration links
             healMigration(displayName).catch(err => console.error(err));
 

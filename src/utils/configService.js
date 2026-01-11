@@ -11,12 +11,12 @@ const CONFIG_COLLECTION = 'config';
 
 // Default payout values (fallback if Firestore config doesn't exist)
 const DEFAULT_PAYOUTS = {
-  STARTING_GIUROS: 10,
-  DAILY_LOGIN_BONUS: 2,
-  DAILY_CHALLENGE_BONUS: 5,
-  STREAK_WEEK_BONUS: 10,
-  PERFECT_SCORE_BONUS: 20,
-  REFERRAL_BONUS: 15,
+  STARTING_GIUROS: 100, // Increased for better onboarding
+  DAILY_LOGIN_BONUS: 50, // Increased significantly
+  DAILY_CHALLENGE_BONUS: 100, // Main source of income
+  STREAK_WEEK_BONUS: 250, // Big reward for consistency
+  PERFECT_SCORE_BONUS: 50, // Skill reward
+  REFERRAL_BONUS: 500, // Growth incentive
 };
 
 // In-memory cache
