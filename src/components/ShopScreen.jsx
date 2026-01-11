@@ -20,11 +20,16 @@ const ShopScreen = ({ username }) => {
   const [balance, setBalance] = useState(0);
   const [purchased, setPurchased] = useState([]);
   const [equipped, setEquipped] = useState({});
-  const [activeTab, setActiveTab] = useState('frames');
+  const [activeTab, setActiveTab] = useState('avatars');
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState(null);
   const [flavorModal, setFlavorModal] = useState(null);
-  const [shopItems, setShopItems] = useState({ avatarFrames: [], titles: [], special: [] });
+  const [shopItems, setShopItems] = useState({
+    avatarFrames: [],
+    titles: [],
+    special: [],
+    avatars: [],
+  });
 
   useEffect(() => {
     const loadData = async () => {
@@ -77,6 +82,8 @@ const ShopScreen = ({ username }) => {
       newEquipped.frameId = item.id;
     } else if (category === 'titles') {
       newEquipped.titleId = item.id;
+    } else if (category === 'avatars') {
+      newEquipped.avatarId = item.id;
     }
 
     await setEquippedCosmetics(username, newEquipped);
@@ -86,17 +93,21 @@ const ShopScreen = ({ username }) => {
   };
 
   const tabs = [
-    { id: 'frames', label: `🖼️ ${t('frames')}`, items: shopItems.avatarFrames },
-    { id: 'titles', label: `🏷️ ${t('titles')}`, items: shopItems.titles },
-    { id: 'special', label: `✨ ${t('special')}`, items: shopItems.special },
+    { id: 'avatars', label: `👤 ${t('avatars') || 'Avatars'}`, items: shopItems.avatars || [] },
+    { id: 'frames', label: `🖼️ ${t('frames')}`, items: shopItems.avatarFrames || [] },
+    { id: 'titles', label: `🏷️ ${t('titles')}`, items: shopItems.titles || [] },
+    { id: 'special', label: `✨ ${t('special')}`, items: shopItems.special || [] },
   ];
 
   const activeItems = tabs.find(t => t.id === activeTab)?.items || [];
 
-  const isOwned = itemId => purchased.includes(itemId);
+  const isOwned = itemId =>
+    purchased.includes(itemId) ||
+    (shopItems.avatars && shopItems.avatars.find(a => a.id === itemId)?.cost === 0);
   const isEquipped = itemId => {
     if (activeTab === 'frames') return equipped.frameId === itemId;
     if (activeTab === 'titles') return equipped.titleId === itemId;
+    if (activeTab === 'avatars') return equipped.avatarId === itemId;
     return false;
   };
 
@@ -190,9 +201,6 @@ const ShopScreen = ({ username }) => {
                 const owned = isOwned(item.id);
                 const active = isEquipped(item.id);
 
-                // Titles use the same list/card view as Frames now
-                // But we add specific behavior (clickable icon for flavor text)
-
                 return (
                   <div
                     key={item.id}
@@ -206,7 +214,7 @@ const ShopScreen = ({ username }) => {
                   >
                     <div className="flex items-start justify-between mb-3">
                       <div className="flex items-center gap-3">
-                        {/* Preview Icon - Clickable for Titles to show Flavor Text */}
+                        {/* Preview Icon */}
                         {/* eslint-disable-next-line jsx-a11y/click-events-have-key-events */}
                         <div
                           onClick={() => {
@@ -220,8 +228,18 @@ const ShopScreen = ({ username }) => {
                         >
                           {item.cssClass ? (
                             <div className={`w-10 h-10 rounded-full ${item.cssClass}`} />
+                          ) : item.image && activeTab === 'avatars' ? (
+                            <img
+                              src={item.image}
+                              alt={item.name}
+                              className="w-full h-full object-cover"
+                            />
                           ) : (
-                            <span>{item.image ? '🎁' : item.prefix || item.emoji || '✨'}</span>
+                            <span>
+                              {item.image && activeTab !== 'avatars'
+                                ? '🎁'
+                                : item.prefix || item.emoji || '✨'}
+                            </span>
                           )}
                         </div>
 

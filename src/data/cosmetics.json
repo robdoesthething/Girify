@@ -1,4 +1,27 @@
 {
+  "avatars": [
+    {
+      "id": "avatar_guiri",
+      "name": "The Guiri",
+      "cost": 0,
+      "image": "/assets/avatars/guiri.svg",
+      "description": "Default tourist look"
+    },
+    {
+      "id": "avatar_local",
+      "name": "Local Legend",
+      "cost": 500,
+      "image": "/assets/avatars/local.svg",
+      "description": "Stylish and confident"
+    },
+    {
+      "id": "avatar_artist",
+      "name": "Gaudí Artist",
+      "cost": 1000,
+      "image": "/assets/avatars/artist.svg",
+      "description": "Colorful and mosaic-inspired"
+    }
+  ],
   "avatarFrames": [
     {
       "id": "frame_gold",

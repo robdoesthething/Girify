@@ -31,16 +31,16 @@ const ChangeView = ({ coords, onAnimationComplete }) => {
       const handleLoad = () => {
         // Small delay to ensure tiles are rendered
         setTimeout(() => {
-          // Slower animation (3.5s) for comfortable viewing
-          map.flyToBounds(allPoints, { padding: [50, 50], maxZoom: 16, duration: 3.5 });
+          // Faster animation for better flow
+          map.flyToBounds(allPoints, { padding: [50, 50], maxZoom: 16, duration: 2.0 });
 
-          // Trigger completion callback after animation duration + buffer
+          // Trigger completion callback
           if (onAnimationComplete) {
             setTimeout(() => {
               onAnimationComplete();
-            }, 3600);
+            }, 2100);
           }
-        }, 300);
+        }, 100);
       };
 
       // If map already has tiles loaded, use immediate logic
@@ -212,6 +212,14 @@ const MapArea = ({ currentStreet, hintStreets = [], theme = 'dark', onAnimationC
   const geometry = currentStreet ? currentStreet.geometry : [];
 
   useEffect(() => {
+    if (currentStreet) {
+      console.log('[MapArea] Current Street:', currentStreet.name);
+      console.log('[MapArea] Geometry points:', geometry.length);
+      console.log('[MapArea] First point:', geometry[0] ? geometry[0][0] : 'None');
+    }
+  }, [currentStreet, geometry]);
+
+  useEffect(() => {
     // Dynamic import to avoid build errors if file is missing
     import('../data/boundary.json')
       .then(mod => setBoundary(mod.default))
@@ -340,13 +348,27 @@ const MapArea = ({ currentStreet, hintStreets = [], theme = 'dark', onAnimationC
             />
           ))}
 
-          {/* Target Street */}
+          {/* Target Street - Background Glow (White) */}
+          {currentStreet && (
+            <Polyline
+              positions={geometry}
+              pathOptions={{
+                color: '#FFFFFF', // White glow
+                weight: 12, // Wider than foreground
+                opacity: 0.5,
+                lineCap: 'round',
+                lineJoin: 'round',
+              }}
+            />
+          )}
+
+          {/* Target Street - Foreground (Navy Blue) */}
           {currentStreet && (
             <Polyline
               positions={geometry}
               pathOptions={{
                 color: '#000080', // Navy Blue matching question bar
-                weight: 8, // Thicker line
+                weight: 6, // Slightly thinner than glow
                 opacity: 1.0,
                 lineCap: 'round',
                 lineJoin: 'round',

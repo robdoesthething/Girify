@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-// eslint-disable-next-line no-unused-vars
-import { AnimatePresence, motion } from 'framer-motion';
+import { AnimatePresence } from 'framer-motion';
 import { useTheme } from '../context/ThemeContext';
 import { getFriendCount, getUserProfile, updateUserProfile } from '../utils/social';
 import { getGiuros, getEquippedCosmetics } from '../utils/giuros';
@@ -39,16 +38,10 @@ const ProfileScreen = ({ username }) => {
   const { theme, t } = useTheme();
   const navigate = useNavigate();
 
-  // Initialize state functions to avoid synchronous effect updates
-  // allHistory = ALL games played (for total count)
-  // uniqueHistory = only first game per day (for streak calculation)
   const [allHistory] = useState(() => {
     try {
       const rawHistory = localStorage.getItem('girify_history');
       const parsedHistory = rawHistory ? JSON.parse(rawHistory) : [];
-      // Limit to latest 7 items for display logic if needed broadly,
-      // but usually we want to keep all data for stats.
-      // We will slice in the render method instead.
       return Array.isArray(parsedHistory) ? parsedHistory : [];
     } catch (e) {
       console.error('Profile data load error:', e);
@@ -56,7 +49,6 @@ const ProfileScreen = ({ username }) => {
     }
   });
 
-  // For streak calculation, we need unique days
   const uniqueHistory = React.useMemo(() => {
     const seenDates = new Set();
     const uniqueList = [];
@@ -81,7 +73,6 @@ const ProfileScreen = ({ username }) => {
   const [profileData, setProfileData] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
   const [editName, setEditName] = useState('');
-  const [editAvatarId, setEditAvatarId] = useState(0); // 0-indexed for array
 
   // Show/Hide Giuros Info
   const [showGiurosInfo, setShowGiurosInfo] = useState(false);
@@ -105,8 +96,6 @@ const ProfileScreen = ({ username }) => {
         if (profile) {
           setProfileData(profile);
           setEditName(profile.realName || '');
-          // If avatarId is stored as 1-20, subtract 1 for array index. Default to 0.
-          setEditAvatarId(profile.avatarId ? profile.avatarId - 1 : 0);
         }
       }
     };
@@ -114,41 +103,31 @@ const ProfileScreen = ({ username }) => {
   }, [username]);
 
   const handleSaveProfile = async () => {
-    // Save realName and avatarId
     const data = {
       realName: editName,
-      avatarId: editAvatarId + 1, // Store as 1-based ID
     };
     await updateUserProfile(username, data);
     setProfileData(prev => ({ ...prev, ...data }));
     setIsEditing(false);
   };
 
-  const cycleAvatar = () => {
-    setEditAvatarId(prev => (prev + 1) % AVATARS.length);
-  };
-
-  const totalGames = allHistory.length; // Use ALL games, not just unique days
+  const totalGames = allHistory.length;
   const bestScore = totalGames > 0 ? Math.max(...allHistory.map(h => (h && h.score) || 0)) : 0;
   const totalScore = allHistory.reduce((acc, curr) => acc + ((curr && curr.score) || 0), 0);
-  // const avgScore = totalGames > 0 ? Math.round(totalScore / totalGames) : 0; // Unused
-  const dailyStreak = calculateStreak(uniqueHistory); // Use unique days for streak
+  const dailyStreak = calculateStreak(uniqueHistory);
 
-  // Achievement badges
   const userStats = { gamesPlayed: totalGames, bestScore, streak: dailyStreak };
   const unlockedBadges = getUnlockedAchievements(userStats);
   const nextBadge = getNextAchievement(userStats);
 
   // Determine display avatar
-  const currentAvatarId = isEditing
-    ? editAvatarId
-    : profileData?.avatarId
-      ? profileData.avatarId - 1
-      : 0;
+  // Prioritize equipped cosmetic avatar ID
+  const equippedAvatarId = equippedCosmetics?.avatarId;
+  const cosmeticAvatar = cosmetics.avatars?.find(a => a.id === equippedAvatarId);
 
-  // Safe bounds check
-  const safeAvatarIndex = Math.max(0, Math.min(currentAvatarId, AVATARS.length - 1));
-  const displayAvatar = AVATARS[safeAvatarIndex];
+  // Fallback to legacy index (stored in profileData.avatarId)
+  const legacyAvatarIndex = profileData?.avatarId ? profileData.avatarId - 1 : 0;
+  const legacyAvatar = AVATARS[Math.max(0, Math.min(legacyAvatarIndex, AVATARS.length - 1))];
 
   // Get equipped frame class
   const equippedFrame = cosmetics.avatarFrames.find(f => f.id === equippedCosmetics.frameId);
@@ -196,14 +175,11 @@ const ProfileScreen = ({ username }) => {
             </button>
           </div>
 
-          {!profileData && (
-            // Loading state
-            <div className="py-10 text-center opacity-50">Loading profile...</div>
-          )}
+          {!profileData && <div className="py-10 text-center opacity-50">Loading profile...</div>}
 
           {profileData && (
             <>
-              {/* Giuros Explainer Callout - Hidden by default, toggled by clicking icon */}
+              {/* Giuros Explainer Callout */}
               <AnimatePresence>
                 {showGiurosInfo && (
                   <motion.div
@@ -235,32 +211,37 @@ const ProfileScreen = ({ username }) => {
                         </div>
                       </div>
                     </div>
-                    {/* Speech Bubble Tail */}
                   </motion.div>
                 )}
               </AnimatePresence>
 
-              {/* Main Profile Info - Removed Card Style, now cleaner layout */}
+              {/* Main Profile Info */}
               <div className="flex flex-col items-center mb-8">
                 {/* Avatar Circle */}
                 <div className="relative group mb-4">
                   <div
                     role="button"
                     tabIndex={0}
-                    onClick={isEditing ? cycleAvatar : undefined}
+                    onClick={() => navigate('/shop')} // Direct to shop for avatar changes
                     onKeyDown={e => {
-                      if (isEditing && (e.key === 'Enter' || e.key === ' ')) {
-                        e.preventDefault();
-                        cycleAvatar();
+                      if (e.key === 'Enter' || e.key === ' ') {
+                        navigate('/shop');
                       }
                     }}
-                    className={`w-28 h-28 rounded-full bg-gradient-to-br from-sky-400 to-indigo-600 flex items-center justify-center text-5xl shadow-2xl ${frameClass} select-none outline-none focus:ring-sky-500
-                ${isEditing ? 'cursor-pointer hover:scale-105 transition-transform' : ''}
-              `}
+                    className={`w-28 h-28 rounded-full bg-gradient-to-br from-sky-400 to-indigo-600 flex items-center justify-center text-5xl shadow-2xl ${frameClass} select-none outline-none focus:ring-sky-500 cursor-pointer hover:scale-105 transition-transform overflow-hidden`}
                   >
-                    {displayAvatar}
+                    {cosmeticAvatar ? (
+                      <img
+                        src={cosmeticAvatar.image}
+                        alt="Avatar"
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      legacyAvatar
+                    )}
                   </div>
-                  {/* Edit Button overlay */}
+
+                  {/* Edit Button overlay (Just indicates editability of profile, but icon itself goes to shop) */}
                   {!isEditing && (
                     <button
                       onClick={() => setIsEditing(true)}
@@ -281,23 +262,6 @@ const ProfileScreen = ({ username }) => {
                       </svg>
                     </button>
                   )}
-                  {isEditing && (
-                    <div className="absolute bottom-0 right-0 bg-white dark:bg-slate-800 rounded-full p-1 shadow-md">
-                      <svg
-                        className="w-4 h-4 text-slate-500"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
-                        />
-                      </svg>
-                    </div>
-                  )}
                 </div>
 
                 {/* Handle / Name Display */}
@@ -305,11 +269,7 @@ const ProfileScreen = ({ username }) => {
                   {username.toLowerCase()}
                 </h2>
 
-                {/* Equipped Title + Real Name */}
                 <div className="flex flex-col items-center gap-1">
-                  {/* Show equipped title badge/icon if any */}
-                  {/* (Assuming titleId maps to a string or object in future, just showing emoji for now if applicable) */}
-
                   {isEditing ? (
                     <div className="mt-2 w-full max-w-[200px] flex flex-col gap-2">
                       <input
@@ -317,9 +277,6 @@ const ProfileScreen = ({ username }) => {
                         value={editName}
                         onChange={e => setEditName(e.target.value)}
                         placeholder="Your Real Name"
-                        onKeyDown={e => {
-                          if (e.key === ' ') e.stopPropagation(); // prevent game hotkeys if any
-                        }}
                         className={`w-full px-3 py-2 text-center text-sm rounded-lg border outline-none ${theme === 'dark' ? 'bg-slate-800 border-slate-700' : 'bg-white border-slate-200'}`}
                       />
                       <div className="flex justify-center gap-2">
@@ -347,20 +304,15 @@ const ProfileScreen = ({ username }) => {
 
               {/* Friend Requests */}
               <div className="text-center mb-6">
-                {equippedCosmetics.titleId && (
-                  <p className="text-sm font-bold text-sky-500 uppercase tracking-widest mt-1">
-                    {cosmetics.titles.find(t => t.id === equippedCosmetics.titleId)?.name ||
-                      'Street Explorer'}
-                  </p>
-                )}
-                {!equippedCosmetics.titleId && (
-                  <p className="text-sm font-bold text-slate-400 uppercase tracking-widest mt-1">
-                    Street Explorer
-                  </p>
-                )}
+                {/* Title Badge Name */}
+                <p className="text-sm font-bold text-sky-500 uppercase tracking-widest mt-1">
+                  {cosmetics.titles.find(t => t.id === equippedCosmetics.titleId)?.name ||
+                    'Street Explorer'}
+                </p>
                 <p className="text-xs opacity-50 mt-1">Joined {joinedDate}</p>
               </div>
-              {/* Stats Grid - Clean, no borders, just icons */}
+
+              {/* Stats Grid */}
               <div className="grid grid-cols-5 gap-4 mb-8">
                 <div className="flex flex-col items-center p-3 rounded-2xl bg-orange-500/10 dark:bg-orange-500/5">
                   <span className="text-2xl mb-1">🔥</span>
@@ -457,7 +409,6 @@ const ProfileScreen = ({ username }) => {
                   </p>
                 )}
 
-                {/* Selected Achievement Detail View */}
                 <AnimatePresence>
                   {selectedAchievement && (
                     <motion.div
@@ -487,7 +438,6 @@ const ProfileScreen = ({ username }) => {
                   )}
                 </AnimatePresence>
 
-                {/* Next Achievement Progress */}
                 {nextBadge && (
                   <div
                     className={`mt-4 p-4 rounded-2xl border ${theme === 'dark' ? 'bg-slate-800 border-slate-700' : 'bg-white border-slate-100 shadow-sm'}`}
@@ -537,7 +487,6 @@ const ProfileScreen = ({ username }) => {
                         (a, b) => (b.timestamp || 0) - (a.timestamp || 0)
                       );
                       const dailyEarliest = new Map();
-                      // Determine earliest timestamp for each date
                       sorted.forEach(g => {
                         if (g.timestamp) {
                           if (
@@ -549,9 +498,7 @@ const ProfileScreen = ({ username }) => {
                         }
                       });
 
-                      // Display latest 7
                       return sorted.slice(0, 7).map((game, i) => {
-                        // It is the daily result if its timestamp matches the earliest for that date
                         const isDaily =
                           game.timestamp && dailyEarliest.get(game.date) === game.timestamp;
 

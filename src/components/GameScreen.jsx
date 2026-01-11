@@ -139,12 +139,13 @@ const GameScreen = ({
               <h2
                 className={`text-3xl md:text-5xl font-black mb-4 ${theme === 'dark' ? 'text-white' : 'text-slate-900'} tracking-tight`}
               >
-                PROVE YOU ARE A LOCAL
+                {t('proveLocal') || 'PROVE YOU ARE A LOCAL'}
               </h2>
               <p
                 className={`text-lg mb-10 font-medium ${theme === 'dark' ? 'text-slate-300' : 'text-slate-600'}`}
               >
-                Welcome back, {state.username.replace('@', '')}!
+                {t('welcomeBack') || 'Welcome back'},{' '}
+                {state.realName || state.username.replace('@', '')}!
               </p>
               <button
                 onClick={() => setupGame()}
@@ -229,6 +230,7 @@ const GameScreen = ({
             total={state.quizStreets.length}
             theme={theme}
             username={state.username}
+            realName={state.realName} // Pass real name
             onRestart={() => setupGame()}
             quizResults={state.quizResults}
             quizStreets={state.quizStreets}

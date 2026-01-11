@@ -256,6 +256,14 @@ const translations = {
       'Win Giuros to unlock exclusive badges, frames, and titles. Show off your expertise with style.',
     joinPlayers: 'Join',
     playersMastering: 'players mastering the city',
+
+    // New additions
+    proveLocal: 'PROVE YOU ARE A LOCAL',
+    cityCuriosity: 'City Curiosity',
+    didYouKnow: 'Did you know?',
+    todaysChallenge: "Today's Challenge",
+    pts: 'pts',
+    shareAndEarn: 'Share & Earn',
   },
 
   es: {
@@ -469,6 +477,14 @@ const translations = {
     landingSubheadline:
       'Únete a miles de locales y exploradores en el reto diario definitivo de trivia callejera.',
     login: 'Iniciar sesión',
+
+    // New additions
+    proveLocal: 'DEMUESTRA QUE ERES LOCAL',
+    cityCuriosity: 'Curiosidad de la Ciudad',
+    didYouKnow: '¿Sabías que...?',
+    todaysChallenge: 'Reto de Hoy',
+    pts: 'pts',
+    shareAndEarn: 'Compartir y Ganar',
   },
 
   ca: {
@@ -683,6 +699,14 @@ const translations = {
     landingSubheadline:
       'Uneix-te a milers de locals i exploradors en el repte diari definitiu de trivia de carrer.',
     login: 'Iniciar sessió',
+
+    // New additions
+    proveLocal: 'DEMOSTRA QUE ETS LOCAL',
+    cityCuriosity: 'Curiositat de la Ciutat',
+    didYouKnow: 'Sabies que...?',
+    todaysChallenge: "Repte d'Avui",
+    pts: 'pts',
+    shareAndEarn: 'Compartir i Guanyar',
   },
 };
 
