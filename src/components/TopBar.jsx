@@ -99,11 +99,11 @@ backdrop-blur-md border-b ${theme === 'dark' ? 'border-slate-600' : 'border-slat
               animate={{ x: 0 }}
               exit={{ x: '-100%' }}
               transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-              className={`fixed top-0 bottom-0 left-0 w-64 z-[7000] p-6 shadow-2xl
+              className={`fixed top-0 bottom-0 left-0 w-64 z-[7000] shadow-2xl flex flex-col
                                     ${theme === 'dark' ? 'bg-neutral-200 text-neutral-900' : 'bg-white text-slate-800'}
 `}
             >
-              <div className="flex justify-between items-center mb-8">
+              <div className="flex justify-between items-center p-6 pb-4 shrink-0">
                 <h2 className="text-xl font-bold">{t('menu')}</h2>
                 <button onClick={() => setMenuOpen(false)} className="p-1 hover:opacity-75">
                   <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -117,96 +117,76 @@ backdrop-blur-md border-b ${theme === 'dark' ? 'border-slate-600' : 'border-slat
                 </button>
               </div>
 
-              <nav className="flex flex-col gap-4">
+              <nav className="flex-1 flex flex-col gap-2 overflow-y-auto px-6 pb-20">
                 <button
                   onClick={() => handleMenuClick(null)}
-                  className="text-left py-2 px-3 rounded-lg hover:bg-slate-500/10 font-medium text-sky-500 bg-sky-500/10 flex items-center gap-3"
+                  className="text-left py-2 px-3 rounded-lg hover:bg-slate-500/10 font-medium text-sky-500 bg-sky-500/10 flex items-center gap-3 shrink-0"
                 >
-                  <img
-                    src="/menu_home_1768127022290.png"
-                    alt=""
-                    className="w-6 h-6 object-contain"
-                  />{' '}
-                  {t('home')}
+                  <span className="text-xl">🏠</span> {t('home')}
                 </button>
                 <button
                   onClick={() => handleMenuClick('profile')}
-                  className="text-left py-2 px-3 rounded-lg hover:bg-slate-500/10 font-medium flex items-center gap-3"
+                  className="text-left py-2 px-3 rounded-lg hover:bg-slate-500/10 font-medium flex items-center gap-3 shrink-0"
                 >
-                  <img
-                    src="/menu_profile_1768127034052.png"
-                    alt=""
-                    className="w-6 h-6 object-contain"
-                  />{' '}
-                  {t('myProfile')}
+                  <span className="text-xl">👤</span> {t('myProfile')}
                 </button>
                 <button
                   onClick={() => handleMenuClick('friends')}
-                  className="text-left py-2 px-3 rounded-lg hover:bg-slate-500/10 font-medium flex items-center gap-3"
+                  className="text-left py-2 px-3 rounded-lg hover:bg-slate-500/10 font-medium flex items-center gap-3 shrink-0"
                 >
-                  <img
-                    src="/menu_friends_1768127046678.png"
-                    alt=""
-                    className="w-6 h-6 object-contain"
-                  />{' '}
-                  {t('friends')}
+                  <span className="text-xl">👥</span> {t('friends')}
                 </button>
                 <button
                   onClick={() => handleMenuClick('leaderboard')}
-                  className="text-left py-2 px-3 rounded-lg hover:bg-slate-500/10 font-medium flex items-center gap-3"
+                  className="text-left py-2 px-3 rounded-lg hover:bg-slate-500/10 font-medium flex items-center gap-3 shrink-0"
                 >
-                  <img
-                    src="/menu_leaderboard_1768127061898.png"
-                    alt=""
-                    className="w-6 h-6 object-contain"
-                  />{' '}
-                  {t('leaderboard')}
+                  <span className="text-xl">🏆</span> {t('leaderboard')}
                 </button>
                 <button
                   onClick={() => handleMenuClick('shop')}
-                  className="text-left py-2 px-3 rounded-lg hover:bg-slate-500/10 font-medium flex items-center gap-3"
+                  className="text-left py-2 px-3 rounded-lg hover:bg-slate-500/10 font-medium flex items-center gap-3 shrink-0"
                 >
                   <span className="text-xl">🛒</span> {t('shop')}
                 </button>
                 <button
                   onClick={() => handleMenuClick('about')}
-                  className="text-left py-2 px-3 rounded-lg hover:bg-slate-500/10 font-medium flex items-center gap-3"
+                  className="text-left py-2 px-3 rounded-lg hover:bg-slate-500/10 font-medium flex items-center gap-3 shrink-0"
                 >
                   <span className="text-xl">ℹ️</span> {t('about')}
                 </button>
                 <button
                   onClick={() => handleMenuClick('news')}
-                  className="text-left py-2 px-3 rounded-lg hover:bg-slate-500/10 font-medium flex items-center gap-3"
+                  className="text-left py-2 px-3 rounded-lg hover:bg-slate-500/10 font-medium flex items-center gap-3 shrink-0"
                 >
                   <span className="text-xl">📰</span> {t('news') || 'News'}
                 </button>
                 <button
                   onClick={() => handleMenuClick('feedback')}
-                  className="text-left py-2 px-3 rounded-lg hover:bg-slate-500/10 font-medium flex items-center gap-3"
+                  className="text-left py-2 px-3 rounded-lg hover:bg-slate-500/10 font-medium flex items-center gap-3 shrink-0"
                 >
                   <span className="text-xl">📝</span> {t('feedback') || 'Feedback'}
                 </button>
                 <button
                   onClick={() => handleMenuClick('settings')}
-                  className="text-left py-2 px-3 rounded-lg hover:bg-slate-500/10 font-medium flex items-center gap-3"
+                  className="text-left py-2 px-3 rounded-lg hover:bg-slate-500/10 font-medium flex items-center gap-3 shrink-0"
                 >
                   <span className="text-xl">⚙️</span> {t('settings')}
                 </button>
 
                 {/* Auth Actions in Menu */}
-                <div className="h-px bg-slate-200 dark:bg-slate-700 my-2" />
+                <div className="h-px bg-slate-200 dark:bg-slate-700 my-2 shrink-0" />
 
                 {!username ? (
                   <>
                     <button
                       onClick={() => handleMenuClick('login')}
-                      className="text-left py-2 px-3 rounded-lg hover:bg-emerald-500/10 font-bold text-emerald-600 dark:text-emerald-400 flex items-center gap-3"
+                      className="text-left py-2 px-3 rounded-lg hover:bg-emerald-500/10 font-bold text-emerald-600 dark:text-emerald-400 flex items-center gap-3 shrink-0"
                     >
                       <span className="text-xl">🔑</span> Sign In
                     </button>
                     <button
                       onClick={() => handleMenuClick('signup')}
-                      className="text-left py-2 px-3 rounded-lg hover:bg-sky-500/10 font-bold text-sky-500 flex items-center gap-3"
+                      className="text-left py-2 px-3 rounded-lg hover:bg-sky-500/10 font-bold text-sky-500 flex items-center gap-3 shrink-0"
                     >
                       <span className="text-xl">✨</span> Sign Up
                     </button>
@@ -214,14 +194,14 @@ backdrop-blur-md border-b ${theme === 'dark' ? 'border-slate-600' : 'border-slat
                 ) : (
                   <button
                     onClick={() => handleMenuClick('logout')}
-                    className="text-left py-2 px-3 rounded-lg hover:bg-red-500/10 font-bold text-red-500 flex items-center gap-3"
+                    className="text-left py-2 px-3 rounded-lg hover:bg-red-500/10 font-bold text-red-500 flex items-center gap-3 shrink-0"
                   >
                     <span className="text-xl">🚪</span> Log Out
                   </button>
                 )}
               </nav>
 
-              <div className="absolute bottom-6 left-6 right-6 text-xs text-slate-500 text-center">
+              <div className="mb-6 mx-6 p-2 text-xs text-slate-500 text-center shrink-0">
                 v1.0.1 Girify
               </div>
             </motion.div>

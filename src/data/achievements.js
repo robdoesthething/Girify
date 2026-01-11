@@ -188,6 +188,7 @@ export const ACHIEVEMENT_BADGES = [
     category: 'starter',
     type: 'shop',
     cost: 50,
+    emoji: '🥘',
   },
   {
     id: 'badge_sangria_bucket',
@@ -196,6 +197,7 @@ export const ACHIEVEMENT_BADGES = [
     category: 'starter',
     type: 'shop',
     cost: 100,
+    emoji: '🍷',
   },
   {
     id: 'badge_tcasual',
@@ -204,6 +206,7 @@ export const ACHIEVEMENT_BADGES = [
     category: 'starter',
     type: 'shop',
     cost: 200,
+    emoji: '🎫',
   },
   {
     id: 'badge_pigeon',
@@ -212,6 +215,7 @@ export const ACHIEVEMENT_BADGES = [
     category: 'starter',
     type: 'shop',
     cost: 300,
+    emoji: '🐈',
   },
   {
     id: 'badge_scooter',
@@ -220,6 +224,7 @@ export const ACHIEVEMENT_BADGES = [
     category: 'starter',
     type: 'shop',
     cost: 500,
+    emoji: '🛴',
   },
   {
     id: 'badge_yacht',
@@ -228,6 +233,7 @@ export const ACHIEVEMENT_BADGES = [
     category: 'starter',
     type: 'shop',
     cost: 1000,
+    emoji: '🛥️',
   },
 ];
 
