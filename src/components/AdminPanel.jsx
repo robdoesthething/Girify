@@ -1080,7 +1080,7 @@ const AdminPanel = () => {
               }}
               className="space-y-4"
             >
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label
                     htmlFor="shop-id"
@@ -1115,7 +1115,7 @@ const AdminPanel = () => {
                   </select>
                 </div>
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label
                     htmlFor="shop-name"
@@ -1151,7 +1151,7 @@ const AdminPanel = () => {
                 </div>
               </div>
               {newShopItem.type === 'title' && (
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <label
                       htmlFor="shop-emoji"
@@ -1231,7 +1231,7 @@ const AdminPanel = () => {
 
           {/* Shop Items Table */}
           <div
-            className={`rounded-2xl overflow-hidden border ${theme === 'dark' ? 'border-slate-700' : 'border-slate-200'}`}
+            className={`rounded-2xl overflow-x-auto border ${theme === 'dark' ? 'border-slate-700' : 'border-slate-200'}`}
           >
             <table className="w-full text-left">
               <thead className={theme === 'dark' ? 'bg-slate-800' : 'bg-slate-100'}>
@@ -1325,44 +1325,46 @@ const AdminPanel = () => {
             className={`p-6 rounded-2xl border ${theme === 'dark' ? 'bg-slate-800 border-slate-700' : 'bg-white border-slate-200'}`}
           >
             <h3 className="text-xl font-bold mb-4">Daily New Users (Last 7 Days)</h3>
-            <div className="h-64 flex items-end gap-2">
-              {/* Simple Bar Chart Calculation */}
-              {(() => {
-                const last7Days = [...Array(7)]
-                  .map((_, i) => {
-                    const d = new Date();
-                    d.setDate(d.getDate() - i);
-                    return d.toISOString().split('T')[0];
-                  })
-                  .reverse();
+            <div className="overflow-x-auto pb-2">
+              <div className="h-64 flex items-end gap-2 min-w-[300px]">
+                {/* Simple Bar Chart Calculation */}
+                {(() => {
+                  const last7Days = [...Array(7)]
+                    .map((_, i) => {
+                      const d = new Date();
+                      d.setDate(d.getDate() - i);
+                      return d.toISOString().split('T')[0];
+                    })
+                    .reverse();
 
-                const counts = last7Days.map(dateStr => {
-                  return users.filter(u => {
-                    if (!u.joinedAt) return false;
-                    const d = u.joinedAt.toDate
-                      ? u.joinedAt.toDate()
-                      : new Date(u.joinedAt.seconds * 1000);
-                    return d.toISOString().split('T')[0] === dateStr;
-                  }).length;
-                });
+                  const counts = last7Days.map(dateStr => {
+                    return users.filter(u => {
+                      if (!u.joinedAt) return false;
+                      const d = u.joinedAt.toDate
+                        ? u.joinedAt.toDate()
+                        : new Date(u.joinedAt.seconds * 1000);
+                      return d.toISOString().split('T')[0] === dateStr;
+                    }).length;
+                  });
 
-                const max = Math.max(...counts, 1);
+                  const max = Math.max(...counts, 1);
 
-                return last7Days.map((date, i) => (
-                  <div key={date} className="flex-1 flex flex-col justify-end items-center group">
-                    <div className="mb-2 font-bold text-sky-500 opacity-0 group-hover:opacity-100 transition-opacity">
-                      {counts[i]}
+                  return last7Days.map((date, i) => (
+                    <div key={date} className="flex-1 flex flex-col justify-end items-center group">
+                      <div className="mb-2 font-bold text-sky-500 opacity-0 group-hover:opacity-100 transition-opacity">
+                        {counts[i]}
+                      </div>
+                      <div
+                        style={{ height: `${(counts[i] / max) * 100}%` }}
+                        className="w-full bg-sky-500/50 rounded-t-lg hover:bg-sky-500 transition-colors relative min-h-[4px]"
+                      ></div>
+                      <div className="mt-2 text-xs opacity-50 rotate-45 origin-left translate-y-2">
+                        {date.slice(5)}
+                      </div>
                     </div>
-                    <div
-                      style={{ height: `${(counts[i] / max) * 100}%` }}
-                      className="w-full bg-sky-500/50 rounded-t-lg hover:bg-sky-500 transition-colors relative min-h-[4px]"
-                    ></div>
-                    <div className="mt-2 text-xs opacity-50 rotate-45 origin-left translate-y-2">
-                      {date.slice(5)}
-                    </div>
-                  </div>
-                ));
-              })()}
+                  ));
+                })()}
+              </div>
             </div>
           </div>
 

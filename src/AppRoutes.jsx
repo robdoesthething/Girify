@@ -733,14 +733,7 @@ const AppRoutes = () => {
           <Route
             path="/"
             element={
-              !state.username ? (
-                <LandingPage
-                  onStart={() => dispatch({ type: 'SET_GAME_STATE', payload: 'register' })}
-                  onLogin={() => dispatch({ type: 'SET_GAME_STATE', payload: 'register' })}
-                  theme={theme}
-                  hasPlayedToday={hasPlayedToday}
-                />
-              ) : !emailVerified ? (
+              state.username && !emailVerified ? (
                 <VerifyEmailScreen theme={theme} />
               ) : (
                 <GameScreen
