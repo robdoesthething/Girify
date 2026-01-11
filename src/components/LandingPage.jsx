@@ -12,8 +12,8 @@ const NEWS_HEADLINES = [
   'SCANDAL: Pidgeon steals whole croissant from tourist.',
 ];
 
-const LandingPage = ({ onStart, onLogin, theme }) => {
-  const { t } = useTheme();
+const LandingPage = ({ onStart: _onStart, onLogin, theme }) => {
+  const { t: _t } = useTheme();
   // Simple ticker for "Mejur Jouma" news
   const [newsIndex, setNewsIndex] = useState(0);
 
