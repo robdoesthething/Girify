@@ -215,14 +215,14 @@ const AdminPanel = () => {
         </nav>
       </div>
 
-      {/* Main Content - Full width */}
+      {/* Main Content - Full width, left-aligned */}
       <div className="flex-1 p-6 overflow-y-auto">
         {loading ? (
           <div className="flex items-center justify-center h-full">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-sky-500"></div>
           </div>
         ) : (
-          <div className="w-full">
+          <div className="w-full max-w-none">
             {/* GIUROS ECONOMICS */}
             {activeTab === 'giuros' && (
               <AdminGiuros users={users} shopItems={shopItems} theme={theme} />
@@ -1042,7 +1042,7 @@ const AdminPanel = () => {
 
       {/* SHOP */}
       {activeTab === 'shop' && (
-        <div className="space-y-6">
+        <div className="space-y-6 w-full">
           <h2 className="text-3xl font-black">Shop Management</h2>
           {/* Add/Edit Form */}
           <div
@@ -1316,7 +1316,7 @@ const AdminPanel = () => {
 
       {/* ANALYTICS */}
       {activeTab === 'analytics' && (
-        <div className="space-y-8">
+        <div className="space-y-8 w-full">
           <h2 className="text-3xl font-black">Analytics</h2>
 
           {/* Key Metrics Grid */}
