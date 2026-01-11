@@ -7,7 +7,6 @@ import AdminGiuros from './AdminGiuros';
 // eslint-disable-next-line no-unused-vars
 import { motion, AnimatePresence } from 'framer-motion';
 import { ACHIEVEMENT_BADGES } from '../data/achievements';
-import quizPlan from '../data/quizPlan.json';
 
 const MetricCard = ({ title, value, color }) => {
   const { theme } = useTheme();
@@ -1320,14 +1319,45 @@ const AdminPanel = () => {
         <div className="space-y-8">
           <h2 className="text-3xl font-black">Analytics</h2>
 
-          {/* Daily Users */}
+          {/* Key Metrics Grid */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <MetricCard title="Total Users" value={users.length} color="text-sky-500" />
+            <MetricCard
+              title="Active Today"
+              value={
+                users.filter(u => {
+                  if (!u.lastPlayDate) return false;
+                  const today = new Date().toISOString().split('T')[0].replace(/-/g, '');
+                  return u.lastPlayDate === today;
+                }).length
+              }
+              color="text-emerald-500"
+            />
+            <MetricCard
+              title="Total Games"
+              value={users.reduce((acc, u) => acc + (u.gamesPlayed || 0), 0).toLocaleString()}
+              color="text-purple-500"
+            />
+            <MetricCard
+              title="Avg Games/User"
+              value={
+                users.length > 0
+                  ? (
+                      users.reduce((acc, u) => acc + (u.gamesPlayed || 0), 0) / users.length
+                    ).toFixed(1)
+                  : '0'
+              }
+              color="text-amber-500"
+            />
+          </div>
+
+          {/* Daily Users Chart */}
           <div
             className={`p-6 rounded-2xl border ${theme === 'dark' ? 'bg-slate-800 border-slate-700' : 'bg-white border-slate-200'}`}
           >
-            <h3 className="text-xl font-bold mb-4">Daily New Users (Last 7 Days)</h3>
+            <h3 className="text-xl font-bold mb-4">📈 Daily New Users (Last 7 Days)</h3>
             <div className="overflow-x-auto pb-2">
-              <div className="h-64 flex items-end gap-2 min-w-[300px]">
-                {/* Simple Bar Chart Calculation */}
+              <div className="h-48 flex items-end gap-3 min-w-[300px]">
                 {(() => {
                   const last7Days = [...Array(7)]
                     .map((_, i) => {
@@ -1351,15 +1381,13 @@ const AdminPanel = () => {
 
                   return last7Days.map((date, i) => (
                     <div key={date} className="flex-1 flex flex-col justify-end items-center group">
-                      <div className="mb-2 font-bold text-sky-500 opacity-0 group-hover:opacity-100 transition-opacity">
-                        {counts[i]}
-                      </div>
+                      <div className="mb-2 font-bold text-sky-500 text-sm">{counts[i]}</div>
                       <div
-                        style={{ height: `${(counts[i] / max) * 100}%` }}
-                        className="w-full bg-sky-500/50 rounded-t-lg hover:bg-sky-500 transition-colors relative min-h-[4px]"
-                      ></div>
-                      <div className="mt-2 text-xs opacity-50 rotate-45 origin-left translate-y-2">
-                        {date.slice(5)}
+                        style={{ height: `${Math.max((counts[i] / max) * 100, 4)}%` }}
+                        className="w-full bg-gradient-to-t from-sky-600 to-sky-400 rounded-t-lg hover:from-sky-500 hover:to-sky-300 transition-colors shadow-lg"
+                      />
+                      <div className="mt-2 text-xs opacity-60 font-medium">
+                        {new Date(date).toLocaleDateString('en', { weekday: 'short' })}
                       </div>
                     </div>
                   ));
@@ -1368,24 +1396,101 @@ const AdminPanel = () => {
             </div>
           </div>
 
-          {/* Upcoming Quizzes */}
+          {/* User Engagement Stats */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* Streak Distribution */}
+            <div
+              className={`p-6 rounded-2xl border ${theme === 'dark' ? 'bg-slate-800 border-slate-700' : 'bg-white border-slate-200'}`}
+            >
+              <h3 className="text-xl font-bold mb-4">🔥 Streak Distribution</h3>
+              <div className="space-y-3">
+                {[
+                  { label: 'No streak', min: 0, max: 0, color: 'bg-slate-400' },
+                  { label: '1-3 days', min: 1, max: 3, color: 'bg-amber-400' },
+                  { label: '4-7 days', min: 4, max: 7, color: 'bg-orange-500' },
+                  { label: '8+ days', min: 8, max: Infinity, color: 'bg-red-500' },
+                ].map(bucket => {
+                  const count = users.filter(
+                    u => (u.streak || 0) >= bucket.min && (u.streak || 0) <= bucket.max
+                  ).length;
+                  const pct = users.length > 0 ? (count / users.length) * 100 : 0;
+                  return (
+                    <div key={bucket.label} className="flex items-center gap-3">
+                      <div className="w-24 text-sm font-medium opacity-70">{bucket.label}</div>
+                      <div className="flex-1 h-6 bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden">
+                        <div
+                          className={`h-full ${bucket.color} transition-all duration-500`}
+                          style={{ width: `${pct}%` }}
+                        />
+                      </div>
+                      <div className="w-16 text-right text-sm font-bold">
+                        {count} ({pct.toFixed(0)}%)
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Top Performers */}
+            <div
+              className={`p-6 rounded-2xl border ${theme === 'dark' ? 'bg-slate-800 border-slate-700' : 'bg-white border-slate-200'}`}
+            >
+              <h3 className="text-xl font-bold mb-4">🏆 Top Performers</h3>
+              <div className="space-y-2">
+                {[...users]
+                  .sort((a, b) => (b.bestScore || 0) - (a.bestScore || 0))
+                  .slice(0, 5)
+                  .map((user, i) => (
+                    <div
+                      key={user.id}
+                      className="flex items-center gap-3 p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700/50"
+                    >
+                      <span
+                        className={`font-black text-lg w-6 ${i === 0 ? 'text-yellow-500' : i === 1 ? 'text-slate-400' : i === 2 ? 'text-orange-600' : 'opacity-50'}`}
+                      >
+                        #{i + 1}
+                      </span>
+                      <span className="flex-1 font-medium truncate">{user.username}</span>
+                      <span className="font-mono font-bold text-emerald-500">
+                        {user.bestScore || 0}
+                      </span>
+                    </div>
+                  ))}
+              </div>
+            </div>
+          </div>
+
+          {/* Accounts Health */}
           <div
             className={`p-6 rounded-2xl border ${theme === 'dark' ? 'bg-slate-800 border-slate-700' : 'bg-white border-slate-200'}`}
           >
-            <h3 className="text-xl font-bold mb-4">Upcoming Quizzes (Content Plan)</h3>
-            <div className="space-y-2 overflow-y-auto max-h-96">
-              {Object.entries(quizPlan)
-                .sort()
-                .map(([date, data]) => (
-                  <div
-                    key={date}
-                    className={`p-3 rounded-xl border flex justify-between items-center ${theme === 'dark' ? 'bg-slate-900 border-slate-700' : 'bg-slate-50 border-slate-200'}`}
-                  >
-                    <div className="font-mono text-sm opacity-70">{date}</div>
-                    <div className="font-bold">{data.topic || 'Unknown Topic'}</div>
-                    <div className="text-xs opacity-50">{data.streets?.length || 0} streets</div>
-                  </div>
-                ))}
+            <h3 className="text-xl font-bold mb-4">🔍 Account Health</h3>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
+              <div className="p-4 rounded-xl bg-emerald-500/10">
+                <div className="text-2xl font-black text-emerald-500">
+                  {users.filter(u => u.email).length}
+                </div>
+                <div className="text-xs font-medium opacity-60">With Email</div>
+              </div>
+              <div className="p-4 rounded-xl bg-red-500/10">
+                <div className="text-2xl font-black text-red-500">
+                  {users.filter(u => !u.email).length}
+                </div>
+                <div className="text-xs font-medium opacity-60">No Email</div>
+              </div>
+              <div className="p-4 rounded-xl bg-sky-500/10">
+                <div className="text-2xl font-black text-sky-500">
+                  {users.filter(u => u.gamesPlayed > 0).length}
+                </div>
+                <div className="text-xs font-medium opacity-60">Played Games</div>
+              </div>
+              <div className="p-4 rounded-xl bg-amber-500/10">
+                <div className="text-2xl font-black text-amber-500">
+                  {users.filter(u => u.gamesPlayed === 0 || !u.gamesPlayed).length}
+                </div>
+                <div className="text-xs font-medium opacity-60">Never Played</div>
+              </div>
             </div>
           </div>
         </div>
