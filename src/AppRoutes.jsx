@@ -433,7 +433,7 @@ const AppRoutes = () => {
   const handleRegister = name => {
     localStorage.setItem('girify_username', name);
     dispatch({ type: 'SET_USERNAME', payload: name });
-    setupGame(name);
+    dispatch({ type: 'SET_GAME_STATE', payload: 'intro' });
   };
 
   const handleLogout = () => {
