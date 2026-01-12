@@ -1,15 +1,34 @@
-import React, { useState } from 'react';
-// eslint-disable-next-line no-unused-vars
+import React, { useState, FC, useEffect } from 'react';
+// @ts-ignore
 import { motion, AnimatePresence } from 'framer-motion';
+// @ts-ignore
 import MapArea from './MapArea';
+// @ts-ignore
 import Quiz from './Quiz';
 import RegisterPanel from './RegisterPanel';
 import SummaryScreen from './SummaryScreen';
 import Logo from './Logo';
+// @ts-ignore
 import OnboardingTour from './OnboardingTour';
 import LandingPage from './LandingPage';
+import { GameStateObject, Street } from '../types/game';
 
-const GameScreen = ({
+interface GameScreenProps {
+  state: GameStateObject;
+  dispatch: React.Dispatch<any>;
+  theme: 'light' | 'dark';
+  deviceMode: 'mobile' | 'tablet' | 'desktop';
+  t: (key: string) => string;
+  currentStreet: Street | null;
+  handleSelectAnswer: (street: Street) => void;
+  handleNext: () => void;
+  processAnswer: (street: Street) => void;
+  setupGame: (freshName?: string) => void;
+  handleRegister: (name: string) => void;
+  hasPlayedToday: () => boolean;
+}
+
+const GameScreen: FC<GameScreenProps> = ({
   state,
   dispatch,
   theme,
@@ -23,14 +42,14 @@ const GameScreen = ({
   handleRegister,
   hasPlayedToday,
 }) => {
-  const [showOnboarding, setShowOnboarding] = useState(() => {
+  const [showOnboarding, setShowOnboarding] = useState<boolean>(() => {
     const completed = localStorage.getItem('girify_onboarding_completed');
     return !completed && !state.username;
   });
 
   // Exit Warning
-  React.useEffect(() => {
-    const handleBeforeUnload = e => {
+  useEffect(() => {
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
       if (state.gameState === 'playing') {
         const msg = t('exitGameWarning') || 'Exit game?';
         e.preventDefault();
@@ -43,7 +62,7 @@ const GameScreen = ({
   }, [state.gameState, t]);
 
   const handleManualNext = () => {
-    if (state.feedback === 'selected') {
+    if (state.feedback === 'selected' && state.selectedAnswer) {
       processAnswer(state.selectedAnswer);
       setTimeout(() => {
         handleNext();
@@ -89,11 +108,10 @@ const GameScreen = ({
             className={`
                   relative z-20 shrink-0
                   glass-panel rounded-none border-l border-white/10
-                  ${
-                    ['mobile', 'tablet'].includes(deviceMode)
-                      ? 'w-full h-[45%] order-2 border-t rounded-t-3xl shadow-[0_-10px_40px_rgba(0,0,0,0.3)]'
-                      : 'w-[400px] lg:w-[450px] h-full order-2'
-                  }
+                  ${['mobile', 'tablet'].includes(deviceMode)
+                ? 'w-full h-[45%] order-2 border-t rounded-t-3xl shadow-[0_-10px_40px_rgba(0,0,0,0.3)]'
+                : 'w-[400px] lg:w-[450px] h-full order-2'
+              }
                `}
           >
             <Quiz>
@@ -101,8 +119,9 @@ const GameScreen = ({
                 <Quiz.Content>
                   <Quiz.Options
                     options={state.options}
-                    onSelect={street => {
+                    onSelect={(street: Street) => {
                       if (state.feedback === 'transitioning') return;
+                      // @ts-ignore
                       if (state.autoAdvance) handleSelectAnswer(street);
                       else dispatch({ type: 'SELECT_ANSWER', payload: street });
                     }}
@@ -163,11 +182,10 @@ const GameScreen = ({
               </p>
               <button
                 onClick={() => setupGame()}
-                className={`px-12 py-5 rounded-full text-white shadow-xl transform hover:scale-105 transition-all duration-300 flex items-center justify-center mx-auto ring-4 ${
-                  hasPlayedToday()
+                className={`px-12 py-5 rounded-full text-white shadow-xl transform hover:scale-105 transition-all duration-300 flex items-center justify-center mx-auto ring-4 ${hasPlayedToday()
                     ? 'bg-[#000080] hover:bg-[#000060] shadow-[#000080]/30 ring-[#000080]/20'
                     : 'bg-sky-500 hover:bg-sky-400 shadow-sky-500/30 ring-sky-500/20'
-                }`}
+                  }`}
               >
                 <span className="font-black text-xl tracking-wider">
                   {hasPlayedToday() ? t('replay') || 'Replay' : t('play') || 'Play'}
@@ -241,6 +259,7 @@ const GameScreen = ({
         <div className="absolute inset-0 z-50 pointer-events-auto">
           <SummaryScreen
             score={state.score}
+            // @ts-ignore
             total={state.quizStreets.length}
             theme={theme}
             username={state.username}

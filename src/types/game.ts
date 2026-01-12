@@ -28,13 +28,16 @@ export type GameState =
     | 'register'
     | 'intro'
     | 'playing'
-    | 'summary';
+    | 'summary'
+    | 'instructions';
 
 export type Feedback =
     | 'none'
     | 'correct'
     | 'incorrect'
-    | 'transitioning';
+    | 'transitioning'
+    | 'idle'
+    | 'selected';
 
 export interface GameStateObject {
     username: string | null;
@@ -45,7 +48,7 @@ export interface GameStateObject {
     questionStartTime: number | null;
     score: number;
     correct: number;
-    questions: Street[];
+    questions?: Street[]; // legacy/redundant?
     options: Street[];
     quizResults: QuizResult[];
     feedback: Feedback;
@@ -57,4 +60,7 @@ export interface GameStateObject {
     streak: number;
     profileLoaded: boolean;
     plannedQuestions: QuizQuestion[] | null;
+    selectedAnswer: Street | null; // Added
+    isInputLocked: boolean; // Added
+    activePage: string | null; // Added
 }

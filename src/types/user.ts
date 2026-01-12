@@ -16,6 +16,8 @@ export interface UserProfile {
     friends?: string[];
     // Legacy migration fields?
     migrationStatus?: string;
+    gamesPlayed?: number;
+    bestScore?: number;
 }
 
 export interface GameHistory {
