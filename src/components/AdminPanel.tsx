@@ -50,17 +50,6 @@ interface ShopItem {
   image?: string;
 }
 
-interface Announcement {
-  id?: string;
-  title: string;
-  body: string;
-  publishDate: string | any;
-  expiryDate?: string | any;
-  priority?: string;
-  targetAudience?: string;
-  isActive?: boolean;
-}
-
 interface FeedbackItem {
   id: string;
   text: string;
@@ -80,44 +69,12 @@ const AdminPanel: React.FC = () => {
   const [migrationStatus, setMigrationStatus] = useState<string | null>(null);
   const { notify } = useNotification();
   const { confirm, confirmConfig, handleClose } = useConfirm();
-  const [promptConfig, setPromptConfig] = useState<{
-    message: string;
-    defaultValue: string;
-    title: string;
-    resolve: (value: string | null) => void;
-  } | null>(null);
-  const [announcements, setAnnouncements] = useState<Announcement[]>([]);
+
   const [shopItems, setShopItems] = useState<{ all: ShopItem[] }>({ all: [] });
-  const [newShopItem, setNewShopItem] = useState<ShopItem>({
-    id: '',
-    name: '',
-    type: 'title',
-    cost: 100,
-    emoji: '',
-    flavorText: '',
-    description: '',
-    cssClass: '',
-  });
-  const [newAnnouncement, setNewAnnouncement] = useState<Announcement>({
-    title: '',
-    body: '',
-    publishDate: '',
-    expiryDate: '',
-  });
-
-  const showPrompt = (message: string, defaultValue = '', title = 'Input Required') =>
-    new Promise<string | null>(resolve => {
-      setPromptConfig({ message, defaultValue, title, resolve });
-    });
-
-  const handlePromptAction = (value: string | null) => {
-    if (promptConfig?.resolve) promptConfig.resolve(value);
-    setPromptConfig(null);
-  };
 
   const fetchData = useCallback(async () => {
     setLoading(true);
-    const [u, f, a, shop] = await Promise.all([
+    const [u, f, , shop] = await Promise.all([
       getAllUsers(100),
       getFeedbackList(),
       getAllAnnouncements(),
@@ -125,7 +82,6 @@ const AdminPanel: React.FC = () => {
     ]);
     setUsers(u);
     setFeedback(f);
-    setAnnouncements(a);
     setShopItems(shop);
     setLoading(false);
   }, []);
@@ -204,8 +160,9 @@ const AdminPanel: React.FC = () => {
     };
 
     // Check if username changed (requires migration)
-    if (editingUser.username !== editingUser.uid && editingUser.uid) { // Assuming uid is the doc ID or similar logic
-      // NOTE: AdminPanel logic assumed username === id mostly in previous code. 
+    if (editingUser.username !== editingUser.uid && editingUser.uid) {
+      // Assuming uid is the doc ID or similar logic
+      // NOTE: AdminPanel logic assumed username === id mostly in previous code.
       // If logic was `editingUser.username !== editingUser.id` (from previous file), we need to check properties.
       // UserProfile has username and uid. We should check if they differ if that implies change.
       // Reverting to previous logic pattern: if edited username differs from original ID.
@@ -247,10 +204,11 @@ const AdminPanel: React.FC = () => {
               <button
                 key={tab}
                 onClick={() => setActiveTab(tab)}
-                className={`text-left px-3 py-2 rounded-lg font-bold text-sm transition-all ${activeTab === tab
+                className={`text-left px-3 py-2 rounded-lg font-bold text-sm transition-all ${
+                  activeTab === tab
                     ? 'bg-sky-500 text-white shadow-lg shadow-sky-500/20'
                     : 'hover:bg-slate-100 dark:hover:bg-slate-800 opacity-60 hover:opacity-100'
-                  }`}
+                }`}
               >
                 {tab.charAt(0).toUpperCase() + tab.slice(1)}
               </button>
@@ -285,10 +243,10 @@ const AdminPanel: React.FC = () => {
                         if (!u.joinedAt) return false;
                         // @ts-ignore
                         const joined = u.joinedAt.toDate
-                          // @ts-ignore
-                          ? u.joinedAt.toDate()
-                          // @ts-ignore
-                          : new Date(u.joinedAt.seconds * 1000);
+                          ? // @ts-ignore
+                            u.joinedAt.toDate()
+                          : // @ts-ignore
+                            new Date(u.joinedAt.seconds * 1000);
                         const weekAgo = new Date();
                         weekAgo.setDate(weekAgo.getDate() - 7);
                         return joined > weekAgo;
@@ -306,8 +264,8 @@ const AdminPanel: React.FC = () => {
                     value={
                       users.length > 0
                         ? Math.round(
-                          users.reduce((acc, u) => acc + (u.bestScore || 0), 0) / users.length
-                        )
+                            users.reduce((acc, u) => acc + (u.bestScore || 0), 0) / users.length
+                          )
                         : 0
                     }
                     color="text-amber-500"
@@ -326,10 +284,17 @@ const AdminPanel: React.FC = () => {
                   <div className="space-y-4">
                     {/* Simplified Data Tools Section for brevity in this conversion */}
                     <div className="flex items-center gap-4">
-                      <button onClick={handleMigration} className="px-6 py-3 rounded-xl bg-rose-500 hover:bg-rose-600 text-white font-bold transition-all shadow-lg shadow-rose-500/20">
+                      <button
+                        onClick={handleMigration}
+                        className="px-6 py-3 rounded-xl bg-rose-500 hover:bg-rose-600 text-white font-bold transition-all shadow-lg shadow-rose-500/20"
+                      >
                         ⚠️ Fix Usernames (Lowercase Migration)
                       </button>
-                      {migrationStatus && <span className="font-mono text-sm opacity-70 bg-slate-100 dark:bg-slate-900 px-3 py-1 rounded">{migrationStatus}</span>}
+                      {migrationStatus && (
+                        <span className="font-mono text-sm opacity-70 bg-slate-100 dark:bg-slate-900 px-3 py-1 rounded">
+                          {migrationStatus}
+                        </span>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -391,7 +356,12 @@ const AdminPanel: React.FC = () => {
                             {user.giuros || 0} 🪙
                           </td>
                           <td className="p-4 flex gap-2">
-                            <button onClick={() => setEditingUser(user)} className="px-3 py-1 bg-sky-500/10 text-sky-500 rounded-lg text-xs font-bold hover:bg-sky-500 hover:text-white transition-colors">Edit</button>
+                            <button
+                              onClick={() => setEditingUser(user)}
+                              className="px-3 py-1 bg-sky-500/10 text-sky-500 rounded-lg text-xs font-bold hover:bg-sky-500 hover:text-white transition-colors"
+                            >
+                              Edit
+                            </button>
                           </td>
                         </tr>
                       ))}
@@ -402,14 +372,10 @@ const AdminPanel: React.FC = () => {
             )}
 
             {/* SHOP */}
-            {activeTab === 'shop' && (
-              <div>Shop Management (Placeholder for now)</div>
-            )}
+            {activeTab === 'shop' && <div>Shop Management (Placeholder for now)</div>}
 
             {/* FEEDBACK */}
-            {activeTab === 'feedback' && (
-              <div>Feedback Management (Placeholder for now)</div>
-            )}
+            {activeTab === 'feedback' && <div>Feedback Management (Placeholder for now)</div>}
           </div>
         )}
       </div>
@@ -470,7 +436,9 @@ const AdminPanel: React.FC = () => {
                     id="edit-giuros"
                     type="number"
                     value={editingUser.giuros}
-                    onChange={e => setEditingUser({ ...editingUser, giuros: Number(e.target.value) })}
+                    onChange={e =>
+                      setEditingUser({ ...editingUser, giuros: Number(e.target.value) })
+                    }
                     className="w-full p-3 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 font-mono"
                   />
                 </div>
