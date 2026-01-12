@@ -109,3 +109,23 @@
   stroke-linecap: round;
   filter: drop-shadow(0 0 8px #0ea5e9);
 }
+
+/* Loading Bar Animation */
+@keyframes loading-bar {
+  0% {
+    width: 0%;
+    margin-left: 0%;
+  }
+  50% {
+    width: 70%;
+    margin-left: 15%;
+  }
+  100% {
+    width: 100%;
+    margin-left: 0%;
+  }
+}
+
+.animate-loading-bar {
+  animation: loading-bar 1.5s ease-in-out infinite;
+}

@@ -1,6 +1,8 @@
-import { useReducer, useEffect, useCallback, useMemo } from 'react';
+import { useReducer, useEffect, useCallback, useMemo, Dispatch } from 'react';
 import { useNavigate } from 'react-router-dom';
+// @ts-ignore
 import { auth } from '../firebase';
+// @ts-ignore
 import { gameReducer, initialState } from '../reducers/gameReducer';
 import {
   getTodaySeed,
@@ -8,21 +10,44 @@ import {
   markTodayAsPlayed,
   selectDistractors,
   shuffleOptions,
+  // @ts-ignore
 } from '../utils/dailyChallenge';
+// @ts-ignore
 import { calculateStreak } from '../utils/stats';
+// @ts-ignore
 import { saveScore } from '../utils/leaderboard';
+// @ts-ignore
 import { calculateScore, shouldPromptFeedback } from '../config/gameConfig';
 import {
   updateUserGameStats,
   saveUserGameResult,
   getReferrer,
   hasDailyReferral,
+  // @ts-ignore
 } from '../utils/social';
+// @ts-ignore
 import { awardChallengeBonus, awardReferralBonus } from '../utils/giuros';
+// @ts-ignore
 import { storage } from '../utils/storage';
+// @ts-ignore
 import { logger } from '../utils/logger';
+// @ts-ignore
 import quizPlan from '../data/quizPlan.json';
+// @ts-ignore
 import { TIME, GAME, FEEDBACK, STORAGE_KEYS } from '../config/constants';
+import { Street, GameStateObject, QuizResult } from '../types/game';
+import { useAsyncOperation } from './useAsyncOperation'; // [NEW]
+
+export interface UseGameStateResult {
+  state: GameStateObject;
+  dispatch: Dispatch<any>;
+  currentStreet: Street | null;
+  setupGame: (freshName?: string) => void;
+  processAnswer: (selectedStreet: Street) => void;
+  handleSelectAnswer: (selectedStreet: Street) => void;
+  handleNext: () => void;
+  handleRegister: (name: string) => void;
+}
 
 /**
  * Hook for managing all game state and gameplay logic
@@ -30,9 +55,16 @@ import { TIME, GAME, FEEDBACK, STORAGE_KEYS } from '../config/constants';
  * @param {Function} getHintStreets - Function to calculate hint streets
  * @returns {Object} Game state, dispatch, and handlers
  */
-export const useGameState = (validStreets, getHintStreets) => {
-  const [state, dispatch] = useReducer(gameReducer, initialState);
+export const useGameState = (
+  validStreets: Street[],
+  getHintStreets: (street: Street) => Street[]
+): UseGameStateResult => {
+  const [state, dispatch] = useReducer(gameReducer, initialState) as [
+    GameStateObject,
+    Dispatch<any>,
+  ];
   const navigate = useNavigate();
+  const { execute } = useAsyncOperation(); // [NEW]
 
   // Current street being quizzed
   const currentStreet = useMemo(
@@ -57,7 +89,7 @@ export const useGameState = (validStreets, getHintStreets) => {
 
   // Auto-advance effect
   useEffect(() => {
-    let timeoutId;
+    let timeoutId: NodeJS.Timeout;
     if (state.feedback === 'transitioning' && state.autoAdvance) {
       timeoutId = setTimeout(() => {
         handleNext();
@@ -70,19 +102,26 @@ export const useGameState = (validStreets, getHintStreets) => {
   /**
    * Generate quiz options for a question
    */
-  const generateOptionsList = useCallback((target, allStreets, questionIndex) => {
-    const todaySeed = getTodaySeed();
-    const questionSeed = todaySeed + questionIndex * 100;
-    const distractors = selectDistractors(allStreets, target, questionSeed);
-    const opts = [target, ...distractors];
-    return shuffleOptions(opts, questionSeed + 50);
-  }, []);
+  const generateOptionsList = useCallback(
+    (target: Street, allStreets: Street[], questionIndex: number) => {
+      const todaySeed = getTodaySeed();
+      const questionSeed = todaySeed + questionIndex * 100;
+      const distractors = selectDistractors(allStreets, target, questionSeed);
+      const opts = [target, ...distractors];
+      return shuffleOptions(opts, questionSeed + 50);
+    },
+    []
+  );
 
   /**
    * Setup a new game session
    */
   const setupGame = useCallback(
-    freshName => {
+    (freshName?: string) => {
+      // NOTE: Setup is mostly synchronous/local calculation, so we might not need a loader here unless
+      // we decide to fetch daily questions from server instead of local JSON plan.
+      // Keeping it sync for now to avoid specific "loading" flash on simple transitions.
+
       const activeName = freshName || state.username;
       if (!activeName) {
         dispatch({ type: 'SET_GAME_STATE', payload: 'register' });
@@ -97,21 +136,23 @@ export const useGameState = (validStreets, getHintStreets) => {
 
       const todaySeed = getTodaySeed();
       const todayStr = new Date().toISOString().split('T')[0];
-      const plannedQuiz = quizPlan?.quizzes?.find(q => q.date === todayStr);
+      const plannedQuiz = quizPlan?.quizzes?.find((q: any) => q.date === todayStr);
 
-      let selected;
-      let initialOptions;
+      let selected: Street[] | undefined;
+      let initialOptions: Street[] | undefined;
 
       if (plannedQuiz && plannedQuiz.questions?.length > 0) {
         const streetMap = new Map(validStreets.map(s => [s.id, s]));
-        selected = plannedQuiz.questions.map(q => streetMap.get(q.correctId)).filter(Boolean);
+        selected = plannedQuiz.questions
+          .map((q: any) => streetMap.get(q.correctId))
+          .filter(Boolean) as Street[];
 
         if (selected.length > 0) {
           const firstQ = plannedQuiz.questions[0];
           const correctStreet = streetMap.get(firstQ.correctId);
           const distractorStreets = firstQ.distractorIds
-            .map(id => streetMap.get(id))
-            .filter(Boolean);
+            .map((id: string) => streetMap.get(id))
+            .filter(Boolean) as Street[];
 
           if (correctStreet && distractorStreets.length >= 3) {
             const opts = [correctStreet, ...distractorStreets.slice(0, 3)];
@@ -144,8 +185,9 @@ export const useGameState = (validStreets, getHintStreets) => {
    * Process answer submission
    */
   const processAnswer = useCallback(
-    selectedStreet => {
+    (selectedStreet: Street) => {
       if (state.feedback === 'transitioning') return;
+      if (!currentStreet) return;
 
       const isCorrect = selectedStreet.id === currentStreet.id;
       const timeElapsed = state.questionStartTime
@@ -153,7 +195,7 @@ export const useGameState = (validStreets, getHintStreets) => {
         : 0;
       const points = calculateScore(timeElapsed, isCorrect, state.hintsRevealedCount);
 
-      const result = {
+      const result: QuizResult = {
         street: currentStreet,
         userAnswer: selectedStreet.name,
         status: isCorrect ? 'correct' : 'failed',
@@ -174,7 +216,7 @@ export const useGameState = (validStreets, getHintStreets) => {
    * Handle answer selection
    */
   const handleSelectAnswer = useCallback(
-    selectedStreet => {
+    (selectedStreet: Street) => {
       dispatch({ type: 'SELECT_ANSWER', payload: selectedStreet });
       processAnswer(selectedStreet);
     },
@@ -193,6 +235,9 @@ export const useGameState = (validStreets, getHintStreets) => {
       // Game complete
       if (state.gameState === 'playing') {
         saveGameResults();
+        // Since saving is async (fire-and-forget logic below), we don't strictly *block* UI here,
+        // but we could wrap saveGameResults in execute() if we wanted a "Saving..." indicator.
+        // For now, let's keep it fluid as users might want to see summary immediately.
       }
       dispatch({ type: 'NEXT_QUESTION', payload: {} });
     } else {
@@ -204,8 +249,8 @@ export const useGameState = (validStreets, getHintStreets) => {
         const plannedQ = state.plannedQuestions[nextIndex];
         const streetMap = new Map(validStreets.map(s => [s.id, s]));
         const distractorStreets = plannedQ.distractorIds
-          .map(id => streetMap.get(id))
-          .filter(Boolean);
+          .map((id: string) => streetMap.get(id))
+          .filter(Boolean) as Street[];
 
         if (distractorStreets.length >= 3) {
           const todaySeed = getTodaySeed();
@@ -238,77 +283,82 @@ export const useGameState = (validStreets, getHintStreets) => {
    * Save game results to localStorage and Firestore
    */
   const saveGameResults = useCallback(() => {
-    try {
-      markTodayAsPlayed();
-      const history = storage.get(STORAGE_KEYS.HISTORY, []);
-      const avgTime = state.quizResults.length
-        ? (
-            state.quizResults.reduce((acc, curr) => acc + (curr.time || 0), 0) /
-            state.quizResults.length
-          ).toFixed(1)
-        : 0;
+    execute(
+      async () => {
+        try {
+          markTodayAsPlayed();
+          const history = storage.get(STORAGE_KEYS.HISTORY, []);
+          const avgTime = state.quizResults.length
+            ? (
+              state.quizResults.reduce(
+                (acc: number, curr: QuizResult) => acc + (curr.time || 0),
+                0
+              ) / state.quizResults.length
+            ).toFixed(1)
+            : 0;
 
-      const newRecord = {
-        date: getTodaySeed(),
-        score: state.score,
-        avgTime: avgTime,
-        timestamp: Date.now(),
-        username: state.username,
-      };
-      history.push(newRecord);
-      storage.set(STORAGE_KEYS.HISTORY, history);
+          const newRecord = {
+            date: getTodaySeed(),
+            score: state.score,
+            avgTime: avgTime,
+            timestamp: Date.now(),
+            username: state.username,
+          };
+          history.push(newRecord);
+          storage.set(STORAGE_KEYS.HISTORY, history);
 
-      if (state.username) {
-        saveUserGameResult(state.username, newRecord);
+          if (state.username) {
+            await saveUserGameResult(state.username, newRecord);
 
-        hasDailyReferral(state.username).then(isBonus => {
-          saveScore(state.username, state.score, newRecord.avgTime, {
-            isBonus,
-            correctAnswers: state.correct,
-            questionCount: state.questions.length,
-            email: auth.currentUser?.email,
-          });
-        });
-
-        const historyForStreak = storage.get(STORAGE_KEYS.HISTORY, []);
-        const streak = calculateStreak(historyForStreak);
-        const totalScore = historyForStreak.reduce((acc, h) => acc + (h.score || 0), 0);
-
-        updateUserGameStats(state.username, {
-          streak,
-          totalScore,
-          lastPlayDate: getTodaySeed(),
-        });
-
-        awardChallengeBonus(state.username, streak).then(() => {
-          // logger.info(`[Giuros] Challenge bonus: +${result.bonus}`);
-        });
-
-        getReferrer(state.username).then(referrer => {
-          if (referrer) {
-            awardReferralBonus(referrer).then(() => {
-              // logger.info(`[Giuros] Referral bonus awarded to: ${referrer}`);
+            const isBonus = await hasDailyReferral(state.username);
+            await saveScore(state.username, state.score, newRecord.avgTime, {
+              isBonus,
+              correctAnswers: state.correct,
+              questionCount: state.questions.length,
+              // @ts-ignore
+              email: auth.currentUser?.email,
             });
+
+            const historyForStreak = storage.get(STORAGE_KEYS.HISTORY, []);
+            const streak = calculateStreak(historyForStreak);
+            const totalScore = historyForStreak.reduce(
+              (acc: number, h: any) => acc + (h.score || 0),
+              0
+            );
+
+            await updateUserGameStats(state.username, {
+              streak,
+              totalScore,
+              lastPlayDate: getTodaySeed(),
+            });
+
+            await awardChallengeBonus(state.username, streak);
+
+            const referrer = await getReferrer(state.username);
+            if (referrer) {
+              await awardReferralBonus(referrer);
+            }
+
+            // Check for feedback prompt
+            const lastFeedback = storage.get(STORAGE_KEYS.LAST_FEEDBACK);
+            const historyList = storage.get(STORAGE_KEYS.HISTORY, []);
+
+            if (shouldPromptFeedback(lastFeedback, historyList.length)) {
+              setTimeout(() => navigate('/feedback'), TIME.FEEDBACK_DELAY);
+            }
           }
-        });
-
-        // Check for feedback prompt
-        const lastFeedback = storage.get(STORAGE_KEYS.LAST_FEEDBACK);
-        const history = storage.get(STORAGE_KEYS.HISTORY, []);
-
-        if (shouldPromptFeedback(lastFeedback, history.length)) {
-          setTimeout(() => navigate('/feedback'), TIME.FEEDBACK_DELAY);
+        } catch (e) {
+          throw e; // Let execute catch it
         }
-      }
-    } catch (e) {
-      logger.error('[Game] Error saving game:', e);
-    }
-  }, [state, navigate]);
+      },
+      { loadingKey: 'save-game', errorMessage: 'Failed to save game results' }
+    );
+  }, [state, navigate, execute]);
 
   /**
    * Handle user registration
    */
-  const handleRegister = useCallback(name => {
+  const handleRegister = useCallback((name: string) => {
     storage.set(STORAGE_KEYS.USERNAME, name);
     dispatch({ type: 'SET_USERNAME', payload: name });
     dispatch({ type: 'SET_GAME_STATE', payload: 'intro' });

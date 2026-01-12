@@ -12,8 +12,46 @@
  * - digital_nomad: Remote worker experience
  */
 
+export interface AchievementCriteria {
+  gamesPlayed?: number;
+  bestScore?: number;
+  streak?: number;
+  wrongStreak?: number;
+  totalPanKm?: number;
+  consecutiveDays?: number;
+  gamesWithoutQuitting?: number;
+  eixampleCorners?: number;
+  gothicStreak?: number;
+  bornGuesses?: number;
+  poblenouGuesses?: number;
+  foodStreetsPerfect?: number;
+  nightPlay?: boolean;
+  ramblasQuickGuess?: boolean;
+  precisionGuess?: boolean;
+  fastLoss?: boolean;
+  speedModeHighScore?: boolean;
+  inviteCount?: number;
+}
+
+export type AchievementCategory = 'starter' | 'social' | 'guiri_path' | 'local_path' | 'high_roller' | 'urban_survival' | 'gastronomy' | 'digital_nomad';
+export type AchievementType = 'merit' | 'shop';
+
+export interface Achievement {
+  id: string;
+  image?: string;
+  name: string;
+  description: string;
+  category: AchievementCategory;
+  type: AchievementType;
+  criteria?: AchievementCriteria;
+  flavorText?: string;
+  cost?: number;
+  emoji?: string;
+  progress?: number;
+}
+
 // Emoji mapping for badges (fallback if no image)
-export const ACHIEVEMENT_BADGES = [
+export const ACHIEVEMENT_BADGES: Achievement[] = [
   // === SOCIAL ===
   {
     id: 'badge_gentrificador',
@@ -237,7 +275,13 @@ export const ACHIEVEMENT_BADGES = [
   },
 ];
 
-export const BADGE_CATEGORIES = {
+export interface BadgeCategoryInfo {
+  name: string;
+  color: string;
+  icon: string;
+}
+
+export const BADGE_CATEGORIES: Record<string, BadgeCategoryInfo> = {
   starter: { name: 'Merits', color: 'blue', icon: '🏆' },
   social: { name: 'Social', color: 'purple', icon: '👥' },
 };
@@ -245,14 +289,14 @@ export const BADGE_CATEGORIES = {
 /**
  * Get all shop badges (purchasable with Giuros)
  */
-export const getShopBadges = () => {
+export const getShopBadges = (): Achievement[] => {
   return ACHIEVEMENT_BADGES.filter(b => b.type === 'shop');
 };
 
 /**
  * Get all merit badges (earned through gameplay)
  */
-export const getMeritBadges = () => {
+export const getMeritBadges = (): Achievement[] => {
   return ACHIEVEMENT_BADGES.filter(b => b.type === 'merit');
 };
 
@@ -262,7 +306,7 @@ export const getMeritBadges = () => {
  * @param {Array} purchasedBadges - Array of badge IDs user has purchased
  * @returns {Array} Array of unlocked badge objects
  */
-export const getUnlockedAchievements = (stats, purchasedBadges = []) => {
+export const getUnlockedAchievements = (stats: any, purchasedBadges: string[] = []): Achievement[] => {
   if (!stats) return [];
 
   const {
@@ -285,7 +329,7 @@ export const getUnlockedAchievements = (stats, purchasedBadges = []) => {
     speedModeHighScore = false,
   } = stats;
 
-  const unlocked = [];
+  const unlocked: Achievement[] = [];
   const purchasedSet = new Set(purchasedBadges);
 
   for (const badge of ACHIEVEMENT_BADGES) {
@@ -299,6 +343,7 @@ export const getUnlockedAchievements = (stats, purchasedBadges = []) => {
 
     // Merit badges - check criteria
     const { criteria } = badge;
+    if (!criteria) continue;
     let meets = true;
 
     if (criteria.gamesPlayed && gamesPlayed < criteria.gamesPlayed) meets = false;
@@ -319,7 +364,6 @@ export const getUnlockedAchievements = (stats, purchasedBadges = []) => {
     if (criteria.ramblasQuickGuess && !ramblasQuickGuess) meets = false;
     if (criteria.precisionGuess && !precisionGuess) meets = false;
     if (criteria.fastLoss && !fastLoss) meets = false;
-    if (criteria.fastLoss && !fastLoss) meets = false;
     if (criteria.speedModeHighScore && !speedModeHighScore) meets = false;
     if (criteria.inviteCount && (stats.inviteCount || 0) < criteria.inviteCount) meets = false;
 
@@ -334,8 +378,8 @@ export const getUnlockedAchievements = (stats, purchasedBadges = []) => {
 /**
  * Get badges grouped by category
  */
-export const getBadgesByCategory = () => {
-  const grouped = {};
+export const getBadgesByCategory = (): Record<string, Achievement[]> => {
+  const grouped: Record<string, Achievement[]> = {};
   for (const badge of ACHIEVEMENT_BADGES) {
     if (!grouped[badge.category]) {
       grouped[badge.category] = [];
@@ -350,14 +394,14 @@ export const getBadgesByCategory = () => {
  * @param {Object} stats - User stats
  * @returns {Object|null} Next achievement with progress info
  */
-export const getNextAchievement = stats => {
+export const getNextAchievement = (stats: any): Achievement | null => {
   if (!stats) return null;
 
   const { gamesPlayed = 0, bestScore = 0, streak = 0 } = stats;
   const unlocked = getUnlockedAchievements(stats);
   const unlockedIds = new Set(unlocked.map(b => b.id));
 
-  let closest = null;
+  let closest: Achievement | null = null;
   let closestProgress = 0;
 
   for (const badge of ACHIEVEMENT_BADGES) {
@@ -365,6 +409,7 @@ export const getNextAchievement = stats => {
     if (badge.type === 'shop') continue; // Skip shop badges for "next achievement"
 
     const { criteria } = badge;
+    if (!criteria) continue;
     let progress = 0;
 
     if (criteria.gamesPlayed) {

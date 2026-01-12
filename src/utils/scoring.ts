@@ -8,7 +8,15 @@ import { calculateScore } from '../config/gameConfig';
  * @param {number} hintsCount - Number of hints revealed (0-3)
  * @returns {number} - Points earned (0-100)
  */
-export function calculateTimeScore(timeInSeconds, isCorrect, hintsCount = 0) {
+/**
+ * Calculate score based on time taken and hints used
+ * @deprecated Use calculateScore from config/gameConfig instead
+ * @param {number} timeInSeconds - Time taken to answer
+ * @param {boolean} isCorrect - Whether answer was correct
+ * @param {number} hintsCount - Number of hints revealed (0-3)
+ * @returns {number} - Points earned (0-100)
+ */
+export function calculateTimeScore(timeInSeconds: number, isCorrect: boolean, hintsCount: number = 0): number {
   return calculateScore(timeInSeconds, isCorrect, hintsCount);
 }
 
@@ -17,7 +25,7 @@ export function calculateTimeScore(timeInSeconds, isCorrect, hintsCount = 0) {
  * @param {number} points - Points earned
  * @returns {string} - Tier label
  */
-export function getScoreTier(points) {
+export function getScoreTier(points: number): string {
   if (points >= 90) return 'Perfect!';
   if (points >= 75) return 'Excellent';
   if (points >= 50) return 'Good';
@@ -31,7 +39,7 @@ export function getScoreTier(points) {
  * @param {number} points - Points earned
  * @returns {string} - Tailwind color class
  */
-export function getScoreTierColor(points) {
+export function getScoreTierColor(points: number): string {
   if (points >= 90) return 'text-emerald-500';
   if (points >= 75) return 'text-green-500';
   if (points >= 50) return 'text-yellow-500';

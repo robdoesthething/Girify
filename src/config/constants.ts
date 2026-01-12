@@ -10,7 +10,7 @@ export const TIME = {
   FEEDBACK_DELAY: 2000,
   AUTO_ADVANCE_DELAY: 1000,
   ANIMATION_DURATION: 300,
-};
+} as const;
 
 // ==================== GAME CONFIG ====================
 export const GAME = {
@@ -25,7 +25,7 @@ export const GAME = {
     HINT_PENALTY: 20,
     STREAK_MULTIPLIER: 1.1,
   },
-};
+} as const;
 
 // ==================== USER SYSTEM ====================
 export const USER = {

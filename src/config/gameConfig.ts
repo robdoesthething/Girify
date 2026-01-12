@@ -1,6 +1,6 @@
 import { GAME, REWARDS, FEEDBACK } from './constants';
 
-export const calculateScore = (timeElapsed, isCorrect, hintsUsed) => {
+export const calculateScore = (timeElapsed: number, isCorrect: boolean, hintsUsed: number): number => {
   if (!isCorrect) return 0;
 
   let score = GAME.POINTS.CORRECT_BASE;
@@ -19,11 +19,11 @@ export const calculateScore = (timeElapsed, isCorrect, hintsUsed) => {
   return Math.max(0, score);
 };
 
-export const calculateStreakBonus = streakDays => {
+export const calculateStreakBonus = (streakDays: number): number => {
   return REWARDS.CHALLENGE_COMPLETE + streakDays * REWARDS.STREAK_BONUS_PER_DAY;
 };
 
-export const shouldPromptFeedback = (lastFeedbackTime, gamesPlayed = 10) => {
+export const shouldPromptFeedback = (lastFeedbackTime: string | null | undefined, gamesPlayed: number = 10): boolean => {
   if (gamesPlayed < FEEDBACK.MIN_GAMES_BEFORE_PROMPT) {
     return false;
   }

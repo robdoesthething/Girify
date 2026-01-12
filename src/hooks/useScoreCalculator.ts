@@ -1,4 +1,5 @@
 import { useCallback } from 'react';
+// @ts-ignore
 import { calculateScore as calculateScoreConfig } from '../config/gameConfig';
 
 /**
@@ -21,9 +22,12 @@ export function useScoreCalculator() {
    * @param {number} hintsCount - Number of hints used (0-3)
    * @returns {number} Points earned (0-100)
    */
-  const calculateScore = useCallback((timeInSeconds, isCorrect, hintsCount = 0) => {
-    return calculateScoreConfig(timeInSeconds, isCorrect, hintsCount);
-  }, []);
+  const calculateScore = useCallback(
+    (timeInSeconds: number, isCorrect: boolean, hintsCount: number = 0): number => {
+      return calculateScoreConfig(timeInSeconds, isCorrect, hintsCount);
+    },
+    []
+  );
 
   return { calculateScore };
 }

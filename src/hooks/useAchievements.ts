@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
+// @ts-ignore
 import { getUserProfile } from '../utils/social';
-import { getUnlockedAchievements } from '../data/achievements';
+import { getUnlockedAchievements, Achievement } from '../data/achievements';
 
 /**
  * Hook for managing achievement tracking and unlock notifications
@@ -9,9 +10,9 @@ import { getUnlockedAchievements } from '../data/achievements';
  * @param {string} pathname - Current route pathname
  * @returns {Object} { newlyUnlockedBadge, dismissAchievement }
  */
-export const useAchievements = (username, gameState, pathname) => {
-  const [newlyUnlockedBadge, setNewlyUnlockedBadge] = useState(null);
-  const prevUnlockedRef = useRef(new Set());
+export const useAchievements = (username: string | null, gameState: string, pathname: string) => {
+  const [newlyUnlockedBadge, setNewlyUnlockedBadge] = useState<Achievement | null>(null);
+  const prevUnlockedRef = useRef<Set<string>>(new Set());
 
   useEffect(() => {
     const checkAchievements = async () => {
