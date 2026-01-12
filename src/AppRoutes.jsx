@@ -1,4 +1,4 @@
-import React, { useReducer, useMemo, useEffect, useState } from 'react';
+import React, { useReducer, useEffect, useState } from 'react';
 import { Routes, Route, useLocation, useNavigate } from 'react-router-dom';
 import { AnimatePresence } from 'framer-motion';
 
@@ -20,9 +20,10 @@ import AnnouncementModal from './components/AnnouncementModal';
 import LandingPage from './components/LandingPage';
 
 import { useTheme } from './context/ThemeContext';
-import rawStreets from './data/streets.json';
 import quizPlan from './data/quizPlan.json';
-import * as turf from '@turf/turf';
+import { useStreets } from './hooks/useStreets';
+import { useAchievements } from './hooks/useAchievements';
+import { useAnnouncements } from './hooks/useAnnouncements';
 import {
   getTodaySeed,
   selectDailyStreets,
@@ -49,9 +50,6 @@ import { claimDailyLoginBonus, awardChallengeBonus, awardReferralBonus } from '.
 import { gameReducer, initialState } from './reducers/gameReducer';
 import { auth } from './firebase';
 import { onAuthStateChanged, signOut, updateProfile } from 'firebase/auth';
-import { getUnreadAnnouncements, markAnnouncementAsRead } from './utils/news';
-import { getUnlockedAchievements } from './data/achievements';
-import { getUserProfile } from './utils/social';
 
 import PrivacyPolicy from './components/PrivacyPolicy';
 import TermsOfService from './components/TermsOfService';
@@ -63,52 +61,22 @@ const AppRoutes = () => {
   const [state, dispatch] = useReducer(gameReducer, initialState);
   const location = useLocation();
   const navigate = useNavigate();
-  const [emailVerified, setEmailVerified] = useState(true); // Default true to not block guests unless auth'd
+  const [emailVerified, setEmailVerified] = useState(true);
 
-  // Announcement Modal State
-  const [pendingAnnouncement, setPendingAnnouncement] = useState(null);
+  // Street data hook
+  const { validStreets, getHintStreets } = useStreets();
 
-  // Achievement Modal State
-  const [newlyUnlockedBadge, setNewlyUnlockedBadge] = useState(null);
-  const prevUnlockedRef = React.useRef(new Set());
+  // Announcement hook
+  const { pendingAnnouncement, dismissAnnouncement, checkAnnouncements } = useAnnouncements(
+    state.username
+  );
 
-  // Check for Achievements
-  useEffect(() => {
-    const checkAchievements = async () => {
-      if (!state.username) return;
-
-      try {
-        const profile = await getUserProfile(state.username);
-        const unlocked = getUnlockedAchievements(profile); // Works if profile matches stats shape
-
-        // Initialize Ref on first load
-        if (prevUnlockedRef.current.size === 0) {
-          unlocked.forEach(b => prevUnlockedRef.current.add(b.id));
-          return;
-        }
-
-        // Check for new ones
-        for (const badge of unlocked) {
-          if (!prevUnlockedRef.current.has(badge.id)) {
-            // New badge!
-            setNewlyUnlockedBadge(badge);
-            prevUnlockedRef.current.add(badge.id);
-            // Break to show one at a time (render loop will catch next one if we supported queue,
-            // but simple 'set' shows latest or first new found.
-            // Better to just show one for now to avoid spam.)
-            break;
-          }
-        }
-      } catch (err) {
-        console.warn('Achievement check failed', err);
-      }
-    };
-
-    // Check periodically or when game state changes to 'summary' (game end)
-    if (state.gameState === 'summary' || location.pathname === '/profile') {
-      checkAchievements();
-    }
-  }, [state.username, state.gameState, location.pathname]);
+  // Achievement hook
+  const { newlyUnlockedBadge, dismissAchievement } = useAchievements(
+    state.username,
+    state.gameState,
+    location.pathname
+  );
 
   // Parse referral code from URL on load
   useEffect(() => {
@@ -123,38 +91,6 @@ const AppRoutes = () => {
   useEffect(() => {
     localStorage.setItem('girify_auto_advance', state.autoAdvance);
   }, [state.autoAdvance]);
-
-  // Memoize valid streets
-  const validStreets = useMemo(() => {
-    const isValidType = name => {
-      if (!name) return false;
-      const lower = name.toLowerCase();
-      return (
-        !lower.includes('autopista') &&
-        !lower.includes('autovia') &&
-        !lower.includes('b-1') &&
-        !lower.includes('b-2')
-      );
-    };
-
-    const rawValidStreets = rawStreets.filter(
-      s => isValidType(s.name) && s.geometry && s.geometry.length > 0
-    );
-    const uniqueStreetsMap = new Map();
-    rawValidStreets.forEach(s => {
-      if (!uniqueStreetsMap.has(s.name)) {
-        uniqueStreetsMap.set(s.name, s);
-      } else {
-        const existing = uniqueStreetsMap.get(s.name);
-        const currentLength = s.geometry.flat().length;
-        const existingLength = existing.geometry.flat().length;
-        if (currentLength > existingLength) {
-          uniqueStreetsMap.set(s.name, s);
-        }
-      }
-    });
-    return Array.from(uniqueStreetsMap.values());
-  }, []);
 
   // Generate options helper
   const generateOptionsList = (target, allStreets, questionIndex) => {
@@ -237,60 +173,15 @@ const AppRoutes = () => {
   const currentStreet =
     state.gameState === 'playing' ? state.quizStreets[state.currentQuestionIndex] : null;
 
-  // Hint Calculation
+  // Hint Calculation - using useStreets hook
   useEffect(() => {
     if (!currentStreet) {
       dispatch({ type: 'SET_HINT_STREETS', payload: [] });
       return;
     }
-
-    const toTurf = lines => lines.map(line => line.map(p => [p[1], p[0]]));
-    let hints = [];
-
-    try {
-      const currentGeo = turf.multiLineString(toTurf(currentStreet.geometry));
-
-      for (const street of rawStreets) {
-        if (street.id === currentStreet.id) continue;
-        const lower = street.name.toLowerCase();
-        if (lower.includes('autopista') || lower.includes('autovia') || lower.includes('ronda'))
-          continue;
-
-        if (street.geometry) {
-          const otherGeo = turf.multiLineString(toTurf(street.geometry));
-          if (!turf.booleanDisjoint(currentGeo, otherGeo)) {
-            hints.push(street);
-            if (hints.length >= 3) break;
-          }
-        }
-      }
-
-      if (hints.length < 3) {
-        const currentCentroid = turf.centroid(currentGeo);
-        const candidates = [];
-        for (const street of rawStreets) {
-          if (street.id === currentStreet.id) continue;
-          if (hints.some(h => h.id === street.id)) continue;
-          const lower = street.name.toLowerCase();
-          if (lower.includes('autopista') || lower.includes('autovia') || lower.includes('ronda'))
-            continue;
-          if (street.geometry) {
-            const p1 = street.geometry[0][0];
-            const otherPoint = turf.point([p1[1], p1[0]]);
-            const dist = turf.distance(currentCentroid, otherPoint);
-            candidates.push({ street, dist });
-          }
-        }
-        candidates.sort((a, b) => a.dist - b.dist);
-        const needed = 3 - hints.length;
-        const extra = candidates.slice(0, needed).map(c => c.street);
-        hints = [...hints, ...extra];
-      }
-    } catch (e) {
-      console.error('Turf error', e);
-    }
+    const hints = getHintStreets(currentStreet);
     dispatch({ type: 'SET_HINT_STREETS', payload: hints });
-  }, [currentStreet]);
+  }, [currentStreet, getHintStreets]);
 
   // Handlers
   const processAnswer = selectedStreet => {
@@ -616,12 +507,7 @@ const AppRoutes = () => {
             );
 
             // NEWS: Check for unread announcements
-            getUnreadAnnouncements(displayName).then(unread => {
-              if (unread && unread.length > 0) {
-                // Show the most recent unread announcement
-                setPendingAnnouncement(unread[0]);
-              }
-            });
+            checkAnnouncements();
 
             // MIGRATION: Sync Local History to Firestore (One-time)
             if (!localStorage.getItem('girify_history_synced')) {
@@ -753,7 +639,7 @@ const AppRoutes = () => {
       }
     });
     return () => unsubscribe();
-  }, [state.gameState]);
+  }, [state.gameState, checkAnnouncements]);
 
   // Auto-Advance
   useEffect(() => {
@@ -787,23 +673,14 @@ const AppRoutes = () => {
       {/* Announcement Modal */}
       <AnimatePresence>
         {pendingAnnouncement && (
-          <AnnouncementModal
-            announcement={pendingAnnouncement}
-            onDismiss={() => {
-              markAnnouncementAsRead(state.username, pendingAnnouncement.id);
-              setPendingAnnouncement(null);
-            }}
-          />
+          <AnnouncementModal announcement={pendingAnnouncement} onDismiss={dismissAnnouncement} />
         )}
       </AnimatePresence>
 
       {/* Achievement Modal */}
       <AnimatePresence>
         {newlyUnlockedBadge && (
-          <AchievementModal
-            achievement={newlyUnlockedBadge}
-            onDismiss={() => setNewlyUnlockedBadge(null)}
-          />
+          <AchievementModal achievement={newlyUnlockedBadge} onDismiss={dismissAchievement} />
         )}
       </AnimatePresence>
 
