@@ -17,18 +17,20 @@ const DEFAULT_PAYOUTS = {
   STREAK_WEEK_BONUS: 250, // Big reward for consistency
   PERFECT_SCORE_BONUS: 50, // Skill reward
   REFERRAL_BONUS: 500, // Growth incentive
-};
+} as const;
+
+export type PayoutConfig = typeof DEFAULT_PAYOUTS;
 
 // In-memory cache
-let cachedPayouts = null;
+let cachedPayouts: PayoutConfig | null = null;
 let cacheTimestamp = 0;
 const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
 
 /**
  * Get payout configuration from Firestore with caching
- * @returns {Promise<typeof DEFAULT_PAYOUTS>}
+ * @returns {Promise<PayoutConfig>}
  */
-export const getPayoutConfig = async () => {
+export const getPayoutConfig = async (): Promise<PayoutConfig> => {
   const now = Date.now();
 
   // Return cached if still valid
@@ -41,7 +43,8 @@ export const getPayoutConfig = async () => {
     const configDoc = await getDoc(configRef);
 
     if (configDoc.exists() && configDoc.data().payouts) {
-      cachedPayouts = { ...DEFAULT_PAYOUTS, ...configDoc.data().payouts };
+      // Cast the result to PayoutConfig (safe assumption for now, ideally validate)
+      cachedPayouts = { ...DEFAULT_PAYOUTS, ...configDoc.data().payouts } as PayoutConfig;
     } else {
       // Initialize with defaults if doesn't exist
       cachedPayouts = DEFAULT_PAYOUTS;
@@ -57,10 +60,10 @@ export const getPayoutConfig = async () => {
 
 /**
  * Update payout configuration in Firestore (admin only)
- * @param {Partial<typeof DEFAULT_PAYOUTS>} updates
+ * @param {Partial<PayoutConfig>} updates
  * @returns {Promise<{success: boolean, error?: string}>}
  */
-export const updatePayoutConfig = async updates => {
+export const updatePayoutConfig = async (updates: Partial<PayoutConfig>): Promise<{ success: boolean, error?: string }> => {
   try {
     const configRef = doc(db, CONFIG_COLLECTION, CONFIG_DOC);
     const configDoc = await getDoc(configRef);
@@ -74,14 +77,14 @@ export const updatePayoutConfig = async updates => {
     await setDoc(configRef, { payouts: newPayouts }, { merge: true });
 
     // Clear cache to force refresh
-    cachedPayouts = newPayouts;
+    cachedPayouts = newPayouts as PayoutConfig;
     cacheTimestamp = Date.now();
 
     // eslint-disable-next-line no-console
     console.log('[Config] Payout config updated:', newPayouts);
 
     return { success: true };
-  } catch (e) {
+  } catch (e: any) {
     console.error('Error updating payout config:', e);
     return { success: false, error: e.message };
   }
@@ -89,14 +92,14 @@ export const updatePayoutConfig = async updates => {
 
 /**
  * Get default payouts (for display/comparison)
- * @returns {typeof DEFAULT_PAYOUTS}
+ * @returns {PayoutConfig}
  */
-export const getDefaultPayouts = () => DEFAULT_PAYOUTS;
+export const getDefaultPayouts = (): PayoutConfig => DEFAULT_PAYOUTS;
 
 /**
  * Clear the cache (useful for testing or admin refresh)
  */
-export const clearPayoutCache = () => {
+export const clearPayoutCache = (): void => {
   cachedPayouts = null;
   cacheTimestamp = 0;
 };

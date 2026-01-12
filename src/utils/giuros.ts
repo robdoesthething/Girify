@@ -1,5 +1,5 @@
 import { db } from '../firebase';
-import { doc, getDoc, updateDoc, Timestamp } from 'firebase/firestore';
+import { doc, getDoc, updateDoc } from 'firebase/firestore';
 import { getPayoutConfig } from './configService';
 import { calculateStreakBonus } from '../config/gameConfig';
 
@@ -18,13 +18,18 @@ export const REFERRAL_BONUS = 15;
  * @param {string} username
  * @returns {Promise<number>}
  */
-export const getGiuros = async username => {
+/**
+ * Get user's current giuros balance
+ * @param {string} username
+ * @returns {Promise<number>}
+ */
+export const getGiuros = async (username: string | null): Promise<number> => {
   if (!username) return 0;
   try {
     const userRef = doc(db, USERS_COLLECTION, username);
     const userDoc = await getDoc(userRef);
     if (userDoc.exists()) {
-      return userDoc.data().giuros ?? STARTING_GIUROS;
+      return userDoc.data()?.giuros ?? STARTING_GIUROS;
     }
     return STARTING_GIUROS;
   } catch (e) {
@@ -40,7 +45,7 @@ export const getGiuros = async username => {
  * @param {string} reason - For logging/audit
  * @returns {Promise<{success: boolean, newBalance: number}>}
  */
-export const addGiuros = async (username, amount, reason = '') => {
+export const addGiuros = async (username: string | null, amount: number, reason: string = ''): Promise<{ success: boolean, newBalance: number }> => {
   if (!username || amount <= 0) return { success: false, newBalance: 0 };
 
   try {
@@ -51,7 +56,7 @@ export const addGiuros = async (username, amount, reason = '') => {
       return { success: false, newBalance: 0 };
     }
 
-    const currentBalance = userDoc.data().giuros ?? STARTING_GIUROS;
+    const currentBalance = userDoc.data()?.giuros ?? STARTING_GIUROS;
     const newBalance = currentBalance + amount;
 
     await updateDoc(userRef, { giuros: newBalance });
@@ -72,7 +77,13 @@ export const addGiuros = async (username, amount, reason = '') => {
  * @param {number} amount
  * @returns {Promise<{success: boolean, newBalance: number}>}
  */
-export const awardGiuros = (username, amount) => addGiuros(username, amount, 'reward');
+/**
+ * Award giuros (wrapper for feedback/other general rewards)
+ * @param {string} username
+ * @param {number} amount
+ * @returns {Promise<{success: boolean, newBalance: number}>}
+ */
+export const awardGiuros = (username: string | null, amount: number) => addGiuros(username, amount, 'reward');
 
 /**
  * Spend giuros on a cosmetic item
@@ -81,7 +92,7 @@ export const awardGiuros = (username, amount) => addGiuros(username, amount, 're
  * @param {string} itemId
  * @returns {Promise<{success: boolean, error?: string, newBalance?: number}>}
  */
-export const spendGiuros = async (username, cost, itemId) => {
+export const spendGiuros = async (username: string | null, cost: number, itemId: string): Promise<{ success: boolean, error?: string, newBalance?: number }> => {
   if (!username || cost <= 0 || !itemId) {
     return { success: false, error: 'Invalid parameters' };
   }
@@ -95,13 +106,13 @@ export const spendGiuros = async (username, cost, itemId) => {
     }
 
     const data = userDoc.data();
-    const currentBalance = data.giuros ?? STARTING_GIUROS;
+    const currentBalance = data?.giuros ?? STARTING_GIUROS;
 
     if (currentBalance < cost) {
       return { success: false, error: 'Insufficient giuros' };
     }
 
-    const purchasedCosmetics = data.purchasedCosmetics || [];
+    const purchasedCosmetics: string[] = data?.purchasedCosmetics || [];
 
     // Check if already purchased (for non-consumable items)
     if (purchasedCosmetics.includes(itemId) && !itemId.startsWith('handle_change')) {
@@ -122,6 +133,7 @@ export const spendGiuros = async (username, cost, itemId) => {
     );
 
     // Publish activity for friend feed (async, don't await)
+    // @ts-ignore - Dynamic import of JS file? Need to check strictness
     import('./publishActivity').then(({ publishCosmeticPurchase }) => {
       // Determine item type from ID prefix
       let itemType = 'item';
@@ -133,7 +145,7 @@ export const spendGiuros = async (username, cost, itemId) => {
     });
 
     return { success: true, newBalance };
-  } catch (e) {
+  } catch (e: any) {
     console.error('Error spending giuros:', e);
     return { success: false, error: e.message };
   }
@@ -144,7 +156,12 @@ export const spendGiuros = async (username, cost, itemId) => {
  * @param {string} username
  * @returns {Promise<{claimed: boolean, bonus: number, newBalance: number}>}
  */
-export const claimDailyLoginBonus = async username => {
+/**
+ * Claim daily login bonus (once per day)
+ * @param {string} username
+ * @returns {Promise<{claimed: boolean, bonus: number, newBalance: number}>}
+ */
+export const claimDailyLoginBonus = async (username: string | null): Promise<{ claimed: boolean, bonus: number, newBalance: number }> => {
   if (!username) return { claimed: false, bonus: 0, newBalance: 0 };
 
   try {
@@ -162,14 +179,14 @@ export const claimDailyLoginBonus = async username => {
 
     const data = userDoc.data();
     const today = new Date().toDateString();
-    const lastLogin = data.lastLoginDate;
+    const lastLogin = data?.lastLoginDate;
 
     // Already claimed today
     if (lastLogin === today) {
-      return { claimed: false, bonus: 0, newBalance: data.giuros ?? startingGiuros };
+      return { claimed: false, bonus: 0, newBalance: data?.giuros ?? startingGiuros };
     }
 
-    const currentBalance = data.giuros ?? startingGiuros;
+    const currentBalance = data?.giuros ?? startingGiuros;
     const newBalance = currentBalance + dailyBonus;
 
     await updateDoc(userRef, {
@@ -193,7 +210,7 @@ export const claimDailyLoginBonus = async username => {
  * @param {number} streak - Current streak for bonus calculation
  * @returns {Promise<{bonus: number, newBalance: number}>}
  */
-export const awardChallengeBonus = async (username, streak = 0) => {
+export const awardChallengeBonus = async (username: string | null, streak: number = 0): Promise<{ bonus: number, newBalance: number }> => {
   if (!username) return { bonus: 0, newBalance: 0 };
 
   // Use centralized game config for calculation
@@ -208,7 +225,7 @@ export const awardChallengeBonus = async (username, streak = 0) => {
  * @param {string} referrerUsername
  * @returns {Promise<{success: boolean, newBalance: number}>}
  */
-export const awardReferralBonus = async referrerUsername => {
+export const awardReferralBonus = async (referrerUsername: string | null): Promise<{ success: boolean, newBalance: number }> => {
   if (!referrerUsername) return { success: false, newBalance: 0 };
 
   // Fetch dynamic config
@@ -222,7 +239,7 @@ export const awardReferralBonus = async referrerUsername => {
  * @param {string} username
  * @returns {Promise<string[]>}
  */
-export const getPurchasedCosmetics = async username => {
+export const getPurchasedCosmetics = async (username: string | null): Promise<string[]> => {
   if (!username) return [];
 
   try {
@@ -230,7 +247,7 @@ export const getPurchasedCosmetics = async username => {
     const userDoc = await getDoc(userRef);
 
     if (userDoc.exists()) {
-      return userDoc.data().purchasedCosmetics || [];
+      return userDoc.data()?.purchasedCosmetics || [];
     }
     return [];
   } catch (e) {
@@ -244,7 +261,7 @@ export const getPurchasedCosmetics = async username => {
  * @param {string} username
  * @param {object} equipped - { frameId, badgeIds, titleId }
  */
-export const setEquippedCosmetics = async (username, equipped) => {
+export const setEquippedCosmetics = async (username: string | null, equipped: Record<string, any>): Promise<void> => {
   if (!username) return;
 
   try {
@@ -260,7 +277,7 @@ export const setEquippedCosmetics = async (username, equipped) => {
  * @param {string} username
  * @returns {Promise<{frameId?: string, badgeIds?: string[], titleId?: string}>}
  */
-export const getEquippedCosmetics = async username => {
+export const getEquippedCosmetics = async (username: string | null): Promise<{ frameId?: string, badgeIds?: string[], titleId?: string } | {}> => {
   if (!username) return {};
 
   try {
@@ -268,7 +285,7 @@ export const getEquippedCosmetics = async username => {
     const userDoc = await getDoc(userRef);
 
     if (userDoc.exists()) {
-      return userDoc.data().equippedCosmetics || {};
+      return userDoc.data()?.equippedCosmetics || {};
     }
     return {};
   } catch (e) {

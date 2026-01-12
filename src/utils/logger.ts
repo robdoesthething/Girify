@@ -3,34 +3,36 @@ const LOG_LEVELS = {
   INFO: 1,
   WARN: 2,
   ERROR: 3,
-};
+} as const;
 
 class Logger {
+  private level: number;
+
   constructor() {
     this.level = import.meta.env.MODE === 'production' ? LOG_LEVELS.WARN : LOG_LEVELS.DEBUG;
   }
 
-  debug(...args) {
+  debug(...args: unknown[]): void {
     if (this.level <= LOG_LEVELS.DEBUG) {
       // eslint-disable-next-line no-console
       console.log('[DEBUG]', ...args);
     }
   }
 
-  info(...args) {
+  info(...args: unknown[]): void {
     if (this.level <= LOG_LEVELS.INFO) {
       // eslint-disable-next-line no-console
       console.info('[INFO]', ...args);
     }
   }
 
-  warn(...args) {
+  warn(...args: unknown[]): void {
     if (this.level <= LOG_LEVELS.WARN) {
       console.warn('[WARN]', ...args);
     }
   }
 
-  error(...args) {
+  error(...args: unknown[]): void {
     if (this.level <= LOG_LEVELS.ERROR) {
       console.error('[ERROR]', ...args);
     }
@@ -40,7 +42,7 @@ class Logger {
     }
   }
 
-  sendToErrorTracking(_args) {
+  private sendToErrorTracking(_args: unknown[]): void {
     // Integrate with Sentry, LogRocket, etc.
     // Sentry.captureException(args[0]);
   }

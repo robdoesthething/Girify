@@ -4,6 +4,7 @@ import { ThemeProvider } from './context/ThemeContext';
 import AppRoutes from './AppRoutes';
 import ErrorBoundary from './components/ErrorBoundary';
 import { NotificationProvider } from './components/NotificationSystem';
+import { LoadingProvider } from './context/LoadingContext';
 
 function App() {
   return (
@@ -12,7 +13,9 @@ function App() {
         <Router>
           <ErrorBoundary>
             <NotificationProvider>
-              <AppRoutes />
+              <LoadingProvider>
+                <AppRoutes />
+              </LoadingProvider>
             </NotificationProvider>
           </ErrorBoundary>
         </Router>

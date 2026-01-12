@@ -1,11 +1,13 @@
 import { useCallback } from 'react';
 import * as turf from '@turf/turf';
+// @ts-ignore
 import rawStreets from '../data/streets.json';
+import { Street } from '../types/game';
 
 // --- Static Data Initialization ---
 // Calculate this once at module load time, not on every render
 
-const isValidType = name => {
+const isValidType = (name: string): boolean => {
   if (!name) return false;
   const lower = name.toLowerCase();
   return (
@@ -16,18 +18,19 @@ const isValidType = name => {
   );
 };
 
-const validStreetsData = (() => {
-  const rawValidStreets = rawStreets.filter(
+const validStreetsData: Street[] = (() => {
+  const streets = rawStreets as Street[];
+  const rawValidStreets = streets.filter(
     s => isValidType(s.name) && s.geometry && s.geometry.length > 0
   );
 
   // Deduplicate by name, keeping the one with most geometry points
-  const uniqueStreetsMap = new Map();
+  const uniqueStreetsMap = new Map<string, Street>();
   rawValidStreets.forEach(s => {
     if (!uniqueStreetsMap.has(s.name)) {
       uniqueStreetsMap.set(s.name, s);
     } else {
-      const existing = uniqueStreetsMap.get(s.name);
+      const existing = uniqueStreetsMap.get(s.name)!;
       const currentLength = s.geometry.flat().length;
       const existingLength = existing.geometry.flat().length;
       if (currentLength > existingLength) {
@@ -49,11 +52,11 @@ export const useStreets = () => {
    * @param {Object} targetStreet - The current street to find hints for
    * @returns {Array} Up to 3 streets that intersect or are near target
    */
-  const getHintStreets = useCallback(targetStreet => {
+  const getHintStreets = useCallback((targetStreet: Street) => {
     if (!targetStreet) return [];
 
-    const toTurf = lines => lines.map(line => line.map(p => [p[1], p[0]]));
-    let hints = [];
+    const toTurf = (lines: number[][][]) => lines.map(line => line.map(p => [p[1], p[0]]));
+    let hints: Street[] = [];
 
     try {
       const currentGeo = turf.multiLineString(toTurf(targetStreet.geometry));
@@ -77,7 +80,7 @@ export const useStreets = () => {
       // If not enough intersecting streets, find nearest
       if (hints.length < 3) {
         const currentCentroid = turf.centroid(currentGeo);
-        const candidates = [];
+        const candidates: { street: Street; dist: number }[] = [];
 
         for (const street of validStreetsData) {
           if (street.id === targetStreet.id) continue;
@@ -103,7 +106,7 @@ export const useStreets = () => {
     return hints;
   }, []);
 
-  return { validStreets: validStreetsData, getHintStreets, rawStreets };
+  return { validStreets: validStreetsData, getHintStreets, rawStreets: rawStreets as Street[] };
 };
 
 export default useStreets;

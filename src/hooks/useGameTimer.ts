@@ -1,5 +1,13 @@
 import { useState, useCallback, useRef, useEffect } from 'react';
 
+export interface UseGameTimerResult {
+  timer: number;
+  startTimer: () => void;
+  stopTimer: () => void;
+  resetTimer: () => void;
+  isRunning: boolean;
+}
+
 /**
  * Custom hook for managing a game timer with start, stop, and reset functionality.
  * Tracks elapsed time in seconds with automatic updates.
@@ -20,11 +28,11 @@ import { useState, useCallback, useRef, useEffect } from 'react';
  * stopTimer(); // Pause counting
  * resetTimer(); // Reset to 0
  */
-export function useGameTimer() {
+export function useGameTimer(): UseGameTimerResult {
   const [timer, setTimer] = useState(0);
   const [isRunning, setIsRunning] = useState(false);
-  const intervalRef = useRef(null);
-  const startTimeRef = useRef(null);
+  const intervalRef = useRef<NodeJS.Timeout | null>(null);
+  const startTimeRef = useRef<number | null>(null);
 
   /**
    * Start or resume the timer
@@ -64,8 +72,10 @@ export function useGameTimer() {
   useEffect(() => {
     if (isRunning) {
       intervalRef.current = setInterval(() => {
-        const elapsed = Math.floor((Date.now() - startTimeRef.current) / 1000);
-        setTimer(elapsed);
+        if (startTimeRef.current !== null) {
+          const elapsed = Math.floor((Date.now() - startTimeRef.current) / 1000);
+          setTimer(elapsed);
+        }
       }, 1000);
     } else {
       if (intervalRef.current) {
