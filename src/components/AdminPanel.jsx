@@ -191,9 +191,9 @@ const AdminPanel = () => {
     <div
       className={`fixed inset-0 pt-16 flex ${theme === 'dark' ? 'bg-slate-900 text-white' : 'bg-slate-50 text-slate-900'}`}
     >
-      {/* Sidebar - Fixed width, scrollable if needed */}
+      {/* Sidebar */}
       <div
-        className={`w-48 shrink-0 p-4 border-r flex flex-col overflow-y-auto ${theme === 'dark' ? 'border-slate-800 bg-slate-900' : 'border-slate-200 bg-white'}`}
+        className={`w-48 shrink-0 p-4 border-r flex flex-col ${theme === 'dark' ? 'border-slate-800 bg-slate-900' : 'border-slate-200 bg-white'}`}
       >
         <h1 className="text-xl font-black mb-6 text-sky-500">Girify Admin</h1>
         <nav className="flex flex-col gap-1">
@@ -215,14 +215,14 @@ const AdminPanel = () => {
         </nav>
       </div>
 
-      {/* Main Content - Takes remaining space, scrollable */}
-      <div className="flex-1 overflow-y-auto p-6">
+      {/* Main Content - h-full + overflow-y-scroll ensures scrolling */}
+      <div className="flex-1 h-full overflow-y-scroll p-6">
         {loading ? (
           <div className="flex items-center justify-center h-full">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-sky-500"></div>
           </div>
         ) : (
-          <div className="w-full pb-8">
+          <div className="w-full pb-16">
             {/* GIUROS ECONOMICS */}
             {activeTab === 'giuros' && (
               <AdminGiuros users={users} shopItems={shopItems} theme={theme} />
