@@ -1,32 +1,34 @@
-import React from 'react';
+import React, { useState } from 'react';
 // eslint-disable-next-line no-unused-vars
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTheme } from '../context/ThemeContext';
 import { useNotifications } from '../hooks/useNotifications';
+import { useNotification } from '../hooks/useNotification';
+import { useConfirm } from '../hooks/useConfirm';
+import { storage } from '../utils/storage';
+import { STORAGE_KEYS } from '../config/constants';
 import { getUserProfile, updateUserProfile } from '../utils/social';
+import { ConfirmDialog } from './ConfirmDialog';
 import PropTypes from 'prop-types';
 
 const SettingsScreen = ({ onClose, onLogout, autoAdvance, setAutoAdvance, username }) => {
   const { theme, themeMode, changeTheme, language, changeLanguage, languages, t } = useTheme();
+  const { notify } = useNotification();
+  const { confirm, confirmConfig, handleClose } = useConfirm();
 
   // Use Notifications Hook
   const { isSupported, isIOS, requestPermission } = useNotifications();
-  // const [notificationsEnabled, setNotificationsEnabled] = React.useState(permission === 'granted'); // Unused
-  const [isAdmin, setIsAdmin] = React.useState(false);
-  const [devTapCount, setDevTapCount] = React.useState(0);
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [devTapCount, setDevTapCount] = useState(0);
 
   // User Profile Settings
-  const [profileSettings, setProfileSettings] = React.useState({
+  const [profileSettings, setProfileSettings] = useState({
     notificationSettings: {
       dailyReminder: true,
       friendActivity: true,
       newsUpdates: true,
     },
   });
-
-  /* React.useEffect(() => {
-    setNotificationsEnabled(permission === 'granted');
-  }, [permission]); */
 
   // Load Profile Settings
   React.useEffect(() => {
@@ -40,9 +42,6 @@ const SettingsScreen = ({ onClose, onLogout, autoAdvance, setAutoAdvance, userna
               newsUpdates: true,
             },
           });
-          // Also sync theme if different? ThemeContext handles local preference,
-          // but valid to sync if user logs in on new device.
-          // For now we let local preference override OR sync if explicitly set.
         }
       });
     }
@@ -80,25 +79,24 @@ const SettingsScreen = ({ onClose, onLogout, autoAdvance, setAutoAdvance, userna
     checkAdmin();
   }, []);
 
-  const handleClearHistory = () => {
+  const handleClearHistory = async () => {
     if (
-      // eslint-disable-next-line no-alert
-      window.confirm(
+      await confirm(
         t('clearHistoryConfirm') ||
-          'Are you sure you want to clear your game history? This cannot be undone.'
+          'Are you sure you want to clear your game history? This cannot be undone.',
+        'Clear History',
+        true
       )
     ) {
-      localStorage.removeItem('girify_history');
-      // eslint-disable-next-line no-alert
-      alert(t('historyCleared') || 'Game history cleared.');
-      // Force reload to update UI (simplest way since history is read from LS in many places)
-      window.location.reload();
+      storage.remove(STORAGE_KEYS.HISTORY);
+      notify(t('historyCleared') || 'Game history cleared.', 'success');
+      // Force reload to update UI
+      setTimeout(() => window.location.reload(), 1000);
     }
   };
 
-  const handleSignOut = () => {
-    // eslint-disable-next-line no-alert
-    if (window.confirm('Are you sure you want to sign out?')) {
+  const handleSignOut = async () => {
+    if (await confirm('Are you sure you want to sign out?', 'Sign Out')) {
       onLogout();
     }
   };
@@ -129,19 +127,16 @@ const SettingsScreen = ({ onClose, onLogout, autoAdvance, setAutoAdvance, userna
             });
           }
 
-          // eslint-disable-next-line no-alert
-          alert('Success! You are now an Admin.');
+          notify('Success! You are now an Admin.', 'success');
           setIsAdmin(true);
-          window.location.reload();
+          setTimeout(() => window.location.reload(), 1000);
         }
       } catch (e) {
         console.error(e);
-        // eslint-disable-next-line no-alert
-        alert('Error promoting: ' + e.message);
+        notify('Error promoting: ' + e.message, 'error');
       }
     } else {
-      // eslint-disable-next-line no-alert
-      if (input) alert('Access Denied.');
+      if (input) notify('Access Denied.', 'error');
     }
   };
 
@@ -278,8 +273,6 @@ const SettingsScreen = ({ onClose, onLogout, autoAdvance, setAutoAdvance, userna
             </div>
           </div>
 
-          {/* Notifications - Mobile Only */}
-
           {/* Notifications */}
           <div className="space-y-4">
             <h3 className="text-sm font-bold uppercase tracking-wider opacity-50">Notifications</h3>
@@ -307,19 +300,24 @@ const SettingsScreen = ({ onClose, onLogout, autoAdvance, setAutoAdvance, userna
               <button
                 onClick={async () => {
                   const isEnabled = profileSettings.notificationSettings?.dailyReminder ?? true;
+
                   if (!isSupported) {
-                    // eslint-disable-next-line no-alert
-                    alert('Notifications not supported on this device.');
+                    notify('Notifications not supported on this device.', 'warning');
                     return;
                   }
+
                   if (!isEnabled) {
                     const granted = await requestPermission();
                     if (!granted) {
-                      // eslint-disable-next-line no-alert
-                      alert('Permission blocked. Please enable in browser settings.');
+                      notify('Permission blocked. Please enable in browser settings.', 'warning');
                       return;
+                    } else {
+                      notify('Notifications enabled!', 'success');
                     }
+                  } else {
+                    notify('Notifications disabled.', 'info');
                   }
+
                   const newSettings = {
                     ...profileSettings.notificationSettings,
                     dailyReminder: !isEnabled,
@@ -404,6 +402,14 @@ const SettingsScreen = ({ onClose, onLogout, autoAdvance, setAutoAdvance, userna
           </div>
         </div>
       </motion.div>
+      <ConfirmDialog
+        isOpen={!!confirmConfig}
+        title={confirmConfig?.title}
+        message={confirmConfig?.message}
+        isDangerous={confirmConfig?.isDangerous}
+        onConfirm={() => handleClose(true)}
+        onCancel={() => handleClose(false)}
+      />
     </div>
   );
 };

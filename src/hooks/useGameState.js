@@ -1,7 +1,7 @@
 import { useReducer, useEffect, useCallback, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { auth } from '../firebase';
-import { gameReducer, initialState } from '../state/gameReducer';
+import { gameReducer, initialState } from '../reducers/gameReducer';
 import {
   getTodaySeed,
   selectDailyStreets,
@@ -9,12 +9,20 @@ import {
   selectDistractors,
   shuffleOptions,
 } from '../utils/dailyChallenge';
-import { calculateTimeScore } from '../utils/scoring';
-import { calculateStreak } from '../utils/achievements';
-import { saveScore, hasDailyReferral } from '../utils/leaderboard';
-import { updateUserGameStats, saveUserGameResult, getReferrer } from '../utils/social';
+import { calculateStreak } from '../utils/stats';
+import { saveScore } from '../utils/leaderboard';
+import { calculateScore, shouldPromptFeedback } from '../config/gameConfig';
+import {
+  updateUserGameStats,
+  saveUserGameResult,
+  getReferrer,
+  hasDailyReferral,
+} from '../utils/social';
 import { awardChallengeBonus, awardReferralBonus } from '../utils/giuros';
+import { storage } from '../utils/storage';
+import { logger } from '../utils/logger';
 import quizPlan from '../data/quizPlan.json';
+import { TIME, GAME, FEEDBACK, STORAGE_KEYS } from '../config/constants';
 
 /**
  * Hook for managing all game state and gameplay logic
@@ -34,7 +42,7 @@ export const useGameState = (validStreets, getHintStreets) => {
 
   // Sync Auto-Advance to localStorage
   useEffect(() => {
-    localStorage.setItem('girify_auto_advance', state.autoAdvance);
+    storage.set(STORAGE_KEYS.AUTO_ADVANCE, state.autoAdvance);
   }, [state.autoAdvance]);
 
   // Calculate hint streets when current street changes
@@ -53,7 +61,7 @@ export const useGameState = (validStreets, getHintStreets) => {
     if (state.feedback === 'transitioning' && state.autoAdvance) {
       timeoutId = setTimeout(() => {
         handleNext();
-      }, 1000);
+      }, TIME.AUTO_ADVANCE_DELAY);
     }
     return () => clearTimeout(timeoutId);
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -82,7 +90,7 @@ export const useGameState = (validStreets, getHintStreets) => {
       }
 
       if (validStreets.length === 0) {
-        console.error('No valid streets found!');
+        logger.error('No valid streets found!');
         dispatch({ type: 'SET_GAME_STATE', payload: 'intro' });
         return;
       }
@@ -95,8 +103,6 @@ export const useGameState = (validStreets, getHintStreets) => {
       let initialOptions;
 
       if (plannedQuiz && plannedQuiz.questions?.length > 0) {
-        // eslint-disable-next-line no-console
-        console.log('[Quiz] Using pre-generated plan for', todayStr);
         const streetMap = new Map(validStreets.map(s => [s.id, s]));
         selected = plannedQuiz.questions.map(q => streetMap.get(q.correctId)).filter(Boolean);
 
@@ -117,8 +123,6 @@ export const useGameState = (validStreets, getHintStreets) => {
       }
 
       if (!selected || selected.length === 0) {
-        // eslint-disable-next-line no-console
-        console.log('[Quiz] Falling back to dynamic generation');
         selected = selectDailyStreets(validStreets, todaySeed);
         initialOptions =
           selected.length > 0 ? generateOptionsList(selected[0], validStreets, 0) : [];
@@ -147,7 +151,7 @@ export const useGameState = (validStreets, getHintStreets) => {
       const timeElapsed = state.questionStartTime
         ? (Date.now() - state.questionStartTime) / 1000
         : 0;
-      const points = calculateTimeScore(timeElapsed, isCorrect, state.hintsRevealedCount);
+      const points = calculateScore(timeElapsed, isCorrect, state.hintsRevealedCount);
 
       const result = {
         street: currentStreet,
@@ -236,7 +240,7 @@ export const useGameState = (validStreets, getHintStreets) => {
   const saveGameResults = useCallback(() => {
     try {
       markTodayAsPlayed();
-      const history = JSON.parse(localStorage.getItem('girify_history') || '[]');
+      const history = storage.get(STORAGE_KEYS.HISTORY, []);
       const avgTime = state.quizResults.length
         ? (
             state.quizResults.reduce((acc, curr) => acc + (curr.time || 0), 0) /
@@ -252,7 +256,7 @@ export const useGameState = (validStreets, getHintStreets) => {
         username: state.username,
       };
       history.push(newRecord);
-      localStorage.setItem('girify_history', JSON.stringify(history));
+      storage.set(STORAGE_KEYS.HISTORY, history);
 
       if (state.username) {
         saveUserGameResult(state.username, newRecord);
@@ -266,7 +270,7 @@ export const useGameState = (validStreets, getHintStreets) => {
           });
         });
 
-        const historyForStreak = JSON.parse(localStorage.getItem('girify_history') || '[]');
+        const historyForStreak = storage.get(STORAGE_KEYS.HISTORY, []);
         const streak = calculateStreak(historyForStreak);
         const totalScore = historyForStreak.reduce((acc, h) => acc + (h.score || 0), 0);
 
@@ -276,31 +280,28 @@ export const useGameState = (validStreets, getHintStreets) => {
           lastPlayDate: getTodaySeed(),
         });
 
-        awardChallengeBonus(state.username, streak).then(result => {
-          // eslint-disable-next-line no-console
-          console.log(`[Giuros] Challenge bonus: +${result.bonus}`);
+        awardChallengeBonus(state.username, streak).then(() => {
+          // logger.info(`[Giuros] Challenge bonus: +${result.bonus}`);
         });
 
         getReferrer(state.username).then(referrer => {
           if (referrer) {
             awardReferralBonus(referrer).then(() => {
-              // eslint-disable-next-line no-console
-              console.log(`[Giuros] Referral bonus awarded to: ${referrer}`);
+              // logger.info(`[Giuros] Referral bonus awarded to: ${referrer}`);
             });
           }
         });
 
         // Check for feedback prompt
-        const lastFeedback = localStorage.getItem('girify_last_feedback');
-        const now = Date.now();
-        if (!lastFeedback || now - parseInt(lastFeedback) > 604800000) {
-          if (Math.random() < 1 / 7) {
-            setTimeout(() => navigate('/feedback'), 2000);
-          }
+        const lastFeedback = storage.get(STORAGE_KEYS.LAST_FEEDBACK);
+        const history = storage.get(STORAGE_KEYS.HISTORY, []);
+
+        if (shouldPromptFeedback(lastFeedback, history.length)) {
+          setTimeout(() => navigate('/feedback'), TIME.FEEDBACK_DELAY);
         }
       }
     } catch (e) {
-      console.error('[Game] Error saving game:', e);
+      logger.error('[Game] Error saving game:', e);
     }
   }, [state, navigate]);
 
@@ -308,7 +309,7 @@ export const useGameState = (validStreets, getHintStreets) => {
    * Handle user registration
    */
   const handleRegister = useCallback(name => {
-    localStorage.setItem('girify_username', name);
+    storage.set(STORAGE_KEYS.USERNAME, name);
     dispatch({ type: 'SET_USERNAME', payload: name });
     dispatch({ type: 'SET_GAME_STATE', payload: 'intro' });
   }, []);

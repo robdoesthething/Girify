@@ -1,47 +1,49 @@
-import { useMemo, useCallback } from 'react';
+import { useCallback } from 'react';
 import * as turf from '@turf/turf';
 import rawStreets from '../data/streets.json';
+
+// --- Static Data Initialization ---
+// Calculate this once at module load time, not on every render
+
+const isValidType = name => {
+  if (!name) return false;
+  const lower = name.toLowerCase();
+  return (
+    !lower.includes('autopista') &&
+    !lower.includes('autovia') &&
+    !lower.includes('b-1') &&
+    !lower.includes('b-2')
+  );
+};
+
+const validStreetsData = (() => {
+  const rawValidStreets = rawStreets.filter(
+    s => isValidType(s.name) && s.geometry && s.geometry.length > 0
+  );
+
+  // Deduplicate by name, keeping the one with most geometry points
+  const uniqueStreetsMap = new Map();
+  rawValidStreets.forEach(s => {
+    if (!uniqueStreetsMap.has(s.name)) {
+      uniqueStreetsMap.set(s.name, s);
+    } else {
+      const existing = uniqueStreetsMap.get(s.name);
+      const currentLength = s.geometry.flat().length;
+      const existingLength = existing.geometry.flat().length;
+      if (currentLength > existingLength) {
+        uniqueStreetsMap.set(s.name, s);
+      }
+    }
+  });
+
+  return Array.from(uniqueStreetsMap.values());
+})();
 
 /**
  * Hook for managing street data - validation and hint calculation
  * @returns {Object} { validStreets, getHintStreets }
  */
 export const useStreets = () => {
-  // Memoize valid streets - filters out highways and deduplicates
-  const validStreets = useMemo(() => {
-    const isValidType = name => {
-      if (!name) return false;
-      const lower = name.toLowerCase();
-      return (
-        !lower.includes('autopista') &&
-        !lower.includes('autovia') &&
-        !lower.includes('b-1') &&
-        !lower.includes('b-2')
-      );
-    };
-
-    const rawValidStreets = rawStreets.filter(
-      s => isValidType(s.name) && s.geometry && s.geometry.length > 0
-    );
-
-    // Deduplicate by name, keeping the one with most geometry points
-    const uniqueStreetsMap = new Map();
-    rawValidStreets.forEach(s => {
-      if (!uniqueStreetsMap.has(s.name)) {
-        uniqueStreetsMap.set(s.name, s);
-      } else {
-        const existing = uniqueStreetsMap.get(s.name);
-        const currentLength = s.geometry.flat().length;
-        const existingLength = existing.geometry.flat().length;
-        if (currentLength > existingLength) {
-          uniqueStreetsMap.set(s.name, s);
-        }
-      }
-    });
-
-    return Array.from(uniqueStreetsMap.values());
-  }, []);
-
   /**
    * Calculate hint streets (streets that intersect with target)
    * @param {Object} targetStreet - The current street to find hints for
@@ -56,12 +58,12 @@ export const useStreets = () => {
     try {
       const currentGeo = turf.multiLineString(toTurf(targetStreet.geometry));
 
-      // Find intersecting streets
-      for (const street of rawStreets) {
+      // OPTIMIZATION: Iterate over validStreetsData instead of rawStreets
+      // This is smaller and already filtered/deduped
+      for (const street of validStreetsData) {
         if (street.id === targetStreet.id) continue;
-        const lower = street.name.toLowerCase();
-        if (lower.includes('autopista') || lower.includes('autovia') || lower.includes('ronda'))
-          continue;
+
+        // No need to check isValidType here as validStreetsData is already filtered
 
         if (street.geometry) {
           const otherGeo = turf.multiLineString(toTurf(street.geometry));
@@ -77,12 +79,9 @@ export const useStreets = () => {
         const currentCentroid = turf.centroid(currentGeo);
         const candidates = [];
 
-        for (const street of rawStreets) {
+        for (const street of validStreetsData) {
           if (street.id === targetStreet.id) continue;
           if (hints.some(h => h.id === street.id)) continue;
-          const lower = street.name.toLowerCase();
-          if (lower.includes('autopista') || lower.includes('autovia') || lower.includes('ronda'))
-            continue;
 
           if (street.geometry) {
             const p1 = street.geometry[0][0];
@@ -104,7 +103,7 @@ export const useStreets = () => {
     return hints;
   }, []);
 
-  return { validStreets, getHintStreets, rawStreets };
+  return { validStreets: validStreetsData, getHintStreets, rawStreets };
 };
 
 export default useStreets;

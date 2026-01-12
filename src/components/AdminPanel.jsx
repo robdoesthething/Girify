@@ -4,6 +4,10 @@ import { getAllUsers, getFeedbackList, updateUserAsAdmin } from '../utils/social
 import { getAllAnnouncements, createAnnouncement, deleteAnnouncement } from '../utils/news';
 import { getShopItems, createShopItem, deleteShopItem, updateShopItem } from '../utils/shop';
 import AdminGiuros from './AdminGiuros';
+import { useNotification } from '../hooks/useNotification';
+import { useConfirm } from '../hooks/useConfirm';
+import { ConfirmDialog } from './ConfirmDialog';
+import { logger } from '../utils/logger';
 // eslint-disable-next-line no-unused-vars
 import { motion, AnimatePresence } from 'framer-motion';
 import { ACHIEVEMENT_BADGES } from '../data/achievements';
@@ -28,7 +32,8 @@ const AdminPanel = () => {
   const [loading, setLoading] = useState(false);
   const [editingUser, setEditingUser] = useState(null);
   const [migrationStatus, setMigrationStatus] = useState(null);
-  const [confirmConfig, setConfirmConfig] = useState(null);
+  const { notify } = useNotification();
+  const { confirm, confirmConfig, handleClose } = useConfirm();
   const [promptConfig, setPromptConfig] = useState(null);
   const [announcements, setAnnouncements] = useState([]);
   const [shopItems, setShopItems] = useState({ all: [] });
@@ -49,20 +54,10 @@ const AdminPanel = () => {
     expiryDate: '',
   });
 
-  const showConfirm = (message, title = 'Confirm Action') =>
-    new Promise(resolve => {
-      setConfirmConfig({ message, title, resolve });
-    });
-
   const showPrompt = (message, defaultValue = '', title = 'Input Required') =>
     new Promise(resolve => {
       setPromptConfig({ message, defaultValue, title, resolve });
     });
-
-  const handleConfirmAction = result => {
-    if (confirmConfig?.resolve) confirmConfig.resolve(result);
-    setConfirmConfig(null);
-  };
 
   const handlePromptAction = value => {
     if (promptConfig?.resolve) promptConfig.resolve(value);
@@ -86,9 +81,10 @@ const AdminPanel = () => {
 
   const handleMigration = async () => {
     if (
-      !(await showConfirm(
+      !(await confirm(
         'WARNING: This will migrate ALL users to lowercase usernames. This is destructive. Are you sure?',
-        'Start Migration'
+        'Start Migration',
+        true
       ))
     )
       return;
@@ -132,7 +128,7 @@ const AdminPanel = () => {
       setMigrationStatus(`Migration complete. Migrated ${migrated} users.`);
       fetchData(); // Refresh list
     } catch (e) {
-      console.error(e);
+      logger.error(e);
       setMigrationStatus(`Error: ${e.message}`);
     }
   };
@@ -158,9 +154,10 @@ const AdminPanel = () => {
     // Check if username changed (requires migration)
     if (editingUser.username !== editingUser.id) {
       if (
-        !(await showConfirm(
+        !(await confirm(
           `Changing username from "${editingUser.id}" to "${editingUser.username}" will migrate all data. Continue?`,
-          'Confirm Migration'
+          'Confirm Migration',
+          true
         ))
       )
         return;
@@ -173,9 +170,8 @@ const AdminPanel = () => {
         // But migrateUser copies old data. So we should apply our form updates to the NEW user.
         await updateUserAsAdmin(editingUser.username, updates);
       } catch (e) {
-        console.error(e);
-        // eslint-disable-next-line no-alert
-        alert(`Migration failed: ${e.message}`);
+        logger.error(e);
+        notify(`Migration failed: ${e.message}`, 'error');
         return;
       }
     } else {
@@ -297,7 +293,7 @@ const AdminPanel = () => {
                       <button
                         onClick={async () => {
                           if (
-                            !(await showConfirm(
+                            !(await confirm(
                               'This will remove duplicate scores, keeping only the best per user. Continue?',
                               'Deduplicate Leaderboard'
                             ))
@@ -356,9 +352,10 @@ const AdminPanel = () => {
                       <button
                         onClick={async () => {
                           if (
-                            !(await showConfirm(
+                            !(await confirm(
                               'This will update usernames to use only first name + 4 digits. Users with >4 digit suffixes or full names will be migrated. Continue?',
-                              'Migrate Usernames'
+                              'Migrate Usernames',
+                              true
                             ))
                           )
                             return;
@@ -442,9 +439,10 @@ const AdminPanel = () => {
                       <button
                         onClick={async () => {
                           if (
-                            !(await showConfirm(
+                            !(await confirm(
                               'This will delete all scores/highscores that do not belong to an active user. Cannot be undone. Continue?',
-                              'Prune Orphans'
+                              'Prune Orphans',
+                              true
                             ))
                           )
                             return;
@@ -608,9 +606,10 @@ const AdminPanel = () => {
                             <button
                               onClick={async () => {
                                 if (
-                                  !(await showConfirm(
+                                  !(await confirm(
                                     `Delete user "${user.username}"? This cannot be undone.`,
-                                    'Delete User'
+                                    'Delete User',
+                                    true
                                   ))
                                 )
                                   return;
@@ -619,17 +618,17 @@ const AdminPanel = () => {
                                   const result = await deleteUserAndData(user.username);
 
                                   if (result.success) {
-                                    // eslint-disable-next-line no-alert
-                                    alert(
-                                      `Deleted user ${user.username} and ${result.count} score records.`
+                                    notify(
+                                      `Deleted user ${user.username} and ${result.count} score records.`,
+                                      'success'
                                     );
                                     fetchData();
                                   } else {
-                                    alert(`Error deleting user: ${result.error}`); // eslint-disable-line no-alert
+                                    notify(`Error deleting user: ${result.error}`, 'error');
                                   }
                                 } catch (e) {
                                   console.error(e);
-                                  alert(`Error deleting user: ${e.message}`); // eslint-disable-line no-alert
+                                  notify(`Error deleting user: ${e.message}`, 'error');
                                 }
                               }}
                               className="px-3 py-1 bg-red-500/10 text-red-500 rounded-lg text-xs font-bold hover:bg-red-500 hover:text-white transition-colors"
@@ -661,20 +660,20 @@ const AdminPanel = () => {
                       if (amountStr === null) return; // Cancelled
                       const amount = parseInt(amountStr, 10);
                       if (isNaN(amount) || amount < 0) {
-                        // eslint-disable-next-line no-alert
-                        alert('Invalid amount. Please enter a positive number.');
+                        notify('Invalid amount. Please enter a positive number.', 'warning');
                         return;
                       }
 
                       const { approveFeedback } = await import('../utils/social');
                       const result = await approveFeedback(item.id, amount);
                       if (result.success) {
-                        // eslint-disable-next-line no-alert
-                        alert(`Approved! ${result.username} received ${result.reward} Giuros.`);
+                        notify(
+                          `Approved! ${result.username} received ${result.reward} Giuros.`,
+                          'success'
+                        );
                         fetchData(); // Refresh
                       } else {
-                        // eslint-disable-next-line no-alert
-                        alert(`Error: ${result.error}`);
+                        notify(`Error: ${result.error}`, 'error');
                       }
                     };
 
@@ -684,16 +683,16 @@ const AdminPanel = () => {
                       if (result.success) {
                         fetchData(); // Refresh
                       } else {
-                        // eslint-disable-next-line no-alert
-                        alert(`Error: ${result.error}`);
+                        notify(`Error: ${result.error}`, 'error');
                       }
                     };
 
                     const handleDeleteFeedback = async () => {
                       if (
-                        !(await showConfirm(
+                        !(await confirm(
                           'Are you sure you want to DELETE this feedback? This cannot be undone.',
-                          'Delete Feedback'
+                          'Delete Feedback',
+                          true
                         ))
                       )
                         return;
@@ -703,8 +702,7 @@ const AdminPanel = () => {
                       if (result.success) {
                         fetchData(); // Refresh
                       } else {
-                        // eslint-disable-next-line no-alert
-                        alert(`Error: ${result.error}`);
+                        notify(`Error: ${result.error}`, 'error');
                       }
                     };
 
@@ -1011,9 +1009,10 @@ const AdminPanel = () => {
                             <button
                               onClick={async () => {
                                 if (
-                                  await showConfirm(
+                                  await confirm(
                                     `Delete announcement "${ann.title}"?`,
-                                    'Delete Announcement'
+                                    'Delete Announcement',
+                                    true
                                   )
                                 ) {
                                   await deleteAnnouncement(ann.id);
@@ -1307,7 +1306,7 @@ const AdminPanel = () => {
                         <button
                           onClick={async () => {
                             if (
-                              await showConfirm('Delete ' + item.name + '?', 'Delete Shop Item')
+                              await confirm('Delete ' + item.name + '?', 'Delete Shop Item', true)
                             ) {
                               await deleteShopItem(item.id);
                               fetchData();
@@ -1736,34 +1735,15 @@ const AdminPanel = () => {
           </div>
         )}
 
-        {/* Confirmation Modal */}
-        {confirmConfig && (
-          <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
-            <motion.div
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.9 }}
-              className={`w-full max-w-sm p-6 rounded-3xl shadow-2xl ${theme === 'dark' ? 'bg-slate-800' : 'bg-white'}`}
-            >
-              <h3 className="text-xl font-black mb-2">{confirmConfig.title}</h3>
-              <p className="opacity-70 mb-6">{confirmConfig.message}</p>
-              <div className="flex gap-3">
-                <button
-                  onClick={() => handleConfirmAction(false)}
-                  className="flex-1 py-3 font-bold opacity-60 hover:opacity-100 bg-slate-100 dark:bg-slate-900 rounded-xl"
-                >
-                  Cancel
-                </button>
-                <button
-                  onClick={() => handleConfirmAction(true)}
-                  className="flex-1 py-3 bg-sky-500 hover:bg-sky-600 text-white rounded-xl font-bold shadow-lg"
-                >
-                  Confirm
-                </button>
-              </div>
-            </motion.div>
-          </div>
-        )}
+        {/* Confirmation Dialog */}
+        <ConfirmDialog
+          isOpen={!!confirmConfig}
+          title={confirmConfig?.title}
+          message={confirmConfig?.message}
+          isDangerous={confirmConfig?.isDangerous}
+          onConfirm={() => handleClose(true)}
+          onCancel={() => handleClose(false)}
+        />
 
         {/* Prompt Modal */}
         {promptConfig && (

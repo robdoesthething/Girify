@@ -4,6 +4,8 @@ import { motion } from 'framer-motion';
 import { getCuriosityByStreets } from '../data/curiosities';
 import { fetchWikiImage } from '../utils/wiki';
 import { useNavigate } from 'react-router-dom';
+import { storage } from '../utils/storage';
+import { STORAGE_KEYS } from '../config/constants';
 
 const SummaryScreen = ({
   score,
@@ -28,7 +30,7 @@ const SummaryScreen = ({
   const streakValue = useMemo(() => {
     if (streak && streak > 0) return streak;
     try {
-      const history = JSON.parse(localStorage.getItem('girify_history') || '[]');
+      const history = storage.get(STORAGE_KEYS.HISTORY, []);
       if (history.length === 0) return 1;
 
       // Get unique dates (first game of each day)

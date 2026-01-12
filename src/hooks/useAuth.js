@@ -1,9 +1,9 @@
 import { useState, useEffect, useCallback } from 'react';
-import { onAuthStateChanged, signOut, updateProfile } from 'firebase/auth';
+import { onAuthStateChanged, signOut } from 'firebase/auth';
 import { auth } from '../firebase';
+import { storage } from '../utils/storage';
 import {
   ensureUserProfile,
-  migrateUser,
   healMigration,
   updateUserProfile,
   getUserGameHistory,
@@ -12,6 +12,11 @@ import {
   markFeedbackRewardSeen,
 } from '../utils/social';
 import { claimDailyLoginBonus } from '../utils/giuros';
+import { useNotification } from './useNotification';
+import { sanitizeInput } from '../utils/security';
+import { UserMigrationService } from '../services/userMigration';
+import { STORAGE_KEYS, MIGRATION, TIME } from '../config/constants';
+import { logger } from '../utils/logger';
 
 /**
  * Hook for Firebase authentication and user profile management
@@ -23,13 +28,14 @@ import { claimDailyLoginBonus } from '../utils/giuros';
 export const useAuth = (dispatch, currentGameState, onAnnouncementsCheck) => {
   const [emailVerified, setEmailVerified] = useState(true);
   const [isLoading, setIsLoading] = useState(true);
+  const { notify } = useNotification();
 
   // Parse referral code from URL on load
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const ref = params.get('ref');
-    if (ref && !localStorage.getItem('girify_referrer')) {
-      localStorage.setItem('girify_referrer', ref);
+    if (ref && !storage.get(STORAGE_KEYS.REFERRER)) {
+      storage.set(STORAGE_KEYS.REFERRER, ref);
     }
   }, []);
 
@@ -47,32 +53,27 @@ export const useAuth = (dispatch, currentGameState, onAnnouncementsCheck) => {
           setEmailVerified(user.emailVerified);
         }
 
-        let displayName = (user.displayName || user.email?.split('@')[0] || 'User').toLowerCase();
+        let displayName = sanitizeInput(
+          user.displayName || user.email?.split('@')[0] || 'User'
+        ).toLowerCase();
 
         // Handle format migration
-        const migrationResult = await handleUserMigration(user, displayName);
-        if (migrationResult.migrated) {
-          displayName = migrationResult.newHandle;
-        }
+        displayName = await UserMigrationService.migrateToNewFormat(user, displayName);
 
         // Ensure Firestore profile and sync data
-        await syncUserProfile(displayName, user, dispatch, onAnnouncementsCheck);
+        await syncUserProfile(displayName, user, dispatch, onAnnouncementsCheck, notify);
 
-        // Update local storage and state
-        const currentUsername = localStorage.getItem('girify_username');
-        if (currentUsername !== displayName) {
-          localStorage.setItem('girify_username', displayName);
-          dispatch({ type: 'SET_USERNAME', payload: displayName });
-          if (currentGameState === 'register') {
-            dispatch({ type: 'SET_GAME_STATE', payload: 'intro' });
-          }
+        // Update state
+        dispatch({ type: 'SET_USERNAME', payload: displayName });
+        if (currentGameState === 'register') {
+          dispatch({ type: 'SET_GAME_STATE', payload: 'intro' });
         }
       }
       setIsLoading(false);
     });
 
     return () => unsubscribe();
-  }, [currentGameState, dispatch, onAnnouncementsCheck]);
+  }, [currentGameState, dispatch, onAnnouncementsCheck, notify]);
 
   /**
    * Handle user logout
@@ -81,68 +82,25 @@ export const useAuth = (dispatch, currentGameState, onAnnouncementsCheck) => {
     navigate => {
       signOut(auth)
         .then(() => {
-          // eslint-disable-next-line no-alert
-          alert('You have been logged out successfully. See you soon!');
+          notify('You have been logged out successfully.', 'success');
         })
-        .catch(err => console.error('Sign out error', err));
+        .catch(err => logger.error('Sign out error', err));
 
-      localStorage.removeItem('girify_username');
-      localStorage.removeItem('lastPlayedDate');
+      storage.remove(STORAGE_KEYS.USERNAME);
+      storage.remove('lastPlayedDate');
       dispatch({ type: 'LOGOUT' });
       navigate('/');
     },
-    [dispatch]
+    [dispatch, notify]
   );
 
   return { emailVerified, isLoading, handleLogout };
 };
 
 /**
- * Handle username format migration
- */
-async function handleUserMigration(user, displayName) {
-  const oldFormatRegex = /.*#\d{4}$/;
-  const newFormatRegex = /^@[a-zA-Z0-9]+\d{4}$/;
-  const hasExcessiveDigits = /\d{5,}$/.test(displayName);
-  const isTooLong = displayName.length > 20;
-
-  let shouldMigrate = false;
-  let newHandle = displayName;
-
-  if (oldFormatRegex.test(displayName)) {
-    // Convert Name#1234 -> @Name1234
-    newHandle = '@' + displayName.replace('#', '');
-    shouldMigrate = true;
-  } else if (!newFormatRegex.test(displayName) || hasExcessiveDigits || isTooLong) {
-    // Generate new handle if invalid format
-    const randomId = Math.floor(1000 + Math.random() * 9000);
-    let coreName = displayName.replace(/^@/, '').split(/\d/)[0];
-    coreName = coreName.replace(/[^a-zA-Z]/g, '').slice(0, 10) || 'User';
-    newHandle = `@${coreName}${randomId}`;
-    shouldMigrate = true;
-  }
-
-  if (shouldMigrate) {
-    try {
-      // eslint-disable-next-line no-console
-      console.log(`[Migration] Update handle: ${displayName} -> ${newHandle}`);
-      await updateProfile(user, { displayName: newHandle });
-      await migrateUser(displayName, newHandle);
-      // eslint-disable-next-line no-console
-      console.log('[Migration] Success! New handle:', newHandle);
-      return { migrated: true, newHandle };
-    } catch (e) {
-      console.error('[Migration] Failed to migrate user:', e);
-    }
-  }
-
-  return { migrated: false, newHandle: displayName };
-}
-
-/**
  * Sync user profile data with Firestore
  */
-async function syncUserProfile(displayName, user, dispatch, onAnnouncementsCheck) {
+async function syncUserProfile(displayName, user, dispatch, onAnnouncementsCheck, notify) {
   try {
     const profile = await ensureUserProfile(displayName, user.uid, { email: user.email });
 
@@ -169,10 +127,13 @@ async function syncUserProfile(displayName, user, dispatch, onAnnouncementsCheck
       const rewards = await checkUnseenFeedbackRewards(displayName);
       if (rewards && rewards.length > 0) {
         const total = rewards.reduce((acc, r) => acc + (r.reward || 0), 0);
-        // eslint-disable-next-line no-alert
-        alert(
-          `🎉 Your feedback has been approved!\n\nYou earned ${total} Giuros for helping us improve Girify!`
-        );
+        if (notify) {
+          notify(
+            `🎉 Your feedback has been approved! +${total} Giuros`,
+            'success',
+            5 * TIME.ONE_SECOND
+          );
+        }
         rewards.forEach(r => markFeedbackRewardSeen(r.id));
       }
 
@@ -195,23 +156,20 @@ async function syncUserProfile(displayName, user, dispatch, onAnnouncementsCheck
  * One-time sync of local game history to Firestore
  */
 async function syncLocalHistory(displayName) {
-  if (localStorage.getItem('girify_history_synced')) return;
+  if (storage.get(STORAGE_KEYS.HISTORY_SYNCED)) return;
 
   try {
-    const localHistoryStr = localStorage.getItem('girify_history');
-    if (localHistoryStr) {
-      const localHistory = JSON.parse(localHistoryStr);
-      if (Array.isArray(localHistory) && localHistory.length > 0) {
-        const existing = await getUserGameHistory(displayName);
-        if (existing.length === 0) {
-          // eslint-disable-next-line no-console
-          console.log(`[Migration] Syncing ${localHistory.length} games to Firestore...`);
-          const toUpload = localHistory.slice(-500);
-          toUpload.forEach(game => saveUserGameResult(displayName, game));
-        }
+    const localHistory = storage.get(STORAGE_KEYS.HISTORY, []);
+    if (Array.isArray(localHistory) && localHistory.length > 0) {
+      const existing = await getUserGameHistory(displayName);
+      if (existing.length === 0) {
+        // eslint-disable-next-line no-console
+        console.log(`[Migration] Syncing ${localHistory.length} games to Firestore...`);
+        const toUpload = localHistory.slice(-MIGRATION.MAX_HISTORY_UPLOAD);
+        toUpload.forEach(game => saveUserGameResult(displayName, game));
       }
     }
-    localStorage.setItem('girify_history_synced', 'true');
+    storage.set(STORAGE_KEYS.HISTORY_SYNCED, 'true');
   } catch (e) {
     console.error('History sync failed', e);
   }
@@ -221,33 +179,27 @@ async function syncLocalHistory(displayName) {
  * One-time sync of local cosmetics/currency to Firestore
  */
 async function syncLocalCosmetics(displayName) {
-  if (localStorage.getItem('girify_cosmetics_synced')) return;
+  if (storage.get(STORAGE_KEYS.COSMETICS_SYNCED)) return;
 
   try {
-    const purchasedStr = localStorage.getItem('girify_purchased');
-    const equippedStr = localStorage.getItem('girify_equipped');
-    const giurosStr = localStorage.getItem('girify_giuros');
+    const purchased = storage.get(STORAGE_KEYS.PURCHASED);
+    const equipped = storage.get(STORAGE_KEYS.EQUIPPED);
+    const giuros = storage.get(STORAGE_KEYS.GIUROS);
 
-    if (purchasedStr || equippedStr || giurosStr) {
-      const purchased = purchasedStr ? JSON.parse(purchasedStr) : undefined;
-      const equipped = equippedStr ? JSON.parse(equippedStr) : undefined;
-      const giuros = giurosStr ? parseInt(giurosStr, 10) : undefined;
-
-      if (
-        (purchased && purchased.length > 0) ||
-        (equipped && Object.keys(equipped).length > 0) ||
-        (giuros !== undefined && giuros > 10)
-      ) {
-        // eslint-disable-next-line no-console
-        console.log('[Migration] Syncing cosmetics and giuros to Firestore...');
-        await updateUserProfile(displayName, {
-          purchasedCosmetics: purchased,
-          equippedCosmetics: equipped,
-          giuros: giuros,
-        });
-      }
+    if (
+      (purchased && purchased.length > 0) ||
+      (equipped && Object.keys(equipped).length > 0) ||
+      (giuros !== undefined && giuros > 10) // giuros is number from storage.get if stored as number/JSON
+    ) {
+      // eslint-disable-next-line no-console
+      console.log('[Migration] Syncing cosmetics and giuros to Firestore...');
+      await updateUserProfile(displayName, {
+        purchasedCosmetics: purchased,
+        equippedCosmetics: equipped,
+        giuros: giuros,
+      });
     }
-    localStorage.setItem('girify_cosmetics_synced', 'true');
+    storage.set(STORAGE_KEYS.COSMETICS_SYNCED, 'true');
   } catch (e) {
     console.error('[Migration] Failed to sync cosmetics:', e);
   }
@@ -260,7 +212,7 @@ async function backfillJoinDate(displayName, profile) {
   let earliestDate = null;
 
   try {
-    const history = JSON.parse(localStorage.getItem('girify_history') || '[]');
+    const history = storage.get(STORAGE_KEYS.HISTORY, []);
     if (history.length > 0) {
       const sorted = [...history].sort((a, b) => (a.timestamp || 0) - (b.timestamp || 0));
       if (sorted[0].timestamp) {
@@ -282,14 +234,14 @@ async function backfillJoinDate(displayName, profile) {
     // eslint-disable-next-line no-console
     console.log('[Migration] Backfilling registry date from history:', earliestDate);
     await updateUserProfile(displayName, { joinedAt: earliestDate });
-    localStorage.setItem('girify_joined', earliestDate.toLocaleDateString());
+    storage.set(STORAGE_KEYS.JOINED, earliestDate.toLocaleDateString());
   }
 
-  if (!localStorage.getItem('girify_joined')) {
+  if (!storage.get(STORAGE_KEYS.JOINED)) {
     if (profileDate) {
-      localStorage.setItem('girify_joined', profileDate.toLocaleDateString());
+      storage.set(STORAGE_KEYS.JOINED, profileDate.toLocaleDateString());
     } else {
-      localStorage.setItem('girify_joined', new Date().toLocaleDateString());
+      storage.set(STORAGE_KEYS.JOINED, new Date().toLocaleDateString());
     }
   }
 }

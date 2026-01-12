@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 // eslint-disable-next-line no-unused-vars
 import { motion } from 'framer-motion';
 import { useTheme } from '../context/ThemeContext';
+import { storage } from '../utils/storage';
 
 const OnboardingTour = ({ onComplete }) => {
   const { theme } = useTheme();
@@ -46,7 +47,7 @@ const OnboardingTour = ({ onComplete }) => {
     if (step < steps.length - 1) {
       setStep(step + 1);
     } else {
-      localStorage.setItem('girify_onboarding_completed', 'true');
+      storage.set('girify_onboarding_completed', 'true');
       onComplete();
     }
   };
@@ -78,7 +79,7 @@ const OnboardingTour = ({ onComplete }) => {
           <div className="flex gap-2 w-full pt-4">
             <button
               onClick={() => {
-                localStorage.setItem('girify_onboarding_completed', 'true');
+                storage.set('girify_onboarding_completed', 'true');
                 onComplete();
               }}
               className="flex-1 py-4 font-bold opacity-50 hover:opacity-100 transition-opacity"

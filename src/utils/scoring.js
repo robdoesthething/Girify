@@ -1,29 +1,15 @@
-// Time-based scoring utility
+import { calculateScore } from '../config/gameConfig';
 
 /**
  * Calculate score based on time taken and hints used
+ * @deprecated Use calculateScore from config/gameConfig instead
  * @param {number} timeInSeconds - Time taken to answer
  * @param {boolean} isCorrect - Whether answer was correct
  * @param {number} hintsCount - Number of hints revealed (0-3)
  * @returns {number} - Points earned (0-100)
  */
-export function calculateTimeScore(timeInSeconds, isCorrect, _hintsCount = 0) {
-  if (!isCorrect) return 0;
-
-  let basePoints = 0;
-  if (timeInSeconds < 5) {
-    basePoints = 100;
-  } else if (timeInSeconds > 25) {
-    basePoints = 20;
-  } else {
-    // Linear reduction from 100 to 20 over the range 5 to 25.
-    // Slope = (20 - 100) / (25 - 5) = -80 / 20 = -4 points per second
-    // Formula: 100 - 4 * (time - 5)
-    basePoints = Math.round(100 - 4 * (timeInSeconds - 5));
-  }
-
-  // No hint penalty per user request
-  return basePoints;
+export function calculateTimeScore(timeInSeconds, isCorrect, hintsCount = 0) {
+  return calculateScore(timeInSeconds, isCorrect, hintsCount);
 }
 
 /**
