@@ -134,8 +134,8 @@ const SummaryScreen = ({
             {curiosity.title}
           </h3>
 
-          <div className="glass-panel w-full overflow-hidden mb-8 shadow-2xl group border border-white/10 relative rounded-3xl">
-            <div className="overflow-hidden h-64 md:h-72 w-full relative">
+          <div className="glass-panel w-full overflow-hidden mb-6 shadow-2xl group border border-white/10 relative rounded-3xl">
+            <div className="overflow-hidden h-48 md:h-64 w-full relative">
               <img
                 src={displayImage}
                 alt="Barcelona"
@@ -145,7 +145,7 @@ const SummaryScreen = ({
               <div className="absolute bottom-3 right-3">
                 <button
                   onClick={handleShare}
-                  className="p-2 rounded-full bg-black/40 backdrop-blur-md border border-white/30 hover:bg-black/60 transition-all active:scale-95"
+                  className="p-2.5 rounded-full bg-white/90 backdrop-blur-md border-2 border-sky-400 hover:bg-sky-500 hover:text-white transition-all active:scale-95 shadow-lg text-sky-600"
                   title="Share this curiosity"
                 >
                   🎁

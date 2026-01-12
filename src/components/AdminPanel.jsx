@@ -189,11 +189,11 @@ const AdminPanel = () => {
 
   return (
     <div
-      className={`h-[calc(100vh-64px)] mt-16 flex overflow-hidden ${theme === 'dark' ? 'bg-slate-900 text-white' : 'bg-slate-50 text-slate-900'}`}
+      className={`min-h-screen max-h-screen pt-16 flex overflow-hidden ${theme === 'dark' ? 'bg-slate-900 text-white' : 'bg-slate-50 text-slate-900'}`}
     >
-      {/* Sidebar - Narrower and fixed */}
+      {/* Sidebar - Narrower and sticky */}
       <div
-        className={`w-48 shrink-0 p-4 border-r flex flex-col ${theme === 'dark' ? 'border-slate-800 bg-slate-900' : 'border-slate-200 bg-white'}`}
+        className={`w-48 shrink-0 p-4 border-r flex flex-col sticky top-16 h-[calc(100vh-64px)] overflow-y-auto ${theme === 'dark' ? 'border-slate-800 bg-slate-900' : 'border-slate-200 bg-white'}`}
       >
         <h1 className="text-xl font-black mb-6 text-sky-500">Girify Admin</h1>
         <nav className="flex flex-col gap-1">
@@ -215,8 +215,8 @@ const AdminPanel = () => {
         </nav>
       </div>
 
-      {/* Main Content - Full width, left-aligned */}
-      <div className="flex-1 p-6 overflow-y-auto">
+      {/* Main Content - Full width, scrollable */}
+      <div className="flex-1 p-6 overflow-y-auto min-h-0 h-[calc(100vh-64px)]">
         {loading ? (
           <div className="flex items-center justify-center h-full">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-sky-500"></div>

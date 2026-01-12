@@ -12,6 +12,7 @@ import {
   updateDoc,
   limit,
   deleteDoc,
+  orderBy,
 } from 'firebase/firestore';
 
 const USERS_COLLECTION = 'users';
@@ -1099,9 +1100,24 @@ export const saveUserGameResult = async (username, gameData) => {
 export const getUserGameHistory = async username => {
   if (!username) return [];
   try {
-    const gamesRef = collection(db, USERS_COLLECTION, username.toLowerCase(), GAMES_SUBCOLLECTION);
-    const q = query(gamesRef, limit(100)); // Limit to last 100 for now
-    const snapshot = await getDocs(q);
+    const cleanUsername = username.toLowerCase().replace(/^@/, '');
+
+    // Try subcollection first
+    const gamesRef = collection(db, USERS_COLLECTION, cleanUsername, GAMES_SUBCOLLECTION);
+    let snapshot = await getDocs(query(gamesRef, limit(100)));
+
+    // Fallback to scores collection if subcollection is empty
+    if (snapshot.empty) {
+      const scoresRef = collection(db, 'scores');
+      const scoresQuery = query(
+        scoresRef,
+        where('username', '==', cleanUsername),
+        orderBy('timestamp', 'desc'),
+        limit(100)
+      );
+      snapshot = await getDocs(scoresQuery);
+    }
+
     return snapshot.docs.map(d => d.data());
   } catch (e) {
     console.error('Error fetching user game history:', e);
