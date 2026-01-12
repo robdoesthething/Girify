@@ -12,7 +12,6 @@ import {
   updateDoc,
   limit,
   deleteDoc,
-  orderBy,
 } from 'firebase/firestore';
 
 const USERS_COLLECTION = 'users';
@@ -1108,17 +1107,39 @@ export const getUserGameHistory = async username => {
 
     // Fallback to scores collection if subcollection is empty
     if (snapshot.empty) {
+      // Simple query without orderBy to avoid composite index requirement
       const scoresRef = collection(db, 'scores');
-      const scoresQuery = query(
-        scoresRef,
-        where('username', '==', cleanUsername),
-        orderBy('timestamp', 'desc'),
-        limit(100)
-      );
+      const scoresQuery = query(scoresRef, where('username', '==', cleanUsername), limit(100));
       snapshot = await getDocs(scoresQuery);
+
+      // Log for debugging
+      if (import.meta.env.DEV) {
+        // eslint-disable-next-line no-console
+        console.log(`[Profile] Fallback query found ${snapshot.size} scores for ${cleanUsername}`);
+      }
     }
 
-    return snapshot.docs.map(d => d.data());
+    // Map and normalize data structure
+    const results = snapshot.docs.map(d => {
+      const data = d.data();
+      return {
+        ...data,
+        // Ensure date field exists (scores use 'date', some legacy use 'timestamp')
+        date:
+          data.date ||
+          (data.timestamp?.seconds
+            ? parseInt(
+                new Date(data.timestamp.seconds * 1000).toISOString().slice(0, 10).replace(/-/g, '')
+              )
+            : null),
+        score: data.score || 0,
+      };
+    });
+
+    // Sort by date descending (client-side since we removed orderBy)
+    results.sort((a, b) => (b.date || 0) - (a.date || 0));
+
+    return results;
   } catch (e) {
     console.error('Error fetching user game history:', e);
     return [];
