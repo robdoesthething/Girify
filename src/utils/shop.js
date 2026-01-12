@@ -8,9 +8,9 @@ let cacheTimestamp = 0;
 const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
 
 /**
- * Fetch all shop items from Firestore
+ * Fetch all shop items from Firestore, merged with local cosmetics.json
  * @param {boolean} forceRefresh - If true, ignore cache
- * @returns {Promise<Object>} - Grouped by type: { avatarFrames: [], titles: [], special: [] }
+ * @returns {Promise<Object>} - Grouped by type: { avatarFrames: [], titles: [], special: [], avatars: [] }
  */
 export const getShopItems = async (forceRefresh = false) => {
   const now = Date.now();
@@ -18,51 +18,47 @@ export const getShopItems = async (forceRefresh = false) => {
     return shopItemsCache;
   }
 
+  // Start with local cosmetics.json as the base source of truth
+  const localItems = [
+    ...(cosmetics.avatarFrames || []).map(i => ({ ...i, type: 'frame' })),
+    ...(cosmetics.titles || []).map(i => ({ ...i, type: 'title' })),
+    ...(cosmetics.special || []).map(i => ({ ...i, type: 'special' })),
+    ...(cosmetics.avatars || []).map(i => ({ ...i, type: 'avatar' })),
+  ];
+
+  const firestoreItems = [];
   try {
     const querySnapshot = await getDocs(collection(db, 'shop_items'));
-    const items = [];
     querySnapshot.forEach(doc => {
-      items.push({ id: doc.id, ...doc.data() });
+      firestoreItems.push({ id: doc.id, ...doc.data() });
     });
-    console.warn('Shop Fetch Success:', items.length, 'items');
-
-    // Group items
-    // Group items
-    const grouped = {
-      avatarFrames: items.filter(i => i.type === 'frame'),
-      titles: items.filter(i => i.type === 'title'),
-      special: items.filter(i => i.type === 'special'),
-      avatars: items.filter(
-        i => i.type === 'avatar' || i.type === 'avatars' || (i.id && i.id.startsWith('avatar_'))
-      ),
-      all: items,
-    };
-
-    shopItemsCache = grouped;
-    cacheTimestamp = now;
-    return grouped;
+    console.warn('Shop Fetch Success:', firestoreItems.length, 'Firestore items');
   } catch (error) {
-    console.error('Error fetching shop items (FULL):', error, error.code, error.message);
-
-    // FALLBACK for local verification if rules prevent access
-    if (error.code === 'permission-denied' || error.message.includes('permissions')) {
-      // Use local cosmetics.json as source of truth
-      return {
-        avatarFrames: cosmetics.avatarFrames || [],
-        titles: cosmetics.titles || [],
-        special: cosmetics.special || [],
-        avatars: cosmetics.avatars || [],
-        all: [
-          ...(cosmetics.avatarFrames || []),
-          ...(cosmetics.titles || []),
-          ...(cosmetics.special || []),
-          ...(cosmetics.avatars || []),
-        ],
-      };
-    }
-
-    return { avatarFrames: [], titles: [], special: [], all: [] };
+    console.error('Error fetching shop items from Firestore:', error);
+    // Continue with just local items
   }
+
+  // Merge: Firestore items override local items with same ID
+  const itemMap = new Map();
+  localItems.forEach(item => itemMap.set(item.id, item));
+  firestoreItems.forEach(item => itemMap.set(item.id, item));
+
+  const allItems = Array.from(itemMap.values());
+
+  // Group items
+  const grouped = {
+    avatarFrames: allItems.filter(i => i.type === 'frame'),
+    titles: allItems.filter(i => i.type === 'title'),
+    special: allItems.filter(i => i.type === 'special'),
+    avatars: allItems.filter(
+      i => i.type === 'avatar' || i.type === 'avatars' || (i.id && i.id.startsWith('avatar_'))
+    ),
+    all: allItems,
+  };
+
+  shopItemsCache = grouped;
+  cacheTimestamp = now;
+  return grouped;
 };
 
 /**

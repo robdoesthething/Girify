@@ -5,6 +5,7 @@
       "name": "The Guiri",
       "cost": 0,
       "image": "/assets/avatars/guiri.svg",
+      "emoji": "🎒",
       "description": "Default tourist look"
     },
     {
@@ -12,6 +13,7 @@
       "name": "Local Legend",
       "cost": 500,
       "image": "/assets/avatars/local.svg",
+      "emoji": "😎",
       "description": "Stylish and confident"
     },
     {
@@ -19,6 +21,7 @@
       "name": "Gaudí Artist",
       "cost": 1000,
       "image": "/assets/avatars/artist.svg",
+      "emoji": "🎨",
       "description": "Colorful and mosaic-inspired"
     }
   ],
