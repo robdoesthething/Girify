@@ -1,4 +1,4 @@
-import React, { useReducer, useEffect, useState } from 'react';
+import React from 'react';
 import { Routes, Route, useLocation, useNavigate } from 'react-router-dom';
 import { AnimatePresence } from 'framer-motion';
 
@@ -20,51 +20,46 @@ import AnnouncementModal from './components/AnnouncementModal';
 import LandingPage from './components/LandingPage';
 
 import { useTheme } from './context/ThemeContext';
-import quizPlan from './data/quizPlan.json';
 import { useStreets } from './hooks/useStreets';
 import { useAchievements } from './hooks/useAchievements';
 import { useAnnouncements } from './hooks/useAnnouncements';
-import {
-  getTodaySeed,
-  selectDailyStreets,
-  hasPlayedToday,
-  markTodayAsPlayed,
-  selectDistractors,
-  shuffleOptions,
-} from './utils/dailyChallenge';
-import { calculateTimeScore } from './utils/scoring';
+import { useAuth } from './hooks/useAuth';
+import { useGameState } from './hooks/useGameState';
+import { hasPlayedToday, getTodaySeed } from './utils/dailyChallenge';
 import { saveScore } from './utils/leaderboard';
-import {
-  ensureUserProfile,
-  migrateUser,
-  hasDailyReferral,
-  healMigration,
-  updateUserProfile,
-  getReferrer,
-  updateUserGameStats,
-  saveUserGameResult,
-  getUserGameHistory,
-} from './utils/social';
-import { calculateStreak } from './utils/stats';
-import { claimDailyLoginBonus, awardChallengeBonus, awardReferralBonus } from './utils/giuros';
-import { gameReducer, initialState } from './reducers/gameReducer';
+import { hasDailyReferral } from './utils/social';
 import { auth } from './firebase';
-import { onAuthStateChanged, signOut, updateProfile } from 'firebase/auth';
+import { storage } from './utils/storage';
+import { STORAGE_KEYS } from './config/constants';
 
 import PrivacyPolicy from './components/PrivacyPolicy';
 import TermsOfService from './components/TermsOfService';
 import VerifyEmailScreen from './components/VerifyEmailScreen';
 import AchievementModal from './components/AchievementModal';
+import { useConfirm } from './hooks/useConfirm';
+import { ConfirmDialog } from './components/ConfirmDialog';
 
 const AppRoutes = () => {
   const { theme, t, deviceMode } = useTheme();
-  const [state, dispatch] = useReducer(gameReducer, initialState);
   const location = useLocation();
   const navigate = useNavigate();
-  const [emailVerified, setEmailVerified] = useState(true);
-
   // Street data hook
   const { validStreets, getHintStreets } = useStreets();
+
+  // Confirmation Hook
+  const { confirm, confirmConfig, handleClose } = useConfirm();
+
+  // Game Logic Hook
+  const {
+    state,
+    dispatch,
+    currentStreet,
+    setupGame,
+    handleSelectAnswer,
+    handleNext,
+    handleRegister,
+    processAnswer,
+  } = useGameState(validStreets, getHintStreets);
 
   // Announcement hook
   const { pendingAnnouncement, dismissAnnouncement, checkAnnouncements } = useAnnouncements(
@@ -78,286 +73,28 @@ const AppRoutes = () => {
     location.pathname
   );
 
-  // Parse referral code from URL on load
-  useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    const ref = params.get('ref');
-    if (ref && !localStorage.getItem('girify_referrer')) {
-      localStorage.setItem('girify_referrer', ref);
-    }
-  }, []);
+  // Auth hook
+  const { emailVerified, handleLogout: performLogout } = useAuth(
+    dispatch,
+    state.gameState,
+    checkAnnouncements
+  );
+  const handleLogout = () => performLogout(navigate);
 
-  // Sync Auto-Advance
-  useEffect(() => {
-    localStorage.setItem('girify_auto_advance', state.autoAdvance);
-  }, [state.autoAdvance]);
-
-  // Generate options helper
-  const generateOptionsList = (target, allStreets, questionIndex) => {
-    const todaySeed = getTodaySeed();
-    const questionSeed = todaySeed + questionIndex * 100;
-    const distractors = selectDistractors(allStreets, target, questionSeed);
-    const opts = [target, ...distractors];
-    return shuffleOptions(opts, questionSeed + 50);
-  };
-
-  /**
-   * Setup Game - Uses pre-generated quiz plan when available
-   */
-  function setupGame(freshName) {
-    const activeName = freshName || state.username;
-    if (!activeName) {
-      dispatch({ type: 'SET_GAME_STATE', payload: 'register' });
-      return;
-    }
-
-    if (validStreets.length === 0) {
-      console.error('No valid streets found!');
-      dispatch({ type: 'SET_GAME_STATE', payload: 'intro' });
-      return;
-    }
-
-    const todaySeed = getTodaySeed();
-
-    // Try to use pre-generated quiz plan
-    const todayStr = new Date().toISOString().split('T')[0];
-    const plannedQuiz = quizPlan?.quizzes?.find(q => q.date === todayStr);
-
-    let selected;
-    let initialOptions;
-
-    if (plannedQuiz && plannedQuiz.questions?.length > 0) {
-      // Use pre-generated quiz plan
-      // eslint-disable-next-line no-console
-      console.log('[Quiz] Using pre-generated plan for', todayStr);
-
-      // Map question IDs to street objects
-      const streetMap = new Map(validStreets.map(s => [s.id, s]));
-
-      selected = plannedQuiz.questions.map(q => streetMap.get(q.correctId)).filter(Boolean);
-
-      if (selected.length > 0) {
-        // Build initial options from pre-generated distractors
-        const firstQ = plannedQuiz.questions[0];
-        const correctStreet = streetMap.get(firstQ.correctId);
-        const distractorStreets = firstQ.distractorIds.map(id => streetMap.get(id)).filter(Boolean);
-
-        if (correctStreet && distractorStreets.length >= 3) {
-          const opts = [correctStreet, ...distractorStreets.slice(0, 3)];
-          initialOptions = shuffleOptions(opts, todaySeed + 50);
-        } else {
-          // Fallback to generated distractors
-          initialOptions = generateOptionsList(selected[0], validStreets, 0);
-        }
-      }
-    }
-
-    // Fallback to dynamic generation if plan not available
-    if (!selected || selected.length === 0) {
-      // eslint-disable-next-line no-console
-      console.log('[Quiz] Falling back to dynamic generation');
-      selected = selectDailyStreets(validStreets, todaySeed);
-      initialOptions = selected.length > 0 ? generateOptionsList(selected[0], validStreets, 0) : [];
-    }
-
-    dispatch({
-      type: 'START_GAME',
-      payload: {
-        quizStreets: selected,
-        initialOptions: initialOptions,
-        plannedQuestions: plannedQuiz?.questions || null, // Store for distractor lookup
-      },
-    });
-  }
-
-  const currentStreet =
-    state.gameState === 'playing' ? state.quizStreets[state.currentQuestionIndex] : null;
-
-  // Hint Calculation - using useStreets hook
-  useEffect(() => {
-    if (!currentStreet) {
-      dispatch({ type: 'SET_HINT_STREETS', payload: [] });
-      return;
-    }
-    const hints = getHintStreets(currentStreet);
-    dispatch({ type: 'SET_HINT_STREETS', payload: hints });
-  }, [currentStreet, getHintStreets]);
-
-  // Handlers
-  const processAnswer = selectedStreet => {
-    if (state.feedback === 'transitioning') return;
-
-    const isCorrect = selectedStreet.id === currentStreet.id;
-    const timeElapsed = state.questionStartTime ? (Date.now() - state.questionStartTime) / 1000 : 0;
-    const points = calculateTimeScore(timeElapsed, isCorrect, state.hintsRevealedCount);
-
-    const result = {
-      street: currentStreet,
-      userAnswer: selectedStreet.name,
-      status: isCorrect ? 'correct' : 'failed',
-      time: timeElapsed,
-      points: points,
-      hintsUsed: state.hintsRevealedCount,
-    };
-
-    dispatch({
-      type: 'ANSWER_SUBMITTED',
-      payload: { result, points, selectedStreet },
-    });
-  };
-
-  const handleSelectAnswer = selectedStreet => {
-    dispatch({ type: 'SELECT_ANSWER', payload: selectedStreet });
-    processAnswer(selectedStreet);
-  };
-
-  const handleNext = () => {
-    if (state.feedback !== 'transitioning') return;
-
-    const nextIndex = state.currentQuestionIndex + 1;
-
-    if (nextIndex >= state.quizStreets.length) {
-      if (state.gameState === 'playing') {
-        try {
-          markTodayAsPlayed();
-          const history = JSON.parse(localStorage.getItem('girify_history') || '[]');
-          const avgTime = state.quizResults.length
-            ? (
-                state.quizResults.reduce((acc, curr) => acc + (curr.time || 0), 0) /
-                state.quizResults.length
-              ).toFixed(1)
-            : 0;
-
-          const newRecord = {
-            date: getTodaySeed(),
-            score: state.score,
-            avgTime: avgTime,
-            timestamp: Date.now(),
-            username: state.username,
-          };
-          history.push(newRecord);
-          localStorage.setItem('girify_history', JSON.stringify(history));
-
-          if (state.username) {
-            // Save to Firestore History
-            saveUserGameResult(state.username, newRecord);
-
-            // Check for referral bonus (allows retry)
-            hasDailyReferral(state.username).then(isBonus => {
-              saveScore(state.username, state.score, newRecord.avgTime, {
-                isBonus,
-                correctAnswers: state.correct,
-                questionCount: state.questions.length,
-                email: auth.currentUser?.email,
-              });
-            });
-
-            // Award giuros for completing the daily challenge
-            const historyForStreak = JSON.parse(localStorage.getItem('girify_history') || '[]');
-            const streak = calculateStreak(historyForStreak);
-
-            // Sync stats to Firestore
-            const totalScore = historyForStreak.reduce((acc, h) => acc + (h.score || 0), 0);
-            updateUserGameStats(state.username, {
-              streak,
-              totalScore,
-              lastPlayDate: getTodaySeed(),
-            });
-            awardChallengeBonus(state.username, streak).then(result => {
-              // eslint-disable-next-line no-console
-              console.log(`[Giuros] Challenge bonus: +${result.bonus}`);
-            });
-
-            // Award referral bonus to whoever referred this user (first game only)
-            getReferrer(state.username).then(referrer => {
-              if (referrer) {
-                awardReferralBonus(referrer).then(() => {
-                  // eslint-disable-next-line no-console
-                  console.log(`[Giuros] Referral bonus awarded to: ${referrer}`);
-                });
-              }
-            });
-
-            // FEEDBACK CHECK: Check if we should ask for feedback (weekly)
-            const lastFeedback = localStorage.getItem('girify_last_feedback');
-            const now = Date.now();
-            // 7 days = 7 * 24 * 60 * 60 * 1000 = 604800000
-            if (!lastFeedback || now - parseInt(lastFeedback) > 604800000) {
-              // 1/7 chance to show
-              if (Math.random() < 1 / 7) {
-                setTimeout(() => navigate('/feedback'), 2000); // Show after short delay
-              }
-            }
-          }
-        } catch (e) {
-          console.error('[Game] Error saving game:', e);
-        }
-      }
-      dispatch({ type: 'NEXT_QUESTION', payload: {} });
-    } else {
-      const nextStreet = state.quizStreets[nextIndex];
-      let nextOptions;
-
-      // Try to use pre-generated distractors from quiz plan
-      if (state.plannedQuestions && state.plannedQuestions[nextIndex]) {
-        const plannedQ = state.plannedQuestions[nextIndex];
-        const streetMap = new Map(validStreets.map(s => [s.id, s]));
-        const distractorStreets = plannedQ.distractorIds
-          .map(id => streetMap.get(id))
-          .filter(Boolean);
-
-        if (distractorStreets.length >= 3) {
-          const todaySeed = getTodaySeed();
-          const opts = [nextStreet, ...distractorStreets.slice(0, 3)];
-          nextOptions = shuffleOptions(opts, todaySeed + nextIndex * 100 + 50);
-        } else {
-          // Fallback to dynamic generation
-          nextOptions = generateOptionsList(nextStreet, validStreets, nextIndex);
-        }
-      } else {
-        // No planned questions, use dynamic generation
-        nextOptions = generateOptionsList(nextStreet, validStreets, nextIndex);
-      }
-
-      dispatch({
-        type: 'NEXT_QUESTION',
-        payload: { options: nextOptions },
-      });
-    }
-  };
-
-  const handleRegister = name => {
-    localStorage.setItem('girify_username', name);
-    dispatch({ type: 'SET_USERNAME', payload: name });
-    dispatch({ type: 'SET_GAME_STATE', payload: 'intro' });
-  };
-
-  const handleLogout = () => {
-    signOut(auth)
-      .then(() => {
-        // eslint-disable-next-line no-alert
-        alert('You have been logged out successfully. See you soon!');
-      })
-      .catch(err => console.error('Sign out error', err));
-    localStorage.removeItem('girify_username');
-    localStorage.removeItem('lastPlayedDate');
-    dispatch({ type: 'LOGOUT' });
-    navigate('/'); // Go home on logout
-  };
-
-  const handleOpenPage = page => {
+  const handleOpenPage = async page => {
     // Check if user is in the middle of a game
     if (state.gameState === 'playing' && state.currentQuestionIndex < state.quizStreets.length) {
-      // eslint-disable-next-line no-alert
-      const confirmed = window.confirm(
+      const confirmed = await confirm(
         t('exitGameWarning') ||
-          'Exit game? Your current score will be saved. You can play again anytime!'
+          'Exit game? Your current score will be saved. You can play again anytime!',
+        'Exit Game',
+        true
       );
       if (!confirmed) return; // Don't navigate if user cancels
 
       // User confirmed - save current progress before exiting
       try {
-        const history = JSON.parse(localStorage.getItem('girify_history') || '[]');
+        const history = storage.get(STORAGE_KEYS.HISTORY, []);
         const avgTime = state.quizResults.length
           ? (
               state.quizResults.reduce((acc, curr) => acc + (curr.time || 0), 0) /
@@ -374,7 +111,7 @@ const AppRoutes = () => {
           incomplete: true, // Mark as incomplete
         };
         history.push(partialRecord);
-        localStorage.setItem('girify_history', JSON.stringify(history));
+        storage.set(STORAGE_KEYS.HISTORY, history);
 
         if (state.username) {
           hasDailyReferral(state.username).then(isBonus => {
@@ -397,261 +134,6 @@ const AppRoutes = () => {
     // If null/undefined, go home. Else go to page.
     navigate(page ? `/${page}` : '/');
   };
-
-  // Auth Listener
-  useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async user => {
-      if (user) {
-        // Force refresh user data to get latest emailVerified status
-        // This handles the case where user verified email in another tab
-        try {
-          await user.reload();
-          // Get fresh user data after reload
-          const freshUser = auth.currentUser;
-          setEmailVerified(freshUser?.emailVerified ?? false);
-        } catch (e) {
-          console.warn('[Auth] Failed to reload user:', e);
-          setEmailVerified(user.emailVerified);
-        }
-
-        let displayName = (user.displayName || user.email?.split('@')[0] || 'User').toLowerCase();
-
-        // MIGRATION 2.0: Ensure handle format (@Name1234)
-        // Previous format was Name#1234. New format @Name1234.
-        const oldFormatRegex = /.*#\d{4}$/;
-        // Enforce ending with exactly 4 digits to ensure uniqueness and consistency
-        const newFormatRegex = /^@[a-zA-Z0-9]+\d{4}$/;
-        // Check for malformed long usernames (e.g. @name12345678)
-        const hasExcessiveDigits = /\d{5,}$/.test(displayName);
-        const isTooLong = displayName.length > 20;
-
-        let shouldMigrateHandle = false;
-        let newHandle = displayName;
-
-        if (oldFormatRegex.test(displayName)) {
-          // Convert Name#1234 -> @Name1234
-          newHandle = '@' + displayName.replace('#', '');
-          shouldMigrateHandle = true;
-        } else if (!newFormatRegex.test(displayName) || hasExcessiveDigits || isTooLong) {
-          // Generate new handle if invalid format, too many digits, or too long
-          const randomId = Math.floor(1000 + Math.random() * 9000); // Always 4 digits
-
-          // Clean name: remove existing digits/special chars, take first part
-          let coreName = displayName.replace(/^@/, '').split(/\d/)[0];
-          // Take only first 10 chars of name to ensure room for suffix
-          coreName = coreName.replace(/[^a-zA-Z]/g, '').slice(0, 10) || 'User';
-
-          newHandle = `@${coreName}${randomId}`;
-          shouldMigrateHandle = true;
-        }
-
-        if (shouldMigrateHandle) {
-          try {
-            // eslint-disable-next-line no-console
-            console.log(`[Migration] Update handle: ${displayName} -> ${newHandle}`);
-
-            // 1. Update Firebase Auth Profile
-            await updateProfile(user, { displayName: newHandle });
-
-            // 2. DATA MIGRATION: Copy old profile data to new handle
-            await migrateUser(displayName, newHandle);
-
-            displayName = newHandle;
-            // eslint-disable-next-line no-console
-            console.log('[Migration] Success! New handle:', displayName);
-          } catch (e) {
-            console.error('[Migration] Failed to migrate user to handle:', e);
-          }
-        }
-
-        // Ensure Firestore profile matches
-        ensureUserProfile(displayName, user.uid, { email: user.email })
-          .then(profile => {
-            // Update Real Name in state
-            if (profile && profile.realName) {
-              dispatch({ type: 'SET_REAL_NAME', payload: profile.realName });
-              // REMOVED local storage persistence as requested
-            }
-            if (profile && profile.streak) {
-              dispatch({ type: 'SET_STREAK', payload: profile.streak });
-            }
-
-            // Mark profile as loaded (even if realName is empty)
-            dispatch({ type: 'SET_PROFILE_LOADED' });
-
-            // Self-heal any broken migration links
-            healMigration(displayName).catch(err => console.error(err));
-
-            // Claim daily login bonus (giuros)
-            claimDailyLoginBonus(displayName).then(result => {
-              if (result.claimed) {
-                // eslint-disable-next-line no-console
-                console.log(`[Giuros] Daily login bonus claimed: +${result.bonus}`);
-              }
-            });
-
-            // FEEDBACK REWARDS: Check if user has earned rewards
-            import('./utils/social').then(
-              ({ checkUnseenFeedbackRewards, markFeedbackRewardSeen }) => {
-                checkUnseenFeedbackRewards(displayName).then(rewards => {
-                  if (rewards && rewards.length > 0) {
-                    const total = rewards.reduce((acc, r) => acc + (r.reward || 0), 0);
-                    // eslint-disable-next-line no-alert
-                    alert(
-                      `🎉 Your feedback has been approved!\n\nYou earned ${total} Giuros for helping us improve Girify!`
-                    );
-                    rewards.forEach(r => markFeedbackRewardSeen(r.id));
-                  }
-                });
-              }
-            );
-
-            // NEWS: Check for unread announcements
-            checkAnnouncements();
-
-            // MIGRATION: Sync Local History to Firestore (One-time)
-            if (!localStorage.getItem('girify_history_synced')) {
-              try {
-                const localHistoryStr = localStorage.getItem('girify_history');
-                if (localHistoryStr) {
-                  const localHistory = JSON.parse(localHistoryStr);
-                  if (Array.isArray(localHistory) && localHistory.length > 0) {
-                    getUserGameHistory(displayName).then(existing => {
-                      if (existing.length === 0) {
-                        // eslint-disable-next-line no-console
-                        console.log(
-                          `[Migration] Syncing ${localHistory.length} games to Firestore...`
-                        );
-                        // Limit to last 500 to avoid rate limits/spam
-                        const toUpload = localHistory.slice(-500);
-                        toUpload.forEach(game => saveUserGameResult(displayName, game));
-                      }
-                      localStorage.setItem('girify_history_synced', 'true');
-                    });
-                  } else {
-                    localStorage.setItem('girify_history_synced', 'true');
-                  }
-                } else {
-                  localStorage.setItem('girify_history_synced', 'true');
-                }
-              } catch (e) {
-                console.error('History sync failed', e);
-                // Don't set synced true if error, try again next time
-              }
-            }
-
-            // MIGRATION: Sync Local Cosmetics/Currency to Firestore (One-time)
-            if (!localStorage.getItem('girify_cosmetics_synced')) {
-              try {
-                const purchasedStr = localStorage.getItem('girify_purchased');
-                const equippedStr = localStorage.getItem('girify_equipped');
-                const giurosStr = localStorage.getItem('girify_giuros');
-
-                if (purchasedStr || equippedStr || giurosStr) {
-                  const purchased = purchasedStr ? JSON.parse(purchasedStr) : undefined;
-                  const equipped = equippedStr ? JSON.parse(equippedStr) : undefined;
-                  const giuros = giurosStr ? parseInt(giurosStr, 10) : undefined;
-
-                  if (
-                    (purchased && purchased.length > 0) ||
-                    (equipped && Object.keys(equipped).length > 0) ||
-                    (giuros !== undefined && giuros > 10)
-                  ) {
-                    // eslint-disable-next-line no-console
-                    console.log('[Migration] Syncing cosmetics and giuros to Firestore...');
-                    import('./utils/social').then(({ updateUserProfile }) => {
-                      updateUserProfile(displayName, {
-                        purchasedCosmetics: purchased,
-                        equippedCosmetics: equipped,
-                        giuros: giuros,
-                      });
-                    });
-                  }
-                }
-                localStorage.setItem('girify_cosmetics_synced', 'true');
-              } catch (e) {
-                console.error('[Migration] Failed to sync cosmetics:', e);
-              }
-            }
-
-            // MIGRATION: Registry Date Backfill
-            // If profile doesn't have a valid joinedAt, OR we want to backfill from history if older
-            let earliestDate = null;
-
-            // Check local history for earliest game
-            try {
-              const history = JSON.parse(localStorage.getItem('girify_history') || '[]');
-              if (history.length > 0) {
-                // Sort by timestamp asc
-                const sorted = [...history].sort((a, b) => (a.timestamp || 0) - (b.timestamp || 0));
-                if (sorted[0].timestamp) {
-                  earliestDate = new Date(sorted[0].timestamp);
-                }
-              }
-            } catch (e) {
-              console.warn('History parse error', e);
-            }
-
-            // If we found an earlier date than what's stored (or nothing stored), use it
-            // Logic: If profile has date X, and history has date Y < X, update to Y.
-            let profileDate = null;
-            if (profile && profile.joinedAt) {
-              profileDate = profile.joinedAt.toDate
-                ? profile.joinedAt.toDate()
-                : new Date(profile.joinedAt.seconds * 1000);
-            }
-
-            if (earliestDate) {
-              if (!profileDate || earliestDate < profileDate) {
-                // eslint-disable-next-line no-console
-                console.log('[Migration] Backfilling registry date from history:', earliestDate);
-                // Update firestore profile with new date? ensureUserProfile doesn't update if exists usually.
-                // We might need a specific update call or rely on local storage for display.
-                // Ideally we update firestore.
-                updateUserProfile(displayName, { joinedAt: earliestDate }).catch(e =>
-                  console.error(e)
-                );
-
-                localStorage.setItem('girify_joined', earliestDate.toLocaleDateString());
-              }
-            }
-
-            // Sync joined date to local storage for display
-            if (!localStorage.getItem('girify_joined')) {
-              if (profileDate) {
-                localStorage.setItem('girify_joined', profileDate.toLocaleDateString());
-              } else {
-                // Fallback to today if truly new and no history
-                localStorage.setItem('girify_joined', new Date().toLocaleDateString());
-              }
-            }
-          })
-          .catch(e => console.error(e));
-
-        const currentUsername = localStorage.getItem('girify_username');
-        if (currentUsername !== displayName) {
-          localStorage.setItem('girify_username', displayName);
-          dispatch({ type: 'SET_USERNAME', payload: displayName });
-          if (state.gameState === 'register') {
-            dispatch({ type: 'SET_GAME_STATE', payload: 'intro' });
-          }
-        }
-      }
-    });
-    return () => unsubscribe();
-  }, [state.gameState, checkAnnouncements]);
-
-  // Auto-Advance
-  useEffect(() => {
-    let timeoutId;
-    if (state.feedback === 'transitioning' && state.autoAdvance) {
-      timeoutId = setTimeout(() => {
-        handleNext();
-      }, 1000);
-    }
-    return () => clearTimeout(timeoutId);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [state.autoAdvance, state.feedback]);
 
   return (
     <div
@@ -760,7 +242,7 @@ const AppRoutes = () => {
               <FeedbackScreen
                 username={state.username}
                 onClose={() => {
-                  localStorage.setItem('girify_last_feedback', Date.now().toString());
+                  storage.set(STORAGE_KEYS.LAST_FEEDBACK, Date.now().toString());
                   handleOpenPage(null);
                 }}
               />
@@ -781,6 +263,15 @@ const AppRoutes = () => {
           © 2025 Girify. All rights reserved.
         </p>
       </div>
+
+      <ConfirmDialog
+        isOpen={!!confirmConfig}
+        title={confirmConfig?.title}
+        message={confirmConfig?.message}
+        isDangerous={confirmConfig?.isDangerous}
+        onConfirm={() => handleClose(true)}
+        onCancel={() => handleClose(false)}
+      />
     </div>
   );
 };

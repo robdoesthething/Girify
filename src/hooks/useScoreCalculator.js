@@ -1,5 +1,5 @@
 import { useCallback } from 'react';
-import { calculateTimeScore } from '../utils/scoring';
+import { calculateScore as calculateScoreConfig } from '../config/gameConfig';
 
 /**
  * Custom hook for calculating quiz scores based on time and correctness.
@@ -22,7 +22,7 @@ export function useScoreCalculator() {
    * @returns {number} Points earned (0-100)
    */
   const calculateScore = useCallback((timeInSeconds, isCorrect, hintsCount = 0) => {
-    return calculateTimeScore(timeInSeconds, isCorrect, hintsCount);
+    return calculateScoreConfig(timeInSeconds, isCorrect, hintsCount);
   }, []);
 
   return { calculateScore };

@@ -13,6 +13,7 @@ import {
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import PropTypes from 'prop-types';
+import { logger } from '../utils/logger';
 // Districts feature removed (incomplete data)
 
 // Component to update map view when street changes
@@ -242,9 +243,9 @@ const MapArea = ({ currentStreet, hintStreets = [], theme = 'dark', onAnimationC
 
   useEffect(() => {
     if (currentStreet) {
-      console.log('[MapArea] Current Street:', currentStreet.name);
-      console.log('[MapArea] Geometry points:', geometry.length);
-      console.log('[MapArea] First point:', geometry[0] ? geometry[0][0] : 'None');
+      logger.info('[MapArea] Current Street:', currentStreet.name);
+      logger.info('[MapArea] Geometry points:', geometry.length);
+      logger.info('[MapArea] First point:', geometry[0] ? geometry[0][0] : 'None');
     }
   }, [currentStreet, geometry]);
 
@@ -252,7 +253,7 @@ const MapArea = ({ currentStreet, hintStreets = [], theme = 'dark', onAnimationC
     // Dynamic import to avoid build errors if file is missing
     import('../data/boundary.json')
       .then(mod => setBoundary(mod.default))
-      .catch(() => console.log('No boundary data found'));
+      .catch(() => logger.info('No boundary data found'));
 
     // Set map loaded after a short delay to ensure Leaflet initializes
     const timer = setTimeout(() => setMapLoaded(true), 100);

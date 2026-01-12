@@ -1,6 +1,7 @@
 import { db } from '../firebase';
 import { doc, getDoc, updateDoc, Timestamp } from 'firebase/firestore';
 import { getPayoutConfig } from './configService';
+import { calculateStreakBonus } from '../config/gameConfig';
 
 const USERS_COLLECTION = 'users';
 
@@ -195,14 +196,8 @@ export const claimDailyLoginBonus = async username => {
 export const awardChallengeBonus = async (username, streak = 0) => {
   if (!username) return { bonus: 0, newBalance: 0 };
 
-  // Fetch dynamic config
-  const config = await getPayoutConfig();
-  let bonus = config.DAILY_CHALLENGE_BONUS;
-
-  // Weekly streak bonus
-  if (streak > 0 && streak % 7 === 0) {
-    bonus += config.STREAK_WEEK_BONUS;
-  }
+  // Use centralized game config for calculation
+  const bonus = calculateStreakBonus(streak);
 
   const result = await addGiuros(username, bonus, `daily challenge (streak: ${streak})`);
   return { bonus, newBalance: result.newBalance };

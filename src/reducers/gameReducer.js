@@ -1,10 +1,11 @@
+import { storage } from '../utils/storage';
+
 export const initialState = {
   // All users start at 'intro' - the landing/play screen
   // Logged-in users will see a "Play" button, not auto-start
   gameState: 'intro',
-  username:
-    typeof localStorage !== 'undefined' ? localStorage.getItem('girify_username') || '' : '',
-  realName: localStorage.getItem('girify_realName') || '', // New field for user's real name
+  username: storage.get('girify_username', ''),
+  realName: storage.get('girify_realName', ''), // New field for user's real name
   profileLoaded: false, // True once profile is fetched from Firestore
   streak: 0, // Streak from DB
   quizStreets: [],
@@ -12,10 +13,10 @@ export const initialState = {
   score: 0,
   feedback: 'idle', // 'idle' | 'transitioning'
   options: [],
-  autoAdvance:
-    typeof localStorage !== 'undefined'
-      ? localStorage.getItem('girify_auto_advance') !== 'false'
-      : true,
+  autoAdvance: (() => {
+    const val = storage.get('girify_auto_advance', true);
+    return val === 'false' ? false : val;
+  })(),
   hintStreets: [],
   hintsRevealedCount: 0,
   startTime: null,

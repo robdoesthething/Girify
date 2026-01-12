@@ -10,6 +10,7 @@ import {
   sendEmailVerification,
 } from 'firebase/auth';
 import { ensureUserProfile, recordReferral, getUserByEmail } from '../utils/social';
+import { storage } from '../utils/storage';
 import { useTheme } from '../context/ThemeContext';
 import PropTypes from 'prop-types';
 
@@ -174,15 +175,15 @@ const RegisterPanel = ({ theme: themeProp, onRegister, initialMode = 'signin' })
 
   const handlePostLogin = async (handle, existingProfile) => {
     // Record referral
-    const referrer = localStorage.getItem('girify_referrer');
+    const referrer = storage.get('girify_referrer');
     if (referrer && referrer !== handle && !existingProfile) {
       await recordReferral(referrer, handle);
-      localStorage.removeItem('girify_referrer');
+      storage.remove('girify_referrer');
     }
 
     // Save joined date
-    if (!localStorage.getItem('girify_joined')) {
-      localStorage.setItem('girify_joined', new Date().toLocaleDateString());
+    if (!storage.get('girify_joined')) {
+      storage.set('girify_joined', new Date().toLocaleDateString());
     }
     // Callback to parent to close modal / start game
     if (onRegister) onRegister(handle);
@@ -231,10 +232,10 @@ const RegisterPanel = ({ theme: themeProp, onRegister, initialMode = 'signin' })
         });
 
         // Record Referral for Email Signups
-        const referrer = localStorage.getItem('girify_referrer');
+        const referrer = storage.get('girify_referrer');
         if (referrer && referrer !== handle) {
           await recordReferral(referrer, handle);
-          localStorage.removeItem('girify_referrer');
+          storage.remove('girify_referrer');
         }
 
         await auth.signOut();
