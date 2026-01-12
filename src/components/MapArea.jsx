@@ -186,6 +186,33 @@ const LANDMARKS = [
   { name: 'Hospital Sant Pau', pos: [41.4116, 2.1749], icon: '🏥' },
   { name: "Vall d'Hebron", pos: [41.4277, 2.1444], icon: '🏥' },
   { name: 'Hospital del Mar', pos: [41.3845, 2.1936], icon: '🏥' },
+
+  // Sarrià-Sant Gervasi District
+  { name: 'Monestir de Pedralbes', pos: [41.3957, 2.1113], icon: '⛪' },
+  { name: "Parc de l'Oreneta", pos: [41.4003, 2.1147], icon: '🌳' },
+  { name: 'Parc de Cervantes', pos: [41.3875, 2.1123], icon: '🌹' },
+  { name: 'Jardins de la Vil·la Amèlia', pos: [41.3965, 2.1318], icon: '🌳' },
+  { name: 'Jardins de la Tamarita', pos: [41.4041, 2.1362], icon: '🌳' },
+  { name: 'Sarrià', pos: [41.4003, 2.1213], icon: '🏘️' },
+  { name: 'Plaça de Sarrià', pos: [41.4005, 2.1218], icon: '⛲' },
+
+  // Sant Andreu District
+  { name: 'Fabra i Coats', pos: [41.4367, 2.1899], icon: '🏭' },
+  { name: 'Parc de la Trinitat', pos: [41.4478, 2.1856], icon: '🌳' },
+  { name: 'Mercat de Sant Andreu', pos: [41.4355, 2.1903], icon: '🛒' },
+  { name: 'Plaça del Comerç', pos: [41.4339, 2.1902], icon: '⛲' },
+  { name: 'Sant Andreu Arenal', pos: [41.4312, 2.1888], icon: '🏟️' },
+  { name: 'Parc de la Pegaso', pos: [41.4243, 2.1924], icon: '🌳' },
+
+  // Nou Barris District
+  { name: 'Parc Central de Nou Barris', pos: [41.4418, 2.1732], icon: '🌳' },
+  { name: 'Parc del Turó de la Peira', pos: [41.4344, 2.1611], icon: '🌳' },
+  { name: 'Mundet', pos: [41.4395, 2.1518], icon: '🏫' },
+  { name: 'Roquetes', pos: [41.4486, 2.1651], icon: '🏘️' },
+  { name: 'Torre Baró', pos: [41.4568, 2.1785], icon: '🏔️' },
+  { name: 'Ciutat Meridiana', pos: [41.4613, 2.1792], icon: '🏘️' },
+  { name: 'Parc de les Aigües', pos: [41.4391, 2.1653], icon: '💧' },
+  { name: 'Can Dragó', pos: [41.435, 2.1818], icon: '🏟️' },
 ];
 
 const createEmojiIcon = emoji => {
