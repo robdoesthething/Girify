@@ -119,10 +119,18 @@ const ProfileScreen = ({ username }) => {
     setIsEditing(false);
   };
 
-  const totalGames = allHistory.length;
-  const bestScore = totalGames > 0 ? Math.max(...allHistory.map(h => (h && h.score) || 0)) : 0;
-  const totalScore = allHistory.reduce((acc, curr) => acc + ((curr && curr.score) || 0), 0);
-  const dailyStreak = calculateStreak(uniqueHistory);
+  // Use profileData from Firestore as fallback when history is empty
+  const totalGames = allHistory.length > 0 ? allHistory.length : profileData?.gamesPlayed || 0;
+  const bestScore =
+    allHistory.length > 0
+      ? Math.max(...allHistory.map(h => (h && h.score) || 0))
+      : profileData?.bestScore || 0;
+  const totalScore =
+    allHistory.length > 0
+      ? allHistory.reduce((acc, curr) => acc + ((curr && curr.score) || 0), 0)
+      : profileData?.totalScore || 0;
+  const dailyStreak =
+    allHistory.length > 0 ? calculateStreak(uniqueHistory) : profileData?.streak || 0;
 
   const userStats = { gamesPlayed: totalGames, bestScore, streak: dailyStreak };
   const unlockedBadges = getUnlockedAchievements(userStats);

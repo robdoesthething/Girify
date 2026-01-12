@@ -145,7 +145,7 @@ const SummaryScreen = ({
               <div className="absolute bottom-3 right-3">
                 <button
                   onClick={handleShare}
-                  className="p-2.5 rounded-full bg-white/90 backdrop-blur-md border-2 border-sky-400 hover:bg-sky-500 hover:text-white transition-all active:scale-95 shadow-lg text-sky-600"
+                  className="p-2.5 rounded-full bg-sky-500 hover:bg-sky-600 transition-all active:scale-95 shadow-lg text-white"
                   title="Share this curiosity"
                 >
                   🎁
