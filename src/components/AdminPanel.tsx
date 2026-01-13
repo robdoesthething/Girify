@@ -75,10 +75,10 @@ const AdminPanel: React.FC = () => {
   const fetchData = useCallback(async () => {
     setLoading(true);
     const [u, f, , shop] = await Promise.all([
-      getAllUsers(100),
-      getFeedbackList(),
+      getAllUsers(100) as unknown as Promise<UserProfile[]>,
+      getFeedbackList() as unknown as Promise<FeedbackItem[]>,
       getAllAnnouncements(),
-      getShopItems(true),
+      getShopItems(true) as unknown as Promise<{ all: ShopItem[] }>,
     ]);
     setUsers(u);
     setFeedback(f);

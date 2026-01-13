@@ -3,18 +3,18 @@ import globals from 'globals';
 import reactHooks from 'eslint-plugin-react-hooks';
 import reactRefresh from 'eslint-plugin-react-refresh';
 import jsxA11y from 'eslint-plugin-jsx-a11y';
+import tseslint from 'typescript-eslint';
 import { defineConfig, globalIgnores } from 'eslint/config';
 
 export default defineConfig([
   globalIgnores(['dist', 'build', 'coverage', 'node_modules', 'src/stories']),
+  js.configs.recommended,
+  ...tseslint.configs.recommended,
   {
-    files: ['**/*.{js,jsx}'],
-    extends: [
-      js.configs.recommended,
-      reactHooks.configs.flat.recommended,
-      reactRefresh.configs.vite,
-    ],
+    files: ['**/*.{js,jsx,ts,tsx}'],
     plugins: {
+      'react-hooks': reactHooks,
+      'react-refresh': reactRefresh,
       'jsx-a11y': jsxA11y,
     },
     languageOptions: {
@@ -28,7 +28,8 @@ export default defineConfig([
     },
     rules: {
       // Unused variables - warn instead of error, allow uppercase and underscore prefix
-      'no-unused-vars': [
+      'no-unused-vars': 'off', // Turn off base rule
+      '@typescript-eslint/no-unused-vars': [
         'warn',
         {
           vars: 'all',
@@ -39,10 +40,17 @@ export default defineConfig([
         },
       ],
 
+      // TypeScript specific
+      '@typescript-eslint/no-explicit-any': 'warn',
+      '@typescript-eslint/ban-ts-comment': 'off', // We use @ts-ignore for untyped modules
+      '@typescript-eslint/no-empty-object-type': 'off', // Allow {} for now
+      '@typescript-eslint/no-unused-expressions': 'off', // Allow some unused expressions (common in tests/mocks)
+      'no-undef': 'off', // TypeScript handles this better
+
       // Console statements - warn (should be removed in production)
       'no-console': ['warn', { allow: ['warn', 'error'] }],
 
-      // React Hooks - enforce dependencies (already in recommended, but explicit)
+      // React Hooks - enforce dependencies
       'react-hooks/rules-of-hooks': 'error',
       'react-hooks/exhaustive-deps': 'warn',
 
@@ -72,7 +80,11 @@ export default defineConfig([
   },
   // Test files - allow console and relax some rules
   {
-    files: ['**/*.test.{js,jsx}', '**/__tests__/**/*.{js,jsx}', '**/setupTests.js'],
+    files: [
+      '**/*.test.{js,jsx,ts,tsx}',
+      '**/__tests__/**/*.{js,jsx,ts,tsx}',
+      '**/setupTests.{js,ts}',
+    ],
     languageOptions: {
       globals: {
         ...globals.browser,
@@ -89,7 +101,8 @@ export default defineConfig([
     },
     rules: {
       'no-console': 'off',
-      'no-unused-vars': 'off',
+      '@typescript-eslint/no-unused-vars': 'off',
+      '@typescript-eslint/no-explicit-any': 'off',
     },
   },
   // Script files - allow node globals
@@ -106,7 +119,7 @@ export default defineConfig([
   },
   // Root-level node scripts
   {
-    files: ['analyze_tiers.js', 'vitest.config.js', 'commitlint.config.js'],
+    files: ['analyze_tiers.js', 'vitest.config.js', 'commitlint.config.js', 'eslint.config.js'],
     languageOptions: {
       globals: {
         ...globals.node,

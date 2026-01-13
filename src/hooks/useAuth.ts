@@ -17,7 +17,8 @@ import {
 // @ts-ignore
 import { claimDailyLoginBonus } from '../utils/giuros';
 import { useNotification } from './useNotification';
-import { useAsyncOperation } from './useAsyncOperation'; // [NEW] Import loading hook
+import { useAsyncOperation } from './useAsyncOperation';
+import { UserProfile } from '../types/user';
 // @ts-ignore
 import { sanitizeInput } from '../utils/security';
 // @ts-ignore
@@ -83,7 +84,7 @@ export const useAuth = (
           async () => {
             await syncUserProfile(displayName, user, dispatch, onAnnouncementsCheck, notify);
           },
-          { loadingKey: 'profile-sync', errorMessage: null } // Sppress annoying error on load if passive
+          { loadingKey: 'profile-sync', errorMessage: undefined } // Suppress annoying error on load if passive
         );
 
         // Update state
@@ -135,7 +136,9 @@ async function syncUserProfile(
   notify: any
 ) {
   try {
-    const profile = await ensureUserProfile(displayName, user.uid, { email: user.email });
+    const profile = (await ensureUserProfile(displayName, user.uid, {
+      email: user.email,
+    })) as unknown as UserProfile;
 
     if (profile) {
       if (profile.realName) {

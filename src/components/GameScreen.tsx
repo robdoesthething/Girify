@@ -91,7 +91,7 @@ const GameScreen: FC<GameScreenProps> = ({
           className={`relative z-0 min-w-0 ${['mobile', 'tablet'].includes(deviceMode) ? 'flex-1 w-full order-1' : 'flex-1 h-full order-1'}`}
         >
           <MapArea
-            currentStreet={currentStreet}
+            currentStreet={currentStreet ?? undefined}
             hintStreets={
               state.gameState === 'playing'
                 ? state.hintStreets.slice(0, state.hintsRevealedCount)
@@ -108,10 +108,11 @@ const GameScreen: FC<GameScreenProps> = ({
             className={`
                   relative z-20 shrink-0
                   glass-panel rounded-none border-l border-white/10
-                  ${['mobile', 'tablet'].includes(deviceMode)
-                ? 'w-full h-[45%] order-2 border-t rounded-t-3xl shadow-[0_-10px_40px_rgba(0,0,0,0.3)]'
-                : 'w-[400px] lg:w-[450px] h-full order-2'
-              }
+                  ${
+                    ['mobile', 'tablet'].includes(deviceMode)
+                      ? 'w-full h-[45%] order-2 border-t rounded-t-3xl shadow-[0_-10px_40px_rgba(0,0,0,0.3)]'
+                      : 'w-[400px] lg:w-[450px] h-full order-2'
+                  }
                `}
           >
             <Quiz>
@@ -182,10 +183,11 @@ const GameScreen: FC<GameScreenProps> = ({
               </p>
               <button
                 onClick={() => setupGame()}
-                className={`px-12 py-5 rounded-full text-white shadow-xl transform hover:scale-105 transition-all duration-300 flex items-center justify-center mx-auto ring-4 ${hasPlayedToday()
+                className={`px-12 py-5 rounded-full text-white shadow-xl transform hover:scale-105 transition-all duration-300 flex items-center justify-center mx-auto ring-4 ${
+                  hasPlayedToday()
                     ? 'bg-[#000080] hover:bg-[#000060] shadow-[#000080]/30 ring-[#000080]/20'
                     : 'bg-sky-500 hover:bg-sky-400 shadow-sky-500/30 ring-sky-500/20'
-                  }`}
+                }`}
               >
                 <span className="font-black text-xl tracking-wider">
                   {hasPlayedToday() ? t('replay') || 'Replay' : t('play') || 'Play'}
