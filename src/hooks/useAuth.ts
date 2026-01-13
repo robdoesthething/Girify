@@ -1,30 +1,29 @@
-import { useState, useEffect, useCallback, Dispatch } from 'react';
 import { onAuthStateChanged, signOut, User } from 'firebase/auth';
+import { Dispatch, useCallback, useEffect, useState } from 'react';
 // @ts-ignore
 import { auth } from '../firebase';
 // @ts-ignore
-import { storage } from '../utils/storage';
 import {
-  ensureUserProfile,
-  healMigration,
-  updateUserProfile,
-  getUserGameHistory,
-  saveUserGameResult,
   checkUnseenFeedbackRewards,
+  ensureUserProfile,
+  getUserGameHistory,
+  healMigration,
   markFeedbackRewardSeen,
-  // @ts-ignore
+  saveUserGameResult,
+  updateUserProfile,
 } from '../utils/social';
+import { storage } from '../utils/storage';
 // @ts-ignore
+import { FeedbackReward, GameHistory, UserProfile } from '../types/user';
 import { claimDailyLoginBonus } from '../utils/giuros';
-import { useNotification } from './useNotification';
 import { useAsyncOperation } from './useAsyncOperation';
-import { UserProfile } from '../types/user';
+import { useNotification } from './useNotification';
 // @ts-ignore
 import { sanitizeInput } from '../utils/security';
 // @ts-ignore
 import { UserMigrationService } from '../services/userMigration';
 // @ts-ignore
-import { STORAGE_KEYS, MIGRATION, TIME } from '../config/constants';
+import { MIGRATION, STORAGE_KEYS, TIME } from '../config/constants';
 // @ts-ignore
 import { logger } from '../utils/logger';
 
@@ -37,8 +36,13 @@ export interface UseAuthResult {
 /**
  * Hook for Firebase authentication and user profile management
  */
+interface AppAction {
+  type: string;
+  payload?: string | number | boolean;
+}
+
 export const useAuth = (
-  dispatch: Dispatch<any>,
+  dispatch: Dispatch<AppAction>,
   currentGameState: string,
   onAnnouncementsCheck?: () => void
 ): UseAuthResult => {
@@ -117,7 +121,7 @@ export const useAuth = (
           successMessage: 'You have been logged out successfully.',
           errorMessage: 'Failed to sign out. Please try again.',
         }
-      ).catch((err: any) => logger.error('Sign out error', err));
+      ).catch((err: Error) => logger.error('Sign out error', err));
     },
     [dispatch, execute] // Removed notify dependency as it's handled by execute
   );
@@ -131,9 +135,15 @@ export const useAuth = (
 async function syncUserProfile(
   displayName: string,
   user: User,
-  dispatch: Dispatch<any>,
+  dispatch: Dispatch<AppAction>,
   onAnnouncementsCheck: (() => void) | undefined,
-  notify: any
+  notify:
+    | ((
+        message: string,
+        type?: 'success' | 'error' | 'info' | 'warning',
+        duration?: number
+      ) => void)
+    | null
 ) {
   try {
     const profile = (await ensureUserProfile(displayName, user.uid, {
@@ -150,7 +160,7 @@ async function syncUserProfile(
       dispatch({ type: 'SET_PROFILE_LOADED' });
 
       // Self-heal any broken migration links
-      healMigration(displayName).catch((err: any) => console.error(err));
+      healMigration(displayName).catch((err: Error) => console.error(err));
 
       // Claim daily login bonus
       const bonusResult = await claimDailyLoginBonus(displayName);
@@ -162,7 +172,7 @@ async function syncUserProfile(
       // Check for feedback rewards
       const rewards = await checkUnseenFeedbackRewards(displayName);
       if (rewards && rewards.length > 0) {
-        const total = rewards.reduce((acc: number, r: any) => acc + (r.reward || 0), 0);
+        const total = rewards.reduce((acc: number, r: FeedbackReward) => acc + (r.reward || 0), 0);
         if (notify) {
           notify(
             `🎉 Your feedback has been approved! +${total} Giuros`,
@@ -170,7 +180,7 @@ async function syncUserProfile(
             5 * TIME.ONE_SECOND
           );
         }
-        rewards.forEach((r: any) => markFeedbackRewardSeen(r.id));
+        rewards.forEach((r: FeedbackReward) => markFeedbackRewardSeen(r.id));
       }
 
       // Check for announcements
@@ -205,7 +215,7 @@ async function syncLocalHistory(displayName: string) {
         // eslint-disable-next-line no-console
         console.log(`[Migration] Syncing ${localHistory.length} games to Firestore...`);
         const toUpload = localHistory.slice(-MIGRATION.MAX_HISTORY_UPLOAD);
-        toUpload.forEach((game: any) => saveUserGameResult(displayName, game));
+        toUpload.forEach((game: GameHistory) => saveUserGameResult(displayName, game));
       }
     }
     storage.set(STORAGE_KEYS.HISTORY_SYNCED, 'true');
@@ -249,13 +259,15 @@ async function syncLocalCosmetics(displayName: string) {
 /**
  * Backfill join date from local history if older
  */
-async function backfillJoinDate(displayName: string, profile: any) {
+async function backfillJoinDate(displayName: string, profile: UserProfile | null) {
   let earliestDate: Date | null = null;
 
   try {
     const history = storage.get(STORAGE_KEYS.HISTORY, []);
     if (history.length > 0) {
-      const sorted = [...history].sort((a: any, b: any) => (a.timestamp || 0) - (b.timestamp || 0));
+      const sorted = [...history].sort(
+        (a: GameHistory, b: GameHistory) => (a.timestamp || 0) - (b.timestamp || 0)
+      );
       if (sorted[0].timestamp) {
         earliestDate = new Date(sorted[0].timestamp);
       }
@@ -266,9 +278,14 @@ async function backfillJoinDate(displayName: string, profile: any) {
 
   let profileDate: Date | null = null;
   if (profile && profile.joinedAt) {
-    profileDate = profile.joinedAt.toDate
-      ? profile.joinedAt.toDate()
-      : new Date(profile.joinedAt.seconds * 1000);
+    // Handle both Firebase Timestamp and Date objects
+    if (profile.joinedAt instanceof Date) {
+      profileDate = profile.joinedAt;
+    } else if (typeof profile.joinedAt === 'object' && 'toDate' in profile.joinedAt) {
+      profileDate = profile.joinedAt.toDate();
+    } else if (typeof profile.joinedAt === 'object' && 'seconds' in profile.joinedAt) {
+      profileDate = new Date((profile.joinedAt as any).seconds * 1000);
+    }
   }
 
   if (earliestDate && (!profileDate || earliestDate < profileDate)) {
