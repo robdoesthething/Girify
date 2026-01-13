@@ -72,7 +72,7 @@ const RecenterControl: React.FC<RecenterControlProps> = ({ center, zoom, bounds 
       const isMobile = window.innerWidth < 768;
       const padding: [number, number] = isMobile ? [40, 40] : [80, 80];
       const allPoints = bounds.flat() as L.LatLngExpression[];
-      map.fitBounds(allPoints, { padding, maxZoom: 18 });
+      map.fitBounds(allPoints as unknown as L.LatLngBoundsExpression, { padding, maxZoom: 18 });
     } else if (center) {
       map.setView(center, zoom || 13);
     }
@@ -368,7 +368,7 @@ const MapArea: React.FC<MapAreaProps> = ({
               positions={geometry as L.LatLngExpression[][]}
               pathOptions={{
                 color: '#FFFFFF',
-                weight: 12,
+                weight: currentZoom < 13 ? 16 : 12,
                 opacity: 0.5,
                 lineCap: 'round',
                 lineJoin: 'round',
@@ -381,7 +381,7 @@ const MapArea: React.FC<MapAreaProps> = ({
               positions={geometry as L.LatLngExpression[][]}
               pathOptions={{
                 color: theme === 'dark' ? '#38bdf8' : '#000080', // Sky-400 for dark, Navy for light
-                weight: 8,
+                weight: currentZoom < 13 ? 10 : 8,
                 opacity: 1.0,
                 lineCap: 'round',
                 lineJoin: 'round',
