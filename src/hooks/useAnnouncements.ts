@@ -8,7 +8,6 @@ interface Announcement {
   body: string;
   publishDate: number;
   timestamp: number;
-  [key: string]: any;
 }
 
 interface UseAnnouncementsReturn {
