@@ -5,12 +5,12 @@ import { useNotification } from './useNotification'; // Assuming useNotification
 // @ts-ignore
 import { logger } from '../utils/logger';
 
-interface AsyncOptions {
+interface AsyncOptions<T = unknown> {
   loadingKey?: string;
   successMessage?: string;
   errorMessage?: string;
-  onSuccess?: (result: any) => void;
-  onError?: (error: any) => void;
+  onSuccess?: (result: T) => void;
+  onError?: (error: Error) => void;
 }
 
 /**
@@ -44,8 +44,9 @@ export const useAsyncOperation = () => {
         }
 
         return result;
-      } catch (error: any) {
-        logger.error(`Async operation failed [${loadingKey}]:`, error);
+      } catch (error: unknown) {
+        const err = error instanceof Error ? error : new Error(String(error));
+        logger.error(`Async operation failed [${loadingKey}]:`, err);
 
         if (options.errorMessage !== null) {
           // Pass null to suppress error notification
@@ -53,7 +54,7 @@ export const useAsyncOperation = () => {
         }
 
         if (onError) {
-          onError(error);
+          onError(err);
         }
         return undefined; // Explicitly return undefined in case of error
       } finally {

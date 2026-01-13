@@ -33,12 +33,18 @@ import { storage } from '../utils/storage';
 import quizPlan from '../data/quizPlan.json';
 // @ts-ignore
 import { STORAGE_KEYS, TIME } from '../config/constants';
-import { GameStateObject, QuizResult, Street } from '../types/game';
+import { GameStateObject, QuizPlan, QuizQuestion, QuizResult, Street } from '../types/game';
+import { GameHistory } from '../types/user';
 import { useAsyncOperation } from './useAsyncOperation'; // [NEW]
+
+interface GameAction {
+  type: string;
+  payload?: string | number | boolean | Street | Street[] | QuizResult | null;
+}
 
 export interface UseGameStateResult {
   state: GameStateObject;
-  dispatch: Dispatch<any>;
+  dispatch: Dispatch<GameAction>;
   currentStreet: Street | null;
   setupGame: (freshName?: string) => void;
   processAnswer: (selectedStreet: Street) => void;
