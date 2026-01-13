@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, FC, ReactNode } from 'react';
+import { createContext, FC, ReactNode, useCallback, useContext, useMemo, useState } from 'react';
 
 interface LoadingState {
   [key: string]: boolean;
@@ -17,22 +17,45 @@ const LoadingContext = createContext<LoadingContextType | undefined>(undefined);
 export const LoadingProvider: FC<{ children: ReactNode }> = ({ children }) => {
   const [loading, setLoading] = useState<LoadingState>({});
 
-  const startLoading = (key: string) => {
-    setLoading(prev => ({ ...prev, [key]: true }));
-  };
+  const startLoading = useCallback((key: string) => {
+    setLoading(prev => {
+      // Avoid state update if already true
+      if (prev[key]) {
+        return prev;
+      }
+      return { ...prev, [key]: true };
+    });
+  }, []);
 
-  const stopLoading = (key: string) => {
-    setLoading(prev => ({ ...prev, [key]: false }));
-  };
+  const stopLoading = useCallback((key: string) => {
+    setLoading(prev => {
+      // Avoid state update if already false
+      if (prev[key] === false) {
+        return prev;
+      }
+      const newState = { ...prev };
+      delete newState[key]; // Cleaner to remove key
+      return newState;
+    });
+  }, []);
 
-  const isLoading = (key: string) => loading[key] || false;
+  const isLoading = useCallback((key: string) => !!loading[key], [loading]);
 
-  const isAnyLoading = () => Object.values(loading).some(v => v);
+  const isAnyLoading = useCallback(() => Object.values(loading).some(Boolean), [loading]);
+
+  const value = useMemo(
+    () => ({
+      loading,
+      startLoading,
+      stopLoading,
+      isLoading,
+      isAnyLoading,
+    }),
+    [loading, startLoading, stopLoading, isLoading, isAnyLoading]
+  );
 
   return (
-    <LoadingContext.Provider
-      value={{ loading, startLoading, stopLoading, isLoading, isAnyLoading }}
-    >
+    <LoadingContext.Provider value={value}>
       {children}
       {isAnyLoading() && <GlobalLoadingIndicator />}
     </LoadingContext.Provider>
