@@ -16,11 +16,18 @@ interface ConfirmResult {
 export const useConfirm = (): ConfirmResult => {
   const [confirmConfig, setConfirmConfig] = useState<ConfirmConfig | null>(null);
 
-  const confirm = useCallback((message: string, title: string = 'Confirm Action', isDangerous: boolean = false): Promise<boolean> => {
-    return new Promise(resolve => {
-      setConfirmConfig({ message, title, resolve, isDangerous });
-    });
-  }, []);
+  const confirm = useCallback(
+    (
+      message: string,
+      title: string = 'Confirm Action',
+      isDangerous: boolean = false
+    ): Promise<boolean> => {
+      return new Promise(resolve => {
+        setConfirmConfig({ message, title, resolve, isDangerous });
+      });
+    },
+    []
+  );
 
   const handleClose = useCallback(
     (result: boolean) => {
