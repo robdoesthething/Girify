@@ -14,7 +14,9 @@
  * @returns {string} Sanitized string
  */
 export const sanitizeInput = (input: unknown): string => {
-  if (typeof input !== 'string') return '';
+  if (typeof input !== 'string') {
+    return '';
+  }
   // Remove HTML tags
   let clean = input.replace(/<[^>]*>?/gm, '');
   // Remove potential script injection patterns (basic)

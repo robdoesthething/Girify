@@ -33,7 +33,15 @@ export interface AchievementCriteria {
   inviteCount?: number;
 }
 
-export type AchievementCategory = 'starter' | 'social' | 'guiri_path' | 'local_path' | 'high_roller' | 'urban_survival' | 'gastronomy' | 'digital_nomad';
+export type AchievementCategory =
+  | 'starter'
+  | 'social'
+  | 'guiri_path'
+  | 'local_path'
+  | 'high_roller'
+  | 'urban_survival'
+  | 'gastronomy'
+  | 'digital_nomad';
 export type AchievementType = 'merit' | 'shop';
 
 export interface Achievement {
@@ -306,8 +314,13 @@ export const getMeritBadges = (): Achievement[] => {
  * @param {Array} purchasedBadges - Array of badge IDs user has purchased
  * @returns {Array} Array of unlocked badge objects
  */
-export const getUnlockedAchievements = (stats: any, purchasedBadges: string[] = []): Achievement[] => {
-  if (!stats) return [];
+export const getUnlockedAchievements = (
+  stats: any,
+  purchasedBadges: string[] = []
+): Achievement[] => {
+  if (!stats) {
+    return [];
+  }
 
   const {
     gamesPlayed = 0,
@@ -343,29 +356,65 @@ export const getUnlockedAchievements = (stats: any, purchasedBadges: string[] = 
 
     // Merit badges - check criteria
     const { criteria } = badge;
-    if (!criteria) continue;
+    if (!criteria) {
+      continue;
+    }
     let meets = true;
 
-    if (criteria.gamesPlayed && gamesPlayed < criteria.gamesPlayed) meets = false;
-    if (criteria.bestScore && bestScore < criteria.bestScore) meets = false;
-    if (criteria.streak && streak < criteria.streak) meets = false;
-    if (criteria.wrongStreak && wrongStreak < criteria.wrongStreak) meets = false;
-    if (criteria.totalPanKm && totalPanKm < criteria.totalPanKm) meets = false;
-    if (criteria.consecutiveDays && consecutiveDays < criteria.consecutiveDays) meets = false;
-    if (criteria.gamesWithoutQuitting && gamesWithoutQuitting < criteria.gamesWithoutQuitting)
+    if (criteria.gamesPlayed && gamesPlayed < criteria.gamesPlayed) {
       meets = false;
-    if (criteria.eixampleCorners && eixampleCorners < criteria.eixampleCorners) meets = false;
-    if (criteria.gothicStreak && gothicStreak < criteria.gothicStreak) meets = false;
-    if (criteria.bornGuesses && bornGuesses < criteria.bornGuesses) meets = false;
-    if (criteria.poblenouGuesses && poblenouGuesses < criteria.poblenouGuesses) meets = false;
-    if (criteria.foodStreetsPerfect && foodStreetsPerfect < criteria.foodStreetsPerfect)
+    }
+    if (criteria.bestScore && bestScore < criteria.bestScore) {
       meets = false;
-    if (criteria.nightPlay && !nightPlay) meets = false;
-    if (criteria.ramblasQuickGuess && !ramblasQuickGuess) meets = false;
-    if (criteria.precisionGuess && !precisionGuess) meets = false;
-    if (criteria.fastLoss && !fastLoss) meets = false;
-    if (criteria.speedModeHighScore && !speedModeHighScore) meets = false;
-    if (criteria.inviteCount && (stats.inviteCount || 0) < criteria.inviteCount) meets = false;
+    }
+    if (criteria.streak && streak < criteria.streak) {
+      meets = false;
+    }
+    if (criteria.wrongStreak && wrongStreak < criteria.wrongStreak) {
+      meets = false;
+    }
+    if (criteria.totalPanKm && totalPanKm < criteria.totalPanKm) {
+      meets = false;
+    }
+    if (criteria.consecutiveDays && consecutiveDays < criteria.consecutiveDays) {
+      meets = false;
+    }
+    if (criteria.gamesWithoutQuitting && gamesWithoutQuitting < criteria.gamesWithoutQuitting) {
+      meets = false;
+    }
+    if (criteria.eixampleCorners && eixampleCorners < criteria.eixampleCorners) {
+      meets = false;
+    }
+    if (criteria.gothicStreak && gothicStreak < criteria.gothicStreak) {
+      meets = false;
+    }
+    if (criteria.bornGuesses && bornGuesses < criteria.bornGuesses) {
+      meets = false;
+    }
+    if (criteria.poblenouGuesses && poblenouGuesses < criteria.poblenouGuesses) {
+      meets = false;
+    }
+    if (criteria.foodStreetsPerfect && foodStreetsPerfect < criteria.foodStreetsPerfect) {
+      meets = false;
+    }
+    if (criteria.nightPlay && !nightPlay) {
+      meets = false;
+    }
+    if (criteria.ramblasQuickGuess && !ramblasQuickGuess) {
+      meets = false;
+    }
+    if (criteria.precisionGuess && !precisionGuess) {
+      meets = false;
+    }
+    if (criteria.fastLoss && !fastLoss) {
+      meets = false;
+    }
+    if (criteria.speedModeHighScore && !speedModeHighScore) {
+      meets = false;
+    }
+    if (criteria.inviteCount && (stats.inviteCount || 0) < criteria.inviteCount) {
+      meets = false;
+    }
 
     if (meets) {
       unlocked.push(badge);
@@ -395,7 +444,9 @@ export const getBadgesByCategory = (): Record<string, Achievement[]> => {
  * @returns {Object|null} Next achievement with progress info
  */
 export const getNextAchievement = (stats: any): Achievement | null => {
-  if (!stats) return null;
+  if (!stats) {
+    return null;
+  }
 
   const { gamesPlayed = 0, bestScore = 0, streak = 0 } = stats;
   const unlocked = getUnlockedAchievements(stats);
@@ -405,11 +456,17 @@ export const getNextAchievement = (stats: any): Achievement | null => {
   let closestProgress = 0;
 
   for (const badge of ACHIEVEMENT_BADGES) {
-    if (unlockedIds.has(badge.id)) continue;
-    if (badge.type === 'shop') continue; // Skip shop badges for "next achievement"
+    if (unlockedIds.has(badge.id)) {
+      continue;
+    }
+    if (badge.type === 'shop') {
+      continue;
+    } // Skip shop badges for "next achievement"
 
     const { criteria } = badge;
-    if (!criteria) continue;
+    if (!criteria) {
+      continue;
+    }
     let progress = 0;
 
     if (criteria.gamesPlayed) {

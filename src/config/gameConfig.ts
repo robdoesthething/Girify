@@ -1,7 +1,13 @@
-import { GAME, REWARDS, FEEDBACK } from './constants';
+import { FEEDBACK, GAME, REWARDS } from './constants';
 
-export const calculateScore = (timeElapsed: number, isCorrect: boolean, hintsUsed: number): number => {
-  if (!isCorrect) return 0;
+export const calculateScore = (
+  timeElapsed: number,
+  isCorrect: boolean,
+  hintsUsed: number
+): number => {
+  if (!isCorrect) {
+    return 0;
+  }
 
   let score = GAME.POINTS.CORRECT_BASE;
 
@@ -23,13 +29,16 @@ export const calculateStreakBonus = (streakDays: number): number => {
   return REWARDS.CHALLENGE_COMPLETE + streakDays * REWARDS.STREAK_BONUS_PER_DAY;
 };
 
-export const shouldPromptFeedback = (lastFeedbackTime: string | null | undefined, gamesPlayed: number = 10): boolean => {
+export const shouldPromptFeedback = (
+  lastFeedbackTime: string | null | undefined,
+  gamesPlayed: number = 10
+): boolean => {
   if (gamesPlayed < FEEDBACK.MIN_GAMES_BEFORE_PROMPT) {
     return false;
   }
 
   const now = Date.now();
-  const timeSinceLastPrompt = lastFeedbackTime ? now - parseInt(lastFeedbackTime) : Infinity;
+  const timeSinceLastPrompt = lastFeedbackTime ? now - parseInt(lastFeedbackTime, 10) : Infinity;
 
   return timeSinceLastPrompt > FEEDBACK.PROMPT_INTERVAL && Math.random() < FEEDBACK.PROMPT_CHANCE;
 };

@@ -1,4 +1,4 @@
-import { useReducer, useEffect, useCallback, useMemo, Dispatch } from 'react';
+import { Dispatch, useCallback, useEffect, useMemo, useReducer } from 'react';
 import { useNavigate } from 'react-router-dom';
 // @ts-ignore
 import { auth } from '../firebase';
@@ -6,11 +6,10 @@ import { auth } from '../firebase';
 import { gameReducer, initialState } from '../reducers/gameReducer';
 import {
   getTodaySeed,
-  selectDailyStreets,
   markTodayAsPlayed,
+  selectDailyStreets,
   selectDistractors,
   shuffleOptions,
-  // @ts-ignore
 } from '../utils/dailyChallenge';
 // @ts-ignore
 import { calculateStreak } from '../utils/stats';
@@ -19,23 +18,22 @@ import { saveScore } from '../utils/leaderboard';
 // @ts-ignore
 import { calculateScore, shouldPromptFeedback } from '../config/gameConfig';
 import {
-  updateUserGameStats,
-  saveUserGameResult,
   getReferrer,
   hasDailyReferral,
-  // @ts-ignore
+  saveUserGameResult,
+  updateUserGameStats,
 } from '../utils/social';
 // @ts-ignore
 import { awardChallengeBonus, awardReferralBonus } from '../utils/giuros';
 // @ts-ignore
-import { storage } from '../utils/storage';
-// @ts-ignore
 import { logger } from '../utils/logger';
+// @ts-ignore
+import { storage } from '../utils/storage';
 // @ts-ignore
 import quizPlan from '../data/quizPlan.json';
 // @ts-ignore
-import { TIME, GAME, FEEDBACK, STORAGE_KEYS } from '../config/constants';
-import { Street, GameStateObject, QuizResult } from '../types/game';
+import { STORAGE_KEYS, TIME } from '../config/constants';
+import { GameStateObject, QuizResult, Street } from '../types/game';
 import { useAsyncOperation } from './useAsyncOperation'; // [NEW]
 
 export interface UseGameStateResult {
@@ -186,8 +184,12 @@ export const useGameState = (
    */
   const processAnswer = useCallback(
     (selectedStreet: Street) => {
-      if (state.feedback === 'transitioning') return;
-      if (!currentStreet) return;
+      if (state.feedback === 'transitioning') {
+        return;
+      }
+      if (!currentStreet) {
+        return;
+      }
 
       const isCorrect = selectedStreet.id === currentStreet.id;
       const timeElapsed = state.questionStartTime
@@ -227,7 +229,9 @@ export const useGameState = (
    * Handle advancing to next question or game end
    */
   const handleNext = useCallback(() => {
-    if (state.feedback !== 'transitioning') return;
+    if (state.feedback !== 'transitioning') {
+      return;
+    }
 
     const nextIndex = state.currentQuestionIndex + 1;
 

@@ -13,7 +13,9 @@ const ACTIVITY_COLLECTION = 'activityFeed';
  * @param {Object} data - Additional data for the activity
  */
 export const publishActivity = async (username, type, data = {}) => {
-  if (!username || !type) return;
+  if (!username || !type) {
+    return;
+  }
 
   try {
     const activityRef = collection(db, ACTIVITY_COLLECTION);

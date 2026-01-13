@@ -1,0 +1,36 @@
+{
+  "recommendations": [
+    // Core
+    "dbaeumer.vscode-eslint",
+    "esbenp.prettier-vscode",
+
+    // React
+    "dsznajder.es7-react-js-snippets",
+    "xabikos.ReactSnippets",
+
+    // Tailwind
+    "bradlc.vscode-tailwindcss",
+
+    // Git
+    "eamodio.gitlens",
+    "mhutchie.git-graph",
+
+    // Utilities
+    "usernamehw.errorlens", // Shows errors inline
+    "gruntfuggly.todo-tree", // Track TODOs
+    "streetsidesoftware.code-spell-checker",
+    "wayou.vscode-todo-highlight",
+
+    // Testing
+    "vitest.explorer",
+
+    // TypeScript (for future)
+    "yoavbls.pretty-ts-errors",
+
+    // Optional but useful
+    "styled-components.vscode-styled-components",
+    "ms-vscode.vscode-typescript-next",
+    "formulahendry.auto-rename-tag",
+    "naumovs.color-highlight"
+  ]
+}

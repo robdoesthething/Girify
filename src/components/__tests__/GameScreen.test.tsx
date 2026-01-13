@@ -1,51 +1,83 @@
-import { describe, it, expect, vi } from 'vitest';
-import { render, screen, fireEvent } from '@testing-library/react';
-import GameScreen from '../GameScreen';
+import { fireEvent, render, screen } from '@testing-library/react';
 import { BrowserRouter } from 'react-router-dom';
+import { describe, expect, it, vi } from 'vitest';
+import GameScreen from '../GameScreen';
 
 // Mock dependencies
-vi.mock('../MapArea', () => ({ default: () => <div data-testid="map-area">Map Area</div> }));
+vi.mock('../MapArea', () => {
+  const MapArea = () => <div data-testid="map-area">Map Area</div>;
+  MapArea.displayName = 'MapArea';
+  return { default: MapArea };
+});
 vi.mock('../Quiz', () => {
   const MockQuiz = ({ children }: any) => <div data-testid="quiz">{children}</div>;
-  MockQuiz.Banner = () => <div data-testid="quiz-banner">Quiz Banner</div>;
-  MockQuiz.Container = ({ children }: any) => <div>{children}</div>;
-  MockQuiz.Content = ({ children }: any) => <div>{children}</div>;
-  MockQuiz.Options = ({ onSelect }: any) => (
+  const Banner = () => <div data-testid="quiz-banner">Quiz Banner</div>;
+  Banner.displayName = 'QuizBanner';
+  MockQuiz.Banner = Banner;
+
+  const Container = ({ children }: any) => <div>{children}</div>;
+  Container.displayName = 'QuizContainer';
+  MockQuiz.Container = Container;
+
+  const Content = ({ children }: any) => <div>{children}</div>;
+  Content.displayName = 'QuizContent';
+  MockQuiz.Content = Content;
+
+  const Options = ({ onSelect }: any) => (
     <div data-testid="quiz-options">
       <button onClick={() => onSelect({ id: 'street1', name: 'Test Street' })}>Option 1</button>
     </div>
   );
-  MockQuiz.Hints = ({ onReveal }: any) => (
+  Options.displayName = 'QuizOptions';
+  MockQuiz.Options = Options;
+
+  const Hints = ({ onReveal }: any) => (
     <div data-testid="quiz-hints">
       <button onClick={onReveal}>Reveal Hint</button>
     </div>
   );
-  MockQuiz.NextButton = ({ onNext }: any) => (
+  Hints.displayName = 'QuizHints';
+  MockQuiz.Hints = Hints;
+
+  const NextButton = ({ onNext }: any) => (
     <button data-testid="next-button" onClick={onNext}>
       Next
     </button>
   );
+  NextButton.displayName = 'QuizNextButton';
+  MockQuiz.NextButton = NextButton;
+
   return { default: MockQuiz };
 });
-vi.mock('../RegisterPanel', () => ({
-  default: ({ onRegister }: any) => (
+vi.mock('../RegisterPanel', () => {
+  const RegisterPanel = ({ onRegister }: any) => (
     <div data-testid="register-panel">
       <button onClick={() => onRegister('@testuser')}>Register</button>
     </div>
-  ),
-}));
-vi.mock('../SummaryScreen', () => ({
-  default: () => <div data-testid="summary-screen">Summary</div>,
-}));
-vi.mock('../LandingPage', () => ({
-  default: ({ onStart, onLogin }: any) => (
+  );
+  RegisterPanel.displayName = 'RegisterPanel';
+  return { default: RegisterPanel };
+});
+vi.mock('../SummaryScreen', () => {
+  const SummaryScreen = () => <div data-testid="summary-screen">Summary</div>;
+  SummaryScreen.displayName = 'SummaryScreen';
+  return { default: SummaryScreen };
+});
+vi.mock('../LandingPage', () => {
+  const LandingPage = ({ onStart, onLogin }: any) => (
     <div data-testid="landing-page">
       <button onClick={onStart}>Start</button>
       <button onClick={onLogin}>Login</button>
     </div>
-  ),
-}));
-vi.mock('../Logo', () => ({ default: () => <div>Logo</div> }));
+  );
+  LandingPage.displayName = 'LandingPage';
+  return { default: LandingPage };
+});
+vi.mock('../Logo', () => {
+  const Logo = () => <div>Logo</div>;
+  Logo.displayName = 'Logo';
+  return { default: Logo };
+});
 vi.mock('../OnboardingTour', () => ({
   default: () => <div data-testid="onboarding">Onboarding</div>,
 }));

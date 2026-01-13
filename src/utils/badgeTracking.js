@@ -18,7 +18,9 @@ const FOOD_STREETS = /verdi|blai|parlament|enric granados|rambla catalunya/i;
  * Get user's badge stats from Firestore
  */
 export async function getBadgeStats(username) {
-  if (!username) return null;
+  if (!username) {
+    return null;
+  }
 
   try {
     const statsRef = doc(db, 'users', username, 'badgeStats', 'current');
@@ -60,7 +62,9 @@ export async function getBadgeStats(username) {
  * Update badge stats after a game
  */
 export async function updateBadgeStats(username, gameResult) {
-  if (!username || !gameResult) return;
+  if (!username || !gameResult) {
+    return;
+  }
 
   try {
     const statsRef = doc(db, 'users', username, 'badgeStats', 'current');
@@ -198,7 +202,9 @@ export async function updateBadgeStats(username, gameResult) {
  * Get user's purchased badges
  */
 export async function getPurchasedBadges(username) {
-  if (!username) return [];
+  if (!username) {
+    return [];
+  }
 
   try {
     const badgesRef = collection(db, 'users', username, 'purchasedBadges');
@@ -214,7 +220,9 @@ export async function getPurchasedBadges(username) {
  * Purchase a badge
  */
 export async function purchaseBadge(username, badgeId) {
-  if (!username || !badgeId) return { success: false, error: 'Invalid params' };
+  if (!username || !badgeId) {
+    return { success: false, error: 'Invalid params' };
+  }
 
   try {
     const badgeRef = doc(db, 'users', username, 'purchasedBadges', badgeId);
@@ -232,7 +240,9 @@ export async function purchaseBadge(username, badgeId) {
  * Track map panning distance (for Socks & Sandals badge)
  */
 export async function trackPanDistance(username, distanceKm) {
-  if (!username || !distanceKm) return;
+  if (!username || !distanceKm) {
+    return;
+  }
 
   try {
     const statsRef = doc(db, 'users', username, 'badgeStats', 'current');

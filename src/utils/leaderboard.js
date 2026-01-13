@@ -192,7 +192,9 @@ export const getLeaderboard = async (period = 'all') => {
     const seenEntries = new Set(); // Prevent duplicate processing of exact same doc
 
     snapshot.forEach(doc => {
-      if (seenEntries.has(doc.id)) return;
+      if (seenEntries.has(doc.id)) {
+        return;
+      }
       seenEntries.add(doc.id);
 
       const data = doc.data();
@@ -224,7 +226,7 @@ export const getLeaderboard = async (period = 'all') => {
       }
 
       // Ensure display format has @ prefix (stored without @ in Firebase usually)
-      const loweredUsername = rawUsername.startsWith('@') ? rawUsername : '@' + rawUsername;
+      const loweredUsername = rawUsername.startsWith('@') ? rawUsername : `@${rawUsername}`;
 
       if (period === 'daily') {
         // Daily: Only today's games
@@ -233,12 +235,18 @@ export const getLeaderboard = async (period = 'all') => {
         } else {
           const d = new Date(date);
           d.setHours(0, 0, 0, 0);
-          if (d.getTime() === todayStart.getTime()) include = true;
+          if (d.getTime() === todayStart.getTime()) {
+            include = true;
+          }
         }
       } else if (period === 'weekly') {
-        if (date >= startOfWeek) include = true;
+        if (date >= startOfWeek) {
+          include = true;
+        }
       } else if (period === 'monthly') {
-        if (date >= startOfMonth) include = true;
+        if (date >= startOfMonth) {
+          include = true;
+        }
       } else if (period === 'all') {
         include = true;
       }
@@ -260,7 +268,9 @@ export const getLeaderboard = async (period = 'all') => {
 
     // Sort Final Result (Score DESC, Time ASC)
     finalScores.sort((a, b) => {
-      if (b.score !== a.score) return b.score - a.score;
+      if (b.score !== a.score) {
+        return b.score - a.score;
+      }
       return a.time - b.time;
     });
 
@@ -268,7 +278,9 @@ export const getLeaderboard = async (period = 'all') => {
     const seen = new Set();
     finalScores = finalScores.filter(s => {
       const u = s.username.toLowerCase();
-      if (seen.has(u)) return false;
+      if (seen.has(u)) {
+        return false;
+      }
       seen.add(u);
       return true;
     });

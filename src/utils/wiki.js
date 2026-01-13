@@ -20,7 +20,9 @@ const WIKI_API_BASE = 'https://ca.wikipedia.org/w/api.php'; // Use Catalan Wikip
  * // Returns: null
  */
 export const fetchWikiImage = async query => {
-  if (!query) return null;
+  if (!query) {
+    return null;
+  }
 
   // Clean query
   const cleanQuery = query.trim();

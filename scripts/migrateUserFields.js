@@ -1,10 +1,7 @@
-import { initializeApp, cert } from 'firebase-admin/app';
+import { cert, initializeApp } from 'firebase-admin/app';
 import { getFirestore } from 'firebase-admin/firestore';
 import { readFile } from 'fs/promises';
-import { fileURLToPath } from 'url';
 import path from 'path';
-
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 /**
  * Migrate User Fields Script

@@ -1,18 +1,18 @@
-import { db } from '../firebase';
 import {
-  collection,
-  doc,
-  setDoc,
-  getDoc,
-  getDocs,
-  query,
-  where,
   Timestamp,
   addDoc,
-  updateDoc,
-  limit,
+  collection,
   deleteDoc,
+  doc,
+  getDoc,
+  getDocs,
+  limit,
+  query,
+  setDoc,
+  updateDoc,
+  where,
 } from 'firebase/firestore';
+import { db } from '../firebase';
 
 const USERS_COLLECTION = 'users';
 const FRIENDSHIPS_COLLECTION = 'friendships';
@@ -33,7 +33,9 @@ const REFERRALS_COLLECTION = 'referrals';
  * // Returns existing profile or creates new one with defaults
  */
 export const ensureUserProfile = async (usernameInput, uid = null, additionalData = {}) => {
-  if (!usernameInput) return null;
+  if (!usernameInput) {
+    return null;
+  }
   const username = usernameInput.toLowerCase();
 
   const userRef = doc(db, USERS_COLLECTION, username);
@@ -103,23 +105,42 @@ export const ensureUserProfile = async (usernameInput, uid = null, additionalDat
   const now = Timestamp.now();
 
   // 1. Critical Identifiers
-  if (uid && data.uid !== uid) updates.uid = uid;
-  if (additionalData.email && !data.email)
+  if (uid && data.uid !== uid) {
+    updates.uid = uid;
+  }
+  if (additionalData.email && !data.email) {
     updates.email = additionalData.email.toLowerCase().trim();
+  }
 
   // 2. Dates
-  if (!data.createdAt && data.joinedAt) updates.createdAt = data.joinedAt;
-  if (!data.updatedAt) updates.updatedAt = now;
+  if (!data.createdAt && data.joinedAt) {
+    updates.createdAt = data.joinedAt;
+  }
+  if (!data.updatedAt) {
+    updates.updatedAt = now;
+  }
 
   // 3. New Streak & Score Fields
-  if (data.streak === undefined) updates.streak = 0;
-  if (data.maxStreak === undefined) updates.maxStreak = 0;
-  if (data.lastPlayDate === undefined) updates.lastPlayDate = null;
-  if (data.totalScore === undefined) updates.totalScore = 0;
+  if (data.streak === undefined) {
+    updates.streak = 0;
+  }
+  if (data.maxStreak === undefined) {
+    updates.maxStreak = 0;
+  }
+  if (data.lastPlayDate === undefined) {
+    updates.lastPlayDate = null;
+  }
+  if (data.totalScore === undefined) {
+    updates.totalScore = 0;
+  }
 
   // 4. Preferences
-  if (data.language === undefined) updates.language = additionalData.language || 'en';
-  if (data.theme === undefined) updates.theme = 'auto';
+  if (data.language === undefined) {
+    updates.language = additionalData.language || 'en';
+  }
+  if (data.theme === undefined) {
+    updates.theme = 'auto';
+  }
   if (data.notificationSettings === undefined) {
     updates.notificationSettings = {
       dailyReminder: true,
@@ -129,8 +150,12 @@ export const ensureUserProfile = async (usernameInput, uid = null, additionalDat
   }
 
   // 5. Init Games Played if missing
-  if (data.gamesPlayed === undefined) updates.gamesPlayed = 0;
-  if (data.bestScore === undefined) updates.bestScore = 0;
+  if (data.gamesPlayed === undefined) {
+    updates.gamesPlayed = 0;
+  }
+  if (data.bestScore === undefined) {
+    updates.bestScore = 0;
+  }
 
   // Apply updates if needed
   if (Object.keys(updates).length > 0) {
@@ -148,7 +173,9 @@ export const ensureUserProfile = async (usernameInput, uid = null, additionalDat
  * @returns {Promise<{username: string, ...}|null>}
  */
 export const getUserByEmail = async email => {
-  if (!email) return null;
+  if (!email) {
+    return null;
+  }
   const cleanEmail = email.toLowerCase().trim();
   try {
     const q = query(collection(db, USERS_COLLECTION), where('email', '==', cleanEmail), limit(1));
@@ -170,13 +197,17 @@ export const getUserByEmail = async email => {
  * @param {object} stats - { streak, totalScore, lastPlayDate }
  */
 export const updateUserGameStats = async (username, { streak, totalScore, lastPlayDate }) => {
-  if (!username) return;
+  if (!username) {
+    return;
+  }
   const lowername = username.toLowerCase();
   const userRef = doc(db, USERS_COLLECTION, lowername);
 
   try {
     const userDoc = await getDoc(userRef);
-    if (!userDoc.exists()) return;
+    if (!userDoc.exists()) {
+      return;
+    }
 
     const currentData = userDoc.data();
     const updates = {
@@ -207,7 +238,9 @@ const FEEDBACK_COLLECTION = 'feedback';
  * Submit user feedback
  */
 export const submitFeedback = async (username, text) => {
-  if (!username || !text) return;
+  if (!username || !text) {
+    return;
+  }
   await addDoc(collection(db, FEEDBACK_COLLECTION), {
     username,
     text,
@@ -300,7 +333,9 @@ export const deleteFeedback = async feedbackId => {
  * Check for unseen feedback rewards for a user
  */
 export const checkUnseenFeedbackRewards = async username => {
-  if (!username) return [];
+  if (!username) {
+    return [];
+  }
   try {
     const q = query(
       collection(db, FEEDBACK_COLLECTION),
@@ -346,7 +381,9 @@ export const getAllUsers = async (limitCount = 50) => {
  * Update user data as Admin (bypass usual checks, trust rules)
  */
 export const updateUserAsAdmin = async (targetUsername, data) => {
-  if (!targetUsername || !data) return;
+  if (!targetUsername || !data) {
+    return;
+  }
   const userRef = doc(db, USERS_COLLECTION, targetUsername);
   await updateDoc(userRef, data);
 };
@@ -358,7 +395,9 @@ export const updateUserAsAdmin = async (targetUsername, data) => {
  * @param {string} username - The username to delete.
  */
 export const deleteUserAndData = async username => {
-  if (!username) return { success: false, error: 'No username provided' };
+  if (!username) {
+    return { success: false, error: 'No username provided' };
+  }
 
   try {
     const { deleteDoc, writeBatch } = await import('firebase/firestore');
@@ -415,7 +454,9 @@ export const deleteUserAndData = async username => {
  * // Returns: { username: 'JohnDoe', gamesPlayed: 15, bestScore: 1850, ... }
  */
 export const getUserProfile = async username => {
-  if (!username) return null;
+  if (!username) {
+    return null;
+  }
 
   const userRef = doc(db, USERS_COLLECTION, username);
   const userDoc = await getDoc(userRef);
@@ -456,9 +497,13 @@ export const getUserProfile = async username => {
       snapshot.forEach(doc => {
         const d = doc.data();
         let t = null;
-        if (d.timestamp?.toDate) t = d.timestamp.toDate();
-        else if (d.timestamp?.seconds) t = new Date(d.timestamp.seconds * 1000);
-        else if (d.timestamp) t = new Date(d.timestamp); // Number or string
+        if (d.timestamp?.toDate) {
+          t = d.timestamp.toDate();
+        } else if (d.timestamp?.seconds) {
+          t = new Date(d.timestamp.seconds * 1000);
+        } else if (d.timestamp) {
+          t = new Date(d.timestamp);
+        } // Number or string
 
         if (t) {
           if (!earliestGame || t < earliestGame) {
@@ -538,7 +583,9 @@ export const getUserProfile = async username => {
  * // Updates gamesPlayed and bestScore if 1900 > previous best
  */
 export const updateUserStats = async (username, score) => {
-  if (!username) return;
+  if (!username) {
+    return;
+  }
 
   const userRef = doc(db, USERS_COLLECTION, username);
   const userDoc = await getDoc(userRef);
@@ -576,7 +623,9 @@ export const updateUserStats = async (username, score) => {
  * // Creates pending friendship document in Firestore
  */
 export const sendFriendRequest = async (fromUser, toUser) => {
-  if (!fromUser || !toUser || fromUser === toUser) return;
+  if (!fromUser || !toUser || fromUser === toUser) {
+    return;
+  }
 
   // Use composite key to prevent duplicates: [user1, user2].sort().join('_')
   // This physically ensures only ONE document can exist for this pair.
@@ -603,8 +652,12 @@ export const sendFriendRequest = async (fromUser, toUser) => {
       getDoc(doc(db, USERS_COLLECTION, fromUser)),
       getDoc(doc(db, USERS_COLLECTION, toUser)),
     ]);
-    if (u1Doc.exists()) user1Email = u1Doc.data().email || null;
-    if (u2Doc.exists()) user2Email = u2Doc.data().email || null;
+    if (u1Doc.exists()) {
+      user1Email = u1Doc.data().email || null;
+    }
+    if (u2Doc.exists()) {
+      user2Email = u2Doc.data().email || null;
+    }
   } catch (e) {
     console.error('Error fetching emails for friend request:', e);
   }
@@ -671,13 +724,19 @@ export const getFriendshipStatus = async (user1, user2) => {
     let status = 'none';
     snap1.forEach(doc => {
       const data = doc.data();
-      if (data.status === 'accepted') status = 'friends';
-      else if (data.status === 'pending') status = 'pending';
+      if (data.status === 'accepted') {
+        status = 'friends';
+      } else if (data.status === 'pending') {
+        status = 'pending';
+      }
     });
     snap2.forEach(doc => {
       const data = doc.data();
-      if (data.status === 'accepted') status = 'friends';
-      else if (data.status === 'pending') status = 'pending';
+      if (data.status === 'accepted') {
+        status = 'friends';
+      } else if (data.status === 'pending') {
+        status = 'pending';
+      }
     });
 
     return status;
@@ -691,7 +750,9 @@ export const getFriendshipStatus = async (user1, user2) => {
  * Get friend count for a user
  */
 export const getFriendCount = async username => {
-  if (!username) return 0;
+  if (!username) {
+    return 0;
+  }
 
   try {
     // Count friends from subcollection (matches friends.js storage)
@@ -716,7 +777,9 @@ export const getFriendCount = async username => {
  * // Saves referral record with timestamp
  */
 export const recordReferral = async (referrer, referred) => {
-  if (!referrer || !referred || referrer === referred) return;
+  if (!referrer || !referred || referrer === referred) {
+    return;
+  }
 
   // Fetch emails
   let referrerEmail = null;
@@ -726,8 +789,12 @@ export const recordReferral = async (referrer, referred) => {
       getDoc(doc(db, USERS_COLLECTION, referrer)),
       getDoc(doc(db, USERS_COLLECTION, referred)),
     ]);
-    if (r1Doc.exists()) referrerEmail = r1Doc.data().email || null;
-    if (r2Doc.exists()) referredEmail = r2Doc.data().email || null;
+    if (r1Doc.exists()) {
+      referrerEmail = r1Doc.data().email || null;
+    }
+    if (r2Doc.exists()) {
+      referredEmail = r2Doc.data().email || null;
+    }
   } catch (e) {
     console.error('Error fetching emails for referral:', e);
   }
@@ -760,7 +827,9 @@ export const recordReferral = async (referrer, referred) => {
  * Get pending friend requests for a user
  */
 export const getPendingFriendRequests = async username => {
-  if (!username) return [];
+  if (!username) {
+    return [];
+  }
 
   const q = query(
     collection(db, FRIENDSHIPS_COLLECTION),
@@ -780,7 +849,9 @@ const BLOCKS_COLLECTION = 'blocks';
  * Block a user
  */
 export const blockUser = async (blocker, blocked) => {
-  if (!blocker || !blocked || blocker === blocked) return;
+  if (!blocker || !blocked || blocker === blocked) {
+    return;
+  }
 
   const blockId = `${blocker}_${blocked}`;
   await setDoc(doc(db, BLOCKS_COLLECTION, blockId), {
@@ -794,7 +865,9 @@ export const blockUser = async (blocker, blocked) => {
  * Unblock a user
  */
 export const unblockUser = async (blocker, blocked) => {
-  if (!blocker || !blocked) return;
+  if (!blocker || !blocked) {
+    return;
+  }
 
   const blockId = `${blocker}_${blocked}`;
   const blockRef = doc(db, BLOCKS_COLLECTION, blockId);
@@ -821,7 +894,9 @@ export const getBlockStatus = async (user1, user2) => {
  * Update user profile data
  */
 export const updateUserProfile = async (username, data) => {
-  if (!username || !data) return;
+  if (!username || !data) {
+    return;
+  }
 
   const userRef = doc(db, USERS_COLLECTION, username);
   await updateDoc(userRef, data);
@@ -836,7 +911,9 @@ export const updateUserProfile = async (username, data) => {
  * @returns {Promise<void>}
  */
 export const migrateUser = async (oldUsername, newHandle) => {
-  if (!oldUsername || !newHandle || oldUsername === newHandle) return;
+  if (!oldUsername || !newHandle || oldUsername === newHandle) {
+    return;
+  }
 
   try {
     const oldRef = doc(db, USERS_COLLECTION, oldUsername);
@@ -941,9 +1018,9 @@ export const migrateUser = async (oldUsername, newHandle) => {
           await deleteDoc(docMsg.ref);
         });
 
-        if (!subSnap.empty)
-          // eslint-disable-next-line no-console
-          console.log(`[Migration] Migrated ${subSnap.size} documents in '${sub}'`);
+        if (!subSnap.empty) {
+          console.warn(`[Migration] Migrated ${subSnap.size} documents in '${sub}'`);
+        }
       } catch (e) {
         console.warn(`[Migration] Failed to migrate subcollection ${sub}:`, e);
       }
@@ -963,11 +1040,15 @@ export const migrateUser = async (oldUsername, newHandle) => {
  * that 'OldName' actually points to them, and 'OldName' is removed from highscores.
  */
 export const healMigration = async handle => {
-  if (!handle) return;
+  if (!handle) {
+    return;
+  }
   try {
     const userRef = doc(db, USERS_COLLECTION, handle);
     const userDoc = await getDoc(userRef);
-    if (!userDoc.exists()) return;
+    if (!userDoc.exists()) {
+      return;
+    }
 
     const data = userDoc.data();
     const oldName = data.migratedFrom;
@@ -1011,7 +1092,9 @@ export const healMigration = async handle => {
  * Used to grant a "Retry" bonus for the daily challenge.
  */
 export const hasDailyReferral = async username => {
-  if (!username) return false;
+  if (!username) {
+    return false;
+  }
 
   try {
     // Helper functionality usually relies on timestamp query
@@ -1043,7 +1126,9 @@ export const hasDailyReferral = async username => {
  * @returns {Promise<string|null>} - The referrer's username or null
  */
 export const getReferrer = async username => {
-  if (!username) return null;
+  if (!username) {
+    return null;
+  }
 
   try {
     const q = query(
@@ -1053,13 +1138,17 @@ export const getReferrer = async username => {
     );
 
     const snap = await getDocs(q);
-    if (snap.empty) return null;
+    if (snap.empty) {
+      return null;
+    }
 
     const referralDoc = snap.docs[0];
     const data = referralDoc.data();
 
     // Check if bonus was already awarded
-    if (data.bonusAwarded) return null;
+    if (data.bonusAwarded) {
+      return null;
+    }
 
     // Mark bonus as awarded
     await updateDoc(referralDoc.ref, { bonusAwarded: true });
@@ -1079,7 +1168,9 @@ const GAMES_SUBCOLLECTION = 'games';
  * @param {object} gameData
  */
 export const saveUserGameResult = async (username, gameData) => {
-  if (!username) return;
+  if (!username) {
+    return;
+  }
   try {
     const gamesRef = collection(db, USERS_COLLECTION, username.toLowerCase(), GAMES_SUBCOLLECTION);
     await addDoc(gamesRef, {
@@ -1097,7 +1188,9 @@ export const saveUserGameResult = async (username, gameData) => {
  * @returns {Promise<Array>}
  */
 export const getUserGameHistory = async username => {
-  if (!username) return [];
+  if (!username) {
+    return [];
+  }
   try {
     const cleanUsername = username.toLowerCase().replace(/^@/, '');
 
@@ -1129,7 +1222,11 @@ export const getUserGameHistory = async username => {
           data.date ||
           (data.timestamp?.seconds
             ? parseInt(
-                new Date(data.timestamp.seconds * 1000).toISOString().slice(0, 10).replace(/-/g, '')
+                new Date(data.timestamp.seconds * 1000)
+                  .toISOString()
+                  .slice(0, 10)
+                  .replace(/-/g, ''),
+                10
               )
             : null),
         score: data.score || 0,

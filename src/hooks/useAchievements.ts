@@ -16,7 +16,9 @@ export const useAchievements = (username: string | null, gameState: string, path
 
   useEffect(() => {
     const checkAchievements = async () => {
-      if (!username) return;
+      if (!username) {
+        return;
+      }
 
       try {
         const profile = await getUserProfile(username);

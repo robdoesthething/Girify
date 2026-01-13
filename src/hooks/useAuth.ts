@@ -193,7 +193,9 @@ async function syncUserProfile(
  * One-time sync of local game history to Firestore
  */
 async function syncLocalHistory(displayName: string) {
-  if (storage.get(STORAGE_KEYS.HISTORY_SYNCED)) return;
+  if (storage.get(STORAGE_KEYS.HISTORY_SYNCED)) {
+    return;
+  }
 
   try {
     const localHistory = storage.get(STORAGE_KEYS.HISTORY, []);
@@ -216,7 +218,9 @@ async function syncLocalHistory(displayName: string) {
  * One-time sync of local cosmetics/currency to Firestore
  */
 async function syncLocalCosmetics(displayName: string) {
-  if (storage.get(STORAGE_KEYS.COSMETICS_SYNCED)) return;
+  if (storage.get(STORAGE_KEYS.COSMETICS_SYNCED)) {
+    return;
+  }
 
   try {
     const purchased = storage.get(STORAGE_KEYS.PURCHASED);
