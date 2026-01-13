@@ -50,7 +50,7 @@ interface FeedbackItem {
   text: string;
   username: string;
   status: 'pending' | 'approved' | 'rejected';
-  createdAt: any;
+  createdAt: Date | { seconds: number; nanoseconds: number };
   reward?: number;
 }
 

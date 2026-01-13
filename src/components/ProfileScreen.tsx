@@ -2,8 +2,9 @@ import { AnimatePresence, motion } from 'framer-motion';
 import React, { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTheme } from '../context/ThemeContext';
-import { getNextAchievement, getUnlockedAchievements } from '../data/achievements';
+import { Achievement, getNextAchievement, getUnlockedAchievements } from '../data/achievements';
 import cosmetics from '../data/cosmetics.json';
+import { UserProfile } from '../types/user';
 import { getEquippedCosmetics, getGiuros } from '../utils/giuros';
 import {
   getFriendCount,
@@ -68,12 +69,12 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ username }) => {
   const [joinedDate, setJoinedDate] = useState('');
   const [friendCount, setFriendCount] = useState(0);
   const [giuros, setGiuros] = useState(0);
-  const [equippedCosmetics, setEquippedCosmetics] = useState<any>({});
-  const [profileData, setProfileData] = useState<any>(null);
+  const [equippedCosmetics, setEquippedCosmetics] = useState<Record<string, string>>({});
+  const [profileData, setProfileData] = useState<UserProfile | null>(null);
   const [isEditing, setIsEditing] = useState(false);
   const [editName, setEditName] = useState('');
   const [showGiurosInfo, setShowGiurosInfo] = useState(false);
-  const [selectedAchievement, setSelectedAchievement] = useState<any>(null);
+  const [selectedAchievement, setSelectedAchievement] = useState<Achievement | null>(null);
 
   useEffect(() => {
     const loadProfile = async () => {
@@ -125,7 +126,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ username }) => {
       realName: editName,
     };
     await updateUserProfile(username, data);
-    setProfileData((prev: any) => ({ ...prev, ...data }));
+    setProfileData((prev: UserProfile | null) => (prev ? { ...prev, ...data } : null));
     setIsEditing(false);
   };
 
@@ -323,8 +324,9 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ username }) => {
 
               <div className="text-center mb-6">
                 <p className="text-sm font-bold text-sky-500 uppercase tracking-widest mt-1 font-inter">
-                  {(cosmetics.titles as any).find((t: any) => t.id === equippedCosmetics.titleId)
-                    ?.name || 'Street Explorer'}
+                  {cosmetics.titles.find(
+                    (t: { id: string; name: string }) => t.id === equippedCosmetics.titleId
+                  )?.name || 'Street Explorer'}
                 </p>
                 <p className="text-xs opacity-50 mt-1">Joined {joinedDate}</p>
               </div>
