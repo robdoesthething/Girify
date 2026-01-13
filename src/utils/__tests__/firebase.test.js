@@ -40,7 +40,7 @@ vi.mock('../dailyChallenge', () => ({
 
 describe('Firebase Leaderboard Functions', () => {
   beforeEach(() => {
-    vi.clearAllMocks();
+    vi.resetAllMocks();
     mocks.collection.mockReturnValue('mockCollection');
     mocks.doc.mockReturnValue('mockDoc');
     mocks.query.mockReturnValue('mocks.query');
@@ -308,6 +308,8 @@ describe('Firebase Leaderboard Functions', () => {
       mocks.getDoc.mockResolvedValue({
         exists: () => false,
       });
+      mocks.addDoc.mockResolvedValue({});
+      mocks.setDoc.mockResolvedValue({});
 
       // Save score
       await saveScore('IntegrationUser', 1500, '10.0');
@@ -340,7 +342,7 @@ describe('Firebase Leaderboard Functions', () => {
 
       expect(leaderboard).toHaveLength(1);
       expect(leaderboard[0]).toMatchObject({
-        username: 'IntegrationUser',
+        username: '@integrationuser',
         score: 1500,
         time: 10.0,
       });
