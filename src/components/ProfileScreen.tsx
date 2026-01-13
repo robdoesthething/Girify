@@ -5,13 +5,9 @@ import { useTheme } from '../context/ThemeContext';
 import { Achievement, getNextAchievement, getUnlockedAchievements } from '../data/achievements';
 import cosmetics from '../data/cosmetics.json';
 import { UserProfile } from '../types/user';
+import { getFriendCount } from '../utils/friends';
 import { getEquippedCosmetics, getGiuros } from '../utils/giuros';
-import {
-  getFriendCount,
-  getUserGameHistory,
-  getUserProfile,
-  updateUserProfile,
-} from '../utils/social';
+import { getUserGameHistory, getUserProfile, updateUserProfile } from '../utils/social';
 import { calculateStreak } from '../utils/stats';
 import TopBar from './TopBar';
 

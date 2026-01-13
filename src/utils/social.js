@@ -447,12 +447,12 @@ export const deleteUserAndData = async username => {
  * Falls back to highscores collection if user profile doesn't exist.
  *
  * @param {string} username - User's display name
- * @returns {Promise<{username: string, gamesPlayed: number, bestScore: number, friendCount: number}|null>}
+ * @returns {Promise<{username: string, uid: string, gamesPlayed: number, bestScore: number, friendCount: number, streak: number, totalScore: number, lastPlayDate: string, joinedAt: any}|null>}
  *          User profile object or null if not found
  *
  * @example
  * const profile = await getUserProfile('JohnDoe');
- * // Returns: { username: 'JohnDoe', gamesPlayed: 15, bestScore: 1850, ... }
+ * // Returns: { username: 'JohnDoe', uid: '...', gamesPlayed: 15, ... }
  */
 export const getUserProfile = async username => {
   if (!username) {
