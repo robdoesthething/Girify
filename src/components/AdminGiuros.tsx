@@ -1,16 +1,42 @@
 import React, { useMemo, useState, useEffect } from 'react';
-import { getPayoutConfig, updatePayoutConfig } from '../utils/configService';
-import PropTypes from 'prop-types';
+// @ts-ignore
+import { getPayoutConfig, updatePayoutConfig, PayoutConfig } from '../utils/configService';
+import { UserProfile } from '../types/user';
 
-const AdminGiuros = ({ users = [], shopItems = [], theme, onUpdateShopItem }) => {
+interface ShopItem {
+  id: string;
+  name: string;
+  type: string;
+  cost: number;
+  emoji?: string;
+  prefix?: string;
+  flavorText?: string;
+  description?: string;
+  cssClass?: string;
+  image?: string;
+}
+
+interface AdminGiurosProps {
+  users: UserProfile[];
+  shopItems: { all: ShopItem[] };
+  theme: string;
+  onUpdateShopItem?: (id: string, updates: any) => Promise<void>;
+}
+
+const AdminGiuros: React.FC<AdminGiurosProps> = ({
+  users = [],
+  shopItems = { all: [] },
+  theme,
+  onUpdateShopItem,
+}) => {
   // Payout config state
-  const [payouts, setPayouts] = useState(null);
-  const [editingPayouts, setEditingPayouts] = useState({});
-  const [savingPayouts, setSavingPayouts] = useState(false);
+  const [payouts, setPayouts] = useState<PayoutConfig | null>(null);
+  const [editingPayouts, setEditingPayouts] = useState<Partial<PayoutConfig>>({});
+  const [savingPayouts, setSavingPayouts] = useState<boolean>(false);
 
   // Fetch payout config on mount
   useEffect(() => {
-    getPayoutConfig().then(config => {
+    getPayoutConfig().then((config: PayoutConfig) => {
       setPayouts(config);
       setEditingPayouts(config);
     });
@@ -32,10 +58,10 @@ const AdminGiuros = ({ users = [], shopItems = [], theme, onUpdateShopItem }) =>
   }, [users]);
 
   // Helper to edit price
-  const handleEditPrice = async item => {
+  const handleEditPrice = async (item: ShopItem) => {
     // eslint-disable-next-line no-alert
-    const newPrice = prompt(`Enter new price for ${item.name}:`, item.cost);
-    if (newPrice !== null && !isNaN(newPrice)) {
+    const newPrice = prompt(`Enter new price for ${item.name}:`, item.cost.toString());
+    if (newPrice !== null && !isNaN(parseInt(newPrice, 10))) {
       if (onUpdateShopItem) {
         await onUpdateShopItem(item.id, { cost: parseInt(newPrice, 10) });
       }
@@ -43,10 +69,10 @@ const AdminGiuros = ({ users = [], shopItems = [], theme, onUpdateShopItem }) =>
   };
 
   // Handle payout value change
-  const handlePayoutChange = (key, value) => {
+  const handlePayoutChange = (key: string, value: string) => {
     const numValue = parseInt(value, 10);
     if (!isNaN(numValue) && numValue >= 0) {
-      setEditingPayouts(prev => ({ ...prev, [key]: numValue }));
+      setEditingPayouts((prev: Partial<PayoutConfig>) => ({ ...prev, [key]: numValue }));
     }
   };
 
@@ -57,7 +83,7 @@ const AdminGiuros = ({ users = [], shopItems = [], theme, onUpdateShopItem }) =>
     setSavingPayouts(false);
 
     if (result.success) {
-      setPayouts(editingPayouts);
+      setPayouts(editingPayouts as PayoutConfig);
       // eslint-disable-next-line no-alert
       alert('Payout configuration saved successfully!');
     } else {
@@ -113,37 +139,37 @@ const AdminGiuros = ({ users = [], shopItems = [], theme, onUpdateShopItem }) =>
             <div className="space-y-3">
               <EditableSourceRow
                 label="Starting Giuros"
-                value={editingPayouts.STARTING_GIUROS}
+                value={editingPayouts.STARTING_GIUROS || 0}
                 onChange={v => handlePayoutChange('STARTING_GIUROS', v)}
                 theme={theme}
               />
               <EditableSourceRow
                 label="Daily Login"
-                value={editingPayouts.DAILY_LOGIN_BONUS}
+                value={editingPayouts.DAILY_LOGIN_BONUS || 0}
                 onChange={v => handlePayoutChange('DAILY_LOGIN_BONUS', v)}
                 theme={theme}
               />
               <EditableSourceRow
                 label="Daily Challenge"
-                value={editingPayouts.DAILY_CHALLENGE_BONUS}
+                value={editingPayouts.DAILY_CHALLENGE_BONUS || 0}
                 onChange={v => handlePayoutChange('DAILY_CHALLENGE_BONUS', v)}
                 theme={theme}
               />
               <EditableSourceRow
                 label="Week Streak Bonus"
-                value={editingPayouts.STREAK_WEEK_BONUS}
+                value={editingPayouts.STREAK_WEEK_BONUS || 0}
                 onChange={v => handlePayoutChange('STREAK_WEEK_BONUS', v)}
                 theme={theme}
               />
               <EditableSourceRow
                 label="Referral Bonus"
-                value={editingPayouts.REFERRAL_BONUS}
+                value={editingPayouts.REFERRAL_BONUS || 0}
                 onChange={v => handlePayoutChange('REFERRAL_BONUS', v)}
                 theme={theme}
               />
               <EditableSourceRow
                 label="Perfect Score"
-                value={editingPayouts.PERFECT_SCORE_BONUS}
+                value={editingPayouts.PERFECT_SCORE_BONUS || 0}
                 onChange={v => handlePayoutChange('PERFECT_SCORE_BONUS', v)}
                 theme={theme}
               />
@@ -216,8 +242,8 @@ const AdminGiuros = ({ users = [], shopItems = [], theme, onUpdateShopItem }) =>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
-              {stats.richest.map((user, i) => (
-                <tr key={user.id}>
+              {stats.richest.map((user: UserProfile, i: number) => (
+                <tr key={user.uid || user.username}>
                   <td className="py-3 font-medium">
                     <span
                       className={`mr-2 font-black ${i === 0 ? 'text-yellow-500' : i === 1 ? 'text-slate-400' : i === 2 ? 'text-orange-700' : 'opacity-50'}`}
@@ -239,7 +265,14 @@ const AdminGiuros = ({ users = [], shopItems = [], theme, onUpdateShopItem }) =>
   );
 };
 
-const MetricCard = ({ title, value, color, theme }) => (
+interface MetricCardProps {
+  title: string;
+  value: string | number;
+  color?: string;
+  theme: string;
+}
+
+const MetricCard: React.FC<MetricCardProps> = ({ title, value, color, theme }) => (
   <div
     className={`p-6 rounded-2xl shadow-sm border ${
       theme === 'dark' ? 'bg-slate-800 border-slate-700' : 'bg-white border-slate-200'
@@ -250,14 +283,13 @@ const MetricCard = ({ title, value, color, theme }) => (
   </div>
 );
 
-MetricCard.propTypes = {
-  title: PropTypes.string.isRequired,
-  value: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
-  color: PropTypes.string,
-  theme: PropTypes.string,
-};
+interface SourceRowProps {
+  label: string;
+  value: string | number;
+  isVariable?: boolean;
+}
 
-const SourceRow = ({ label, value, isVariable }) => (
+const SourceRow: React.FC<SourceRowProps> = ({ label, value, isVariable }) => (
   <div className="flex justify-between items-center p-2 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors">
     <span className="font-medium text-sm text-slate-700 dark:text-slate-300">{label}</span>
     <span className={`font-mono font-bold ${isVariable ? 'text-blue-500' : 'text-emerald-500'}`}>
@@ -266,13 +298,14 @@ const SourceRow = ({ label, value, isVariable }) => (
   </div>
 );
 
-SourceRow.propTypes = {
-  label: PropTypes.string.isRequired,
-  value: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
-  isVariable: PropTypes.bool,
-};
+interface EditableSourceRowProps {
+  label: string;
+  value: number;
+  onChange: (val: string) => void;
+  theme: string;
+}
 
-const EditableSourceRow = ({ label, value, onChange, theme }) => (
+const EditableSourceRow: React.FC<EditableSourceRowProps> = ({ label, value, onChange, theme }) => (
   <div className="flex justify-between items-center p-2 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors">
     <span className="font-medium text-sm text-slate-700 dark:text-slate-300">{label}</span>
     <div className="flex items-center gap-1">
@@ -291,19 +324,5 @@ const EditableSourceRow = ({ label, value, onChange, theme }) => (
     </div>
   </div>
 );
-
-EditableSourceRow.propTypes = {
-  label: PropTypes.string.isRequired,
-  value: PropTypes.number,
-  onChange: PropTypes.func.isRequired,
-  theme: PropTypes.string,
-};
-
-AdminGiuros.propTypes = {
-  users: PropTypes.array,
-  shopItems: PropTypes.object,
-  theme: PropTypes.string,
-  onUpdateShopItem: PropTypes.func,
-};
 
 export default AdminGiuros;

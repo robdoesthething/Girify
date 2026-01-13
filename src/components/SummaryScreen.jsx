@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-// eslint-disable-next-line no-unused-vars
+
 import { motion } from 'framer-motion';
 import { getCuriosityByStreets } from '../data/curiosities';
 import { fetchWikiImage } from '../utils/wiki';
@@ -15,6 +15,7 @@ const SummaryScreen = ({
   realName,
   streak,
   onRestart,
+  quizResults,
   quizStreets,
   t,
 }) => {

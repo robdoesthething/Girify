@@ -3,7 +3,6 @@ import { getTranslation, LANGUAGES } from '../i18n/translations';
 
 const ThemeContext = createContext();
 
-// eslint-disable-next-line react-refresh/only-export-components
 export const useTheme = () => {
   const context = useContext(ThemeContext);
   if (!context) {
@@ -43,7 +42,6 @@ export const ThemeProvider = ({ children }) => {
     const newTheme = resolveTheme();
     // Only update if changed to avoid cascading renders warning
     if (newTheme !== theme) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
       setTheme(newTheme);
     }
     document.documentElement.setAttribute('class', newTheme);

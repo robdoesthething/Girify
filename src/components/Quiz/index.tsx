@@ -1,16 +1,30 @@
-import React from 'react';
-// eslint-disable-next-line no-unused-vars
+import { FC, ReactNode } from 'react';
+// @ts-ignore
 import { motion } from 'framer-motion';
+// @ts-ignore
 import Banner from './Banner';
+// @ts-ignore
 import Options from './Options';
+// @ts-ignore
 import Hints from './Hints';
+// @ts-ignore
 import NextButton from './NextButton';
 
-import PropTypes from 'prop-types';
+interface QuizProps {
+  children?: ReactNode;
+  className?: string;
+}
 
-const Quiz = ({ children, className }) => {
-  /* const { t } = useTheme(); */
+interface QuizComponent extends FC<QuizProps> {
+  Banner: FC<any>;
+  Options: FC<any>;
+  Hints: FC<any>;
+  NextButton: FC<any>;
+  Container: FC<{ children: ReactNode; keyProp: string | number }>;
+  Content: FC<{ children: ReactNode }>;
+}
 
+const Quiz: QuizComponent = ({ children, className }) => {
   return (
     <div
       className={`
@@ -24,7 +38,10 @@ const Quiz = ({ children, className }) => {
 };
 
 // Subcomponent for the standard container animations
-const Container = ({ children, keyProp }) => {
+const Container: FC<{ children: ReactNode; keyProp: string | number }> = ({
+  children,
+  keyProp,
+}) => {
   return (
     <motion.div
       key={keyProp}
@@ -40,7 +57,7 @@ const Container = ({ children, keyProp }) => {
 };
 
 // Wrapper for the Main content area (Options usually)
-const Content = ({ children }) => {
+const Content: FC<{ children: ReactNode }> = ({ children }) => {
   return (
     <div className="flex-1 flex flex-col justify-evenly p-2 pt-4 w-full overflow-hidden relative z-10">
       {children}
@@ -54,19 +71,5 @@ Quiz.Hints = Hints;
 Quiz.NextButton = NextButton;
 Quiz.Container = Container;
 Quiz.Content = Content;
-
-Quiz.propTypes = {
-  children: PropTypes.node,
-  className: PropTypes.string,
-};
-
-Container.propTypes = {
-  children: PropTypes.node.isRequired,
-  keyProp: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
-};
-
-Content.propTypes = {
-  children: PropTypes.node.isRequired,
-};
 
 export default Quiz;

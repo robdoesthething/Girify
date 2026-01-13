@@ -1,4 +1,4 @@
-import { motion, AnimatePresence } from 'framer-motion'; // eslint-disable-line no-unused-vars
+import { motion, AnimatePresence } from 'framer-motion';
 import { useState } from 'react';
 import { NotificationContext } from '../context/NotificationContext';
 

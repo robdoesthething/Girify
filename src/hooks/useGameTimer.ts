@@ -31,7 +31,7 @@ export interface UseGameTimerResult {
 export function useGameTimer(): UseGameTimerResult {
   const [timer, setTimer] = useState(0);
   const [isRunning, setIsRunning] = useState(false);
-  const intervalRef = useRef<NodeJS.Timeout | null>(null);
+  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const startTimeRef = useRef<number | null>(null);
 
   /**

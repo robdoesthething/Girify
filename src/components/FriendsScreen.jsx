@@ -14,7 +14,7 @@ import {
 import { ACTIVITY_TYPES } from '../data/activityTypes';
 // PublicProfileModal removed
 import { useNavigate } from 'react-router-dom';
-// eslint-disable-next-line no-unused-vars
+
 import { motion, AnimatePresence } from 'framer-motion';
 
 const AVATARS = [

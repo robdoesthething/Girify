@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useTheme } from '../context/ThemeContext';
-// eslint-disable-next-line no-unused-vars
+
 import { motion, AnimatePresence } from 'framer-motion';
 import SeoHead from './SeoHead';
 import { Link } from 'react-router-dom';
@@ -12,7 +12,7 @@ const NEWS_HEADLINES = [
   'SCANDAL: Pidgeon steals whole croissant from tourist.',
 ];
 
-const LandingPage = ({ onStart: _onStart, onLogin, theme }) => {
+const LandingPage = ({ onStart: _onStart, onLogin, theme, hasPlayedToday }) => {
   const { t: _t } = useTheme();
   // Simple ticker for "Mejur Jouma" news
   const [newsIndex, setNewsIndex] = useState(0);

@@ -89,7 +89,7 @@ export const useGameState = (
 
   // Auto-advance effect
   useEffect(() => {
-    let timeoutId: NodeJS.Timeout;
+    let timeoutId: ReturnType<typeof setTimeout>;
     if (state.feedback === 'transitioning' && state.autoAdvance) {
       timeoutId = setTimeout(() => {
         handleNext();
@@ -285,70 +285,66 @@ export const useGameState = (
   const saveGameResults = useCallback(() => {
     execute(
       async () => {
-        try {
-          markTodayAsPlayed();
-          const history = storage.get(STORAGE_KEYS.HISTORY, []);
-          const avgTime = state.quizResults.length
-            ? (
+        markTodayAsPlayed();
+        const history = storage.get(STORAGE_KEYS.HISTORY, []);
+        const avgTime = state.quizResults.length
+          ? (
               state.quizResults.reduce(
                 (acc: number, curr: QuizResult) => acc + (curr.time || 0),
                 0
               ) / state.quizResults.length
             ).toFixed(1)
-            : 0;
+          : 0;
 
-          const newRecord = {
-            date: getTodaySeed(),
-            score: state.score,
-            avgTime: avgTime,
-            timestamp: Date.now(),
-            username: state.username,
-          };
-          history.push(newRecord);
-          storage.set(STORAGE_KEYS.HISTORY, history);
+        const newRecord = {
+          date: getTodaySeed(),
+          score: state.score,
+          avgTime: avgTime,
+          timestamp: Date.now(),
+          username: state.username,
+        };
+        history.push(newRecord);
+        storage.set(STORAGE_KEYS.HISTORY, history);
 
-          if (state.username) {
-            await saveUserGameResult(state.username, newRecord);
+        if (state.username) {
+          await saveUserGameResult(state.username, newRecord);
 
-            const isBonus = await hasDailyReferral(state.username);
-            await saveScore(state.username, state.score, newRecord.avgTime, {
-              isBonus,
-              correctAnswers: state.correct,
-              questionCount: state.questions.length,
-              // @ts-ignore
-              email: auth.currentUser?.email,
-            });
+          const isBonus = await hasDailyReferral(state.username);
+          await saveScore(state.username, state.score, newRecord.avgTime, {
+            isBonus,
+            correctAnswers: state.correct,
+            questionCount: state.questions?.length || 0,
+            // @ts-ignore
+            email: auth.currentUser?.email,
+          });
 
-            const historyForStreak = storage.get(STORAGE_KEYS.HISTORY, []);
-            const streak = calculateStreak(historyForStreak);
-            const totalScore = historyForStreak.reduce(
-              (acc: number, h: any) => acc + (h.score || 0),
-              0
-            );
+          const historyForStreak = storage.get(STORAGE_KEYS.HISTORY, []);
+          const streak = calculateStreak(historyForStreak);
+          const totalScore = historyForStreak.reduce(
+            (acc: number, h: any) => acc + (h.score || 0),
+            0
+          );
 
-            await updateUserGameStats(state.username, {
-              streak,
-              totalScore,
-              lastPlayDate: getTodaySeed(),
-            });
+          await updateUserGameStats(state.username, {
+            streak,
+            totalScore,
+            lastPlayDate: getTodaySeed(),
+          });
 
-            await awardChallengeBonus(state.username, streak);
+          await awardChallengeBonus(state.username, streak);
 
-            const referrer = await getReferrer(state.username);
-            if (referrer) {
-              await awardReferralBonus(referrer);
-            }
-
-            // Check for feedback prompt
-            const lastFeedback = storage.get(STORAGE_KEYS.LAST_FEEDBACK);
-            const historyList = storage.get(STORAGE_KEYS.HISTORY, []);
-
-            if (shouldPromptFeedback(lastFeedback, historyList.length)) {
-              setTimeout(() => navigate('/feedback'), TIME.FEEDBACK_DELAY);
-            }
+          const referrer = await getReferrer(state.username);
+          if (referrer) {
+            await awardReferralBonus(referrer);
           }
-        } catch (e) {
-          throw e; // Let execute catch it
+
+          // Check for feedback prompt
+          const lastFeedback = storage.get(STORAGE_KEYS.LAST_FEEDBACK);
+          const historyList = storage.get(STORAGE_KEYS.HISTORY, []);
+
+          if (shouldPromptFeedback(lastFeedback, historyList.length)) {
+            setTimeout(() => navigate('/feedback'), TIME.FEEDBACK_DELAY);
+          }
         }
       },
       { loadingKey: 'save-game', errorMessage: 'Failed to save game results' }

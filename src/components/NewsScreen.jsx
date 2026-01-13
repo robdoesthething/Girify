@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { motion } from 'framer-motion'; // eslint-disable-line no-unused-vars
+import { motion } from 'framer-motion';
 import { useTheme } from '../context/ThemeContext';
 import { getActiveAnnouncements, markAnnouncementAsRead } from '../utils/news';
 import PropTypes from 'prop-types';
