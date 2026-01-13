@@ -8,21 +8,28 @@ interface NewsScreenProps {
   username?: string;
 }
 
+interface Announcement {
+  id: string;
+  title: string;
+  body: string;
+  publishDate: Date | { seconds: number; toDate: () => Date };
+}
+
 const NewsScreen: React.FC<NewsScreenProps> = ({ onClose, username }) => {
   const { theme, t } = useTheme();
-  const [announcements, setAnnouncements] = useState<any[]>([]);
+  const [announcements, setAnnouncements] = useState<Announcement[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchAnnouncements = async () => {
       setLoading(true);
-      const news = await (getActiveAnnouncements as any)();
+      const news = await getActiveAnnouncements();
       setAnnouncements(news);
 
       // Mark all as read when viewing
       if (username) {
         for (const a of news) {
-          await (markAnnouncementAsRead as any)(username, a.id);
+          await markAnnouncementAsRead(username, a.id);
         }
       }
       setLoading(false);
@@ -31,11 +38,20 @@ const NewsScreen: React.FC<NewsScreenProps> = ({ onClose, username }) => {
     fetchAnnouncements();
   }, [username]);
 
-  const formatDate = (timestamp: any) => {
+  const formatDate = (timestamp: Date | { seconds: number; toDate?: () => Date }) => {
     if (!timestamp) {
       return '';
     }
-    const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
+
+    let date: Date;
+    if (timestamp instanceof Date) {
+      date = timestamp;
+    } else if (timestamp.toDate) {
+      date = timestamp.toDate();
+    } else {
+      date = new Date((timestamp as { seconds: number }).seconds * 1000);
+    }
+
     return date.toLocaleDateString(undefined, {
       year: 'numeric',
       month: 'short',

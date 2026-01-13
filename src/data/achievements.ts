@@ -12,6 +12,27 @@
  * - digital_nomad: Remote worker experience
  */
 
+export interface PlayerStats {
+  gamesPlayed?: number;
+  bestScore?: number;
+  streak?: number;
+  wrongStreak?: number;
+  totalPanKm?: number;
+  consecutiveDays?: number;
+  gamesWithoutQuitting?: number;
+  eixampleCorners?: number;
+  gothicStreak?: number;
+  bornGuesses?: number;
+  poblenouGuesses?: number;
+  foodStreetsPerfect?: number;
+  nightPlay?: boolean;
+  ramblasQuickGuess?: boolean;
+  precisionGuess?: boolean;
+  fastLoss?: boolean;
+  speedModeHighScore?: boolean;
+  inviteCount?: number;
+}
+
 export interface AchievementCriteria {
   gamesPlayed?: number;
   bestScore?: number;
@@ -315,7 +336,7 @@ export const getMeritBadges = (): Achievement[] => {
  * @returns {Array} Array of unlocked badge objects
  */
 export const getUnlockedAchievements = (
-  stats: any,
+  stats: PlayerStats,
   purchasedBadges: string[] = []
 ): Achievement[] => {
   if (!stats) {
@@ -443,7 +464,7 @@ export const getBadgesByCategory = (): Record<string, Achievement[]> => {
  * @param {Object} stats - User stats
  * @returns {Object|null} Next achievement with progress info
  */
-export const getNextAchievement = (stats: any): Achievement | null => {
+export const getNextAchievement = (stats: PlayerStats): Achievement | null => {
   if (!stats) {
     return null;
   }
