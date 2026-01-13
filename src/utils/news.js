@@ -2,21 +2,21 @@
  * News/Announcements Utility Functions
  * Handles creating, fetching, and tracking read status of announcements
  */
-import { db } from '../firebase';
 import {
-  collection,
-  doc,
-  getDocs,
   addDoc,
-  updateDoc,
+  collection,
   deleteDoc,
-  query,
-  where,
-  orderBy,
-  Timestamp,
+  doc,
   getDoc,
+  getDocs,
+  orderBy,
+  query,
   setDoc,
+  Timestamp,
+  updateDoc,
+  where,
 } from 'firebase/firestore';
+import { db } from '../firebase';
 
 const ANNOUNCEMENTS_COLLECTION = 'announcements';
 const USER_READ_COLLECTION = 'userReadAnnouncements';
@@ -136,6 +136,13 @@ export const markAnnouncementAsRead = async (username, announcementId) => {
   }
 };
 
+const toTimestamp = date => {
+  if (!date) {
+    return null;
+  }
+  return date instanceof Date ? Timestamp.fromDate(date) : Timestamp.fromDate(new Date(date));
+};
+
 /**
  * Create a new announcement (admin only)
  * @param {Object} announcement - { title, body, publishDate, expiryDate?, isActive?, priority?, targetAudience? }
@@ -161,15 +168,8 @@ export const createAnnouncement = async announcement => {
     const docRef = await addDoc(announcementsRef, {
       title,
       body,
-      publishDate:
-        publishDate instanceof Date
-          ? Timestamp.fromDate(publishDate)
-          : Timestamp.fromDate(new Date(publishDate)),
-      expiryDate: expiryDate
-        ? expiryDate instanceof Date
-          ? Timestamp.fromDate(expiryDate)
-          : Timestamp.fromDate(new Date(expiryDate))
-        : null,
+      publishDate: toTimestamp(publishDate),
+      expiryDate: toTimestamp(expiryDate),
       isActive, // Manual toggle for visibility
       priority, // 'low' | 'normal' | 'high' | 'urgent'
       targetAudience, // 'all' | 'new_users' | 'returning'
@@ -195,16 +195,10 @@ export const updateAnnouncement = async (id, updates) => {
     // Convert dates if needed
     const updatedData = { ...updates };
     if (updates.publishDate) {
-      updatedData.publishDate =
-        updates.publishDate instanceof Date
-          ? Timestamp.fromDate(updates.publishDate)
-          : Timestamp.fromDate(new Date(updates.publishDate));
+      updatedData.publishDate = toTimestamp(updates.publishDate);
     }
     if (updates.expiryDate) {
-      updatedData.expiryDate =
-        updates.expiryDate instanceof Date
-          ? Timestamp.fromDate(updates.expiryDate)
-          : Timestamp.fromDate(new Date(updates.expiryDate));
+      updatedData.expiryDate = toTimestamp(updates.expiryDate);
     }
 
     await updateDoc(announcementRef, updatedData);
