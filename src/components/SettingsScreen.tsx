@@ -5,6 +5,7 @@ import { useTheme } from '../context/ThemeContext';
 import { useConfirm } from '../hooks/useConfirm';
 import { useNotification } from '../hooks/useNotification';
 import { useNotifications } from '../hooks/useNotifications';
+import { UserProfile } from '../types/user';
 import { getUserProfile, updateUserProfile } from '../utils/social';
 import { storage } from '../utils/storage';
 import { ConfirmDialog } from './ConfirmDialog';
@@ -46,7 +47,8 @@ const SettingsScreen: React.FC<SettingsScreenProps> = ({
 
   useEffect(() => {
     if (username) {
-      getUserProfile(username).then(profile => {
+      getUserProfile(username).then(data => {
+        const profile = data as UserProfile;
         if (profile) {
           setProfileSettings({
             notificationSettings: profile.notificationSettings || {
@@ -192,16 +194,27 @@ const SettingsScreen: React.FC<SettingsScreenProps> = ({
               className={`p-4 rounded-xl border ${theme === 'dark' ? 'border-slate-800 bg-slate-800/50' : 'border-slate-100 bg-slate-50'}`}
             >
               <div className="flex gap-2">
-                {languages.map(lang => (
-                  <button
-                    key={lang.code}
-                    onClick={() => changeLanguage(lang.code)}
-                    className={`flex-1 py-2 px-3 rounded-lg text-sm font-medium transition-all font-inter ${language === lang.code ? 'bg-sky-500 text-white shadow-md' : theme === 'dark' ? 'bg-slate-700 hover:bg-slate-600 text-slate-300' : 'bg-white hover:bg-slate-100 text-slate-700 border border-slate-200'}`}
-                    type="button"
-                  >
-                    <span className="mr-1">{lang.flag}</span> {lang.name}
-                  </button>
-                ))}
+                {languages.map(lang => {
+                  const getButtonClass = () => {
+                    if (language === lang.code) {
+                      return 'bg-sky-500 text-white shadow-md';
+                    }
+                    return theme === 'dark'
+                      ? 'bg-slate-700 hover:bg-slate-600 text-slate-300'
+                      : 'bg-white hover:bg-slate-100 text-slate-700 border border-slate-200';
+                  };
+
+                  return (
+                    <button
+                      key={lang.code}
+                      onClick={() => changeLanguage(lang.code)}
+                      className={`flex-1 py-2 px-3 rounded-lg text-sm font-medium transition-all font-inter ${getButtonClass()}`}
+                      type="button"
+                    >
+                      <span className="mr-1">{lang.flag}</span> {lang.name}
+                    </button>
+                  );
+                })}
               </div>
             </div>
           </div>

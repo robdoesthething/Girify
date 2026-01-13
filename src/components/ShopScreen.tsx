@@ -162,6 +162,43 @@ const ShopScreen: React.FC<ShopScreenProps> = ({ username }) => {
     return false;
   };
 
+  const getTabButtonClass = (tabId: string) => {
+    if (activeTab === tabId) {
+      return 'bg-sky-500 text-white shadow-lg';
+    }
+    return theme === 'dark'
+      ? 'bg-slate-800 text-slate-300 hover:bg-slate-700'
+      : 'bg-slate-100 text-slate-600 hover:bg-slate-200';
+  };
+
+  const getItemCardClass = (active: boolean) => {
+    if (active) {
+      return 'border-sky-500 bg-sky-500/10';
+    }
+    return theme === 'dark' ? 'border-slate-700 bg-slate-800' : 'border-slate-200 bg-white';
+  };
+
+  const getEquipButtonClass = (active: boolean) => {
+    if (active) {
+      return 'bg-sky-500 text-white';
+    }
+    return theme === 'dark' ? 'bg-slate-700 hover:bg-slate-600' : 'bg-slate-100 hover:bg-slate-200';
+  };
+
+  const renderItemIcon = (item: ShopItem) => {
+    if (item.cssClass) {
+      return <div className={`w-10 h-10 rounded-full ${item.cssClass}`} />;
+    }
+    if (item.image && activeTab === 'avatars') {
+      return <img src={item.image} alt={item.name} className="w-full h-full object-cover" />;
+    }
+    return (
+      <span>
+        {item.image && activeTab !== 'avatars' ? '🎁' : item.prefix || item.emoji || '✨'}
+      </span>
+    );
+  };
+
   return (
     <div
       className={`fixed inset-0 w-full h-full flex flex-col overflow-hidden transition-colors duration-500 ${theme === 'dark' ? 'bg-slate-900 text-white' : 'bg-slate-50 text-slate-900'}`}
@@ -193,11 +230,14 @@ const ShopScreen: React.FC<ShopScreenProps> = ({ username }) => {
               <span>🛒</span> {t('shop')}
             </h1>
 
-            <div className="flex items-center gap-2 px-2 z-10">
+            <div className="bg-white/10 backdrop-blur-md px-4 py-2 rounded-2xl flex items-center gap-2 border border-white/10 shadow-lg">
               <img src="/giuro.png" alt="Giuros" className="h-6 w-auto object-contain" />
-              <span className="font-black text-lg text-yellow-600 dark:text-yellow-400 font-inter">
-                {balance}
-              </span>
+              <div className="flex flex-col items-end leading-none">
+                <span className="text-lg font-black text-yellow-500">{balance}</span>
+                <span className="text-[10px] uppercase font-bold opacity-60 font-inter">
+                  Giuros
+                </span>
+              </div>
             </div>
           </div>
 
@@ -214,13 +254,7 @@ const ShopScreen: React.FC<ShopScreenProps> = ({ username }) => {
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
-                className={`px-4 py-2 rounded-xl font-bold text-sm whitespace-nowrap transition-all font-inter ${
-                  activeTab === tab.id
-                    ? 'bg-sky-500 text-white shadow-lg'
-                    : theme === 'dark'
-                      ? 'bg-slate-800 text-slate-300 hover:bg-slate-700'
-                      : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
-                }`}
+                className={`px-4 py-2 rounded-xl font-bold text-sm whitespace-nowrap transition-all font-inter ${getTabButtonClass(tab.id)}`}
                 type="button"
               >
                 {tab.label}
@@ -241,7 +275,7 @@ const ShopScreen: React.FC<ShopScreenProps> = ({ username }) => {
                 return (
                   <div
                     key={item.id}
-                    className={`p-4 rounded-2xl border transition-all ${active ? 'border-sky-500 bg-sky-500/10' : theme === 'dark' ? 'border-slate-700 bg-slate-800' : 'border-slate-200 bg-white'}`}
+                    className={`p-4 rounded-2xl border transition-all ${getItemCardClass(active)}`}
                   >
                     <div className="flex items-start justify-between mb-3">
                       <div className="flex items-center gap-3">
@@ -260,21 +294,7 @@ const ShopScreen: React.FC<ShopScreenProps> = ({ username }) => {
                           }}
                           className={`w-12 h-12 rounded-xl bg-slate-100 dark:bg-slate-700 flex items-center justify-center text-2xl relative overflow-hidden shrink-0 ${activeTab === 'titles' ? 'cursor-pointer hover:scale-105 transition-transform' : ''}`}
                         >
-                          {item.cssClass ? (
-                            <div className={`w-10 h-10 rounded-full ${item.cssClass}`} />
-                          ) : item.image && activeTab === 'avatars' ? (
-                            <img
-                              src={item.image}
-                              alt={item.name}
-                              className="w-full h-full object-cover"
-                            />
-                          ) : (
-                            <span>
-                              {item.image && activeTab !== 'avatars'
-                                ? '🎁'
-                                : item.prefix || item.emoji || '✨'}
-                            </span>
-                          )}
+                          {renderItemIcon(item)}
                         </div>
 
                         <div>
@@ -310,7 +330,7 @@ const ShopScreen: React.FC<ShopScreenProps> = ({ username }) => {
                         activeTab !== 'special' && (
                           <button
                             onClick={() => handleEquip(item, activeTab)}
-                            className={`flex-1 py-2 rounded-xl font-bold text-xs transition-all font-inter ${active ? 'bg-sky-500 text-white' : theme === 'dark' ? 'bg-slate-700 hover:bg-slate-600' : 'bg-slate-100 hover:bg-slate-200'}`}
+                            className={`flex-1 py-2 rounded-xl font-bold text-xs transition-all font-inter ${getEquipButtonClass(active)}`}
                             type="button"
                           >
                             {active ? `✓ ${t('equipped')}` : t('equip')}
