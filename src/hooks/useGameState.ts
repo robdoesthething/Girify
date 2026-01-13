@@ -1,45 +1,36 @@
 import { Dispatch, useCallback, useEffect, useMemo, useReducer } from 'react';
-import { useNavigate } from 'react-router-dom';
 // @ts-ignore
-import { auth } from '../firebase';
 // @ts-ignore
 import { gameReducer, initialState } from '../reducers/gameReducer';
-import {
-  getTodaySeed,
-  markTodayAsPlayed,
-  selectDailyStreets,
-  selectDistractors,
-  shuffleOptions,
-} from '../utils/dailyChallenge';
+import { getTodaySeed, shuffleOptions } from '../utils/dailyChallenge';
 // @ts-ignore
-import { calculateStreak } from '../utils/stats';
 // @ts-ignore
-import { saveScore } from '../utils/leaderboard';
 // @ts-ignore
-import { calculateScore, shouldPromptFeedback } from '../config/gameConfig';
-import {
-  getReferrer,
-  hasDailyReferral,
-  saveUserGameResult,
-  updateUserGameStats,
-} from '../utils/social';
+import { calculateScore } from '../config/gameConfig';
 // @ts-ignore
-import { awardChallengeBonus, awardReferralBonus } from '../utils/giuros';
 // @ts-ignore
-import { logger } from '../utils/logger';
 // @ts-ignore
 import { storage } from '../utils/storage';
 // @ts-ignore
 import quizPlan from '../data/quizPlan.json';
 // @ts-ignore
-import { STORAGE_KEYS, TIME } from '../config/constants';
-import { GameStateObject, QuizPlan, QuizQuestion, QuizResult, Street } from '../types/game';
-import { GameHistory } from '../types/user';
-import { useAsyncOperation } from './useAsyncOperation'; // [NEW]
+import { GAME_LOGIC, STORAGE_KEYS, TIME } from '../config/constants';
+import { GameStateObject, QuizResult, Street } from '../types/game';
+import { calculateGameSetup, GameSetupResult, generateOptionsList } from '../utils/gameHelpers';
+import { useGamePersistence } from './useGamePersistence';
 
 interface GameAction {
   type: string;
-  payload?: string | number | boolean | Street | Street[] | QuizResult | null;
+  payload?:
+    | string
+    | number
+    | boolean
+    | Street
+    | Street[]
+    | QuizResult
+    | null
+    | GameSetupResult
+    | Record<string, unknown>;
 }
 
 export interface UseGameStateResult {
@@ -65,10 +56,9 @@ export const useGameState = (
 ): UseGameStateResult => {
   const [state, dispatch] = useReducer(gameReducer, initialState) as [
     GameStateObject,
-    Dispatch<any>,
+    Dispatch<GameAction>,
   ];
-  const navigate = useNavigate();
-  const { execute } = useAsyncOperation(); // [NEW]
+  const { saveGameResults } = useGamePersistence();
 
   // Current street being quizzed
   const currentStreet = useMemo(
@@ -103,86 +93,32 @@ export const useGameState = (
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [state.autoAdvance, state.feedback]);
 
-  /**
-   * Generate quiz options for a question
-   */
-  const generateOptionsList = useCallback(
-    (target: Street, allStreets: Street[], questionIndex: number) => {
-      const todaySeed = getTodaySeed();
-      const questionSeed = todaySeed + questionIndex * 100;
-      const distractors = selectDistractors(allStreets, target, questionSeed);
-      const opts = [target, ...distractors];
-      return shuffleOptions(opts, questionSeed + 50);
-    },
-    []
-  );
+  // ...
 
   /**
    * Setup a new game session
    */
   const setupGame = useCallback(
     (freshName?: string) => {
-      // NOTE: Setup is mostly synchronous/local calculation, so we might not need a loader here unless
-      // we decide to fetch daily questions from server instead of local JSON plan.
-      // Keeping it sync for now to avoid specific "loading" flash on simple transitions.
-
       const activeName = freshName || state.username;
       if (!activeName) {
         dispatch({ type: 'SET_GAME_STATE', payload: 'register' });
         return;
       }
 
-      if (validStreets.length === 0) {
-        logger.error('No valid streets found!');
+      const setupResult = calculateGameSetup(validStreets, quizPlan);
+
+      if (!setupResult) {
         dispatch({ type: 'SET_GAME_STATE', payload: 'intro' });
         return;
       }
 
-      const todaySeed = getTodaySeed();
-      const todayStr = new Date().toISOString().split('T')[0];
-      const plannedQuiz = quizPlan?.quizzes?.find((q: QuizPlan) => q.date === todayStr);
-
-      let selected: Street[] | undefined;
-      let initialOptions: Street[] | undefined;
-
-      if (plannedQuiz && plannedQuiz.questions?.length > 0) {
-        const streetMap = new Map(validStreets.map(s => [s.id, s]));
-        selected = plannedQuiz.questions
-          .map((q: QuizQuestion) => streetMap.get(q.correctId))
-          .filter(Boolean) as Street[];
-
-        if (selected.length > 0) {
-          const firstQ = plannedQuiz.questions[0];
-          const correctStreet = streetMap.get(firstQ.correctId);
-          const distractorStreets = firstQ.distractorIds
-            .map((id: string) => streetMap.get(id))
-            .filter(Boolean) as Street[];
-
-          if (correctStreet && distractorStreets.length >= 3) {
-            const opts = [correctStreet, ...distractorStreets.slice(0, 3)];
-            initialOptions = shuffleOptions(opts, todaySeed + 50);
-          } else {
-            initialOptions = generateOptionsList(selected[0], validStreets, 0);
-          }
-        }
-      }
-
-      if (!selected || selected.length === 0) {
-        selected = selectDailyStreets(validStreets, todaySeed);
-        initialOptions =
-          selected.length > 0 ? generateOptionsList(selected[0], validStreets, 0) : [];
-      }
-
       dispatch({
         type: 'START_GAME',
-        payload: {
-          quizStreets: selected,
-          initialOptions: initialOptions,
-          plannedQuestions: plannedQuiz?.questions || null,
-        },
+        payload: setupResult,
       });
     },
-    [state.username, validStreets, generateOptionsList]
+    [state.username, validStreets]
   );
 
   /**
@@ -244,7 +180,7 @@ export const useGameState = (
     if (nextIndex >= state.quizStreets.length) {
       // Game complete
       if (state.gameState === 'playing') {
-        saveGameResults();
+        saveGameResults(state);
         // Since saving is async (fire-and-forget logic below), we don't strictly *block* UI here,
         // but we could wrap saveGameResults in execute() if we wanted a "Saving..." indicator.
         // For now, let's keep it fluid as users might want to see summary immediately.
@@ -262,10 +198,15 @@ export const useGameState = (
           .map((id: string) => streetMap.get(id))
           .filter(Boolean) as Street[];
 
-        if (distractorStreets.length >= 3) {
+        if (distractorStreets.length >= GAME_LOGIC.DISTRACTORS_COUNT) {
           const todaySeed = getTodaySeed();
-          const opts = [nextStreet, ...distractorStreets.slice(0, 3)];
-          nextOptions = shuffleOptions(opts, todaySeed + nextIndex * 100 + 50);
+          const opts = [nextStreet, ...distractorStreets.slice(0, GAME_LOGIC.DISTRACTORS_COUNT)];
+          nextOptions = shuffleOptions(
+            opts,
+            todaySeed +
+              nextIndex * GAME_LOGIC.QUESTION_SEED_MULTIPLIER +
+              GAME_LOGIC.SHUFFLE_SEED_OFFSET
+          );
         } else {
           nextOptions = generateOptionsList(nextStreet, validStreets, nextIndex);
         }
@@ -288,78 +229,6 @@ export const useGameState = (
     validStreets,
     generateOptionsList,
   ]);
-
-  /**
-   * Save game results to localStorage and Firestore
-   */
-  const saveGameResults = useCallback(() => {
-    execute(
-      async () => {
-        markTodayAsPlayed();
-        const history = storage.get(STORAGE_KEYS.HISTORY, []);
-        const avgTime = state.quizResults.length
-          ? (
-              state.quizResults.reduce(
-                (acc: number, curr: QuizResult) => acc + (curr.time || 0),
-                0
-              ) / state.quizResults.length
-            ).toFixed(1)
-          : 0;
-
-        const newRecord = {
-          date: getTodaySeed(),
-          score: state.score,
-          avgTime: avgTime,
-          timestamp: Date.now(),
-          username: state.username,
-        };
-        history.push(newRecord);
-        storage.set(STORAGE_KEYS.HISTORY, history);
-
-        if (state.username) {
-          await saveUserGameResult(state.username, newRecord);
-
-          const isBonus = await hasDailyReferral(state.username);
-          await saveScore(state.username, state.score, newRecord.avgTime, {
-            isBonus,
-            correctAnswers: state.correct,
-            questionCount: state.questions?.length || 0,
-            // @ts-ignore
-            email: auth.currentUser?.email,
-          });
-
-          const historyForStreak = storage.get(STORAGE_KEYS.HISTORY, []);
-          const streak = calculateStreak(historyForStreak);
-          const totalScore = historyForStreak.reduce(
-            (acc: number, h: GameHistory) => acc + (h.score || 0),
-            0
-          );
-
-          await updateUserGameStats(state.username, {
-            streak,
-            totalScore,
-            lastPlayDate: getTodaySeed(),
-          });
-
-          await awardChallengeBonus(state.username, streak);
-
-          const referrer = await getReferrer(state.username);
-          if (referrer) {
-            await awardReferralBonus(referrer);
-          }
-
-          // Check for feedback prompt
-          const lastFeedback = storage.get(STORAGE_KEYS.LAST_FEEDBACK);
-          const historyList = storage.get(STORAGE_KEYS.HISTORY, []);
-
-          if (shouldPromptFeedback(lastFeedback, historyList.length)) {
-            setTimeout(() => navigate('/feedback'), TIME.FEEDBACK_DELAY);
-          }
-        }
-      },
-      { loadingKey: 'save-game', errorMessage: 'Failed to save game results' }
-    );
-  }, [state, navigate, execute]);
 
   /**
    * Handle user registration

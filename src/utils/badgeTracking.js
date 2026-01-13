@@ -3,8 +3,8 @@
  * Handles tracking badge progress and awarding merit badges
  */
 
+import { collection, doc, getDoc, getDocs, increment, setDoc, updateDoc } from 'firebase/firestore';
 import { db } from '../firebase';
-import { doc, getDoc, setDoc, updateDoc, increment, collection, getDocs } from 'firebase/firestore';
 
 // Street name patterns for location-based badges
 const RAMBLAS_PATTERNS = /rambla|ramblas/i;
@@ -104,17 +104,21 @@ export async function updateBadgeStats(username, gameResult) {
 
     // Night play (2-5 AM)
     const hour = new Date().getHours();
-    if (hour >= 2 && hour < 5) {
+    if (hour >= BADGES.NIGHT_START && hour < BADGES.NIGHT_END) {
       updates.nightPlay = true;
     }
 
     // Fast loss (all wrong in under 1 minute)
-    if (gameResult.duration && gameResult.duration < 60 && gameResult.correctCount === 0) {
+    if (
+      gameResult.duration &&
+      gameResult.duration < TIME.ONE_MINUTE / 1000 &&
+      gameResult.correctCount === 0
+    ) {
       updates.fastLoss = true;
     }
 
     // Wrong streak tracking
-    if (gameResult.wrongStreak && gameResult.wrongStreak >= 5) {
+    if (gameResult.wrongStreak && gameResult.wrongStreak >= BADGES.WRONG_STREAK) {
       updates.wrongStreak = Math.max(currentStats.wrongStreak || 0, gameResult.wrongStreak);
     }
 
@@ -127,7 +131,7 @@ export async function updateBadgeStats(username, gameResult) {
         const streetName = q.streetName || '';
 
         // Ramblas quick guess
-        if (RAMBLAS_PATTERNS.test(streetName) && q.correct && q.time < 3) {
+        if (RAMBLAS_PATTERNS.test(streetName) && q.correct && q.time < BADGES.QUICK_GUESS_TIME) {
           updates.ramblasQuickGuess = true;
         }
 
@@ -183,7 +187,7 @@ export async function updateBadgeStats(username, gameResult) {
         gothicStreak: 0,
         bornGuesses: 0,
         poblenouGuesses: 0,
-        nightPlay: hour >= 2 && hour < 5,
+        nightPlay: hour >= BADGES.NIGHT_START && hour < BADGES.NIGHT_END,
         ramblasQuickGuess: false,
         precisionGuess: false,
         foodStreetsPerfect: 0,

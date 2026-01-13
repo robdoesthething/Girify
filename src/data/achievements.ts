@@ -1,3 +1,4 @@
+import { UI } from '../config/constants';
 /**
  * Achievement Badges - Earned through gameplay milestones
  * These are separate from purchasable cosmetics
@@ -500,7 +501,7 @@ export const getNextAchievement = (stats: PlayerStats): Achievement | null => {
 
     if (progress > closestProgress) {
       closestProgress = progress;
-      closest = { ...badge, progress: Math.min(progress, 0.99) };
+      closest = { ...badge, progress: Math.min(progress, UI.ACHIEVEMENT_COMPLETION_THRESHOLD) };
     }
   }
 

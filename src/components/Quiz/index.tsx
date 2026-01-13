@@ -1,14 +1,9 @@
-import { FC, ReactNode } from 'react';
-// @ts-ignore
 import { motion } from 'framer-motion';
-// @ts-ignore
+import { FC, ReactNode } from 'react';
 import Banner from './Banner';
-// @ts-ignore
-import Options from './Options';
-// @ts-ignore
 import Hints from './Hints';
-// @ts-ignore
 import NextButton from './NextButton';
+import Options from './Options';
 
 interface QuizProps {
   children?: ReactNode;
@@ -16,10 +11,10 @@ interface QuizProps {
 }
 
 interface QuizComponent extends FC<QuizProps> {
-  Banner: FC<any>;
-  Options: FC<any>;
-  Hints: FC<any>;
-  NextButton: FC<any>;
+  Banner: typeof Banner;
+  Options: typeof Options;
+  Hints: typeof Hints;
+  NextButton: typeof NextButton;
   Container: FC<{ children: ReactNode; keyProp: string | number }>;
   Content: FC<{ children: ReactNode }>;
 }

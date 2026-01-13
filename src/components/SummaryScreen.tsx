@@ -6,14 +6,9 @@ import { getCuriosityByStreets } from '../data/curiosities';
 import { storage } from '../utils/storage';
 import { fetchWikiImage } from '../utils/wiki';
 
-import { QuizResult } from '../types/game';
+import { TIME, UI } from '../config/constants';
+import { QuizResult, Street } from '../types/game';
 import { GameHistory } from '../types/user';
-
-interface Street {
-  id: string;
-  name: string;
-  tier: number;
-}
 
 interface Curiosity {
   title: string;
@@ -39,7 +34,6 @@ const SummaryScreen: React.FC<SummaryScreenProps> = ({
   total,
   theme,
   username,
-  realName,
   streak,
   onRestart,
   quizStreets,
@@ -100,20 +94,18 @@ const SummaryScreen: React.FC<SummaryScreenProps> = ({
   }, [streak]);
 
   const getGreeting = () => {
-    const percentage = score / maxPossibleScore;
-    const displayName =
-      realName || (username ? username.replace('@', '').split(/\d/)[0] : 'Explorer');
+    const ratio = score / maxPossibleScore;
 
-    if (percentage >= 0.9) {
-      return `Incredible, ${displayName}!`;
+    if (ratio >= UI.PERFORMANCE_THRESHOLDS.EXCELLENT) {
+      return '🏆 Unstoppable! The streets know your name!';
     }
-    if (percentage >= 0.7) {
-      return `Great job, ${displayName}!`;
+    if (ratio >= UI.PERFORMANCE_THRESHOLDS.GOOD) {
+      return '🔥 Great job! You really know this city!';
     }
-    if (percentage >= 0.5) {
-      return `Good effort, ${displayName}!`;
+    if (ratio >= UI.PERFORMANCE_THRESHOLDS.FAIR) {
+      return '👍 Not bad! Keep exploring!';
     }
-    return `Keep exploring, ${displayName}!`;
+    return '🗺️ Keep wandering! Every street has a story.';
   };
 
   useEffect(() => {
@@ -149,7 +141,7 @@ const SummaryScreen: React.FC<SummaryScreenProps> = ({
       } else {
         await navigator.clipboard.writeText(shareUrl);
         setShareStatus('Copied!');
-        setTimeout(() => setShareStatus(null), 3000);
+        setTimeout(() => setShareStatus(null), TIME.SUMMARY_ANIMATION_DELAY);
       }
     } catch (e) {
       console.error('Share failed:', e);

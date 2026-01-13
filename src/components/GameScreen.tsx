@@ -12,9 +12,14 @@ import { GameStateObject, Street } from '../types/game';
 import LandingPage from './LandingPage';
 import OnboardingTour from './OnboardingTour';
 
+interface AppAction {
+  type: string;
+  payload?: any;
+}
+
 interface GameScreenProps {
   state: GameStateObject;
-  dispatch: React.Dispatch<any>;
+  dispatch: React.Dispatch<AppAction>;
   theme: 'light' | 'dark';
   deviceMode: 'mobile' | 'tablet' | 'desktop';
   t: (key: string) => string;
@@ -120,11 +125,11 @@ const GameScreen: FC<GameScreenProps> = ({
                 <Quiz.Content>
                   <Quiz.Options
                     options={state.options}
-                    onSelect={(street: Street) => {
+                    onSelect={option => {
+                      const street = option as Street;
                       if (state.feedback === 'transitioning') {
                         return;
                       }
-                      // @ts-ignore
                       if (state.autoAdvance) {
                         handleSelectAnswer(street);
                       } else {
@@ -272,8 +277,8 @@ const GameScreen: FC<GameScreenProps> = ({
             // @ts-ignore
             total={state.quizStreets.length}
             theme={theme}
-            username={state.username}
-            realName={state.realName} // Pass real name
+            username={state.username ?? undefined}
+            realName={state.realName ?? undefined} // Pass real name
             streak={state.streak} // Pass streak
             onRestart={() => setupGame()}
             quizResults={state.quizResults}

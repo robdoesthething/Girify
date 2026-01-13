@@ -35,13 +35,20 @@ interface ShopScreenProps {
   username: string;
 }
 
+interface EquippedCosmetics {
+  frameId?: string;
+  badgeIds?: string[];
+  titleId?: string;
+  avatarId?: string;
+}
+
 const ShopScreen: React.FC<ShopScreenProps> = ({ username }) => {
   const { theme, t } = useTheme();
   const navigate = useNavigate();
 
   const [balance, setBalance] = useState(0);
   const [purchased, setPurchased] = useState<string[]>([]);
-  const [equipped, setEquipped] = useState<any>({});
+  const [equipped, setEquipped] = useState<EquippedCosmetics>({});
   const [activeTab, setActiveTab] = useState<'avatars' | 'frames' | 'titles' | 'special'>(
     'avatars'
   );
@@ -70,7 +77,7 @@ const ShopScreen: React.FC<ShopScreenProps> = ({ username }) => {
         ]);
         setBalance(bal);
         setPurchased(owned || []);
-        setEquipped(eq || {});
+        setEquipped((eq as EquippedCosmetics) || {});
         setShopItems(items as ShopItems);
       } catch (e) {
         console.error('Error loading shop data:', e);
@@ -102,7 +109,7 @@ const ShopScreen: React.FC<ShopScreenProps> = ({ username }) => {
     } else {
       setMessage({
         type: 'error',
-        text: (result as any).error || t('purchaseFailed') || 'Purchase failed',
+        text: result.error || t('purchaseFailed') || 'Purchase failed',
       });
       setTimeout(() => setMessage(null), 2000);
     }

@@ -2,7 +2,7 @@ export interface Street {
   id: string;
   name: string;
   geometry: number[][][]; // array of line strings or whatever the GeoJSON structure is
-  properties?: Record<string, any>;
+  properties?: Record<string, unknown>;
 }
 
 export interface QuizQuestion {

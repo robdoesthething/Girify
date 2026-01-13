@@ -12,6 +12,7 @@ import {
   updateDoc,
   where,
 } from 'firebase/firestore';
+import { SOCIAL } from '../config/constants';
 import { db } from '../firebase';
 
 const USERS_COLLECTION = 'users';
@@ -1133,8 +1134,8 @@ export const getReferrer = async username => {
   try {
     const q = query(
       collection(db, REFERRALS_COLLECTION),
-      where('referred', '==', username),
-      limit(1)
+      orderBy('timestamp', 'desc'),
+      limit(SOCIAL.NEWS.MAX_ITEMS)
     );
 
     const snap = await getDocs(q);

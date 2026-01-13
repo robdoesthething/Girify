@@ -1,5 +1,6 @@
 import { AlertCircle, Download, Play } from 'lucide-react';
 import React, { useState } from 'react';
+import { API } from '../config/constants';
 
 const StreetsFetcher: React.FC = () => {
   const [status, setStatus] = useState('');
@@ -41,13 +42,16 @@ const StreetsFetcher: React.FC = () => {
     delay = 1000
   ): Promise<Response> => {
     try {
-      const response = await fetch(url, options);
+      const response = await fetch(url, { ...options, signal: AbortSignal.timeout(API.TIMEOUT) });
 
       if (response.ok) {
         return response;
       }
 
-      if (response.status === 429 || response.status >= 500) {
+      if (
+        response.status === API.HTTP.TOO_MANY_REQUESTS ||
+        response.status >= API.HTTP.SERVER_ERROR
+      ) {
         throw new Error(`Request failed with status ${response.status}`);
       }
 

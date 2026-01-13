@@ -1,17 +1,17 @@
-import { db } from '../firebase';
 import {
+  addDoc,
   collection,
   doc,
-  setDoc,
-  addDoc,
   getDoc,
-  query,
-  orderBy,
-  limit,
   getDocs,
+  limit,
+  orderBy,
+  query,
+  setDoc,
   Timestamp,
   where,
 } from 'firebase/firestore';
+import { db } from '../firebase';
 import { getTodaySeed } from './dailyChallenge';
 
 const HIGHSCORES_COLLECTION = 'highscores'; // Personal Bests (All Time)
@@ -121,7 +121,7 @@ export const getLeaderboard = async (period = 'all') => {
     const scoresRef = collection(db, SCORES_COLLECTION);
     // Increase limit to capture more history for 'all' time aggregation
     // Long term: Move this aggregation to backend (Cloud Functions)
-    const q = query(scoresRef, orderBy('timestamp', 'desc'), limit(2000));
+    const q = query(scoresRef, orderBy('timestamp', 'desc'), limit(SOCIAL.LEADERBOARD.FETCH_LIMIT));
 
     if (import.meta.env.DEV) {
       // eslint-disable-next-line no-console
