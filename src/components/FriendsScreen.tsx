@@ -118,7 +118,7 @@ const FriendsScreen: React.FC<FriendsScreenProps> = ({ onClose, username }) => {
     }
     setSearching(true);
     const results = await searchUsers(searchQuery);
-    setSearchResults(results.filter((r: any) => r.username !== username));
+    setSearchResults(results.filter((r: { username: string }) => r.username !== username));
     setSearching(false);
   };
 

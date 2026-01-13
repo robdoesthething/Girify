@@ -1,7 +1,7 @@
-import { db } from '../firebase';
 import { doc, getDoc, updateDoc } from 'firebase/firestore';
-import { getPayoutConfig } from './configService';
 import { calculateStreakBonus } from '../config/gameConfig';
+import { db } from '../firebase';
+import { getPayoutConfig } from './configService';
 
 const USERS_COLLECTION = 'users';
 
@@ -162,9 +162,10 @@ export const spendGiuros = async (
     });
 
     return { success: true, newBalance };
-  } catch (e: any) {
-    console.error('Error spending giuros:', e);
-    return { success: false, error: e.message };
+  } catch (e: unknown) {
+    const err = e instanceof Error ? e : new Error(String(e));
+    console.error('Error spending giuros:', err);
+    return { success: false, error: err.message };
   }
 };
 
