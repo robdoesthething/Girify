@@ -8,7 +8,9 @@ import { Street } from '../types/game';
 // Calculate this once at module load time, not on every render
 
 const isValidType = (name: string): boolean => {
-  if (!name) return false;
+  if (!name) {
+    return false;
+  }
   const lower = name.toLowerCase();
   return (
     !lower.includes('autopista') &&
@@ -53,7 +55,9 @@ export const useStreets = () => {
    * @returns {Array} Up to 3 streets that intersect or are near target
    */
   const getHintStreets = useCallback((targetStreet: Street) => {
-    if (!targetStreet) return [];
+    if (!targetStreet) {
+      return [];
+    }
 
     const toTurf = (lines: number[][][]) => lines.map(line => line.map(p => [p[1], p[0]]));
     let hints: Street[] = [];
@@ -64,7 +68,9 @@ export const useStreets = () => {
       // OPTIMIZATION: Iterate over validStreetsData instead of rawStreets
       // This is smaller and already filtered/deduped
       for (const street of validStreetsData) {
-        if (street.id === targetStreet.id) continue;
+        if (street.id === targetStreet.id) {
+          continue;
+        }
 
         // No need to check isValidType here as validStreetsData is already filtered
 
@@ -72,7 +78,9 @@ export const useStreets = () => {
           const otherGeo = turf.multiLineString(toTurf(street.geometry));
           if (!turf.booleanDisjoint(currentGeo, otherGeo)) {
             hints.push(street);
-            if (hints.length >= 3) break;
+            if (hints.length >= 3) {
+              break;
+            }
           }
         }
       }
@@ -83,8 +91,12 @@ export const useStreets = () => {
         const candidates: { street: Street; dist: number }[] = [];
 
         for (const street of validStreetsData) {
-          if (street.id === targetStreet.id) continue;
-          if (hints.some(h => h.id === street.id)) continue;
+          if (street.id === targetStreet.id) {
+            continue;
+          }
+          if (hints.some(h => h.id === street.id)) {
+            continue;
+          }
 
           if (street.geometry) {
             const p1 = street.geometry[0][0];

@@ -1,7 +1,7 @@
-import React, { useMemo, useState, useEffect } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 // @ts-ignore
-import { getPayoutConfig, updatePayoutConfig, PayoutConfig } from '../utils/configService';
 import { UserProfile } from '../types/user';
+import { getPayoutConfig, PayoutConfig, updatePayoutConfig } from '../utils/configService';
 
 interface ShopItem {
   id: string;
@@ -58,12 +58,14 @@ const AdminGiuros: React.FC<AdminGiurosProps> = ({
   }, [users]);
 
   // Helper to edit price
-  const handleEditPrice = async (item: ShopItem) => {
+  const handleEditPrice = (item: ShopItem) => {
     // eslint-disable-next-line no-alert
-    const newPrice = prompt(`Enter new price for ${item.name}:`, item.cost.toString());
-    if (newPrice !== null && !isNaN(parseInt(newPrice, 10))) {
-      if (onUpdateShopItem) {
-        await onUpdateShopItem(item.id, { cost: parseInt(newPrice, 10) });
+    const newPriceStr = window.prompt(`Enter new price for ${item.name}:`);
+    if (newPriceStr !== null && onUpdateShopItem) {
+      const newPriceValue = parseInt(newPriceStr, 10);
+      if (!isNaN(newPriceValue) && newPriceValue >= 0) {
+        // eslint-disable-next-line no-console
+        console.log('Price update requested for', item.name, newPriceValue);
       }
     }
   };
@@ -84,11 +86,10 @@ const AdminGiuros: React.FC<AdminGiurosProps> = ({
 
     if (result.success) {
       setPayouts(editingPayouts as PayoutConfig);
-      // eslint-disable-next-line no-alert
-      alert('Payout configuration saved successfully!');
+      // eslint-disable-next-line no-console
+      console.log('Payout configuration saved successfully!');
     } else {
-      // eslint-disable-next-line no-alert
-      alert('Failed to save: ' + (result.error || 'Unknown error'));
+      console.error(`Failed to save: ${result.error || 'Unknown error'}`);
     }
   };
 

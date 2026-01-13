@@ -24,7 +24,9 @@ export const REFERRAL_BONUS = 15;
  * @returns {Promise<number>}
  */
 export const getGiuros = async (username: string | null): Promise<number> => {
-  if (!username) return 0;
+  if (!username) {
+    return 0;
+  }
   try {
     const userRef = doc(db, USERS_COLLECTION, username);
     const userDoc = await getDoc(userRef);
@@ -45,8 +47,14 @@ export const getGiuros = async (username: string | null): Promise<number> => {
  * @param {string} reason - For logging/audit
  * @returns {Promise<{success: boolean, newBalance: number}>}
  */
-export const addGiuros = async (username: string | null, amount: number, reason: string = ''): Promise<{ success: boolean, newBalance: number }> => {
-  if (!username || amount <= 0) return { success: false, newBalance: 0 };
+export const addGiuros = async (
+  username: string | null,
+  amount: number,
+  reason: string = ''
+): Promise<{ success: boolean; newBalance: number }> => {
+  if (!username || amount <= 0) {
+    return { success: false, newBalance: 0 };
+  }
 
   try {
     const userRef = doc(db, USERS_COLLECTION, username);
@@ -83,7 +91,8 @@ export const addGiuros = async (username: string | null, amount: number, reason:
  * @param {number} amount
  * @returns {Promise<{success: boolean, newBalance: number}>}
  */
-export const awardGiuros = (username: string | null, amount: number) => addGiuros(username, amount, 'reward');
+export const awardGiuros = (username: string | null, amount: number) =>
+  addGiuros(username, amount, 'reward');
 
 /**
  * Spend giuros on a cosmetic item
@@ -92,7 +101,11 @@ export const awardGiuros = (username: string | null, amount: number) => addGiuro
  * @param {string} itemId
  * @returns {Promise<{success: boolean, error?: string, newBalance?: number}>}
  */
-export const spendGiuros = async (username: string | null, cost: number, itemId: string): Promise<{ success: boolean, error?: string, newBalance?: number }> => {
+export const spendGiuros = async (
+  username: string | null,
+  cost: number,
+  itemId: string
+): Promise<{ success: boolean; error?: string; newBalance?: number }> => {
   if (!username || cost <= 0 || !itemId) {
     return { success: false, error: 'Invalid parameters' };
   }
@@ -137,9 +150,13 @@ export const spendGiuros = async (username: string | null, cost: number, itemId:
     import('./publishActivity').then(({ publishCosmeticPurchase }) => {
       // Determine item type from ID prefix
       let itemType = 'item';
-      if (itemId.startsWith('badge_')) itemType = 'badge';
-      else if (itemId.startsWith('frame_')) itemType = 'frame';
-      else if (itemId.startsWith('title_')) itemType = 'title';
+      if (itemId.startsWith('badge_')) {
+        itemType = 'badge';
+      } else if (itemId.startsWith('frame_')) {
+        itemType = 'frame';
+      } else if (itemId.startsWith('title_')) {
+        itemType = 'title';
+      }
 
       publishCosmeticPurchase(username, itemId, itemId, itemType);
     });
@@ -161,8 +178,12 @@ export const spendGiuros = async (username: string | null, cost: number, itemId:
  * @param {string} username
  * @returns {Promise<{claimed: boolean, bonus: number, newBalance: number}>}
  */
-export const claimDailyLoginBonus = async (username: string | null): Promise<{ claimed: boolean, bonus: number, newBalance: number }> => {
-  if (!username) return { claimed: false, bonus: 0, newBalance: 0 };
+export const claimDailyLoginBonus = async (
+  username: string | null
+): Promise<{ claimed: boolean; bonus: number; newBalance: number }> => {
+  if (!username) {
+    return { claimed: false, bonus: 0, newBalance: 0 };
+  }
 
   try {
     // Fetch dynamic config
@@ -210,8 +231,13 @@ export const claimDailyLoginBonus = async (username: string | null): Promise<{ c
  * @param {number} streak - Current streak for bonus calculation
  * @returns {Promise<{bonus: number, newBalance: number}>}
  */
-export const awardChallengeBonus = async (username: string | null, streak: number = 0): Promise<{ bonus: number, newBalance: number }> => {
-  if (!username) return { bonus: 0, newBalance: 0 };
+export const awardChallengeBonus = async (
+  username: string | null,
+  streak: number = 0
+): Promise<{ bonus: number; newBalance: number }> => {
+  if (!username) {
+    return { bonus: 0, newBalance: 0 };
+  }
 
   // Use centralized game config for calculation
   const bonus = calculateStreakBonus(streak);
@@ -225,8 +251,12 @@ export const awardChallengeBonus = async (username: string | null, streak: numbe
  * @param {string} referrerUsername
  * @returns {Promise<{success: boolean, newBalance: number}>}
  */
-export const awardReferralBonus = async (referrerUsername: string | null): Promise<{ success: boolean, newBalance: number }> => {
-  if (!referrerUsername) return { success: false, newBalance: 0 };
+export const awardReferralBonus = async (
+  referrerUsername: string | null
+): Promise<{ success: boolean; newBalance: number }> => {
+  if (!referrerUsername) {
+    return { success: false, newBalance: 0 };
+  }
 
   // Fetch dynamic config
   const config = await getPayoutConfig();
@@ -240,7 +270,9 @@ export const awardReferralBonus = async (referrerUsername: string | null): Promi
  * @returns {Promise<string[]>}
  */
 export const getPurchasedCosmetics = async (username: string | null): Promise<string[]> => {
-  if (!username) return [];
+  if (!username) {
+    return [];
+  }
 
   try {
     const userRef = doc(db, USERS_COLLECTION, username);
@@ -261,8 +293,13 @@ export const getPurchasedCosmetics = async (username: string | null): Promise<st
  * @param {string} username
  * @param {object} equipped - { frameId, badgeIds, titleId }
  */
-export const setEquippedCosmetics = async (username: string | null, equipped: Record<string, any>): Promise<void> => {
-  if (!username) return;
+export const setEquippedCosmetics = async (
+  username: string | null,
+  equipped: Record<string, any>
+): Promise<void> => {
+  if (!username) {
+    return;
+  }
 
   try {
     const userRef = doc(db, USERS_COLLECTION, username);
@@ -277,8 +314,12 @@ export const setEquippedCosmetics = async (username: string | null, equipped: Re
  * @param {string} username
  * @returns {Promise<{frameId?: string, badgeIds?: string[], titleId?: string}>}
  */
-export const getEquippedCosmetics = async (username: string | null): Promise<{ frameId?: string, badgeIds?: string[], titleId?: string } | {}> => {
-  if (!username) return {};
+export const getEquippedCosmetics = async (
+  username: string | null
+): Promise<{ frameId?: string; badgeIds?: string[]; titleId?: string } | {}> => {
+  if (!username) {
+    return {};
+  }
 
   try {
     const userRef = doc(db, USERS_COLLECTION, username);

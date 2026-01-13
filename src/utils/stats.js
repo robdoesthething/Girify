@@ -6,7 +6,9 @@
  * @returns {number} Current streak
  */
 export const calculateStreak = history => {
-  if (!history || history.length === 0) return 0;
+  if (!history || history.length === 0) {
+    return 0;
+  }
 
   // Sort by date descending
   const sorted = [...history].sort((a, b) => b.date - a.date);
@@ -15,7 +17,8 @@ export const calculateStreak = history => {
   const today = new Date();
   const getSeed = d =>
     parseInt(
-      `${d.getFullYear()}${String(d.getMonth() + 1).padStart(2, '0')}${String(d.getDate()).padStart(2, '0')}`
+      `${d.getFullYear()}${String(d.getMonth() + 1).padStart(2, '0')}${String(d.getDate()).padStart(2, '0')}`,
+      10
     );
 
   const todaySeed = getSeed(today);
@@ -32,7 +35,9 @@ export const calculateStreak = history => {
   // If last played > yesterday, streak is broken.
   // But wait, lastPlayed is YYYYMMDD integer. So larger int means NEWER date.
   // If lastPlayed < yesterdaySeed, streak is broken.
-  if (lastPlayed < yesterdaySeed) return 0;
+  if (lastPlayed < yesterdaySeed) {
+    return 0;
+  }
 
   let expectedDate = lastPlayed === todaySeed ? todaySeed : yesterdaySeed;
 
@@ -41,9 +46,11 @@ export const calculateStreak = history => {
     if (record.date === expectedDate) {
       streak++;
       // Move expected to previous day
-      const year = Math.floor(expectedDate / 10000);
-      const month = Math.floor((expectedDate % 10000) / 100);
-      const day = expectedDate % 100;
+      const YEAR_DIVISOR = 10000;
+      const MONTH_DIVISOR = 100;
+      const year = Math.floor(expectedDate / YEAR_DIVISOR);
+      const month = Math.floor((expectedDate % YEAR_DIVISOR) / MONTH_DIVISOR);
+      const day = expectedDate % MONTH_DIVISOR;
       const d = new Date(year, month - 1, day);
       d.setDate(d.getDate() - 1);
       expectedDate = getSeed(d);

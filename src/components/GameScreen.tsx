@@ -1,17 +1,16 @@
-import React, { useState, FC, useEffect } from 'react';
+import React, { FC, useEffect, useState } from 'react';
 // @ts-ignore
-import { motion, AnimatePresence } from 'framer-motion';
 // @ts-ignore
 import MapArea from './MapArea';
 // @ts-ignore
+import Logo from './Logo';
 import Quiz from './Quiz';
 import RegisterPanel from './RegisterPanel';
 import SummaryScreen from './SummaryScreen';
-import Logo from './Logo';
 // @ts-ignore
-import OnboardingTour from './OnboardingTour';
-import LandingPage from './LandingPage';
 import { GameStateObject, Street } from '../types/game';
+import LandingPage from './LandingPage';
+import OnboardingTour from './OnboardingTour';
 
 interface GameScreenProps {
   state: GameStateObject;
@@ -56,6 +55,7 @@ const GameScreen: FC<GameScreenProps> = ({
         e.returnValue = msg;
         return msg;
       }
+      return undefined;
     };
     window.addEventListener('beforeunload', handleBeforeUnload);
     return () => window.removeEventListener('beforeunload', handleBeforeUnload);
@@ -121,10 +121,15 @@ const GameScreen: FC<GameScreenProps> = ({
                   <Quiz.Options
                     options={state.options}
                     onSelect={(street: Street) => {
-                      if (state.feedback === 'transitioning') return;
+                      if (state.feedback === 'transitioning') {
+                        return;
+                      }
                       // @ts-ignore
-                      if (state.autoAdvance) handleSelectAnswer(street);
-                      else dispatch({ type: 'SELECT_ANSWER', payload: street });
+                      if (state.autoAdvance) {
+                        handleSelectAnswer(street);
+                      } else {
+                        dispatch({ type: 'SELECT_ANSWER', payload: street });
+                      }
                     }}
                     selectedAnswer={state.selectedAnswer}
                     feedback={state.feedback}
@@ -243,8 +248,11 @@ const GameScreen: FC<GameScreenProps> = ({
           <button
             onClick={() => {
               localStorage.setItem('girify_instructions_seen', 'true');
-              if (state.username) setupGame();
-              else dispatch({ type: 'SET_GAME_STATE', payload: 'register' });
+              if (state.username) {
+                setupGame();
+              } else {
+                dispatch({ type: 'SET_GAME_STATE', payload: 'register' });
+              }
             }}
             className="px-10 py-4 bg-emerald-500 hover:bg-emerald-600 text-white rounded-2xl shadow-lg shadow-emerald-500/20 font-bold text-xl transition-all transform hover:scale-105"
           >

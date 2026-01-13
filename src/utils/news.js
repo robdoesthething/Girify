@@ -81,11 +81,15 @@ export const getActiveAnnouncements = async () => {
  * @returns {Promise<Array>}
  */
 export const getUnreadAnnouncements = async username => {
-  if (!username) return [];
+  if (!username) {
+    return [];
+  }
 
   try {
     const active = await getActiveAnnouncements();
-    if (active.length === 0) return [];
+    if (active.length === 0) {
+      return [];
+    }
 
     // Get user's read announcements
     const userReadRef = doc(db, USER_READ_COLLECTION, username);
@@ -105,7 +109,9 @@ export const getUnreadAnnouncements = async username => {
  * @param {string} announcementId
  */
 export const markAnnouncementAsRead = async (username, announcementId) => {
-  if (!username || !announcementId) return;
+  if (!username || !announcementId) {
+    return;
+  }
 
   try {
     const userReadRef = doc(db, USER_READ_COLLECTION, username);

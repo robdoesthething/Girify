@@ -1,0 +1,157 @@
+import React, { createContext, useContext, useEffect, useState } from 'react';
+import { getTranslation, LANGUAGES } from '../i18n/translations';
+
+interface ThemeContextType {
+  theme: string;
+  themeMode: string;
+  changeTheme: (mode: 'light' | 'dark' | 'auto') => void;
+  toggleTheme: () => void;
+  deviceMode: 'mobile' | 'tablet' | 'desktop';
+  zoom: number;
+  setZoom: React.Dispatch<React.SetStateAction<number>>;
+  language: string;
+  changeLanguage: (lang: string) => void;
+  languages: typeof LANGUAGES;
+  t: (key: string) => string;
+}
+
+const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
+
+export const useTheme = (): ThemeContextType => {
+  const context = useContext(ThemeContext);
+  if (!context) {
+    return {
+      theme: 'light',
+      themeMode: 'auto',
+      changeTheme: () => {},
+      language: 'en',
+      changeLanguage: () => {},
+      toggleTheme: () => {},
+      languages: LANGUAGES,
+      t: key => key,
+      deviceMode: 'desktop',
+      zoom: 1,
+      setZoom: () => {},
+    };
+  }
+  return context;
+};
+
+interface ThemeProviderProps {
+  children: React.ReactNode;
+}
+
+export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
+  const [themeMode, setThemeMode] = useState<'light' | 'dark' | 'auto'>(() => {
+    return (localStorage.getItem('girify_theme_mode') as 'light' | 'dark' | 'auto') || 'auto';
+  });
+
+  const [theme, setTheme] = useState<'light' | 'dark'>('light');
+
+  useEffect(() => {
+    const resolveTheme = (): 'light' | 'dark' => {
+      if (themeMode === 'auto') {
+        return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+      }
+      return themeMode;
+    };
+
+    const newTheme = resolveTheme();
+    if (newTheme !== theme) {
+      // Use requestAnimationFrame to avoid synchronous setState in effect
+      requestAnimationFrame(() => setTheme(newTheme));
+    }
+    document.documentElement.setAttribute('class', newTheme);
+    localStorage.setItem('girify_theme_mode', themeMode);
+  }, [themeMode]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  useEffect(() => {
+    if (themeMode !== 'auto') {
+      return () => {};
+    }
+    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+    const handleChange = (e: MediaQueryListEvent) => {
+      if (themeMode === 'auto') {
+        const newTheme = e.matches ? 'dark' : 'light';
+        setTheme(newTheme);
+        document.documentElement.setAttribute('class', newTheme);
+      }
+    };
+    mediaQuery.addEventListener('change', handleChange);
+    return () => mediaQuery.removeEventListener('change', handleChange);
+  }, [themeMode]);
+
+  const [language, setLanguage] = useState(() => {
+    const saved = localStorage.getItem('girify_language');
+    if (saved) {
+      return saved;
+    }
+    const browserLang = navigator.language?.split('-')[0];
+    if (['es', 'ca'].includes(browserLang)) {
+      return browserLang;
+    }
+    return 'en';
+  });
+
+  const [zoom, setZoom] = useState(1);
+
+  const getDeviceMode = (): 'mobile' | 'tablet' | 'desktop' => {
+    const width = window.innerWidth;
+    if (width < 768) {
+      return 'mobile';
+    }
+    if (width < 1024) {
+      return 'tablet';
+    }
+    return 'desktop';
+  };
+
+  const [deviceMode, setDeviceMode] = useState(getDeviceMode());
+
+  useEffect(() => {
+    const handleResize = () => {
+      setDeviceMode(getDeviceMode());
+    };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  const changeTheme = (mode: 'light' | 'dark' | 'auto') => {
+    setThemeMode(mode);
+  };
+
+  const toggleTheme = () => {
+    setThemeMode(prev => (prev === 'light' ? 'dark' : 'light'));
+  };
+
+  const changeLanguage = (lang: string) => {
+    setLanguage(lang);
+    localStorage.setItem('girify_language', lang);
+  };
+
+  const t = (key: string) => getTranslation(language, key);
+
+  useEffect(() => {
+    document.documentElement.setAttribute('class', theme);
+  }, [theme]);
+
+  return (
+    <ThemeContext.Provider
+      value={{
+        theme,
+        themeMode,
+        changeTheme,
+        toggleTheme,
+        deviceMode,
+        zoom,
+        setZoom,
+        language,
+        changeLanguage,
+        languages: LANGUAGES,
+        t,
+      }}
+    >
+      {children}
+    </ThemeContext.Provider>
+  );
+};

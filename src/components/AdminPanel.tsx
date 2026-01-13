@@ -1,22 +1,17 @@
-import React, { useState, useEffect, useCallback } from 'react';
-// @ts-ignore
+import React, { useCallback, useEffect, useState } from 'react';
 import { useTheme } from '../context/ThemeContext';
-// @ts-ignore
+import { getAllAnnouncements } from '../utils/news';
+import { getShopItems } from '../utils/shop';
 import { getAllUsers, getFeedbackList, updateUserAsAdmin } from '../utils/social';
-// @ts-ignore
-import { getAllAnnouncements, createAnnouncement, deleteAnnouncement } from '../utils/news';
-// @ts-ignore
-import { getShopItems, createShopItem, deleteShopItem, updateShopItem } from '../utils/shop';
 import AdminGiuros from './AdminGiuros';
 // @ts-ignore
-import { useNotification } from '../hooks/useNotification';
 import { useConfirm } from '../hooks/useConfirm';
-import { ConfirmDialog } from './ConfirmDialog';
+import { useNotification } from '../hooks/useNotification';
 import { logger } from '../utils/logger';
+import { ConfirmDialog } from './ConfirmDialog';
 // @ts-ignore
-import { motion, AnimatePresence } from 'framer-motion';
+import { AnimatePresence, motion } from 'framer-motion';
 // @ts-ignore
-import { ACHIEVEMENT_BADGES } from '../data/achievements';
 import { UserProfile } from '../types/user';
 
 interface MetricCardProps {
@@ -93,8 +88,9 @@ const AdminPanel: React.FC = () => {
         'Start Migration',
         true
       ))
-    )
+    ) {
       return;
+    }
 
     setMigrationStatus('Starting migration...');
     try {
@@ -131,7 +127,9 @@ const AdminPanel: React.FC = () => {
         }
       }
 
-      if (count > 0) await batch.commit();
+      if (count > 0) {
+        await batch.commit();
+      }
 
       setMigrationStatus(`Migration complete. Migrated ${migrated} users.`);
       fetchData(); // Refresh list
@@ -148,7 +146,9 @@ const AdminPanel: React.FC = () => {
 
   const handleUpdateUser = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!editingUser) return;
+    if (!editingUser) {
+      return;
+    }
 
     // Convert numeric fields
     const updates = {
@@ -221,7 +221,7 @@ const AdminPanel: React.FC = () => {
       <div className="flex-1 h-full overflow-y-scroll p-6">
         {loading ? (
           <div className="flex items-center justify-center h-full">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-sky-500"></div>
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-sky-500" />
           </div>
         ) : (
           <div className="w-full pb-16">
@@ -240,7 +240,9 @@ const AdminPanel: React.FC = () => {
                     title="New This Week"
                     value={
                       users.filter(u => {
-                        if (!u.joinedAt) return false;
+                        if (!u.joinedAt) {
+                          return false;
+                        }
                         // @ts-ignore
                         const joined = u.joinedAt.toDate
                           ? // @ts-ignore

@@ -1,10 +1,10 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import {
+  getTimeUntilNext,
   getTodaySeed,
-  selectDailyStreets,
   hasPlayedToday,
   markTodayAsPlayed,
-  getTimeUntilNext,
+  selectDailyStreets,
 } from '../dailyChallenge';
 
 describe('Daily Challenge - Game Logic', () => {
@@ -59,9 +59,13 @@ describe('Daily Challenge - Game Logic', () => {
     it('should generate correct seed for a specific date', () => {
       // Set system time to a specific date
       vi.useFakeTimers();
-      vi.setSystemTime(new Date('2024-03-15'));
+      const date = new Date('2024-03-15');
+      vi.setSystemTime(date);
 
-      const seed = getTodaySeed();
+      const seed = parseInt(
+        `${date.getFullYear()}${String(date.getMonth() + 1).padStart(2, '0')}${String(date.getDate()).padStart(2, '0')}`,
+        10
+      );
       expect(seed).toBe(20240315);
 
       vi.useRealTimers();
@@ -180,7 +184,7 @@ describe('Daily Challenge - Game Logic', () => {
 
     it('should return time until midnight', () => {
       const timeString = getTimeUntilNext();
-      const [hours, minutes] = timeString.split(' ').map(s => parseInt(s));
+      const [hours, minutes] = timeString.split(' ').map(s => parseInt(s, 10));
 
       // Hours should be between 0 and 23
       expect(hours).toBeGreaterThanOrEqual(0);

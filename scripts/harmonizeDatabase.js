@@ -1,10 +1,7 @@
-import { initializeApp, cert } from 'firebase-admin/app';
+import { cert, initializeApp } from 'firebase-admin/app';
 import { getFirestore } from 'firebase-admin/firestore';
 import { readFile } from 'fs/promises';
-import { fileURLToPath } from 'url';
 import path from 'path';
-
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 /**
  * Harmonize Database Script
@@ -102,8 +99,6 @@ async function harmonizeFriendships(db, emailCache) {
   snapshot.docs.forEach(d => existingDocs.set(d.id, d));
   const pairsProcessed = new Set();
 
-  let processedCount = 0;
-
   for (const doc of snapshot.docs) {
     const data = doc.data();
     if (!data.user1 || !data.user2) continue;
@@ -177,7 +172,6 @@ async function harmonizeFriendships(db, emailCache) {
     }
 
     if (batchSize >= 400) await commitBatch();
-    processedCount++;
   }
 
   await commitBatch();
