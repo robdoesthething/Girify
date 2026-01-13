@@ -170,7 +170,7 @@ async function syncUserProfile(
       }
 
       // Check for feedback rewards
-      const rewards = await checkUnseenFeedbackRewards(displayName);
+      const rewards = (await checkUnseenFeedbackRewards(displayName)) as FeedbackReward[];
       if (rewards && rewards.length > 0) {
         const total = rewards.reduce((acc: number, r: FeedbackReward) => acc + (r.reward || 0), 0);
         if (notify) {
