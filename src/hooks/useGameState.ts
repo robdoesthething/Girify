@@ -134,7 +134,7 @@ export const useGameState = (
 
       const todaySeed = getTodaySeed();
       const todayStr = new Date().toISOString().split('T')[0];
-      const plannedQuiz = quizPlan?.quizzes?.find((q: any) => q.date === todayStr);
+      const plannedQuiz = quizPlan?.quizzes?.find((q: QuizPlan) => q.date === todayStr);
 
       let selected: Street[] | undefined;
       let initialOptions: Street[] | undefined;
@@ -142,7 +142,7 @@ export const useGameState = (
       if (plannedQuiz && plannedQuiz.questions?.length > 0) {
         const streetMap = new Map(validStreets.map(s => [s.id, s]));
         selected = plannedQuiz.questions
-          .map((q: any) => streetMap.get(q.correctId))
+          .map((q: QuizQuestion) => streetMap.get(q.correctId))
           .filter(Boolean) as Street[];
 
         if (selected.length > 0) {
@@ -325,7 +325,7 @@ export const useGameState = (
           const historyForStreak = storage.get(STORAGE_KEYS.HISTORY, []);
           const streak = calculateStreak(historyForStreak);
           const totalScore = historyForStreak.reduce(
-            (acc: number, h: any) => acc + (h.score || 0),
+            (acc: number, h: GameHistory) => acc + (h.score || 0),
             0
           );
 
