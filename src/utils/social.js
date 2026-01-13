@@ -1049,8 +1049,29 @@ export const getUserGameHistory = async username => {
     if (snapshot.empty) {
       // Simple query without orderBy to avoid composite index requirement
       const scoresRef = collection(db, 'scores');
-      const scoresQuery = query(scoresRef, where('username', '==', cleanUsername), limit(100));
-      snapshot = await getDocs(scoresQuery);
+      // Try both lowercase and original to be safe (if mixed case data exists)
+      const qLower = query(scoresRef, where('username', '==', cleanUsername), limit(100));
+      const qOriginal =
+        username !== cleanUsername
+          ? query(scoresRef, where('username', '==', username), limit(100))
+          : null;
+
+      const [snapLower, snapOriginal] = await Promise.all([
+        getDocs(qLower),
+        qOriginal ? getDocs(qOriginal) : Promise.resolve({ docs: [] }),
+      ]);
+
+      // Merge and deduplicate by ID
+      const mergedDocs = new Map();
+      snapLower.docs.forEach(d => mergedDocs.set(d.id, d));
+      // @ts-ignore
+      snapOriginal.docs.forEach(d => mergedDocs.set(d.id, d));
+
+      snapshot = {
+        size: mergedDocs.size,
+        docs: Array.from(mergedDocs.values()),
+        empty: mergedDocs.size === 0,
+      };
 
       // Log for debugging
       if (import.meta.env.DEV) {
