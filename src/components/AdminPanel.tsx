@@ -133,9 +133,10 @@ const AdminPanel: React.FC = () => {
 
       setMigrationStatus(`Migration complete. Migrated ${migrated} users.`);
       fetchData(); // Refresh list
-    } catch (e: any) {
+    } catch (e: unknown) {
       logger.error(e);
-      setMigrationStatus(`Error: ${e.message}`);
+      const errorMessage = e instanceof Error ? e.message : String(e);
+      setMigrationStatus(`Error: ${errorMessage}`);
     }
   };
 
@@ -183,9 +184,10 @@ const AdminPanel: React.FC = () => {
       await updateUserAsAdmin(editingUser.username, updates);
       setEditingUser(null);
       fetchData();
-    } catch (e: any) {
+    } catch (e: unknown) {
       logger.error(e);
-      notify(`Update failed: ${e.message}`, 'error');
+      const errorMessage = e instanceof Error ? e.message : String(e);
+      notify(`Update failed: ${errorMessage}`, 'error');
     }
   };
 

@@ -52,9 +52,10 @@ const StreetsFetcher: React.FC = () => {
       }
 
       return response;
-    } catch (error: any) {
+    } catch (error: unknown) {
       if (retries > 0) {
-        setStatus(`⚠️ Error: ${error.message}. Retrying in ${delay / 1000}s...`);
+        const errorMessage = error instanceof Error ? error.message : String(error);
+        setStatus(`⚠️ Error: ${errorMessage}. Retrying in ${delay / 1000}s...`);
         await wait(delay);
         return fetchWithRetry(url, options, retries - 1, delay * 2);
       }
@@ -144,8 +145,9 @@ const StreetsFetcher: React.FC = () => {
       const t3Count = streetArray.filter(s => s.tier === 3).length;
       const t4Count = streetArray.filter(s => s.tier === 4).length;
       setProgress(`Tier breakdown: T1=${t1Count}, T2=${t2Count}, T3=${t3Count}, T4=${t4Count}`);
-    } catch (error: any) {
-      setStatus(`Error: ${error.message}`);
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      setStatus(`Error: ${errorMessage}`);
       setProgress('Please try another mirror or wait a moment.');
     } finally {
       setLoading(false);

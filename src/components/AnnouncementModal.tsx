@@ -6,7 +6,7 @@ interface Announcement {
   id: string;
   title: string;
   body: string;
-  publishDate: any; // Firestore Timestamp or Date
+  publishDate: Date | { seconds: number; toDate?: () => Date };
 }
 
 interface AnnouncementModalProps {
@@ -21,11 +21,20 @@ const AnnouncementModal: React.FC<AnnouncementModalProps> = ({ announcement, onD
     return null;
   }
 
-  const formatDate = (timestamp: any) => {
+  const formatDate = (timestamp: Date | { seconds: number; toDate?: () => Date }) => {
     if (!timestamp) {
       return '';
     }
-    const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
+
+    let date: Date;
+    if (timestamp instanceof Date) {
+      date = timestamp;
+    } else if (timestamp.toDate) {
+      date = timestamp.toDate();
+    } else {
+      date = new Date((timestamp as { seconds: number }).seconds * 1000);
+    }
+
     return date.toLocaleDateString(undefined, {
       year: 'numeric',
       month: 'short',

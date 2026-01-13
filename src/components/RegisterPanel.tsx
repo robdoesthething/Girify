@@ -163,8 +163,9 @@ const RegisterPanel: React.FC<RegisterPanelProps> = ({
       });
 
       await handlePostLogin(handle, !!existingProfile);
-    } catch (err: any) {
-      setError(getAuthErrorMessage(err.code, err.message));
+    } catch (err: unknown) {
+      const error = err instanceof Error ? err : new Error(String(err));
+      setError(getAuthErrorMessage('auth/error', error.message));
       setLoading(false);
     }
   };
@@ -261,8 +262,9 @@ const RegisterPanel: React.FC<RegisterPanelProps> = ({
       }
 
       await handlePostLogin(handle, !!profile);
-    } catch (err: any) {
-      setError(getAuthErrorMessage(err.code));
+    } catch (err: unknown) {
+      const error = err instanceof Error ? err : new Error(String(err));
+      setError(getAuthErrorMessage((error as any).code || 'auth/error'));
       setLoading(false);
     }
   };

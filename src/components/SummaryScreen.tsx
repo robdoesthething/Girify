@@ -6,6 +6,9 @@ import { getCuriosityByStreets } from '../data/curiosities';
 import { storage } from '../utils/storage';
 import { fetchWikiImage } from '../utils/wiki';
 
+import { QuizResult } from '../types/game';
+import { GameHistory } from '../types/user';
+
 interface Street {
   id: string;
   name: string;
@@ -26,7 +29,7 @@ interface SummaryScreenProps {
   realName?: string;
   streak?: number;
   onRestart: () => void;
-  quizResults: any[];
+  quizResults: QuizResult[];
   quizStreets: Street[];
   t: (key: string) => string;
 }
@@ -63,7 +66,7 @@ const SummaryScreen: React.FC<SummaryScreenProps> = ({
         return 1;
       }
 
-      const uniqueDates = [...new Set(history.map((h: any) => h.date))].sort().reverse();
+      const uniqueDates = [...new Set(history.map((h: GameHistory) => h.date))].sort().reverse();
       if (uniqueDates.length === 0) {
         return 1;
       }

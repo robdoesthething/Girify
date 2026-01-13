@@ -143,9 +143,10 @@ const SettingsScreen: React.FC<SettingsScreenProps> = ({
           setIsAdmin(true);
           setTimeout(() => window.location.reload(), 1000);
         }
-      } catch (e: any) {
+      } catch (e: unknown) {
         console.error(e);
-        notify(`Error promoting: ${e.message}`, 'error');
+        const errorMessage = e instanceof Error ? e.message : String(e);
+        notify(`Error promoting: ${errorMessage}`, 'error');
       }
     } else {
       if (input) {

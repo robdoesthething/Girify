@@ -41,9 +41,19 @@ const LeaderboardScreen: React.FC<LeaderboardScreenProps> = ({ currentUser }) =>
       } else {
         setScores(data.filter(s => s.username && s.username !== 'UNKNOWN'));
       }
-    } catch (err: any) {
-      console.error('Failed to load scores:', err);
-      let msg = err.message || 'Failed to load leaderboard';
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        console.error('Failed to load scores:', err);
+      } else {
+        console.error('Failed to load scores:', String(err));
+      }
+
+      let msg = 'Failed to load leaderboard';
+      if (err instanceof Error) {
+        msg = err.message || msg;
+      } else {
+        msg = String(err) || msg;
+      }
       if (msg.includes('Missing or insufficient permissions')) {
         msg = 'Database permissions error. Ask admin to check Firestore rules.';
       } else if (msg.includes('Timeout')) {
@@ -149,13 +159,13 @@ const LeaderboardScreen: React.FC<LeaderboardScreenProps> = ({ currentUser }) =>
                 {scores.map((s, index) => {
                   let dateStr = 'Unknown';
                   try {
-                    const ts = s.timestamp as any;
-                    if (ts && ts.seconds) {
+                    const ts = s.timestamp;
+                    if (ts && typeof ts === 'object' && 'seconds' in ts) {
                       dateStr = new Date(ts.seconds * 1000).toLocaleDateString(undefined, {
                         month: 'short',
                         day: 'numeric',
                       });
-                    } else if (ts) {
+                    } else if (typeof ts === 'number' || typeof ts === 'string') {
                       dateStr = new Date(ts).toLocaleDateString(undefined, {
                         month: 'short',
                         day: 'numeric',

@@ -82,6 +82,8 @@ const PublicProfileScreen: React.FC<PublicProfileScreenProps> = ({ currentUser }
             gamesPlayed: 0,
             bestScore: 0,
             friendCount: 0,
+            maxStreak: 0,
+            avatarId: 0,
           });
         }
         setEquippedCosmetics(cosmeticsData || {});
