@@ -1,5 +1,5 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { saveScore, getLeaderboard } from '../leaderboard';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { getLeaderboard, saveScore } from '../leaderboard';
 
 // Mock Firestore
 const mocks = vi.hoisted(() => ({
@@ -303,7 +303,7 @@ describe('Firebase Leaderboard Functions', () => {
   });
 
   describe('Integration: Save and Retrieve', () => {
-    it.skip('should save score and retrieve it from leaderboard', async () => {
+    it('should save score and retrieve it from leaderboard', async () => {
       // Setup: No existing score
       mocks.getDoc.mockResolvedValue({
         exists: () => false,
