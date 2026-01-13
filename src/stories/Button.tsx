@@ -1,7 +1,7 @@
 import React from 'react';
 import './button.css';
 
-interface ButtonProps {
+interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   /** Is this the principal call to action on the page? */
   isPrimary?: boolean;
   /** What background color to use */
@@ -12,7 +12,6 @@ interface ButtonProps {
   label: string;
   /** Optional click handler */
   onClick?: () => void;
-  [key: string]: any;
 }
 
 /** Primary UI component for user interaction */

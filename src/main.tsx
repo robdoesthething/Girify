@@ -18,9 +18,10 @@ if (rootElement) {
       </StrictMode>
     );
     logger.info('[main.tsx] App rendered successfully');
-  } catch (e: any) {
+  } catch (e: unknown) {
     logger.error('[main.tsx] Failed to render:', e);
-    rootElement.innerHTML = `<div style="padding: 20px; color: red;">Error: ${e.message}</div>`;
+    const errorMessage = e instanceof Error ? e.message : String(e);
+    rootElement.innerHTML = `<div style="padding: 20px; color: red;">Error: ${errorMessage}</div>`;
   }
 } else {
   logger.error('[main.tsx] Root element not found');

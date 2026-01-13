@@ -20,7 +20,7 @@ interface AdminGiurosProps {
   users: UserProfile[];
   shopItems: { all: ShopItem[] };
   theme: string;
-  onUpdateShopItem?: (id: string, updates: any) => Promise<void>;
+  onUpdateShopItem?: (id: string, updates: Partial<ShopItem>) => Promise<void>;
 }
 
 const AdminGiuros: React.FC<AdminGiurosProps> = ({

@@ -1,6 +1,7 @@
 import { fireEvent, render, screen } from '@testing-library/react';
 import { BrowserRouter } from 'react-router-dom';
 import { describe, expect, it, vi } from 'vitest';
+import { Feedback, GameState } from '../../types/game';
 import GameScreen from '../GameScreen';
 
 // Mock dependencies
@@ -52,7 +53,7 @@ vi.mock('../Quiz', () => {
   return { default: MockQuiz };
 });
 vi.mock('../RegisterPanel', () => {
-  const RegisterPanel = ({ onRegister }: any) => (
+  const RegisterPanel = ({ onRegister }: { onRegister: (username: string) => void }) => (
     <div data-testid="register-panel">
       <button onClick={() => onRegister('@testuser')}>Register</button>
     </div>
@@ -66,7 +67,7 @@ vi.mock('../SummaryScreen', () => {
   return { default: SummaryScreen };
 });
 vi.mock('../LandingPage', () => {
-  const LandingPage = ({ onStart, onLogin }: any) => (
+  const LandingPage = ({ onStart, onLogin }: { onStart: () => void; onLogin: () => void }) => (
     <div data-testid="landing-page">
       <button onClick={onStart}>Start</button>
       <button onClick={onLogin}>Login</button>
@@ -99,7 +100,7 @@ const mockProcessAnswer = vi.fn();
 const defaultProps = {
   state: {
     username: null,
-    gameState: 'intro',
+    gameState: 'intro' as GameState,
     score: 0,
     streak: 0,
     quizStreets: [],
@@ -108,15 +109,26 @@ const defaultProps = {
     hintStreets: [],
     hintsRevealedCount: 0,
     options: [],
-    feedback: 'idle',
+    feedback: 'idle' as Feedback,
     autoAdvance: false,
     selectedAnswer: null,
     isInputLocked: false,
     profileLoaded: false,
+    realName: '',
+    questionStartTime: 0,
+    correct: 0,
+    selectedStreet: null,
+    answerStatus: 'idle',
+    showResults: false,
+    showSummary: false,
+    hintLevel: 0,
+    registerMode: 'signup' as 'signup' | 'signin',
+    plannedQuestions: [],
+    activePage: 'game',
   },
   dispatch: mockDispatch,
-  theme: 'light',
-  deviceMode: 'desktop',
+  theme: 'light' as 'light' | 'dark',
+  deviceMode: 'desktop' as 'desktop' | 'mobile' | 'tablet',
   t: (key: string) => key,
   currentStreet: null,
   handleSelectAnswer: mockHandleSelectAnswer,
@@ -127,7 +139,7 @@ const defaultProps = {
   hasPlayedToday: () => false,
 };
 
-const renderGameScreen = (props: any = {}) => {
+const renderGameScreen = (props: Record<string, unknown> = {}) => {
   return render(
     <BrowserRouter>
       <GameScreen {...defaultProps} {...props} />

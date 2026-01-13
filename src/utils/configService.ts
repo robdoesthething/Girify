@@ -3,8 +3,8 @@
  * Fetches and caches app configuration from Firestore.
  * Allows dynamic configuration of payouts without code changes.
  */
-import { db } from '../firebase';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
+import { db } from '../firebase';
 
 const CONFIG_DOC = 'settings';
 const CONFIG_COLLECTION = 'config';
@@ -63,7 +63,9 @@ export const getPayoutConfig = async (): Promise<PayoutConfig> => {
  * @param {Partial<PayoutConfig>} updates
  * @returns {Promise<{success: boolean, error?: string}>}
  */
-export const updatePayoutConfig = async (updates: Partial<PayoutConfig>): Promise<{ success: boolean, error?: string }> => {
+export const updatePayoutConfig = async (
+  updates: Partial<PayoutConfig>
+): Promise<{ success: boolean; error?: string }> => {
   try {
     const configRef = doc(db, CONFIG_COLLECTION, CONFIG_DOC);
     const configDoc = await getDoc(configRef);
@@ -84,9 +86,10 @@ export const updatePayoutConfig = async (updates: Partial<PayoutConfig>): Promis
     console.log('[Config] Payout config updated:', newPayouts);
 
     return { success: true };
-  } catch (e: any) {
+  } catch (e: unknown) {
     console.error('Error updating payout config:', e);
-    return { success: false, error: e.message };
+    const errorMessage = e instanceof Error ? e.message : String(e);
+    return { success: false, error: errorMessage };
   }
 };
 
