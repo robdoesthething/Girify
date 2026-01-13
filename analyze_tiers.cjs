@@ -31,10 +31,6 @@ try {
     return street.geometry.reduce((acc, seg) => acc + seg.length, 0);
   }
 
-  function _getName(street) {
-    return street.name;
-  }
-
   // Group by tier
   const tiers = {};
   streets.forEach(s => {

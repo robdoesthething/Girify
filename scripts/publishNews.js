@@ -1,11 +1,8 @@
-import { initializeApp, cert } from 'firebase-admin/app';
+import { cert, initializeApp } from 'firebase-admin/app';
 import { getFirestore } from 'firebase-admin/firestore';
 import { readFile } from 'fs/promises';
-import { fileURLToPath } from 'url';
 import path from 'path';
 import readline from 'readline';
-
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 /**
  * Publish News Script

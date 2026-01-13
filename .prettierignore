@@ -1,21 +1,9 @@
-# Build outputs
 dist
 build
 coverage
-
-# Dependencies
 node_modules
-
-# HTML files (Vite handles these)
-*.html
-
-# Lock files
-package-lock.json
-pnpm-lock.yaml
-yarn.lock
-
-# Git
+*.min.js
+*.min.css
+public
+.vscode
 .git
-
-# Husky
-.husky

@@ -1,0 +1,558 @@
+
+> girify@0.2.0 lint
+> eslint . --ext js,jsx,ts,tsx
+
+(node:47688) ESLintEnvWarning: /* eslint-env */ comments are no longer recognized when linting with flat config and will be reported as errors as of v10.0.0. Replace them with /* global */ comments or define globals in your config file. See https://eslint.org/docs/latest/use/configure/migration-guide#eslint-env-configuration-comments for details. Found in /Users/robertosanchezgallego/Desktop/Girify/analyze_tiers.cjs at line 1.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:47688) ESLintEnvWarning: /* eslint-env */ comments are no longer recognized when linting with flat config and will be reported as errors as of v10.0.0. Replace them with /* global */ comments or define globals in your config file. See https://eslint.org/docs/latest/use/configure/migration-guide#eslint-env-configuration-comments for details. Found in /Users/robertosanchezgallego/Desktop/Girify/playwright.config.ts at line 1.
+(node:47688) ESLintEnvWarning: /* eslint-env */ comments are no longer recognized when linting with flat config and will be reported as errors as of v10.0.0. Replace them with /* global */ comments or define globals in your config file. See https://eslint.org/docs/latest/use/configure/migration-guide#eslint-env-configuration-comments for details. Found in /Users/robertosanchezgallego/Desktop/Girify/scripts/fetchStreets.js at line 1.
+(node:47688) ESLintEnvWarning: /* eslint-env */ comments are no longer recognized when linting with flat config and will be reported as errors as of v10.0.0. Replace them with /* global */ comments or define globals in your config file. See https://eslint.org/docs/latest/use/configure/migration-guide#eslint-env-configuration-comments for details. Found in /Users/robertosanchezgallego/Desktop/Girify/scripts/generateQuizPlan.js at line 1.
+
+/Users/robertosanchezgallego/Desktop/Girify/scripts/harmonizeDatabase.js
+  178:5  error  'processedCount' is assigned a value but never used  no-unused-vars
+
+/Users/robertosanchezgallego/Desktop/Girify/scripts/migrateCosmetics.js
+  53:11  error  'processItems' is assigned a value but never used  no-unused-vars
+
+/Users/robertosanchezgallego/Desktop/Girify/src/AppRoutes.tsx
+   41:29  warning  Arrow function has too many lines (207). Maximum allowed is 150  max-lines-per-function
+  117:77  warning  Unexpected any. Specify a different type                         @typescript-eslint/no-explicit-any
+
+/Users/robertosanchezgallego/Desktop/Girify/src/components/AdminGiuros.tsx
+   23:44  warning  Unexpected any. Specify a different type                                       @typescript-eslint/no-explicit-any
+   26:49  warning  Arrow function has too many lines (214). Maximum allowed is 150                max-lines-per-function
+   51:91  warning  No magic number: 5                                                             no-magic-numbers
+   61:50  warning  Async arrow function 'handleEditPrice' has no 'await' expression               @typescript-eslint/require-await
+   89:7   warning  Unused eslint-disable directive (no problems were reported from 'no-console')
+  248:53  warning  Do not nest ternary expressions                                                no-nested-ternary
+  248:83  warning  Do not nest ternary expressions                                                no-nested-ternary
+
+/Users/robertosanchezgallego/Desktop/Girify/src/components/AdminPanel.tsx
+   53:14  warning  Unexpected any. Specify a different type                         @typescript-eslint/no-explicit-any
+   57:30  warning  Arrow function has too many lines (367). Maximum allowed is 150  max-lines-per-function
+  133:17  warning  Unexpected any. Specify a different type                         @typescript-eslint/no-explicit-any
+  181:17  warning  Unexpected any. Specify a different type                         @typescript-eslint/no-explicit-any
+  246:61  warning  No magic number: 7                                               no-magic-numbers
+
+/Users/robertosanchezgallego/Desktop/Girify/src/components/AnnouncementModal.tsx
+   9:16  warning  Unexpected any. Specify a different type            @typescript-eslint/no-explicit-any
+  22:34  warning  Unexpected any. Specify a different type            @typescript-eslint/no-explicit-any
+  62:11  warning  Dangerous property 'dangerouslySetInnerHTML' found  react/no-danger
+
+/Users/robertosanchezgallego/Desktop/Girify/src/components/FeedbackModal.tsx
+   9:3   warning  Prop name `inline` doesn’t match rule `^(is|has|should|can|will|did)[A-Z]([A-Za-z0-9]?)+`  react/boolean-prop-naming
+  36:30  warning  Unexpected any. Specify a different type                                                   @typescript-eslint/no-explicit-any
+  42:8   warning  No magic number: 2000                                                                      no-magic-numbers
+
+/Users/robertosanchezgallego/Desktop/Girify/src/components/FeedbackScreen.tsx
+  11:55  warning  Arrow function has too many lines (158). Maximum allowed is 150  max-lines-per-function
+  35:30  warning  Unexpected any. Specify a different type                         @typescript-eslint/no-explicit-any
+
+/Users/robertosanchezgallego/Desktop/Girify/src/components/FriendRequests.tsx
+  11:44  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  19:52  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  33:37  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/Users/robertosanchezgallego/Desktop/Girify/src/components/FriendsScreen.tsx
+   45:53  warning  Arrow function has too many lines (425). Maximum allowed is 150  max-lines-per-function
+   50:44  warning  Unexpected any. Specify a different type                         @typescript-eslint/no-explicit-any
+   55:54  warning  Unexpected any. Specify a different type                         @typescript-eslint/no-explicit-any
+  103:41  warning  Unexpected any. Specify a different type                         @typescript-eslint/no-explicit-any
+  116:43  warning  No magic number: 3000                                            no-magic-numbers
+
+/Users/robertosanchezgallego/Desktop/Girify/src/components/GameScreen.tsx
+  17:28  warning  Unexpected any. Specify a different type                         @typescript-eslint/no-explicit-any
+  30:41  warning  Arrow function has too many lines (235). Maximum allowed is 150  max-lines-per-function
+  69:10  warning  No magic number: 1500                                            no-magic-numbers
+
+/Users/robertosanchezgallego/Desktop/Girify/src/components/LandingPage.tsx
+  28:8  warning  No magic number: 4000  no-magic-numbers
+
+/Users/robertosanchezgallego/Desktop/Girify/src/components/LeaderboardScreen.tsx
+   19:61  warning  Arrow function has too many lines (158). Maximum allowed is 150  max-lines-per-function
+   34:87  warning  No magic number: 5000                                            no-magic-numbers
+   44:19  warning  Unexpected any. Specify a different type                         @typescript-eslint/no-explicit-any
+  107:14  warning  Do not nest ternary expressions                                  no-nested-ternary
+  112:17  warning  Do not nest ternary expressions                                  no-nested-ternary
+  128:47  warning  Unexpected any. Specify a different type                         @typescript-eslint/no-explicit-any
+  144:52  warning  No magic number: 0.05                                            no-magic-numbers
+  156:27  warning  Do not nest ternary expressions                                  no-nested-ternary
+  161:29  warning  Do not nest ternary expressions                                  no-nested-ternary
+  161:77  warning  Do not nest ternary expressions                                  no-nested-ternary
+
+/Users/robertosanchezgallego/Desktop/Girify/src/components/MapArea.tsx
+   28:50  warning  No magic number: 80                                              no-magic-numbers
+   28:54  warning  No magic number: 80                                              no-magic-numbers
+   32:16  warning  No magic number: 2100                                            no-magic-numbers
+   37:19  warning  Unexpected any. Specify a different type                         @typescript-eslint/no-explicit-any
+   43:20  warning  No magic number: 41.3879                                         no-magic-numbers
+   43:29  warning  No magic number: 2.1699                                          no-magic-numbers
+   43:38  warning  No magic number: 13                                              no-magic-numbers
+   73:44  warning  No magic number: 768                                             no-magic-numbers
+   74:53  warning  No magic number: 40                                              no-magic-numbers
+   74:57  warning  No magic number: 40                                              no-magic-numbers
+   74:64  warning  No magic number: 80                                              no-magic-numbers
+   74:68  warning  No magic number: 80                                              no-magic-numbers
+   78:35  warning  No magic number: 13                                              no-magic-numbers
+  114:36  warning  No magic number: 41.4036                                         no-magic-numbers
+  114:45  warning  No magic number: 2.1744                                          no-magic-numbers
+  115:34  warning  No magic number: 41.4036                                         no-magic-numbers
+  115:43  warning  No magic number: 2.1894                                          no-magic-numbers
+  116:29  warning  No magic number: 41.4218                                         no-magic-numbers
+  116:38  warning  No magic number: 2.1186                                          no-magic-numbers
+  117:31  warning  No magic number: 41.4145                                         no-magic-numbers
+  117:40  warning  No magic number: 2.1527                                          no-magic-numbers
+  118:29  warning  No magic number: 41.3809                                         no-magic-numbers
+  118:38  warning  No magic number: 2.1228                                          no-magic-numbers
+  119:25  warning  No magic number: 41.3688                                         no-magic-numbers
+  119:34  warning  No magic number: 2.1534                                          no-magic-numbers
+  120:28  warning  No magic number: 41.3684                                         no-magic-numbers
+  120:37  warning  No magic number: 2.191                                           no-magic-numbers
+  121:32  warning  No magic number: 41.3916                                         no-magic-numbers
+  121:41  warning  No magic number: 2.1649                                          no-magic-numbers
+  122:31  warning  No magic number: 41.3954                                         no-magic-numbers
+  122:40  warning  No magic number: 2.1619                                          no-magic-numbers
+  123:34  warning  No magic number: 41.3911                                         no-magic-numbers
+  123:43  warning  No magic number: 2.1806                                          no-magic-numbers
+  124:29  warning  No magic number: 41.384                                          no-magic-numbers
+  124:37  warning  No magic number: 2.1762                                          no-magic-numbers
+  125:37  warning  No magic number: 41.3758                                         no-magic-numbers
+  125:46  warning  No magic number: 2.1778                                          no-magic-numbers
+  126:29  warning  No magic number: 41.3817                                         no-magic-numbers
+  126:38  warning  No magic number: 2.1716                                          no-magic-numbers
+  127:39  warning  No magic number: 41.3875                                         no-magic-numbers
+  127:48  warning  No magic number: 2.1753                                          no-magic-numbers
+  128:40  warning  No magic number: 41.3837                                         no-magic-numbers
+  128:49  warning  No magic number: 2.182                                           no-magic-numbers
+  129:35  warning  No magic number: 41.3675                                         no-magic-numbers
+  129:44  warning  No magic number: 2.1469                                          no-magic-numbers
+  132:42  warning  No magic number: 41.3881                                         no-magic-numbers
+  132:51  warning  No magic number: 2.1873                                          no-magic-numbers
+  133:46  warning  No magic number: 41.4397                                         no-magic-numbers
+  133:55  warning  No magic number: 2.1465                                          no-magic-numbers
+  134:37  warning  No magic number: 41.3636                                         no-magic-numbers
+  134:46  warning  No magic number: 2.1578                                          no-magic-numbers
+  135:38  warning  No magic number: 41.4187                                         no-magic-numbers
+  135:47  warning  No magic number: 2.1642                                          no-magic-numbers
+  136:54  warning  No magic number: 41.3661                                         no-magic-numbers
+  136:63  warning  No magic number: 2.1659                                          no-magic-numbers
+  137:41  warning  No magic number: 41.4103                                         no-magic-numbers
+  137:50  warning  No magic number: 2.2168                                          no-magic-numbers
+  138:49  warning  No magic number: 41.3768                                         no-magic-numbers
+  138:58  warning  No magic number: 2.1378                                          no-magic-numbers
+  139:38  warning  No magic number: 41.3773                                         no-magic-numbers
+  139:47  warning  No magic number: 2.1461                                          no-magic-numbers
+  142:34  warning  No magic number: 41.3851                                         no-magic-numbers
+  142:43  warning  No magic number: 2.1811                                          no-magic-numbers
+  143:26  warning  No magic number: 41.3833                                         no-magic-numbers
+  143:35  warning  No magic number: 2.1667                                          no-magic-numbers
+  144:34  warning  No magic number: 41.3755                                         no-magic-numbers
+  144:43  warning  No magic number: 2.1754                                          no-magic-numbers
+  145:31  warning  No magic number: 41.413                                          no-magic-numbers
+  145:39  warning  No magic number: 2.1317                                          no-magic-numbers
+  146:39  warning  No magic number: 41.3685                                         no-magic-numbers
+  146:48  warning  No magic number: 2.16                                            no-magic-numbers
+  147:31  warning  No magic number: 41.371                                          no-magic-numbers
+  147:39  warning  No magic number: 2.1492                                          no-magic-numbers
+  148:50  warning  No magic number: 41.384                                          no-magic-numbers
+  148:58  warning  No magic number: 2.1773                                          no-magic-numbers
+  151:29  warning  No magic number: 41.3636                                         no-magic-numbers
+  151:38  warning  No magic number: 2.1578                                          no-magic-numbers
+  152:39  warning  No magic number: 41.4186                                         no-magic-numbers
+  152:48  warning  No magic number: 2.1579                                          no-magic-numbers
+  153:38  warning  No magic number: 41.4189                                         no-magic-numbers
+  153:47  warning  No magic number: 2.158                                           no-magic-numbers
+  154:37  warning  No magic number: 41.4175                                         no-magic-numbers
+  154:46  warning  No magic number: 2.115                                           no-magic-numbers
+  157:48  warning  No magic number: 41.435                                          no-magic-numbers
+  157:56  warning  No magic number: 2.1818                                          no-magic-numbers
+  158:33  warning  No magic number: 41.412                                          no-magic-numbers
+  158:41  warning  No magic number: 2.2163                                          no-magic-numbers
+  159:38  warning  No magic number: 41.4042                                         no-magic-numbers
+  159:47  warning  No magic number: 2.1913                                          no-magic-numbers
+  160:36  warning  No magic number: 41.3892                                         no-magic-numbers
+  160:45  warning  No magic number: 2.1384                                          no-magic-numbers
+  161:31  warning  No magic number: 41.3758                                         no-magic-numbers
+  161:40  warning  No magic number: 2.1492                                          no-magic-numbers
+  162:31  warning  No magic number: 41.3753                                         no-magic-numbers
+  162:40  warning  No magic number: 2.1828                                          no-magic-numbers
+  163:31  warning  No magic number: 41.361                                          no-magic-numbers
+  163:39  warning  No magic number: 2.1287                                          no-magic-numbers
+  164:26  warning  No magic number: 41.3551                                         no-magic-numbers
+  164:35  warning  No magic number: 2.0722                                          no-magic-numbers
+  167:44  warning  No magic number: 41.3712                                         no-magic-numbers
+  167:53  warning  No magic number: 2.1895                                          no-magic-numbers
+  168:45  warning  No magic number: 41.3784                                         no-magic-numbers
+  168:54  warning  No magic number: 2.1925                                          no-magic-numbers
+  169:42  warning  No magic number: 41.3834                                         no-magic-numbers
+  169:51  warning  No magic number: 2.1963                                          no-magic-numbers
+  170:45  warning  No magic number: 41.3907                                         no-magic-numbers
+  170:54  warning  No magic number: 2.2035                                          no-magic-numbers
+  171:40  warning  No magic number: 41.3948                                         no-magic-numbers
+  171:49  warning  No magic number: 2.2078                                          no-magic-numbers
+  172:43  warning  No magic number: 41.3995                                         no-magic-numbers
+  172:52  warning  No magic number: 2.2132                                          no-magic-numbers
+  173:48  warning  No magic number: 41.4035                                         no-magic-numbers
+  173:57  warning  No magic number: 2.2173                                          no-magic-numbers
+  174:38  warning  No magic number: 41.4072                                         no-magic-numbers
+  174:47  warning  No magic number: 2.2215                                          no-magic-numbers
+  177:36  warning  No magic number: 41.3896                                         no-magic-numbers
+  177:45  warning  No magic number: 2.1539                                          no-magic-numbers
+  178:38  warning  No magic number: 41.4116                                         no-magic-numbers
+  178:47  warning  No magic number: 2.1749                                          no-magic-numbers
+  179:34  warning  No magic number: 41.4277                                         no-magic-numbers
+  179:43  warning  No magic number: 2.1444                                          no-magic-numbers
+  180:37  warning  No magic number: 41.3845                                         no-magic-numbers
+  180:46  warning  No magic number: 2.1936                                          no-magic-numbers
+  183:42  warning  No magic number: 41.3957                                         no-magic-numbers
+  183:51  warning  No magic number: 2.1113                                          no-magic-numbers
+  184:38  warning  No magic number: 41.4003                                         no-magic-numbers
+  184:47  warning  No magic number: 2.1147                                          no-magic-numbers
+  185:38  warning  No magic number: 41.3875                                         no-magic-numbers
+  185:47  warning  No magic number: 2.1123                                          no-magic-numbers
+  186:48  warning  No magic number: 41.3965                                         no-magic-numbers
+  186:57  warning  No magic number: 2.1318                                          no-magic-numbers
+  187:43  warning  No magic number: 41.4041                                         no-magic-numbers
+  187:52  warning  No magic number: 2.1362                                          no-magic-numbers
+  188:27  warning  No magic number: 41.4003                                         no-magic-numbers
+  188:36  warning  No magic number: 2.1213                                          no-magic-numbers
+  189:36  warning  No magic number: 41.4005                                         no-magic-numbers
+  189:45  warning  No magic number: 2.1218                                          no-magic-numbers
+  192:34  warning  No magic number: 41.4367                                         no-magic-numbers
+  192:43  warning  No magic number: 2.1899                                          no-magic-numbers
+  193:40  warning  No magic number: 41.4478                                         no-magic-numbers
+  193:49  warning  No magic number: 2.1856                                          no-magic-numbers
+  194:42  warning  No magic number: 41.4355                                         no-magic-numbers
+  194:51  warning  No magic number: 2.1903                                          no-magic-numbers
+  195:37  warning  No magic number: 41.4339                                         no-magic-numbers
+  195:46  warning  No magic number: 2.1902                                          no-magic-numbers
+  196:39  warning  No magic number: 41.4312                                         no-magic-numbers
+  196:48  warning  No magic number: 2.1888                                          no-magic-numbers
+  197:38  warning  No magic number: 41.4243                                         no-magic-numbers
+  197:47  warning  No magic number: 2.1924                                          no-magic-numbers
+  200:47  warning  No magic number: 41.4418                                         no-magic-numbers
+  200:56  warning  No magic number: 2.1732                                          no-magic-numbers
+  201:46  warning  No magic number: 41.4344                                         no-magic-numbers
+  201:55  warning  No magic number: 2.1611                                          no-magic-numbers
+  202:27  warning  No magic number: 41.4395                                         no-magic-numbers
+  202:36  warning  No magic number: 2.1518                                          no-magic-numbers
+  203:29  warning  No magic number: 41.4486                                         no-magic-numbers
+  203:38  warning  No magic number: 2.1651                                          no-magic-numbers
+  204:31  warning  No magic number: 41.4568                                         no-magic-numbers
+  204:40  warning  No magic number: 2.1785                                          no-magic-numbers
+  205:37  warning  No magic number: 41.4613                                         no-magic-numbers
+  205:46  warning  No magic number: 2.1792                                          no-magic-numbers
+  206:39  warning  No magic number: 41.4391                                         no-magic-numbers
+  206:48  warning  No magic number: 2.1653                                          no-magic-numbers
+  207:30  warning  No magic number: 41.435                                          no-magic-numbers
+  207:38  warning  No magic number: 2.1818                                          no-magic-numbers
+  214:16  warning  No magic number: 30                                              no-magic-numbers
+  214:20  warning  No magic number: 30                                              no-magic-numbers
+  215:18  warning  No magic number: 15                                              no-magic-numbers
+  215:22  warning  No magic number: 15                                              no-magic-numbers
+  234:41  warning  Arrow function has too many lines (164). Maximum allowed is 150  max-lines-per-function
+  241:50  warning  No magic number: 13                                              no-magic-numbers
+  254:47  warning  Unexpected any. Specify a different type                         @typescript-eslint/no-explicit-any
+  290:20  warning  No magic number: 41.3879                                         no-magic-numbers
+  290:29  warning  No magic number: 2.1699                                          no-magic-numbers
+  298:14  warning  No magic number: 41.2                                            no-magic-numbers
+  299:14  warning  No magic number: 41.6                                            no-magic-numbers
+  299:20  warning  No magic number: 2.45                                            no-magic-numbers
+  319:37  warning  No magic number: 41.3879                                         no-magic-numbers
+  319:46  warning  No magic number: 2.1699                                          no-magic-numbers
+  336:27  warning  No magic number: 11                                              no-magic-numbers
+  338:28  warning  Do not use Array index in keys                                   react/no-array-index-key
+  339:33  warning  No magic number: 15                                              no-magic-numbers
+  343:33  warning  No magic number: 5                                               no-magic-numbers
+  395:9   warning  Empty components are self-closing                                react/self-closing-comp
+  398:9   warning  Empty components are self-closing                                react/self-closing-comp
+
+/Users/robertosanchezgallego/Desktop/Girify/src/components/NewsScreen.tsx
+   13:54  warning  Unexpected any. Specify a different type            @typescript-eslint/no-explicit-any
+   19:53  warning  Unexpected any. Specify a different type            @typescript-eslint/no-explicit-any
+   25:44  warning  Unexpected any. Specify a different type            @typescript-eslint/no-explicit-any
+   34:34  warning  Unexpected any. Specify a different type            @typescript-eslint/no-explicit-any
+   77:10  warning  Do not nest ternary expressions                     no-nested-ternary
+  117:19  warning  Dangerous property 'dangerouslySetInnerHTML' found  react/no-danger
+
+/Users/robertosanchezgallego/Desktop/Girify/src/components/OnboardingTour.tsx
+   75:23  warning  No magic number: 3              no-magic-numbers
+  104:22  warning  Do not use Array index in keys  react/no-array-index-key
+
+/Users/robertosanchezgallego/Desktop/Girify/src/components/ProfileScreen.tsx
+   32:53   warning  Arrow function has too many lines (349). Maximum allowed is 150  max-lines-per-function
+   53:62   warning  Unexpected any. Specify a different type                         @typescript-eslint/no-explicit-any
+   54:50   warning  Unexpected any. Specify a different type                         @typescript-eslint/no-explicit-any
+   58:66   warning  Unexpected any. Specify a different type                         @typescript-eslint/no-explicit-any
+  103:27   warning  Unexpected any. Specify a different type                         @typescript-eslint/no-explicit-any
+  114:80   warning  Unexpected any. Specify a different type                         @typescript-eslint/no-explicit-any
+  189:52   warning  Unexpected any. Specify a different type                         @typescript-eslint/no-explicit-any
+  231:41   warning  Unexpected any. Specify a different type                         @typescript-eslint/no-explicit-any
+  231:55   warning  Unexpected any. Specify a different type                         @typescript-eslint/no-explicit-any
+  303:29   warning  Do not nest ternary expressions                                  no-nested-ternary
+  384:46   warning  No magic number: 7                                               no-magic-numbers
+  387:37   warning  Do not use Array index in keys                                   react/no-array-index-key
+  387:129  warning  Do not nest ternary expressions                                  no-nested-ternary
+
+/Users/robertosanchezgallego/Desktop/Girify/src/components/PublicProfileScreen.tsx
+   25:65  warning  Arrow function has too many lines (260). Maximum allowed is 150  max-lines-per-function
+   31:42  warning  Unexpected any. Specify a different type                         @typescript-eslint/no-explicit-any
+   39:62  warning  Unexpected any. Specify a different type                         @typescript-eslint/no-explicit-any
+  184:44  warning  No magic number: 6                                               no-magic-numbers
+  193:44  warning  No magic number: 6                                               no-magic-numbers
+  195:49  warning  No magic number: 6                                               no-magic-numbers
+  203:16  warning  Do not nest ternary expressions                                  no-nested-ternary
+  269:26  warning  Do not nest ternary expressions                                  no-nested-ternary
+
+/Users/robertosanchezgallego/Desktop/Girify/src/components/Quiz/Hints.tsx
+  19:37  warning  No magic number: 3  no-magic-numbers
+
+/Users/robertosanchezgallego/Desktop/Girify/src/components/Quiz/NextButton.tsx
+  18:17  warning  Do not nest ternary expressions  no-nested-ternary
+
+/Users/robertosanchezgallego/Desktop/Girify/src/components/Quiz/Options.tsx
+  13:3  warning  Prop name `autoAdvance` doesn’t match rule `^(is|has|should|can|will|did)[A-Z]([A-Za-z0-9]?)+`  react/boolean-prop-naming
+  14:3  warning  Prop name `disabled` doesn’t match rule `^(is|has|should|can|will|did)[A-Z]([A-Za-z0-9]?)+`     react/boolean-prop-naming
+
+/Users/robertosanchezgallego/Desktop/Girify/src/components/Quiz/index.tsx
+  19:14  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  20:15  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  21:13  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  22:18  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/Users/robertosanchezgallego/Desktop/Girify/src/components/RegisterPanel.tsx
+   31:25  warning  No magic number: 3                                               no-magic-numbers
+   50:54  warning  No magic number: 9000                                            no-magic-numbers
+   54:60  warning  No magic number: 20                                              no-magic-numbers
+   95:53  warning  Arrow function has too many lines (248). Maximum allowed is 150  max-lines-per-function
+  122:73  warning  Unexpected any. Specify a different type                         @typescript-eslint/no-explicit-any
+  148:19  warning  Unexpected any. Specify a different type                         @typescript-eslint/no-explicit-any
+  246:19  warning  Unexpected any. Specify a different type                         @typescript-eslint/no-explicit-any
+  358:14  warning  Do not nest ternary expressions                                  no-nested-ternary
+
+/Users/robertosanchezgallego/Desktop/Girify/src/components/SettingsScreen.tsx
+   15:3    warning  Prop name `autoAdvance` doesn’t match rule `^(is|has|should|can|will|did)[A-Z]([A-Za-z0-9]?)+`  react/boolean-prop-naming
+   20:55   warning  Arrow function has too many lines (264). Maximum allowed is 150                                 max-lines-per-function
+   42:47   warning  Unexpected any. Specify a different type                                                        @typescript-eslint/no-explicit-any
+   57:21   warning  No magic number: 7                                                                              no-magic-numbers
+  130:19   warning  Unexpected any. Specify a different type                                                        @typescript-eslint/no-explicit-any
+  165:109  warning  Do not nest ternary expressions                                                                 no-nested-ternary
+
+/Users/robertosanchezgallego/Desktop/Girify/src/components/ShopScreen.tsx
+   38:47   warning  Arrow function has too many lines (280). Maximum allowed is 150  max-lines-per-function
+   44:44   warning  Unexpected any. Specify a different type                         @typescript-eslint/no-explicit-any
+   82:42   warning  No magic number: 2000                                            no-magic-numbers
+   88:42   warning  No magic number: 2000                                            no-magic-numbers
+   97:42   warning  No magic number: 2000                                            no-magic-numbers
+   99:52   warning  Unexpected any. Specify a different type                         @typescript-eslint/no-explicit-any
+  100:42   warning  No magic number: 2000                                            no-magic-numbers
+  118:40   warning  No magic number: 2000                                            no-magic-numbers
+  176:19   warning  Do not nest ternary expressions                                  no-nested-ternary
+  200:90   warning  Do not nest ternary expressions                                  no-nested-ternary
+  216:28   warning  Do not nest ternary expressions                                  no-nested-ternary
+  250:110  warning  Do not nest ternary expressions                                  no-nested-ternary
+
+/Users/robertosanchezgallego/Desktop/Girify/src/components/StreetsFetcher.tsx
+    4:34  warning  Arrow function has too many lines (232). Maximum allowed is 150  max-lines-per-function
+    7:42  warning  Unexpected any. Specify a different type                         @typescript-eslint/no-explicit-any
+   43:31  warning  No magic number: 429                                             no-magic-numbers
+   43:57  warning  No magic number: 500                                             no-magic-numbers
+   48:21  warning  Unexpected any. Specify a different type                         @typescript-eslint/no-explicit-any
+   88:39  warning  Unexpected any. Specify a different type                         @typescript-eslint/no-explicit-any
+   93:46  warning  No magic number: 4                                               no-magic-numbers
+   96:41  warning  Unexpected any. Specify a different type                         @typescript-eslint/no-explicit-any
+   97:38  warning  No magic number: 5                                               no-magic-numbers
+   98:38  warning  No magic number: 5                                               no-magic-numbers
+  126:58  warning  No magic number: 3                                               no-magic-numbers
+  127:58  warning  No magic number: 4                                               no-magic-numbers
+  131:21  warning  Unexpected any. Specify a different type                         @typescript-eslint/no-explicit-any
+
+/Users/robertosanchezgallego/Desktop/Girify/src/components/SummaryScreen.tsx
+   29:16  warning  Unexpected any. Specify a different type                         @typescript-eslint/no-explicit-any
+   34:53  warning  Arrow function has too many lines (231). Maximum allowed is 150  max-lines-per-function
+   63:55  warning  Unexpected any. Specify a different type                         @typescript-eslint/no-explicit-any
+  100:23  warning  No magic number: 0.9                                             no-magic-numbers
+  103:23  warning  No magic number: 0.7                                             no-magic-numbers
+  106:23  warning  No magic number: 0.5                                             no-magic-numbers
+  145:48  warning  No magic number: 3000                                            no-magic-numbers
+
+/Users/robertosanchezgallego/Desktop/Girify/src/components/TopBar.tsx
+  13:39  warning  Arrow function has too many lines (196). Maximum allowed is 150  max-lines-per-function
+
+/Users/robertosanchezgallego/Desktop/Girify/src/components/__tests__/GameScreen.test.tsx
+  10:21  error  Component definition is missing display name  react/display-name
+  11:24  error  Component definition is missing display name  react/display-name
+  12:22  error  Component definition is missing display name  react/display-name
+  13:22  error  Component definition is missing display name  react/display-name
+  18:20  error  Component definition is missing display name  react/display-name
+  23:25  error  Component definition is missing display name  react/display-name
+
+/Users/robertosanchezgallego/Desktop/Girify/src/components/stories/TopBar.stories.tsx
+  12:23  warning  Unexpected empty method 'onOpenPage'      no-empty-function
+  13:27  warning  Unexpected empty method 'onTriggerLogin'  no-empty-function
+  14:21  warning  Unexpected empty method 'onLogout'        no-empty-function
+
+/Users/robertosanchezgallego/Desktop/Girify/src/config/constants.ts
+   4:15  warning  No magic number: 60  no-magic-numbers
+   5:13  warning  No magic number: 60  no-magic-numbers
+   5:18  warning  No magic number: 60  no-magic-numbers
+   6:12  warning  No magic number: 24  no-magic-numbers
+   6:17  warning  No magic number: 60  no-magic-numbers
+   6:22  warning  No magic number: 60  no-magic-numbers
+   7:13  warning  No magic number: 7   no-magic-numbers
+   7:17  warning  No magic number: 24  no-magic-numbers
+   7:22  warning  No magic number: 60  no-magic-numbers
+   7:27  warning  No magic number: 60  no-magic-numbers
+  51:22  warning  No magic number: 7   no-magic-numbers
+
+/Users/robertosanchezgallego/Desktop/Girify/src/context/LoadingContext.tsx
+  42:14  warning  Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components  react-refresh/only-export-components
+
+/Users/robertosanchezgallego/Desktop/Girify/src/context/ThemeContext.tsx
+   20:14  warning  Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components  react-refresh/only-export-components
+   26:26  warning  Unexpected empty method 'changeTheme'                                                                                           no-empty-function
+   28:29  warning  Unexpected empty method 'changeLanguage'                                                                                        no-empty-function
+   29:26  warning  Unexpected empty method 'toggleTheme'                                                                                           no-empty-function
+   34:22  warning  Unexpected empty method 'setZoom'                                                                                               no-empty-function
+   71:20  warning  Unexpected empty arrow function                                                                                                 no-empty-function
+  101:17  warning  No magic number: 768                                                                                                            no-magic-numbers
+  104:17  warning  No magic number: 1024                                                                                                           no-magic-numbers
+
+/Users/robertosanchezgallego/Desktop/Girify/src/data/achievements.ts
+  309:48  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  397:43  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  425:58  warning  No magic number: 0.99                     no-magic-numbers
+
+/Users/robertosanchezgallego/Desktop/Girify/src/data/curiosities.js
+  350:51  warning  No magic number: 3  no-magic-numbers
+
+/Users/robertosanchezgallego/Desktop/Girify/src/declarations.d.ts
+  4:18  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/Users/robertosanchezgallego/Desktop/Girify/src/hooks/useAsyncOperation.ts
+  12:26  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  13:23  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  50:29  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/Users/robertosanchezgallego/Desktop/Girify/src/hooks/useAuth.ts
+   41:22  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  120:21  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  134:22  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  136:11  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  153:46  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  165:55  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  170:13  warning  No magic number: 5                        no-magic-numbers
+  173:29  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  206:33  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  248:63  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  254:44  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  254:52  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/Users/robertosanchezgallego/Desktop/Girify/src/hooks/useGameState.ts
+   41:22  warning  Unexpected any. Specify a different type                         @typescript-eslint/no-explicit-any
+   56:29  warning  Arrow function has too many lines (241). Maximum allowed is 150  max-lines-per-function
+   62:14  warning  Unexpected any. Specify a different type                         @typescript-eslint/no-explicit-any
+  109:50  warning  No magic number: 50                                              no-magic-numbers
+  137:55  warning  Unexpected any. Specify a different type                         @typescript-eslint/no-explicit-any
+  145:20  warning  Unexpected any. Specify a different type                         @typescript-eslint/no-explicit-any
+  155:60  warning  No magic number: 3                                               no-magic-numbers
+  156:72  warning  No magic number: 3                                               no-magic-numbers
+  157:63  warning  No magic number: 50                                              no-magic-numbers
+  253:41  warning  No magic number: 3                                               no-magic-numbers
+  255:67  warning  No magic number: 3                                               no-magic-numbers
+  256:76  warning  No magic number: 50                                              no-magic-numbers
+  322:30  warning  Unexpected any. Specify a different type                         @typescript-eslint/no-explicit-any
+
+/Users/robertosanchezgallego/Desktop/Girify/src/hooks/useStreets.ts
+  75:13  warning  Blocks are nested too deeply (5). Maximum allowed is 4  max-depth
+  75:33  warning  No magic number: 3                                      no-magic-numbers
+  81:26  warning  No magic number: 3                                      no-magic-numbers
+  98:24  warning  No magic number: 3                                      no-magic-numbers
+
+/Users/robertosanchezgallego/Desktop/Girify/src/main.tsx
+  21:15  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/Users/robertosanchezgallego/Desktop/Girify/src/stories/Button.tsx
+  15:18  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/Users/robertosanchezgallego/Desktop/Girify/src/types/game.ts
+  5:33  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/Users/robertosanchezgallego/Desktop/Girify/src/utils/__tests__/firebase.test.js
+  152:77  warning  Unexpected empty arrow function  no-empty-function
+  163:77  warning  Unexpected empty arrow function  no-empty-function
+  205:83  warning  Unexpected empty arrow function  no-empty-function
+  273:83  warning  Unexpected empty arrow function  no-empty-function
+
+/Users/robertosanchezgallego/Desktop/Girify/src/utils/badgeTracking.js
+  103:29  warning  No magic number: 5   no-magic-numbers
+  108:54  warning  No magic number: 60  no-magic-numbers
+  113:61  warning  No magic number: 5   no-magic-numbers
+  126:72  warning  No magic number: 3   no-magic-numbers
+  182:40  warning  No magic number: 5   no-magic-numbers
+
+/Users/robertosanchezgallego/Desktop/Girify/src/utils/configService.ts
+  27:19  warning  No magic number: 5                        no-magic-numbers
+  27:23  warning  No magic number: 60                       no-magic-numbers
+  87:15  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/Users/robertosanchezgallego/Desktop/Girify/src/utils/dailyChallenge.js
+   10:32  warning  No magic number: 10000  no-magic-numbers
+   75:46  warning  No magic number: 4      no-magic-numbers
+   76:44  warning  No magic number: 4      no-magic-numbers
+   76:47  warning  No magic number: 6      no-magic-numbers
+   77:42  warning  No magic number: 6      no-magic-numbers
+   77:45  warning  No magic number: 8      no-magic-numbers
+   84:64  warning  No magic number: 3      no-magic-numbers
+   85:64  warning  No magic number: 3      no-magic-numbers
+   86:52  warning  No magic number: 3      no-magic-numbers
+   87:52  warning  No magic number: 4      no-magic-numbers
+   93:24  warning  No magic number: 7      no-magic-numbers
+  149:43  warning  No magic number: 60     no-magic-numbers
+  149:48  warning  No magic number: 60     no-magic-numbers
+  150:46  warning  No magic number: 60     no-magic-numbers
+  150:51  warning  No magic number: 60     no-magic-numbers
+  150:66  warning  No magic number: 60     no-magic-numbers
+  174:21  warning  No magic number: 3      no-magic-numbers
+  180:32  warning  No magic number: 3      no-magic-numbers
+
+/Users/robertosanchezgallego/Desktop/Girify/src/utils/friends.js
+   45:13  warning  No magic number: 5                                      no-magic-numbers
+   54:13  warning  No magic number: 5                                      no-magic-numbers
+  337:11  warning  Blocks are nested too deeply (5). Maximum allowed is 4  max-depth
+  386:36  warning  No magic number: 50                                     no-magic-numbers
+
+/Users/robertosanchezgallego/Desktop/Girify/src/utils/giuros.ts
+  148:15  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  264:94  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/Users/robertosanchezgallego/Desktop/Girify/src/utils/leaderboard.js
+  124:68  warning  No magic number: 2000  no-magic-numbers
+  182:30  warning  No magic number: 6     no-magic-numbers
+  276:33  warning  No magic number: 50    no-magic-numbers
+
+/Users/robertosanchezgallego/Desktop/Girify/src/utils/news.js
+  162:19  warning  Do not nest ternary expressions  no-nested-ternary
+
+/Users/robertosanchezgallego/Desktop/Girify/src/utils/scoring.ts
+  29:17  warning  No magic number: 90  no-magic-numbers
+  30:17  warning  No magic number: 75  no-magic-numbers
+  31:17  warning  No magic number: 50  no-magic-numbers
+  32:17  warning  No magic number: 30  no-magic-numbers
+  43:17  warning  No magic number: 90  no-magic-numbers
+  44:17  warning  No magic number: 75  no-magic-numbers
+  45:17  warning  No magic number: 50  no-magic-numbers
+  46:17  warning  No magic number: 30  no-magic-numbers
+
+/Users/robertosanchezgallego/Desktop/Girify/src/utils/shop.js
+  8:24  warning  No magic number: 5   no-magic-numbers
+  8:28  warning  No magic number: 60  no-magic-numbers
+
+/Users/robertosanchezgallego/Desktop/Girify/src/utils/social.js
+   66:71  warning  No magic number: 20  no-magic-numbers
+  858:68  warning  No magic number: 20  no-magic-numbers
+  908:15  warning  No magic number: 50  no-magic-numbers
+
+✖ 437 problems (8 errors, 429 warnings)
+  0 errors and 3 warnings potentially fixable with the `--fix` option.
+

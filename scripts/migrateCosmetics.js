@@ -1,11 +1,9 @@
-import { initializeApp, cert } from 'firebase-admin/app';
+import { cert, initializeApp } from 'firebase-admin/app';
 import { getFirestore } from 'firebase-admin/firestore';
 import { readFile } from 'fs/promises';
-import { fileURLToPath } from 'url';
 import path from 'path';
 
 // Construct __dirname in ES module
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 /**
  * Cosmetics Migration Script
@@ -49,31 +47,6 @@ const run = async () => {
         batch = db.batch();
         count = 0;
       }
-    };
-
-    // Helper to process items
-    const processItems = (items, type) => {
-      items.forEach(item => {
-        const docRef = shopItemsRef.doc(item.id);
-
-        // Ensure type is set
-        const data = {
-          ...item,
-          type: type,
-        };
-
-        batch.set(docRef, data, { merge: true });
-        count++;
-        uploaded++;
-
-        if (count >= 400) {
-          // Cannot await inside forEach with this logic easily, but synchronous batch Add is fine.
-          // We can commit periodically. However, since this is small data,
-          // we can just let count go up. Wait... Firebase batch limit is 500.
-          // Let's execute immediately if we hit limit.
-          // Note: using async inside forEach is tricky. Let's use for...of loop in main function.
-        }
-      });
     };
 
     const allItems = [];

@@ -1,19 +1,19 @@
-import { db } from '../firebase';
 import {
   collection,
+  deleteDoc,
   doc,
-  setDoc,
+  endAt,
   getDoc,
   getDocs,
-  query,
-  where,
-  orderBy,
   limit,
-  deleteDoc,
-  Timestamp,
+  orderBy,
+  query,
+  setDoc,
   startAt,
-  endAt,
+  Timestamp,
+  where,
 } from 'firebase/firestore';
+import { db } from '../firebase';
 
 const USERS_COLLECTION = 'users'; // Store user profiles/friends here
 const HIGHSCORES_COLLECTION = 'highscores'; // For searching users
@@ -27,13 +27,15 @@ const sanitize = name => name.toLowerCase().replace(/\//g, '_');
  * Search for users by username prefix (using highscores as user index)
  */
 export const searchUsers = async searchText => {
-  if (!searchText || searchText.length < 2) return [];
+  if (!searchText || searchText.length < 2) {
+    return [];
+  }
 
   // Remove @ prefix if user typed it
   // Remove @ prefix and normalize to lowercase
   const searchLower = searchText.toLowerCase();
   const cleanSearch = searchLower.startsWith('@') ? searchLower.slice(1) : searchLower;
-  const legacySearch = '@' + cleanSearch;
+  const legacySearch = `@${cleanSearch}`;
 
   try {
     // Query 1: Clean usernames (New/Migrated format)
@@ -41,7 +43,7 @@ export const searchUsers = async searchText => {
       collection(db, HIGHSCORES_COLLECTION),
       orderBy('username'),
       startAt(cleanSearch),
-      endAt(cleanSearch + '\uf8ff'),
+      endAt(`${cleanSearch}\uf8ff`),
       limit(5)
     );
 
@@ -50,7 +52,7 @@ export const searchUsers = async searchText => {
       collection(db, HIGHSCORES_COLLECTION),
       orderBy('username'),
       startAt(legacySearch),
-      endAt(legacySearch + '\uf8ff'),
+      endAt(`${legacySearch}\uf8ff`),
       limit(5)
     );
 
@@ -70,7 +72,7 @@ export const searchUsers = async searchText => {
         // For display: New handles (with #) don't need @. Legacy ones might.
         // If rawUser has #, leave it. If it starts with @, leave it. Else add @.
         const isHandle = rawUser.includes('#');
-        const displayUser = isHandle || rawUser.startsWith('@') ? rawUser : '@' + rawUser;
+        const displayUser = isHandle || rawUser.startsWith('@') ? rawUser : `@${rawUser}`;
 
         results.set(key, {
           username: displayUser,
@@ -93,14 +95,18 @@ export const searchUsers = async searchText => {
  * Send a friend request
  */
 export const sendFriendRequest = async (fromUsername, toUsername) => {
-  if (!fromUsername || !toUsername) return { error: 'Invalid usernames' };
+  if (!fromUsername || !toUsername) {
+    return { error: 'Invalid usernames' };
+  }
 
   // SANITIZE BOTH INPUTS STRICTLY
   const fromClean = sanitize(fromUsername);
   let toClean = sanitize(toUsername);
 
   // STRICT SELF CHECK (after sanitization)
-  if (fromClean === toClean) return { error: 'Cannot add yourself' };
+  if (fromClean === toClean) {
+    return { error: 'Cannot add yourself' };
+  }
 
   try {
     // 0. Check if target user has migrated
@@ -112,18 +118,24 @@ export const sendFriendRequest = async (fromUsername, toUsername) => {
         // Redirect request to the new handle
         toClean = sanitize(data.migratedTo);
         // Re-check self after migration redirect
-        if (fromClean === toClean) return { error: 'Cannot add yourself' };
+        if (fromClean === toClean) {
+          return { error: 'Cannot add yourself' };
+        }
       }
     }
     // Check if already friends
     const friendshipRef = doc(db, USERS_COLLECTION, fromClean, 'friends', toClean);
     const friendshipSnap = await getDoc(friendshipRef);
-    if (friendshipSnap.exists()) return { error: 'Already friends' };
+    if (friendshipSnap.exists()) {
+      return { error: 'Already friends' };
+    }
 
     // Check if request already sent
     const requestRef = doc(db, USERS_COLLECTION, toClean, 'requests', fromClean);
     const requestSnap = await getDoc(requestRef);
-    if (requestSnap.exists()) return { error: 'Request already sent' };
+    if (requestSnap.exists()) {
+      return { error: 'Request already sent' };
+    }
 
     // Create request
     await setDoc(requestRef, {
@@ -143,7 +155,9 @@ export const sendFriendRequest = async (fromUsername, toUsername) => {
  * Get incoming friend requests
  */
 export const getIncomingRequests = async username => {
-  if (!username) return [];
+  if (!username) {
+    return [];
+  }
   const clean = sanitize(username);
 
   try {
@@ -207,7 +221,9 @@ export const declineFriendRequest = async (username, fromUsername) => {
  * Get my friends list
  */
 export const getFriends = async username => {
-  if (!username) return [];
+  if (!username) {
+    return [];
+  }
   const clean = sanitize(username);
 
   try {
@@ -217,7 +233,8 @@ export const getFriends = async username => {
     // Get today's date seed
     const today = new Date();
     const todaySeed = parseInt(
-      `${today.getFullYear()}${String(today.getMonth() + 1).padStart(2, '0')}${String(today.getDate()).padStart(2, '0')}`
+      `${today.getFullYear()}${String(today.getMonth() + 1).padStart(2, '0')}${String(today.getDate()).padStart(2, '0')}`,
+      10
     );
 
     // For each friend, fetch their profile data
@@ -277,7 +294,9 @@ export const getFriends = async username => {
  * - username_changed: Friend changed their username
  */
 export const getFriendFeed = async friendsList => {
-  if (!friendsList || friendsList.length === 0) return [];
+  if (!friendsList || friendsList.length === 0) {
+    return [];
+  }
 
   // Ensure all friend usernames are without @ prefix for scores query
   // (usernames are stored WITHOUT @ in Firebase)
@@ -363,7 +382,9 @@ export const getFriendFeed = async friendsList => {
 
   for (const activity of allActivities) {
     if (activity.type === 'daily_score') {
-      if (!activity.timestamp) continue;
+      if (!activity.timestamp) {
+        continue;
+      }
       const date = new Date(activity.timestamp.seconds * 1000).toDateString();
       const key = `${activity.username}_${date}`;
       if (!seenUserDays.has(key)) {
@@ -389,7 +410,9 @@ export const getFriendFeed = async friendsList => {
  * Remove a friend
  */
 export const removeFriend = async (user1, user2) => {
-  if (!user1 || !user2) return { error: 'Invalid users' };
+  if (!user1 || !user2) {
+    return { error: 'Invalid users' };
+  }
   const clean1 = sanitize(user1);
   const clean2 = sanitize(user2);
 
@@ -407,7 +430,9 @@ export const removeFriend = async (user1, user2) => {
  * Get friendship status between two users (using subcollections)
  */
 export const getFriendshipStatus = async (user1, user2) => {
-  if (!user1 || !user2) return 'none';
+  if (!user1 || !user2) {
+    return 'none';
+  }
   const clean1 = sanitize(user1);
   const clean2 = sanitize(user2);
 
@@ -415,17 +440,23 @@ export const getFriendshipStatus = async (user1, user2) => {
     // Check if friends
     const friendRef = doc(db, USERS_COLLECTION, clean1, 'friends', clean2);
     const friendSnap = await getDoc(friendRef);
-    if (friendSnap.exists()) return 'friends';
+    if (friendSnap.exists()) {
+      return 'friends';
+    }
 
     // Check if I sent request
     const sentRef = doc(db, USERS_COLLECTION, clean2, 'requests', clean1);
     const sentSnap = await getDoc(sentRef);
-    if (sentSnap.exists()) return 'pending';
+    if (sentSnap.exists()) {
+      return 'pending';
+    }
 
     // Check if they sent request
     const receivedRef = doc(db, USERS_COLLECTION, clean1, 'requests', clean2);
     const receivedSnap = await getDoc(receivedRef);
-    if (receivedSnap.exists()) return 'pending';
+    if (receivedSnap.exists()) {
+      return 'pending';
+    }
 
     return 'none';
   } catch (e) {
@@ -438,7 +469,9 @@ export const getFriendshipStatus = async (user1, user2) => {
  * Block a user
  */
 export const blockUser = async (blocker, blocked) => {
-  if (!blocker || !blocked || blocker === blocked) return;
+  if (!blocker || !blocked || blocker === blocked) {
+    return;
+  }
 
   const blockId = `${sanitize(blocker)}_${sanitize(blocked)}`;
   await setDoc(doc(db, BLOCKS_COLLECTION, blockId), {
@@ -452,7 +485,9 @@ export const blockUser = async (blocker, blocked) => {
  * Unblock a user
  */
 export const unblockUser = async (blocker, blocked) => {
-  if (!blocker || !blocked) return;
+  if (!blocker || !blocked) {
+    return;
+  }
 
   const blockId = `${sanitize(blocker)}_${sanitize(blocked)}`;
   const blockRef = doc(db, BLOCKS_COLLECTION, blockId);

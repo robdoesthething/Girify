@@ -1,1 +1,1 @@
-NODE_NO_WARNINGS=1 npx lint-staged
+npx lint-staged

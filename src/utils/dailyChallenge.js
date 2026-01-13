@@ -20,7 +20,7 @@ export function getTodaySeed() {
   const year = today.getFullYear();
   const month = String(today.getMonth() + 1).padStart(2, '0');
   const day = String(today.getDate()).padStart(2, '0');
-  return parseInt(`${year}${month}${day}`);
+  return parseInt(`${year}${month}${day}`, 10);
 }
 
 /**
@@ -57,7 +57,7 @@ function getSeedForDate(date) {
   const year = date.getFullYear();
   const month = String(date.getMonth() + 1).padStart(2, '0');
   const day = String(date.getDate()).padStart(2, '0');
-  return parseInt(`${year}${month}${day}`);
+  return parseInt(`${year}${month}${day}`, 10);
 }
 
 /**
@@ -71,9 +71,10 @@ export function selectDailyStreets(validStreets, seed) {
   const excludedIds = new Set();
 
   // Parse seed back to date to iterate backwards
-  const year = Math.floor(seed / 10000);
-  const month = Math.floor((seed % 10000) / 100) - 1;
-  const day = seed % 100;
+  const seedStr = String(seed);
+  const year = parseInt(seedStr.substring(0, 4), 10);
+  const month = parseInt(seedStr.substring(4, 6), 10) - 1;
+  const day = parseInt(seedStr.substring(6, 8), 10);
   const currentDate = new Date(year, month, day);
 
   // We need a pure function to select streets for a given seed WITHOUT exclusion recursion
@@ -85,7 +86,9 @@ export function selectDailyStreets(validStreets, seed) {
     const t3 = shuffled.filter(str => str.tier === 3).slice(0, 2);
     const t4 = shuffled.filter(str => str.tier === 4).slice(0, 2);
     let sel = [...t1, ...t2, ...t3, ...t4];
-    if (sel.length < 10) sel = shuffled.slice(0, 10);
+    if (sel.length < 10) {
+      sel = shuffled.slice(0, 10);
+    }
     return sel;
   };
 
@@ -160,7 +163,9 @@ export function getTimeUntilNext() {
  */
 export function selectDistractors(validStreets, target, seed) {
   const getPrefix = name => {
-    if (!name) return '';
+    if (!name) {
+      return '';
+    }
     const match = name.match(
       /^(Carrer|Avinguda|Plaça|Passeig|Passatge|Ronda|Via|Camí|Jardins|Parc|Rambla|Travessera)(\s+d(e|els|es|el|ala)|(?=\s))?/i
     );
