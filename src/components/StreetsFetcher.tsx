@@ -92,36 +92,41 @@ const StreetsFetcher: React.FC = () => {
 
       const processedStreets = new Map();
 
-      data.elements.forEach((element: any) => {
-        if (!element.tags?.name) {
-          return;
+      data.elements.forEach(
+        (element: {
+          tags?: Record<string, string>;
+          geometry?: Array<{ lat: number; lon: number }>;
+        }) => {
+          if (!element.tags?.name) {
+            return;
+          }
+
+          const name = element.tags.name;
+          const highway = element.tags.highway;
+          const tier = tierMapping[highway] || 4;
+
+          const geometry =
+            element.geometry?.map((coord: { lat: number; lon: number }) => [
+              Number(coord.lat.toFixed(5)),
+              Number(coord.lon.toFixed(5)),
+            ]) || [];
+
+          if (geometry.length === 0) {
+            return;
+          }
+
+          if (!processedStreets.has(name)) {
+            processedStreets.set(name, {
+              id: `street_${name.toLowerCase().replace(/[^a-z0-9]/g, '_')}`,
+              name: name,
+              tier: tier,
+              geometry: [],
+            });
+          }
+
+          processedStreets.get(name).geometry.push(geometry);
         }
-
-        const name = element.tags.name;
-        const highway = element.tags.highway;
-        const tier = tierMapping[highway] || 4;
-
-        const geometry =
-          element.geometry?.map((coord: any) => [
-            Number(coord.lat.toFixed(5)),
-            Number(coord.lon.toFixed(5)),
-          ]) || [];
-
-        if (geometry.length === 0) {
-          return;
-        }
-
-        if (!processedStreets.has(name)) {
-          processedStreets.set(name, {
-            id: `street_${name.toLowerCase().replace(/[^a-z0-9]/g, '_')}`,
-            name: name,
-            tier: tier,
-            geometry: [],
-          });
-        }
-
-        processedStreets.get(name).geometry.push(geometry);
-      });
+      );
 
       const streetArray = Array.from(processedStreets.values());
 
