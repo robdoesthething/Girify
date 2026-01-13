@@ -27,13 +27,14 @@ export const fetchWikiImage = async query => {
   // Clean query
   const cleanQuery = query.trim();
 
-  // 1. Try direct search for page images
+  // 1. Try direct search for page images with redirect handling
   const params = new URLSearchParams({
     action: 'query',
     titles: cleanQuery,
     prop: 'pageimages',
     format: 'json',
     pithumbsize: 600,
+    redirects: '1', // Follow redirects (Important for "Carrer de..." -> "Carrer...")
     origin: '*', // CORS
   });
 
@@ -52,9 +53,28 @@ export const fetchWikiImage = async query => {
       }
     }
 
-    // 2. If no direct hit, try searching for the street name specifically as a search term
-    // NOTE: "Carrer de Balmes" might redirect to "Balmes" or vice versa
-    // We can try a broader search if specific fails, but precise is safer for "curiosity" context.
+    // 2. Fallback: If no image found, try searching using the "search" action (fuzzier)
+    // This handles cases where exact title match (even with redirects) fails.
+    if (cleanQuery.length > 5) {
+      const searchParams = new URLSearchParams({
+        action: 'query',
+        list: 'search',
+        srsearch: cleanQuery,
+        format: 'json',
+        origin: '*',
+      });
+      const searchResp = await fetch(`${WIKI_API_BASE}?${searchParams.toString()}`);
+      const searchData = await searchResp.json();
+
+      if (searchData.query?.search?.length > 0) {
+        const bestTitle = searchData.query.search[0].title;
+        // Recursively try one more time with the found best title
+        if (bestTitle && bestTitle !== cleanQuery) {
+          return fetchWikiImage(bestTitle);
+        }
+      }
+    }
+
     return null;
   } catch (error) {
     console.error('Wiki fetch error:', error);

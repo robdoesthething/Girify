@@ -511,3 +511,23 @@ export const getBlockStatus = async (user1, user2) => {
     return false;
   }
 };
+
+/**
+ * Get friend count for a user
+ */
+export const getFriendCount = async username => {
+  if (!username) {
+    return 0;
+  }
+
+  try {
+    // Count friends from subcollection (matches friends.js storage)
+    const friendsSnapshot = await getDocs(
+      collection(db, USERS_COLLECTION, sanitize(username), 'friends')
+    );
+    return friendsSnapshot.size;
+  } catch (e) {
+    console.error('Error getting friend count:', e);
+    return 0;
+  }
+};
