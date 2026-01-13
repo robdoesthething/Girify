@@ -380,8 +380,8 @@ const MapArea: React.FC<MapAreaProps> = ({
             <Polyline
               positions={geometry as L.LatLngExpression[][]}
               pathOptions={{
-                color: '#000080',
-                weight: 6,
+                color: theme === 'dark' ? '#38bdf8' : '#000080', // Sky-400 for dark, Navy for light
+                weight: 8,
                 opacity: 1.0,
                 lineCap: 'round',
                 lineJoin: 'round',
