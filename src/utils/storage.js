@@ -18,10 +18,14 @@ class StorageManager {
       return this.cache.get(key);
     }
 
-    if (typeof localStorage === 'undefined') return defaultValue;
+    if (typeof localStorage === 'undefined') {
+      return defaultValue;
+    }
 
     const value = localStorage.getItem(key);
-    if (value === null) return defaultValue;
+    if (value === null) {
+      return defaultValue;
+    }
 
     try {
       const parsed = JSON.parse(value);
@@ -41,7 +45,9 @@ class StorageManager {
    */
   set(key, value) {
     this.cache.set(key, value);
-    if (typeof localStorage === 'undefined') return;
+    if (typeof localStorage === 'undefined') {
+      return;
+    }
 
     try {
       localStorage.setItem(key, JSON.stringify(value));

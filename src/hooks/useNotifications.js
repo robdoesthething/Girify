@@ -20,7 +20,9 @@ export const useNotifications = () => {
   const [isIOS] = useState(() => /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream);
 
   const [isSupported] = useState(() => {
-    if (!('Notification' in window)) return false;
+    if (!('Notification' in window)) {
+      return false;
+    }
     const ios = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
     return !ios; // Disable if iOS
   });
@@ -35,7 +37,9 @@ export const useNotifications = () => {
    * @returns {Promise<boolean>} True if permission granted and token saved
    */
   const requestPermission = async () => {
-    if (!isSupported) return false;
+    if (!isSupported) {
+      return false;
+    }
 
     try {
       const result = await Notification.requestPermission();
@@ -64,7 +68,9 @@ export const useNotifications = () => {
    */
   const saveToken = async token => {
     const user = auth.currentUser;
-    if (!user) return;
+    if (!user) {
+      return;
+    }
 
     try {
       // Platform detection

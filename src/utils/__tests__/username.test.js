@@ -7,8 +7,12 @@ describe('Username Validation Logic', () => {
     const hasExcessiveDigits = /\d{5,}$/.test(displayName);
     const isTooLong = displayName.length > 20;
 
-    if (hasExcessiveDigits) return false;
-    if (isTooLong) return false;
+    if (hasExcessiveDigits) {
+      return false;
+    }
+    if (isTooLong) {
+      return false;
+    }
     return newFormatRegex.test(displayName);
   };
 
@@ -30,7 +34,7 @@ describe('Username Validation Logic', () => {
   });
 
   it('should reject too long usernames', () => {
-    const longName = '@' + 'a'.repeat(20) + '1234';
+    const longName = `@${'a'.repeat(20)}1234`;
     expect(isValidUsername(longName)).toBe(false);
   });
 

@@ -1,17 +1,139 @@
 {
-    "css.validate": false,
-    "less.validate": false,
-    "scss.validate": false,
+    // ==================== EDITOR ====================
+    "editor.formatOnSave": true,
+    "editor.formatOnPaste": true,
+    "editor.codeActionsOnSave": {
+        "source.fixAll.eslint": "explicit",
+        "source.organizeImports": "explicit"
+    },
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
+    "editor.tabSize": 2,
+    "editor.insertSpaces": true,
+    "editor.detectIndentation": false,
+    // ==================== FILES ====================
+    "files.eol": "\n",
+    "files.trimTrailingWhitespace": true,
+    "files.insertFinalNewline": true,
     "files.associations": {
         "*.css": "tailwindcss"
     },
-    "editor.quickSuggestions": {
-        "strings": true
+    // ==================== SEARCH ====================
+    "search.exclude": {
+        "**/node_modules": true,
+        "**/dist": true,
+        "**/build": true,
+        "**/coverage": true,
+        "**/.git": true,
+        "**/package-lock.json": true
     },
-    "git.experimental.generateCommitMessageWithCopilot": false,
-    "github.copilot.chat.commitMessageGeneration.instructions": [
+    // ==================== JAVASCRIPT/TYPESCRIPT ====================
+    "[javascript]": {
+        "editor.defaultFormatter": "esbenp.prettier-vscode",
+        "editor.formatOnSave": true
+    },
+    "[javascriptreact]": {
+        "editor.defaultFormatter": "esbenp.prettier-vscode",
+        "editor.formatOnSave": true
+    },
+    "[typescript]": {
+        "editor.defaultFormatter": "esbenp.prettier-vscode",
+        "editor.formatOnSave": true
+    },
+    "[typescriptreact]": {
+        "editor.defaultFormatter": "esbenp.prettier-vscode",
+        "editor.formatOnSave": true
+    },
+    "[json]": {
+        "editor.defaultFormatter": "esbenp.prettier-vscode"
+    },
+    "[jsonc]": {
+        "editor.defaultFormatter": "esbenp.prettier-vscode"
+    },
+    // ==================== ESLINT ====================
+    "eslint.enable": true,
+    "eslint.validate": [
+        "javascript",
+        "javascriptreact",
+        "typescript",
+        "typescriptreact"
+    ],
+    "eslint.workingDirectories": [
         {
-            "text": "Keep commit messages under 72 characters. Use conventional commit format: type(scope): subject. Subject must be lowercase with no trailing period."
+            "mode": "auto"
         }
-    ]
+    ],
+    // ==================== TAILWIND ====================
+    "tailwindCSS.experimental.classRegex": [
+        [
+            "cva\\(([^)]*)\\)",
+            "[\"'`]([^\"'`]*).*?[\"'`]"
+        ],
+        [
+            "cx\\(([^)]*)\\)",
+            "(?:'|\"|`)([^']*)(?:'|\"|`)"
+        ]
+    ],
+    // ==================== GIT ====================
+    "git.ignoreLimitWarning": true,
+    // ==================== PERFORMANCE ====================
+    "files.watcherExclude": {
+        "**/.git/objects/**": true,
+        "**/.git/subtree-cache/**": true,
+        "**/node_modules/**": true,
+        "**/dist/**": true,
+        "**/build/**": true
+    },
+    // ==================== TERMINAL ====================
+    "terminal.integrated.defaultProfile.windows": "Git Bash",
+    // ==================== WARNINGS ====================
+    "javascript.validate.enable": true,
+    "typescript.validate.enable": true,
+    "javascript.suggestionActions.enabled": true,
+    "typescript.suggestionActions.enabled": true,
+    // ==================== INTELLISENSE ====================
+    "javascript.suggest.autoImports": true,
+    "typescript.suggest.autoImports": true,
+    "javascript.updateImportsOnFileMove.enabled": "always",
+    "typescript.updateImportsOnFileMove.enabled": "always",
+    // ==================== EMMET ====================
+    "emmet.includeLanguages": {
+        "javascript": "javascriptreact",
+        "typescript": "typescriptreact"
+    },
+    // ==================== CUSTOM WARNINGS ====================
+    "todo-tree.regex.regex": "(//|#|<!--|;|/\\*|^|^\\s*(-|\\d+.))\\s*($TAGS)",
+    "todo-tree.general.tags": [
+        "TODO",
+        "FIXME",
+        "BUG",
+        "HACK",
+        "XXX",
+        "DEPRECATED",
+        "SECURITY"
+    ],
+    "todo-tree.highlights.defaultHighlight": {
+        "icon": "alert",
+        "type": "text",
+        "foreground": "#fff",
+        "background": "#ff0000",
+        "opacity": 50
+    },
+    "todo-tree.highlights.customHighlight": {
+        "TODO": {
+            "icon": "check",
+            "background": "#FFA500"
+        },
+        "FIXME": {
+            "icon": "alert",
+            "background": "#FF0000"
+        },
+        "BUG": {
+            "icon": "bug",
+            "background": "#DC143C"
+        },
+        "SECURITY": {
+            "icon": "shield",
+            "background": "#8B0000"
+        }
+    }
 }

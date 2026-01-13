@@ -23,7 +23,9 @@ export class UserMigrationService {
   }
 
   static needsMigration(handle) {
-    if (!handle) return false;
+    if (!handle) {
+      return false;
+    }
     const oldFormat = USER.HANDLE_FORMATS.OLD_REGEX;
     const newFormat = USER.HANDLE_FORMATS.NEW_REGEX;
     const hasExcessiveDigits = USER.HANDLE_FORMATS.EXCESSIVE_DIGITS.test(handle);
@@ -35,7 +37,7 @@ export class UserMigrationService {
   static generateNewHandle(handle) {
     const oldFormat = USER.HANDLE_FORMATS.OLD_REGEX;
     if (oldFormat.test(handle)) {
-      return '@' + handle.replace('#', '');
+      return `@${handle.replace('#', '')}`;
     }
 
     // Fallback for invalid formats
