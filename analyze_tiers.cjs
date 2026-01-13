@@ -1,4 +1,4 @@
-/* eslint-env node */
+/* global require, process */
 const fs = require('fs');
 const path = require('path');
 

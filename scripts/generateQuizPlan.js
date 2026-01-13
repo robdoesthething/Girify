@@ -1,4 +1,3 @@
-/* eslint-env node */
 /**
  * Quiz Plan Generator
  * Generates a 100-day quiz schedule following all rules:
