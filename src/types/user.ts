@@ -21,6 +21,13 @@ export interface UserProfile {
   friendCount?: number;
   maxStreak?: number;
   avatarId?: number;
+  notificationSettings?: NotificationSettings;
+}
+
+export interface NotificationSettings {
+  dailyReminder: boolean;
+  friendActivity: boolean;
+  newsUpdates: boolean;
 }
 
 export interface GameHistory {

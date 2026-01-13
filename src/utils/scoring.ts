@@ -1,3 +1,4 @@
+import { GAME } from '../config/constants';
 import { calculateScore } from '../config/gameConfig';
 
 /**
@@ -30,16 +31,16 @@ export function calculateTimeScore(
  * @returns {string} - Tier label
  */
 export function getScoreTier(points: number): string {
-  if (points >= 90) {
+  if (points >= GAME.SCORING_TIERS.PERFECT) {
     return 'Perfect!';
   }
-  if (points >= 75) {
+  if (points >= GAME.SCORING_TIERS.GREAT) {
     return 'Excellent';
   }
-  if (points >= 50) {
+  if (points >= GAME.SCORING_TIERS.GOOD) {
     return 'Good';
   }
-  if (points >= 30) {
+  if (points >= GAME.SCORING_TIERS.OKAY) {
     return 'Fair';
   }
   if (points > 0) {
@@ -49,21 +50,41 @@ export function getScoreTier(points: number): string {
 }
 
 /**
+ * Get color for score tier
+ * @param {string} tier - Score tier label
+ * @returns {string} - Color hex
+ */
+// ...
+
+export const getAccuracyStars = (percentage: number): number => {
+  if (percentage >= GAME.SCORING_TIERS.PERFECT) {
+    return GAME.MAX_HINTS;
+  }
+  if (percentage >= GAME.SCORING_TIERS.GREAT) {
+    return 2;
+  }
+  if (percentage >= GAME.SCORING_TIERS.GOOD) {
+    return 1;
+  }
+  return 0;
+};
+
+/**
  * Get score tier color
  * @param {number} points - Points earned
  * @returns {string} - Tailwind color class
  */
 export function getScoreTierColor(points: number): string {
-  if (points >= 90) {
+  if (points >= GAME.SCORING_TIERS.PERFECT) {
     return 'text-emerald-500';
   }
-  if (points >= 75) {
+  if (points >= GAME.SCORING_TIERS.GREAT) {
     return 'text-green-500';
   }
-  if (points >= 50) {
+  if (points >= GAME.SCORING_TIERS.GOOD) {
     return 'text-yellow-500';
   }
-  if (points >= 30) {
+  if (points >= GAME.SCORING_TIERS.OKAY) {
     return 'text-orange-500';
   }
   if (points > 0) {

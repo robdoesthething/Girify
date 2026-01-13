@@ -2,13 +2,20 @@ import React, { useEffect, useState } from 'react';
 import { useTheme } from '../context/ThemeContext';
 import { acceptFriendRequest, getIncomingRequests } from '../utils/friends';
 
+interface FriendRequest {
+  id: string;
+  from: string;
+  status: string;
+  timestamp: { seconds: number; nanoseconds: number };
+}
+
 interface FriendRequestsProps {
   username: string;
 }
 
 const FriendRequests: React.FC<FriendRequestsProps> = ({ username }) => {
   const { theme } = useTheme();
-  const [requests, setRequests] = useState<any[]>([]);
+  const [requests, setRequests] = useState<FriendRequest[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -18,8 +25,9 @@ const FriendRequests: React.FC<FriendRequestsProps> = ({ username }) => {
       }
       setLoading(true);
       try {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const data = await (getIncomingRequests as any)(username);
-        setRequests(data);
+        setRequests(data as FriendRequest[]);
       } catch (error) {
         console.error('Error loading friend requests:', error);
       } finally {
@@ -32,6 +40,7 @@ const FriendRequests: React.FC<FriendRequestsProps> = ({ username }) => {
 
   const handleAccept = async (reqId: string) => {
     try {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       await (acceptFriendRequest as any)(reqId);
       // Remove from list
       setRequests(prev => prev.filter(r => r.id !== reqId));
@@ -66,9 +75,9 @@ const FriendRequests: React.FC<FriendRequestsProps> = ({ username }) => {
           >
             <div className="flex items-center gap-2">
               <div className="w-8 h-8 rounded-full bg-gradient-to-br from-indigo-400 to-purple-500 flex items-center justify-center text-white font-bold text-xs ring-2 ring-white dark:ring-neutral-800 font-inter">
-                {req.user1.charAt(0).toUpperCase()}
+                {req.from.charAt(0).toUpperCase()}
               </div>
-              <span className="font-bold text-sm font-inter">{req.user1}</span>
+              <span className="font-bold text-sm font-inter">{req.from}</span>
             </div>
             <button
               onClick={() => handleAccept(req.id)}

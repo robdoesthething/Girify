@@ -13,6 +13,7 @@ import {
   Timestamp,
   where,
 } from 'firebase/firestore';
+import { SOCIAL } from '../config/constants';
 import { db } from '../firebase';
 
 const USERS_COLLECTION = 'users'; // Store user profiles/friends here
@@ -38,13 +39,15 @@ export const searchUsers = async searchText => {
   const legacySearch = `@${cleanSearch}`;
 
   try {
+    const usersRef = collection(db, HIGHSCORES_COLLECTION); // Define usersRef here
+    const lowerQuery = cleanSearch; // Define lowerQuery here
+
     // Query 1: Clean usernames (New/Migrated format)
     const q1 = query(
-      collection(db, HIGHSCORES_COLLECTION),
-      orderBy('username'),
-      startAt(cleanSearch),
-      endAt(`${cleanSearch}\uf8ff`),
-      limit(5)
+      usersRef,
+      where('username', '>=', lowerQuery),
+      where('username', '<=', `${lowerQuery}\uf8ff`),
+      limit(SOCIAL.FRIENDS.MAX_DISPLAY)
     );
 
     // Query 2: Legacy usernames (With @ prefix)

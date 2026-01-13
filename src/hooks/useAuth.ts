@@ -284,7 +284,7 @@ async function backfillJoinDate(displayName: string, profile: UserProfile | null
     } else if (typeof profile.joinedAt === 'object' && 'toDate' in profile.joinedAt) {
       profileDate = profile.joinedAt.toDate();
     } else if (typeof profile.joinedAt === 'object' && 'seconds' in profile.joinedAt) {
-      profileDate = new Date((profile.joinedAt as any).seconds * 1000);
+      profileDate = new Date((profile.joinedAt as { seconds: number }).seconds * 1000);
     }
   }
 

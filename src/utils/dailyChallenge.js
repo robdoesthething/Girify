@@ -1,3 +1,5 @@
+import { GAME_LOGIC, PRNG } from '../config/constants';
+
 // Daily Challenge Utility
 // Generates consistent street selection based on date
 
@@ -7,7 +9,7 @@
  * @returns {number} - Random number between 0 and 1
  */
 export function seededRandom(seed) {
-  const x = Math.sin(seed++) * 10000;
+  const x = Math.sin(seed++) * PRNG.SEED_SCALE;
   return x - Math.floor(x);
 }
 
@@ -57,8 +59,32 @@ function getSeedForDate(date) {
   const year = date.getFullYear();
   const month = String(date.getMonth() + 1).padStart(2, '0');
   const day = String(date.getDate()).padStart(2, '0');
-  return parseInt(`${year}${month}${day}`, 10);
+  const mod =
+    year * GAME_LOGIC.DAILY_CHALLENGE.SEED_MULTIPLIER +
+    parseInt(month, 10) * 100 +
+    parseInt(day, 10);
+  return mod;
 }
+
+/**
+ * Deterministically get an index for a street from a list based on date and question number.
+ * This is used for selecting the daily street for a specific question slot.
+ * @param {Array} validStreets - All valid streets
+ * @param {number} dateSeed - Date seed
+ * @param {number} questionIndex - The index of the question (0-9)
+ * @returns {number} - The index of the selected street in validStreets
+ */
+export const getDailyStreetIndex = (validStreets, dateSeed, questionIndex) => {
+  if (!validStreets || validStreets.length === 0) {
+    return 0;
+  }
+
+  // Create a pseudo-random index based on date and question number
+  // Using primes to avoid patterns
+  const index =
+    (dateSeed + questionIndex * PRNG.PRIME_1 + (dateSeed % PRNG.PRIME_2)) % validStreets.length;
+  return index;
+};
 
 /**
  * Select daily streets based on date seed
@@ -179,6 +205,19 @@ export function selectDistractors(validStreets, target, seed) {
     pool = validStreets.filter(s => s.id !== target.id);
   }
 
+  // Try to find a "neighbor" street first
+  const neighbors = validStreets.filter(s => {
+    const latDiff = Math.abs(s.lat - target.lat);
+    const lngDiff = Math.abs(s.lng - target.lng);
+    return latDiff < NEARBY_THRESHOLD && lngDiff < NEARBY_THRESHOLD && s.name !== target.name;
+  });
+
+  if (neighbors.length >= PRNG.MOD_4) {
+    // Return a random neighbor
+    return neighbors[seed % neighbors.length];
+  }
+
+  // If no neighbors, find closest by sorting (simplified)
   // Shuffle pool with seed
   const shuffledPool = seededShuffle(pool, seed);
   return shuffledPool.slice(0, 3);

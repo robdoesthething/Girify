@@ -49,7 +49,7 @@ const SettingsScreen: React.FC<SettingsScreenProps> = ({
       getUserProfile(username).then(profile => {
         if (profile) {
           setProfileSettings({
-            notificationSettings: (profile as any).notificationSettings || {
+            notificationSettings: profile.notificationSettings || {
               dailyReminder: true,
               friendActivity: true,
               newsUpdates: true,

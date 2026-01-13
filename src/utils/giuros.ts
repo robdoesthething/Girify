@@ -296,7 +296,7 @@ export const getPurchasedCosmetics = async (username: string | null): Promise<st
  */
 export const setEquippedCosmetics = async (
   username: string | null,
-  equipped: Record<string, any>
+  equipped: Record<string, unknown>
 ): Promise<void> => {
   if (!username) {
     return;

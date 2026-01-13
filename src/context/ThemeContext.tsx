@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
+import { UI } from '../config/constants';
 import { getTranslation, LANGUAGES } from '../i18n/translations';
 
 interface ThemeContextType {
@@ -95,22 +96,31 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
 
   const [zoom, setZoom] = useState(1);
 
-  const getDeviceMode = (): 'mobile' | 'tablet' | 'desktop' => {
+  const getInitialDeviceMode = (): 'mobile' | 'tablet' | 'desktop' => {
     const width = window.innerWidth;
-    if (width < 768) {
+    if (width < UI.BREAKPOINTS.MOBILE) {
       return 'mobile';
     }
-    if (width < 1024) {
+    if (width < UI.BREAKPOINTS.TABLET) {
       return 'tablet';
     }
     return 'desktop';
   };
 
-  const [deviceMode, setDeviceMode] = useState(getDeviceMode());
+  const [deviceMode, setDeviceMode] = useState<'mobile' | 'tablet' | 'desktop'>(
+    getInitialDeviceMode()
+  );
 
   useEffect(() => {
     const handleResize = () => {
-      setDeviceMode(getDeviceMode());
+      const width = window.innerWidth;
+      if (width < UI.BREAKPOINTS.MOBILE) {
+        setDeviceMode('mobile');
+      } else if (width < UI.BREAKPOINTS.TABLET) {
+        setDeviceMode('tablet');
+      } else {
+        setDeviceMode('desktop');
+      }
     };
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);

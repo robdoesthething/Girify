@@ -25,7 +25,11 @@ const ChangeView: React.FC<ChangeViewProps> = ({ coords, onAnimationComplete }) 
 
       const handleLoad = () => {
         setTimeout(() => {
-          map.flyToBounds(allPoints, { padding: [80, 80], maxZoom: 15, duration: 2.0 });
+          map.flyToBounds(allPoints as L.LatLngBoundsExpression, {
+            padding: [80, 80],
+            maxZoom: 15,
+            duration: 2.0,
+          });
           if (onAnimationComplete) {
             setTimeout(() => {
               onAnimationComplete();
@@ -34,13 +38,8 @@ const ChangeView: React.FC<ChangeViewProps> = ({ coords, onAnimationComplete }) 
         }, 100);
       };
 
-      if ((map as any)._loaded) {
-        handleLoad();
-      } else {
-        map.once('load', handleLoad);
-      }
-    } else {
-      map.setView([41.3879, 2.1699], 13);
+      // If map is already loaded/ready
+      handleLoad();
     }
   }, [coords, map, onAnimationComplete]);
   return null;
@@ -248,10 +247,9 @@ const MapArea: React.FC<MapAreaProps> = ({
       logger.info('[MapArea] Geometry points:', currentStreet.geometry.length);
     }
   }, [currentStreet]);
-
   useEffect(() => {
     import('../data/boundary.json')
-      .then(mod => setBoundary(mod.default as any))
+      .then(mod => setBoundary(mod.default as unknown as L.LatLngExpression[]))
       .catch(() => logger.info('No boundary data found'));
   }, []);
 
