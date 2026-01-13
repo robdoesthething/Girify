@@ -11,6 +11,7 @@ import {
   Timestamp,
   where,
 } from 'firebase/firestore';
+import { SOCIAL } from '../config/constants';
 import { db } from '../firebase';
 import { getTodaySeed } from './dailyChallenge';
 
