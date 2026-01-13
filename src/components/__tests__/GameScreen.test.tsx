@@ -10,20 +10,22 @@ vi.mock('../MapArea', () => {
   return { default: MapArea };
 });
 vi.mock('../Quiz', () => {
-  const MockQuiz = ({ children }: any) => <div data-testid="quiz">{children}</div>;
+  const MockQuiz = ({ children }: React.PropsWithChildren) => (
+    <div data-testid="quiz">{children}</div>
+  );
   const Banner = () => <div data-testid="quiz-banner">Quiz Banner</div>;
   Banner.displayName = 'QuizBanner';
   MockQuiz.Banner = Banner;
 
-  const Container = ({ children }: any) => <div>{children}</div>;
+  const Container = ({ children }: React.PropsWithChildren) => <div>{children}</div>;
   Container.displayName = 'QuizContainer';
   MockQuiz.Container = Container;
 
-  const Content = ({ children }: any) => <div>{children}</div>;
+  const Content = ({ children }: React.PropsWithChildren) => <div>{children}</div>;
   Content.displayName = 'QuizContent';
   MockQuiz.Content = Content;
 
-  const Options = ({ onSelect }: any) => (
+  const Options = ({ onSelect }: { onSelect: (option: { id: string; name: string }) => void }) => (
     <div data-testid="quiz-options">
       <button onClick={() => onSelect({ id: 'street1', name: 'Test Street' })}>Option 1</button>
     </div>
@@ -31,7 +33,7 @@ vi.mock('../Quiz', () => {
   Options.displayName = 'QuizOptions';
   MockQuiz.Options = Options;
 
-  const Hints = ({ onReveal }: any) => (
+  const Hints = ({ onReveal }: { onReveal: () => void }) => (
     <div data-testid="quiz-hints">
       <button onClick={onReveal}>Reveal Hint</button>
     </div>
@@ -39,7 +41,7 @@ vi.mock('../Quiz', () => {
   Hints.displayName = 'QuizHints';
   MockQuiz.Hints = Hints;
 
-  const NextButton = ({ onNext }: any) => (
+  const NextButton = ({ onNext }: { onNext: () => void }) => (
     <button data-testid="next-button" onClick={onNext}>
       Next
     </button>

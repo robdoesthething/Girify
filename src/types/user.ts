@@ -18,6 +18,9 @@ export interface UserProfile {
   migrationStatus?: string;
   gamesPlayed?: number;
   bestScore?: number;
+  friendCount?: number;
+  maxStreak?: number;
+  avatarId?: number;
 }
 
 export interface GameHistory {

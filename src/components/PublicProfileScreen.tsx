@@ -3,6 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { useTheme } from '../context/ThemeContext';
 import { getUnlockedAchievements } from '../data/achievements';
 import cosmetics from '../data/cosmetics.json';
+import { UserProfile } from '../types/user';
 import {
   blockUser,
   getBlockStatus,
@@ -46,7 +47,7 @@ const PublicProfileScreen: React.FC<PublicProfileScreenProps> = ({ currentUser }
   const username = decodeURIComponent(encodedUsername || '');
   const navigate = useNavigate();
 
-  const [profile, setProfile] = useState<any>(null);
+  const [profile, setProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [friendStatus, setFriendStatus] = useState<'none' | 'friends' | 'pending'>('none');
   const [isBlocked, setIsBlocked] = useState(false);
@@ -54,7 +55,7 @@ const PublicProfileScreen: React.FC<PublicProfileScreenProps> = ({ currentUser }
   const [requestSent, setRequestSent] = useState(false);
   const [blocking, setBlocking] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [equippedCosmetics, setEquippedCosmetics] = useState<any>({});
+  const [equippedCosmetics, setEquippedCosmetics] = useState<Record<string, string>>({});
 
   useEffect(() => {
     const loadProfile = async () => {
@@ -63,7 +64,7 @@ const PublicProfileScreen: React.FC<PublicProfileScreenProps> = ({ currentUser }
       try {
         const [data, cosmeticsData] = await Promise.all([
           getUserProfile(username),
-          getEquippedCosmetics(username),
+          getEquippedCosmetics(username) as Promise<Record<string, string>>,
         ]);
 
         if (data) {
@@ -71,6 +72,13 @@ const PublicProfileScreen: React.FC<PublicProfileScreenProps> = ({ currentUser }
         } else {
           setProfile({
             username,
+            uid: '', // Placeholder, as we don't have UID for non-existent profile
+            email: '',
+            realName: '',
+            streak: 0,
+            totalScore: 0,
+            lastPlayDate: '',
+            joinedAt: new Date(),
             gamesPlayed: 0,
             bestScore: 0,
             friendCount: 0,
@@ -94,6 +102,13 @@ const PublicProfileScreen: React.FC<PublicProfileScreenProps> = ({ currentUser }
         setError('Failed to load profile');
         setProfile({
           username,
+          uid: '',
+          email: '',
+          realName: '',
+          streak: 0,
+          totalScore: 0,
+          lastPlayDate: '',
+          joinedAt: new Date(),
           gamesPlayed: 0,
           bestScore: 0,
           friendCount: 0,
@@ -215,9 +230,13 @@ const PublicProfileScreen: React.FC<PublicProfileScreenProps> = ({ currentUser }
               {profile?.joinedAt && (
                 <p className="text-xs font-bold uppercase tracking-widest opacity-40 mt-2">
                   {t('playerSince')}{' '}
-                  {profile.joinedAt.toDate
-                    ? profile.joinedAt.toDate().toLocaleDateString()
-                    : new Date(profile.joinedAt.seconds * 1000).toLocaleDateString()}
+                  {profile.joinedAt instanceof Date
+                    ? profile.joinedAt.toLocaleDateString()
+                    : (profile.joinedAt as { toDate: () => Date }).toDate
+                      ? (profile.joinedAt as { toDate: () => Date }).toDate().toLocaleDateString()
+                      : new Date(
+                          (profile.joinedAt as { seconds: number }).seconds * 1000
+                        ).toLocaleDateString()}
                 </p>
               )}
 
