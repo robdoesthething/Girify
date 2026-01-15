@@ -1,22 +1,32 @@
 import { AnimatePresence } from 'framer-motion';
-import React from 'react';
+import React, { Suspense, lazy } from 'react';
 import { Route, Routes, useLocation, useNavigate } from 'react-router-dom';
 
-import AboutScreen from './components/AboutScreen';
-import AdminPanel from './components/AdminPanel';
-import AdminRoute from './components/AdminRoute';
+// Eagerly loaded (needed immediately)
 import AnnouncementModal from './components/AnnouncementModal';
-import FeedbackScreen from './components/FeedbackScreen';
-import FriendsScreen from './components/FriendsScreen';
 import GameScreen from './components/GameScreen';
-import LeaderboardScreen from './components/LeaderboardScreen';
-import NewsScreen from './components/NewsScreen';
-import ProfileScreen from './components/ProfileScreen';
-import PublicProfileScreen from './components/PublicProfileScreen';
-import SettingsScreen from './components/SettingsScreen';
-import ShopScreen from './components/ShopScreen';
-import StreetsFetcher from './components/StreetsFetcher';
 import TopBar from './components/TopBar';
+
+// Lazy loaded (route-based code splitting)
+const AboutScreen = lazy(() => import('./components/AboutScreen'));
+const AdminPanel = lazy(() => import('./components/AdminPanel'));
+const AdminRoute = lazy(() => import('./components/AdminRoute'));
+const FeedbackScreen = lazy(() => import('./components/FeedbackScreen'));
+const FriendsScreen = lazy(() => import('./components/FriendsScreen'));
+const LeaderboardScreen = lazy(() => import('./components/LeaderboardScreen'));
+const NewsScreen = lazy(() => import('./components/NewsScreen'));
+const ProfileScreen = lazy(() => import('./components/ProfileScreen'));
+const PublicProfileScreen = lazy(() => import('./components/PublicProfileScreen'));
+const SettingsScreen = lazy(() => import('./components/SettingsScreen'));
+const ShopScreen = lazy(() => import('./components/ShopScreen'));
+const StreetsFetcher = lazy(() => import('./components/StreetsFetcher'));
+const PrivacyPolicy = lazy(() => import('./components/PrivacyPolicy'));
+const TermsOfService = lazy(() => import('./components/TermsOfService'));
+const VerifyEmailScreen = lazy(() => import('./components/VerifyEmailScreen'));
+const AchievementModal = lazy(() => import('./components/AchievementModal'));
+const ConfirmDialog = lazy(() =>
+  import('./components/ConfirmDialog').then(m => ({ default: m.ConfirmDialog }))
+);
 
 import { STORAGE_KEYS } from './config/constants';
 import { useTheme } from './context/ThemeContext';
@@ -30,12 +40,14 @@ import { saveScore } from './utils/leaderboard';
 import { hasDailyReferral } from './utils/social';
 import { storage } from './utils/storage';
 
-import AchievementModal from './components/AchievementModal';
-import { ConfirmDialog } from './components/ConfirmDialog';
-import PrivacyPolicy from './components/PrivacyPolicy';
-import TermsOfService from './components/TermsOfService';
-import VerifyEmailScreen from './components/VerifyEmailScreen';
 import { useConfirm } from './hooks/useConfirm';
+
+// Loading fallback component
+const PageLoader = () => (
+  <div className="flex items-center justify-center h-full">
+    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-sky-500" />
+  </div>
+);
 
 const AppRoutes: React.FC = () => {
   const { theme, t, deviceMode } = useTheme();
@@ -163,95 +175,102 @@ const AppRoutes: React.FC = () => {
       {/* Achievement Modal */}
       <AnimatePresence>
         {newlyUnlockedBadge && (
-          <AchievementModal achievement={newlyUnlockedBadge} onDismiss={dismissAchievement} />
+          <Suspense fallback={null}>
+            <AchievementModal achievement={newlyUnlockedBadge} onDismiss={dismissAchievement} />
+          </Suspense>
         )}
       </AnimatePresence>
 
-      <AnimatePresence mode="wait">
-        <Routes location={location} key={location.pathname}>
-          <Route path="/privacy" element={<PrivacyPolicy />} />
-          <Route path="/terms" element={<TermsOfService />} />
-          <Route
-            path="/"
-            element={
-              state.username && !emailVerified ? (
-                <VerifyEmailScreen theme={theme as 'light' | 'dark'} />
-              ) : (
-                <GameScreen
-                  state={state}
-                  dispatch={dispatch}
-                  theme={theme as 'light' | 'dark'}
-                  deviceMode={deviceMode}
-                  t={t}
-                  currentStreet={currentStreet}
-                  handleSelectAnswer={handleSelectAnswer}
-                  handleNext={handleNext}
-                  processAnswer={processAnswer}
-                  setupGame={setupGame}
-                  handleRegister={handleRegister}
-                  hasPlayedToday={hasPlayedToday}
+      <Suspense fallback={<PageLoader />}>
+        <AnimatePresence mode="wait">
+          <Routes location={location} key={location.pathname}>
+            <Route path="/privacy" element={<PrivacyPolicy />} />
+            <Route path="/terms" element={<TermsOfService />} />
+            <Route
+              path="/"
+              element={
+                state.username && !emailVerified ? (
+                  <VerifyEmailScreen theme={theme as 'light' | 'dark'} />
+                ) : (
+                  <GameScreen
+                    state={state}
+                    dispatch={dispatch}
+                    theme={theme as 'light' | 'dark'}
+                    deviceMode={deviceMode}
+                    t={t}
+                    currentStreet={currentStreet}
+                    handleSelectAnswer={handleSelectAnswer}
+                    handleNext={handleNext}
+                    processAnswer={processAnswer}
+                    setupGame={setupGame}
+                    handleRegister={handleRegister}
+                    hasPlayedToday={hasPlayedToday}
+                  />
+                )
+              }
+            />
+            <Route
+              path="/leaderboard"
+              element={<LeaderboardScreen currentUser={state.username || undefined} />}
+            />
+            <Route
+              path="/settings"
+              element={
+                <SettingsScreen
+                  onClose={() => handleOpenPage(null)}
+                  onLogout={handleLogout}
+                  autoAdvance={state.autoAdvance}
+                  setAutoAdvance={val => dispatch({ type: 'SET_AUTO_ADVANCE', payload: val })}
+                  username={state.username || undefined}
                 />
-              )
-            }
-          />
-          <Route
-            path="/leaderboard"
-            element={<LeaderboardScreen currentUser={state.username || undefined} />}
-          />
-          <Route
-            path="/settings"
-            element={
-              <SettingsScreen
-                onClose={() => handleOpenPage(null)}
-                onLogout={handleLogout}
-                autoAdvance={state.autoAdvance}
-                setAutoAdvance={val => dispatch({ type: 'SET_AUTO_ADVANCE', payload: val })}
-                username={state.username || undefined}
-              />
-            }
-          />
-          <Route path="/about" element={<AboutScreen onClose={() => handleOpenPage(null)} />} />
-          <Route path="/profile" element={<ProfileScreen username={state.username || ''} />} />
-          <Route
-            path="/user/:username"
-            element={<PublicProfileScreen currentUser={state.username || undefined} />}
-          />
-          <Route
-            path="/friends"
-            element={
-              <FriendsScreen username={state.username || ''} onClose={() => handleOpenPage(null)} />
-            }
-          />
-          <Route path="/shop" element={<ShopScreen username={state.username || ''} />} />
-          <Route
-            path="/news"
-            element={
-              <NewsScreen
-                username={state.username || undefined}
-                onClose={() => handleOpenPage(null)}
-              />
-            }
-          />
-          <Route
-            path="/feedback"
-            element={
-              <FeedbackScreen
-                username={state.username || ''}
-                onClose={() => {
-                  storage.set(STORAGE_KEYS.LAST_FEEDBACK, Date.now().toString());
-                  handleOpenPage(null);
-                }}
-              />
-            }
-          />
+              }
+            />
+            <Route path="/about" element={<AboutScreen onClose={() => handleOpenPage(null)} />} />
+            <Route path="/profile" element={<ProfileScreen username={state.username || ''} />} />
+            <Route
+              path="/user/:username"
+              element={<PublicProfileScreen currentUser={state.username || undefined} />}
+            />
+            <Route
+              path="/friends"
+              element={
+                <FriendsScreen
+                  username={state.username || ''}
+                  onClose={() => handleOpenPage(null)}
+                />
+              }
+            />
+            <Route path="/shop" element={<ShopScreen username={state.username || ''} />} />
+            <Route
+              path="/news"
+              element={
+                <NewsScreen
+                  username={state.username || undefined}
+                  onClose={() => handleOpenPage(null)}
+                />
+              }
+            />
+            <Route
+              path="/feedback"
+              element={
+                <FeedbackScreen
+                  username={state.username || ''}
+                  onClose={() => {
+                    storage.set(STORAGE_KEYS.LAST_FEEDBACK, Date.now().toString());
+                    handleOpenPage(null);
+                  }}
+                />
+              }
+            />
 
-          {/* Admin Route */}
-          <Route element={<AdminRoute />}>
-            <Route path="/admin" element={<AdminPanel />} />
-            <Route path="/fetch-streets" element={<StreetsFetcher />} />
-          </Route>
-        </Routes>
-      </AnimatePresence>
+            {/* Admin Route */}
+            <Route element={<AdminRoute />}>
+              <Route path="/admin" element={<AdminPanel />} />
+              <Route path="/fetch-streets" element={<StreetsFetcher />} />
+            </Route>
+          </Routes>
+        </AnimatePresence>
+      </Suspense>
 
       {/* Global Copyright Footer */}
       <div className="absolute bottom-1 left-0 right-0 text-center pointer-events-none opacity-40 mix-blend-difference pb-4">
@@ -260,14 +279,16 @@ const AppRoutes: React.FC = () => {
         </p>
       </div>
 
-      <ConfirmDialog
-        isOpen={!!confirmConfig}
-        title={confirmConfig?.title || ''}
-        message={confirmConfig?.message || ''}
-        isDangerous={confirmConfig?.isDangerous || false}
-        onConfirm={() => handleClose(true)}
-        onCancel={() => handleClose(false)}
-      />
+      <Suspense fallback={null}>
+        <ConfirmDialog
+          isOpen={!!confirmConfig}
+          title={confirmConfig?.title || ''}
+          message={confirmConfig?.message || ''}
+          isDangerous={confirmConfig?.isDangerous || false}
+          onConfirm={() => handleClose(true)}
+          onCancel={() => handleClose(false)}
+        />
+      </Suspense>
     </div>
   );
 };

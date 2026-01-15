@@ -1,6 +1,6 @@
 {
   "name": "girify",
-  "description": "Girify - Manchester Street Quiz Game. Identify streets on the map in a daily challenge.",
+  "description": "Girify - Barcelona Streets Quiz Game. Identify streets on the map in a daily challenge.",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/robdoesthething/Girify.git"
@@ -25,6 +25,8 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
+    "analyze": "vite build --mode analyze",
+    "clean": "rm -rf dist node_modules/.vite",
     "lint": "eslint . --ext js,jsx,ts,tsx",
     "lint:fix": "eslint . --ext js,jsx,ts,tsx --fix",
     "lint:report": "eslint . --ext js,jsx,ts,tsx --format html --output-file eslint-report.html",
@@ -40,6 +42,7 @@
     "type-check:watch": "tsc --noEmit --watch",
     "check": "npm run lint && npm run format:check && npm run test -- --run",
     "check:fix": "npm run lint:fix && npm run format",
+    "validate": "npm run type-check && npm run lint && npm run test -- --run",
     "ci": "npm run lint && npm run format:check && npm run test -- --run && npm run build",
     "prepare": "husky install",
     "fetch-streets": "node scripts/fetchStreets.js",
@@ -49,9 +52,11 @@
     "build-storybook": "storybook build"
   },
   "dependencies": {
-    "@turf/turf": "^7.3.1",
+    "@turf/boolean-disjoint": "^7.3.2",
+    "@turf/centroid": "^7.3.2",
+    "@turf/distance": "^7.3.2",
+    "@turf/helpers": "^7.3.2",
     "firebase": "^12.7.0",
-    "firebase-admin": "^13.6.0",
     "framer-motion": "^12.23.26",
     "i18next": "^25.7.4",
     "leaflet": "^1.9.4",
@@ -100,6 +105,7 @@
     "playwright": "^1.57.0",
     "postcss": "^8.5.6",
     "prettier": "^3.7.4",
+    "rollup-plugin-visualizer": "^6.0.5",
     "storybook": "^10.1.11",
     "tailwindcss": "^3.4.17",
     "typescript": "^5.9.3",

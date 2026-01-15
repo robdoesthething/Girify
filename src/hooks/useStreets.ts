@@ -1,5 +1,8 @@
+import booleanDisjoint from '@turf/boolean-disjoint';
+import centroid from '@turf/centroid';
+import turfDistance from '@turf/distance';
+import { multiLineString, point } from '@turf/helpers';
 import { useCallback } from 'react';
-import * as turf from '@turf/turf';
 // @ts-ignore
 import rawStreets from '../data/streets.json';
 import { Street } from '../types/game';
@@ -63,7 +66,7 @@ export const useStreets = () => {
     let hints: Street[] = [];
 
     try {
-      const currentGeo = turf.multiLineString(toTurf(targetStreet.geometry));
+      const currentGeo = multiLineString(toTurf(targetStreet.geometry));
 
       // OPTIMIZATION: Iterate over validStreetsData instead of rawStreets
       // This is smaller and already filtered/deduped
@@ -75,8 +78,8 @@ export const useStreets = () => {
         // No need to check isValidType here as validStreetsData is already filtered
 
         if (street.geometry) {
-          const otherGeo = turf.multiLineString(toTurf(street.geometry));
-          if (!turf.booleanDisjoint(currentGeo, otherGeo)) {
+          const otherGeo = multiLineString(toTurf(street.geometry));
+          if (!booleanDisjoint(currentGeo, otherGeo)) {
             hints.push(street);
             if (hints.length >= 3) {
               break;
@@ -87,7 +90,7 @@ export const useStreets = () => {
 
       // If not enough intersecting streets, find nearest
       if (hints.length < 3) {
-        const currentCentroid = turf.centroid(currentGeo);
+        const currentCentroid = centroid(currentGeo);
         const candidates: { street: Street; dist: number }[] = [];
 
         for (const street of validStreetsData) {
@@ -100,8 +103,8 @@ export const useStreets = () => {
 
           if (street.geometry) {
             const p1 = street.geometry[0][0];
-            const otherPoint = turf.point([p1[1], p1[0]]);
-            const dist = turf.distance(currentCentroid, otherPoint);
+            const otherPoint = point([p1[1], p1[0]]);
+            const dist = turfDistance(currentCentroid, otherPoint);
             candidates.push({ street, dist });
           }
         }
