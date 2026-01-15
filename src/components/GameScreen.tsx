@@ -96,7 +96,7 @@ const GameScreen: FC<GameScreenProps> = ({
           className={`relative z-0 min-w-0 ${['mobile', 'tablet'].includes(deviceMode) ? 'flex-1 w-full order-1' : 'flex-1 h-full order-1'}`}
         >
           <MapArea
-            currentStreet={currentStreet ?? undefined}
+            currentStreet={currentStreet ?? null}
             hintStreets={
               state.gameState === 'playing'
                 ? state.hintStreets.slice(0, state.hintsRevealedCount)
@@ -115,7 +115,7 @@ const GameScreen: FC<GameScreenProps> = ({
                   glass-panel rounded-none border-l border-white/10
                   ${
                     ['mobile', 'tablet'].includes(deviceMode)
-                      ? 'w-full h-[45%] order-2 border-t rounded-t-3xl shadow-[0_-10px_40px_rgba(0,0,0,0.3)]'
+                      ? 'w-full h-[33%] order-2 border-t rounded-t-3xl shadow-[0_-10px_40px_rgba(0,0,0,0.3)]'
                       : 'w-[400px] lg:w-[450px] h-full order-2'
                   }
                `}
@@ -137,7 +137,7 @@ const GameScreen: FC<GameScreenProps> = ({
                       }
                     }}
                     selectedAnswer={state.selectedAnswer}
-                    feedback={state.feedback}
+                    feedback={state.feedback as any}
                     correctName={currentStreet?.name}
                     autoAdvance={state.autoAdvance}
                     disabled={state.isInputLocked}
@@ -148,7 +148,7 @@ const GameScreen: FC<GameScreenProps> = ({
                   hintStreets={state.hintStreets}
                   hintsRevealed={state.hintsRevealedCount}
                   onReveal={() => dispatch({ type: 'REVEAL_HINT' })}
-                  feedback={state.feedback}
+                  feedback={state.feedback as any}
                 />
 
                 {!state.autoAdvance && (
@@ -156,7 +156,7 @@ const GameScreen: FC<GameScreenProps> = ({
                     onNext={handleManualNext}
                     isLastQuestion={state.currentQuestionIndex >= state.quizStreets.length - 1}
                     isSubmit={state.feedback === 'selected'}
-                    feedback={state.feedback}
+                    feedback={state.feedback as any}
                     disabled={!state.selectedAnswer && state.feedback === 'idle'}
                   />
                 )}
