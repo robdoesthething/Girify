@@ -164,6 +164,21 @@ export const sendFriendRequest = async (
       return { error: 'Already friends' };
     }
 
+    // Check reverse friendship to be safe
+    const reverseFriendshipRef = doc(db, USERS_COLLECTION, toClean, 'friends', fromClean);
+    const reverseFriendshipSnap = await getDoc(reverseFriendshipRef);
+    if (reverseFriendshipSnap.exists()) {
+      // If inconsistent, we can maybe self-heal here, but for now just block
+      return { error: 'Already friends' };
+    }
+
+    // Check if they already sent YOU a request
+    const reverseRequestRef = doc(db, USERS_COLLECTION, fromClean, 'requests', toClean);
+    const reverseRequestSnap = await getDoc(reverseRequestRef);
+    if (reverseRequestSnap.exists()) {
+      return { error: 'They already sent you a request. Check your inbox!' };
+    }
+
     const requestRef = doc(db, USERS_COLLECTION, toClean, 'requests', fromClean);
     const requestSnap = await getDoc(requestRef);
     if (requestSnap.exists()) {
