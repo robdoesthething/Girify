@@ -516,8 +516,9 @@ export const getUserProfile = async (username: string): Promise<UserProfile | nu
     const friendCount = friendsSnapshot.size;
 
     let joinedAt = profileData?.joinedAt || Timestamp.now();
+    let earliestGame: Date | null = null;
+
     if (!snapshot.empty) {
-      let earliestGame: Date | null = null;
       snapshot.forEach(docSnap => {
         const d = docSnap.data() as DocumentData;
         let t: Date | null = null;
