@@ -5,6 +5,7 @@ import ErrorBoundary from './components/ErrorBoundary';
 import './index.css';
 import { assertEnvValid } from './utils/envValidation';
 import { logger } from './utils/logger';
+import { reportWebVitals } from './utils/webVitals';
 
 // Validate environment variables on startup
 try {
@@ -29,6 +30,9 @@ if (rootElement) {
       </StrictMode>
     );
     logger.info('[main.tsx] App rendered successfully');
+
+    // Report Core Web Vitals
+    reportWebVitals();
   } catch (e: unknown) {
     logger.error('[main.tsx] Failed to render:', e);
     const errorMessage = e instanceof Error ? e.message : String(e);
