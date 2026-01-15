@@ -1,4 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { Street } from '../../types/game';
 import {
   getTimeUntilNext,
   getTodaySeed,
@@ -7,27 +8,20 @@ import {
   selectDailyStreets,
 } from '../dailyChallenge';
 
-interface MockStreet {
-  id: string;
-  name: string;
-  tier: number;
-  geometry: number[][][][];
-}
-
 describe('Daily Challenge - Game Logic', () => {
-  const mockStreets: MockStreet[] = [
-    { id: '1', name: 'Carrer de Balmes', tier: 1, geometry: [[[[]]]] },
-    { id: '2', name: 'Avinguda Diagonal', tier: 1, geometry: [[[[]]]] },
-    { id: '3', name: 'Passeig de Gràcia', tier: 1, geometry: [[[[]]]] },
-    { id: '4', name: 'Carrer de Aragó', tier: 2, geometry: [[[[]]]] },
-    { id: '5', name: 'Carrer de València', tier: 2, geometry: [[[[]]]] },
-    { id: '6', name: 'Gran Via', tier: 2, geometry: [[[[]]]] },
-    { id: '7', name: 'Ronda de Sant Pere', tier: 3, geometry: [[[[]]]] },
-    { id: '8', name: 'Carrer de Provença', tier: 3, geometry: [[[[]]]] },
-    { id: '9', name: 'Carrer de Mallorca', tier: 4, geometry: [[[[]]]] },
-    { id: '10', name: 'Carrer de Rosselló', tier: 4, geometry: [[[[]]]] },
-    { id: '11', name: 'Carrer de Còrsega', tier: 4, geometry: [[[[]]]] },
-    { id: '12', name: 'Carrer de Girona', tier: 1, geometry: [[[[]]]] },
+  const mockStreets: Street[] = [
+    { id: '1', name: 'Carrer de Balmes', tier: 1, geometry: [[]] },
+    { id: '2', name: 'Avinguda Diagonal', tier: 1, geometry: [[]] },
+    { id: '3', name: 'Passeig de Gràcia', tier: 1, geometry: [[]] },
+    { id: '4', name: 'Carrer de Aragó', tier: 2, geometry: [[]] },
+    { id: '5', name: 'Carrer de València', tier: 2, geometry: [[]] },
+    { id: '6', name: 'Gran Via', tier: 2, geometry: [[]] },
+    { id: '7', name: 'Ronda de Sant Pere', tier: 3, geometry: [[]] },
+    { id: '8', name: 'Carrer de Provença', tier: 3, geometry: [[]] },
+    { id: '9', name: 'Carrer de Mallorca', tier: 4, geometry: [[]] },
+    { id: '10', name: 'Carrer de Rosselló', tier: 4, geometry: [[]] },
+    { id: '11', name: 'Carrer de Còrsega', tier: 4, geometry: [[]] },
+    { id: '12', name: 'Carrer de Girona', tier: 1, geometry: [[]] },
   ];
 
   beforeEach(() => {
