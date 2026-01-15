@@ -516,10 +516,10 @@ export const getUserProfile = async (username: string): Promise<UserProfile | nu
     const friendCount = friendsSnapshot.size;
 
     let joinedAt = profileData?.joinedAt || Timestamp.now();
-    let earliestGame: Date | null = null;
 
     if (!snapshot.empty) {
-      snapshot.forEach(docSnap => {
+      // Use reduce pattern instead of forEach to help TypeScript track the type
+      const earliestGame = snapshot.docs.reduce<Date | null>((earliest, docSnap) => {
         const d = docSnap.data() as DocumentData;
         let t: Date | null = null;
         if (typeof d.timestamp?.toDate === 'function') {
@@ -530,12 +530,11 @@ export const getUserProfile = async (username: string): Promise<UserProfile | nu
           t = new Date(d.timestamp as string | number);
         }
 
-        if (t) {
-          if (!earliestGame || t < earliestGame) {
-            earliestGame = t;
-          }
+        if (t && (!earliest || t < earliest)) {
+          return t;
         }
-      });
+        return earliest;
+      }, null);
 
       const currentJoinedDate =
         typeof (joinedAt as Timestamp).toDate === 'function'
