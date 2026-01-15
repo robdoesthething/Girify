@@ -647,10 +647,9 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ username }) => {
   };
 
   const totalGames = allHistory.length > 0 ? allHistory.length : profileData?.gamesPlayed || 0;
-  const bestScore =
-    allHistory.length > 0
-      ? Math.max(...allHistory.map(h => (h && h.score) || 0))
-      : profileData?.bestScore || 0;
+  const calculatedBest =
+    allHistory.length > 0 ? Math.max(...allHistory.map(h => (h && h.score) || 0)) : 0;
+  const bestScore = Math.max(calculatedBest, profileData?.bestScore || 0);
   const totalScore =
     allHistory.length > 0
       ? allHistory.reduce((acc, curr) => acc + ((curr && curr.score) || 0), 0)

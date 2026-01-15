@@ -1,18 +1,25 @@
+import { AnimatePresence, motion } from 'framer-motion';
 import React, { useCallback, useEffect, useState } from 'react';
 import { useTheme } from '../context/ThemeContext';
-import { getAllAnnouncements } from '../utils/news';
-import { getShopItems } from '../utils/shop';
-import { getAllUsers, getFeedbackList, updateUserAsAdmin } from '../utils/social';
-import AdminGiuros from './AdminGiuros';
 // @ts-ignore
 import { useConfirm } from '../hooks/useConfirm';
 import { useNotification } from '../hooks/useNotification';
-import { logger } from '../utils/logger';
-import { ConfirmDialog } from './ConfirmDialog';
-// @ts-ignore
-import { AnimatePresence, motion } from 'framer-motion';
-// @ts-ignore
 import { UserProfile } from '../types/user';
+import { logger } from '../utils/logger';
+import { Announcement, getAllAnnouncements } from '../utils/news';
+import { getShopItems, ShopItem } from '../utils/shop';
+import {
+  deleteUserAndData,
+  FeedbackItem,
+  getAllUsers,
+  getFeedbackList,
+  updateUserAsAdmin,
+} from '../utils/social';
+import AdminAnnouncements from './AdminAnnouncements';
+import AdminFeedback from './AdminFeedback';
+import AdminGiuros from './AdminGiuros';
+import AdminShop from './AdminShop';
+import { ConfirmDialog } from './ConfirmDialog';
 
 interface MetricCardProps {
   title: string;
@@ -32,33 +39,13 @@ const MetricCard: React.FC<MetricCardProps> = ({ title, value, color }) => {
   );
 };
 
-interface ShopItem {
-  id: string;
-  name: string;
-  type: string;
-  cost: number;
-  emoji?: string;
-  prefix?: string;
-  flavorText?: string;
-  description?: string;
-  cssClass?: string;
-  image?: string;
-}
-
-interface FeedbackItem {
-  id: string;
-  text: string;
-  username: string;
-  status: 'pending' | 'approved' | 'rejected';
-  createdAt: Date | { seconds: number; nanoseconds: number };
-  reward?: number;
-}
-
+// eslint-disable-next-line max-lines-per-function
 const AdminPanel: React.FC = () => {
   const { theme } = useTheme();
   const [activeTab, setActiveTab] = useState<string>('dashboard');
   const [users, setUsers] = useState<UserProfile[]>([]);
   const [feedback, setFeedback] = useState<FeedbackItem[]>([]);
+  const [announcements, setAnnouncements] = useState<Announcement[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
   const [editingUser, setEditingUser] = useState<UserProfile | null>(null);
   const [migrationStatus, setMigrationStatus] = useState<string | null>(null);
@@ -69,7 +56,7 @@ const AdminPanel: React.FC = () => {
 
   const fetchData = useCallback(async () => {
     setLoading(true);
-    const [u, f, , shop] = await Promise.all([
+    const [u, f, a, shop] = await Promise.all([
       getAllUsers(100) as unknown as Promise<UserProfile[]>,
       getFeedbackList() as unknown as Promise<FeedbackItem[]>,
       getAllAnnouncements(),
@@ -77,6 +64,7 @@ const AdminPanel: React.FC = () => {
     ]);
     setUsers(u);
     setFeedback(f);
+    setAnnouncements(a);
     setShopItems(shop);
     setLoading(false);
   }, []);
@@ -98,11 +86,13 @@ const AdminPanel: React.FC = () => {
       // @ts-ignore
       const { db } = await import('../firebase');
 
-      const usersRef = collection(db, 'users');
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const usersRef = collection(db as any, 'users');
       const snapshot = await getDocs(usersRef);
       let migrated = 0;
       let count = 0;
-      let batch = writeBatch(db);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      let batch = writeBatch(db as any);
       const batchSize = 200;
 
       for (const userDoc of snapshot.docs) {
@@ -122,7 +112,8 @@ const AdminPanel: React.FC = () => {
 
         if (count >= batchSize) {
           await batch.commit();
-          batch = writeBatch(db);
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          batch = writeBatch(db as any);
           count = 0;
         }
       }
@@ -137,6 +128,39 @@ const AdminPanel: React.FC = () => {
       logger.error(e);
       const errorMessage = e instanceof Error ? e.message : String(e);
       setMigrationStatus(`Error: ${errorMessage}`);
+    }
+  };
+
+  const handleCleanupUser = async () => {
+    // Find user without email (orphaned/test accounts)
+    const badUser = users.find(u => !u.email);
+
+    if (!badUser) {
+      notify('No user without email found.', 'success');
+      return;
+    }
+
+    if (
+      !(await confirm(
+        `Found user "${badUser.username}" with no email. Delete permanently?`,
+        'Cleanup Data',
+        true
+      ))
+    ) {
+      return;
+    }
+
+    try {
+      const result = await deleteUserAndData(badUser.username);
+      if (result.success) {
+        notify(`Deleted user ${badUser.username}`, 'success');
+        fetchData();
+      } else {
+        notify('Failed to delete user', 'error');
+      }
+    } catch (e) {
+      console.error(e);
+      notify('Cleanup failed', 'error');
     }
   };
 
@@ -160,30 +184,11 @@ const AdminPanel: React.FC = () => {
       purchasedCosmetics: editingUser.purchasedCosmetics || [],
     };
 
-    // Check if username changed (requires migration)
-    if (editingUser.username !== editingUser.uid && editingUser.uid) {
-      // Assuming uid is the doc ID or similar logic
-      // NOTE: AdminPanel logic assumed username === id mostly in previous code.
-      // If logic was `editingUser.username !== editingUser.id` (from previous file), we need to check properties.
-      // UserProfile has username and uid. We should check if they differ if that implies change.
-      // Reverting to previous logic pattern: if edited username differs from original ID.
-      // Need to track original ID? editingUser comes from `users` state.
-      // Let's assume `editingUser.username` is the potentially EDITED one.
-      // But wait, `setEditingUser` updates `editingUser`. We don't have original unless we store it.
-      // Actually `handleUpdateUser` logic in original file used `editingUser.id` vs `editingUser.username`.
-      // `UserProfile` type in `user.ts` has `uid` not `id`. Firebase docs have `id`.
-      // I should use `uid` or cast to `any` if valid.
-    }
-
-    // Simplification for TS refactor:
-    // We'll treat updates via standard admin functions.
-    // If we need migration logic, we'd need to know formatting.
-    // For now, let's use straightforward update.
-
     try {
       await updateUserAsAdmin(editingUser.username, updates);
       setEditingUser(null);
       fetchData();
+      notify('User updated successfully', 'success');
     } catch (e: unknown) {
       logger.error(e);
       const errorMessage = e instanceof Error ? e.message : String(e);
@@ -230,6 +235,36 @@ const AdminPanel: React.FC = () => {
             {/* GIUROS ECONOMICS */}
             {activeTab === 'giuros' && (
               <AdminGiuros users={users} shopItems={shopItems} theme={theme} />
+            )}
+
+            {/* SHOP */}
+            {activeTab === 'shop' && (
+              <AdminShop
+                items={shopItems}
+                onRefresh={fetchData}
+                notify={notify}
+                confirm={confirm}
+              />
+            )}
+
+            {/* FEEDBACK */}
+            {activeTab === 'feedback' && (
+              <AdminFeedback
+                feedback={feedback}
+                onRefresh={fetchData}
+                notify={notify}
+                confirm={confirm}
+              />
+            )}
+
+            {/* ANNOUNCEMENTS */}
+            {activeTab === 'announcements' && (
+              <AdminAnnouncements
+                announcements={announcements}
+                onRefresh={fetchData}
+                notify={notify}
+                confirm={confirm}
+              />
             )}
 
             {/* DASHBOARD */}
@@ -286,13 +321,18 @@ const AdminPanel: React.FC = () => {
                 <div className="p-6 rounded-2xl bg-white dark:bg-slate-800 shadow-sm border border-slate-100 dark:border-slate-700">
                   <h3 className="text-xl font-bold mb-4">Data Tools</h3>
                   <div className="space-y-4">
-                    {/* Simplified Data Tools Section for brevity in this conversion */}
-                    <div className="flex items-center gap-4">
+                    <div className="flex items-center gap-4 flex-wrap">
                       <button
                         onClick={handleMigration}
+                        className="px-6 py-3 rounded-xl bg-orange-500 hover:bg-orange-600 text-white font-bold transition-all shadow-lg shadow-orange-500/20"
+                      >
+                        ⚠️ Fix Usernames (Lowercase)
+                      </button>
+                      <button
+                        onClick={handleCleanupUser}
                         className="px-6 py-3 rounded-xl bg-rose-500 hover:bg-rose-600 text-white font-bold transition-all shadow-lg shadow-rose-500/20"
                       >
-                        ⚠️ Fix Usernames (Lowercase Migration)
+                        🗑️ Cleanup No-Email Users
                       </button>
                       {migrationStatus && (
                         <span className="font-mono text-sm opacity-70 bg-slate-100 dark:bg-slate-900 px-3 py-1 rounded">
@@ -375,11 +415,33 @@ const AdminPanel: React.FC = () => {
               </div>
             )}
 
-            {/* SHOP */}
-            {activeTab === 'shop' && <div>Shop Management (Placeholder for now)</div>}
-
-            {/* FEEDBACK */}
-            {activeTab === 'feedback' && <div>Feedback Management (Placeholder for now)</div>}
+            {/* ANALYTICS */}
+            {activeTab === 'analytics' && (
+              <div className="space-y-6">
+                <h2 className="text-3xl font-black">Analytics</h2>
+                <p className="opacity-60">More advanced analytics coming soon.</p>
+                <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                  <MetricCard title="Total Users" value={users.length} color="text-sky-500" />
+                  <MetricCard
+                    title="Total Games"
+                    value={users.reduce((acc, u) => acc + (u.gamesPlayed || 0), 0)}
+                    color="text-purple-500"
+                  />
+                  <MetricCard
+                    title="Average Score"
+                    value={Math.round(
+                      users.reduce((acc, u) => acc + (u.bestScore || 0), 0) / (users.length || 1)
+                    )}
+                    color="text-emerald-500"
+                  />
+                  <MetricCard
+                    title="Total Economy"
+                    value={users.reduce((acc, u) => acc + (u.giuros || 0), 0).toLocaleString()}
+                    color="text-yellow-500"
+                  />
+                </div>
+              </div>
+            )}
           </div>
         )}
       </div>
