@@ -1,9 +1,18 @@
-import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
+import { visualizer } from 'rollup-plugin-visualizer';
+import { defineConfig } from 'vite';
 
 // https://vite.dev/config/
-export default defineConfig({
-  plugins: [react()],
+export default defineConfig(({ mode }) => ({
+  plugins: [
+    react(),
+    mode === 'analyze' &&
+      visualizer({
+        open: true,
+        gzipSize: true,
+        filename: 'dist/stats.html',
+      }),
+  ].filter(Boolean),
   test: {
     globals: true,
     environment: 'jsdom',
@@ -15,4 +24,4 @@ export default defineConfig({
     include: ['src/**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}'],
     exclude: ['node_modules', 'dist', '.idea', '.git', '.cache', 'e2e'],
   },
-});
+}));
