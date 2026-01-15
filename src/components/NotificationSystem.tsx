@@ -3,7 +3,7 @@ import { ReactNode, useState } from 'react';
 import { NotificationContext } from '../context/NotificationContext';
 
 interface Notification {
-  id: number;
+  id: number | string;
   message: string;
   type: 'success' | 'error' | 'info' | 'warning';
 }
@@ -28,7 +28,7 @@ export const NotificationProvider: React.FC<NotificationProviderProps> = ({ chil
     return id;
   };
 
-  const dismiss = (id: number) => {
+  const dismiss = (id: number | string) => {
     setNotifications(prev => prev.filter(n => n.id !== id));
   };
 
@@ -42,7 +42,7 @@ export const NotificationProvider: React.FC<NotificationProviderProps> = ({ chil
 
 interface NotificationContainerProps {
   notifications: Notification[];
-  onDismiss: (id: number) => void;
+  onDismiss: (id: number | string) => void;
 }
 
 const NotificationContainer: React.FC<NotificationContainerProps> = ({

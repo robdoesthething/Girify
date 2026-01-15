@@ -106,15 +106,20 @@ export function gameReducer(state, action) {
         feedback: 'selected',
       };
 
-    case 'ANSWER_SUBMITTED':
+    case 'ANSWER_SUBMITTED': {
       // Payload: { result, points }
+      // Calculate new score with a cap of 1000
+      const potentialScore = state.score + action.payload.points;
+      const finalScore = Math.min(potentialScore, 1000);
+
       return {
         ...state,
-        score: state.score + action.payload.points,
+        score: finalScore,
         quizResults: [...state.quizResults, action.payload.result],
         feedback: 'transitioning',
         selectedAnswer: action.payload.selectedStreet, // Persist selection after submit
       };
+    }
 
     case 'NEXT_QUESTION': {
       const nextIndex = state.currentQuestionIndex + 1;
