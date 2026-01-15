@@ -4,10 +4,11 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTheme } from '../context/ThemeContext';
 import { Achievement, getNextAchievement, getUnlockedAchievements } from '../data/achievements';
-import cosmeticsData from '../data/cosmetics.json';
+// import cosmeticsData from '../data/cosmetics.json';
 import { GameHistory, UserProfile } from '../types/user';
 import { getFriendCount } from '../utils/friends';
 import { getEquippedCosmetics, getGiuros } from '../utils/giuros';
+import { getShopItems, ShopItem } from '../utils/shop';
 import { getUserGameHistory, getUserProfile, updateUserProfile } from '../utils/social';
 import { calculateStreak } from '../utils/stats';
 import TopBar from './TopBar';
@@ -39,13 +40,12 @@ const HISTORY_LIMIT = 7;
 const SCORE_DIVISOR = 1000;
 const ROUND_FACTOR = 100;
 
-interface Cosmetics {
-  avatars: { id: string; image: string }[];
-  avatarFrames: { id: string; cssClass: string }[];
-  titles: { id: string; name: string }[];
-}
-
-const cosmetics = cosmeticsData as Cosmetics;
+// interface Cosmetics {
+//   avatars: { id: string; image: string }[];
+//   avatarFrames: { id: string; cssClass: string }[];
+//   titles: { id: string; name: string }[];
+// }
+// const cosmetics = cosmeticsData as Cosmetics;
 
 // Helper function for date parsing
 const parseJoinedDate = (joinedAt: any): Date => {
@@ -101,6 +101,9 @@ interface ProfileHeaderProps {
   navigate: (path: string) => void;
   theme: string;
   t: (key: string) => string;
+  allAvatars: ShopItem[];
+  allFrames: ShopItem[];
+  allTitles: ShopItem[];
 }
 
 const ProfileHeader: React.FC<ProfileHeaderProps> = ({
@@ -116,16 +119,18 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
   navigate,
   theme,
   t,
+  allAvatars,
+  allFrames,
+  allTitles,
 }) => {
   const equippedAvatarId = equippedCosmetics?.avatarId;
-  const cosmeticAvatar = cosmetics.avatars?.find(a => a.id === equippedAvatarId);
+  const cosmeticAvatar = allAvatars.find(a => a.id === equippedAvatarId);
   const legacyAvatarIndex = profileData?.avatarId ? profileData.avatarId - 1 : 0;
   const legacyAvatar = AVATARS[Math.max(0, Math.min(legacyAvatarIndex, AVATARS.length - 1))];
-  const equippedFrame = cosmetics.avatarFrames.find(f => f.id === equippedCosmetics.frameId);
+  const equippedFrame = allFrames.find(f => f.id === equippedCosmetics.frameId);
   const frameClass = equippedFrame?.cssClass || 'ring-4 ring-white dark:ring-slate-700';
   const titleName =
-    cosmetics.titles.find(tItem => tItem.id === equippedCosmetics.titleId)?.name ||
-    'Street Explorer';
+    allTitles.find(tItem => tItem.id === equippedCosmetics.titleId)?.name || 'Street Explorer';
 
   return (
     <div className="flex flex-col items-center mb-8">
@@ -142,7 +147,11 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
           className={`w-28 h-28 rounded-full bg-gradient-to-br from-sky-400 to-indigo-600 flex items-center justify-center text-5xl shadow-2xl ${frameClass} select-none outline-none focus:ring-sky-500 cursor-pointer hover:scale-105 transition-transform overflow-hidden`}
         >
           {cosmeticAvatar ? (
-            <img src={cosmeticAvatar.image} alt="Avatar" className="w-full h-full object-cover" />
+            <img
+              src={cosmeticAvatar.image as string}
+              alt="Avatar"
+              className="w-full h-full object-cover"
+            />
           ) : (
             legacyAvatar
           )}
@@ -485,6 +494,9 @@ const useProfileData = (username: string) => {
   const [equippedCosmetics, setEquippedCosmetics] = useState<Record<string, string>>({});
   const [joinedDate, setJoinedDate] = useState('');
   const [loading, setLoading] = useState(true);
+  const [shopAvatars, setShopAvatars] = useState<ShopItem[]>([]);
+  const [shopFrames, setShopFrames] = useState<ShopItem[]>([]);
+  const [shopTitles, setShopTitles] = useState<ShopItem[]>([]);
 
   useEffect(() => {
     const loadProfile = async () => {
@@ -494,18 +506,52 @@ const useProfileData = (username: string) => {
 
       try {
         setLoading(true);
-        const [count, bal, equipped, history, profile] = await Promise.all([
+        const [count, bal, equipped, history, profile, shopItems] = await Promise.all([
           getFriendCount(username),
           getGiuros(username),
           getEquippedCosmetics(username),
           getUserGameHistory(username),
           getUserProfile(username),
+          getShopItems(),
         ]);
 
         setFriendCount(count);
         setGiuros(bal);
         setEquippedCosmetics(equipped || {});
-        setAllHistory(history || []);
+
+        // Map GameData to GameHistory
+        const mappedHistory: GameHistory[] = (history || []).map(h => {
+          let ts = 0;
+          if (h.timestamp && typeof (h.timestamp as any).toDate === 'function') {
+            ts = (h.timestamp as any).toDate().getTime();
+          } else if ((h.timestamp as any)?.seconds) {
+            ts = (h.timestamp as any).seconds * 1000;
+          } else if (typeof h.timestamp === 'number') {
+            ts = h.timestamp;
+          } else {
+            // Fallback to date number if timestamp missing
+            const dStr = h.date?.toString() || '';
+            if (dStr.length === 8) {
+              const y = parseInt(dStr.slice(0, 4), 10);
+              const m = parseInt(dStr.slice(4, 6), 10) - 1;
+              const d = parseInt(dStr.slice(6, 8), 10);
+              ts = new Date(y, m, d).getTime();
+            }
+          }
+
+          return {
+            date: h.date?.toString() || new Date(ts).toISOString().slice(0, 10),
+            score: h.score,
+            avgTime: '0s', // Default as it's missing in GameData
+            timestamp: ts,
+            username: username,
+          };
+        });
+
+        setAllHistory(mappedHistory);
+        setShopAvatars(shopItems.avatars || []);
+        setShopFrames(shopItems.avatarFrames || []);
+        setShopTitles(shopItems.titles || []);
 
         if (profile) {
           const userProfile = profile as UserProfile;
@@ -533,6 +579,9 @@ const useProfileData = (username: string) => {
     equippedCosmetics,
     joinedDate,
     loading,
+    shopAvatars,
+    shopFrames,
+    shopTitles,
   };
 };
 
@@ -553,6 +602,9 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ username }) => {
     equippedCosmetics,
     joinedDate,
     loading,
+    shopAvatars,
+    shopFrames,
+    shopTitles,
   } = useProfileData(username);
 
   const [isEditing, setIsEditing] = useState(false);
@@ -705,6 +757,9 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ username }) => {
                 navigate={p => navigate(p)}
                 theme={theme}
                 t={t}
+                allAvatars={shopAvatars}
+                allFrames={shopFrames}
+                allTitles={shopTitles}
               />
 
               <StatsGrid
