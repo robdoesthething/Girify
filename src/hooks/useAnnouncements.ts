@@ -6,7 +6,7 @@ interface Announcement {
   title: string;
   message: string;
   body: string;
-  publishDate: number;
+  publishDate: Date | { seconds: number; toDate?: () => Date };
   timestamp: number;
 }
 
