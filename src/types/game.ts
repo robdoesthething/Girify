@@ -3,6 +3,9 @@ export interface Street {
   name: string;
   geometry: number[][][]; // array of line strings or whatever the GeoJSON structure is
   properties?: Record<string, unknown>;
+  tier?: number; // 1-4 difficulty tier for street selection
+  lat?: number; // center latitude for proximity calculations
+  lng?: number; // center longitude for proximity calculations
 }
 
 export interface QuizQuestion {
