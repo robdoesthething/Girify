@@ -133,7 +133,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onLogin, theme }) => {
         </motion.div>
       </main>
 
-      <footer className="relative mt-auto p-8 text-center text-sm opacity-40 font-mono z-10 bg-slate-100/50 dark:bg-slate-900/50 backdrop-blur-sm">
+      <footer className="relative p-8 text-center text-sm opacity-40 font-mono z-10 bg-slate-100/50 dark:bg-slate-900/50 backdrop-blur-sm">
         <p className="mb-2">&copy; {new Date().getFullYear()} Girify · Barcelona</p>
         <div className="flex justify-center gap-4">
           <Link to="/privacy" className="hover:text-white underline decoration-dotted">
