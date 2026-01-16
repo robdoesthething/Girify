@@ -985,6 +985,9 @@ export const saveUserGameResult = async (username: string, gameData: GameData): 
 /**
  * Get user's game history
  */
+/**
+ * Get user's game history
+ */
 export const getUserGameHistory = async (username: string): Promise<GameData[]> => {
   if (!username) {
     return [];
@@ -993,73 +996,111 @@ export const getUserGameHistory = async (username: string): Promise<GameData[]> 
     const cleanUsername = username.toLowerCase().replace(/^@/, '');
     const originalUsername = username.toLowerCase();
 
-    // Try finding games in the clean username path first
+    // Strategy: Fetch from both sources in parallel and merge them.
+    // 1. 'games' subcollection (personal history)
+    // 2. 'scores' collection (global leaderboard entries)
+
+    // Prepare queries
     const gamesRef = collection(db, USERS_COLLECTION, cleanUsername, GAMES_SUBCOLLECTION);
-    let snapshot = await getDocs(query(gamesRef, limit(HISTORY_LIMIT)));
+    const gamesQuery = query(gamesRef, limit(HISTORY_LIMIT));
 
-    // If empty and usernames differ, try the original username path (e.g. users/@handle/games)
-    if (snapshot.empty && cleanUsername !== originalUsername) {
+    const scoresRef = collection(db, 'scores');
+    const scoresQueryClean = query(
+      scoresRef,
+      where('username', '==', cleanUsername),
+      limit(HISTORY_LIMIT)
+    );
+    const scoresQueryOriginal =
+      originalUsername !== cleanUsername
+        ? query(scoresRef, where('username', '==', originalUsername), limit(HISTORY_LIMIT))
+        : null;
+
+    // Execute all queries
+    const [gamesSnap, scoresCleanSnap, scoresOriginalSnap] = await Promise.all([
+      getDocs(gamesQuery).catch(() => ({ docs: [] }) as any), // safely handle error if subcollection doesn't exist
+      getDocs(scoresQueryClean),
+      scoresQueryOriginal ? getDocs(scoresQueryOriginal) : Promise.resolve({ docs: [] } as any),
+    ]);
+
+    // Merge strategy: Use a Map keyed by a unique identifier relative to the game.
+    // Since IDs might differ between collections, we'll try to dedup by timestamp/date if possible,
+    // or just simply merge all unique document IDs if they represent unique games.
+    // Note: 'scores' docs and 'games' docs are different documents.
+    // 'scores' are definitive for completed daily games.
+    // 'games' might contain local history syncs.
+    // We will prioritize 'scores' data for display as it's the official record.
+
+    const allGames: GameData[] = [];
+    const seenSignatures = new Set<string>();
+
+    const processDoc = (d: DocumentData) => {
+      const data = d.data ? d.data() : d; // Handle both QueryDocumentSnapshot and raw data
+
+      // Normalize Date
+      let timestamp = 0;
+      if (data.timestamp?.toMillis) {
+        timestamp = data.timestamp.toMillis();
+      } else if (data.timestamp?.seconds) {
+        timestamp = data.timestamp.seconds * 1000;
+      } else if (typeof data.timestamp === 'number') {
+        timestamp = data.timestamp;
+      } else if (data.date) {
+        // Try to parse YYYYMMDD
+        const dStr = data.date.toString();
+        // eslint-disable-next-line no-magic-numbers
+        if (dStr.length === 8) {
+          // eslint-disable-next-line no-magic-numbers
+          const y = parseInt(dStr.slice(0, 4), 10);
+          // eslint-disable-next-line no-magic-numbers
+          const m = parseInt(dStr.slice(4, 6), 10) - 1;
+          // eslint-disable-next-line no-magic-numbers
+          const dd = parseInt(dStr.slice(6, 8), 10);
+          timestamp = new Date(y, m, dd).getTime();
+        }
+      }
+
+      // Generate a signature to deduplicate: Date + Score
+      // This handles the case where the same game exists in both collections
+      const dateKey =
+        (data.date as number) ||
+        parseInt(new Date(timestamp).toISOString().slice(0, 10).replace(/-/g, ''), 10);
+
+      const signature = `${dateKey}_${data.score}`;
+
+      if (!seenSignatures.has(signature)) {
+        seenSignatures.add(signature);
+        allGames.push({
+          ...data,
+          date: dateKey,
+          score: (data.score as number) || 0,
+          timestamp: timestamp || Date.now(), // Ensure valid timestamp
+        } as GameData);
+      }
+    };
+
+    // Process scores first (highest priority/validity)
+    scoresCleanSnap.docs.forEach((d: DocumentData) => processDoc(d));
+    scoresOriginalSnap.docs.forEach((d: DocumentData) => processDoc(d));
+
+    // Then process games (personal history, might contain partials or unsynced)
+    gamesSnap.docs.forEach((d: DocumentData) => processDoc(d));
+
+    // If we still found nothing and clean != original, try 'games' on original username as last resort
+    if (allGames.length === 0 && cleanUsername !== originalUsername) {
       const altGamesRef = collection(db, USERS_COLLECTION, originalUsername, GAMES_SUBCOLLECTION);
-      const altSnapshot = await getDocs(query(altGamesRef, limit(HISTORY_LIMIT)));
-      if (!altSnapshot.empty) {
-        snapshot = altSnapshot;
-      }
+      const altSnap = await getDocs(query(altGamesRef, limit(HISTORY_LIMIT)));
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      altSnap.docs.forEach((d: any) => processDoc(d));
     }
 
-    if (snapshot.empty) {
-      const scoresRef = collection(db, 'scores');
-      const qLower = query(scoresRef, where('username', '==', cleanUsername), limit(HISTORY_LIMIT));
-      const qOriginal =
-        originalUsername !== cleanUsername
-          ? query(scoresRef, where('username', '==', originalUsername), limit(HISTORY_LIMIT))
-          : null;
-
-      const [snapLower, snapOriginal] = await Promise.all([
-        getDocs(qLower),
-        qOriginal ? getDocs(qOriginal) : Promise.resolve({ docs: [] as typeof snapshot.docs }),
-      ]);
-
-      const mergedDocs = new Map<string, (typeof snapshot.docs)[0]>();
-      snapLower.docs.forEach(d => mergedDocs.set(d.id, d));
-      snapOriginal.docs.forEach(d => mergedDocs.set(d.id, d));
-
-      snapshot = {
-        size: mergedDocs.size,
-        docs: Array.from(mergedDocs.values()),
-        empty: mergedDocs.size === 0,
-      } as typeof snapshot;
-
-      if (import.meta.env.DEV) {
-        console.warn(`[Profile] Fallback query found ${snapshot.size} scores for ${cleanUsername}`);
-      }
-    }
-
-    const results: GameData[] = snapshot.docs.map(d => {
-      const data = d.data() as DocumentData;
-      return {
-        ...data,
-        date:
-          (data.date as number) ||
-          ((data.timestamp as { seconds?: number })?.seconds
-            ? parseInt(
-                new Date((data.timestamp as { seconds: number }).seconds * MS_PER_SECOND)
-                  .toISOString()
-                  .slice(0, 10)
-                  .replace(/-/g, ''),
-                10
-              )
-            : null),
-        score: (data.score as number) || 0,
-      } as GameData;
-    });
-
-    results.sort((a, b) => {
+    // Sort by Date descending
+    allGames.sort((a, b) => {
       const dateA = a.date ? Number(a.date.toString().replace(/-/g, '')) : 0;
       const dateB = b.date ? Number(b.date.toString().replace(/-/g, '')) : 0;
       return dateB - dateA;
     });
 
-    return results;
+    return allGames;
   } catch (e) {
     console.error('Error fetching user game history:', e);
     return [];
