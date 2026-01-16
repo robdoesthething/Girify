@@ -2,6 +2,7 @@ import { AnimatePresence, motion } from 'framer-motion';
 import React, { useCallback, useEffect, useState } from 'react';
 import { useTheme } from '../../context/ThemeContext';
 // @ts-ignore
+import ProfileScreen from '../../features/profile/components/ProfileScreen';
 import { useConfirm } from '../../hooks/useConfirm';
 import { useNotification } from '../../hooks/useNotification';
 import { UserProfile } from '../../types/user';
@@ -17,7 +18,6 @@ import {
   updateUserAsAdmin,
 } from '../../utils/social';
 import { ConfirmDialog } from '../ConfirmDialog';
-import ProfileScreen from '../ProfileScreen';
 import AdminAchievements from './AdminAchievements';
 import AdminAnnouncements from './AdminAnnouncements';
 import AdminConfig from './AdminConfig';
