@@ -8,10 +8,16 @@ export interface ShopItem {
   id: string;
   name?: string;
   type: ShopItemType;
-  price?: number;
+  cost?: number; // Renamed/Added from price to match usage
+  price?: number; // Kept for backward compatibility if needed, but better to migrate
   rarity?: string;
   color?: string;
   description?: string;
+  image?: string;
+  emoji?: string;
+  cssClass?: string;
+  flavorText?: string;
+  prefix?: string;
   [key: string]: unknown;
 }
 

@@ -236,7 +236,7 @@ const SettingsScreen: React.FC<SettingsScreenProps> = ({
                   onClick={() => {
                     changeTheme(mode.id as 'light' | 'dark' | 'auto');
                     if (username) {
-                      updateUserProfile(username, { theme: mode.id });
+                      updateUserProfile(username, { theme: mode.id as 'light' | 'dark' | 'auto' });
                     }
                   }}
                   className={`flex-1 py-2 rounded-lg text-sm font-bold flex items-center justify-center gap-2 transition-all font-inter ${themeMode === mode.id ? 'bg-white dark:bg-slate-700 text-sky-500 shadow-sm' : 'text-slate-500 hover:text-slate-900 dark:hover:text-slate-300'}`}

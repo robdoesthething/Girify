@@ -35,6 +35,7 @@ import { useAnnouncements } from './hooks/useAnnouncements';
 import { useAuth } from './hooks/useAuth';
 import { useGameState } from './hooks/useGameState';
 import { useStreets } from './hooks/useStreets';
+import { GameHistory } from './types/user';
 import { getTodaySeed, hasPlayedToday } from './utils/dailyChallenge';
 import { saveScore } from './utils/leaderboard';
 import { hasDailyReferral } from './utils/social';
@@ -106,7 +107,7 @@ const AppRoutes: React.FC = () => {
 
       // User confirmed - save current progress before exiting
       try {
-        const history = storage.get(STORAGE_KEYS.HISTORY, []);
+        const history = storage.get<GameHistory[]>(STORAGE_KEYS.HISTORY, []);
         const avgTime = state.quizResults.length
           ? (
               state.quizResults.reduce((acc, curr) => acc + (curr.time || 0), 0) /
@@ -115,11 +116,11 @@ const AppRoutes: React.FC = () => {
           : 0;
 
         const partialRecord = {
-          date: getTodaySeed(),
+          date: getTodaySeed().toString(),
           score: state.score,
-          avgTime: avgTime,
+          avgTime: avgTime.toString(),
           timestamp: Date.now(),
-          username: state.username,
+          username: state.username || 'guest',
           incomplete: true, // Mark as incomplete
         };
         history.push(partialRecord);
