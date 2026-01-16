@@ -23,3 +23,15 @@
 - **News Required**: Every feature commit or deployment MUST be followed by a News/Announcement update to keep users informed.
 - **Privacy**: Never include confidential info in news.
 - **Format**: Use the `scripts/publishNews.js` script.
+
+## Commit Messages
+
+- **Format**: Conventional Commits (`type(scope): subject`)
+  - Types: `feat`, `fix`, `docs`, `style`, `refactor`, `test`, `chore`
+- **Length**: Maximum 100 characters for the header.
+- **Casing**: Subject must be all lowercase.
+- **Punctuation**: No trailing period at the end of the subject.
+- **Examples**:
+  - ✅ `feat(auth): add email verification step`
+  - ✅ `fix(shop): correct price calculation for bundles`
+  - ❌ `Fixed the login bug.` (Uppercase, period, no type)
