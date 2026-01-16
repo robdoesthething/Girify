@@ -72,7 +72,7 @@ export const saveScore = async (
 
   try {
     const now = Timestamp.now();
-    const cleanUsername = username.startsWith('@') ? username.slice(1) : username;
+    const cleanUsername = (username.startsWith('@') ? username.slice(1) : username).toLowerCase();
     const scoreData = {
       username: cleanUsername,
       score,
