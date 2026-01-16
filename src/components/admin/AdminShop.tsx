@@ -1,13 +1,13 @@
 import { AnimatePresence, motion } from 'framer-motion';
 import React, { useState } from 'react';
-import { useTheme } from '../context/ThemeContext';
+import { useTheme } from '../../context/ThemeContext';
 import {
   createShopItem,
   deleteShopItem,
   ShopItem,
   ShopItemType,
   updateShopItem,
-} from '../utils/shop';
+} from '../../utils/shop';
 
 interface AdminShopProps {
   items: { all: ShopItem[] };

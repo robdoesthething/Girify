@@ -1,7 +1,7 @@
 import { AnimatePresence, motion } from 'framer-motion';
 import React, { useState } from 'react';
-import { useTheme } from '../context/ThemeContext';
-import { Announcement, createAnnouncement, deleteAnnouncement } from '../utils/news';
+import { useTheme } from '../../context/ThemeContext';
+import { Announcement, createAnnouncement, deleteAnnouncement } from '../../utils/news';
 
 interface AdminAnnouncementsProps {
   announcements: Announcement[];

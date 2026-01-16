@@ -9,8 +9,8 @@ import TopBar from './components/TopBar';
 
 // Lazy loaded (route-based code splitting)
 const AboutScreen = lazy(() => import('./components/AboutScreen'));
-const AdminPanel = lazy(() => import('./components/AdminPanel'));
-const AdminRoute = lazy(() => import('./components/AdminRoute'));
+const AdminPanel = lazy(() => import('./components/admin/AdminPanel'));
+const AdminRoute = lazy(() => import('./components/admin/AdminRoute'));
 const FeedbackScreen = lazy(() => import('./components/FeedbackScreen'));
 const FriendsScreen = lazy(() => import('./components/FriendsScreen'));
 const LeaderboardScreen = lazy(() => import('./components/LeaderboardScreen'));

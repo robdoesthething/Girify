@@ -1,21 +1,23 @@
 import { AnimatePresence, motion } from 'framer-motion';
 import React, { useCallback, useEffect, useState } from 'react';
-import { useTheme } from '../context/ThemeContext';
+import { useTheme } from '../../context/ThemeContext';
 // @ts-ignore
-import { useConfirm } from '../hooks/useConfirm';
-import { useNotification } from '../hooks/useNotification';
-import { UserProfile } from '../types/user';
-import { logger } from '../utils/logger';
-import { DashboardMetrics, getDashboardMetrics } from '../utils/metrics';
-import { Announcement, getAllAnnouncements } from '../utils/news';
-import { getShopItems, ShopItem } from '../utils/shop';
+import { useConfirm } from '../../hooks/useConfirm';
+import { useNotification } from '../../hooks/useNotification';
+import { UserProfile } from '../../types/user';
+import { logger } from '../../utils/logger';
+import { DashboardMetrics, getDashboardMetrics } from '../../utils/metrics';
+import { Announcement, getAllAnnouncements } from '../../utils/news';
+import { getShopItems, ShopItem } from '../../utils/shop';
 import {
   deleteUserAndData,
   FeedbackItem,
   getAllUsers,
   getFeedbackList,
   updateUserAsAdmin,
-} from '../utils/social';
+} from '../../utils/social';
+import { ConfirmDialog } from '../ConfirmDialog';
+import ProfileScreen from '../ProfileScreen';
 import AdminAchievements from './AdminAchievements';
 import AdminAnnouncements from './AdminAnnouncements';
 import AdminConfig from './AdminConfig';
@@ -24,8 +26,6 @@ import AdminFeedback from './AdminFeedback';
 import AdminGameMaster from './AdminGameMaster';
 import AdminGiuros from './AdminGiuros';
 import AdminShop from './AdminShop';
-import { ConfirmDialog } from './ConfirmDialog';
-import ProfileScreen from './ProfileScreen';
 
 interface MetricCardProps {
   title: string;
@@ -95,7 +95,7 @@ const AdminPanel: React.FC = () => {
     try {
       const { collection, getDocs, doc, writeBatch } = await import('firebase/firestore');
       // @ts-ignore
-      const { db } = await import('../firebase');
+      const { db } = await import('../../firebase');
 
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const usersRef = collection(db as any, 'users');

@@ -1,7 +1,7 @@
 /* eslint-disable max-lines-per-function */
 import { motion } from 'framer-motion';
 import React, { useCallback, useEffect, useState } from 'react';
-import { createQuest, deleteQuest, getQuests, Quest, updateQuest } from '../utils/quests';
+import { createQuest, deleteQuest, getQuests, Quest, updateQuest } from '../../utils/quests';
 
 interface AdminContentProps {
   onNotify: (msg: string, type: 'success' | 'error' | 'info') => void;

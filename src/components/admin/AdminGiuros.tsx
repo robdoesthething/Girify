@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 // @ts-ignore
-import { UserProfile } from '../types/user';
-import { getPayoutConfig, PayoutConfig, updatePayoutConfig } from '../utils/configService';
+import { UserProfile } from '../../types/user';
+import { getPayoutConfig, PayoutConfig, updatePayoutConfig } from '../../utils/configService';
 
 interface ShopItem {
   id: string;

@@ -1,7 +1,7 @@
 /* eslint-disable max-lines-per-function */
 import { AnimatePresence, motion } from 'framer-motion';
 import React, { useState } from 'react';
-import { getUserProfile, updateUserAsAdmin } from '../utils/social';
+import { getUserProfile, updateUserAsAdmin } from '../../utils/social';
 
 interface AdminGameMasterProps {
   onNotify: (msg: string, type: 'success' | 'error' | 'info') => void;
