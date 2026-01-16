@@ -1,18 +1,11 @@
 import { motion } from 'framer-motion';
 import React, { useEffect, useState } from 'react';
 import { useTheme } from '../context/ThemeContext';
-import { getActiveAnnouncements, markAnnouncementAsRead } from '../utils/news';
+import { Announcement, getActiveAnnouncements, markAnnouncementAsRead } from '../utils/news';
 
 interface NewsScreenProps {
   onClose: () => void;
   username?: string;
-}
-
-interface Announcement {
-  id: string;
-  title: string;
-  body: string;
-  publishDate: Date | { seconds: number; toDate: () => Date };
 }
 
 const NewsScreen: React.FC<NewsScreenProps> = ({ onClose, username }) => {

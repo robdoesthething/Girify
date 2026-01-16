@@ -6,6 +6,7 @@ export interface Street {
   tier?: number; // 1-4 difficulty tier for street selection
   lat?: number; // center latitude for proximity calculations
   lng?: number; // center longitude for proximity calculations
+  [key: string]: any;
 }
 
 export interface QuizQuestion {

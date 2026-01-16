@@ -171,13 +171,13 @@ const RegisterPanel: React.FC<RegisterPanelProps> = ({
   };
 
   const handlePostLogin = async (handle: string, isExisting: boolean) => {
-    const referrer = storage.get('girify_referrer');
+    const referrer = storage.get('girify_referrer', '');
     if (referrer && referrer !== handle && !isExisting) {
       await recordReferral(referrer, handle);
       storage.remove('girify_referrer');
     }
 
-    if (!storage.get('girify_joined')) {
+    if (!storage.get('girify_joined', null)) {
       storage.set('girify_joined', new Date().toLocaleDateString());
     }
     if (onRegister) {
@@ -226,7 +226,7 @@ const RegisterPanel: React.FC<RegisterPanelProps> = ({
           email,
         });
 
-        const referrer = storage.get('girify_referrer');
+        const referrer = storage.get('girify_referrer', '');
         if (referrer && referrer !== handle) {
           await recordReferral(referrer, handle);
           storage.remove('girify_referrer');

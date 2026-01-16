@@ -9,27 +9,8 @@ import {
   setEquippedCosmetics,
   spendGiuros,
 } from '../utils/giuros';
-import { getShopItems } from '../utils/shop';
+import { getShopItems, GroupedShopItems, ShopItem } from '../utils/shop';
 import TopBar from './TopBar';
-
-interface ShopItem {
-  id: string;
-  name: string;
-  cost: number;
-  description?: string;
-  flavorText?: string;
-  cssClass?: string;
-  image?: string;
-  prefix?: string;
-  emoji?: string;
-}
-
-interface ShopItems {
-  avatarFrames: ShopItem[];
-  titles: ShopItem[];
-  special: ShopItem[];
-  avatars: ShopItem[];
-}
 
 interface ShopScreenProps {
   username: string;
@@ -55,11 +36,12 @@ const ShopScreen: React.FC<ShopScreenProps> = ({ username }) => {
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
   const [flavorModal, setFlavorModal] = useState<ShopItem | null>(null);
-  const [shopItems, setShopItems] = useState<ShopItems>({
+  const [shopItems, setShopItems] = useState<GroupedShopItems>({
     avatarFrames: [],
     titles: [],
     special: [],
     avatars: [],
+    all: [],
   });
 
   useEffect(() => {
@@ -78,7 +60,7 @@ const ShopScreen: React.FC<ShopScreenProps> = ({ username }) => {
         setBalance(bal);
         setPurchased(owned || []);
         setEquipped((eq as EquippedCosmetics) || {});
-        setShopItems(items as ShopItems);
+        setShopItems(items);
       } catch (e) {
         console.error('Error loading shop data:', e);
       }
@@ -94,13 +76,14 @@ const ShopScreen: React.FC<ShopScreenProps> = ({ username }) => {
       return;
     }
 
-    if (balance < item.cost) {
+    const cost = item.cost || item.price || 0;
+    if (balance < cost) {
       setMessage({ type: 'error', text: t('notEnoughGiuros') });
       setTimeout(() => setMessage(null), 2000);
       return;
     }
 
-    const result = await spendGiuros(username, item.cost, item.id);
+    const result = await spendGiuros(username, cost, item.id);
     if (result.success) {
       setBalance(result.newBalance ?? balance);
       setPurchased(prev => [...prev, item.id]);
@@ -143,7 +126,7 @@ const ShopScreen: React.FC<ShopScreenProps> = ({ username }) => {
     { id: 'special', label: `✨ ${t('special')}`, items: shopItems.special || [] },
   ];
 
-  const activeItems = tabs.find(t_ => t_.id === activeTab)?.items || [];
+  const activeItems = (tabs.find(t_ => t_.id === activeTab)?.items || []).filter(i => !!i);
 
   const isOwned = (itemId: string) =>
     purchased.includes(itemId) ||
@@ -299,7 +282,7 @@ const ShopScreen: React.FC<ShopScreenProps> = ({ username }) => {
 
                         <div>
                           <h3 className="font-bold text-sm leading-tight font-inter">
-                            {t(item.name) || item.name}
+                            {t(item.name || '') || item.name}
                           </h3>
                           <p className="text-xs opacity-60 mt-1 line-clamp-2 font-inter">
                             {activeTab === 'titles' && item.flavorText
@@ -318,7 +301,7 @@ const ShopScreen: React.FC<ShopScreenProps> = ({ username }) => {
                           <div className="flex items-center gap-1 justify-end font-inter">
                             <img src="/giuro.png" alt="" className="h-4 w-auto object-contain" />
                             <span className="font-black text-yellow-600 dark:text-yellow-400 text-sm">
-                              {item.cost}
+                              {item.cost || item.price || 0}
                             </span>
                           </div>
                         )}
@@ -339,8 +322,8 @@ const ShopScreen: React.FC<ShopScreenProps> = ({ username }) => {
                       ) : (
                         <button
                           onClick={() => handlePurchase(item, activeTab)}
-                          disabled={balance < item.cost}
-                          className={`flex-1 py-2 rounded-xl font-bold text-xs transition-all font-inter ${balance >= item.cost ? 'bg-yellow-500 hover:bg-yellow-600 text-white shadow-lg shadow-yellow-500/20' : 'bg-slate-300 text-slate-500 cursor-not-allowed'}`}
+                          disabled={balance < (item.cost || item.price || 0)}
+                          className={`flex-1 py-2 rounded-xl font-bold text-xs transition-all font-inter ${balance >= (item.cost || item.price || 0) ? 'bg-yellow-500 hover:bg-yellow-600 text-white shadow-lg shadow-yellow-500/20' : 'bg-slate-300 text-slate-500 cursor-not-allowed'}`}
                           type="button"
                         >
                           {t('buy')}
@@ -370,7 +353,7 @@ const ShopScreen: React.FC<ShopScreenProps> = ({ username }) => {
                   {flavorModal.prefix || flavorModal.emoji || '✨'}
                 </div>
                 <h3 className="text-xl font-bold mb-1 font-inter">
-                  {t(flavorModal.name) || flavorModal.name}
+                  {t(flavorModal.name || '') || flavorModal.name}
                 </h3>
                 <div className="text-sm opacity-60 italic px-4 font-inter">
                   &quot;
@@ -396,7 +379,7 @@ const ShopScreen: React.FC<ShopScreenProps> = ({ username }) => {
                     <div className="flex items-center gap-2 bg-yellow-500/10 px-3 py-1 rounded-full font-inter">
                       <img src="/giuro.png" alt="" className="w-5 h-5 font-inter" />
                       <span className="font-bold text-yellow-600 dark:text-yellow-400">
-                        {flavorModal.cost}
+                        {flavorModal.cost || flavorModal.price || 0}
                       </span>
                     </div>
                   );
@@ -425,8 +408,8 @@ const ShopScreen: React.FC<ShopScreenProps> = ({ username }) => {
                     return (
                       <button
                         onClick={() => handlePurchase(flavorModal, 'titles')}
-                        disabled={balance < flavorModal.cost}
-                        className={`flex-1 py-3 rounded-xl font-bold text-sm transition-all font-inter ${balance >= flavorModal.cost ? 'bg-yellow-500 hover:bg-yellow-600 text-white shadow-lg' : 'bg-slate-300 text-slate-500 cursor-not-allowed'}`}
+                        disabled={balance < (flavorModal.cost || flavorModal.price || 0)}
+                        className={`flex-1 py-3 rounded-xl font-bold text-sm transition-all font-inter ${balance >= (flavorModal.cost || flavorModal.price || 0) ? 'bg-yellow-500 hover:bg-yellow-600 text-white shadow-lg' : 'bg-slate-300 text-slate-500 cursor-not-allowed'}`}
                         type="button"
                       >
                         {t('buy')}

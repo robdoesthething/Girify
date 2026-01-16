@@ -1,9 +1,9 @@
+import { Timestamp } from 'firebase/firestore';
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useTheme } from '../context/ThemeContext';
 import { getUnlockedAchievements } from '../data/achievements';
 import cosmetics from '../data/cosmetics.json';
-import { UserProfile } from '../types/user';
 import {
   blockUser,
   getBlockStatus,
@@ -11,7 +11,7 @@ import {
   sendFriendRequest,
 } from '../utils/friends';
 import { getEquippedCosmetics } from '../utils/giuros';
-import { getUserGameHistory, getUserProfile } from '../utils/social';
+import { getUserGameHistory, getUserProfile, UserProfile } from '../utils/social'; // Changed to match getUserProfile return type
 import TopBar from './TopBar';
 
 const AVATARS = [
@@ -80,7 +80,7 @@ const PublicProfileScreen: React.FC<PublicProfileScreenProps> = ({ currentUser }
             streak: 0,
             totalScore: 0,
             lastPlayDate: '',
-            joinedAt: new Date(),
+            joinedAt: Timestamp.now(),
             gamesPlayed: 0,
             bestScore: 0,
             friendCount: 0,
