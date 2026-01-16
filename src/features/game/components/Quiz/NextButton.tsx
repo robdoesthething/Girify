@@ -7,9 +7,16 @@ interface NextButtonProps {
   isLastQuestion: boolean;
   feedback: 'idle' | 'selected' | 'transitioning';
   isSubmit?: boolean;
+  disabled?: boolean;
 }
 
-const NextButton: React.FC<NextButtonProps> = ({ onNext, isLastQuestion, feedback, isSubmit }) => {
+const NextButton: React.FC<NextButtonProps> = ({
+  onNext,
+  isLastQuestion,
+  feedback,
+  isSubmit,
+  disabled,
+}) => {
   const { theme, t } = useTheme();
 
   // Show button when answer is selected (manual mode) or during transition
@@ -32,14 +39,18 @@ const NextButton: React.FC<NextButtonProps> = ({ onNext, isLastQuestion, feedbac
       <button
         onClick={e => {
           e.stopPropagation();
-          onNext();
+          if (!disabled) {
+            onNext();
+          }
         }}
+        disabled={disabled}
         className={`w-full sm:w-auto px-6 md:px-8 py-2 md:py-3 text-sm md:text-base rounded-full font-black shadow-lg transition-all active:scale-95 border font-inter
                     ${
                       theme === 'dark'
                         ? 'bg-neutral-200 hover:bg-white text-neutral-900 border-white'
                         : 'bg-slate-900 hover:bg-slate-800 text-white border-slate-900'
                     }
+                    ${disabled ? 'opacity-50 cursor-not-allowed' : ''}
                 `}
         type="button"
       >
