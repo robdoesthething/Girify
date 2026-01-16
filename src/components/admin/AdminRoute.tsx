@@ -2,7 +2,7 @@ import { onAuthStateChanged } from 'firebase/auth';
 import { doc, getDoc } from 'firebase/firestore';
 import React, { useEffect, useState } from 'react';
 import { Navigate, Outlet } from 'react-router-dom';
-import { auth, db } from '../firebase';
+import { auth, db } from '../../firebase';
 
 const AdminRoute: React.FC = () => {
   const [isAdmin, setIsAdmin] = useState<boolean | null>(null); // null = checking, true/false

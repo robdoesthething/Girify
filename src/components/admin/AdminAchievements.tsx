@@ -6,7 +6,7 @@ import {
   deleteAchievement,
   getAllAchievements,
   updateAchievement,
-} from '../utils/achievements';
+} from '../../utils/achievements';
 
 interface AdminAchievementsProps {
   onNotify: (msg: string, type: 'success' | 'error' | 'info') => void;

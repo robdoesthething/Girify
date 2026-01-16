@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { useTheme } from '../context/ThemeContext';
-import { approveFeedback, deleteFeedback, FeedbackItem, rejectFeedback } from '../utils/social';
+import { useTheme } from '../../context/ThemeContext';
+import { approveFeedback, deleteFeedback, FeedbackItem, rejectFeedback } from '../../utils/social';
 
 interface AdminFeedbackProps {
   feedback: FeedbackItem[];
