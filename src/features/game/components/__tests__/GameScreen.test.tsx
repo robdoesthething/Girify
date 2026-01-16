@@ -1,8 +1,15 @@
 import { fireEvent, render, screen } from '@testing-library/react';
 import { BrowserRouter } from 'react-router-dom';
 import { describe, expect, it, vi } from 'vitest';
-import { Feedback, GameState } from '../../types/game';
+import { Feedback, GameState } from '../../../../types/game';
 import GameScreen from '../GameScreen';
+
+// Mock Firebase to prevent initialization errors in tests
+vi.mock('../../../../firebase', () => ({
+  auth: {},
+  db: {},
+  storage: {},
+}));
 
 // Mock dependencies
 vi.mock('../MapArea', () => {
@@ -52,7 +59,7 @@ vi.mock('../Quiz', () => {
 
   return { default: MockQuiz };
 });
-vi.mock('../RegisterPanel', () => {
+vi.mock('../../../auth/components/RegisterPanel', () => {
   const RegisterPanel = ({ onRegister }: { onRegister: (username: string) => void }) => (
     <div data-testid="register-panel">
       <button onClick={() => onRegister('@testuser')}>Register</button>
@@ -66,7 +73,7 @@ vi.mock('../SummaryScreen', () => {
   SummaryScreen.displayName = 'SummaryScreen';
   return { default: SummaryScreen };
 });
-vi.mock('../LandingPage', () => {
+vi.mock('../../../../components/LandingPage', () => {
   const LandingPage = ({ onStart, onLogin }: { onStart: () => void; onLogin: () => void }) => (
     <div data-testid="landing-page">
       <button onClick={onStart}>Start</button>
@@ -76,7 +83,7 @@ vi.mock('../LandingPage', () => {
   LandingPage.displayName = 'LandingPage';
   return { default: LandingPage };
 });
-vi.mock('../Logo', () => {
+vi.mock('../../../../components/Logo', () => {
   const Logo = () => <div>Logo</div>;
   Logo.displayName = 'Logo';
   return { default: Logo };
@@ -86,7 +93,7 @@ vi.mock('../OnboardingTour', () => ({
 }));
 
 // Mock utils
-vi.mock('../../utils/dailyChallenge', () => ({
+vi.mock('../../../../utils/dailyChallenge', () => ({
   hasPlayedToday: vi.fn(() => false),
 }));
 
