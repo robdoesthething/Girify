@@ -107,6 +107,7 @@ interface GameStatsUpdate {
   streak: number;
   totalScore: number;
   lastPlayDate: string;
+  currentScore?: number;
 }
 
 /**
@@ -165,6 +166,9 @@ export const ensureUserProfile = async (
         friendActivity: true,
         newsUpdates: true,
       },
+      migratedTo: null,
+      migratedFrom: null,
+      referredBy: null,
     };
     await setDoc(userRef, profileData);
     return profileData;
@@ -253,7 +257,7 @@ export const getUserByEmail = async (email: string): Promise<UserProfile | null>
  */
 export const updateUserGameStats = async (
   username: string,
-  { streak, totalScore, lastPlayDate }: GameStatsUpdate
+  { streak, totalScore, lastPlayDate, currentScore }: GameStatsUpdate
 ): Promise<void> => {
   if (!username) {
     return;
@@ -278,6 +282,13 @@ export const updateUserGameStats = async (
 
     if (streak > ((currentData.maxStreak as number) || 0)) {
       updates.maxStreak = streak;
+    }
+
+    if (currentScore !== undefined) {
+      const currentBest = (currentData.bestScore as number) || 0;
+      if (currentScore > currentBest) {
+        updates.bestScore = currentScore;
+      }
     }
 
     await updateDoc(userRef, updates);
@@ -980,16 +991,27 @@ export const getUserGameHistory = async (username: string): Promise<GameData[]> 
   }
   try {
     const cleanUsername = username.toLowerCase().replace(/^@/, '');
+    const originalUsername = username.toLowerCase();
 
+    // Try finding games in the clean username path first
     const gamesRef = collection(db, USERS_COLLECTION, cleanUsername, GAMES_SUBCOLLECTION);
     let snapshot = await getDocs(query(gamesRef, limit(HISTORY_LIMIT)));
+
+    // If empty and usernames differ, try the original username path (e.g. users/@handle/games)
+    if (snapshot.empty && cleanUsername !== originalUsername) {
+      const altGamesRef = collection(db, USERS_COLLECTION, originalUsername, GAMES_SUBCOLLECTION);
+      const altSnapshot = await getDocs(query(altGamesRef, limit(HISTORY_LIMIT)));
+      if (!altSnapshot.empty) {
+        snapshot = altSnapshot;
+      }
+    }
 
     if (snapshot.empty) {
       const scoresRef = collection(db, 'scores');
       const qLower = query(scoresRef, where('username', '==', cleanUsername), limit(HISTORY_LIMIT));
       const qOriginal =
-        username !== cleanUsername
-          ? query(scoresRef, where('username', '==', username), limit(HISTORY_LIMIT))
+        originalUsername !== cleanUsername
+          ? query(scoresRef, where('username', '==', originalUsername), limit(HISTORY_LIMIT))
           : null;
 
       const [snapLower, snapOriginal] = await Promise.all([
