@@ -108,6 +108,17 @@ export const saveScore = async (
     if (shouldUpdate) {
       await setDoc(userDocRef, scoreData);
     }
+
+    // [New] Also update the User Profile stats (for 'bestScore' consistency)
+    // Dynamic import to avoid circular dependency if possible, or direct if allowed.
+    // Assuming circular dependency is handled or fine.
+    const { updateUserGameStats } = await import('./social');
+    await updateUserGameStats(username, {
+      streak: streakAtPlay || 0,
+      totalScore: score, // This adds to total score in updateUserGameStats
+      lastPlayDate: new Date().toISOString(),
+      currentScore: score,
+    });
   } catch (e) {
     console.error('Error saving score: ', e);
     console.error(
