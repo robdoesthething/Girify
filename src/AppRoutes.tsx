@@ -4,25 +4,25 @@ import { Route, Routes, useLocation, useNavigate } from 'react-router-dom';
 
 // Eagerly loaded (needed immediately)
 import AnnouncementModal from './components/AnnouncementModal';
-import GameScreen from './components/GameScreen';
 import TopBar from './components/TopBar';
+import GameScreen from './features/game/components/GameScreen';
 
 // Lazy loaded (route-based code splitting)
 const AboutScreen = lazy(() => import('./components/AboutScreen'));
 const AdminPanel = lazy(() => import('./components/admin/AdminPanel'));
 const AdminRoute = lazy(() => import('./components/admin/AdminRoute'));
 const FeedbackScreen = lazy(() => import('./components/FeedbackScreen'));
-const FriendsScreen = lazy(() => import('./components/FriendsScreen'));
-const LeaderboardScreen = lazy(() => import('./components/LeaderboardScreen'));
+const FriendsScreen = lazy(() => import('./features/friends/components/FriendsScreen'));
+const LeaderboardScreen = lazy(() => import('./features/leaderboard/components/LeaderboardScreen'));
 const NewsScreen = lazy(() => import('./components/NewsScreen'));
-const ProfileScreen = lazy(() => import('./components/ProfileScreen'));
-const PublicProfileScreen = lazy(() => import('./components/PublicProfileScreen'));
+const ProfileScreen = lazy(() => import('./features/profile/components/ProfileScreen'));
+const PublicProfileScreen = lazy(() => import('./features/profile/components/PublicProfileScreen'));
 const SettingsScreen = lazy(() => import('./components/SettingsScreen'));
-const ShopScreen = lazy(() => import('./components/ShopScreen'));
-const StreetsFetcher = lazy(() => import('./components/StreetsFetcher'));
+const ShopScreen = lazy(() => import('./features/shop/components/ShopScreen'));
+const StreetsFetcher = lazy(() => import('./features/game/components/StreetsFetcher'));
 const PrivacyPolicy = lazy(() => import('./components/PrivacyPolicy'));
 const TermsOfService = lazy(() => import('./components/TermsOfService'));
-const VerifyEmailScreen = lazy(() => import('./components/VerifyEmailScreen'));
+const VerifyEmailScreen = lazy(() => import('./features/auth/components/VerifyEmailScreen'));
 const AchievementModal = lazy(() => import('./components/AchievementModal'));
 const ConfirmDialog = lazy(() =>
   import('./components/ConfirmDialog').then(m => ({ default: m.ConfirmDialog }))
@@ -30,11 +30,11 @@ const ConfirmDialog = lazy(() =>
 
 import { STORAGE_KEYS } from './config/constants';
 import { useTheme } from './context/ThemeContext';
+import { useAuth } from './features/auth/hooks/useAuth';
+import { useGameState } from './features/game/hooks/useGameState';
+import { useStreets } from './features/game/hooks/useStreets';
 import { useAchievements } from './hooks/useAchievements';
 import { useAnnouncements } from './hooks/useAnnouncements';
-import { useAuth } from './hooks/useAuth';
-import { useGameState } from './hooks/useGameState';
-import { useStreets } from './hooks/useStreets';
 import { GameHistory } from './types/user';
 import { getTodaySeed, hasPlayedToday } from './utils/dailyChallenge';
 import { saveScore } from './utils/leaderboard';
