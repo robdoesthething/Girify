@@ -1,28 +1,36 @@
-import { useState, useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import { getAllAchievements } from '../utils/achievements';
 // @ts-ignore
+import { Achievement, getUnlockedAchievements } from '../data/achievements';
 import { getUserProfile } from '../utils/social';
-import { getUnlockedAchievements, Achievement } from '../data/achievements';
 
-/**
- * Hook for managing achievement tracking and unlock notifications
- * @param {string} username - Current user's username
- * @param {string} gameState - Current game state ('playing', 'summary', etc.)
- * @param {string} pathname - Current route pathname
- * @returns {Object} { newlyUnlockedBadge, dismissAchievement }
- */
 export const useAchievements = (username: string | null, gameState: string, pathname: string) => {
   const [newlyUnlockedBadge, setNewlyUnlockedBadge] = useState<Achievement | null>(null);
+  const [achievementRules, setAchievementRules] = useState<Achievement[]>([]);
   const prevUnlockedRef = useRef<Set<string>>(new Set());
+
+  // Fetch rules on mount
+  useEffect(() => {
+    const fetchRules = async () => {
+      const rules = await getAllAchievements();
+      setAchievementRules(rules);
+    };
+    fetchRules();
+  }, []);
 
   useEffect(() => {
     const checkAchievements = async () => {
-      if (!username) {
+      if (!username || achievementRules.length === 0) {
         return;
       }
 
       try {
         const profile = await getUserProfile(username);
-        const unlocked = getUnlockedAchievements(profile);
+        if (!profile) {
+          return;
+        }
+        // Pass dynamic rules here
+        const unlocked = getUnlockedAchievements(profile, [], achievementRules);
 
         // Initialize ref on first load
         if (prevUnlockedRef.current.size === 0) {
@@ -47,7 +55,7 @@ export const useAchievements = (username: string | null, gameState: string, path
     if (gameState === 'summary' || pathname === '/profile') {
       checkAchievements();
     }
-  }, [username, gameState, pathname]);
+  }, [username, gameState, pathname, achievementRules]);
 
   const dismissAchievement = () => {
     setNewlyUnlockedBadge(null);
