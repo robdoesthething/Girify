@@ -443,6 +443,7 @@ export const getAllUsers = async (limitCount = 50): Promise<UserProfile[]> => {
 
 /**
  * Update user data as Admin
+ * @throws Error if not authenticated or not an admin
  */
 export const updateUserAsAdmin = async (
   targetUsername: string,
@@ -451,6 +452,11 @@ export const updateUserAsAdmin = async (
   if (!targetUsername || !data) {
     return;
   }
+
+  // Security: Verify admin before write
+  const { requireAdmin } = await import('./auth');
+  await requireAdmin();
+
   const userRef = doc(db, USERS_COLLECTION, targetUsername);
   await updateDoc(userRef, data as DocumentData);
 };
