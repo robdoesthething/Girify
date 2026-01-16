@@ -6,6 +6,7 @@ import { useConfirm } from '../hooks/useConfirm';
 import { useNotification } from '../hooks/useNotification';
 import { UserProfile } from '../types/user';
 import { logger } from '../utils/logger';
+import { DashboardMetrics, getDashboardMetrics } from '../utils/metrics';
 import { Announcement, getAllAnnouncements } from '../utils/news';
 import { getShopItems, ShopItem } from '../utils/shop';
 import {
@@ -15,11 +16,16 @@ import {
   getFeedbackList,
   updateUserAsAdmin,
 } from '../utils/social';
+import AdminAchievements from './AdminAchievements';
 import AdminAnnouncements from './AdminAnnouncements';
+import AdminConfig from './AdminConfig';
+import AdminContent from './AdminContent';
 import AdminFeedback from './AdminFeedback';
+import AdminGameMaster from './AdminGameMaster';
 import AdminGiuros from './AdminGiuros';
 import AdminShop from './AdminShop';
 import { ConfirmDialog } from './ConfirmDialog';
+import ProfileScreen from './ProfileScreen';
 
 interface MetricCardProps {
   title: string;
@@ -48,24 +54,29 @@ const AdminPanel: React.FC = () => {
   const [announcements, setAnnouncements] = useState<Announcement[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
   const [editingUser, setEditingUser] = useState<UserProfile | null>(null);
+  const [viewingUser, setViewingUser] = useState<UserProfile | null>(null);
   const [migrationStatus, setMigrationStatus] = useState<string | null>(null);
   const { notify } = useNotification();
   const { confirm, confirmConfig, handleClose } = useConfirm();
 
   const [shopItems, setShopItems] = useState<{ all: ShopItem[] }>({ all: [] });
+  const [metrics, setMetrics] = useState<DashboardMetrics | null>(null);
 
   const fetchData = useCallback(async () => {
     setLoading(true);
-    const [u, f, a, shop] = await Promise.all([
+    const [u, f, a, shop, m] = await Promise.all([
       getAllUsers(100) as unknown as Promise<UserProfile[]>,
       getFeedbackList() as unknown as Promise<FeedbackItem[]>,
       getAllAnnouncements(),
       getShopItems(true) as unknown as Promise<{ all: ShopItem[] }>,
+      getDashboardMetrics(),
     ]);
     setUsers(u);
     setFeedback(f);
     setAnnouncements(a);
-    setShopItems(shop);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    setShopItems(shop as any);
+    setMetrics(m);
     setLoading(false);
   }, []);
 
@@ -182,6 +193,8 @@ const AdminPanel: React.FC = () => {
       gamesPlayed: Number(editingUser.gamesPlayed),
       bestScore: Number(editingUser.bestScore),
       purchasedCosmetics: editingUser.purchasedCosmetics || [],
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      joinedAt: editingUser.joinedAt as any,
     };
 
     try {
@@ -206,21 +219,30 @@ const AdminPanel: React.FC = () => {
       >
         <h1 className="text-xl font-black mb-6 text-sky-500">Girify Admin</h1>
         <nav className="flex flex-col gap-1">
-          {['dashboard', 'users', 'shop', 'feedback', 'announcements', 'analytics', 'giuros'].map(
-            tab => (
-              <button
-                key={tab}
-                onClick={() => setActiveTab(tab)}
-                className={`text-left px-3 py-2 rounded-lg font-bold text-sm transition-all ${
-                  activeTab === tab
-                    ? 'bg-sky-500 text-white shadow-lg shadow-sky-500/20'
-                    : 'hover:bg-slate-100 dark:hover:bg-slate-800 opacity-60 hover:opacity-100'
-                }`}
-              >
-                {tab.charAt(0).toUpperCase() + tab.slice(1)}
-              </button>
-            )
-          )}
+          {[
+            'dashboard',
+            'users',
+            'gamemaster',
+            'achievements',
+            'content',
+            'shop',
+            'feedback',
+            'announcements',
+            'giuros',
+            'config',
+          ].map(tab => (
+            <button
+              key={tab}
+              onClick={() => setActiveTab(tab)}
+              className={`text-left px-3 py-2 rounded-lg font-bold text-sm transition-all ${
+                activeTab === tab
+                  ? 'bg-sky-500 text-white shadow-lg shadow-sky-500/20'
+                  : 'hover:bg-slate-100 dark:hover:bg-slate-800 opacity-60 hover:opacity-100'
+              }`}
+            >
+              {tab.charAt(0).toUpperCase() + tab.slice(1)}
+            </button>
+          ))}
         </nav>
       </div>
 
@@ -232,14 +254,27 @@ const AdminPanel: React.FC = () => {
           </div>
         ) : (
           <div className="w-full pb-16">
+            {/* GAMEMASTER */}
+            {activeTab === 'gamemaster' && <AdminGameMaster onNotify={notify} confirm={confirm} />}
+
+            {/* ACHIEVEMENTS */}
+            {activeTab === 'achievements' && (
+              <AdminAchievements onNotify={notify} confirm={confirm} />
+            )}
+
+            {/* CONTENT STUDIO */}
+            {activeTab === 'content' && <AdminContent onNotify={notify} confirm={confirm} />}
+
             {/* GIUROS ECONOMICS */}
             {activeTab === 'giuros' && (
+              // @ts-ignore
               <AdminGiuros users={users} shopItems={shopItems} theme={theme} />
             )}
 
             {/* SHOP */}
             {activeTab === 'shop' && (
               <AdminShop
+                // @ts-ignore
                 items={shopItems}
                 onRefresh={fetchData}
                 notify={notify}
@@ -267,55 +302,45 @@ const AdminPanel: React.FC = () => {
               />
             )}
 
+            {/* CONFIG */}
+            {activeTab === 'config' && <AdminConfig onNotify={notify} />}
+
             {/* DASHBOARD */}
             {activeTab === 'dashboard' && (
               <div className="space-y-8">
                 <h2 className="text-3xl font-black">Overview</h2>
-                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-                  <MetricCard title="Total Users" value={users.length} color="text-sky-500" />
-                  <MetricCard
-                    title="New This Week"
-                    value={
-                      users.filter(u => {
-                        if (!u.joinedAt) {
-                          return false;
-                        }
-                        // @ts-ignore
-                        const joined = u.joinedAt.toDate
-                          ? // @ts-ignore
-                            u.joinedAt.toDate()
-                          : // @ts-ignore
-                            new Date(u.joinedAt.seconds * 1000);
-                        const weekAgo = new Date();
-                        weekAgo.setDate(weekAgo.getDate() - 7);
-                        return joined > weekAgo;
-                      }).length
-                    }
-                    color="text-emerald-500"
-                  />
-                  <MetricCard
-                    title="Total Games"
-                    value={users.reduce((acc, u) => acc + (u.gamesPlayed || 0), 0)}
-                    color="text-purple-500"
-                  />
-                  <MetricCard
-                    title="Avg Best Score"
-                    value={
-                      users.length > 0
-                        ? Math.round(
-                            users.reduce((acc, u) => acc + (u.bestScore || 0), 0) / users.length
-                          )
-                        : 0
-                    }
-                    color="text-amber-500"
-                  />
-                  <MetricCard
-                    title="Total Giuros"
-                    value={users.reduce((acc, u) => acc + (u.giuros || 0), 0).toLocaleString()}
-                    color="text-yellow-500"
-                  />
-                  <MetricCard title="Feedback" value={feedback.length} color="text-rose-500" />
-                </div>
+                {metrics ? (
+                  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+                    <MetricCard
+                      title="Total Users"
+                      value={metrics.totalUsers}
+                      color="text-sky-500"
+                    />
+                    <MetricCard
+                      title="New (24h)"
+                      value={metrics.newUsers24h}
+                      color="text-emerald-500"
+                    />
+                    <MetricCard
+                      title="Active (24h)"
+                      value={metrics.activeUsers24h}
+                      color="text-purple-500"
+                    />
+                    <MetricCard
+                      title="Games (24h)"
+                      value={metrics.gamesPlayed24h}
+                      color="text-orange-500"
+                    />
+                    <MetricCard title="Feedback" value={feedback.length} color="text-pink-500" />
+                    <MetricCard
+                      title="Items"
+                      value={shopItems.all?.length || 0}
+                      color="text-yellow-500"
+                    />
+                  </div>
+                ) : (
+                  <div className="py-12 text-center opacity-50">Loading metrics...</div>
+                )}
 
                 {/* Data Tools */}
                 <div className="p-6 rounded-2xl bg-white dark:bg-slate-800 shadow-sm border border-slate-100 dark:border-slate-700">
@@ -400,6 +425,12 @@ const AdminPanel: React.FC = () => {
                             {user.giuros || 0} 🪙
                           </td>
                           <td className="p-4 flex gap-2">
+                            <button
+                              onClick={() => setViewingUser(user)}
+                              className="px-3 py-1 bg-purple-500/10 text-purple-500 rounded-lg text-xs font-bold hover:bg-purple-500 hover:text-white transition-colors"
+                            >
+                              View
+                            </button>
                             <button
                               onClick={() => setEditingUser(user)}
                               className="px-3 py-1 bg-sky-500/10 text-sky-500 rounded-lg text-xs font-bold hover:bg-sky-500 hover:text-white transition-colors"
@@ -538,6 +569,41 @@ const AdminPanel: React.FC = () => {
           onConfirm={() => handleClose(true)}
           onCancel={() => handleClose(false)}
         />
+      </AnimatePresence>
+
+      {/* VIEW PROFILE MODAL */}
+      <AnimatePresence>
+        {viewingUser && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-md">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              className={`relative w-full max-w-4xl h-[90vh] overflow-y-auto rounded-3xl shadow-2xl ${theme === 'dark' ? 'bg-slate-900' : 'bg-slate-50'}`}
+            >
+              <button
+                onClick={() => setViewingUser(null)}
+                className="absolute top-4 right-4 z-50 p-2 rounded-full bg-black/50 text-white hover:bg-black/70 transition-colors"
+              >
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M6 18L18 6M6 6l12 12"
+                  />
+                </svg>
+              </button>
+              <div className="p-8">
+                <div className="bg-orange-500 text-white text-center py-2 px-4 rounded-xl font-bold mb-6">
+                  ⚠️ ADMIN VIEW: Viewing profile of {viewingUser.username}
+                </div>
+                {/* @ts-ignore */}
+                <ProfileScreen username={viewingUser!.username} />
+              </div>
+            </motion.div>
+          </div>
+        )}
       </AnimatePresence>
     </div>
   );

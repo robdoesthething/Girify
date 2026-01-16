@@ -338,7 +338,8 @@ export const getMeritBadges = (): Achievement[] => {
  */
 export const getUnlockedAchievements = (
   stats: PlayerStats,
-  purchasedBadges: string[] = []
+  purchasedBadges: string[] = [],
+  badgesList: Achievement[] = ACHIEVEMENT_BADGES
 ): Achievement[] => {
   if (!stats) {
     return [];
@@ -367,7 +368,7 @@ export const getUnlockedAchievements = (
   const unlocked: Achievement[] = [];
   const purchasedSet = new Set(purchasedBadges);
 
-  for (const badge of ACHIEVEMENT_BADGES) {
+  for (const badge of badgesList) {
     // Shop badges - check if purchased
     if (badge.type === 'shop') {
       if (purchasedSet.has(badge.id)) {
@@ -449,9 +450,11 @@ export const getUnlockedAchievements = (
 /**
  * Get badges grouped by category
  */
-export const getBadgesByCategory = (): Record<string, Achievement[]> => {
+export const getBadgesByCategory = (
+  badgesList: Achievement[] = ACHIEVEMENT_BADGES
+): Record<string, Achievement[]> => {
   const grouped: Record<string, Achievement[]> = {};
-  for (const badge of ACHIEVEMENT_BADGES) {
+  for (const badge of badgesList) {
     if (!grouped[badge.category]) {
       grouped[badge.category] = [];
     }
@@ -465,19 +468,22 @@ export const getBadgesByCategory = (): Record<string, Achievement[]> => {
  * @param {Object} stats - User stats
  * @returns {Object|null} Next achievement with progress info
  */
-export const getNextAchievement = (stats: PlayerStats): Achievement | null => {
+export const getNextAchievement = (
+  stats: PlayerStats,
+  badgesList: Achievement[] = ACHIEVEMENT_BADGES
+): Achievement | null => {
   if (!stats) {
     return null;
   }
 
   const { gamesPlayed = 0, bestScore = 0, streak = 0 } = stats;
-  const unlocked = getUnlockedAchievements(stats);
+  const unlocked = getUnlockedAchievements(stats, [], badgesList);
   const unlockedIds = new Set(unlocked.map(b => b.id));
 
   let closest: Achievement | null = null;
   let closestProgress = 0;
 
-  for (const badge of ACHIEVEMENT_BADGES) {
+  for (const badge of badgesList) {
     if (unlockedIds.has(badge.id)) {
       continue;
     }

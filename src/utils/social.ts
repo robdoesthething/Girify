@@ -48,6 +48,7 @@ export interface UserProfile {
   createdAt?: Timestamp;
   updatedAt?: Timestamp;
   friendCount?: number;
+  banned?: boolean;
   gamesPlayed?: number;
   bestScore?: number;
   totalScore?: number;
@@ -1017,8 +1018,10 @@ export const getUserGameHistory = async (username: string): Promise<GameData[]> 
 
     // Execute all queries
     const [gamesSnap, scoresCleanSnap, scoresOriginalSnap] = await Promise.all([
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       getDocs(gamesQuery).catch(() => ({ docs: [] }) as any), // safely handle error if subcollection doesn't exist
       getDocs(scoresQueryClean),
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       scoresQueryOriginal ? getDocs(scoresQueryOriginal) : Promise.resolve({ docs: [] } as any),
     ]);
 

@@ -22,6 +22,7 @@ export interface UserProfile {
   maxStreak?: number;
   avatarId?: number;
   notificationSettings?: NotificationSettings;
+  banned?: boolean;
 }
 
 export interface NotificationSettings {
