@@ -2,6 +2,7 @@ import { ReactNode, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTheme } from '../../../context/ThemeContext';
 import { ACTIVITY_TYPES } from '../../../data/activityTypes';
+import { getAvatar } from '../../../data/avatars';
 import {
   acceptFriendRequest,
   blockUser,
@@ -13,29 +14,6 @@ import {
   searchUsers,
   sendFriendRequest,
 } from '../../../utils/friends';
-
-const AVATARS = [
-  '🐶',
-  '🐱',
-  '🐭',
-  '🐹',
-  '🐰',
-  '🦊',
-  '🐻',
-  '🐼',
-  '🐨',
-  '🐯',
-  '🦁',
-  '🐮',
-  '🐷',
-  '🐸',
-  '🐵',
-  '🐔',
-  '🐧',
-  '🐦',
-  '🦆',
-  '🦅',
-];
 
 interface FriendsScreenProps {
   onClose: () => void;
@@ -58,6 +36,7 @@ interface FeedItem {
   itemName?: string;
   score?: number;
   timestamp?: { seconds: number };
+  avatarId?: number;
 }
 
 const FriendsScreen: React.FC<FriendsScreenProps> = ({ onClose, username }) => {
@@ -312,9 +291,11 @@ const FriendsScreen: React.FC<FriendsScreenProps> = ({ onClose, username }) => {
               </div>
             ) : (
               feed.map(item => {
-                const friend = friends.find(f => f.username === item.username);
-                const avatarId = friend?.avatarId ? friend.avatarId - 1 : 0;
-                const avatar = AVATARS[avatarId] || '🐼';
+                // Use avatarId from feed item (already populated from friends data)
+                // or fallback to looking up from friends list
+                const avatar = getAvatar(
+                  item.avatarId || friends.find(f => f.username === item.username)?.avatarId
+                );
 
                 if (item.type === ACTIVITY_TYPES.USERNAME_CHANGED) {
                   return (
@@ -447,7 +428,7 @@ const FriendsScreen: React.FC<FriendsScreenProps> = ({ onClose, username }) => {
               >
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 rounded-full flex items-center justify-center text-xl bg-gradient-to-br from-sky-400 to-indigo-600 border-2 border-white dark:border-slate-800 shadow-sm">
-                    {AVATARS[f.avatarId ? f.avatarId - 1 : 0] || '🐼'}
+                    {getAvatar(f.avatarId)}
                   </div>
                   <div>
                     <h4 className="font-bold text-sm leading-tight">{f.username.toLowerCase()}</h4>
