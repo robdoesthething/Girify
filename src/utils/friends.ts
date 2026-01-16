@@ -44,16 +44,20 @@ export interface Friend {
   since?: Timestamp;
   badges?: string[];
   todayGames?: number;
+  avatarId?: number;
 }
 
 export interface FeedActivity {
   id: string;
-  type: 'daily_score' | 'badge_earned' | 'username_changed';
+  type: 'daily_score' | 'badge_earned' | 'username_changed' | 'cosmetic_purchased';
   username: string;
   score?: number;
   time?: number;
   timestamp?: Timestamp | { seconds: number };
   oldUsername?: string;
+  avatarId?: number;
+  itemName?: string;
+  badge?: { name: string; emoji: string };
 }
 
 type FriendshipStatus = 'friends' | 'pending' | 'none';
@@ -299,10 +303,12 @@ export const getFriends = async (username: string): Promise<Friend[]> => {
 
         let badges: string[] = [];
         let todayGames = 0;
+        let avatarId: number | undefined;
 
         if (userSnap.exists()) {
           const profileData = userSnap.data() as DocumentData;
           badges = (profileData.equippedBadges as string[]) || [];
+          avatarId = profileData.avatarId as number | undefined;
         }
 
         const scoresQuery = query(
@@ -318,6 +324,7 @@ export const getFriends = async (username: string): Promise<Friend[]> => {
           ...(friendData as Friend),
           badges,
           todayGames,
+          avatarId,
         });
       } catch (profileError) {
         console.warn(`Could not fetch profile for ${friendUsername}:`, profileError);
@@ -348,6 +355,13 @@ export const getFriendFeed = async (friendsList: Friend[]): Promise<FeedActivity
 
   const friendSet = new Set(friendNames.map(n => n.toLowerCase()));
 
+  // Create a map for quick friend lookup by username
+  const friendMap = new Map<string, Friend>();
+  friendsList.forEach(f => {
+    const name = f.username.startsWith('@') ? f.username.slice(1) : f.username;
+    friendMap.set(name.toLowerCase(), f);
+  });
+
   try {
     const q = query(
       collection(db, SCORES_COLLECTION),
@@ -363,6 +377,7 @@ export const getFriendFeed = async (friendsList: Friend[]): Promise<FeedActivity
       const cleanLower = lowerUser.startsWith('@') ? lowerUser.slice(1) : lowerUser;
 
       if (friendSet.has(cleanLower)) {
+        const friend = friendMap.get(cleanLower);
         allActivities.push({
           id: docSnap.id,
           type: 'daily_score',
@@ -370,6 +385,7 @@ export const getFriendFeed = async (friendsList: Friend[]): Promise<FeedActivity
           score: data.score as number,
           time: data.time as number,
           timestamp: data.timestamp as Timestamp,
+          avatarId: friend?.avatarId,
         });
       }
     });

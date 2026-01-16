@@ -1,8 +1,10 @@
 import { Timestamp } from 'firebase/firestore';
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
+import TopBar from '../../../components/TopBar';
 import { useTheme } from '../../../context/ThemeContext';
 import { getUnlockedAchievements } from '../../../data/achievements';
+import { getAvatar } from '../../../data/avatars';
 import cosmetics from '../../../data/cosmetics.json';
 import {
   blockUser,
@@ -12,30 +14,6 @@ import {
 } from '../../../utils/friends';
 import { getEquippedCosmetics } from '../../../utils/giuros';
 import { getUserGameHistory, getUserProfile, UserProfile } from '../../../utils/social'; // Changed to match getUserProfile return type
-import TopBar from '../../../components/TopBar';
-
-const AVATARS = [
-  '🐶',
-  '🐱',
-  '🐭',
-  '🐹',
-  '🐰',
-  '🦊',
-  '🐻',
-  '🐼',
-  '🐨',
-  '🐯',
-  '🦁',
-  '🐮',
-  '🐷',
-  '🐸',
-  '🐵',
-  '🐔',
-  '🐧',
-  '🐦',
-  '🦆',
-  '🦅',
-];
 
 interface PublicProfileScreenProps {
   currentUser?: string;
@@ -166,9 +144,7 @@ const PublicProfileScreen: React.FC<PublicProfileScreenProps> = ({ currentUser }
     }
   };
 
-  const avatarIndex = profile?.avatarId ? profile.avatarId - 1 : 0;
-  const safeAvatarIndex = Math.max(0, Math.min(avatarIndex, AVATARS.length - 1));
-  const displayAvatar = AVATARS[safeAvatarIndex] || AVATARS[0];
+  const displayAvatar = getAvatar(profile?.avatarId);
   const initial = username ? username.charAt(0).toUpperCase() : '?';
 
   const equippedFrame = cosmetics.avatarFrames.find(f => f.id === equippedCosmetics.frameId);

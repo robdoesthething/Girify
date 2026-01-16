@@ -8,37 +8,15 @@ import {
   getNextAchievement,
   getUnlockedAchievements,
 } from '../../../data/achievements';
+import { AVATARS } from '../../../data/avatars';
 // import cosmeticsData from '../../../data/cosmetics.json';
+import TopBar from '../../../components/TopBar';
 import { GameHistory, UserProfile } from '../../../types/user';
 import { getFriendCount } from '../../../utils/friends';
 import { getEquippedCosmetics, getGiuros } from '../../../utils/giuros';
 import { getShopItems, ShopItem } from '../../../utils/shop';
 import { getUserGameHistory, getUserProfile, updateUserProfile } from '../../../utils/social';
 import { calculateStreak } from '../../../utils/stats';
-import TopBar from '../../../components/TopBar';
-
-const AVATARS = [
-  '🐶',
-  '🐱',
-  '🐭',
-  '🐹',
-  '🐰',
-  '🦊',
-  '🐻',
-  '🐼',
-  '🐨',
-  '🐯',
-  '🦁',
-  '🐮',
-  '🐷',
-  '🐸',
-  '🐵',
-  '🐔',
-  '🐧',
-  '🐦',
-  '🦆',
-  '🦅',
-];
 
 const HISTORY_LIMIT = 7;
 const SCORE_DIVISOR = 1000;
