@@ -1031,7 +1031,11 @@ export const getUserGameHistory = async (username: string): Promise<GameData[]> 
       } as GameData;
     });
 
-    results.sort((a, b) => ((b.date as number) || 0) - ((a.date as number) || 0));
+    results.sort((a, b) => {
+      const dateA = a.date ? Number(a.date.toString().replace(/-/g, '')) : 0;
+      const dateB = b.date ? Number(b.date.toString().replace(/-/g, '')) : 0;
+      return dateB - dateA;
+    });
 
     return results;
   } catch (e) {
