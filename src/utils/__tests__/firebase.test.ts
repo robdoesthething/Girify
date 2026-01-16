@@ -13,6 +13,7 @@ const mocks = vi.hoisted(() => ({
   orderBy: vi.fn(),
   limit: vi.fn(),
   where: vi.fn(),
+  updateDoc: vi.fn(),
   timestamp: { now: vi.fn(() => ({ seconds: 1234567890 })) },
 }));
 
@@ -21,6 +22,7 @@ vi.mock('firebase/firestore', () => ({
   doc: (...args: unknown[]) => mocks.doc(...args),
   setDoc: (...args: unknown[]) => mocks.setDoc(...args),
   addDoc: (...args: unknown[]) => mocks.addDoc(...args),
+  updateDoc: (...args: unknown[]) => mocks.updateDoc(...args),
   getDoc: (...args: unknown[]) => mocks.getDoc(...args),
   getDocs: (...args: unknown[]) => mocks.getDocs(...args),
   query: (...args: unknown[]) => mocks.query(...args),
@@ -28,6 +30,10 @@ vi.mock('firebase/firestore', () => ({
   limit: (...args: unknown[]) => mocks.limit(...args),
   where: (...args: unknown[]) => mocks.where(...args),
   Timestamp: mocks.timestamp,
+}));
+
+vi.mock('../social', () => ({
+  updateUserGameStats: vi.fn(),
 }));
 
 vi.mock('../../firebase', () => ({
@@ -66,7 +72,7 @@ describe('Firebase Leaderboard Functions', () => {
       expect(mocks.addDoc).toHaveBeenCalledWith(
         'mockCollection',
         expect.objectContaining({
-          username: 'TestUser',
+          username: 'testuser',
           score: 1500,
           time: 10.5,
           date: 20240101,
@@ -86,7 +92,7 @@ describe('Firebase Leaderboard Functions', () => {
       expect(mocks.setDoc).toHaveBeenCalledWith(
         'mockDoc',
         expect.objectContaining({
-          username: 'NewUser',
+          username: 'newuser',
           score: 1200,
           time: 12.0,
         })
@@ -97,7 +103,7 @@ describe('Firebase Leaderboard Functions', () => {
       mocks.getDoc.mockResolvedValue({
         exists: () => true,
         data: () => ({
-          username: 'TestUser',
+          username: 'testuser',
           score: 1000,
           time: 15.0,
         }),
