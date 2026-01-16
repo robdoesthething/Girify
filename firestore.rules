@@ -1,16 +1,34 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    
+
     // Helper to check if user is admin
     function isAdmin() {
       return request.auth != null && exists(/databases/$(database)/documents/admins/$(request.auth.uid));
     }
 
-    // Admins: Public Read, Self Write (for verification/promotion)
+    // Admins: Public Read, Admin-Only Write (prevents self-escalation)
     match /admins/{uid} {
       allow read: if true;
-      allow write: if request.auth != null && request.auth.uid == uid;
+      allow write: if isAdmin(); // Only existing admins can promote others
+    }
+
+    // Game Config: Public Read, Admin Write
+    match /config/{docId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // Quests: Public Read, Admin Write
+    match /quests/{questId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // Achievements: Public Read, Admin Write
+    match /achievements/{achievementId} {
+      allow read: if true;
+      allow write: if isAdmin();
     }
 
     // Highscores: Public Read, Auth Write
@@ -18,19 +36,19 @@ service cloud.firestore {
       allow read: if true;
       allow write: if request.auth != null;
     }
-    
+
     // Scores: Public Read, Auth Write
     match /scores/{document} {
       allow read: if true;
       allow write: if request.auth != null;
     }
 
-    // Users: Public Read (for search/profiles), Auth Write (Self or Admin)
+    // Users: Public Read (for search/profiles), Self or Admin Write
+    // Fixed: Prevents UID injection by only checking resource.data.uid
     match /users/{userId} {
       allow read: if true;
       allow write: if request.auth != null && (
-        resource.data.uid == request.auth.uid || 
-        request.resource.data.uid == request.auth.uid || 
+        (resource.data.uid != null && resource.data.uid == request.auth.uid) ||
         isAdmin()
       );
 
@@ -59,7 +77,7 @@ service cloud.firestore {
       }
     }
 
-    // Feedback: Create (Auth), Read (Admin)
+    // Feedback: Create (Auth), Read/Update/Delete (Admin)
     match /feedback/{feedbackId} {
       allow create: if request.auth != null;
       allow read, update, delete: if isAdmin();
@@ -67,7 +85,7 @@ service cloud.firestore {
 
     // Referrals: Auth Read/Write
     match /referrals/{document} {
-      allow read: if true; 
+      allow read: if true;
       allow write: if request.auth != null;
     }
 
@@ -108,7 +126,8 @@ service cloud.firestore {
 
     // Default Fallback (Block others)
     match /{document=**} {
-      allow read, write: if false; 
+      allow read, write: if false;
     }
   }
 }
+

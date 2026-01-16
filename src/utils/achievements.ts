@@ -1,6 +1,8 @@
 import { collection, deleteDoc, doc, getDocs, setDoc } from 'firebase/firestore';
 import { ACHIEVEMENT_BADGES, Achievement } from '../data/achievements';
 import { db } from '../firebase';
+import { requireAdmin } from './auth';
+import { logger } from './logger';
 
 // Simple in-memory cache
 let achievementsCache: Achievement[] | null = null;
@@ -26,9 +28,8 @@ export const getAllAchievements = async (forceRefresh = false): Promise<Achievem
       // @ts-ignore
       firestoreItems.push({ id: docSnapshot.id, ...docSnapshot.data() });
     });
-    // console.log('Achievements Fetch Success:', firestoreItems.length, 'items');
   } catch (error) {
-    console.error('Error fetching achievements from Firestore:', error);
+    logger.error('Error fetching achievements from Firestore', { error });
     // Fallback to strict local usage if completely failed
   }
 
@@ -56,11 +57,14 @@ export const updateAchievement = async (
   updates: Partial<Achievement>
 ): Promise<{ success: boolean; error?: string }> => {
   try {
+    // Security: Verify admin before write
+    await requireAdmin();
+
     await setDoc(doc(db, 'achievements', id), updates, { merge: true });
     achievementsCache = null; // Invalidate cache
     return { success: true };
   } catch (error) {
-    console.error('Error updating achievement:', error);
+    logger.error('Error updating achievement', { error });
     return { success: false, error: (error as Error).message };
   }
 };
@@ -72,11 +76,14 @@ export const createAchievement = async (
   itemData: Achievement
 ): Promise<{ success: boolean; error?: string }> => {
   try {
+    // Security: Verify admin before write
+    await requireAdmin();
+
     await setDoc(doc(db, 'achievements', itemData.id), itemData);
     achievementsCache = null;
     return { success: true };
   } catch (error) {
-    console.error('Error creating achievement:', error);
+    logger.error('Error creating achievement', { error });
     return { success: false, error: (error as Error).message };
   }
 };
@@ -88,11 +95,14 @@ export const deleteAchievement = async (
   id: string
 ): Promise<{ success: boolean; error?: string }> => {
   try {
+    // Security: Verify admin before write
+    await requireAdmin();
+
     await deleteDoc(doc(db, 'achievements', id));
     achievementsCache = null;
     return { success: true };
   } catch (error) {
-    console.error('Error deleting achievement:', error);
+    logger.error('Error deleting achievement', { error });
     return { success: false, error: (error as Error).message };
   }
 };
