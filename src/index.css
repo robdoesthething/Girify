@@ -19,27 +19,27 @@
       sans-serif;
     line-height: 1.5;
     font-weight: 400;
-
-    /* Default to Dark Mode for the Indie Hacker vibe */
     color-scheme: dark;
   }
 
   body {
     @apply m-0 min-h-screen min-w-[320px] antialiased;
-    /* Deep slate background */
     @apply bg-slate-950 text-slate-300 selection:bg-sky-500/30;
   }
 
-  /* Reset outline but keep accessibility via other means if needed,
-     though 'outline-none' is common in this aesthetic,
-     better to have focus-visible styles */
+  /* Better focus states */
   *:focus-visible {
     @apply outline-none ring-2 ring-sky-500/50 ring-offset-2 ring-offset-slate-950;
+  }
+
+  /* Smooth scrolling */
+  html {
+    scroll-behavior: smooth;
   }
 }
 
 @layer components {
-  /* Glassmorphism Utilities */
+  /* Enhanced Glassmorphism */
   .glass {
     @apply bg-gradient-to-b from-white/10 to-white/5 backdrop-blur-xl border border-white/10 shadow-xl shadow-black/20 ring-1 ring-white/5;
   }
@@ -49,29 +49,80 @@
   }
 
   .glass-button {
-    @apply glass hover:bg-white/10 hover:border-white/20 transition-all duration-300 active:scale-95 flex items-center justify-center gap-2;
+    @apply glass hover:bg-white/15 hover:border-white/20 transition-all duration-300 active:scale-95 flex items-center justify-center gap-2 cursor-pointer;
   }
 
-  /* Bento Grid Utilities */
-  .bento-grid {
-    @apply grid grid-cols-1 md:grid-cols-3 gap-6;
+  /* Modern Button Styles */
+  .btn-primary {
+    @apply px-8 py-4 rounded-2xl font-bold text-lg;
+    @apply bg-gradient-to-r from-sky-500 to-sky-600;
+    @apply hover:from-sky-400 hover:to-sky-500;
+    @apply text-white shadow-xl shadow-sky-500/30;
+    @apply transform hover:scale-105 active:scale-95;
+    @apply transition-all duration-300;
+    @apply relative overflow-hidden group;
   }
 
-  .bento-item {
-    @apply glass-panel p-8 flex flex-col items-center justify-center text-center hover:bg-white/10 transition-colors group;
+  .btn-secondary {
+    @apply px-6 py-3 rounded-xl font-semibold;
+    @apply bg-white dark:bg-slate-800 border-2 border-slate-300 dark:border-slate-700;
+    @apply text-slate-700 dark:text-slate-200;
+    @apply hover:border-slate-400 dark:hover:border-slate-600 hover:shadow-lg;
+    @apply transition-all duration-200;
   }
 
   /* Typography Utilities */
   .heading-xl {
-    @apply text-4xl md:text-5xl font-extrabold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-sky-400 to-emerald-400;
+    @apply text-4xl md:text-5xl lg:text-6xl font-extrabold tracking-tight;
+    @apply bg-clip-text text-transparent bg-gradient-to-r from-sky-400 to-emerald-400;
   }
 
   .heading-lg {
-    @apply text-2xl md:text-3xl font-bold tracking-tight text-white;
+    @apply text-3xl md:text-4xl font-bold tracking-tight text-white;
+  }
+
+  .heading-md {
+    @apply text-2xl md:text-3xl font-semibold tracking-tight;
   }
 
   .text-balance {
     text-wrap: balance;
+  }
+
+  /* Card Components */
+  .card {
+    @apply bg-white dark:bg-slate-800 rounded-2xl shadow-lg;
+    @apply border border-slate-200 dark:border-slate-700;
+    @apply p-6 hover:shadow-xl transition-shadow duration-300;
+  }
+
+  .card-interactive {
+    @apply card hover:scale-[1.02] active:scale-[0.98];
+    @apply cursor-pointer transition-transform duration-200;
+  }
+}
+
+@layer utilities {
+  /* Animation delays for staggered effects */
+  .animation-delay-2000 {
+    animation-delay: 2s;
+  }
+
+  .animation-delay-4000 {
+    animation-delay: 4s;
+  }
+
+  /* Gradient text utilities */
+  .text-gradient {
+    @apply bg-clip-text text-transparent;
+  }
+
+  .text-gradient-primary {
+    @apply text-gradient bg-gradient-to-r from-sky-400 to-blue-500;
+  }
+
+  .text-gradient-accent {
+    @apply text-gradient bg-gradient-to-r from-emerald-400 to-cyan-400;
   }
 }
 
@@ -86,28 +137,30 @@
   @apply !bg-slate-950/80 !text-slate-500 backdrop-blur-sm rounded-tr-lg pr-2;
 }
 
-/* Neon Pulse Animation for Map */
+/* Improved Map Animations */
 @keyframes neon-pulse {
   0% {
     stroke-opacity: 1;
     stroke-width: 6;
+    filter: drop-shadow(0 0 8px #0ea5e9);
   }
   50% {
-    stroke-opacity: 0.5;
+    stroke-opacity: 0.6;
     stroke-width: 8;
+    filter: drop-shadow(0 0 16px #0ea5e9);
   }
   100% {
     stroke-opacity: 1;
     stroke-width: 6;
+    filter: drop-shadow(0 0 8px #0ea5e9);
   }
 }
 
 .blinking-highlight {
   animation: neon-pulse 2s infinite;
-  stroke: #0ea5e9; /* Sky 500 */
+  stroke: #0ea5e9;
   stroke-width: 6;
   stroke-linecap: round;
-  filter: drop-shadow(0 0 8px #0ea5e9);
 }
 
 .neon-highlight {
@@ -115,7 +168,6 @@
   stroke: #00ffff;
   stroke-width: 6;
   stroke-linecap: round;
-  filter: drop-shadow(0 0 8px #00ffff);
 }
 
 /* Loading Bar Animation */
@@ -136,4 +188,39 @@
 
 .animate-loading-bar {
   animation: loading-bar 1.5s ease-in-out infinite;
+}
+
+/* Scale-in animation for checkmarks and icons */
+@keyframes scale-in {
+  0% {
+    transform: scale(0);
+    opacity: 0;
+  }
+  50% {
+    transform: scale(1.2);
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.animate-scale-in {
+  animation: scale-in 0.3s ease-out;
+}
+
+/* Fade in animations */
+@keyframes fade-in-up {
+  0% {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in-up {
+  animation: fade-in-up 0.6s ease-out;
 }
