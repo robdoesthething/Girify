@@ -113,7 +113,7 @@ const PublicProfileScreen: React.FC<PublicProfileScreenProps> = ({ currentUser }
           streak: 0,
           totalScore: 0,
           lastPlayDate: '',
-          joinedAt: new Date(),
+          joinedAt: Timestamp.now(),
           gamesPlayed: 0,
           bestScore: 0,
           friendCount: 0,
