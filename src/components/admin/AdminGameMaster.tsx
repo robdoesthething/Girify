@@ -3,6 +3,9 @@ import { AnimatePresence, motion } from 'framer-motion';
 import React, { useState } from 'react';
 import { getUserProfile, updateUserAsAdmin } from '../../utils/social';
 
+import { doc, setDoc } from 'firebase/firestore';
+import { db } from '../../firebase';
+
 interface AdminGameMasterProps {
   onNotify: (msg: string, type: 'success' | 'error' | 'info') => void;
   confirm: (msg: string, title?: string, isDanger?: boolean) => Promise<boolean>;
@@ -14,6 +17,46 @@ const AdminGameMaster: React.FC<AdminGameMasterProps> = ({ onNotify, confirm }) 
   const [targetUser, setTargetUser] = useState<any | null>(null);
   const [loading, setLoading] = useState(false);
   const [newItemId, setNewItemId] = useState('');
+
+  const seedMayorJaume = async () => {
+    if (
+      !(await confirm(
+        'Create/Reset Mayor Jaume profile? This will overwrite the user document.',
+        'Seed Identity',
+        true
+      ))
+    ) {
+      return;
+    }
+    try {
+      await setDoc(doc(db, 'users', 'mayor_jaume'), {
+        username: '@MayorJaume',
+        realName: 'Mayor Jaume',
+        email: 'mayor@girify.com',
+        role: 'user',
+        verified: true,
+        isSystem: true,
+        createdAt: new Date(),
+        lastLogin: new Date(),
+        banned: false,
+        giuros: 9000000,
+        totalScore: 1000000,
+        gamesPlayed: 1000,
+        streak: 999,
+        bestScore: 25000,
+        purchasedCosmetics: ['title_mayor', 'frame_gold', 'avatar_mayor'],
+        equippedCosmetics: {
+          titleId: 'title_mayor',
+          frameId: 'frame_gold',
+          avatarId: 'avatar_mayor',
+        },
+      });
+      onNotify('Mayor Jaume seeded successfully!', 'success');
+    } catch (e) {
+      console.error(e);
+      onNotify('Seeding failed', 'error');
+    }
+  };
 
   const handleSearch = async () => {
     if (!searchTerm) {
@@ -108,6 +151,14 @@ const AdminGameMaster: React.FC<AdminGameMasterProps> = ({ onNotify, confirm }) 
         <div>
           <h2 className="text-2xl font-black text-slate-800 dark:text-white">Game Master Tools</h2>
           <p className="text-sm opacity-60">User Operations & Support.</p>
+        </div>
+        <div className="flex gap-2">
+          <button
+            onClick={seedMayorJaume}
+            className="px-4 py-2 bg-amber-500 hover:bg-amber-600 text-white font-bold rounded-xl text-xs shadow-lg shadow-amber-500/20"
+          >
+            👑 Seed Mayor Jaume
+          </button>
         </div>
       </div>
 

@@ -1,12 +1,12 @@
 import { AnimatePresence, motion } from 'framer-motion';
 import React, { useCallback, useEffect, useState } from 'react';
+import { Achievement } from '../../data/achievements';
 import {
   createAchievement,
   deleteAchievement,
   getAllAchievements,
   updateAchievement,
 } from '../../utils/achievements';
-import { Achievement } from '../data/achievements';
 
 interface AdminAchievementsProps {
   onNotify: (msg: string, type: 'success' | 'error' | 'info') => void;
@@ -358,12 +358,74 @@ const AdminAchievements: React.FC<AdminAchievementsProps> = ({ onNotify, confirm
                   </div>
                 )}
 
-                <div>
+                <div className="bg-slate-100 dark:bg-slate-800 p-4 rounded-xl border border-slate-200 dark:border-slate-700">
+                  <label className="block text-xs font-bold uppercase opacity-50 mb-2">
+                    Criteria Builder
+                  </label>
+                  <div className="flex gap-2 mb-2">
+                    <select
+                      className="flex-1 px-3 py-2 rounded-lg text-xs"
+                      onChange={e => {
+                        const type = e.target.value;
+                        if (type) {
+                          const current = (editingItem.criteria || {}) as Record<string, number>;
+                          setEditingItem({
+                            ...editingItem,
+                            criteria: { ...current, [type]: 1 },
+                          });
+                        }
+                      }}
+                      defaultValue=""
+                    >
+                      <option value="" disabled>
+                        Add Condition...
+                      </option>
+                      <option value="minScore">Min Score</option>
+                      <option value="totalGames">Total Games</option>
+                      <option value="streak">Streak</option>
+                      <option value="friends">Friends Count</option>
+                      <option value="unlocks">Unlock Count</option>
+                      <option value="daysPlayed">Days Played</option>
+                    </select>
+                  </div>
+
+                  {Object.entries(editingItem.criteria || {}).map(([key, val]) => (
+                    <div key={key} className="flex items-center gap-2 mb-2">
+                      <span className="text-xs font-mono bg-slate-200 dark:bg-slate-700 px-2 py-1 rounded w-24">
+                        {key}
+                      </span>
+                      <input
+                        type="number"
+                        value={val as number}
+                        onChange={e => {
+                          setEditingItem({
+                            ...editingItem,
+                            criteria: {
+                              ...(editingItem.criteria as Record<string, number>),
+                              [key]: parseInt(e.target.value, 10),
+                            },
+                          });
+                        }}
+                        className="w-20 px-2 py-1 text-xs rounded border border-slate-300 dark:border-slate-600"
+                      />
+                      <button
+                        onClick={() => {
+                          const newCriteria = { ...editingItem.criteria };
+                          delete newCriteria[key];
+                          setEditingItem({ ...editingItem, criteria: newCriteria });
+                        }}
+                        className="text-red-500 hover:text-red-700"
+                      >
+                        ✕
+                      </button>
+                    </div>
+                  ))}
+
                   <label
                     htmlFor="achieve-criteria"
-                    className="block text-xs font-bold uppercase opacity-50 mb-1"
+                    className="block text-xs font-bold uppercase opacity-50 mb-1 mt-4"
                   >
-                    Criteria (JSON)
+                    Raw JSON
                   </label>
                   <textarea
                     id="achieve-criteria"

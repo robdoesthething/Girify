@@ -156,9 +156,11 @@ const ShopScreen: React.FC<ShopScreenProps> = ({ username }) => {
 
   const getItemCardClass = (active: boolean) => {
     if (active) {
-      return 'border-sky-500 bg-sky-500/10';
+      return 'border-4 border-sky-500 bg-sky-500/10 shadow-sky-500/20 shadow-xl';
     }
-    return theme === 'dark' ? 'border-slate-700 bg-slate-800' : 'border-slate-200 bg-white';
+    return theme === 'dark'
+      ? 'border-4 border-slate-700 bg-slate-800'
+      : 'border-4 border-slate-200 bg-white shadow-lg';
   };
 
   const getEquipButtonClass = (active: boolean) => {
@@ -173,7 +175,14 @@ const ShopScreen: React.FC<ShopScreenProps> = ({ username }) => {
       return <div className={`w-10 h-10 rounded-full ${item.cssClass}`} />;
     }
     if (item.image && activeTab === 'avatars') {
-      return <img src={item.image} alt={item.name} className="w-full h-full object-cover" />;
+      return (
+        <img
+          src={item.image}
+          alt={item.name}
+          className="w-full h-full object-cover"
+          style={{ imageRendering: 'pixelated' }}
+        />
+      );
     }
     return (
       <span>
@@ -279,7 +288,8 @@ const ShopScreen: React.FC<ShopScreenProps> = ({ username }) => {
                               setFlavorModal(item);
                             }
                           }}
-                          className={`w-12 h-12 rounded-xl bg-slate-100 dark:bg-slate-700 flex items-center justify-center text-2xl relative overflow-hidden shrink-0 ${activeTab === 'titles' ? 'cursor-pointer hover:scale-105 transition-transform' : ''}`}
+                          className={`w-12 h-12 rounded-xl bg-slate-100 dark:bg-slate-700 flex items-center justify-center text-2xl relative overflow-hidden shrink-0 ${activeTab === 'titles' ? 'cursor-pointer hover:scale-105 transition-transform' : ''} border-2 border-slate-300 dark:border-slate-600 shadow-sm`}
+                          style={{ imageRendering: 'pixelated' }}
                         >
                           {renderItemIcon(item)}
                         </div>
