@@ -58,7 +58,7 @@
       "cost": 25,
       "prefix": "🧭",
       "flavorText": "The journey of a thousand miles begins with a single step. Or in this case, a single tap.",
-      "image": "/giuro.png"
+      "image": "/assets/nano_banana.png"
     },
     {
       "id": "title_master",
@@ -66,7 +66,7 @@
       "cost": 100,
       "prefix": "🎓",
       "flavorText": "You don't just know the streets; you are the streets.",
-      "image": "/giuro.png"
+      "image": "/assets/nano_banana.png"
     },
     {
       "id": "title_legend",
@@ -74,7 +74,7 @@
       "cost": 200,
       "prefix": "👑",
       "flavorText": "They'll build statues of you. Or at least name a small alley after you.",
-      "image": "/giuro.png"
+      "image": "/assets/nano_banana.png"
     },
     {
       "id": "merit_supporter",
@@ -83,7 +83,7 @@
       "prefix": "💖",
       "description": "Show your support for the game.",
       "flavorText": "You were here when we were just a map and a dream. Thank you!",
-      "image": "/giuro.png"
+      "image": "/assets/nano_banana.png"
     },
     {
       "id": "merit_contributor",
@@ -92,7 +92,7 @@
       "prefix": "🏗️",
       "description": "For those who give back.",
       "flavorText": "Your feedback shapes the city. You are a true architect of Girify.",
-      "image": "/giuro.png"
+      "image": "/assets/nano_banana.png"
     },
     {
       "id": "merit_vip",
@@ -101,7 +101,7 @@
       "prefix": "⚜️",
       "description": "The ultimate flex.",
       "flavorText": "Access to absolutely nothing extra, but you look cool doing it.",
-      "image": "/giuro.png"
+      "image": "/assets/nano_banana.png"
     },
     {
       "id": "badge_paellador",
@@ -110,7 +110,8 @@
       "prefix": "🥘",
       "category": "guiri_path",
       "description": "Authentic cultural experience!",
-      "flavorText": "Best served with neon yellow rice and frozen peas."
+      "flavorText": "Best served with neon yellow rice and frozen peas.",
+      "image": "/assets/nano_banana.png"
     },
     {
       "id": "badge_sangria_bucket",
@@ -119,7 +120,8 @@
       "prefix": "🍷",
       "category": "guiri_path",
       "description": "Sophisticated choice.",
-      "flavorText": "1 liter of sugar and cheap wine. A sophisticated choice for a sophisticated traveler."
+      "flavorText": "1 liter of sugar and cheap wine. A sophisticated choice for a sophisticated traveler.",
+      "image": "/assets/nano_banana.png"
     },
     {
       "id": "badge_tcasual_hoarder",
@@ -128,7 +130,8 @@
       "prefix": "🎫",
       "category": "local_path",
       "description": "Metro veteran.",
-      "flavorText": "You know the struggle of the magnetic strip failing at the turnstile."
+      "flavorText": "You know the struggle of the magnetic strip failing at the turnstile.",
+      "image": "/assets/nano_banana.png"
     },
     {
       "id": "badge_pigeon_whisperer",
@@ -137,7 +140,8 @@
       "prefix": "🐦",
       "category": "local_path",
       "description": "City wildlife expert.",
-      "flavorText": "They are the true owners of the city. You have earned their respect."
+      "flavorText": "They are the true owners of the city. You have earned their respect.",
+      "image": "/assets/nano_banana.png"
     },
     {
       "id": "badge_balcony_grandma",
@@ -146,7 +150,8 @@
       "prefix": "👵",
       "category": "urban_survival",
       "description": "Neighborhood watch.",
-      "flavorText": "She sees everything. She judges everything. The ultimate security camera."
+      "flavorText": "She sees everything. She judges everything. The ultimate security camera.",
+      "image": "/assets/nano_banana.png"
     },
     {
       "id": "badge_water_gun",
@@ -155,7 +160,8 @@
       "prefix": "🔫",
       "category": "urban_survival",
       "description": "Terrace defender.",
-      "flavorText": "For when the terrace noise gets too loud. A playful weapon of distraction."
+      "flavorText": "For when the terrace noise gets too loud. A playful weapon of distraction.",
+      "image": "/assets/nano_banana.png"
     },
     {
       "id": "badge_vermut_sunday",
@@ -164,7 +170,8 @@
       "prefix": "🍸",
       "category": "gastronomy",
       "description": "Sunday ritual.",
-      "flavorText": "The sacred ritual. Must be consumed standing up in a crowded doorway."
+      "flavorText": "The sacred ritual. Must be consumed standing up in a crowded doorway.",
+      "image": "/assets/nano_banana.png"
     },
     {
       "id": "badge_inflation_breakfast",
@@ -173,7 +180,8 @@
       "prefix": "🥐",
       "category": "gastronomy",
       "description": "Modern dining.",
-      "flavorText": "It costs 25 Euros, but the sourdough is artisan. You hipster."
+      "flavorText": "It costs 25 Euros, but the sourdough is artisan. You hipster.",
+      "image": "/assets/nano_banana.png"
     },
     {
       "id": "badge_rooftop_yoga",
@@ -182,7 +190,8 @@
       "prefix": "🧘",
       "category": "digital_nomad",
       "description": "Zen mode.",
-      "flavorText": "Namaste on the terrace. Please ignore the construction noise next door."
+      "flavorText": "Namaste on the terrace. Please ignore the construction noise next door.",
+      "image": "/assets/nano_banana.png"
     },
     {
       "id": "badge_coworking_king",
@@ -191,7 +200,8 @@
       "prefix": "💻",
       "category": "digital_nomad",
       "description": "Remote worker.",
-      "flavorText": "You work in 'Tech'. You have calls at 10. You need fast WiFi."
+      "flavorText": "You work in 'Tech'. You have calls at 10. You need fast WiFi.",
+      "image": "/assets/nano_banana.png"
     },
     {
       "id": "badge_pickpocket_proof",
@@ -200,7 +210,8 @@
       "prefix": "💼",
       "category": "high_roller",
       "description": "Secure belongings.",
-      "flavorText": "Your wallet is safe. Your dignity? Debatable."
+      "flavorText": "Your wallet is safe. Your dignity? Debatable.",
+      "image": "/assets/nano_banana.png"
     },
     {
       "id": "badge_scooter_menace",
@@ -209,7 +220,8 @@
       "prefix": "🛴",
       "category": "high_roller",
       "description": "Urban mobility.",
-      "flavorText": "Sidewalks, roads, bike lanes... the world is your highway."
+      "flavorText": "Sidewalks, roads, bike lanes... the world is your highway.",
+      "image": "/assets/nano_banana.png"
     },
     {
       "id": "badge_yacht_parking",
@@ -218,7 +230,8 @@
       "prefix": "🛥️",
       "category": "high_roller",
       "description": "Luxury living.",
-      "flavorText": "You don't guess streets anymore; you buy them."
+      "flavorText": "You don't guess streets anymore; you buy them.",
+      "image": "/assets/nano_banana.png"
     }
   ],
   "special": [
