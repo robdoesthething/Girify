@@ -117,7 +117,7 @@ const AdminGiuros: React.FC<AdminGiurosProps> = ({
         <MetricCard
           title="Starting Amount"
           value={payouts?.STARTING_GIUROS ?? '...'}
-          color="text-slate-500"
+          color="text-slate-600"
           theme={theme}
         />
         <MetricCard
@@ -315,11 +315,12 @@ const EditableSourceRow: React.FC<EditableSourceRowProps> = ({ label, value, onC
         type="number"
         value={value}
         onChange={e => onChange(e.target.value)}
+        aria-label={`Value for ${label}`}
         className={`w-20 p-1 rounded text-right font-mono font-bold ${
           theme === 'dark'
             ? 'bg-slate-700 text-emerald-400 border-slate-600'
             : 'bg-slate-100 text-emerald-600 border-slate-200'
-        } border`}
+        } border outline-none focus:ring-2 focus:ring-sky-500 transition-all`}
         min="0"
       />
     </div>

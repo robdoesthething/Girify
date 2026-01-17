@@ -1,12 +1,12 @@
 import { AnimatePresence, motion } from 'framer-motion';
 import React, { useCallback, useEffect, useState } from 'react';
-import { Achievement } from '../data/achievements';
 import {
   createAchievement,
   deleteAchievement,
   getAllAchievements,
   updateAchievement,
 } from '../../utils/achievements';
+import { Achievement } from '../data/achievements';
 
 interface AdminAchievementsProps {
   onNotify: (msg: string, type: 'success' | 'error' | 'info') => void;
@@ -179,12 +179,12 @@ const AdminAchievements: React.FC<AdminAchievementsProps> = ({ onNotify, confirm
                   <h3 className="font-bold text-slate-900 dark:text-white leading-tight">
                     {item.name}
                   </h3>
-                  <span className="text-[10px] uppercase font-bold px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-700 text-slate-500">
+                  <span className="text-[10px] uppercase font-bold px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-700 text-slate-600">
                     {item.category} / {item.type}
                   </span>
                 </div>
               </div>
-              <p className="text-xs text-slate-500 dark:text-slate-400 mb-2">{item.description}</p>
+              <p className="text-xs text-slate-600 dark:text-slate-400 mb-2">{item.description}</p>
               <div className="text-[10px] font-mono opacity-50 truncate">ID: {item.id}</div>
               {item.cost && (
                 <div className="text-xs font-bold text-yellow-500 mt-1">Cost: {item.cost}</div>
@@ -213,50 +213,68 @@ const AdminAchievements: React.FC<AdminAchievementsProps> = ({ onNotify, confirm
 
               <div className="space-y-4">
                 <div>
-                  <label className="block text-xs font-bold uppercase opacity-50 mb-1">
+                  <label
+                    htmlFor="achieve-id"
+                    className="block text-xs font-bold uppercase opacity-50 mb-1"
+                  >
                     ID (Unique)
                   </label>
                   <input
+                    id="achieve-id"
                     type="text"
                     value={editingItem.id || ''}
                     disabled={!!achievements.find(a => a.id === editingItem.id)}
                     onChange={e => setEditingItem({ ...editingItem, id: e.target.value })}
-                    className="w-full px-3 py-2 rounded-lg border dark:bg-slate-800 dark:border-slate-700 font-mono text-sm"
+                    className="w-full px-3 py-2 rounded-lg border dark:bg-slate-800 dark:border-slate-700 font-mono text-sm outline-none focus:ring-2 focus:ring-sky-500 transition-all"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold uppercase opacity-50 mb-1">Name</label>
+                  <label
+                    htmlFor="achieve-name"
+                    className="block text-xs font-bold uppercase opacity-50 mb-1"
+                  >
+                    Name
+                  </label>
                   <input
+                    id="achieve-name"
                     type="text"
                     value={editingItem.name || ''}
                     onChange={e => setEditingItem({ ...editingItem, name: e.target.value })}
-                    className="w-full px-3 py-2 rounded-lg border dark:bg-slate-800 dark:border-slate-700"
+                    className="w-full px-3 py-2 rounded-lg border dark:bg-slate-800 dark:border-slate-700 outline-none focus:ring-2 focus:ring-sky-500 transition-all"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold uppercase opacity-50 mb-1">
+                  <label
+                    htmlFor="achieve-desc"
+                    className="block text-xs font-bold uppercase opacity-50 mb-1"
+                  >
                     Description
                   </label>
                   <textarea
+                    id="achieve-desc"
                     rows={2}
                     value={editingItem.description || ''}
                     onChange={e => setEditingItem({ ...editingItem, description: e.target.value })}
-                    className="w-full px-3 py-2 rounded-lg border dark:bg-slate-800 dark:border-slate-700"
+                    className="w-full px-3 py-2 rounded-lg border dark:bg-slate-800 dark:border-slate-700 outline-none focus:ring-2 focus:ring-sky-500 transition-all"
                   />
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-xs font-bold uppercase opacity-50 mb-1">
+                    <label
+                      htmlFor="achieve-cat"
+                      className="block text-xs font-bold uppercase opacity-50 mb-1"
+                    >
                       Category
                     </label>
                     <select
+                      id="achieve-cat"
                       value={editingItem.category || 'starter'}
                       // @ts-ignore
                       onChange={e => setEditingItem({ ...editingItem, category: e.target.value })}
-                      className="w-full px-3 py-2 rounded-lg border dark:bg-slate-800 dark:border-slate-700"
+                      className="w-full px-3 py-2 rounded-lg border dark:bg-slate-800 dark:border-slate-700 outline-none focus:ring-2 focus:ring-sky-500 transition-all"
                     >
                       <option value="social">Social</option>
                       <option value="starter">Starter</option>
@@ -267,14 +285,18 @@ const AdminAchievements: React.FC<AdminAchievementsProps> = ({ onNotify, confirm
                     </select>
                   </div>
                   <div>
-                    <label className="block text-xs font-bold uppercase opacity-50 mb-1">
+                    <label
+                      htmlFor="achieve-type"
+                      className="block text-xs font-bold uppercase opacity-50 mb-1"
+                    >
                       Type
                     </label>
                     <select
+                      id="achieve-type"
                       value={editingItem.type || 'merit'}
                       // @ts-ignore
                       onChange={e => setEditingItem({ ...editingItem, type: e.target.value })}
-                      className="w-full px-3 py-2 rounded-lg border dark:bg-slate-800 dark:border-slate-700"
+                      className="w-full px-3 py-2 rounded-lg border dark:bg-slate-800 dark:border-slate-700 outline-none focus:ring-2 focus:ring-sky-500 transition-all"
                     >
                       <option value="merit">Merit (Unlockable)</option>
                       <option value="shop">Shop Item</option>
@@ -284,51 +306,67 @@ const AdminAchievements: React.FC<AdminAchievementsProps> = ({ onNotify, confirm
 
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-xs font-bold uppercase opacity-50 mb-1">
+                    <label
+                      htmlFor="achieve-image"
+                      className="block text-xs font-bold uppercase opacity-50 mb-1"
+                    >
                       Image URL
                     </label>
                     <input
+                      id="achieve-image"
                       type="text"
                       value={editingItem.image || ''}
                       onChange={e => setEditingItem({ ...editingItem, image: e.target.value })}
-                      className="w-full px-3 py-2 rounded-lg border dark:bg-slate-800 dark:border-slate-700 text-xs"
+                      className="w-full px-3 py-2 rounded-lg border dark:bg-slate-800 dark:border-slate-700 text-xs outline-none focus:ring-2 focus:ring-sky-500 transition-all"
                       placeholder="/badges/file.png"
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-bold uppercase opacity-50 mb-1">
+                    <label
+                      htmlFor="achieve-emoji"
+                      className="block text-xs font-bold uppercase opacity-50 mb-1"
+                    >
                       Emoji (Alt)
                     </label>
                     <input
+                      id="achieve-emoji"
                       type="text"
                       value={editingItem.emoji || ''}
                       onChange={e => setEditingItem({ ...editingItem, emoji: e.target.value })}
-                      className="w-full px-3 py-2 rounded-lg border dark:bg-slate-800 dark:border-slate-700 text-center"
+                      className="w-full px-3 py-2 rounded-lg border dark:bg-slate-800 dark:border-slate-700 text-center outline-none focus:ring-2 focus:ring-sky-500 transition-all"
                     />
                   </div>
                 </div>
 
                 {editingItem.type === 'shop' && (
                   <div>
-                    <label className="block text-xs font-bold uppercase opacity-50 mb-1">
+                    <label
+                      htmlFor="achieve-cost"
+                      className="block text-xs font-bold uppercase opacity-50 mb-1"
+                    >
                       Cost (Giuros)
                     </label>
                     <input
+                      id="achieve-cost"
                       type="number"
                       value={editingItem.cost || 0}
                       onChange={e =>
                         setEditingItem({ ...editingItem, cost: Number(e.target.value) })
                       }
-                      className="w-full px-3 py-2 rounded-lg border dark:bg-slate-800 dark:border-slate-700"
+                      className="w-full px-3 py-2 rounded-lg border dark:bg-slate-800 dark:border-slate-700 outline-none focus:ring-2 focus:ring-sky-500 transition-all"
                     />
                   </div>
                 )}
 
                 <div>
-                  <label className="block text-xs font-bold uppercase opacity-50 mb-1">
+                  <label
+                    htmlFor="achieve-criteria"
+                    className="block text-xs font-bold uppercase opacity-50 mb-1"
+                  >
                     Criteria (JSON)
                   </label>
                   <textarea
+                    id="achieve-criteria"
                     rows={3}
                     value={JSON.stringify(editingItem.criteria || {}, null, 2)}
                     // @ts-ignore
@@ -340,7 +378,7 @@ const AdminAchievements: React.FC<AdminAchievementsProps> = ({ onNotify, confirm
                         // ignore invalid json while typing
                       }
                     }}
-                    className="w-full px-3 py-2 rounded-lg border dark:bg-slate-800 dark:border-slate-700 font-mono text-xs"
+                    className="w-full px-3 py-2 rounded-lg border dark:bg-slate-800 dark:border-slate-700 font-mono text-xs outline-none focus:ring-2 focus:ring-sky-500 transition-all"
                   />
                   <p className="text-[10px] opacity-40 mt-1">
                     Careful! Invalid JSON will be ignored.

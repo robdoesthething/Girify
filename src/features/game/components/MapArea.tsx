@@ -150,6 +150,7 @@ const RecenterControl: React.FC<RecenterControlProps> = ({ center, zoom, bounds 
         onClick={handleRecenter}
         className="bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 p-2 rounded-lg shadow-lg hover:scale-105 transition-transform border border-slate-200 dark:border-slate-700 font-inter"
         title="Re-center Map"
+        aria-label="Re-center Map"
         type="button"
       >
         <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -256,6 +257,7 @@ const MapArea: React.FC<MapAreaProps> = ({
           maxBounds={MAX_BOUNDS}
           maxBoundsViscosity={BOUNDS_VISCOSITY}
           className="h-full w-full outline-none"
+          aria-label="Game Map"
         >
           <TileLayer
             attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'

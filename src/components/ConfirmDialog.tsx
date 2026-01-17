@@ -1,5 +1,5 @@
 import { AnimatePresence, motion } from 'framer-motion';
-
+import React, { useEffect } from 'react';
 interface ConfirmDialogProps {
   isOpen: boolean;
   title: string;
@@ -17,6 +17,21 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
   onCancel,
   isDangerous = false,
 }) => {
+  // eslint-disable-next-line consistent-return
+  useEffect(() => {
+    if (isOpen) {
+      const handleEsc = (e: KeyboardEvent) => {
+        if (e.key === 'Escape') {
+          onCancel();
+        }
+      };
+      window.addEventListener('keydown', handleEsc);
+      return () => {
+        window.removeEventListener('keydown', handleEsc);
+      };
+    }
+  }, [isOpen, onCancel]);
+
   return (
     <AnimatePresence>
       {isOpen && (
@@ -34,9 +49,23 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
             animate={{ scale: 1, opacity: 1, y: 0 }}
             exit={{ scale: 0.9, opacity: 0, y: 20 }}
             className="relative bg-white dark:bg-slate-900 rounded-3xl p-6 max-w-md w-full shadow-2xl overflow-hidden"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="confirm-title"
+            aria-describedby="confirm-desc"
           >
-            <h3 className="text-xl font-black mb-2 text-slate-900 dark:text-white">{title}</h3>
-            <p className="text-slate-600 dark:text-slate-300 mb-8 leading-relaxed">{message}</p>
+            <h3
+              id="confirm-title"
+              className="text-xl font-black mb-2 text-slate-900 dark:text-white"
+            >
+              {title}
+            </h3>
+            <p
+              id="confirm-desc"
+              className="text-slate-600 dark:text-slate-300 mb-8 leading-relaxed"
+            >
+              {message}
+            </p>
 
             <div className="flex gap-3 justify-end font-bold">
               <button

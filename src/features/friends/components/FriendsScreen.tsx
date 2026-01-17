@@ -181,6 +181,7 @@ const FriendsScreen: React.FC<FriendsScreenProps> = ({ onClose, username }) => {
           onClick={onClose}
           className="p-2 rounded-full hover:bg-black/5 dark:hover:bg-white/10"
           type="button"
+          aria-label={t('close')}
         >
           <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path
@@ -229,6 +230,7 @@ const FriendsScreen: React.FC<FriendsScreenProps> = ({ onClose, username }) => {
                 onChange={e => setSearchQuery(e.target.value)}
                 placeholder="Search username..."
                 className="flex-1 px-4 py-2 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-black text-sm"
+                aria-label="Search username"
               />
               <button
                 type="submit"
@@ -453,6 +455,7 @@ const FriendsScreen: React.FC<FriendsScreenProps> = ({ onClose, username }) => {
                     }}
                     className="p-2 ml-2 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors"
                     type="button"
+                    aria-label="Friend Options"
                   >
                     <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
                       <path d="M12 8c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z" />

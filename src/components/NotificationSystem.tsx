@@ -66,12 +66,14 @@ const NotificationContainer: React.FC<NotificationContainerProps> = ({
               ${notification.type === 'warning' ? 'bg-amber-500' : ''}
               text-white font-medium
             `}
+            role="alert"
           >
             <span>{notification.message}</span>
             <button
               onClick={() => onDismiss(notification.id)}
               className="ml-4 hover:opacity-75 transition-opacity"
               type="button"
+              aria-label="Dismiss"
             >
               ✕
             </button>

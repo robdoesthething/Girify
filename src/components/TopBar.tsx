@@ -59,6 +59,8 @@ backdrop-blur-md border-b ${theme === 'dark' ? 'border-slate-600' : 'border-slat
             onClick={() => setMenuOpen(!menuOpen)}
             className={`p-2 rounded-full transition-colors shrink-0 ${theme === 'dark' ? 'hover:bg-neutral-300' : 'hover:bg-slate-100'} `}
             type="button"
+            aria-label="Open menu"
+            aria-expanded={menuOpen}
           >
             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path
@@ -73,6 +75,7 @@ backdrop-blur-md border-b ${theme === 'dark' ? 'border-slate-600' : 'border-slat
             onClick={() => onOpenPage(null)}
             className="flex items-center hover:opacity-80 transition-opacity"
             type="button"
+            aria-label="Go to home"
           >
             <Logo className="h-5 md:h-7 w-auto object-contain" />
           </button>
@@ -106,6 +109,7 @@ backdrop-blur-md border-b ${theme === 'dark' ? 'border-slate-600' : 'border-slat
                   onClick={() => setMenuOpen(false)}
                   className="p-1 hover:opacity-75"
                   type="button"
+                  aria-label="Close menu"
                 >
                   <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path

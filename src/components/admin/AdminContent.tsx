@@ -137,9 +137,15 @@ const AdminContent: React.FC<AdminContentProps> = ({ onNotify, confirm }) => {
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
           <div className="md:col-span-2">
-            <label className="block text-xs font-bold uppercase opacity-50 mb-1">Quest Title</label>
+            <label
+              htmlFor="quest-title"
+              className="block text-xs font-bold uppercase opacity-50 mb-1"
+            >
+              Quest Title
+            </label>
             <input
-              className="w-full px-3 py-2 rounded-lg border dark:bg-slate-900 dark:border-slate-600 font-bold"
+              id="quest-title"
+              className="w-full px-3 py-2 rounded-lg border dark:bg-slate-900 dark:border-slate-600 font-bold outline-none focus:ring-2 focus:ring-sky-500 transition-all"
               placeholder="e.g. Gracia Explorer"
               value={title}
               onChange={e => setTitle(e.target.value)}
@@ -147,9 +153,15 @@ const AdminContent: React.FC<AdminContentProps> = ({ onNotify, confirm }) => {
           </div>
 
           <div className="md:col-span-2">
-            <label className="block text-xs font-bold uppercase opacity-50 mb-1">Description</label>
+            <label
+              htmlFor="quest-desc"
+              className="block text-xs font-bold uppercase opacity-50 mb-1"
+            >
+              Description
+            </label>
             <textarea
-              className="w-full px-3 py-2 rounded-lg border dark:bg-slate-900 dark:border-slate-600 text-sm"
+              id="quest-desc"
+              className="w-full px-3 py-2 rounded-lg border dark:bg-slate-900 dark:border-slate-600 text-sm outline-none focus:ring-2 focus:ring-sky-500 transition-all"
               placeholder="Describe what the user must do..."
               rows={2}
               value={description}
@@ -158,9 +170,15 @@ const AdminContent: React.FC<AdminContentProps> = ({ onNotify, confirm }) => {
           </div>
 
           <div>
-            <label className="block text-xs font-bold uppercase opacity-50 mb-1">Type</label>
+            <label
+              htmlFor="quest-type"
+              className="block text-xs font-bold uppercase opacity-50 mb-1"
+            >
+              Type
+            </label>
             <select
-              className="w-full px-3 py-2 rounded-lg border dark:bg-slate-900 dark:border-slate-600"
+              id="quest-type"
+              className="w-full px-3 py-2 rounded-lg border dark:bg-slate-900 dark:border-slate-600 outline-none focus:ring-2 focus:ring-sky-500 transition-all"
               value={criteriaType}
               onChange={e => setCriteriaType(e.target.value)}
             >
@@ -173,11 +191,15 @@ const AdminContent: React.FC<AdminContentProps> = ({ onNotify, confirm }) => {
           </div>
 
           <div>
-            <label className="block text-xs font-bold uppercase opacity-50 mb-1">
+            <label
+              htmlFor="quest-criteria"
+              className="block text-xs font-bold uppercase opacity-50 mb-1"
+            >
               Criteria Value
             </label>
             <input
-              className="w-full px-3 py-2 rounded-lg border dark:bg-slate-900 dark:border-slate-600"
+              id="quest-criteria"
+              className="w-full px-3 py-2 rounded-lg border dark:bg-slate-900 dark:border-slate-600 outline-none focus:ring-2 focus:ring-sky-500 transition-all"
               placeholder="e.g. 5, 2000, 'Main St'"
               value={criteriaValue}
               onChange={e => setCriteriaValue(e.target.value)}
@@ -185,24 +207,32 @@ const AdminContent: React.FC<AdminContentProps> = ({ onNotify, confirm }) => {
           </div>
 
           <div>
-            <label className="block text-xs font-bold uppercase opacity-50 mb-1">
+            <label
+              htmlFor="quest-reward"
+              className="block text-xs font-bold uppercase opacity-50 mb-1"
+            >
               Reward (Giuros)
             </label>
             <input
+              id="quest-reward"
               type="number"
-              className="w-full px-3 py-2 rounded-lg border dark:bg-slate-900 dark:border-slate-600"
+              className="w-full px-3 py-2 rounded-lg border dark:bg-slate-900 dark:border-slate-600 outline-none focus:ring-2 focus:ring-sky-500 transition-all"
               value={rewardGiuros}
               onChange={e => setRewardGiuros(e.target.value)}
             />
           </div>
 
           <div>
-            <label className="block text-xs font-bold uppercase opacity-50 mb-1">
+            <label
+              htmlFor="quest-date"
+              className="block text-xs font-bold uppercase opacity-50 mb-1"
+            >
               Active Date (Optional)
             </label>
             <input
+              id="quest-date"
               type="date"
-              className="w-full px-3 py-2 rounded-lg border dark:bg-slate-900 dark:border-slate-600"
+              className="w-full px-3 py-2 rounded-lg border dark:bg-slate-900 dark:border-slate-600 outline-none focus:ring-2 focus:ring-sky-500 transition-all"
               value={activeDate}
               onChange={e => setActiveDate(e.target.value)}
             />

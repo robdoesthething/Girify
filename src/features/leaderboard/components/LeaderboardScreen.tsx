@@ -1,9 +1,9 @@
 import { motion } from 'framer-motion';
 import React, { useCallback, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import TopBar from '../../../components/TopBar';
 import { useTheme } from '../../../context/ThemeContext';
 import { getLeaderboard } from '../../../utils/leaderboard';
-import TopBar from '../../../components/TopBar';
 
 interface ScoreEntry {
   id?: string;
@@ -93,6 +93,7 @@ const LeaderboardScreen: React.FC<LeaderboardScreenProps> = ({ currentUser }) =>
               onClick={() => navigate(-1)}
               className="flex items-center gap-2 text-sm font-bold opacity-60 hover:opacity-100 transition-opacity z-10"
               type="button"
+              aria-label={t('back')}
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path
@@ -193,6 +194,19 @@ const LeaderboardScreen: React.FC<LeaderboardScreenProps> = ({ currentUser }) =>
                           navigate('/profile');
                         } else {
                           navigate(`/user/${encodeURIComponent(s.username)}`);
+                        }
+                      }}
+                      role="button"
+                      tabIndex={0}
+                      onKeyDown={e => {
+                        if (e.key === 'Enter' || e.key === ' ') {
+                          const cleanClicked = s.username?.replace(/^@/, '') || '';
+                          const myClean = currentUser?.replace(/^@/, '') || '';
+                          if (cleanClicked.toLowerCase() === myClean.toLowerCase()) {
+                            navigate('/profile');
+                          } else {
+                            navigate(`/user/${encodeURIComponent(s.username)}`);
+                          }
                         }
                       }}
                       className={`flex items-center justify-between p-4 rounded-2xl border cursor-pointer transition-all hover:scale-[1.02]

@@ -105,6 +105,7 @@ const FeedbackScreen: React.FC<FeedbackScreenProps> = ({ username, onClose }) =>
                     value={feedback}
                     onChange={e => setFeedback(e.target.value)}
                     placeholder={t('feedbackPlaceholderFeatures') || 'I wish the game had...'}
+                    aria-label="Your Feedback"
                     className={`w-full h-48 p-4 rounded-xl resize-none outline-none border focus:ring-2 focus:ring-sky-500 transition-all mb-4 text-lg font-inter ${
                       theme === 'dark'
                         ? 'bg-slate-800 border-slate-700 placeholder-slate-600 text-white'
@@ -122,6 +123,7 @@ const FeedbackScreen: React.FC<FeedbackScreenProps> = ({ username, onClose }) =>
                       value={captchaAnswer}
                       onChange={e => setCaptchaAnswer(e.target.value)}
                       placeholder="?"
+                      aria-label="Captcha Answer"
                       className="w-20 p-2 rounded-lg border text-center font-bold outline-none focus:ring-2 focus:ring-sky-500 dark:bg-slate-800 dark:border-slate-600 dark:text-white font-inter"
                     />
                     <span className="text-xs opacity-50 ml-auto font-inter">

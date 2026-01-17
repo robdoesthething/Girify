@@ -165,27 +165,35 @@ const AdminShop: React.FC<AdminShopProps> = ({ items, onRefresh, notify, confirm
               <form onSubmit={handleSave} className="space-y-4">
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="text-xs uppercase font-bold opacity-50 block mb-1">
+                    <label
+                      htmlFor="shop-item-id"
+                      className="text-xs uppercase font-bold opacity-50 block mb-1"
+                    >
                       ID (Unique)
                     </label>
                     <input
+                      id="shop-item-id"
                       value={editingItem.id || ''}
                       onChange={e => setEditingItem({ ...editingItem, id: e.target.value })}
                       disabled={!isCreating}
-                      className="w-full p-3 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 font-mono"
+                      className="w-full p-3 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 font-mono outline-none focus:ring-2 focus:ring-sky-500 transition-all"
                       placeholder="e.g. avatar_fox"
                     />
                   </div>
                   <div>
-                    <label className="text-xs uppercase font-bold opacity-50 block mb-1">
+                    <label
+                      htmlFor="shop-item-type"
+                      className="text-xs uppercase font-bold opacity-50 block mb-1"
+                    >
                       Type
                     </label>
                     <select
+                      id="shop-item-type"
                       value={editingItem.type || 'avatar'}
                       onChange={e =>
                         setEditingItem({ ...editingItem, type: e.target.value as ShopItemType })
                       }
-                      className="w-full p-3 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700"
+                      className="w-full p-3 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 outline-none focus:ring-2 focus:ring-sky-500 transition-all"
                     >
                       <option value="avatar">Avatar</option>
                       <option value="frame">Frame</option>
@@ -196,11 +204,17 @@ const AdminShop: React.FC<AdminShopProps> = ({ items, onRefresh, notify, confirm
                 </div>
 
                 <div>
-                  <label className="text-xs uppercase font-bold opacity-50 block mb-1">Name</label>
+                  <label
+                    htmlFor="shop-item-name"
+                    className="text-xs uppercase font-bold opacity-50 block mb-1"
+                  >
+                    Name
+                  </label>
                   <input
+                    id="shop-item-name"
                     value={editingItem.name || ''}
                     onChange={e => setEditingItem({ ...editingItem, name: e.target.value })}
-                    className="w-full p-3 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700"
+                    className="w-full p-3 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 outline-none focus:ring-2 focus:ring-sky-500 transition-all"
                     placeholder="Display Name"
                   />
                 </div>
@@ -211,12 +225,14 @@ const AdminShop: React.FC<AdminShopProps> = ({ items, onRefresh, notify, confirm
                       Cost (Giuros)
                     </label>
                     <input
+                      id="shop-item-cost"
                       type="number"
                       value={editingItem.cost || 0}
                       onChange={e =>
                         setEditingItem({ ...editingItem, cost: parseInt(e.target.value, 10) })
                       }
-                      className="w-full p-3 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 font-mono text-yellow-500 font-bold"
+                      aria-label="Cost in Giuros"
+                      className="w-full p-3 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 font-mono text-yellow-500 font-bold outline-none focus:ring-2 focus:ring-sky-500 transition-all"
                     />
                   </div>
                   <div>
@@ -224,22 +240,28 @@ const AdminShop: React.FC<AdminShopProps> = ({ items, onRefresh, notify, confirm
                       Emoji (Optional)
                     </label>
                     <input
+                      id="shop-item-emoji"
                       value={editingItem.emoji || ''}
                       onChange={e => setEditingItem({ ...editingItem, emoji: e.target.value })}
-                      className="w-full p-3 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-center"
+                      aria-label="Emoji Icon"
+                      className="w-full p-3 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-center outline-none focus:ring-2 focus:ring-sky-500 transition-all"
                       placeholder="🦊"
                     />
                   </div>
                 </div>
 
                 <div>
-                  <label className="text-xs uppercase font-bold opacity-50 block mb-1">
+                  <label
+                    htmlFor="shop-item-image"
+                    className="text-xs uppercase font-bold opacity-50 block mb-1"
+                  >
                     Image URL (Optional)
                   </label>
                   <input
+                    id="shop-item-image"
                     value={editingItem.image || ''}
                     onChange={e => setEditingItem({ ...editingItem, image: e.target.value })}
-                    className="w-full p-3 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-xs font-mono"
+                    className="w-full p-3 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-xs font-mono outline-none focus:ring-2 focus:ring-sky-500 transition-all"
                     placeholder="/images/avatars/..."
                   />
                 </div>

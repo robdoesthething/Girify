@@ -19,6 +19,16 @@ interface AchievementModalProps {
 const AchievementModal: React.FC<AchievementModalProps> = ({ achievement, onDismiss }) => {
   const { theme, t } = useTheme();
 
+  React.useEffect(() => {
+    const handleEsc = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        onDismiss();
+      }
+    };
+    window.addEventListener('keydown', handleEsc);
+    return () => window.removeEventListener('keydown', handleEsc);
+  }, [onDismiss]);
+
   if (!achievement) {
     return null;
   }
@@ -41,6 +51,10 @@ const AchievementModal: React.FC<AchievementModalProps> = ({ achievement, onDism
                   ${theme === 'dark' ? 'bg-slate-900 text-white' : 'bg-white text-slate-900'}
                   border-4 border-yellow-500
               `}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="achievement-title"
+        aria-describedby="achievement-desc"
       >
         {/* Confetti / Rays Effect Background */}
         <div className="absolute inset-0 z-0 opacity-10 animate-spin-slow">
@@ -53,7 +67,10 @@ const AchievementModal: React.FC<AchievementModalProps> = ({ achievement, onDism
           <h3 className="text-xs font-black text-yellow-500/80 uppercase tracking-widest mb-1 font-inter">
             {t('new') || 'NEW'}
           </h3>
-          <h3 className="text-lg font-black text-yellow-500 uppercase tracking-wider mb-4 font-inter">
+          <h3
+            id="achievement-title"
+            className="text-lg font-black text-yellow-500 uppercase tracking-wider mb-4 font-inter"
+          >
             {t('achievementUnlocked') || 'Achievement Unlocked!'}
           </h3>
 
@@ -76,7 +93,10 @@ const AchievementModal: React.FC<AchievementModalProps> = ({ achievement, onDism
 
           <h2 className="text-2xl font-black mb-2 leading-tight font-inter">{achievement.name}</h2>
 
-          <p className="text-lg font-medium opacity-80 mb-6 italic font-inter">
+          <p
+            id="achievement-desc"
+            className="text-lg font-medium opacity-80 mb-6 italic font-inter"
+          >
             &quot;{achievement.description}&quot;
           </p>
 
