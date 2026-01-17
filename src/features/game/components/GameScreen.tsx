@@ -181,9 +181,9 @@ const GameScreen: FC<GameScreenProps> = ({
                 <Logo className="h-16 w-auto" />
               </div>
               <h2
-                className={`text-3xl md:text-5xl font-black mb-4 ${theme === 'dark' ? 'text-white' : 'text-slate-900'} tracking-tight`}
+                className={`text-2xl md:text-4xl font-extrabold mb-4 p-4 rounded-xl backdrop-blur-md ${theme === 'dark' ? 'text-white bg-slate-900/40' : 'text-slate-800 bg-white/40'} tracking-tight`}
               >
-                {t('proveLocal') || 'PROVE YOU ARE A LOCAL'}
+                {t('proveLocal') || 'Prove you are a local'}
               </h2>
               <p
                 className={`text-lg mb-10 font-medium ${theme === 'dark' ? 'text-slate-300' : 'text-slate-600'}`}

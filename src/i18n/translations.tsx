@@ -270,7 +270,7 @@ const translations: Translations = {
     playersMastering: 'players mastering the city',
 
     // New additions
-    proveLocal: 'PROVE YOU ARE A LOCAL',
+    proveLocal: 'Prove you are a local',
     cityCuriosity: 'City Curiosity',
     didYouKnow: 'Did you know?',
     todaysChallenge: "Today's Challenge",
@@ -492,7 +492,7 @@ const translations: Translations = {
     login: 'Iniciar sesión',
 
     // New additions
-    proveLocal: 'DEMUESTRA QUE ERES LOCAL',
+    proveLocal: 'Demuestra que eres local',
     cityCuriosity: 'Curiosidad de la Ciudad',
     didYouKnow: '¿Sabías que...?',
     todaysChallenge: 'Reto de Hoy',
@@ -715,7 +715,7 @@ const translations: Translations = {
     login: 'Iniciar sessió',
 
     // New additions
-    proveLocal: 'DEMOSTRA QUE ETS LOCAL',
+    proveLocal: 'Demostra que ets local',
     cityCuriosity: 'Curiositat de la Ciutat',
     didYouKnow: 'Sabies que...?',
     todaysChallenge: "Repte d'Avui",
