@@ -15,6 +15,7 @@ import {
 import { SOCIAL } from '../config/constants';
 import { db } from '../firebase';
 import { getTodaySeed } from './dailyChallenge';
+import { updateUserGameStats } from './social';
 
 const HIGHSCORES_COLLECTION = 'highscores';
 const SCORES_COLLECTION = 'scores';
@@ -110,9 +111,7 @@ export const saveScore = async (
     }
 
     // [New] Also update the User Profile stats (for 'bestScore' consistency)
-    // Dynamic import to avoid circular dependency if possible, or direct if allowed.
-    // Assuming circular dependency is handled or fine.
-    const { updateUserGameStats } = await import('./social');
+    // Using static import to avoid build warnings
     await updateUserGameStats(username, {
       streak: streakAtPlay || 0,
       totalScore: score, // This adds to total score in updateUserGameStats

@@ -2,6 +2,7 @@ import { doc, getDoc, updateDoc } from 'firebase/firestore';
 import { calculateStreakBonus } from '../config/gameConfig';
 import { db } from '../firebase';
 import { getPayoutConfig } from './configService';
+import { publishCosmeticPurchase } from './publishActivity';
 
 const USERS_COLLECTION = 'users';
 
@@ -145,21 +146,16 @@ export const spendGiuros = async (
       `[Giuros] -${cost} for ${username} (purchased ${itemId}). New balance: ${newBalance}`
     );
 
-    // Publish activity for friend feed (async, don't await)
-    // @ts-ignore - Dynamic import of JS file? Need to check strictness
-    import('./publishActivity').then(({ publishCosmeticPurchase }) => {
-      // Determine item type from ID prefix
-      let itemType = 'item';
-      if (itemId.startsWith('badge_')) {
-        itemType = 'badge';
-      } else if (itemId.startsWith('frame_')) {
-        itemType = 'frame';
-      } else if (itemId.startsWith('title_')) {
-        itemType = 'title';
-      }
-
-      publishCosmeticPurchase(username, itemId, itemId, itemType);
-    });
+    // Publish activity for friend feed
+    let itemType = 'item';
+    if (itemId.startsWith('badge_')) {
+      itemType = 'badge';
+    } else if (itemId.startsWith('frame_')) {
+      itemType = 'frame';
+    } else if (itemId.startsWith('title_')) {
+      itemType = 'title';
+    }
+    publishCosmeticPurchase(username, itemId, itemId, itemType);
 
     return { success: true, newBalance };
   } catch (e: unknown) {
