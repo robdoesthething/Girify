@@ -71,9 +71,20 @@ export const getShopItems = async (forceRefresh = false): Promise<GroupedShopIte
   }
 
   // Merge: Firestore items override local items with same ID
+  // Merge: Firestore items override local items with same ID, but preserve local fields (like images) if missing in Firestore
   const itemMap = new Map<string, ShopItem>();
   localItems.forEach(item => itemMap.set(item.id, item));
-  firestoreItems.forEach(item => itemMap.set(item.id, item));
+
+  firestoreItems.forEach(item => {
+    const existing = itemMap.get(item.id);
+    if (existing) {
+      // Merge existing (local) with new (firestore)
+      // Firestore data takes precedence for conflicting keys, but local keys (like new images) are kept
+      itemMap.set(item.id, { ...existing, ...item });
+    } else {
+      itemMap.set(item.id, item);
+    }
+  });
 
   const allItems = Array.from(itemMap.values());
 
