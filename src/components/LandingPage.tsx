@@ -191,7 +191,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onLogin, theme }) => {
       </main>
 
       {/* Footer with subtle improvements */}
-      <footer className="relative p-8 text-center text-sm text-slate-500 dark:text-slate-400 font-mono z-10 bg-slate-100/80 dark:bg-slate-900/50 backdrop-blur-sm border-t border-slate-200 dark:border-slate-800">
+      <footer className="relative p-8 text-center text-sm text-slate-600 dark:text-slate-400 font-mono z-10 bg-slate-100/80 dark:bg-slate-900/50 backdrop-blur-sm border-t border-slate-200 dark:border-slate-800">
         <p className="mb-3">&copy; {new Date().getFullYear()} Girify · Barcelona</p>
         <div className="flex justify-center gap-6">
           <Link

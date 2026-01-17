@@ -131,6 +131,7 @@ const AdminFeedback: React.FC<AdminFeedbackProps> = ({ feedback, onRefresh, noti
                           [item.id]: parseInt(e.target.value, 10),
                         }))
                       }
+                      aria-label="Reward Amount"
                       className="w-20 p-2 rounded-lg bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-xs font-bold text-center"
                     />
                   )}

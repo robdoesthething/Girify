@@ -173,6 +173,7 @@ const SettingsScreen: React.FC<SettingsScreenProps> = ({
             onClick={onClose}
             className={`p-2 rounded-full transition-colors ${theme === 'dark' ? 'hover:bg-slate-800' : 'hover:bg-slate-100'}`}
             type="button"
+            aria-label={t('close') || 'Close'}
           >
             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path
@@ -239,7 +240,7 @@ const SettingsScreen: React.FC<SettingsScreenProps> = ({
                       updateUserProfile(username, { theme: mode.id as 'light' | 'dark' | 'auto' });
                     }
                   }}
-                  className={`flex-1 py-2 rounded-lg text-sm font-bold flex items-center justify-center gap-2 transition-all font-inter ${themeMode === mode.id ? 'bg-white dark:bg-slate-700 text-sky-500 shadow-sm' : 'text-slate-500 hover:text-slate-900 dark:hover:text-slate-300'}`}
+                  className={`flex-1 py-2 rounded-lg text-sm font-bold flex items-center justify-center gap-2 transition-all font-inter ${themeMode === mode.id ? 'bg-white dark:bg-slate-700 text-sky-500 shadow-sm' : 'text-slate-600 hover:text-slate-900 dark:hover:text-slate-300'}`}
                   type="button"
                 >
                   <span className="text-lg">{mode.icon}</span>
@@ -278,6 +279,9 @@ const SettingsScreen: React.FC<SettingsScreenProps> = ({
                 onClick={toggleAutoAdvance}
                 className={`w-12 h-7 rounded-full transition-colors relative ${autoAdvance ? 'bg-emerald-500' : 'bg-slate-300'}`}
                 type="button"
+                role="switch"
+                aria-checked={autoAdvance}
+                aria-label={t('autoAdvance') || 'Auto Advance'}
               >
                 <div
                   className={`absolute top-1 w-5 h-5 rounded-full bg-white transition-all shadow-sm ${autoAdvance ? 'left-6' : 'left-1'}`}
@@ -340,6 +344,9 @@ const SettingsScreen: React.FC<SettingsScreenProps> = ({
                 }}
                 className={`w-12 h-7 rounded-full transition-colors relative ${(profileSettings.notificationSettings?.dailyReminder ?? true) ? 'bg-emerald-500' : 'bg-slate-300'}`}
                 type="button"
+                role="switch"
+                aria-checked={profileSettings.notificationSettings?.dailyReminder ?? true}
+                aria-label="Daily Reminders"
               >
                 <div
                   className={`absolute top-1 w-5 h-5 rounded-full bg-white transition-all shadow-sm ${(profileSettings.notificationSettings?.dailyReminder ?? true) ? 'left-6' : 'left-1'}`}
@@ -400,12 +407,14 @@ const SettingsScreen: React.FC<SettingsScreenProps> = ({
               </a>
             ) : (
               <div className="mt-8 text-center pb-4">
-                <p
+                <button
+                  type="button"
                   onClick={handleVersionClick}
-                  className="text-xs text-slate-300 dark:text-slate-700 select-none cursor-default font-mono"
+                  className="text-xs text-slate-300 dark:text-slate-700 select-none cursor-default font-mono hover:text-slate-500 dark:hover:text-slate-500 transition-colors bg-transparent border-0"
+                  aria-label="Version Info"
                 >
                   v0.1.0
-                </p>
+                </button>
               </div>
             )}
           </div>

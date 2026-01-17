@@ -119,7 +119,8 @@ const AdminGameMaster: React.FC<AdminGameMasterProps> = ({ onNotify, confirm }) 
           value={searchTerm}
           onChange={e => setSearchTerm(e.target.value)}
           onKeyDown={e => e.key === 'Enter' && handleSearch()}
-          className="flex-1 px-4 py-3 rounded-xl border bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-slate-600 font-bold"
+          aria-label="Search User by Username"
+          className="flex-1 px-4 py-3 rounded-xl border bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-slate-600 font-bold outline-none focus:ring-2 focus:ring-sky-500 transition-all"
         />
         <button
           onClick={handleSearch}
@@ -197,10 +198,11 @@ const AdminGameMaster: React.FC<AdminGameMasterProps> = ({ onNotify, confirm }) 
 
               <div className="flex gap-2 mb-6">
                 <input
-                  className="flex-1 px-3 py-2 rounded-lg border dark:bg-slate-900 dark:border-slate-600 font-mono text-sm"
+                  className="flex-1 px-3 py-2 rounded-lg border dark:bg-slate-900 dark:border-slate-600 font-mono text-sm outline-none focus:ring-2 focus:ring-sky-500 transition-all"
                   placeholder="Item ID (e.g. frame_gold)"
                   value={newItemId}
                   onChange={e => setNewItemId(e.target.value)}
+                  aria-label="Item ID to add"
                 />
                 <button
                   onClick={handleAddItem}
@@ -222,6 +224,7 @@ const AdminGameMaster: React.FC<AdminGameMasterProps> = ({ onNotify, confirm }) 
                     <button
                       onClick={() => handleRemoveItem(item)}
                       className="w-5 h-5 flex items-center justify-center rounded-full hover:bg-red-100 text-red-500 text-xs"
+                      aria-label={`Remove ${item}`}
                     >
                       ✕
                     </button>

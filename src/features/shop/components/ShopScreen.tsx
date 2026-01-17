@@ -1,6 +1,7 @@
 import { AnimatePresence } from 'framer-motion';
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import TopBar from '../../../components/TopBar';
 import { useTheme } from '../../../context/ThemeContext';
 import {
   getEquippedCosmetics,
@@ -10,7 +11,6 @@ import {
   spendGiuros,
 } from '../../../utils/giuros';
 import { getShopItems, GroupedShopItems, ShopItem } from '../../../utils/shop';
-import TopBar from '../../../components/TopBar';
 
 interface ShopScreenProps {
   username: string;
@@ -198,6 +198,7 @@ const ShopScreen: React.FC<ShopScreenProps> = ({ username }) => {
               onClick={() => navigate(-1)}
               className="flex items-center gap-2 text-sm font-bold opacity-60 hover:opacity-100 transition-opacity z-10"
               type="button"
+              aria-label={t('back')}
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path
@@ -213,8 +214,11 @@ const ShopScreen: React.FC<ShopScreenProps> = ({ username }) => {
               <span>🛒</span> {t('shop')}
             </h1>
 
-            <div className="bg-white/10 backdrop-blur-md px-4 py-2 rounded-2xl flex items-center gap-2 border border-white/10 shadow-lg">
-              <img src="/giuro.png" alt="Giuros" className="h-6 w-auto object-contain" />
+            <div
+              className="bg-white/10 backdrop-blur-md px-4 py-2 rounded-2xl flex items-center gap-2 border border-white/10 shadow-lg"
+              aria-label={`Balance: ${balance} Giuros`}
+            >
+              <img src="/giuro.png" alt="" className="h-6 w-auto object-contain" />
               <div className="flex flex-col items-end leading-none">
                 <span className="text-lg font-black text-yellow-500">{balance}</span>
                 <span className="text-[10px] uppercase font-bold opacity-60 font-inter">
@@ -298,7 +302,10 @@ const ShopScreen: React.FC<ShopScreenProps> = ({ username }) => {
                             ✓ {t('owned')}
                           </span>
                         ) : (
-                          <div className="flex items-center gap-1 justify-end font-inter">
+                          <div
+                            className="flex items-center gap-1 justify-end font-inter"
+                            aria-label={`Cost: ${item.cost || item.price || 0} Giuros`}
+                          >
                             <img src="/giuro.png" alt="" className="h-4 w-auto object-contain" />
                             <span className="font-black text-yellow-600 dark:text-yellow-400 text-sm">
                               {item.cost || item.price || 0}

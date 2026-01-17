@@ -170,7 +170,7 @@ const SummaryScreen: React.FC<SummaryScreenProps> = ({
             <div className="overflow-hidden h-48 md:h-64 w-full relative">
               <img
                 src={displayImage}
-                alt="Barcelona"
+                alt={curiosity.title || 'Barcelona curiosity'}
                 className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-slate-900/90 via-transparent to-transparent" />
@@ -179,6 +179,7 @@ const SummaryScreen: React.FC<SummaryScreenProps> = ({
                   onClick={handleShare}
                   className="p-2.5 rounded-full bg-sky-500 hover:bg-sky-600 transition-all active:scale-95 shadow-lg text-white"
                   title="Share this curiosity"
+                  aria-label="Share this curiosity"
                 >
                   🎁
                 </button>
@@ -229,7 +230,7 @@ const SummaryScreen: React.FC<SummaryScreenProps> = ({
 
           <div className="grid grid-cols-2 gap-4 w-full mb-8">
             <div className="glass-panel p-4 flex flex-col items-center justify-center col-span-1 asp-square">
-              <span className="text-xs opacity-50 uppercase tracking-wider font-bold mb-1">
+              <span className="text-xs opacity-70 uppercase tracking-wider font-bold mb-1">
                 Score
               </span>
               <div className="flex flex-col items-center">

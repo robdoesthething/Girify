@@ -177,38 +177,52 @@ const AdminAnnouncements: React.FC<AdminAnnouncementsProps> = ({
               <h3 className="text-2xl font-black mb-6">New Announcement</h3>
               <form onSubmit={handleCreate} className="space-y-4">
                 <div>
-                  <label className="text-xs uppercase font-bold opacity-50 block mb-1">Title</label>
+                  <label
+                    htmlFor="announce-title"
+                    className="text-xs uppercase font-bold opacity-50 block mb-1"
+                  >
+                    Title
+                  </label>
                   <input
+                    id="announce-title"
                     value={newAnnouncement.title}
                     onChange={e =>
                       setNewAnnouncement({ ...newAnnouncement, title: e.target.value })
                     }
-                    className="w-full p-3 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 font-bold"
+                    className="w-full p-3 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 font-bold outline-none focus:ring-2 focus:ring-sky-500 transition-all"
                     placeholder="Headline"
                   />
                 </div>
                 <div>
-                  <label className="text-xs uppercase font-bold opacity-50 block mb-1">
+                  <label
+                    htmlFor="announce-body"
+                    className="text-xs uppercase font-bold opacity-50 block mb-1"
+                  >
                     Content
                   </label>
                   <textarea
+                    id="announce-body"
                     value={newAnnouncement.body}
                     onChange={e => setNewAnnouncement({ ...newAnnouncement, body: e.target.value })}
-                    className="w-full p-3 h-32 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700"
+                    className="w-full p-3 h-32 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 outline-none focus:ring-2 focus:ring-sky-500 transition-all"
                     placeholder="Message body..."
                   />
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="text-xs uppercase font-bold opacity-50 block mb-1">
+                    <label
+                      htmlFor="announce-priority"
+                      className="text-xs uppercase font-bold opacity-50 block mb-1"
+                    >
                       Priority
                     </label>
                     <select
+                      id="announce-priority"
                       value={newAnnouncement.priority}
                       onChange={e =>
                         setNewAnnouncement({ ...newAnnouncement, priority: e.target.value })
                       }
-                      className="w-full p-3 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700"
+                      className="w-full p-3 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 outline-none focus:ring-2 focus:ring-sky-500 transition-all"
                     >
                       <option value="low">Low</option>
                       <option value="normal">Normal</option>
@@ -217,16 +231,20 @@ const AdminAnnouncements: React.FC<AdminAnnouncementsProps> = ({
                     </select>
                   </div>
                   <div>
-                    <label className="text-xs uppercase font-bold opacity-50 block mb-1">
+                    <label
+                      htmlFor="announce-days"
+                      className="text-xs uppercase font-bold opacity-50 block mb-1"
+                    >
                       Duration (Days)
                     </label>
                     <input
+                      id="announce-days"
                       type="number"
                       value={newAnnouncement.daysToLive}
                       onChange={e =>
                         setNewAnnouncement({ ...newAnnouncement, daysToLive: e.target.value })
                       }
-                      className="w-full p-3 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700"
+                      className="w-full p-3 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 outline-none focus:ring-2 focus:ring-sky-500 transition-all"
                     />
                   </div>
                 </div>
