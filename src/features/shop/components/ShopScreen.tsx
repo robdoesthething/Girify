@@ -174,21 +174,17 @@ const ShopScreen: React.FC<ShopScreenProps> = ({ username }) => {
     if (item.cssClass) {
       return <div className={`w-10 h-10 rounded-full ${item.cssClass}`} />;
     }
-    if (item.image && activeTab === 'avatars') {
+    if (item.image) {
       return (
         <img
           src={item.image}
           alt={item.name}
-          className="w-full h-full object-cover"
+          className="w-full h-full object-contain"
           style={{ imageRendering: 'pixelated' }}
         />
       );
     }
-    return (
-      <span>
-        {item.image && activeTab !== 'avatars' ? '🎁' : item.prefix || item.emoji || '✨'}
-      </span>
-    );
+    return <span style={{ fontSize: '1.5rem' }}>{item.prefix || item.emoji || '✨'}</span>;
   };
 
   return (

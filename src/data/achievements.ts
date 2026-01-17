@@ -257,6 +257,7 @@ export const ACHIEVEMENT_BADGES: Achievement[] = [
     type: 'shop',
     cost: 50,
     emoji: '🥘',
+    image: '/assets/nano_banana.png',
   },
   {
     id: 'badge_sangria_bucket',
@@ -266,6 +267,7 @@ export const ACHIEVEMENT_BADGES: Achievement[] = [
     type: 'shop',
     cost: 100,
     emoji: '🍷',
+    image: '/assets/nano_banana.png',
   },
   {
     id: 'badge_tcasual',
@@ -275,6 +277,7 @@ export const ACHIEVEMENT_BADGES: Achievement[] = [
     type: 'shop',
     cost: 200,
     emoji: '🎫',
+    image: '/assets/nano_banana.png',
   },
   {
     id: 'badge_pigeon',
@@ -284,6 +287,7 @@ export const ACHIEVEMENT_BADGES: Achievement[] = [
     type: 'shop',
     cost: 300,
     emoji: '🐈',
+    image: '/assets/nano_banana.png',
   },
   {
     id: 'badge_scooter',
@@ -293,6 +297,7 @@ export const ACHIEVEMENT_BADGES: Achievement[] = [
     type: 'shop',
     cost: 500,
     emoji: '🛴',
+    image: '/assets/nano_banana.png',
   },
   {
     id: 'badge_yacht',
@@ -302,6 +307,7 @@ export const ACHIEVEMENT_BADGES: Achievement[] = [
     type: 'shop',
     cost: 1000,
     emoji: '🛥️',
+    image: '/assets/nano_banana.png',
   },
 ];
 
