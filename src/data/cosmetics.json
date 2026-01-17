@@ -12,7 +12,7 @@
       "id": "avatar_local",
       "name": "Local Legend",
       "cost": 500,
-      "image": "/assets/avatars/local.svg",
+      "image": "/assets/pixel_avatar_local.png",
       "emoji": "😎",
       "description": "Stylish and confident"
     },
@@ -20,7 +20,7 @@
       "id": "avatar_artist",
       "name": "Gaudí Artist",
       "cost": 1000,
-      "image": "/assets/avatars/artist.svg",
+      "image": "/assets/pixel_avatar_artist.png",
       "emoji": "🎨",
       "description": "Colorful and mosaic-inspired"
     }
@@ -239,6 +239,7 @@
       "id": "handle_change",
       "name": "Change Handle",
       "cost": 10000,
+      "image": "/assets/pixel_name_tag.png",
       "description": "Change your username once",
       "consumable": true
     }
