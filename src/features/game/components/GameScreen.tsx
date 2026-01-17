@@ -193,13 +193,13 @@ const GameScreen: FC<GameScreenProps> = ({
               </p>
               <button
                 onClick={() => setupGame()}
-                className={`px-12 py-5 rounded-full text-white shadow-xl transform hover:scale-105 transition-all duration-300 flex items-center justify-center mx-auto ring-4 ${
+                className={`px-10 py-4 rounded-xl text-white shadow-lg transform hover:scale-105 transition-all duration-300 flex items-center justify-center mx-auto ${
                   hasPlayedToday()
-                    ? 'bg-[#000080] hover:bg-[#000060] shadow-[#000080]/30 ring-[#000080]/20'
-                    : 'bg-sky-500 hover:bg-sky-400 shadow-sky-500/30 ring-sky-500/20'
+                    ? 'bg-slate-700 hover:bg-slate-600 shadow-slate-700/30'
+                    : 'bg-emerald-500 hover:bg-emerald-400 shadow-emerald-500/30'
                 }`}
               >
-                <span className="font-black text-xl tracking-wider">
+                <span className="font-bold text-lg tracking-wide">
                   {hasPlayedToday() ? t('replay') || 'Replay' : t('play') || 'Play'}
                 </span>
               </button>
