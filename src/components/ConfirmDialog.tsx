@@ -17,8 +17,9 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
   onCancel,
   isDangerous = false,
 }) => {
-  // eslint-disable-next-line consistent-return
   useEffect(() => {
+    let cleanup: (() => void) | undefined;
+
     if (isOpen) {
       const handleEsc = (e: KeyboardEvent) => {
         if (e.key === 'Escape') {
@@ -26,10 +27,12 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
         }
       };
       window.addEventListener('keydown', handleEsc);
-      return () => {
+      cleanup = () => {
         window.removeEventListener('keydown', handleEsc);
       };
     }
+
+    return cleanup;
   }, [isOpen, onCancel]);
 
   return (

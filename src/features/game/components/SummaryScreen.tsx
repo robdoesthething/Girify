@@ -3,6 +3,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { STORAGE_KEYS } from '../../../config/constants';
 import { getCuriosityByStreets } from '../../../data/curiosities';
+import { calculateStreak } from '../../../utils/stats';
 import { storage } from '../../../utils/storage';
 import { fetchWikiImage } from '../../../utils/wiki';
 
@@ -55,40 +56,15 @@ const SummaryScreen: React.FC<SummaryScreenProps> = ({
     if (streak && streak > 0) {
       return streak;
     }
+
     try {
-      const history = storage.get(STORAGE_KEYS.HISTORY, []);
-      if (history.length === 0) {
-        return 1;
-      }
-
-      const uniqueDates = [...new Set(history.map((h: GameHistory) => h.date))].sort().reverse();
-      if (uniqueDates.length === 0) {
-        return 1;
-      }
-
-      const now = new Date();
-      const today = now.toISOString().split('T')[0].replace(/-/g, '');
-      const yesterdayDate = new Date(now);
-      yesterdayDate.setDate(yesterdayDate.getDate() - 1);
-      const yesterday = yesterdayDate.toISOString().split('T')[0].replace(/-/g, '');
-
-      if (uniqueDates[0] !== today && uniqueDates[0] !== yesterday) {
-        return 1;
-      }
-
-      let currentStreak = 0;
-      const expectedDate = new Date(now);
-
-      for (const dateStr of uniqueDates) {
-        const expected = expectedDate.toISOString().split('T')[0].replace(/-/g, '');
-        if (dateStr === expected) {
-          currentStreak++;
-          expectedDate.setDate(expectedDate.getDate() - 1);
-        } else {
-          break;
-        }
-      }
-      return Math.max(currentStreak, 1);
+      const history = storage.get<GameHistory[]>(STORAGE_KEYS.HISTORY, []);
+      // Map local history to formatting expected by calculateStreak (number date)
+      const formattedHistory = history.map(h => ({
+        ...h,
+        date: typeof h.date === 'string' ? Number(h.date) : h.date,
+      }));
+      return Math.max(calculateStreak(formattedHistory), 1);
     } catch {
       return 1;
     }
@@ -200,7 +176,7 @@ const SummaryScreen: React.FC<SummaryScreenProps> = ({
           <div className="flex gap-3 w-full">
             <button
               onClick={handleShare}
-              className="flex-1 py-4 bg-white/5 hover:bg-white/10 border border-white/10 text-white rounded-2xl font-bold text-sm transition-all"
+              className="flex-1 py-4 bg-slate-200 dark:bg-white/5 hover:bg-slate-300 dark:hover:bg-white/10 border border-slate-300 dark:border-white/10 text-slate-800 dark:text-white rounded-2xl font-bold text-sm transition-all"
             >
               {shareStatus || `🎁 ${t('share') || 'Share & Earn'}`}
             </button>

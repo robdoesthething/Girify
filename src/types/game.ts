@@ -45,7 +45,7 @@ export interface GameStateObject {
   options: Street[];
   quizResults: QuizResult[];
   feedback: Feedback;
-  selectedStreet: Street | null;
+  // selectedStreet: Street | null; // Removed in favor of selectedAnswer
   hintsRevealedCount: number;
   hintStreets: Street[];
   autoAdvance: boolean;

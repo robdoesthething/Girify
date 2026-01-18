@@ -410,7 +410,9 @@ const AdminAchievements: React.FC<AdminAchievementsProps> = ({ onNotify, confirm
                       />
                       <button
                         onClick={() => {
-                          const newCriteria = { ...editingItem.criteria };
+                          const newCriteria = {
+                            ...(editingItem.criteria as Record<string, number>),
+                          };
                           delete newCriteria[key];
                           setEditingItem({ ...editingItem, criteria: newCriteria });
                         }}

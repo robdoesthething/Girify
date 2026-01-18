@@ -69,6 +69,8 @@ const OnboardingTour: React.FC<OnboardingTourProps> = ({ onComplete }) => {
             ? 'bg-slate-900 border border-slate-700 text-white'
             : 'bg-white text-slate-900'
         }`}
+        role="dialog"
+        aria-label={steps[step].title}
       >
         {/* Dialogue Header with Mayor Jaume */}
         <div className="bg-gradient-to-r from-sky-600 to-blue-600 p-6 pb-12 relative">
@@ -106,7 +108,7 @@ const OnboardingTour: React.FC<OnboardingTourProps> = ({ onComplete }) => {
                 storage.set('girify_onboarding_completed', 'true');
                 onComplete();
               }}
-              className="px-6 py-4 font-bold opacity-50 hover:opacity-100 transition-opacity"
+              className="px-6 py-4 font-bold opacity-50 hover:opacity-100 focus:opacity-100 transition-opacity outline-none focus:ring-2 focus:ring-sky-500 rounded-xl"
               type="button"
             >
               Skip

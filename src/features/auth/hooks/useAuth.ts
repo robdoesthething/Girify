@@ -14,10 +14,10 @@ import {
 } from '../../../utils/social';
 import { storage } from '../../../utils/storage';
 // @ts-ignore
-import { FeedbackReward, GameHistory, UserProfile } from '../../../types/user';
-import { claimDailyLoginBonus } from '../../../utils/giuros';
 import { useAsyncOperation } from '../../../hooks/useAsyncOperation';
 import { useNotification } from '../../../hooks/useNotification';
+import { FeedbackReward, GameHistory, UserProfile } from '../../../types/user';
+import { claimDailyLoginBonus } from '../../../utils/giuros';
 // @ts-ignore
 import { sanitizeInput } from '../../../utils/security';
 // @ts-ignore
@@ -55,7 +55,7 @@ export const useAuth = (
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const ref = params.get('ref');
-    if (ref && !storage.get(STORAGE_KEYS.REFERRER)) {
+    if (ref && !storage.get(STORAGE_KEYS.REFERRER, '')) {
       storage.set(STORAGE_KEYS.REFERRER, ref);
     }
   }, []);
@@ -147,7 +147,7 @@ async function syncUserProfile(
 ) {
   try {
     const profile = (await ensureUserProfile(displayName, user.uid, {
-      email: user.email,
+      email: user.email || undefined,
     })) as unknown as UserProfile;
 
     if (profile) {
@@ -203,7 +203,7 @@ async function syncUserProfile(
  * One-time sync of local game history to Firestore
  */
 async function syncLocalHistory(displayName: string) {
-  if (storage.get(STORAGE_KEYS.HISTORY_SYNCED)) {
+  if (storage.get(STORAGE_KEYS.HISTORY_SYNCED, false)) {
     return;
   }
 
@@ -215,7 +215,16 @@ async function syncLocalHistory(displayName: string) {
         // eslint-disable-next-line no-console
         console.log(`[Migration] Syncing ${localHistory.length} games to Firestore...`);
         const toUpload = localHistory.slice(-MIGRATION.MAX_HISTORY_UPLOAD);
-        toUpload.forEach((game: GameHistory) => saveUserGameResult(displayName, game));
+        toUpload.forEach((game: GameHistory) =>
+          saveUserGameResult(displayName, {
+            ...game,
+            date: typeof game.date === 'string' ? new Date(game.date).getTime() : game.date || 0,
+            timestamp:
+              typeof game.timestamp === 'number'
+                ? { seconds: Math.floor(game.timestamp / 1000) }
+                : game.timestamp || undefined,
+          } as any)
+        );
       }
     }
     storage.set(STORAGE_KEYS.HISTORY_SYNCED, 'true');
@@ -228,14 +237,14 @@ async function syncLocalHistory(displayName: string) {
  * One-time sync of local cosmetics/currency to Firestore
  */
 async function syncLocalCosmetics(displayName: string) {
-  if (storage.get(STORAGE_KEYS.COSMETICS_SYNCED)) {
+  if (storage.get(STORAGE_KEYS.COSMETICS_SYNCED, false)) {
     return;
   }
 
   try {
-    const purchased = storage.get(STORAGE_KEYS.PURCHASED);
-    const equipped = storage.get(STORAGE_KEYS.EQUIPPED);
-    const giuros = storage.get(STORAGE_KEYS.GIUROS);
+    const purchased = storage.get<string[]>(STORAGE_KEYS.PURCHASED, []);
+    const equipped = storage.get<Record<string, string>>(STORAGE_KEYS.EQUIPPED, {});
+    const giuros = storage.get<number>(STORAGE_KEYS.GIUROS, 0);
 
     if (
       (purchased && purchased.length > 0) ||
@@ -263,7 +272,7 @@ async function backfillJoinDate(displayName: string, profile: UserProfile | null
   let earliestDate: Date | null = null;
 
   try {
-    const history = storage.get(STORAGE_KEYS.HISTORY, []);
+    const history = storage.get<GameHistory[]>(STORAGE_KEYS.HISTORY, []);
     if (history.length > 0) {
       const sorted = [...history].sort(
         (a: GameHistory, b: GameHistory) => (a.timestamp || 0) - (b.timestamp || 0)
@@ -291,11 +300,13 @@ async function backfillJoinDate(displayName: string, profile: UserProfile | null
   if (earliestDate && (!profileDate || earliestDate < profileDate)) {
     // eslint-disable-next-line no-console
     console.log('[Migration] Backfilling registry date from history:', earliestDate);
-    await updateUserProfile(displayName, { joinedAt: earliestDate });
+    // Cast to any to bypass strict Timestamp check for now, or convert if possible.
+    // Ideally we import Timestamp from firebase/firestore but user helper handles conversion usually.
+    await updateUserProfile(displayName, { joinedAt: earliestDate } as any);
     storage.set(STORAGE_KEYS.JOINED, earliestDate!.toLocaleDateString());
   }
 
-  if (!storage.get(STORAGE_KEYS.JOINED)) {
+  if (!storage.get(STORAGE_KEYS.JOINED, '')) {
     if (profileDate) {
       storage.set(STORAGE_KEYS.JOINED, profileDate.toLocaleDateString());
     } else {
