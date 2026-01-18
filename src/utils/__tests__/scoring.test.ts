@@ -1,7 +1,7 @@
-import { describe, it, expect } from 'vitest';
+import { describe, expect, it } from 'vitest';
+import { GAME, REWARDS } from '../../config/constants';
 import { calculateScore, calculateStreakBonus } from '../../config/gameConfig';
 import { getScoreTier, getScoreTierColor } from '../scoring';
-import { GAME, REWARDS } from '../../config/constants';
 
 describe('Scoring Logic (gameConfig)', () => {
   it('returns 0 for incorrect answers', () => {
@@ -9,21 +9,21 @@ describe('Scoring Logic (gameConfig)', () => {
     expect(score).toBe(0);
   });
 
-  it('awards full base points for correct answer with no hints and fast time', () => {
+  it('awards standard points regardless of time', () => {
     // timeElapsed = 0 should give Max time bonus
     const score = calculateScore(0, true, 0);
-    // Base + Max Bonus
-    const expected = GAME.POINTS.CORRECT_BASE + GAME.POINTS.TIME_BONUS_MAX;
+    // Base only (time bonus removed)
+    const expected = GAME.POINTS.CORRECT_BASE;
     expect(score).toBe(expected);
   });
 
-  it('reduces time bonus as time elapses', () => {
+  it('does not reduce score based on time', () => {
     const fastScore = calculateScore(1, true, 0);
     const slowScore = calculateScore(5, true, 0);
-    expect(fastScore).toBeGreaterThan(slowScore);
+    expect(fastScore).toBe(slowScore);
   });
 
-  it('gives no time bonus if elapsed time exceeds threshold', () => {
+  it('keeps base score even if elapsed time exceeds threshold', () => {
     const score = calculateScore(GAME.TIME_BONUS_THRESHOLD + 1, true, 0);
     expect(score).toBe(GAME.POINTS.CORRECT_BASE);
   });
