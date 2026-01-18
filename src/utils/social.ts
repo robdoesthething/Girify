@@ -174,11 +174,30 @@ export const ensureUserProfile = async (
       migratedTo: null,
       migratedFrom: null,
       referredBy: null,
-      district: additionalData.district,
+      district:
+        additionalData.district || DISTRICTS[Math.floor(Math.random() * DISTRICTS.length)].id,
       team: additionalData.district
         ? DISTRICTS.find(d => d.id === additionalData.district)?.teamName
-        : undefined,
+        : (() => {
+            // Need to ensure team matches the random district if fallback was used.
+            // Since we can't easily sync two random calls inline, let's fix the logic by
+            // utilizing the fact that we can't capture the previous random value here easily.
+            // A better approach is to rely on 'updateUserGameStats' or just accept that this
+            // fallback is a last resort. However, correctness is key.
+            // Let's assume the previous random call gave us a valid ID.
+            // Actually, to be safe, we should determine the values BEFORE this object.
+            return undefined;
+          })(),
     };
+
+    // Fix: Refactor to calculate district first
+    const selectedDistrictId =
+      additionalData.district || DISTRICTS[Math.floor(Math.random() * DISTRICTS.length)].id;
+    const selectedTeamName = DISTRICTS.find(d => d.id === selectedDistrictId)?.teamName;
+
+    profileData.district = selectedDistrictId;
+    profileData.team = selectedTeamName;
+
     await setDoc(userRef, profileData);
     return profileData;
   }

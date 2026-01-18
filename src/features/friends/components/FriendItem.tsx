@@ -27,7 +27,7 @@ const FriendItem: React.FC<FriendItemProps> = ({ friend, onRemove, onBlock }) =>
 
   const equippedAvatarId = friend.equippedCosmetics?.avatarId;
   const hasCustomAvatar = equippedAvatarId && equippedAvatarId.startsWith('pixel_');
-  const avatarUrl = hasCustomAvatar ? `/assets/${equippedAvatarId}.png` : null;
+  const avatarUrl = hasCustomAvatar ? `/assets/districts/${equippedAvatarId}.png` : null;
 
   return (
     <div className="p-3 rounded-lg border flex justify-between items-center bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 transition-colors relative">
@@ -38,7 +38,7 @@ const FriendItem: React.FC<FriendItemProps> = ({ friend, onRemove, onBlock }) =>
           {avatarUrl ? (
             <img src={avatarUrl} alt={friend.username} className="w-full h-full object-cover" />
           ) : (
-            getAvatar(friend.avatarId)
+            getAvatar(friend.avatarId || 1)
           )}
         </div>
         <div>

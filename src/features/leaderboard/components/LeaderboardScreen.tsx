@@ -130,7 +130,7 @@ const LeaderboardScreen: React.FC<LeaderboardScreenProps> = ({ currentUser }) =>
             >
               <button
                 onClick={() => setViewMode('individual')}
-                className={`px-4 py-2 text-xs font-bold rounded-lg transition-all
+                className={`px-4 py-2 text-xs font-bold rounded-lg transition-all uppercase
                   ${viewMode === 'individual' ? 'bg-emerald-500 text-white shadow-md' : 'text-slate-500 hover:text-slate-800 dark:hover:text-slate-300'}`}
                 type="button"
               >
@@ -138,7 +138,7 @@ const LeaderboardScreen: React.FC<LeaderboardScreenProps> = ({ currentUser }) =>
               </button>
               <button
                 onClick={() => setViewMode('teams')}
-                className={`px-4 py-2 text-xs font-bold rounded-lg transition-all
+                className={`px-4 py-2 text-xs font-bold rounded-lg transition-all uppercase
                   ${viewMode === 'teams' ? 'bg-emerald-500 text-white shadow-md' : 'text-slate-500 hover:text-slate-800 dark:hover:text-slate-300'}`}
                 type="button"
               >
@@ -156,7 +156,7 @@ const LeaderboardScreen: React.FC<LeaderboardScreenProps> = ({ currentUser }) =>
                 <button
                   key={tab.id}
                   onClick={() => setPeriod(tab.id)}
-                  className={`px-4 py-2 text-xs font-bold rounded-lg transition-all tracking-wider
+                  className={`px-4 py-2 text-xs font-bold rounded-lg transition-all tracking-wider uppercase
                          ${period === tab.id ? 'bg-sky-500 text-white shadow-md' : 'text-slate-500 hover:text-slate-800 dark:hover:text-slate-300'}
                       `}
                   type="button"
