@@ -205,7 +205,7 @@ const ShopScreen: React.FC<ShopScreenProps> = ({ username }) => {
     }
     return theme === 'dark'
       ? 'border-4 border-slate-700 bg-slate-800'
-      : 'border-4 border-slate-200 bg-white shadow-lg';
+      : 'border-4 border-slate-200 bg-white/50 backdrop-blur-sm shadow-lg';
   };
 
   const getEquipButtonClass = (active: boolean) => {

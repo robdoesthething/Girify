@@ -131,10 +131,13 @@ export const saveScore = async (
 /**
  * Fetch leaderboard scores with automatic deduplication (one entry per user)
  */
-export const getLeaderboard = async (period: LeaderboardPeriod = 'all'): Promise<ScoreEntry[]> => {
+export const getLeaderboard = async (
+  period: LeaderboardPeriod = 'all',
+  limitCount: number = SOCIAL.LEADERBOARD.FETCH_LIMIT
+): Promise<ScoreEntry[]> => {
   try {
     const scoresRef = collection(db, SCORES_COLLECTION);
-    const q = query(scoresRef, orderBy('timestamp', 'desc'), limit(SOCIAL.LEADERBOARD.FETCH_LIMIT));
+    const q = query(scoresRef, orderBy('timestamp', 'desc'), limit(limitCount));
 
     if (import.meta.env.DEV) {
       console.warn(`[Leaderboard] Fetching scores for period: ${period}`);
@@ -386,7 +389,8 @@ export const getTeamLeaderboard = async (
     });
 
     // Fetch individual scores for the period
-    const individualScores = await getLeaderboard(period);
+    // Fetch individual scores for the period with higher limit to ensure team accuracy
+    const individualScores = await getLeaderboard(period, 1000);
 
     // Aggregate by team
     const teamScores: Record<string, { score: number; members: Set<string>; id: string }> = {};

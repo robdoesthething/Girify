@@ -145,7 +145,6 @@ const PublicProfileScreen: React.FC<PublicProfileScreenProps> = ({ currentUser }
     }
   };
 
-  const displayAvatar = getAvatar(profile?.avatarId);
   const formattedUsername = formatUsername(username);
 
   const equippedAvatarId = equippedCosmetics?.avatarId;
@@ -208,7 +207,7 @@ const PublicProfileScreen: React.FC<PublicProfileScreenProps> = ({ currentUser }
                   {avatarUrl ? (
                     <img src={avatarUrl} alt={username} className="w-full h-full object-cover" />
                   ) : (
-                    displayAvatar
+                    getAvatar(profile?.avatarId || 1)
                   )}
                 </div>
               )}
