@@ -152,7 +152,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onLogin, theme }) => {
             ))}
           </div>
 
-          {/* News section with better integration */}
+          {/* News section with Mayor Jaume */}
           <div className="w-full max-w-2xl">
             <div className="bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-900 dark:to-slate-800 rounded-3xl p-6 sm:p-8 flex flex-col sm:flex-row items-center gap-6 text-left border-2 border-slate-300 dark:border-slate-700 shadow-xl relative overflow-hidden group hover:shadow-2xl transition-all duration-300">
               {/* Background decoration */}
@@ -160,16 +160,22 @@ const LandingPage: React.FC<LandingPageProps> = ({ onLogin, theme }) => {
                 NEWS
               </div>
 
-              {/* Reporter image with better styling */}
-              <img
-                src="/images/mejur_jouma.png"
-                alt="Mejur Jouma"
-                className="w-28 h-28 sm:w-32 sm:h-32 rounded-full border-4 border-yellow-500 shadow-xl shadow-yellow-500/20 bg-indigo-900 object-cover flex-shrink-0 transform group-hover:scale-105 transition-transform duration-300"
-              />
+              {/* Mayor Jaume Pixel Art */}
+              <div className="relative">
+                <img
+                  src="/assets/pixel_mayor_jaume.png"
+                  alt="Mayor Jaume"
+                  className="w-28 h-28 sm:w-32 sm:h-32 rounded-xl border-4 border-yellow-500 shadow-xl shadow-yellow-500/20 bg-indigo-900/50 object-cover flex-shrink-0 transform group-hover:scale-105 transition-transform duration-300"
+                  style={{ imageRendering: 'pixelated' }}
+                />
+                <div className="absolute -bottom-2 -right-2 bg-yellow-500 text-yellow-900 text-[10px] font-black px-2 py-0.5 rounded-full border-2 border-white dark:border-slate-900">
+                  MAYOR
+                </div>
+              </div>
 
               <div className="flex-1 text-center sm:text-left">
                 <div className="inline-block text-yellow-600 dark:text-yellow-400 font-bold text-xs uppercase mb-2 px-3 py-1 bg-yellow-100 dark:bg-yellow-500/20 rounded-full">
-                  🎙️ Mejur Jouma Reports
+                  🎙️ Mayor Jaume Reports
                 </div>
                 <div className="font-bold text-base sm:text-lg min-h-[3rem] flex items-center">
                   <AnimatePresence mode="wait">
@@ -178,7 +184,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onLogin, theme }) => {
                       initial={{ opacity: 0, y: 10 }}
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0, y: -10 }}
-                      className="line-clamp-2 text-slate-800 dark:text-slate-200"
+                      className="line-clamp-2 text-slate-800 dark:text-slate-200 font-medium italic"
                     >
                       &quot;{NEWS_HEADLINES[newsIndex]}&quot;
                     </motion.p>
