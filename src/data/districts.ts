@@ -10,9 +10,9 @@ export const DISTRICTS: District[] = [
   {
     id: 'ciutat_vella',
     name: 'Ciutat Vella',
-    teamName: 'Ciutat Vella Gargoyles',
+    teamName: 'Ciutat Vella Bats',
     color: 'from-purple-500 to-indigo-600',
-    logo: '/assets/districts/pixel_gargoyle.png',
+    logo: '/assets/districts/pixel_bat.png',
   },
   {
     id: 'eixample',

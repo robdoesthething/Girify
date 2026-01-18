@@ -1,4 +1,5 @@
 import { motion } from 'framer-motion';
+import PropTypes from 'prop-types';
 import React, { useState } from 'react';
 import { useTheme } from '../context/ThemeContext';
 import { DISTRICTS } from '../data/districts';
@@ -88,10 +89,7 @@ const DistrictSelectionModal: React.FC<DistrictSelectionModalProps> = ({
             <div className="p-4 rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 flex items-center gap-4 animate-fadeIn">
               {(() => {
                 const d = DISTRICTS.find(dist => dist.id === district);
-                if (!d) {
-                  return null;
-                }
-                return (
+                return d ? (
                   <>
                     <div
                       className={`w-16 h-16 rounded-full bg-gradient-to-br ${d.color} p-0.5 shadow-lg flex-shrink-0`}
@@ -111,7 +109,7 @@ const DistrictSelectionModal: React.FC<DistrictSelectionModalProps> = ({
                       </h3>
                     </div>
                   </>
-                );
+                ) : null;
               })()}
             </div>
           )}
@@ -139,6 +137,11 @@ const DistrictSelectionModal: React.FC<DistrictSelectionModalProps> = ({
       </motion.div>
     </div>
   );
+};
+
+DistrictSelectionModal.propTypes = {
+  username: PropTypes.string.isRequired,
+  onComplete: PropTypes.func.isRequired,
 };
 
 export default DistrictSelectionModal;
