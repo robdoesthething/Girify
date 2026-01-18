@@ -37,7 +37,10 @@ interface OperationResult {
 // Simple in-memory cache
 let shopItemsCache: GroupedShopItems | null = null;
 let cacheTimestamp = 0;
-const CACHE_DURATION_MS = 5 * 60 * 1000; // 5 minutes
+const CACHE_DURATION_MINUTES = 5;
+const SECONDS_PER_MINUTE = 60;
+const MS_PER_SECOND = 1000;
+const CACHE_DURATION_MS = CACHE_DURATION_MINUTES * SECONDS_PER_MINUTE * MS_PER_SECOND;
 
 /**
  * Fetch all shop items from Firestore, merged with local cosmetics.json
@@ -143,6 +146,9 @@ export const createShopItem = async (itemData: ShopItem): Promise<OperationResul
 /**
  * Delete a shop item
  */
+/**
+ * Delete a shop item
+ */
 export const deleteShopItem = async (id: string): Promise<OperationResult> => {
   try {
     await deleteDoc(doc(db, 'shop_items', id));
@@ -152,4 +158,40 @@ export const deleteShopItem = async (id: string): Promise<OperationResult> => {
     console.error('Error deleting shop item:', error);
     return { success: false, error: (error as Error).message };
   }
+};
+
+/**
+ * Sync local cosmetics.json to Firestore
+ * Overwrites Firestore data with local definitions for shared IDs
+ */
+export const syncWithLocal = async (): Promise<{ updated: number; errors: number }> => {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const rawCosmetics = cosmetics as Record<string, any[]>;
+  const localItems: ShopItem[] = [
+    ...(rawCosmetics.avatarFrames || []).map(i => ({ ...i, type: 'frame' as const })),
+    ...(rawCosmetics.titles || []).map(i => ({ ...i, type: 'title' as const })),
+    ...(rawCosmetics.special || []).map(i => ({ ...i, type: 'special' as const })),
+    ...(rawCosmetics.avatars || []).map(i => ({ ...i, type: 'avatar' as const })),
+  ] as ShopItem[];
+
+  let updated = 0;
+  let errors = 0;
+
+  for (const item of localItems) {
+    try {
+      if (!item.id) {
+        continue;
+      }
+      // We merge with existing to preserve any extra fields Firestore might have (like sales stats if we had them)
+      // BUT we explicitly overwrite the definition fields from local
+      await setDoc(doc(db, 'shop_items', item.id), item, { merge: true });
+      updated++;
+    } catch (e) {
+      console.error(`Failed to sync item ${item.id}`, e);
+      errors++;
+    }
+  }
+
+  shopItemsCache = null;
+  return { updated, errors };
 };

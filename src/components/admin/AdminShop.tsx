@@ -1,13 +1,14 @@
-import { AnimatePresence, motion } from 'framer-motion';
+import { AnimatePresence } from 'framer-motion';
 import React, { useState } from 'react';
 import { useTheme } from '../../context/ThemeContext';
 import {
   createShopItem,
   deleteShopItem,
   ShopItem,
-  ShopItemType,
+  syncWithLocal,
   updateShopItem,
 } from '../../utils/shop';
+import AdminShopForm from './AdminShopForm';
 
 interface AdminShopProps {
   items: { all: ShopItem[] };
@@ -74,15 +75,43 @@ const AdminShop: React.FC<AdminShopProps> = ({ items, onRefresh, notify, confirm
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <h2 className="text-3xl font-black">Shop Management</h2>
-        <button
-          onClick={() => {
-            setEditingItem({ type: 'avatar', cost: 100 });
-            setIsCreating(true);
-          }}
-          className="px-4 py-2 bg-sky-500 hover:bg-sky-600 text-white rounded-lg font-bold shadow-lg shadow-sky-500/20 transition-all"
-        >
-          + Add Item
-        </button>
+        <div className="flex gap-3">
+          <button
+            onClick={async () => {
+              if (
+                await confirm(
+                  'This will overwrite Firestore shop items with local cosmetics.json data. Continue?',
+                  'Sync Shop Items',
+                  true
+                )
+              ) {
+                try {
+                  notify('Syncing...', 'success');
+                  const { updated, errors } = await syncWithLocal();
+                  notify(
+                    `Synced ${updated} items. Errors: ${errors}`,
+                    errors > 0 ? 'error' : 'success'
+                  );
+                  onRefresh();
+                } catch {
+                  notify('Sync failed', 'error');
+                }
+              }
+            }}
+            className="px-4 py-2 bg-indigo-500 hover:bg-indigo-600 text-white rounded-lg font-bold shadow-lg shadow-indigo-500/20 transition-all"
+          >
+            ↻ Sync Local
+          </button>
+          <button
+            onClick={() => {
+              setEditingItem({ type: 'avatar', cost: 100 });
+              setIsCreating(true);
+            }}
+            className="px-4 py-2 bg-sky-500 hover:bg-sky-600 text-white rounded-lg font-bold shadow-lg shadow-sky-500/20 transition-all"
+          >
+            + Add Item
+          </button>
+        </div>
       </div>
 
       <div
@@ -154,150 +183,14 @@ const AdminShop: React.FC<AdminShopProps> = ({ items, onRefresh, notify, confirm
 
       <AnimatePresence>
         {editingItem && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
-            <motion.div
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.9 }}
-              className={`w-full max-w-lg p-6 rounded-3xl shadow-2xl ${theme === 'dark' ? 'bg-slate-800' : 'bg-white'}`}
-            >
-              <h3 className="text-2xl font-black mb-6">{isCreating ? 'New Item' : 'Edit Item'}</h3>
-              <form onSubmit={handleSave} className="space-y-4">
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label
-                      htmlFor="shop-item-id"
-                      className="text-xs uppercase font-bold opacity-50 block mb-1"
-                    >
-                      ID (Unique)
-                    </label>
-                    <input
-                      id="shop-item-id"
-                      value={editingItem.id || ''}
-                      onChange={e => setEditingItem({ ...editingItem, id: e.target.value })}
-                      disabled={!isCreating}
-                      className="w-full p-3 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 font-mono outline-none focus:ring-2 focus:ring-sky-500 transition-all"
-                      placeholder="e.g. avatar_fox"
-                    />
-                  </div>
-                  <div>
-                    <label
-                      htmlFor="shop-item-type"
-                      className="text-xs uppercase font-bold opacity-50 block mb-1"
-                    >
-                      Type
-                    </label>
-                    <select
-                      id="shop-item-type"
-                      value={editingItem.type || 'avatar'}
-                      onChange={e =>
-                        setEditingItem({ ...editingItem, type: e.target.value as ShopItemType })
-                      }
-                      className="w-full p-3 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 outline-none focus:ring-2 focus:ring-sky-500 transition-all"
-                    >
-                      <option value="avatar">Avatar</option>
-                      <option value="frame">Frame</option>
-                      <option value="title">Title</option>
-                      <option value="special">Special</option>
-                    </select>
-                  </div>
-                </div>
-
-                <div>
-                  <label
-                    htmlFor="shop-item-name"
-                    className="text-xs uppercase font-bold opacity-50 block mb-1"
-                  >
-                    Name
-                  </label>
-                  <input
-                    id="shop-item-name"
-                    value={editingItem.name || ''}
-                    onChange={e => setEditingItem({ ...editingItem, name: e.target.value })}
-                    className="w-full p-3 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 outline-none focus:ring-2 focus:ring-sky-500 transition-all"
-                    placeholder="Display Name"
-                  />
-                </div>
-
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="text-xs uppercase font-bold opacity-50 block mb-1">
-                      Cost (Giuros)
-                    </label>
-                    <input
-                      id="shop-item-cost"
-                      type="number"
-                      value={editingItem.cost || 0}
-                      onChange={e =>
-                        setEditingItem({ ...editingItem, cost: parseInt(e.target.value, 10) })
-                      }
-                      aria-label="Cost in Giuros"
-                      className="w-full p-3 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 font-mono text-yellow-500 font-bold outline-none focus:ring-2 focus:ring-sky-500 transition-all"
-                    />
-                  </div>
-                  <div>
-                    <label className="text-xs uppercase font-bold opacity-50 block mb-1">
-                      Emoji (Optional)
-                    </label>
-                    <input
-                      id="shop-item-emoji"
-                      value={editingItem.emoji || ''}
-                      onChange={e => setEditingItem({ ...editingItem, emoji: e.target.value })}
-                      aria-label="Emoji Icon"
-                      className="w-full p-3 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-center outline-none focus:ring-2 focus:ring-sky-500 transition-all"
-                      placeholder="🦊"
-                    />
-                  </div>
-                </div>
-
-                <div>
-                  <label
-                    htmlFor="shop-item-image"
-                    className="text-xs uppercase font-bold opacity-50 block mb-1"
-                  >
-                    Image URL (Optional)
-                  </label>
-                  <input
-                    id="shop-item-image"
-                    value={editingItem.image || ''}
-                    onChange={e => setEditingItem({ ...editingItem, image: e.target.value })}
-                    className="w-full p-3 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-xs font-mono outline-none focus:ring-2 focus:ring-sky-500 transition-all"
-                    placeholder="/images/avatars/..."
-                  />
-                </div>
-
-                {editingItem.type === 'frame' && (
-                  <div>
-                    <label className="text-xs uppercase font-bold opacity-50 block mb-1">
-                      CSS Class (for Frames)
-                    </label>
-                    <input
-                      value={editingItem.cssClass || ''}
-                      onChange={e => setEditingItem({ ...editingItem, cssClass: e.target.value })}
-                      className="w-full p-3 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 font-mono text-xs"
-                      placeholder="ring-4 ring-orange-500"
-                    />
-                  </div>
-                )}
-
-                <div className="flex gap-3 pt-4">
-                  <button
-                    type="button"
-                    onClick={() => setEditingItem(null)}
-                    className="flex-1 py-3 font-bold opacity-60 hover:opacity-100"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    type="submit"
-                    className="flex-1 py-3 bg-sky-500 hover:bg-sky-600 text-white rounded-xl font-bold shadow-lg"
-                  >
-                    {isCreating ? 'Create Item' : 'Save Changes'}
-                  </button>
-                </div>
-              </form>
-            </motion.div>
-          </div>
+          <AdminShopForm
+            editingItem={editingItem}
+            isCreating={isCreating}
+            theme={theme}
+            onSave={handleSave}
+            onCancel={() => setEditingItem(null)}
+            onChange={updates => setEditingItem({ ...editingItem, ...updates })}
+          />
         )}
       </AnimatePresence>
     </div>

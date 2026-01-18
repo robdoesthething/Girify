@@ -9,6 +9,7 @@ import {
   getUnlockedAchievements,
 } from '../../../data/achievements';
 import { AVATARS } from '../../../data/avatars';
+import EditProfileModal from './EditProfileModal';
 // import cosmeticsData from '../../../data/cosmetics.json';
 import TopBar from '../../../components/TopBar';
 import { GameHistory, UserProfile } from '../../../types/user';
@@ -75,11 +76,8 @@ interface ProfileHeaderProps {
   profileData: UserProfile;
   isEditing: boolean;
   setIsEditing: (val: boolean) => void;
-  editName: string;
-  setEditName: (val: string) => void;
   joinedDate: string;
   equippedCosmetics: Record<string, string>;
-  onSave: () => void;
   navigate: (path: string) => void;
   theme: string;
   t: (key: string) => string;
@@ -93,11 +91,8 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
   profileData,
   isEditing,
   setIsEditing,
-  editName,
-  setEditName,
   joinedDate,
   equippedCosmetics,
-  onSave,
   navigate,
   theme,
   t,
@@ -161,33 +156,10 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
       <h2 className="text-3xl font-black tracking-tight mb-1">{username.toLowerCase()}</h2>
 
       <div className="flex flex-col items-center gap-1">
-        {isEditing && (
-          <div className="mt-2 w-full max-w-[200px] flex flex-col gap-2">
-            <input
-              type="text"
-              value={editName}
-              onChange={e => setEditName(e.target.value)}
-              placeholder="Your Real Name"
-              className={`w-full px-3 py-2 text-center text-sm rounded-lg border outline-none ${theme === 'dark' ? 'bg-slate-800 border-slate-700 text-white placeholder-slate-600' : 'bg-white border-slate-200 text-slate-900 placeholder-slate-400'}`}
-            />
-            <div className="flex justify-center gap-2">
-              <button
-                onClick={() => setIsEditing(false)}
-                className="flex-1 text-xs px-3 py-2 rounded-lg bg-slate-200 dark:bg-slate-700 font-bold"
-                type="button"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={onSave}
-                className="flex-1 text-xs px-3 py-2 rounded-lg bg-sky-500 text-white font-bold"
-                type="button"
-              >
-                Save
-              </button>
-            </div>
-          </div>
-        )}
+        {/* Modal handled at screen level, just showing name here */}
+        <p className="text-sm font-medium opacity-60 mb-2">
+          {profileData.realName || t('unknownName') || 'Unknown Player'}
+        </p>
       </div>
 
       <p className="text-[10px] font-bold uppercase tracking-widest opacity-40 mt-3 font-mono">
@@ -591,16 +563,10 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ username }) => {
   } = useProfileData(username);
 
   const [isEditing, setIsEditing] = useState(false);
-  const [editName, setEditName] = useState('');
   const [showGiurosInfo, setShowGiurosInfo] = useState(false);
   const [selectedAchievement, setSelectedAchievement] = useState<Achievement | null>(null);
 
-  useEffect(() => {
-    if (profileData) {
-      // eslint-disable-next-line
-      setEditName(profileData.realName || '');
-    }
-  }, [profileData]);
+  // useEffect for initial edit name population removed as logic moved to modal
 
   const uniqueHistory = useMemo(() => {
     const seenDates = new Set();
@@ -620,12 +586,54 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ username }) => {
     }));
   }, [uniqueHistory]);
 
-  const handleSaveProfile = async () => {
-    const data = {
-      realName: editName,
+  // Determine owned items
+  const ownedAvatars = useMemo(() => {
+    // Basic logic: Default avatars + Purchased ones + Unlocked ones
+    // For now, assuming all "purchasedCosmetics" in profileData contains IDs
+    const ownedIds = new Set(profileData?.purchasedCosmetics || []);
+    // Always include free avatars (cost 0)
+    shopAvatars.forEach(a => {
+      if (a.cost === 0) {
+        ownedIds.add(a.id);
+      }
+    });
+    return shopAvatars.filter(a => ownedIds.has(a.id));
+  }, [profileData, shopAvatars]);
+
+  const ownedFrames = useMemo(() => {
+    const ownedIds = new Set(profileData?.purchasedCosmetics || []);
+    // Always include free frames if any (usually none, but future proof)
+    shopFrames.forEach(f => {
+      if (f.cost === 0) {
+        ownedIds.add(f.id);
+      }
+    });
+    return shopFrames.filter(f => ownedIds.has(f.id));
+  }, [profileData, shopFrames]);
+
+  const handleSaveProfile = async (newName: string, newAvatarId: string, newFrameId: string) => {
+    const updates: Partial<UserProfile> = {
+      realName: newName,
+      // Update equippedCosmetics in profile
+      equippedCosmetics: {
+        ...equippedCosmetics,
+        avatarId: newAvatarId,
+        frameId: newFrameId,
+      },
     };
-    await updateUserProfile(username, data);
-    setProfileData((prev: UserProfile | null) => (prev ? { ...prev, ...data } : null));
+
+    // Also update legacy avatarId for backward compat if it's a legacy avatar
+    // (This is best effort, ideally we move away from integer IDs)
+
+    await updateUserProfile(username, updates as any);
+
+    // Update local state
+    setProfileData(prev => (prev ? { ...prev, ...updates } : null));
+
+    // Force update of equipped cosmetics state
+    // In a real app keying by user ID or refetching might be cleaner
+    window.location.reload();
+
     setIsEditing(false);
   };
 
@@ -733,17 +741,28 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ username }) => {
                 profileData={profileData}
                 isEditing={isEditing}
                 setIsEditing={setIsEditing}
-                editName={editName}
-                setEditName={setEditName}
+                // editName and setEditName removed as they are handled in modal
                 joinedDate={joinedDate}
                 equippedCosmetics={equippedCosmetics}
-                onSave={handleSaveProfile}
+                // onSave removed as it's handled in modal
                 navigate={p => navigate(p)}
                 theme={theme}
                 t={t}
                 allAvatars={shopAvatars}
                 allFrames={shopFrames}
                 allTitles={shopTitles}
+              />
+
+              <EditProfileModal
+                isOpen={isEditing}
+                onClose={() => setIsEditing(false)}
+                onSave={handleSaveProfile}
+                currentName={profileData.realName || ''}
+                currentAvatarId={equippedCosmetics.avatarId || ''}
+                currentFrameId={equippedCosmetics.frameId || ''}
+                ownedAvatars={ownedAvatars}
+                ownedFrames={ownedFrames}
+                allAvatars={shopAvatars}
               />
 
               <StatsGrid

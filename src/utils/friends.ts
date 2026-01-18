@@ -45,6 +45,11 @@ export interface Friend {
   badges?: string[];
   todayGames?: number;
   avatarId?: number;
+  equippedCosmetics?: {
+    avatarId?: string;
+    frameId?: string;
+    titleId?: string;
+  };
 }
 
 export interface FeedActivity {
@@ -304,11 +309,13 @@ export const getFriends = async (username: string): Promise<Friend[]> => {
         let badges: string[] = [];
         let todayGames = 0;
         let avatarId: number | undefined;
+        let equippedCosmetics: Friend['equippedCosmetics'] = {};
 
         if (userSnap.exists()) {
           const profileData = userSnap.data() as DocumentData;
           badges = (profileData.equippedBadges as string[]) || [];
           avatarId = profileData.avatarId as number | undefined;
+          equippedCosmetics = (profileData.equippedCosmetics as Friend['equippedCosmetics']) || {};
         }
 
         const scoresQuery = query(
@@ -325,6 +332,7 @@ export const getFriends = async (username: string): Promise<Friend[]> => {
           badges,
           todayGames,
           avatarId,
+          equippedCosmetics,
         });
       } catch (profileError) {
         console.warn(`Could not fetch profile for ${friendUsername}:`, profileError);
@@ -400,22 +408,31 @@ export const getFriendFeed = async (friendsList: Friend[]): Promise<FeedActivity
 
   for (const chunk of chunks) {
     try {
-      for (const username of chunk) {
+      // Fetch chunk in parallel or just simplify the loop structure
+      const promises = chunk.map(async username => {
         const userRef = doc(db, USERS_COLLECTION, username);
         const userDoc = await getDoc(userRef);
         if (userDoc.exists()) {
           const data = userDoc.data() as DocumentData;
           if (data.migratedFrom && data.updatedAt) {
-            allActivities.push({
+            return {
               id: `namechange_${username}`,
               type: 'username_changed',
               username: username,
               oldUsername: data.migratedFrom as string,
               timestamp: data.updatedAt as Timestamp,
-            });
+            } as FeedActivity;
           }
         }
-      }
+        return null;
+      });
+
+      const results = await Promise.all(promises);
+      results.forEach(res => {
+        if (res) {
+          allActivities.push(res);
+        }
+      });
     } catch (e) {
       console.warn('Error checking username changes:', e);
     }
