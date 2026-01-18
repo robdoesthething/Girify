@@ -13,6 +13,7 @@ import EditProfileModal from './EditProfileModal';
 // import cosmeticsData from '../../../data/cosmetics.json';
 import TopBar from '../../../components/TopBar';
 import { GameHistory, UserProfile } from '../../../types/user';
+import { formatUsername } from '../../../utils/format';
 import { getFriendCount } from '../../../utils/friends';
 import { getEquippedCosmetics, getGiuros } from '../../../utils/giuros';
 import { getShopItems, ShopItem } from '../../../utils/shop';
@@ -121,7 +122,7 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
               navigate('/shop');
             }
           }}
-          className={`w-28 h-28 rounded-full bg-gradient-to-br from-sky-400 to-indigo-600 flex items-center justify-center text-5xl shadow-2xl ${frameClass} select-none outline-none focus:ring-sky-500 cursor-pointer hover:scale-105 transition-transform overflow-hidden`}
+          className={`w-28 h-28 rounded-full ${cosmeticAvatar ? 'bg-transparent' : 'bg-gradient-to-br from-sky-400 to-indigo-600'} flex items-center justify-center text-5xl shadow-2xl ${frameClass} select-none outline-none focus:ring-sky-500 cursor-pointer hover:scale-105 transition-transform overflow-hidden`}
         >
           {cosmeticAvatar ? (
             <img
@@ -153,7 +154,7 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
         )}
       </div>
 
-      <h2 className="text-3xl font-black tracking-tight mb-1">{username.toLowerCase()}</h2>
+      <h2 className="text-3xl font-black tracking-tight mb-1">{formatUsername(username)}</h2>
 
       <div className="flex flex-col items-center gap-1">
         {/* Modal handled at screen level, just showing name here */}

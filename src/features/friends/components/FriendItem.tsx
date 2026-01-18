@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getAvatar } from '../../../data/avatars';
+import { formatUsername } from '../../../utils/format';
 
 export interface Friend {
   username: string;
@@ -41,7 +42,7 @@ const FriendItem: React.FC<FriendItemProps> = ({ friend, onRemove, onBlock }) =>
           )}
         </div>
         <div>
-          <h4 className="font-bold text-sm leading-tight">{friend.username.toLowerCase()}</h4>
+          <h4 className="font-bold text-sm leading-tight">{formatUsername(friend.username)}</h4>
           {friend.badges && friend.badges.length > 0 && (
             <span className="text-xs mr-2" title="Equipped Badge">
               {typeof friend.badges[0] === 'string' ? friend.badges[0] : '🏅'}

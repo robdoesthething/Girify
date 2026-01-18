@@ -2,6 +2,7 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useTheme } from '../context/ThemeContext';
+import { DISTRICTS } from '../data/districts';
 import SeoHead from './SeoHead';
 
 const NEWS_HEADLINES = [
@@ -150,6 +151,60 @@ const LandingPage: React.FC<LandingPageProps> = ({ onLogin, theme }) => {
                 </p>
               </motion.div>
             ))}
+          </div>
+
+          {/* District Showcase - MEET THE NEIGHBORHOODS */}
+          <div className="w-full mb-16">
+            <div className="flex items-center gap-4 mb-8">
+              <div className="h-px bg-slate-200 dark:bg-slate-800 flex-1" />
+              <h2 className="text-2xl font-black uppercase tracking-widest text-slate-400">
+                Choose Your Allegiance
+              </h2>
+              <div className="h-px bg-slate-200 dark:bg-slate-800 flex-1" />
+            </div>
+
+            <div className="relative group/scroller">
+              {/* Fade edges */}
+              <div className="absolute left-0 top-0 bottom-0 w-12 bg-gradient-to-r from-slate-50 dark:from-slate-950 to-transparent z-10 pointer-events-none" />
+              <div className="absolute right-0 top-0 bottom-0 w-12 bg-gradient-to-l from-slate-50 dark:from-slate-950 to-transparent z-10 pointer-events-none" />
+
+              <div className="flex gap-4 overflow-x-auto pb-8 pt-4 px-4 snap-x scrollbar-hide -mx-4">
+                {DISTRICTS.map((district, i) => (
+                  <motion.div
+                    key={district.id}
+                    initial={{ opacity: 0, x: 20 }}
+                    whileInView={{ opacity: 1, x: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ delay: i * 0.05 }}
+                    className="flex-shrink-0 snap-center"
+                  >
+                    <div className="w-48 p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-lg flex flex-col items-center gap-3 group hover:scale-105 transition-transform duration-300">
+                      <div
+                        className={`w-24 h-24 rounded-full bg-gradient-to-br ${district.color} p-1 shadow-inner relative overflow-hidden`}
+                      >
+                        <div className="w-full h-full bg-slate-900 rounded-full flex items-center justify-center">
+                          <img
+                            src={district.logo}
+                            alt={district.teamName}
+                            className="w-16 h-16 object-contain drop-shadow-lg"
+                            style={{ imageRendering: 'pixelated' }}
+                          />
+                        </div>
+                      </div>
+
+                      <div className="text-center">
+                        <h3 className="font-bold text-sm text-slate-900 dark:text-white leading-tight mb-1">
+                          {district.teamName}
+                        </h3>
+                        <p className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">
+                          {district.name}
+                        </p>
+                      </div>
+                    </div>
+                  </motion.div>
+                ))}
+              </div>
+            </div>
           </div>
 
           {/* News section with Mayor Jaume */}

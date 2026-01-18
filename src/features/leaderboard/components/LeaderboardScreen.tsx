@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import TopBar from '../../../components/TopBar';
 import { useTheme } from '../../../context/ThemeContext';
 import { DISTRICTS } from '../../../data/districts';
+import { formatUsername } from '../../../utils/format';
 import { getLeaderboard, getTeamLeaderboard, TeamScoreEntry } from '../../../utils/leaderboard';
 
 interface ScoreEntry {
@@ -155,7 +156,7 @@ const LeaderboardScreen: React.FC<LeaderboardScreenProps> = ({ currentUser }) =>
                 <button
                   key={tab.id}
                   onClick={() => setPeriod(tab.id)}
-                  className={`px-4 py-2 text-xs font-bold rounded-lg transition-all uppercase tracking-wider
+                  className={`px-4 py-2 text-xs font-bold rounded-lg transition-all tracking-wider
                          ${period === tab.id ? 'bg-sky-500 text-white shadow-md' : 'text-slate-500 hover:text-slate-800 dark:hover:text-slate-300'}
                       `}
                   type="button"
@@ -324,7 +325,7 @@ const LeaderboardScreen: React.FC<LeaderboardScreenProps> = ({ currentUser }) =>
                         </div>
                         <div>
                           <div className="font-bold text-sm flex items-center gap-1 font-inter">
-                            {s.username}
+                            {formatUsername(s.username)}
                             {isMe && (
                               <span className="text-[10px] bg-sky-500 text-white px-1.5 rounded-full font-inter">
                                 YOU
