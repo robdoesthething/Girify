@@ -43,6 +43,7 @@ const SummaryScreen: React.FC<SummaryScreenProps> = ({
   const [view, setView] = useState<'curiosity' | 'actions'>('curiosity');
   const [shareStatus, setShareStatus] = useState<string | null>(null);
 
+  // Max score is 100 per question (User request: max 1000 total)
   const maxPossibleScore = total * 100;
   const curiosity = useMemo<Curiosity>(
     () => getCuriosityByStreets(quizStreets) as Curiosity,
