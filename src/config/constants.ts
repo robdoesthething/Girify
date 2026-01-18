@@ -34,13 +34,14 @@ export const UI = {
 export const GAME = {
   QUESTIONS_PER_GAME: 10,
   MAX_HINTS: 3,
-  TIME_BONUS_THRESHOLD: 5, // seconds
+  TIME_BONUS_THRESHOLD: 3, // seconds for max bonus
+  TIME_DECAY_RATE: 20, // seconds after which bonus reaches 0
 
   // Scoring
   POINTS: {
     CORRECT_BASE: 100,
-    TIME_BONUS_MAX: 0, // Disabled per user request
-    HINT_PENALTY: 20,
+    TIME_BONUS_MAX: 900, // Max bonus for fast answers (total max: 1000)
+    HINT_PENALTY: 50,
     STREAK_MULTIPLIER: 1.1,
   },
 

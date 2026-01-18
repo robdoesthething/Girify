@@ -1,7 +1,7 @@
 import { FEEDBACK, GAME, REWARDS } from './constants';
 
 export const calculateScore = (
-  _timeElapsed: number,
+  timeElapsed: number,
   isCorrect: boolean,
   hintsUsed: number
 ): number => {
@@ -11,13 +11,25 @@ export const calculateScore = (
 
   let score = GAME.POINTS.CORRECT_BASE;
 
-  // Time bonus removed per user request (max score fixed at 1000)
-  // if (timeElapsed < GAME.TIME_BONUS_THRESHOLD) { ... }
+  // Time bonus: faster = more points (decays linearly)
+  // Under TIME_BONUS_THRESHOLD: full bonus (900 pts)
+  // Over TIME_DECAY_RATE seconds: no bonus
+  if (timeElapsed <= GAME.TIME_BONUS_THRESHOLD) {
+    score += GAME.POINTS.TIME_BONUS_MAX;
+  } else if (timeElapsed < GAME.TIME_DECAY_RATE) {
+    const bonus = Math.round(
+      GAME.POINTS.TIME_BONUS_MAX *
+        (1 -
+          (timeElapsed - GAME.TIME_BONUS_THRESHOLD) /
+            (GAME.TIME_DECAY_RATE - GAME.TIME_BONUS_THRESHOLD))
+    );
+    score += Math.max(0, bonus);
+  }
 
   // Hint penalty
   score -= hintsUsed * GAME.POINTS.HINT_PENALTY;
 
-  return Math.max(0, score);
+  return Math.max(0, Math.min(1000, score));
 };
 
 export const calculateStreakBonus = (streakDays: number): number => {

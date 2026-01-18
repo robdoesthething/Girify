@@ -350,3 +350,82 @@ const aggregateCumulativeScores = (scores: ScoreEntry[]): ScoreEntry[] => {
 
   return aggregated;
 };
+
+export interface TeamScoreEntry {
+  id: string;
+  teamName: string;
+  teamId: string;
+  score: number;
+  memberCount: number;
+  avgScore: number;
+}
+
+/**
+ * Get team leaderboard with time period filtering
+ * Aggregates individual scores by team for the given period
+ */
+export const getTeamLeaderboard = async (
+  period: LeaderboardPeriod = 'all'
+): Promise<TeamScoreEntry[]> => {
+  try {
+    // Fetch user profiles to get team assignments
+    const usersRef = collection(db, 'users');
+    const usersSnap = await getDocs(usersRef);
+    const userTeamMap: Record<string, { team: string; district: string }> = {};
+
+    usersSnap.forEach(docSnap => {
+      const data = docSnap.data() as DocumentData;
+      const username =
+        (data.username as string)?.toLowerCase().replace('@', '') || docSnap.id.toLowerCase();
+      if (data.team && data.district) {
+        userTeamMap[username] = {
+          team: data.team as string,
+          district: data.district as string,
+        };
+      }
+    });
+
+    // Fetch individual scores for the period
+    const individualScores = await getLeaderboard(period);
+
+    // Aggregate by team
+    const teamScores: Record<string, { score: number; members: Set<string> }> = {};
+
+    individualScores.forEach(score => {
+      const username = score.username.toLowerCase().replace('@', '');
+      const userTeam = userTeamMap[username];
+
+      if (userTeam) {
+        if (!teamScores[userTeam.team]) {
+          teamScores[userTeam.team] = { score: 0, members: new Set() };
+        }
+        teamScores[userTeam.team].score += score.score;
+        teamScores[userTeam.team].members.add(username);
+      }
+    });
+
+    // Convert to array and calculate averages
+    const result: TeamScoreEntry[] = Object.entries(teamScores).map(([teamName, data]) => {
+      // Find district ID from team name
+      const { DISTRICTS } = require('../data/districts');
+      const district = DISTRICTS.find((d: { teamName: string }) => d.teamName === teamName);
+
+      return {
+        id: district?.id || teamName.toLowerCase().replace(/\s+/g, '_'),
+        teamName,
+        teamId: district?.id || '',
+        score: data.score,
+        memberCount: data.members.size,
+        avgScore: data.members.size > 0 ? Math.round(data.score / data.members.size) : 0,
+      };
+    });
+
+    // Sort by total score descending
+    result.sort((a, b) => b.score - a.score);
+
+    return result;
+  } catch (e) {
+    console.error('Error getting team leaderboard:', e);
+    return [];
+  }
+};

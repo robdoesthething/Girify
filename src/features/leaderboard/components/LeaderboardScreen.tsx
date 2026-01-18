@@ -4,8 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import TopBar from '../../../components/TopBar';
 import { useTheme } from '../../../context/ThemeContext';
 import { DISTRICTS } from '../../../data/districts';
-import { getLeaderboard } from '../../../utils/leaderboard';
-import { getDistrictRankings } from '../../../utils/social';
+import { getLeaderboard, getTeamLeaderboard, TeamScoreEntry } from '../../../utils/leaderboard';
 
 interface ScoreEntry {
   id?: string;
@@ -18,46 +17,31 @@ interface LeaderboardScreenProps {
   currentUser?: string;
 }
 
-const ORDINAL_MOD_100 = 100;
-const ORDINAL_MOD_10 = 10;
-const ORDINAL_OFFSET = 20;
-
-const getOrdinal = (n: number) => {
-  const s = ['th', 'st', 'nd', 'rd'];
-  const v = n % ORDINAL_MOD_100;
-  return s[(v - ORDINAL_OFFSET) % ORDINAL_MOD_10] || s[v] || s[0];
-};
-
 const LeaderboardScreen: React.FC<LeaderboardScreenProps> = ({ currentUser }) => {
   const { theme, t } = useTheme();
   const navigate = useNavigate();
   const [scores, setScores] = useState<ScoreEntry[]>([]);
+  const [teamScores, setTeamScores] = useState<TeamScoreEntry[]>([]);
   const [loading, setLoading] = useState(true);
-  const [period, setPeriod] = useState<'all' | 'monthly' | 'weekly' | 'daily' | 'districts'>('all');
+  const [period, setPeriod] = useState<'all' | 'monthly' | 'weekly' | 'daily'>('all');
+  const [viewMode, setViewMode] = useState<'individual' | 'teams'>('individual');
   const [error, setError] = useState<string | null>(null);
 
   const loadScores = useCallback(async () => {
     setLoading(true);
     setError(null);
     setScores([]);
+    setTeamScores([]);
 
     try {
       const timeoutPromise = new Promise((_, reject) =>
         setTimeout(() => reject(new Error('Timeout: Server response took too long')), 5000)
       );
-      if (period === 'districts') {
-        const districtsData = await getDistrictRankings();
-        // Map to ScoreEntry format
-        const mapped = districtsData.map((d: { id: string; score: number }) => {
-          const distName = DISTRICTS.find(di => di.id === d.id)?.name || d.id;
-          return {
-            id: d.id,
-            username: distName, // Display district name as username
-            score: d.score,
-            timestamp: Date.now(),
-          };
-        });
-        setScores(mapped);
+
+      if (viewMode === 'teams') {
+        const dataPromise = getTeamLeaderboard(period);
+        const data = (await Promise.race([dataPromise, timeoutPromise])) as TeamScoreEntry[];
+        setTeamScores(data || []);
       } else {
         const dataPromise = getLeaderboard(period);
         const data = (await Promise.race([dataPromise, timeoutPromise])) as ScoreEntry[] | null;
@@ -91,18 +75,17 @@ const LeaderboardScreen: React.FC<LeaderboardScreenProps> = ({ currentUser }) =>
     } finally {
       setLoading(false);
     }
-  }, [period]);
+  }, [period, viewMode]);
 
   useEffect(() => {
     loadScores();
   }, [loadScores]);
 
-  const TABS: { id: 'all' | 'monthly' | 'weekly' | 'daily' | 'districts'; label: string }[] = [
+  const TABS: { id: 'all' | 'monthly' | 'weekly' | 'daily'; label: string }[] = [
     { id: 'all', label: t('allTime') },
     { id: 'monthly', label: t('monthly') },
     { id: 'weekly', label: t('weekly') },
     { id: 'daily', label: t('daily') },
-    { id: 'districts', label: t('clansTitle') || 'Districts' },
   ];
 
   return (
@@ -114,7 +97,7 @@ const LeaderboardScreen: React.FC<LeaderboardScreenProps> = ({ currentUser }) =>
         onTriggerLogin={mode => navigate(`/?auth=${mode}`)}
       />
 
-      <div className="flex-1 w-full px-4 py-8 pt-20 overflow-x-hidden">
+      <div className="flex-1 w-full px-4 py-8 pt-20 overflow-x-hidden overflow-y-auto">
         <div className="max-w-2xl mx-auto w-full">
           <div className="flex items-center justify-between mb-8 relative">
             <button
@@ -139,6 +122,31 @@ const LeaderboardScreen: React.FC<LeaderboardScreenProps> = ({ currentUser }) =>
             <div className="w-10" />
           </div>
 
+          {/* Individual/Teams Toggle */}
+          <div className="flex justify-center mb-4">
+            <div
+              className={`flex p-1 rounded-xl ${theme === 'dark' ? 'bg-slate-800' : 'bg-slate-200'}`}
+            >
+              <button
+                onClick={() => setViewMode('individual')}
+                className={`px-4 py-2 text-xs font-bold rounded-lg transition-all
+                  ${viewMode === 'individual' ? 'bg-emerald-500 text-white shadow-md' : 'text-slate-500 hover:text-slate-800 dark:hover:text-slate-300'}`}
+                type="button"
+              >
+                👤 {t('individual') || 'Individual'}
+              </button>
+              <button
+                onClick={() => setViewMode('teams')}
+                className={`px-4 py-2 text-xs font-bold rounded-lg transition-all
+                  ${viewMode === 'teams' ? 'bg-emerald-500 text-white shadow-md' : 'text-slate-500 hover:text-slate-800 dark:hover:text-slate-300'}`}
+                type="button"
+              >
+                🏆 {t('teams') || 'Teams'}
+              </button>
+            </div>
+          </div>
+
+          {/* Period Tabs */}
           <div className="flex justify-center mb-6">
             <div
               className={`flex p-1 rounded-xl ${theme === 'dark' ? 'bg-slate-800' : 'bg-slate-200'}`}
@@ -178,7 +186,72 @@ const LeaderboardScreen: React.FC<LeaderboardScreenProps> = ({ currentUser }) =>
                   Try Again
                 </button>
               </div>
-            ) : scores.length === 0 ? (
+            ) : viewMode === 'teams' ? (
+              // Teams View
+              teamScores.length === 0 ? (
+                <div className="flex flex-col items-center justify-center py-20 opacity-40">
+                  <span className="text-4xl mb-4">📭</span>
+                  <p className="font-bold font-inter">{t('noRecords')}</p>
+                </div>
+              ) : (
+                <div className="space-y-2 pb-10">
+                  {teamScores.map((team, index) => {
+                    const district = DISTRICTS.find(d => d.teamName === team.teamName);
+                    return (
+                      <motion.div
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: index * 0.05 }}
+                        key={team.id}
+                        className={`flex items-center justify-between p-4 rounded-2xl border transition-all
+                          ${theme === 'dark' ? 'bg-slate-800 border-slate-700' : 'bg-white border-slate-200 shadow-sm'}
+                        `}
+                      >
+                        <div className="flex items-center gap-4">
+                          <div
+                            className={`w-10 h-10 flex items-center justify-center rounded-full font-black text-sm relative overflow-hidden
+                              ${index === 0 ? 'bg-yellow-400' : index === 1 ? 'bg-slate-300' : index === 2 ? 'bg-amber-600' : 'bg-slate-100 dark:bg-slate-700'}
+                            `}
+                          >
+                            {district?.logo ? (
+                              <img
+                                src={district.logo}
+                                alt={team.teamName}
+                                className="w-full h-full object-cover"
+                              />
+                            ) : (
+                              index + 1
+                            )}
+                          </div>
+                          <div>
+                            <div className="font-bold text-sm flex items-center gap-2 font-inter">
+                              {team.teamName}
+                            </div>
+                            <div className="text-[10px] opacity-50 font-mono flex items-center gap-2">
+                              <span>
+                                {team.memberCount} {team.memberCount === 1 ? 'player' : 'players'}
+                              </span>
+                              <span>•</span>
+                              <span>avg {team.avgScore.toLocaleString()} pts</span>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="text-right">
+                          <div className="font-black text-lg text-emerald-500 font-inter">
+                            {team.score.toLocaleString()}
+                          </div>
+                          <div className="text-[9px] font-bold opacity-40 uppercase font-inter">
+                            Total Points
+                          </div>
+                        </div>
+                      </motion.div>
+                    );
+                  })}
+                </div>
+              )
+            ) : // Individual View
+            scores.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-20 opacity-40">
                 <span className="text-4xl mb-4">📭</span>
                 <p className="font-bold font-inter">{t('noRecords')}</p>
@@ -204,9 +277,7 @@ const LeaderboardScreen: React.FC<LeaderboardScreenProps> = ({ currentUser }) =>
                     dateStr = '--';
                   }
 
-                  const isDistrict = period === 'districts';
                   const isMe =
-                    !isDistrict &&
                     currentUser &&
                     s.username?.toLowerCase().replace(/^@/, '') ===
                       currentUser.toLowerCase().replace(/^@/, '');
@@ -218,9 +289,6 @@ const LeaderboardScreen: React.FC<LeaderboardScreenProps> = ({ currentUser }) =>
                       transition={{ delay: index * 0.05 }}
                       key={s.id || index}
                       onClick={() => {
-                        if (isDistrict) {
-                          return;
-                        }
                         const cleanClicked = s.username?.replace(/^@/, '') || '';
                         const myClean = currentUser?.replace(/^@/, '') || '';
                         if (cleanClicked.toLowerCase() === myClean.toLowerCase()) {
@@ -229,8 +297,8 @@ const LeaderboardScreen: React.FC<LeaderboardScreenProps> = ({ currentUser }) =>
                           navigate(`/user/${encodeURIComponent(s.username)}`);
                         }
                       }}
-                      role={isDistrict ? 'listitem' : 'button'}
-                      tabIndex={isDistrict ? -1 : 0}
+                      role="button"
+                      tabIndex={0}
                       onKeyDown={e => {
                         if (e.key === 'Enter' || e.key === ' ') {
                           const cleanClicked = s.username?.replace(/^@/, '') || '';
@@ -243,24 +311,16 @@ const LeaderboardScreen: React.FC<LeaderboardScreenProps> = ({ currentUser }) =>
                         }
                       }}
                       className={`flex items-center justify-between p-4 rounded-2xl border cursor-pointer transition-all hover:scale-[1.02]
-                        ${isMe ? 'border-sky-500 bg-sky-500/10 shadow-lg shadow-sky-500/10' : theme === 'dark' ? 'bg-slate-800 border-slate-700 hover:border-slate-600' : 'bg-white border-slate-200 hover:border-sky-200 shadow-sm'}
-                      `}
+                          ${isMe ? 'border-sky-500 bg-sky-500/10 shadow-lg shadow-sky-500/10' : theme === 'dark' ? 'bg-slate-800 border-slate-700 hover:border-slate-600' : 'bg-white border-slate-200 hover:border-sky-200 shadow-sm'}
+                        `}
                     >
                       <div className="flex items-center gap-4">
                         <div
                           className={`w-8 h-8 flex items-center justify-center rounded-full font-black text-sm relative overflow-hidden
-                          ${index === 0 ? 'bg-yellow-400 text-yellow-900' : index === 1 ? 'bg-slate-300 text-slate-900' : index === 2 ? 'bg-amber-600 text-white' : 'bg-slate-100 dark:bg-slate-700 opacity-50'}
-                        `}
+                            ${index === 0 ? 'bg-yellow-400 text-yellow-900' : index === 1 ? 'bg-slate-300 text-slate-900' : index === 2 ? 'bg-amber-600 text-white' : 'bg-slate-100 dark:bg-slate-700 opacity-50'}
+                          `}
                         >
-                          {isDistrict
-                            ? DISTRICTS.find(d => d.teamName === s.username)?.logo && (
-                                <img
-                                  src={DISTRICTS.find(d => d.teamName === s.username)?.logo}
-                                  alt="logo"
-                                  className="w-full h-full object-cover"
-                                />
-                              )
-                            : index + 1}
+                          {index + 1}
                         </div>
                         <div>
                           <div className="font-bold text-sm flex items-center gap-1 font-inter">
@@ -270,15 +330,8 @@ const LeaderboardScreen: React.FC<LeaderboardScreenProps> = ({ currentUser }) =>
                                 YOU
                               </span>
                             )}
-                            {isDistrict && (
-                              <span className="text-[10px] opacity-50 font-normal ml-1">
-                                {DISTRICTS.find(d => d.teamName === s.username)?.name}
-                              </span>
-                            )}
                           </div>
-                          <div className="text-[10px] opacity-50 font-mono">
-                            {isDistrict ? index + 1 + getOrdinal(index + 1) : dateStr}
-                          </div>
+                          <div className="text-[10px] opacity-50 font-mono">{dateStr}</div>
                         </div>
                       </div>
 

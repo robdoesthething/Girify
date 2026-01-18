@@ -9,22 +9,25 @@ describe('Scoring Logic (gameConfig)', () => {
     expect(score).toBe(0);
   });
 
-  it('awards standard points regardless of time', () => {
-    // timeElapsed = 0 should give Max time bonus
+  it('awards maximum points for fast answers', () => {
+    // timeElapsed <= TIME_BONUS_THRESHOLD (3s) should give full bonus
     const score = calculateScore(0, true, 0);
-    // Base only (time bonus removed)
-    const expected = GAME.POINTS.CORRECT_BASE;
+    // Base + max time bonus = 100 + 900 = 1000
+    const expected = GAME.POINTS.CORRECT_BASE + GAME.POINTS.TIME_BONUS_MAX;
     expect(score).toBe(expected);
+    expect(score).toBe(1000);
   });
 
-  it('does not reduce score based on time', () => {
-    const fastScore = calculateScore(1, true, 0);
-    const slowScore = calculateScore(5, true, 0);
-    expect(fastScore).toBe(slowScore);
+  it('reduces score based on time (linear decay)', () => {
+    const fastScore = calculateScore(1, true, 0); // < 3s = max
+    const slowScore = calculateScore(10, true, 0); // 10s = partial bonus
+    expect(fastScore).toBe(1000);
+    expect(slowScore).toBeLessThan(fastScore);
+    expect(slowScore).toBeGreaterThan(GAME.POINTS.CORRECT_BASE);
   });
 
-  it('keeps base score even if elapsed time exceeds threshold', () => {
-    const score = calculateScore(GAME.TIME_BONUS_THRESHOLD + 1, true, 0);
+  it('gives base score only after TIME_DECAY_RATE (20s)', () => {
+    const score = calculateScore(GAME.TIME_DECAY_RATE, true, 0);
     expect(score).toBe(GAME.POINTS.CORRECT_BASE);
   });
 

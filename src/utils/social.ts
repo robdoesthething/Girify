@@ -230,8 +230,13 @@ export const ensureUserProfile = async (
   if (data.bestScore === undefined) {
     updates.bestScore = 0;
   }
+  // Update district if provided and different from current
+  if (additionalData.district && data.district !== additionalData.district) {
+    updates.district = additionalData.district;
+    updates.team = DISTRICTS.find(d => d.id === additionalData.district)?.teamName;
+  }
   // Backfill team if missing and district exists
-  if (!data.team && data.district) {
+  if (!data.team && data.district && !updates.team) {
     updates.team = DISTRICTS.find(d => d.id === data.district)?.teamName;
   }
 
