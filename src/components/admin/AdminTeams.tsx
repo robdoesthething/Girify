@@ -167,16 +167,13 @@ const AdminTeams: React.FC = () => {
                   <td className="px-6 py-4 font-medium">{team.name}</td>
                   <td className="px-6 py-4">
                     <div className="flex items-center gap-2">
-                      {(() => {
-                        const district = DISTRICTS.find(d => d.id === team.id);
-                        return district?.logo ? (
-                          <img
-                            src={district.logo}
-                            alt=""
-                            className="w-6 h-6 rounded-full object-cover"
-                          />
-                        ) : null;
-                      })()}
+                      {DISTRICTS.find(d => d.id === team.id)?.logo && (
+                        <img
+                          src={DISTRICTS.find(d => d.id === team.id)?.logo}
+                          alt=""
+                          className="w-6 h-6 rounded-full object-cover"
+                        />
+                      )}
                       <span
                         className={`font-black bg-gradient-to-r ${team.color} bg-clip-text text-transparent`}
                       >
