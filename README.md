@@ -1,181 +1,145 @@
 # 🗺️ Girify - Barcelona Streets Quiz
 
-![Coverage](https://img.shields.io/badge/coverage-unknown-grey)
+![TypeScript](https://img.shields.io/badge/TypeScript-57.6%25-blue)
+![Build](https://img.shields.io/badge/build-passing-brightgreen)
+![Tests](https://img.shields.io/badge/tests-70%20passed-brightgreen)
 
 A daily geography challenge where users identify Barcelona streets on an interactive map. Everyone gets the same 10 streets each day!
 
 🎮 **[Play Live](https://girify.vercel.app)**
 
-## Features
+## ✨ Features
 
-- 🌍 Interactive Leaflet map with Barcelona streets
-- 🎯 Daily challenges with deterministic seeding
-- ⚡ Speed-based scoring system
-- 💡 Smart hints system with map overlays
-- 🏆 Global Firebase leaderboard
-- 🔐 Google & Email/Password authentication
-- 🌓 Dark/Light mode
-- 📱 Fully responsive (Mobile/Tablet/Desktop)
+- 🌍 **Interactive Map** - Leaflet-powered Barcelona street exploration
+- 🎯 **Daily Challenges** - Same 10 streets for everyone, new set daily
+- ⚡ **Speed Scoring** - Faster answers = more points (up to 1000 per question)
+- 💡 **Smart Hints** - Map overlays showing nearby intersecting streets
+- 🏆 **Leaderboards** - Global rankings (daily, weekly, all-time, districts)
+- 🏙️ **District Teams** - Join one of 10 Barcelona district teams
+- 👥 **Social Features** - Friends, profiles, achievements, referrals
+- 🛒 **Shop** - Customizable avatars, frames, and titles with in-game currency
+- 🔐 **Authentication** - Google & Email/Password with email verification
+- 🌓 **Themes** - Dark/Light/Auto mode
+- 📱 **Responsive** - Mobile, Tablet, and Desktop optimized
+- 🔔 **PWA** - Installable with offline support
 
-## Tech Stack
+## 🛠️ Tech Stack
 
-- **Frontend**: React 18, Vite, Tailwind CSS
-- **Map**: Leaflet.js + OpenStreetMap
-- **Backend**: Firebase (Auth + Firestore)
-- **Deployment**: Vercel
-- **Data**: OpenStreetMap via Overpass API
+| Category       | Technologies                                |
+| -------------- | ------------------------------------------- |
+| **Frontend**   | React 19, TypeScript, Vite 7, Tailwind CSS  |
+| **Map**        | Leaflet.js, React-Leaflet, OpenStreetMap    |
+| **Backend**    | Firebase (Auth, Firestore, Cloud Messaging) |
+| **Animation**  | Framer Motion                               |
+| **Testing**    | Vitest, React Testing Library, Playwright   |
+| **Deployment** | Vercel (auto-deploy on push)                |
 
-## Local Development
-
-### Prerequisites
-
-- Node.js 18+
-- npm or yarn
-- Firebase project (for auth & database)
-
-### Setup
-
-1. **Clone the repository**
+## 🚀 Quick Start
 
 ```bash
+# Clone and install
 git clone https://github.com/robdoesthething/Girify.git
 cd Girify
-```
-
-2. **Install dependencies**
-
-```bash
 npm install
-```
 
-3. **Configure Firebase**
-
-   Copy the env template:
-
-```bash
+# Configure Firebase (copy .env.template to .env.development)
 cp .env.template .env.development
-```
+# Fill in your Firebase credentials
 
-Fill in your Firebase credentials in `.env.development`:
-
-```env
-VITE_FIREBASE_API_KEY=your_api_key
-VITE_FIREBASE_AUTH_DOMAIN=your_auth_domain
-VITE_FIREBASE_PROJECT_ID=your_project_id
-VITE_FIREBASE_STORAGE_BUCKET=your_storage_bucket
-VITE_FIREBASE_MESSAGING_SENDER_ID=your_sender_id
-VITE_FIREBASE_APP_ID=your_app_id
-```
-
-4. **Run development server**
-
-```bash
+# Run development server
 npm run dev
 ```
 
 Open [http://localhost:5173](http://localhost:5173)
 
-5. **Build for production**
+## 📁 Project Structure
 
-```bash
-npm run build
+```
+src/
+├── components/      # Shared UI components
+│   └── admin/       # Admin panel components
+├── features/        # Feature-based modules
+│   ├── auth/        # Authentication (login, register, verify)
+│   ├── friends/     # Friend system
+│   ├── game/        # Core game logic & components
+│   ├── leaderboard/ # Rankings & scores
+│   ├── profile/     # User profiles
+│   └── shop/        # In-game shop
+├── context/         # React Context providers
+├── data/            # Static data (streets, cosmetics, districts)
+├── hooks/           # Custom React hooks
+├── types/           # TypeScript type definitions
+└── utils/           # Utility functions & Firebase helpers
 ```
 
-## Data Pipeline
-
-The app uses 200 curated Barcelona streets extracted from OpenStreetMap:
-
-```bash
-# Fetch latest street data (requires ~180s)
-npm run fetch-streets
-```
-
-This runs `scripts/fetchStreets.js` which:
-
-1. Queries Overpass API for Barcelona streets
-2. Filters and deduplicates ~11,466 segments
-3. Saves 200 best streets to `src/data/streets.json`
-
-## Game Mechanics
+## 🎮 Game Mechanics
 
 ### Daily Challenge System
 
-- Uses date-based seeding: `hash("2026-01-01") → deterministic shuffle`
+- Date-based seeding: `hash("2026-01-18") → deterministic shuffle`
 - Everyone gets the same 10 streets per day
 - No backend coordination needed!
 
 ### Scoring
 
-- **Speed-based**: <3s = 1000pts, <10s = 750pts, <20s = 500pts, >20s = 250pts
-- **No hint penalties** (as of v1.0)
+| Speed | Points |
+| ----- | ------ |
+| < 3s  | 1000   |
+| < 10s | 750    |
+| < 20s | 500    |
+| > 20s | 250    |
 
-### Hints
+### District Teams
 
-- 3 hints per question
-- Shows nearby intersecting streets
-- Fallback: nearest streets by distance
+Each user joins one of 10 Barcelona district teams:
 
-## Project Structure
+- Ciutat Vella Gargoyles 🏛️
+- Eixample Dragons 🐉
+- Sants Lions 🦁
+- Les Corts Eagles 🦅
+- Sarrià Foxes 🦊
+- Gràcia Cats 🐱
+- Horta Boars 🐗
+- Nou Barris Wolves 🐺
+- Sant Andreu Bears 🐻
+- Sant Martí Sharks 🦈
 
+## 🧪 Testing
+
+```bash
+npm run test          # Run all tests
+npm run test:watch    # Watch mode
+npm run test:coverage # Coverage report
+npm run test:e2e      # Playwright E2E tests
 ```
-Girify/
-├── src/
-│   ├── components/       # React UI components
-│   │   ├── App.jsx       # Main game logic
-│   │   ├── MapArea.jsx   # Leaflet map
-│   │   ├── Quiz/         # Quiz components
-│   │   └── ...
-│   ├── context/          # React Context (Theme)
-│   ├── data/             # Static game data
-│   │   ├── streets.json  # 200 Barcelona streets
-│   │   └── boundary.json # City boundary
-│   └── utils/            # Firebase config, helpers
-├── scripts/              # Data fetching scripts
-├── public/               # Static assets
-└── vercel.json           # Deployment config
-```
 
-## Deployment
+## 📝 Scripts
 
-Deployed automatically via Vercel on push to `main`:
+| Script                  | Description                  |
+| ----------------------- | ---------------------------- |
+| `npm run dev`           | Start dev server             |
+| `npm run build`         | Production build             |
+| `npm run lint`          | ESLint check                 |
+| `npm run type-check`    | TypeScript validation        |
+| `npm run fetch-streets` | Refresh street data from OSM |
 
-1. **Connect to Vercel**: Link your GitHub repo
-2. **Add Environment Variables**: Copy all `VITE_*` vars to Vercel dashboard
-3. **Deploy**: `git push origin main`
-
-## Contributing
-
-Contributions welcome! Please:
+## 🤝 Contributing
 
 1. Fork the repository
 2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit changes (`git commit -m 'Add amazing feature'`)
-4. Push to branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
+3. Commit with conventional commits (`git commit -m 'feat: add amazing feature'`)
+4. Push and open a Pull Request
 
-## Roadmap
-
-- [ ] TypeScript migration
-- [ ] Add testing (Vitest + React Testing Library)
-- [ ] Multi-city support (Madrid, Valencia)
-- [ ] Multiplayer mode (real-time races)
-- [ ] Achievement system
-- [ ] Progressive difficulty modes
-
-## License
+## 📄 License
 
 MIT License - feel free to use for learning or your own projects!
 
-## Credits
+## 🙏 Credits
 
 - **Map Data**: OpenStreetMap contributors
 - **Map Tiles**: Carto CDN
 - **Street Data**: Overpass API
 - Built with 💙 by [robdoesthething](https://github.com/robdoesthething)
-
-## Support
-
-Found a bug? [Open an issue](https://github.com/robdoesthething/Girify/issues)
 
 ---
 

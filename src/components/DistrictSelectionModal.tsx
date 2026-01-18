@@ -53,13 +53,13 @@ const DistrictSelectionModal: React.FC<DistrictSelectionModalProps> = ({
         }`}
       >
         <div className="text-center mb-6">
-          <span className="text-4xl mb-2 block">🏙️</span>
+          <span className="text-4xl mb-2 block">🏆</span>
           <h2 className="text-2xl font-black mb-2 tracking-tight">
-            {t('chooseYourDistrict') || 'Choose Your District'}
+            {t('joinATeam') || 'Join a Team!'}
           </h2>
           <p className={`text-sm ${theme === 'dark' ? 'text-slate-400' : 'text-slate-500'}`}>
-            {t('districtRequiredDetails') ||
-              'Join a district team to compete in the global leaderboard!'}
+            {t('teamRequiredDetails') ||
+              'Pick your Barcelona district and compete with your team in the global leaderboard!'}
           </p>
         </div>
 
@@ -74,11 +74,11 @@ const DistrictSelectionModal: React.FC<DistrictSelectionModalProps> = ({
             }`}
           >
             <option value="" disabled>
-              {t('selectDistrict') || 'Select District'}
+              {t('chooseATeam') || '🏆 Choose a team...'}
             </option>
             {DISTRICTS.map(d => (
               <option key={d.id} value={d.id}>
-                {d.name}
+                {d.teamName}
               </option>
             ))}
           </select>

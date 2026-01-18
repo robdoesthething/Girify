@@ -1,8 +1,10 @@
 import {
   createUserWithEmailAndPassword,
+  getRedirectResult,
   sendEmailVerification,
   signInWithEmailAndPassword,
   signInWithPopup,
+  signInWithRedirect,
   updateProfile,
 } from 'firebase/auth';
 import { motion } from 'framer-motion';
@@ -128,49 +130,83 @@ const RegisterPanel: React.FC<RegisterPanelProps> = ({
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
+  // Check if mobile Safari (popups often blocked)
+  const isMobileSafari =
+    /iPhone|iPad|iPod/.test(navigator.userAgent) &&
+    /Safari/.test(navigator.userAgent) &&
+    !/CriOS|FxiOS/.test(navigator.userAgent);
+
+  // Handle redirect result on mount (for mobile Safari flow)
+  useEffect(() => {
+    const checkRedirectResult = async () => {
+      try {
+        const result = await getRedirectResult(auth);
+        if (result?.user) {
+          setLoading(true);
+          await processGoogleUser(result.user);
+        }
+      } catch (err) {
+        console.error('Redirect result error:', err);
+        setError('Authentication failed. Please try again.');
+      }
+    };
+    checkRedirectResult();
+  }, []);
+
+  // Shared logic for processing Google user after popup or redirect
+  const processGoogleUser = async (user: import('firebase/auth').User) => {
+    let handle = user.displayName || '';
+    let avatarId = getRandomAvatarId();
+    const fullName = user.displayName || user.email?.split('@')[0] || 'User';
+
+    // Critical: Check by UID first (most reliable), then by email
+    const { getUserByUid } = await import('../../../utils/social');
+    let existingProfile = (await getUserByUid(user.uid)) as any;
+
+    if (!existingProfile) {
+      existingProfile = (await getUserByEmail(user.email || '')) as any;
+    }
+
+    if (existingProfile) {
+      handle = existingProfile.username;
+      if (!handle.startsWith('@')) {
+        handle = `@${handle}`;
+      }
+      avatarId = existingProfile.avatarId || avatarId;
+    } else {
+      handle = generateHandle(fullName);
+      if (!handle.startsWith('@')) {
+        handle = `@${handle}`;
+      }
+
+      if (user.displayName !== handle) {
+        await updateProfile(user, { displayName: handle });
+      }
+    }
+
+    await ensureUserProfile(handle, user.uid, {
+      realName: fullName,
+      avatarId,
+      email: user.email || '',
+    });
+
+    await handlePostLogin(handle, !!existingProfile);
+  };
+
   const handleGoogleLogin = async () => {
     try {
       setLoading(true);
       setError('');
+
+      // Use redirect on mobile Safari (popups are blocked)
+      if (isMobileSafari) {
+        await signInWithRedirect(auth, googleProvider);
+        return; // Will be handled by getRedirectResult on page reload
+      }
+
+      // Use popup for desktop and other browsers
       const result = await signInWithPopup(auth, googleProvider);
-      const user = result.user;
-
-      let handle = user.displayName || '';
-      let avatarId = getRandomAvatarId();
-      const fullName = user.displayName || user.email?.split('@')[0] || 'User';
-
-      // Critical: Check by UID first (most reliable), then by email
-      const { getUserByUid } = await import('../../../utils/social');
-      let existingProfile = (await getUserByUid(user.uid)) as any;
-
-      if (!existingProfile) {
-        existingProfile = (await getUserByEmail(user.email || '')) as any;
-      }
-
-      if (existingProfile) {
-        handle = existingProfile.username;
-        if (!handle.startsWith('@')) {
-          handle = `@${handle}`;
-        }
-        avatarId = existingProfile.avatarId || avatarId;
-      } else {
-        handle = generateHandle(fullName);
-        if (!handle.startsWith('@')) {
-          handle = `@${handle}`;
-        }
-
-        if (user.displayName !== handle) {
-          await updateProfile(user, { displayName: handle });
-        }
-      }
-
-      await ensureUserProfile(handle, user.uid, {
-        realName: fullName,
-        avatarId,
-        email: user.email || '',
-      });
-
-      await handlePostLogin(handle, !!existingProfile);
+      await processGoogleUser(result.user);
     } catch (err: unknown) {
       const error = err instanceof Error ? err : new Error(String(err));
       setError(getAuthErrorMessage('auth/error', error.message));
