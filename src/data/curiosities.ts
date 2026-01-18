@@ -298,12 +298,12 @@ const CURIOSITIES_DATA: Curiosity[] = [
 ];
 
 const GENERIC_IMAGES: string[] = [
-  'https://images.unsplash.com/photo-1583422409516-2895a77efded?w=800',
-  'https://images.unsplash.com/photo-1562883676-8c7feb83f09b?w=800',
-  'https://images.unsplash.com/photo-1511527661048-7fe73d85e9a4?w=800',
-  'https://images.unsplash.com/photo-1579282240050-352db0a14c21?w=800',
-  'https://images.unsplash.com/photo-1558642084-fd07fae5282e?w=800',
-  'https://images.unsplash.com/photo-1539037116277-4db20889f2d4?w=800',
+  'https://images.unsplash.com/photo-1583422409516-2895a77efded?auto=format&fit=crop&w=800&q=80', // Barcelona Street
+  'https://images.unsplash.com/photo-1562883676-8c7feb83f09b?auto=format&fit=crop&w=800&q=80', // Barcelona Architecture
+  'https://images.unsplash.com/photo-1511527661048-7fe73d85e9a4?auto=format&fit=crop&w=800&q=80', // Arc de Triomf
+  'https://images.unsplash.com/photo-1579282240050-352db0a14c21?auto=format&fit=crop&w=800&q=80', // Parc Guell
+  'https://images.unsplash.com/photo-1558642084-fd07fae5282e?auto=format&fit=crop&w=800&q=80', // Eixample
+  'https://images.unsplash.com/photo-1539037116277-4db20889f2d4?auto=format&fit=crop&w=800&q=80', // Gothic Quarter
 ];
 
 function getRandomImage(): string {

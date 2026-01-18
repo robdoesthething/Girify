@@ -23,6 +23,42 @@
       "image": "/assets/pixel_avatar_artist.png",
       "emoji": "🎨",
       "description": "Colorful and mosaic-inspired"
+    },
+    {
+      "id": "pixel_avatar_cat",
+      "name": "Street Cat",
+      "cost": 0,
+      "image": "/assets/pixel_avatar_cat.png",
+      "emoji": "😺",
+      "description": "Unlock: 3 Day Streak",
+      "unlockCondition": { "type": "streak", "value": 3 }
+    },
+    {
+      "id": "pixel_avatar_robot",
+      "name": "Retro Bot",
+      "cost": 0,
+      "image": "/assets/pixel_avatar_robot.png",
+      "emoji": "🤖",
+      "description": "Unlock: Play 10 Games",
+      "unlockCondition": { "type": "gamesPlayed", "value": 10 }
+    },
+    {
+      "id": "pixel_avatar_alien",
+      "name": "Tourist Alien",
+      "cost": 0,
+      "image": "/assets/pixel_avatar_alien.png",
+      "emoji": "👽",
+      "description": "Unlock: Score > 1200 pts",
+      "unlockCondition": { "type": "bestScore", "value": 1200 }
+    },
+    {
+      "id": "pixel_avatar_ninja",
+      "name": "Urban Ninja",
+      "cost": 0,
+      "image": "/assets/pixel_avatar_ninja.png",
+      "emoji": "🥷",
+      "description": "Unlock: Play 50 Games",
+      "unlockCondition": { "type": "gamesPlayed", "value": 50 }
     }
   ],
   "avatarFrames": [
@@ -83,7 +119,7 @@
       "prefix": "💖",
       "description": "Show your support for the game.",
       "flavorText": "You were here when we were just a map and a dream. Thank you!",
-      "image": "/assets/pixel_heart.png"
+      "image": "/assets/pixel_merit_supporter.png"
     },
     {
       "id": "merit_contributor",
@@ -92,7 +128,7 @@
       "prefix": "🏗️",
       "description": "For those who give back.",
       "flavorText": "Your feedback shapes the city. You are a true architect of Girify.",
-      "image": "/assets/pixel_blueprint.png"
+      "image": "/assets/pixel_merit_contributor.png"
     },
     {
       "id": "merit_vip",
@@ -101,7 +137,7 @@
       "prefix": "⚜️",
       "description": "The ultimate flex.",
       "flavorText": "Access to absolutely nothing extra, but you look cool doing it.",
-      "image": "/assets/pixel_diamond.png"
+      "image": "/assets/pixel_merit_vip.png"
     },
     {
       "id": "badge_paellador",
