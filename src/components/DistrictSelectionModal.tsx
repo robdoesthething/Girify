@@ -37,7 +37,7 @@ const DistrictSelectionModal: React.FC<DistrictSelectionModalProps> = ({
       onComplete();
     } catch (err) {
       console.error('Error updating district:', err);
-      setError('Failed to update district. Please try again.');
+      setError(t('districtUpdateError') || 'Failed to update district. Please try again.');
       setLoading(false);
     }
   };
@@ -131,7 +131,7 @@ const DistrictSelectionModal: React.FC<DistrictSelectionModalProps> = ({
               }
             `}
           >
-            {loading ? 'Joining...' : 'Confirm & Join Team'}
+            {loading ? t('joining') || 'Joining...' : t('confirmJoinTeam') || 'Confirm & Join Team'}
           </button>
         </div>
       </motion.div>
