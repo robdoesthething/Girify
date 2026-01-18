@@ -153,6 +153,14 @@ const RegisterPanel: React.FC<RegisterPanelProps> = ({
     checkRedirectResult();
   }, []);
 
+  const [pendingGoogleUser, setPendingGoogleUser] = useState<{
+    user: import('firebase/auth').User;
+    handle: string;
+    fullName: string;
+    avatarId: number;
+    email: string | null;
+  } | null>(null);
+
   // Shared logic for processing Google user after popup or redirect
   const processGoogleUser = async (user: import('firebase/auth').User) => {
     let handle = user.displayName || '';
@@ -184,13 +192,49 @@ const RegisterPanel: React.FC<RegisterPanelProps> = ({
       }
     }
 
+    // Force district selection for new users or those without a district
+    if (!existingProfile?.district) {
+      setPendingGoogleUser({
+        user,
+        handle,
+        fullName,
+        avatarId,
+        email: user.email || null,
+      });
+      setLoading(false);
+      return;
+    }
+
     await ensureUserProfile(handle, user.uid, {
       realName: fullName,
       avatarId,
-      email: user.email || '',
+      email: user.email || undefined,
+      district: existingProfile.district,
     });
 
-    await handlePostLogin(handle, !!existingProfile);
+    await handlePostLogin(handle, true);
+  };
+
+  const completeGoogleSignup = async () => {
+    if (!pendingGoogleUser || !district) {
+      return;
+    }
+
+    setLoading(true);
+    try {
+      await ensureUserProfile(pendingGoogleUser.handle, pendingGoogleUser.user.uid, {
+        realName: pendingGoogleUser.fullName,
+        avatarId: pendingGoogleUser.avatarId,
+        email: pendingGoogleUser.email || undefined,
+        district: district,
+      });
+
+      await handlePostLogin(pendingGoogleUser.handle, false);
+    } catch (err: unknown) {
+      const error = err instanceof Error ? err : new Error(String(err));
+      setError(getAuthErrorMessage('auth/error', error.message));
+      setLoading(false);
+    }
   };
 
   const handleGoogleLogin = async () => {
@@ -314,6 +358,78 @@ const RegisterPanel: React.FC<RegisterPanelProps> = ({
     }
   };
 
+  if (pendingGoogleUser) {
+    return (
+      <div className="absolute inset-0 z-[3000] flex items-center justify-center p-6 backdrop-blur-xl pointer-events-auto overflow-hidden overflow-y-auto">
+        <motion.div
+          initial={{ scale: 0.9, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          className={`w-full max-w-sm p-8 rounded-3xl shadow-2xl border my-auto ${
+            theme === 'dark'
+              ? 'bg-slate-900/90 border-slate-700 text-white'
+              : 'bg-white/90 border-slate-200 text-slate-900'
+          }`}
+        >
+          <h2 className="text-2xl font-black mb-2 tracking-tight text-center">One Last Step!</h2>
+          <p
+            className={`text-sm text-center mb-6 font-medium ${theme === 'dark' ? 'text-slate-400' : 'text-slate-500'}`}
+          >
+            Welcome, <span className="font-bold text-sky-500">{pendingGoogleUser.handle}</span>!{' '}
+            <br />
+            Please choose your district to complete your registration.
+          </p>
+
+          <div className="space-y-3 mb-6">
+            <div className="grid grid-cols-2 gap-2 max-h-60 overflow-y-auto pr-1 custom-scrollbar">
+              {DISTRICTS.map(d => (
+                <button
+                  key={d.id}
+                  type="button"
+                  onClick={() => setDistrict(d.id)}
+                  className={`relative flex items-center gap-3 p-3 rounded-xl border-2 transition-all text-left group
+                    ${
+                      district === d.id
+                        ? `border-${d.color.split('-')[1]}-500 bg-${d.color.split('-')[1]}-500/10 active-district-ring`
+                        : `border-transparent ${theme === 'dark' ? 'bg-slate-800 hover:bg-slate-700' : 'bg-slate-100 hover:bg-slate-50'} hover:border-slate-300 dark:hover:border-slate-600`
+                    }
+                  `}
+                >
+                  <img
+                    src={d.logo}
+                    alt={d.teamName}
+                    className="w-8 h-8 object-contain"
+                    style={{ imageRendering: 'pixelated' }}
+                  />
+                  <div className="flex-1 min-w-0">
+                    <p
+                      className={`text-[10px] font-black uppercase truncate ${district === d.id ? 'text-sky-500' : 'text-slate-500'}`}
+                    >
+                      {d.name}
+                    </p>
+                  </div>
+
+                  {district === d.id && (
+                    <div className="absolute inset-0 rounded-xl border-2 border-sky-500 pointer-events-none shadow-[0_0_10px_rgba(14,165,233,0.3)]" />
+                  )}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <button
+            onClick={completeGoogleSignup}
+            disabled={!district || loading}
+            className={`w-full py-3 rounded-xl font-bold text-sm transition-all shadow-lg active:scale-95 text-white
+                ${!district || loading ? 'bg-slate-400 cursor-not-allowed' : 'bg-sky-500 hover:bg-sky-600 shadow-sky-500/20'}
+            `}
+          >
+            {loading ? 'Finalizing...' : 'Complete Registration'}
+          </button>
+        </motion.div>
+      </div>
+    );
+  }
+
   return (
     <div className="absolute inset-0 z-[3000] flex items-center justify-center p-6 backdrop-blur-xl pointer-events-auto overflow-hidden overflow-y-auto">
       <motion.div
@@ -409,24 +525,53 @@ const RegisterPanel: React.FC<RegisterPanelProps> = ({
                   }`}
                 />
               </div>
-              <select
-                value={district}
-                onChange={e => setDistrict(e.target.value)}
-                className={`w-full px-4 py-3 rounded-xl border font-medium outline-none focus:ring-2 focus:ring-sky-500 transition-all appearance-none ${
-                  theme === 'dark'
-                    ? 'bg-slate-800 border-slate-700 text-white placeholder-slate-600'
-                    : 'bg-white border-slate-200 text-slate-900 placeholder-slate-400'
-                }`}
-              >
-                <option value="" disabled>
-                  {t('selectDistrict') || 'Select District'}
-                </option>
-                {DISTRICTS.map(d => (
-                  <option key={d.id} value={d.id}>
-                    {d.name}
-                  </option>
-                ))}
-              </select>
+              <div className="space-y-3">
+                <label
+                  className={`text-xs font-bold uppercase tracking-wider ${theme === 'dark' ? 'text-slate-400' : 'text-slate-500'}`}
+                >
+                  {t('chooseYourDistrict') || 'Choose Your Allegiance'}
+                </label>
+
+                <div className="grid grid-cols-2 gap-2 max-h-48 overflow-y-auto pr-1 custom-scrollbar">
+                  {DISTRICTS.map(d => (
+                    <button
+                      key={d.id}
+                      type="button"
+                      onClick={() => setDistrict(d.id)}
+                      className={`relative flex items-center gap-3 p-3 rounded-xl border-2 transition-all text-left group
+                        ${
+                          district === d.id
+                            ? `border-${d.color.split('-')[1]}-500 bg-${d.color.split('-')[1]}-500/10 active-district-ring`
+                            : `border-transparent ${theme === 'dark' ? 'bg-slate-800 hover:bg-slate-700' : 'bg-slate-100 hover:bg-slate-50'} hover:border-slate-300 dark:hover:border-slate-600`
+                        }
+                      `}
+                    >
+                      <img
+                        src={d.logo}
+                        alt={d.teamName}
+                        className="w-8 h-8 object-contain"
+                        style={{ imageRendering: 'pixelated' }}
+                      />
+                      <div className="flex-1 min-w-0">
+                        <p
+                          className={`text-[10px] font-black uppercase truncate ${district === d.id ? 'text-sky-500' : 'text-slate-500'}`}
+                        >
+                          {d.name}
+                        </p>
+                        <p
+                          className={`text-xs font-bold truncate ${theme === 'dark' ? 'text-white' : 'text-slate-800'}`}
+                        >
+                          {d.teamName.replace(d.name, '').trim() || d.teamName}
+                        </p>
+                      </div>
+
+                      {district === d.id && (
+                        <div className="absolute inset-0 rounded-xl border-2 border-sky-500 pointer-events-none shadow-[0_0_10px_rgba(14,165,233,0.3)]" />
+                      )}
+                    </button>
+                  ))}
+                </div>
+              </div>
 
               {district && (
                 <div className="mt-4 p-4 rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 flex items-center gap-4 animate-fadeIn">

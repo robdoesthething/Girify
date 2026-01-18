@@ -389,31 +389,50 @@ export const getTeamLeaderboard = async (
     const individualScores = await getLeaderboard(period);
 
     // Aggregate by team
-    const teamScores: Record<string, { score: number; members: Set<string> }> = {};
+    const teamScores: Record<string, { score: number; members: Set<string>; id: string }> = {};
+
+    // Helper to find district
+    const { DISTRICTS } = require('../data/districts');
+    const findDistrict = (key: string) => {
+      if (!key) {
+        return null;
+      }
+      const k = key.toLowerCase();
+
+      return DISTRICTS.find(
+        (d: any) => d.id === k || d.teamName.toLowerCase() === k || d.name.toLowerCase() === k
+      );
+    };
+
+    // Build cleaner map
+    const normalizedUserTeamMap: Record<string, { teamName: string; id: string }> = {};
+    Object.entries(userTeamMap).forEach(([user, info]) => {
+      // Try resolving by team name first, then district ID
+      const district = findDistrict(info.team) || findDistrict(info.district);
+      if (district) {
+        normalizedUserTeamMap[user] = { teamName: district.teamName, id: district.id };
+      }
+    });
 
     individualScores.forEach(score => {
       const username = score.username.toLowerCase().replace('@', '');
-      const userTeam = userTeamMap[username];
+      const userTeam = normalizedUserTeamMap[username];
 
       if (userTeam) {
-        if (!teamScores[userTeam.team]) {
-          teamScores[userTeam.team] = { score: 0, members: new Set() };
+        if (!teamScores[userTeam.teamName]) {
+          teamScores[userTeam.teamName] = { score: 0, members: new Set(), id: userTeam.id };
         }
-        teamScores[userTeam.team].score += score.score;
-        teamScores[userTeam.team].members.add(username);
+        teamScores[userTeam.teamName].score += score.score;
+        teamScores[userTeam.teamName].members.add(username);
       }
     });
 
     // Convert to array and calculate averages
     const result: TeamScoreEntry[] = Object.entries(teamScores).map(([teamName, data]) => {
-      // Find district ID from team name
-      const { DISTRICTS } = require('../data/districts');
-      const district = DISTRICTS.find((d: { teamName: string }) => d.teamName === teamName);
-
       return {
-        id: district?.id || teamName.toLowerCase().replace(/\s+/g, '_'),
+        id: data.id,
         teamName,
-        teamId: district?.id || '',
+        teamId: data.id,
         score: data.score,
         memberCount: data.members.size,
         avgScore: data.members.size > 0 ? Math.round(data.score / data.members.size) : 0,

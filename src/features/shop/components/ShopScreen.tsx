@@ -329,7 +329,7 @@ const ShopScreen: React.FC<ShopScreenProps> = ({ username }) => {
                               setFlavorModal(item);
                             }
                           }}
-                          className={`w-12 h-12 rounded-xl bg-slate-100 dark:bg-slate-700 flex items-center justify-center text-2xl relative overflow-hidden shrink-0 ${activeTab === 'titles' ? 'cursor-pointer hover:scale-105 transition-transform' : ''} border-2 border-slate-300 dark:border-slate-600 shadow-sm`}
+                          className={`w-12 h-12 rounded-xl bg-transparent flex items-center justify-center text-2xl relative overflow-hidden shrink-0 ${activeTab === 'titles' ? 'cursor-pointer hover:scale-105 transition-transform' : ''} border-2 border-slate-300 dark:border-slate-600 shadow-sm`}
                           style={{ imageRendering: 'pixelated' }}
                         >
                           {renderItemIcon(item)}

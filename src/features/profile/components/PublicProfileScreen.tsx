@@ -6,6 +6,7 @@ import { useTheme } from '../../../context/ThemeContext';
 import { getUnlockedAchievements } from '../../../data/achievements';
 import { getAvatar } from '../../../data/avatars';
 import cosmetics from '../../../data/cosmetics.json';
+import { formatUsername } from '../../../utils/format';
 import {
   blockUser,
   getBlockStatus,
@@ -13,7 +14,7 @@ import {
   sendFriendRequest,
 } from '../../../utils/friends';
 import { getEquippedCosmetics } from '../../../utils/giuros';
-import { getUserGameHistory, getUserProfile, UserProfile } from '../../../utils/social'; // Changed to match getUserProfile return type
+import { getUserGameHistory, getUserProfile, UserProfile } from '../../../utils/social';
 
 interface PublicProfileScreenProps {
   currentUser?: string;
@@ -145,7 +146,11 @@ const PublicProfileScreen: React.FC<PublicProfileScreenProps> = ({ currentUser }
   };
 
   const displayAvatar = getAvatar(profile?.avatarId);
-  const initial = username ? username.charAt(0).toUpperCase() : '?';
+  const formattedUsername = formatUsername(username);
+
+  const equippedAvatarId = equippedCosmetics?.avatarId;
+  const hasCustomAvatar = equippedAvatarId && equippedAvatarId.startsWith('pixel_');
+  const avatarUrl = hasCustomAvatar ? `/assets/districts/${equippedAvatarId}.png` : null;
 
   const equippedFrame = cosmetics.avatarFrames.find(f => f.id === equippedCosmetics.frameId);
   const frameClass = equippedFrame?.cssClass || 'ring-4 ring-white dark:ring-slate-700';
@@ -192,19 +197,23 @@ const PublicProfileScreen: React.FC<PublicProfileScreenProps> = ({ currentUser }
             className={`rounded-3xl shadow-xl overflow-hidden border ${theme === 'dark' ? 'bg-slate-800 border-slate-700' : 'bg-white border-slate-100'}`}
           >
             <div
-              className={`p-8 flex flex-col items-center border-b relative ${theme === 'dark' ? 'border-slate-700 bg-slate-800/50' : 'border-slate-100 bg-slate-50'}`}
+              className={`p-8 flex flex-col items-center border-b relative ${theme === 'dark' ? 'border-slate-700 bg-slate-800/50' : 'border-slate-50'}`}
             >
               {loading ? (
                 <div className="w-24 h-24 rounded-full bg-slate-200 dark:bg-slate-700 animate-pulse mb-4" />
               ) : (
                 <div
-                  className={`w-24 h-24 rounded-full bg-gradient-to-br from-sky-400 to-indigo-600 flex items-center justify-center text-4xl shadow-lg mb-4 ${frameClass}`}
+                  className={`w-24 h-24 rounded-full ${avatarUrl ? 'bg-transparent' : 'bg-gradient-to-br from-sky-400 to-indigo-600'} flex items-center justify-center text-4xl shadow-lg mb-4 ${frameClass} overflow-hidden`}
                 >
-                  {profile && profile.avatarId ? displayAvatar : initial}
+                  {avatarUrl ? (
+                    <img src={avatarUrl} alt={username} className="w-full h-full object-cover" />
+                  ) : (
+                    displayAvatar
+                  )}
                 </div>
               )}
 
-              <h2 className="text-2xl font-black tracking-tight">{username.toLowerCase()}</h2>
+              <h2 className="text-2xl font-black tracking-tight">{formattedUsername}</h2>
               {profile?.realName && (
                 <p className="text-sm font-bold opacity-50 mt-1">{profile.realName}</p>
               )}
