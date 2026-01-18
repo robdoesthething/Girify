@@ -1,4 +1,4 @@
-import { Street } from '../types/game';
+import { QuizResult, Street } from '../types/game';
 import { storage } from '../utils/storage';
 
 // Game state types
@@ -7,14 +7,6 @@ export type GameStateType = 'intro' | 'register' | 'playing' | 'summary';
 export type FeedbackType = 'idle' | 'transitioning' | 'selected' | 'correct' | 'wrong';
 
 export type RegisterMode = 'signin' | 'signup';
-
-export interface QuizResult {
-  correct: boolean;
-  streetName: string;
-  time: number;
-  hintsUsed: number;
-  points: number;
-}
 
 export interface PlannedQuestion {
   targetStreet: Street;
@@ -196,7 +188,7 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
       return {
         ...state,
         score: finalScore,
-        correct: state.correct + (action.payload.result.correct ? 1 : 0),
+        correct: state.correct + (action.payload.result.status === 'correct' ? 1 : 0),
         quizResults: [...state.quizResults, action.payload.result],
         feedback: 'transitioning',
         selectedAnswer: action.payload.selectedStreet,

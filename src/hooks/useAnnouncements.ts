@@ -1,14 +1,5 @@
 import { useCallback, useState } from 'react';
-import { getUnreadAnnouncements, markAnnouncementAsRead } from '../utils/news';
-
-interface Announcement {
-  id: string;
-  title: string;
-  message: string;
-  body: string;
-  publishDate: Date | { seconds: number; toDate?: () => Date };
-  timestamp: number;
-}
+import { Announcement, getUnreadAnnouncements, markAnnouncementAsRead } from '../utils/news';
 
 interface UseAnnouncementsReturn {
   pendingAnnouncement: Announcement | null;

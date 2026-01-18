@@ -21,9 +21,9 @@ import { awardChallengeBonus, awardReferralBonus } from '../../../utils/giuros';
 import { storage } from '../../../utils/storage';
 // @ts-ignore
 import { STORAGE_KEYS, TIME } from '../../../config/constants';
+import { useAsyncOperation } from '../../../hooks/useAsyncOperation';
 import { GameStateObject, QuizResult } from '../../../types/game';
 import { GameHistory } from '../../../types/user';
-import { useAsyncOperation } from '../../../hooks/useAsyncOperation';
 
 export const useGamePersistence = () => {
   const navigate = useNavigate();
@@ -34,7 +34,7 @@ export const useGamePersistence = () => {
       execute(
         async () => {
           markTodayAsPlayed();
-          const history = storage.get(STORAGE_KEYS.HISTORY, []);
+          const history = storage.get<GameHistory[]>(STORAGE_KEYS.HISTORY, []);
           const avgTime = state.quizResults.length
             ? (
                 state.quizResults.reduce(
@@ -44,21 +44,29 @@ export const useGamePersistence = () => {
               ).toFixed(1)
             : 0;
 
-          const newRecord = {
-            date: getTodaySeed(),
+          const localRecord: GameHistory = {
+            date: String(getTodaySeed()),
             score: state.score,
-            avgTime: avgTime,
+            avgTime: String(avgTime),
             timestamp: Date.now(),
-            username: state.username,
+            username: state.username || '',
           };
-          history.push(newRecord);
+          history.push(localRecord);
           storage.set(STORAGE_KEYS.HISTORY, history);
 
           if (state.username) {
-            await saveUserGameResult(state.username, newRecord);
+            // Firestore expects date as number (YYYYMMDD) and timestamp object
+            const firestoreData = {
+              ...localRecord,
+              date: getTodaySeed(),
+              timestamp: { seconds: Math.floor(localRecord.timestamp / 1000) },
+            };
+
+            // @ts-ignore - GameData type mismatch with GameHistory fields is handled by loose typing in social.ts
+            await saveUserGameResult(state.username, firestoreData);
 
             const isBonus = await hasDailyReferral(state.username);
-            await saveScore(state.username, state.score, newRecord.avgTime, {
+            await saveScore(state.username, state.score, Number(localRecord.avgTime), {
               isBonus,
               correctAnswers: state.correct,
               questionCount: state.questions?.length || 0,
@@ -66,8 +74,10 @@ export const useGamePersistence = () => {
               email: auth.currentUser?.email,
             });
 
-            const historyForStreak = storage.get(STORAGE_KEYS.HISTORY, []);
-            const streak = calculateStreak(historyForStreak);
+            const historyForStreak = storage.get<GameHistory[]>(STORAGE_KEYS.HISTORY, []);
+            const streak = calculateStreak(
+              historyForStreak.map(h => ({ ...h, date: Number(h.date) }))
+            );
             const totalScore = historyForStreak.reduce(
               (acc: number, h: GameHistory) => acc + (h.score || 0),
               0
@@ -76,7 +86,7 @@ export const useGamePersistence = () => {
             await updateUserGameStats(state.username, {
               streak,
               totalScore,
-              lastPlayDate: getTodaySeed(),
+              lastPlayDate: String(getTodaySeed()),
             });
 
             await awardChallengeBonus(state.username, streak);
@@ -87,8 +97,8 @@ export const useGamePersistence = () => {
             }
 
             // Check for feedback prompt
-            const lastFeedback = storage.get(STORAGE_KEYS.LAST_FEEDBACK);
-            const historyList = storage.get(STORAGE_KEYS.HISTORY, []);
+            const lastFeedback = storage.get<string>(STORAGE_KEYS.LAST_FEEDBACK, '');
+            const historyList = storage.get<GameHistory[]>(STORAGE_KEYS.HISTORY, []);
 
             if (shouldPromptFeedback(lastFeedback, historyList.length)) {
               setTimeout(() => navigate('/feedback'), TIME.FEEDBACK_DELAY);
