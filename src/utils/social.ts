@@ -254,6 +254,27 @@ export const getUserByEmail = async (email: string): Promise<UserProfile | null>
 };
 
 /**
+ * Look up a user profile by UID
+ */
+export const getUserByUid = async (uid: string): Promise<UserProfile | null> => {
+  if (!uid) {
+    return null;
+  }
+  try {
+    const q = query(collection(db, USERS_COLLECTION), where('uid', '==', uid), limit(1));
+    const snapshot = await getDocs(q);
+    if (!snapshot.empty) {
+      const docSnap = snapshot.docs[0];
+      return { id: docSnap.id, ...docSnap.data() } as UserProfile;
+    }
+    return null;
+  } catch (e) {
+    console.error('Error fetching user by uid:', e);
+    return null;
+  }
+};
+
+/**
  * Update user stats after a game
  */
 export const updateUserGameStats = async (

@@ -137,7 +137,13 @@ const RegisterPanel: React.FC<RegisterPanelProps> = ({
       let avatarId = getRandomAvatarId();
       const fullName = user.displayName || user.email?.split('@')[0] || 'User';
 
-      const existingProfile = (await getUserByEmail(user.email || '')) as any;
+      // Critical: Check by UID first (most reliable), then by email
+      const { getUserByUid } = await import('../../../utils/social');
+      let existingProfile = (await getUserByUid(user.uid)) as any;
+
+      if (!existingProfile) {
+        existingProfile = (await getUserByEmail(user.email || '')) as any;
+      }
 
       if (existingProfile) {
         handle = existingProfile.username;

@@ -18,7 +18,7 @@ import { SOCIAL } from '../config/constants';
 import { db } from '../firebase';
 
 const USERS_COLLECTION = 'users';
-const HIGHSCORES_COLLECTION = 'highscores';
+// const HIGHSCORES_COLLECTION = 'highscores';
 const SCORES_COLLECTION = 'scores';
 const BLOCKS_COLLECTION = 'blocks';
 
@@ -83,7 +83,7 @@ export const searchUsers = async (searchText: string): Promise<UserSearchResult[
   const legacySearch = `@${cleanSearch}`;
 
   try {
-    const usersRef = collection(db, HIGHSCORES_COLLECTION);
+    const usersRef = collection(db, USERS_COLLECTION);
     const lowerQuery = cleanSearch;
 
     const q1 = query(
@@ -94,7 +94,7 @@ export const searchUsers = async (searchText: string): Promise<UserSearchResult[
     );
 
     const q2 = query(
-      collection(db, HIGHSCORES_COLLECTION),
+      collection(db, USERS_COLLECTION),
       orderBy('username'),
       startAt(legacySearch),
       endAt(`${legacySearch}\uf8ff`),
