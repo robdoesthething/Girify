@@ -100,9 +100,9 @@
       "id": "title_master",
       "name": "Street Master",
       "cost": 100,
-      "prefix": "🎓",
-      "flavorText": "You don't just know the streets; you are the streets.",
-      "image": "/assets/pixel_medal.png"
+      "prefix": "🏙️",
+      "flavorText": "The city is your chessboard, and you're always three moves ahead.",
+      "image": "/assets/pixel_blueprint.png"
     },
     {
       "id": "title_legend",
@@ -111,6 +111,14 @@
       "prefix": "👑",
       "flavorText": "They'll build statues of you. Or at least name a small alley after you.",
       "image": "/assets/pixel_crown.png"
+    },
+    {
+      "id": "title_archaeologist",
+      "name": "Urban Archaeologist",
+      "cost": 250,
+      "prefix": "🏛️",
+      "flavorText": "Digging up histories that aren't even on Wikipedia.",
+      "image": "/assets/pixel_briefcase.png"
     },
     {
       "id": "merit_supporter",
