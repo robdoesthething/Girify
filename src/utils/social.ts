@@ -17,6 +17,7 @@ import {
   writeBatch,
 } from 'firebase/firestore';
 import { SOCIAL } from '../config/constants';
+import { DISTRICTS } from '../data/districts';
 import { db } from '../firebase';
 
 const USERS_COLLECTION = 'users';
@@ -67,6 +68,8 @@ export interface UserProfile {
   migratedTo?: string | null;
   migratedFrom?: string | null;
   referredBy?: string | null;
+  district?: string;
+  team?: string;
 }
 
 export interface FeedbackItem {
@@ -102,6 +105,7 @@ interface AdditionalProfileData {
   realName?: string;
   avatarId?: number;
   language?: string;
+  district?: string;
 }
 
 interface GameStatsUpdate {
@@ -170,6 +174,10 @@ export const ensureUserProfile = async (
       migratedTo: null,
       migratedFrom: null,
       referredBy: null,
+      district: additionalData.district,
+      team: additionalData.district
+        ? DISTRICTS.find(d => d.id === additionalData.district)?.teamName
+        : undefined,
     };
     await setDoc(userRef, profileData);
     return profileData;
@@ -221,6 +229,10 @@ export const ensureUserProfile = async (
   }
   if (data.bestScore === undefined) {
     updates.bestScore = 0;
+  }
+  // Backfill team if missing and district exists
+  if (!data.team && data.district) {
+    updates.team = DISTRICTS.find(d => d.id === data.district)?.teamName;
   }
 
   if (Object.keys(updates).length > 0) {
@@ -314,6 +326,11 @@ export const updateUserGameStats = async (
     }
 
     await updateDoc(userRef, updates);
+
+    // Update district score if user has one
+    if (currentData.district) {
+      await updateDistrictScore(currentData.district, currentScore || 0);
+    }
   } catch (e) {
     console.error('Error updating game stats:', e);
   }
@@ -1133,6 +1150,43 @@ export const getUserGameHistory = async (username: string): Promise<GameData[]> 
     return allGames;
   } catch (e) {
     console.error('Error fetching user game history:', e);
+    return [];
+  }
+};
+
+/**
+ * Update district score
+ */
+export const updateDistrictScore = async (districtId: string, score: number): Promise<void> => {
+  if (!districtId || !score) {
+    return;
+  }
+
+  try {
+    const districtRef = doc(db, 'districts', districtId);
+    await setDoc(
+      districtRef,
+      {
+        score: increment(score),
+        name: districtId, // We can improve this to rely on ID mapping or store name
+      },
+      { merge: true }
+    );
+  } catch (e) {
+    console.error('Error updating district score:', e);
+  }
+};
+
+/**
+ * Get district rankings
+ */
+export const getDistrictRankings = async (): Promise<{ id: string; score: number }[]> => {
+  try {
+    const q = query(collection(db, 'districts'), orderBy('score', 'desc'));
+    const snapshot = await getDocs(q);
+    return snapshot.docs.map(d => ({ id: d.id, ...d.data() }) as { id: string; score: number });
+  } catch (e) {
+    console.error('Error fetching district rankings:', e);
     return [];
   }
 };

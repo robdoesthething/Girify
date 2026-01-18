@@ -276,6 +276,12 @@ const translations: Translations = {
     todaysChallenge: "Today's Challenge",
     pts: 'pts',
     shareAndEarn: 'Share & Earn',
+    masterSelectedStreets: 'Master Selected Streets!',
+    district: 'District',
+    selectDistrict: 'Select District',
+    clansTitle: 'District Clans',
+    joinClan: 'Join a District Clan',
+    clanLeaderboard: 'District Rankings',
   },
 
   es: {
@@ -498,6 +504,12 @@ const translations: Translations = {
     todaysChallenge: 'Reto de Hoy',
     pts: 'pts',
     shareAndEarn: 'Compartir y Ganar',
+    masterSelectedStreets: '¡Domina las Calles Seleccionadas!',
+    district: 'Distrito',
+    selectDistrict: 'Selecciona Distrito',
+    clansTitle: 'Clanes de Distrito',
+    joinClan: 'Únete a un Clan',
+    clanLeaderboard: 'Ranking de Distritos',
   },
 
   ca: {
@@ -721,6 +733,12 @@ const translations: Translations = {
     todaysChallenge: "Repte d'Avui",
     pts: 'pts',
     shareAndEarn: 'Compartir i Guanyar',
+    masterSelectedStreets: 'Domina els Carrers Seleccionats!',
+    district: 'Districte',
+    selectDistrict: 'Selecciona Districte',
+    clansTitle: 'Clans de Districte',
+    joinClan: 'Uneix-te a un Clan',
+    clanLeaderboard: 'Rànquing de Districtes',
   },
 };
 

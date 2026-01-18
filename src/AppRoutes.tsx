@@ -27,6 +27,7 @@ const AchievementModal = lazy(() => import('./components/AchievementModal'));
 const ConfirmDialog = lazy(() =>
   import('./components/ConfirmDialog').then(m => ({ default: m.ConfirmDialog }))
 );
+const DistrictSelectionModal = lazy(() => import('./components/DistrictSelectionModal'));
 
 import { STORAGE_KEYS } from './config/constants';
 import { useTheme } from './context/ThemeContext';
@@ -42,6 +43,7 @@ import { hasDailyReferral } from './utils/social';
 import { storage } from './utils/storage';
 
 import { useConfirm } from './hooks/useConfirm';
+import { getUserProfile } from './utils/social';
 
 // Loading fallback component
 const PageLoader = () => (
@@ -91,6 +93,28 @@ const AppRoutes: React.FC = () => {
     checkAnnouncements
   );
   const handleLogout = () => performLogout(navigate);
+
+  const [showDistrictModal, setShowDistrictModal] = React.useState(false);
+
+  // Check for missing district
+  React.useEffect(() => {
+    const checkDistrict = async () => {
+      if (state.username && !state.username.startsWith('guest')) {
+        try {
+          const profile = await getUserProfile(state.username);
+          if (profile && !profile.district) {
+            setShowDistrictModal(true);
+          }
+        } catch (e) {
+          console.error('Error checking district:', e);
+        }
+      }
+    };
+
+    // Simple debounce/delay to avoid checking too early or too often
+    const timeout = setTimeout(checkDistrict, 2000);
+    return () => clearTimeout(timeout);
+  }, [state.username]);
 
   const handleOpenPage = async (page: string | null) => {
     // Check if user is in the middle of a game
@@ -178,6 +202,18 @@ const AppRoutes: React.FC = () => {
         {newlyUnlockedBadge && (
           <Suspense fallback={null}>
             <AchievementModal achievement={newlyUnlockedBadge} onDismiss={dismissAchievement} />
+          </Suspense>
+        )}
+      </AnimatePresence>
+
+      {/* District Selection Modal */}
+      <AnimatePresence>
+        {showDistrictModal && (
+          <Suspense fallback={null}>
+            <DistrictSelectionModal
+              username={state.username || ''}
+              onComplete={() => setShowDistrictModal(false)}
+            />
           </Suspense>
         )}
       </AnimatePresence>

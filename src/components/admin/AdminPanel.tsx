@@ -26,6 +26,7 @@ import AdminFeedback from './AdminFeedback';
 import AdminGameMaster from './AdminGameMaster';
 import AdminGiuros from './AdminGiuros';
 import AdminShop from './AdminShop';
+import AdminTeams from './AdminTeams';
 
 interface MetricCardProps {
   title: string;
@@ -222,6 +223,7 @@ const AdminPanel: React.FC = () => {
           {[
             'dashboard',
             'users',
+            'teams',
             'gamemaster',
             'achievements',
             'content',
@@ -256,6 +258,9 @@ const AdminPanel: React.FC = () => {
           <div className="w-full pb-16">
             {/* GAMEMASTER */}
             {activeTab === 'gamemaster' && <AdminGameMaster onNotify={notify} confirm={confirm} />}
+
+            {/* TEAMS */}
+            {activeTab === 'teams' && <AdminTeams />}
 
             {/* ACHIEVEMENTS */}
             {activeTab === 'achievements' && (
