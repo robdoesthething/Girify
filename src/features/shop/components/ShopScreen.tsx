@@ -44,6 +44,8 @@ const ShopScreen: React.FC<ShopScreenProps> = ({ username }) => {
     all: [],
   });
 
+  const [userStats, setUserStats] = useState<any>(null); // Store user stats for unlock logic
+
   useEffect(() => {
     const loadData = async () => {
       if (!username) {
@@ -51,16 +53,21 @@ const ShopScreen: React.FC<ShopScreenProps> = ({ username }) => {
       }
       setLoading(true);
       try {
-        const [bal, owned, eq, items] = await Promise.all([
+        // Dynamic import to avoid circular dependency issues if any
+        const { getUserProfile } = await import('../../../utils/social');
+
+        const [bal, owned, eq, items, profile] = await Promise.all([
           getGiuros(username),
           getPurchasedCosmetics(username),
           getEquippedCosmetics(username),
           getShopItems(),
+          getUserProfile(username),
         ]);
         setBalance(bal);
         setPurchased(owned || []);
         setEquipped((eq as EquippedCosmetics) || {});
         setShopItems(items);
+        setUserStats(profile);
       } catch (e) {
         console.error('Error loading shop data:', e);
       }
@@ -69,10 +76,48 @@ const ShopScreen: React.FC<ShopScreenProps> = ({ username }) => {
     loadData();
   }, [username]);
 
+  const checkUnlockCondition = (item: ShopItem): { locked: boolean; reason?: string } => {
+    if (!item.unlockCondition || !userStats) {
+      return { locked: false };
+    }
+
+    const { type, value } = item.unlockCondition as { type: string; value: number };
+
+    if (type === 'streak') {
+      const currentStreak = userStats.streak || 0; // Use current streak
+      if (currentStreak < value) {
+        return { locked: true, reason: `Need ${value} day streak (Current: ${currentStreak})` };
+      }
+    }
+
+    if (type === 'gamesPlayed') {
+      const games = userStats.gamesPlayed || 0;
+      if (games < value) {
+        return { locked: true, reason: `Play ${value} games (Current: ${games})` };
+      }
+    }
+
+    if (type === 'bestScore') {
+      const best = userStats.bestScore || 0;
+      if (best < value) {
+        return { locked: true, reason: `Score > ${value} in one game (Best: ${best})` };
+      }
+    }
+
+    return { locked: false };
+  };
+
   const handlePurchase = async (item: ShopItem, _category: string) => {
     if (purchased.includes(item.id)) {
       setMessage({ type: 'error', text: t('alreadyOwned') });
       setTimeout(() => setMessage(null), 2000);
+      return;
+    }
+
+    const { locked, reason } = checkUnlockCondition(item);
+    if (locked) {
+      setMessage({ type: 'error', text: `Locked! ${reason}` });
+      setTimeout(() => setMessage(null), 3000);
       return;
     }
 
@@ -335,11 +380,21 @@ const ShopScreen: React.FC<ShopScreenProps> = ({ username }) => {
                       ) : (
                         <button
                           onClick={() => handlePurchase(item, activeTab)}
-                          disabled={balance < (item.cost || item.price || 0)}
-                          className={`flex-1 py-2 rounded-xl font-bold text-xs transition-all font-inter ${balance >= (item.cost || item.price || 0) ? 'bg-yellow-500 hover:bg-yellow-600 text-white shadow-lg shadow-yellow-500/20' : 'bg-slate-300 text-slate-500 cursor-not-allowed'}`}
+                          disabled={
+                            balance < (item.cost || item.price || 0) ||
+                            checkUnlockCondition(item).locked
+                          }
+                          className={`flex-1 py-2 rounded-xl font-bold text-xs transition-all font-inter
+                            ${
+                              checkUnlockCondition(item).locked
+                                ? 'bg-slate-300 dark:bg-slate-700 text-slate-500 cursor-not-allowed'
+                                : balance >= (item.cost || item.price || 0)
+                                  ? 'bg-yellow-500 hover:bg-yellow-600 text-white shadow-lg shadow-yellow-500/20'
+                                  : 'bg-slate-300 text-slate-500 cursor-not-allowed'
+                            }`}
                           type="button"
                         >
-                          {t('buy')}
+                          {checkUnlockCondition(item).locked ? '🔒 Locked' : t('buy')}
                         </button>
                       )}
                     </div>

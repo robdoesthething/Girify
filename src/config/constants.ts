@@ -39,7 +39,7 @@ export const GAME = {
   // Scoring
   POINTS: {
     CORRECT_BASE: 100,
-    TIME_BONUS_MAX: 50,
+    TIME_BONUS_MAX: 0, // Disabled per user request
     HINT_PENALTY: 20,
     STREAK_MULTIPLIER: 1.1,
   },

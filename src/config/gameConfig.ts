@@ -1,7 +1,7 @@
 import { FEEDBACK, GAME, REWARDS } from './constants';
 
 export const calculateScore = (
-  timeElapsed: number,
+  _timeElapsed: number,
   isCorrect: boolean,
   hintsUsed: number
 ): number => {
@@ -11,13 +11,8 @@ export const calculateScore = (
 
   let score = GAME.POINTS.CORRECT_BASE;
 
-  // Time bonus (faster = more points)
-  if (timeElapsed < GAME.TIME_BONUS_THRESHOLD) {
-    const timeBonus = Math.floor(
-      GAME.POINTS.TIME_BONUS_MAX * (1 - timeElapsed / GAME.TIME_BONUS_THRESHOLD)
-    );
-    score += timeBonus;
-  }
+  // Time bonus removed per user request (max score fixed at 1000)
+  // if (timeElapsed < GAME.TIME_BONUS_THRESHOLD) { ... }
 
   // Hint penalty
   score -= hintsUsed * GAME.POINTS.HINT_PENALTY;
