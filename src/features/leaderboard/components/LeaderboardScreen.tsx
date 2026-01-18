@@ -3,7 +3,9 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import TopBar from '../../../components/TopBar';
 import { useTheme } from '../../../context/ThemeContext';
+import { DISTRICTS } from '../../../data/districts';
 import { getLeaderboard } from '../../../utils/leaderboard';
+import { getDistrictRankings } from '../../../utils/social';
 
 interface ScoreEntry {
   id?: string;
@@ -16,12 +18,22 @@ interface LeaderboardScreenProps {
   currentUser?: string;
 }
 
+const ORDINAL_MOD_100 = 100;
+const ORDINAL_MOD_10 = 10;
+const ORDINAL_OFFSET = 20;
+
+const getOrdinal = (n: number) => {
+  const s = ['th', 'st', 'nd', 'rd'];
+  const v = n % ORDINAL_MOD_100;
+  return s[(v - ORDINAL_OFFSET) % ORDINAL_MOD_10] || s[v] || s[0];
+};
+
 const LeaderboardScreen: React.FC<LeaderboardScreenProps> = ({ currentUser }) => {
   const { theme, t } = useTheme();
   const navigate = useNavigate();
   const [scores, setScores] = useState<ScoreEntry[]>([]);
   const [loading, setLoading] = useState(true);
-  const [period, setPeriod] = useState<'all' | 'monthly' | 'weekly' | 'daily'>('all');
+  const [period, setPeriod] = useState<'all' | 'monthly' | 'weekly' | 'daily' | 'districts'>('all');
   const [error, setError] = useState<string | null>(null);
 
   const loadScores = useCallback(async () => {
@@ -33,13 +45,28 @@ const LeaderboardScreen: React.FC<LeaderboardScreenProps> = ({ currentUser }) =>
       const timeoutPromise = new Promise((_, reject) =>
         setTimeout(() => reject(new Error('Timeout: Server response took too long')), 5000)
       );
-      const dataPromise = getLeaderboard(period);
-      const data = (await Promise.race([dataPromise, timeoutPromise])) as ScoreEntry[] | null;
-
-      if (data === null) {
-        setScores([]);
+      if (period === 'districts') {
+        const districtsData = await getDistrictRankings();
+        // Map to ScoreEntry format
+        const mapped = districtsData.map((d: { id: string; score: number }) => {
+          const distName = DISTRICTS.find(di => di.id === d.id)?.name || d.id;
+          return {
+            id: d.id,
+            username: distName, // Display district name as username
+            score: d.score,
+            timestamp: Date.now(),
+          };
+        });
+        setScores(mapped);
       } else {
-        setScores(data.filter(s => s.username && s.username !== 'UNKNOWN'));
+        const dataPromise = getLeaderboard(period);
+        const data = (await Promise.race([dataPromise, timeoutPromise])) as ScoreEntry[] | null;
+
+        if (data === null) {
+          setScores([]);
+        } else {
+          setScores(data.filter(s => s.username && s.username !== 'UNKNOWN'));
+        }
       }
     } catch (err: unknown) {
       if (err instanceof Error) {
@@ -70,11 +97,12 @@ const LeaderboardScreen: React.FC<LeaderboardScreenProps> = ({ currentUser }) =>
     loadScores();
   }, [loadScores]);
 
-  const TABS: { id: 'all' | 'monthly' | 'weekly' | 'daily'; label: string }[] = [
+  const TABS: { id: 'all' | 'monthly' | 'weekly' | 'daily' | 'districts'; label: string }[] = [
     { id: 'all', label: t('allTime') },
     { id: 'monthly', label: t('monthly') },
     { id: 'weekly', label: t('weekly') },
     { id: 'daily', label: t('daily') },
+    { id: 'districts', label: t('clansTitle') || 'Districts' },
   ];
 
   return (
@@ -176,7 +204,9 @@ const LeaderboardScreen: React.FC<LeaderboardScreenProps> = ({ currentUser }) =>
                     dateStr = '--';
                   }
 
+                  const isDistrict = period === 'districts';
                   const isMe =
+                    !isDistrict &&
                     currentUser &&
                     s.username?.toLowerCase().replace(/^@/, '') ===
                       currentUser.toLowerCase().replace(/^@/, '');
@@ -188,6 +218,9 @@ const LeaderboardScreen: React.FC<LeaderboardScreenProps> = ({ currentUser }) =>
                       transition={{ delay: index * 0.05 }}
                       key={s.id || index}
                       onClick={() => {
+                        if (isDistrict) {
+                          return;
+                        }
                         const cleanClicked = s.username?.replace(/^@/, '') || '';
                         const myClean = currentUser?.replace(/^@/, '') || '';
                         if (cleanClicked.toLowerCase() === myClean.toLowerCase()) {
@@ -196,8 +229,8 @@ const LeaderboardScreen: React.FC<LeaderboardScreenProps> = ({ currentUser }) =>
                           navigate(`/user/${encodeURIComponent(s.username)}`);
                         }
                       }}
-                      role="button"
-                      tabIndex={0}
+                      role={isDistrict ? 'listitem' : 'button'}
+                      tabIndex={isDistrict ? -1 : 0}
                       onKeyDown={e => {
                         if (e.key === 'Enter' || e.key === ' ') {
                           const cleanClicked = s.username?.replace(/^@/, '') || '';
@@ -215,11 +248,19 @@ const LeaderboardScreen: React.FC<LeaderboardScreenProps> = ({ currentUser }) =>
                     >
                       <div className="flex items-center gap-4">
                         <div
-                          className={`w-8 h-8 flex items-center justify-center rounded-full font-black text-sm
+                          className={`w-8 h-8 flex items-center justify-center rounded-full font-black text-sm relative overflow-hidden
                           ${index === 0 ? 'bg-yellow-400 text-yellow-900' : index === 1 ? 'bg-slate-300 text-slate-900' : index === 2 ? 'bg-amber-600 text-white' : 'bg-slate-100 dark:bg-slate-700 opacity-50'}
                         `}
                         >
-                          {index + 1}
+                          {isDistrict
+                            ? DISTRICTS.find(d => d.teamName === s.username)?.logo && (
+                                <img
+                                  src={DISTRICTS.find(d => d.teamName === s.username)?.logo}
+                                  alt="logo"
+                                  className="w-full h-full object-cover"
+                                />
+                              )
+                            : index + 1}
                         </div>
                         <div>
                           <div className="font-bold text-sm flex items-center gap-1 font-inter">
@@ -229,8 +270,15 @@ const LeaderboardScreen: React.FC<LeaderboardScreenProps> = ({ currentUser }) =>
                                 YOU
                               </span>
                             )}
+                            {isDistrict && (
+                              <span className="text-[10px] opacity-50 font-normal ml-1">
+                                {DISTRICTS.find(d => d.teamName === s.username)?.name}
+                              </span>
+                            )}
                           </div>
-                          <div className="text-[10px] opacity-50 font-mono">{dateStr}</div>
+                          <div className="text-[10px] opacity-50 font-mono">
+                            {isDistrict ? index + 1 + getOrdinal(index + 1) : dateStr}
+                          </div>
                         </div>
                       </div>
 

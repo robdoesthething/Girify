@@ -1,0 +1,232 @@
+
+> girify@0.2.0 lint
+> eslint . --ext js,jsx,ts,tsx
+
+
+/Users/robertosanchezgallego/Desktop/Girify/src/AppRoutes.tsx
+   53:29  warning  Arrow function has too many lines (215). Maximum allowed is 150  max-lines-per-function
+  132:71  warning  Unexpected any. Specify a different type                         @typescript-eslint/no-explicit-any
+
+/Users/robertosanchezgallego/Desktop/Girify/src/components/AnnouncementModal.tsx
+  75:11  warning  Dangerous property 'dangerouslySetInnerHTML' found  react/no-danger
+
+/Users/robertosanchezgallego/Desktop/Girify/src/components/FeedbackScreen.tsx
+  11:55  warning  Arrow function has too many lines (164). Maximum allowed is 150  max-lines-per-function
+  37:30  warning  Unexpected any. Specify a different type                         @typescript-eslint/no-explicit-any
+
+/Users/robertosanchezgallego/Desktop/Girify/src/components/LandingPage.tsx
+   21:49  warning  Arrow function has too many lines (186). Maximum allowed is 150  max-lines-per-function
+   28:8   warning  No magic number: 4000                                            no-magic-numbers
+  136:22  warning  Do not use Array index in keys                                   react/no-array-index-key
+  139:44  warning  No magic number: 0.1                                             no-magic-numbers
+  139:50  warning  No magic number: 0.3                                             no-magic-numbers
+
+/Users/robertosanchezgallego/Desktop/Girify/src/components/NewsScreen.tsx
+   88:10  warning  Do not nest ternary expressions                     no-nested-ternary
+  132:19  warning  Dangerous property 'dangerouslySetInnerHTML' found  react/no-danger
+
+/Users/robertosanchezgallego/Desktop/Girify/src/components/SettingsScreen.tsx
+  16:3   warning  Prop name `autoAdvance` doesn’t match rule `^(is|has|should|can|will|did)[A-Z]([A-Za-z0-9]?)+`  react/boolean-prop-naming
+  21:55  warning  Arrow function has too many lines (391). Maximum allowed is 150                                 max-lines-per-function
+  71:21  warning  No magic number: 7                                                                              no-magic-numbers
+
+/Users/robertosanchezgallego/Desktop/Girify/src/components/TopBar.tsx
+  13:39  warning  Arrow function has too many lines (262). Maximum allowed is 150  max-lines-per-function
+
+/Users/robertosanchezgallego/Desktop/Girify/src/components/admin/AdminAnnouncements.tsx
+  134:23  warning  Do not nest ternary expressions  no-nested-ternary
+
+/Users/robertosanchezgallego/Desktop/Girify/src/components/admin/AdminConfig.tsx
+  8:49  warning  Arrow function has too many lines (170). Maximum allowed is 150  max-lines-per-function
+
+/Users/robertosanchezgallego/Desktop/Girify/src/components/admin/AdminFeedback.tsx
+   12:53  warning  Arrow function has too many lines (162). Maximum allowed is 150  max-lines-per-function
+   16:57  warning  No magic number: 50                                              no-magic-numbers
+  139:81  warning  No magic number: 50                                              no-magic-numbers
+
+/Users/robertosanchezgallego/Desktop/Girify/src/components/admin/AdminGiuros.tsx
+   26:49  warning  Arrow function has too many lines (217). Maximum allowed is 150  max-lines-per-function
+   51:91  warning  No magic number: 5                                               no-magic-numbers
+  250:53  warning  Do not nest ternary expressions                                  no-nested-ternary
+  250:83  warning  Do not nest ternary expressions                                  no-nested-ternary
+
+/Users/robertosanchezgallego/Desktop/Girify/src/components/admin/AdminShop.tsx
+  20:45  warning  Arrow function has too many lines (172). Maximum allowed is 150  max-lines-per-function
+
+/Users/robertosanchezgallego/Desktop/Girify/src/components/stories/TopBar.stories.tsx
+  12:23  warning  Unexpected empty method 'onOpenPage'      no-empty-function
+  13:27  warning  Unexpected empty method 'onTriggerLogin'  no-empty-function
+  14:21  warning  Unexpected empty method 'onLogout'        no-empty-function
+
+/Users/robertosanchezgallego/Desktop/Girify/src/context/LoadingContext.tsx
+  65:14  warning  Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components  react-refresh/only-export-components
+
+/Users/robertosanchezgallego/Desktop/Girify/src/context/ThemeContext.tsx
+  21:14  warning  Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components  react-refresh/only-export-components
+  27:26  warning  Unexpected empty method 'changeTheme'                                                                                           no-empty-function
+  29:29  warning  Unexpected empty method 'changeLanguage'                                                                                        no-empty-function
+  30:26  warning  Unexpected empty method 'toggleTheme'                                                                                           no-empty-function
+  35:22  warning  Unexpected empty method 'setZoom'                                                                                               no-empty-function
+  71:20  warning  Unexpected empty arrow function                                                                                                 no-empty-function
+
+/Users/robertosanchezgallego/Desktop/Girify/src/data/curiosities.ts
+  399:30  error    Expected { after 'if' condition  curly
+  400:30  error    Expected { after 'if' condition  curly
+  438:51  warning  No magic number: 3               no-magic-numbers
+
+/Users/robertosanchezgallego/Desktop/Girify/src/features/auth/components/RegisterPanel.tsx
+   46:25  warning  No magic number: 3                                               no-magic-numbers
+   65:54  warning  No magic number: 9000                                            no-magic-numbers
+   69:60  warning  No magic number: 20                                              no-magic-numbers
+  110:53  warning  Arrow function has too many lines (321). Maximum allowed is 150  max-lines-per-function
+  144:63  warning  Unexpected any. Specify a different type                         @typescript-eslint/no-explicit-any
+  147:71  warning  Unexpected any. Specify a different type                         @typescript-eslint/no-explicit-any
+  276:46  warning  Unexpected any. Specify a different type                         @typescript-eslint/no-explicit-any
+  399:29  error    Expected { after 'if' condition                                  curly
+  449:14  warning  Do not nest ternary expressions                                  no-nested-ternary
+
+/Users/robertosanchezgallego/Desktop/Girify/src/features/auth/hooks/useAuth.ts
+  180:13  warning  No magic number: 5                        no-magic-numbers
+  226:16  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  305:72  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/Users/robertosanchezgallego/Desktop/Girify/src/features/friends/components/FriendsScreen.tsx
+   48:53  warning  Arrow function has too many lines (402). Maximum allowed is 150  max-lines-per-function
+   53:44  warning  Unexpected any. Specify a different type                         @typescript-eslint/no-explicit-any
+   58:54  warning  Unexpected any. Specify a different type                         @typescript-eslint/no-explicit-any
+  118:43  warning  No magic number: 3000                                            no-magic-numbers
+
+/Users/robertosanchezgallego/Desktop/Girify/src/features/game/components/GameScreen.tsx
+   17:13  warning  Unexpected any. Specify a different type                         @typescript-eslint/no-explicit-any
+   35:41  warning  Arrow function has too many lines (244). Maximum allowed is 150  max-lines-per-function
+   74:10  warning  No magic number: 1500                                            no-magic-numbers
+  140:49  warning  Unexpected any. Specify a different type                         @typescript-eslint/no-explicit-any
+  151:47  warning  Unexpected any. Specify a different type                         @typescript-eslint/no-explicit-any
+  159:49  warning  Unexpected any. Specify a different type                         @typescript-eslint/no-explicit-any
+
+/Users/robertosanchezgallego/Desktop/Girify/src/features/game/components/MapArea.tsx
+  106:18  warning  Unexpected empty arrow function  no-empty-function
+  300:28  warning  Do not use Array index in keys   react/no-array-index-key
+
+/Users/robertosanchezgallego/Desktop/Girify/src/features/game/components/OnboardingTour.tsx
+  128:22  warning  Do not use Array index in keys  react/no-array-index-key
+
+/Users/robertosanchezgallego/Desktop/Girify/src/features/game/components/Quiz/Hints.tsx
+  19:37  warning  No magic number: 3  no-magic-numbers
+
+/Users/robertosanchezgallego/Desktop/Girify/src/features/game/components/Quiz/NextButton.tsx
+  10:3   warning  Prop name `disabled` doesn’t match rule `^(is|has|should|can|will|did)[A-Z]([A-Za-z0-9]?)+`  react/boolean-prop-naming
+  27:17  warning  Do not nest ternary expressions                                                              no-nested-ternary
+
+/Users/robertosanchezgallego/Desktop/Girify/src/features/game/components/Quiz/Options.tsx
+  13:3  warning  'correctName' PropType is defined but prop is never used                                        react/no-unused-prop-types
+  14:3  warning  Prop name `autoAdvance` doesn’t match rule `^(is|has|should|can|will|did)[A-Z]([A-Za-z0-9]?)+`  react/boolean-prop-naming
+  15:3  warning  Prop name `disabled` doesn’t match rule `^(is|has|should|can|will|did)[A-Z]([A-Za-z0-9]?)+`     react/boolean-prop-naming
+
+/Users/robertosanchezgallego/Desktop/Girify/src/features/game/components/StreetsFetcher.tsx
+    5:34  warning  Arrow function has too many lines (262). Maximum allowed is 150  max-lines-per-function
+    8:42  warning  Unexpected any. Specify a different type                         @typescript-eslint/no-explicit-any
+  111:48  warning  No magic number: 4                                               no-magic-numbers
+  115:40  warning  No magic number: 5                                               no-magic-numbers
+  116:40  warning  No magic number: 5                                               no-magic-numbers
+  149:58  warning  No magic number: 3                                               no-magic-numbers
+  150:58  warning  No magic number: 4                                               no-magic-numbers
+
+/Users/robertosanchezgallego/Desktop/Girify/src/features/game/components/SummaryScreen.tsx
+  34:53  warning  Arrow function has too many lines (212). Maximum allowed is 150  max-lines-per-function
+
+/Users/robertosanchezgallego/Desktop/Girify/src/features/game/hooks/useGameState.ts
+  57:29  warning  Arrow function has too many lines (151). Maximum allowed is 150  max-lines-per-function
+
+/Users/robertosanchezgallego/Desktop/Girify/src/features/game/hooks/useStreets.ts
+   84:13  warning  Blocks are nested too deeply (5). Maximum allowed is 4  max-depth
+   84:33  warning  No magic number: 3                                      no-magic-numbers
+   92:26  warning  No magic number: 3                                      no-magic-numbers
+  113:24  warning  No magic number: 3                                      no-magic-numbers
+
+/Users/robertosanchezgallego/Desktop/Girify/src/features/leaderboard/components/LeaderboardScreen.tsx
+   31:61  warning  Arrow function has too many lines (261). Maximum allowed is 150  max-lines-per-function
+   46:87  warning  No magic number: 5000                                            no-magic-numbers
+  162:14  warning  Do not nest ternary expressions                                  no-nested-ternary
+  169:17  warning  Do not nest ternary expressions                                  no-nested-ternary
+  218:52  warning  No magic number: 0.05                                            no-magic-numbers
+  246:27  warning  Do not nest ternary expressions                                  no-nested-ternary
+  252:29  warning  Do not nest ternary expressions                                  no-nested-ternary
+  252:77  warning  Do not nest ternary expressions                                  no-nested-ternary
+
+/Users/robertosanchezgallego/Desktop/Girify/src/features/profile/components/EditProfileModal.tsx
+  18:59  warning  Arrow function has too many lines (151). Maximum allowed is 150  max-lines-per-function
+
+/Users/robertosanchezgallego/Desktop/Girify/src/features/profile/components/ProfileScreen.tsx
+   34:36  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  480:53  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  481:34  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  482:38  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  483:34  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  489:33  warning  No magic number: 8                        no-magic-numbers
+  490:48  warning  No magic number: 4                        no-magic-numbers
+  491:45  warning  No magic number: 4                        no-magic-numbers
+  491:48  warning  No magic number: 6                        no-magic-numbers
+  492:45  warning  No magic number: 6                        no-magic-numbers
+  492:48  warning  No magic number: 8                        no-magic-numbers
+  628:50  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/Users/robertosanchezgallego/Desktop/Girify/src/features/profile/components/PublicProfileScreen.tsx
+   22:65  warning  Arrow function has too many lines (375). Maximum allowed is 150  max-lines-per-function
+   37:42  warning  Unexpected any. Specify a different type                         @typescript-eslint/no-explicit-any
+  214:20  warning  Do not nest ternary expressions                                  no-nested-ternary
+  226:44  warning  No magic number: 6                                               no-magic-numbers
+  243:44  warning  No magic number: 6                                               no-magic-numbers
+  245:49  warning  No magic number: 6                                               no-magic-numbers
+  253:16  warning  Do not nest ternary expressions                                  no-nested-ternary
+  340:43  warning  No magic number: 5                                               no-magic-numbers
+  342:34  warning  Do not use Array index in keys                                   react/no-array-index-key
+  370:26  warning  Do not nest ternary expressions                                  no-nested-ternary
+
+/Users/robertosanchezgallego/Desktop/Girify/src/features/shop/components/ShopScreen.tsx
+   26:47  warning  Arrow function has too many lines (437). Maximum allowed is 150  max-lines-per-function
+   47:46  warning  Unexpected any. Specify a different type                         @typescript-eslint/no-explicit-any
+  113:42  warning  No magic number: 2000                                            no-magic-numbers
+  120:42  warning  No magic number: 3000                                            no-magic-numbers
+  127:42  warning  No magic number: 2000                                            no-magic-numbers
+  136:42  warning  No magic number: 2000                                            no-magic-numbers
+  142:42  warning  No magic number: 2000                                            no-magic-numbers
+  160:40  warning  No magic number: 2000                                            no-magic-numbers
+  389:31  warning  Do not nest ternary expressions                                  no-nested-ternary
+
+/Users/robertosanchezgallego/Desktop/Girify/src/types/game.ts
+  9:18  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/Users/robertosanchezgallego/Desktop/Girify/src/utils/__tests__/firebase.test.ts
+  163:77  warning  Unexpected empty arrow function  no-empty-function
+  174:77  warning  Unexpected empty arrow function  no-empty-function
+  217:83  warning  Unexpected empty arrow function  no-empty-function
+  283:83  warning  Unexpected empty arrow function  no-empty-function
+
+/Users/robertosanchezgallego/Desktop/Girify/src/utils/configService.ts
+  27:19  warning  No magic number: 5   no-magic-numbers
+  27:23  warning  No magic number: 60  no-magic-numbers
+
+/Users/robertosanchezgallego/Desktop/Girify/src/utils/dailyChallenge.ts
+  11:28  warning  No magic number: 60  no-magic-numbers
+  11:33  warning  No magic number: 60  no-magic-numbers
+  12:30  warning  No magic number: 60  no-magic-numbers
+  88:46  warning  No magic number: 4   no-magic-numbers
+  89:44  warning  No magic number: 4   no-magic-numbers
+  89:47  warning  No magic number: 6   no-magic-numbers
+  90:42  warning  No magic number: 6   no-magic-numbers
+  90:45  warning  No magic number: 8   no-magic-numbers
+  95:64  warning  No magic number: 3   no-magic-numbers
+  96:64  warning  No magic number: 3   no-magic-numbers
+  97:52  warning  No magic number: 3   no-magic-numbers
+  98:52  warning  No magic number: 4   no-magic-numbers
+
+/Users/robertosanchezgallego/Desktop/Girify/src/utils/leaderboard.ts
+  170:30  warning  No magic number: 6  no-magic-numbers
+
+/Users/robertosanchezgallego/Desktop/Girify/src/utils/quests.ts
+  45:69  warning  No magic number: 500  no-magic-numbers
+
+✖ 144 problems (3 errors, 141 warnings)
+  3 errors and 0 warnings potentially fixable with the `--fix` option.
+

@@ -8,6 +8,7 @@ import {
 import { motion } from 'framer-motion';
 import { useEffect, useState } from 'react';
 import { useTheme } from '../../../context/ThemeContext';
+import { DISTRICTS } from '../../../data/districts';
 import { auth, googleProvider } from '../../../firebase';
 import { ensureUserProfile, getUserByEmail, recordReferral } from '../../../utils/social';
 import { storage } from '../../../utils/storage';
@@ -123,6 +124,7 @@ const RegisterPanel: React.FC<RegisterPanelProps> = ({
   const [lastName, setLastName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [district, setDistrict] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
@@ -205,8 +207,8 @@ const RegisterPanel: React.FC<RegisterPanelProps> = ({
       setError('');
 
       if (isSignUp) {
-        if (!firstName || !lastName) {
-          setError(t('enterYourName') || 'Please enter your first and last name');
+        if (!firstName || !lastName || !district) {
+          setError(t('fillAllFields') || 'Please enter all fields including district');
           setLoading(false);
           return;
         }
@@ -230,6 +232,7 @@ const RegisterPanel: React.FC<RegisterPanelProps> = ({
           realName,
           avatarId,
           email,
+          district,
         });
 
         const referrer = storage.get('girify_referrer', '');
@@ -345,30 +348,86 @@ const RegisterPanel: React.FC<RegisterPanelProps> = ({
 
         <form onSubmit={handleEmailAuth} className="space-y-3">
           {isSignUp && (
-            <div className="flex gap-3">
-              <input
-                type="text"
-                placeholder={t('firstName') || 'First Name'}
-                value={firstName}
-                onChange={e => setFirstName(e.target.value)}
-                className={`w-1/2 px-4 py-3 rounded-xl border font-medium outline-none focus:ring-2 focus:ring-sky-500 transition-all ${
+            <>
+              <div className="flex gap-3">
+                <input
+                  type="text"
+                  placeholder={t('firstName') || 'First Name'}
+                  value={firstName}
+                  onChange={e => setFirstName(e.target.value)}
+                  className={`w-1/2 px-4 py-3 rounded-xl border font-medium outline-none focus:ring-2 focus:ring-sky-500 transition-all ${
+                    theme === 'dark'
+                      ? 'bg-slate-800 border-slate-700 text-white placeholder-slate-600'
+                      : 'bg-white border-slate-200 text-slate-900 placeholder-slate-400'
+                  }`}
+                />
+                <input
+                  type="text"
+                  placeholder={t('lastName') || 'Last Name'}
+                  value={lastName}
+                  onChange={e => setLastName(e.target.value)}
+                  className={`w-1/2 px-4 py-3 rounded-xl border font-medium outline-none focus:ring-2 focus:ring-sky-500 transition-all ${
+                    theme === 'dark'
+                      ? 'bg-slate-800 border-slate-700 text-white placeholder-slate-600'
+                      : 'bg-white border-slate-200 text-slate-900 placeholder-slate-400'
+                  }`}
+                />
+              </div>
+              <select
+                value={district}
+                onChange={e => setDistrict(e.target.value)}
+                className={`w-full px-4 py-3 rounded-xl border font-medium outline-none focus:ring-2 focus:ring-sky-500 transition-all appearance-none ${
                   theme === 'dark'
                     ? 'bg-slate-800 border-slate-700 text-white placeholder-slate-600'
                     : 'bg-white border-slate-200 text-slate-900 placeholder-slate-400'
                 }`}
-              />
-              <input
-                type="text"
-                placeholder={t('lastName') || 'Last Name'}
-                value={lastName}
-                onChange={e => setLastName(e.target.value)}
-                className={`w-1/2 px-4 py-3 rounded-xl border font-medium outline-none focus:ring-2 focus:ring-sky-500 transition-all ${
-                  theme === 'dark'
-                    ? 'bg-slate-800 border-slate-700 text-white placeholder-slate-600'
-                    : 'bg-white border-slate-200 text-slate-900 placeholder-slate-400'
-                }`}
-              />
-            </div>
+              >
+                <option value="" disabled>
+                  {t('selectDistrict') || 'Select District'}
+                </option>
+                {DISTRICTS.map(d => (
+                  <option key={d.id} value={d.id}>
+                    {d.name}
+                  </option>
+                ))}
+              </select>
+
+              {district && (
+                <div className="mt-4 p-4 rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 flex items-center gap-4 animate-fadeIn">
+                  {(() => {
+                    const d = DISTRICTS.find(dist => dist.id === district);
+                    if (!d) {
+                      return null;
+                    }
+                    return (
+                      <>
+                        <div
+                          className={`w-16 h-16 rounded-full bg-gradient-to-br ${d.color} p-0.5 shadow-lg`}
+                        >
+                          <div className="w-full h-full rounded-full bg-slate-900 flex items-center justify-center overflow-hidden border-2 border-white/20">
+                            <img
+                              src={d.logo}
+                              alt={d.teamName}
+                              className="w-full h-full object-cover"
+                            />
+                          </div>
+                        </div>
+                        <div>
+                          <p className="text-xs font-bold opacity-50 uppercase tracking-widest">
+                            {t('youAreJoining') || 'You are joining'}
+                          </p>
+                          <h3
+                            className={`text-xl font-black bg-gradient-to-r ${d.color} bg-clip-text text-transparent`}
+                          >
+                            {d.teamName}
+                          </h3>
+                        </div>
+                      </>
+                    );
+                  })()}
+                </div>
+              )}
+            </>
           )}
           <input
             type="email"

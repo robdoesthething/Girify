@@ -2,6 +2,7 @@ import { motion } from 'framer-motion';
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { STORAGE_KEYS } from '../../../config/constants';
+import { useTheme } from '../../../context/ThemeContext';
 import { getCuriosityByStreets } from '../../../data/curiosities';
 import { calculateStreak } from '../../../utils/stats';
 import { storage } from '../../../utils/storage';
@@ -41,14 +42,15 @@ const SummaryScreen: React.FC<SummaryScreenProps> = ({
   t,
 }) => {
   const navigate = useNavigate();
+  const { language } = useTheme();
   const [view, setView] = useState<'curiosity' | 'actions'>('curiosity');
   const [shareStatus, setShareStatus] = useState<string | null>(null);
 
   // Max score is 100 per question (User request: max 1000 total)
   const maxPossibleScore = total * 100;
   const curiosity = useMemo<Curiosity>(
-    () => getCuriosityByStreets(quizStreets) as Curiosity,
-    [quizStreets]
+    () => getCuriosityByStreets(quizStreets, undefined, language) as Curiosity,
+    [quizStreets, language]
   );
   const [displayImage, setDisplayImage] = useState(curiosity.image);
 
