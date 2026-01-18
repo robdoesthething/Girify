@@ -14,7 +14,7 @@ interface TeamStats {
 }
 
 const AdminTeams: React.FC = () => {
-  const { theme } = useTheme();
+  const { theme, t } = useTheme();
   const [stats, setStats] = useState<TeamStats[]>([]);
   const [loading, setLoading] = useState(true);
   const [sortField, setSortField] = useState<keyof TeamStats>('score');
@@ -94,19 +94,21 @@ const AdminTeams: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="p-8 text-center text-slate-500 animate-pulse">Loading team statistics...</div>
+      <div className="p-8 text-center text-slate-500 animate-pulse">
+        {t('loadingTeamStats') || 'Loading team statistics...'}
+      </div>
     );
   }
 
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
-        <h2 className="text-2xl font-black">District Teams</h2>
+        <h2 className="text-2xl font-black">{t('districtTeams') || 'District Teams'}</h2>
         <button
           onClick={loadData}
           className="px-4 py-2 text-sm bg-sky-500 text-white rounded-lg hover:bg-sky-600 transition-colors"
         >
-          Refresh Data
+          {t('refreshData') || 'Refresh Data'}
         </button>
       </div>
 
@@ -124,7 +126,7 @@ const AdminTeams: React.FC = () => {
                   onClick={() => handleSort('name')}
                 >
                   <div className="flex items-center gap-1">
-                    District <SortIcon field="name" />
+                    {t('district') || 'District'} <SortIcon field="name" />
                   </div>
                 </th>
                 <th
@@ -132,7 +134,7 @@ const AdminTeams: React.FC = () => {
                   onClick={() => handleSort('teamName')}
                 >
                   <div className="flex items-center gap-1">
-                    Team <SortIcon field="teamName" />
+                    {t('team') || 'Team'} <SortIcon field="teamName" />
                   </div>
                 </th>
                 <th
@@ -140,7 +142,7 @@ const AdminTeams: React.FC = () => {
                   onClick={() => handleSort('members')}
                 >
                   <div className="flex items-center justify-end gap-1">
-                    Members <SortIcon field="members" />
+                    {t('members') || 'Members'} <SortIcon field="members" />
                   </div>
                 </th>
                 <th
@@ -148,7 +150,7 @@ const AdminTeams: React.FC = () => {
                   onClick={() => handleSort('score')}
                 >
                   <div className="flex items-center justify-end gap-1">
-                    Total Score <SortIcon field="score" />
+                    {t('totalScore') || 'Total Score'} <SortIcon field="score" />
                   </div>
                 </th>
                 <th
@@ -156,7 +158,7 @@ const AdminTeams: React.FC = () => {
                   onClick={() => handleSort('avgScore')}
                 >
                   <div className="flex items-center justify-end gap-1">
-                    Avg Score <SortIcon field="avgScore" />
+                    {t('avgScore') || 'Avg Score'} <SortIcon field="avgScore" />
                   </div>
                 </th>
               </tr>
