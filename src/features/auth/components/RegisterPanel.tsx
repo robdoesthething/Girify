@@ -163,6 +163,7 @@ const RegisterPanel: React.FC<RegisterPanelProps> = ({
 
   // Shared logic for processing Google user after popup or redirect
   const processGoogleUser = async (user: import('firebase/auth').User) => {
+    console.warn('[AuthDebug] Processing Google User:', user.uid, user.email);
     let handle = user.displayName || '';
     let avatarId = getRandomAvatarId();
     const fullName = user.displayName || user.email?.split('@')[0] || 'User';
@@ -170,9 +171,12 @@ const RegisterPanel: React.FC<RegisterPanelProps> = ({
     // Critical: Check by UID first (most reliable), then by email
     const { getUserByUid } = await import('../../../utils/social');
     let existingProfile = (await getUserByUid(user.uid)) as any;
+    console.warn('[AuthDebug] Profile check by UID:', existingProfile ? 'Found' : 'Not Found');
 
     if (!existingProfile) {
+      console.warn('[AuthDebug] Checking by email fallback...');
       existingProfile = (await getUserByEmail(user.email || '')) as any;
+      console.warn('[AuthDebug] Profile check by Email:', existingProfile ? 'Found' : 'Not Found');
     }
 
     if (existingProfile) {
@@ -186,6 +190,7 @@ const RegisterPanel: React.FC<RegisterPanelProps> = ({
       if (!handle.startsWith('@')) {
         handle = `@${handle}`;
       }
+      console.warn('[AuthDebug] New user, generated handle:', handle);
 
       if (user.displayName !== handle) {
         await updateProfile(user, { displayName: handle });
@@ -194,6 +199,7 @@ const RegisterPanel: React.FC<RegisterPanelProps> = ({
 
     // Force district selection for new users or those without a district
     if (!existingProfile?.district) {
+      console.warn('[AuthDebug] No district in profile. Stopping to show District Modal.');
       setPendingGoogleUser({
         user,
         handle,
@@ -205,6 +211,8 @@ const RegisterPanel: React.FC<RegisterPanelProps> = ({
       return;
     }
 
+    console.warn('[AuthDebug] District found in profile:', existingProfile.district);
+    console.warn('[AuthDebug] Calling ensureUserProfile...');
     await ensureUserProfile(handle, user.uid, {
       realName: fullName,
       avatarId,
@@ -212,6 +220,7 @@ const RegisterPanel: React.FC<RegisterPanelProps> = ({
       district: existingProfile.district,
     });
 
+    console.warn('[AuthDebug] Calls handlePostLogin...');
     await handlePostLogin(handle, true);
   };
 
@@ -239,19 +248,24 @@ const RegisterPanel: React.FC<RegisterPanelProps> = ({
 
   const handleGoogleLogin = async () => {
     try {
+      console.warn('[AuthDebug] Starting Google Login...');
       setLoading(true);
       setError('');
 
       // Use redirect on mobile Safari (popups are blocked)
       if (isMobileSafari) {
+        console.warn('[AuthDebug] Mobile Safari detected, using redirect');
         await signInWithRedirect(auth, googleProvider);
         return; // Will be handled by getRedirectResult on page reload
       }
 
       // Use popup for desktop and other browsers
+      console.warn('[AuthDebug] Using popup for sign in');
       const result = await signInWithPopup(auth, googleProvider);
+      console.warn('[AuthDebug] Popup success, user:', result.user.uid);
       await processGoogleUser(result.user);
     } catch (err: unknown) {
+      console.error('[AuthDebug] Google Login Error:', err);
       const error = err instanceof Error ? err : new Error(String(err));
       setError(getAuthErrorMessage('auth/error', error.message));
       setLoading(false);
@@ -259,6 +273,7 @@ const RegisterPanel: React.FC<RegisterPanelProps> = ({
   };
 
   const handlePostLogin = async (handle: string, isExisting: boolean) => {
+    console.warn('[AuthDebug] handlePostLogin called for:', handle, 'Existing:', isExisting);
     const referrer = storage.get('girify_referrer', '');
     if (referrer && referrer !== handle && !isExisting) {
       await recordReferral(referrer, handle);
@@ -269,7 +284,10 @@ const RegisterPanel: React.FC<RegisterPanelProps> = ({
       storage.set('girify_joined', new Date().toLocaleDateString());
     }
     if (onRegister) {
+      console.warn('[AuthDebug] Calling onRegister callback...');
       onRegister(handle);
+    } else {
+      console.warn('[AuthDebug] NO onRegister callback defined!');
     }
 
     setLoading(false);
