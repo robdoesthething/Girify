@@ -13,6 +13,7 @@ import {
   where,
 } from 'firebase/firestore';
 import { SOCIAL } from '../config/constants';
+import { DISTRICTS } from '../data/districts';
 import { db } from '../firebase';
 import { getTodaySeed } from './dailyChallenge';
 import { updateUserGameStats } from './social';
@@ -397,7 +398,6 @@ export const getTeamLeaderboard = async (
     const teamScores: Record<string, { score: number; members: Set<string>; id: string }> = {};
 
     // Helper to find district
-    const { DISTRICTS } = require('../data/districts');
     const findDistrict = (key: string) => {
       if (!key) {
         return null;

@@ -129,6 +129,7 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
               src={cosmeticAvatar.image as string}
               alt="Avatar"
               className="w-full h-full object-cover"
+              style={{ imageRendering: 'pixelated', mixBlendMode: 'multiply' }}
             />
           ) : (
             legacyAvatar
@@ -296,6 +297,7 @@ const AchievementsList: React.FC<AchievementsListProps> = ({
                   src={badge.image}
                   alt={badge.name}
                   className="w-10 h-10 object-contain mb-1 drop-shadow-sm"
+                  style={{ imageRendering: 'pixelated', mixBlendMode: 'multiply' }}
                 />
               ) : (
                 <span className="text-3xl mb-1">{badge.emoji}</span>
@@ -326,6 +328,7 @@ const AchievementsList: React.FC<AchievementsListProps> = ({
                   src={selectedAchievement.image}
                   alt={selectedAchievement.name}
                   className="w-16 h-16 object-contain drop-shadow-md"
+                  style={{ imageRendering: 'pixelated', mixBlendMode: 'multiply' }}
                 />
               ) : (
                 <span className="text-4xl">{selectedAchievement.emoji}</span>
@@ -348,7 +351,12 @@ const AchievementsList: React.FC<AchievementsListProps> = ({
           <div className="flex items-center justify-between mb-2">
             <span className="text-xs font-bold opacity-60 font-inter">{t('nextAchievement')}</span>
             {nextBadge.image ? (
-              <img src={nextBadge.image} alt={nextBadge.name} className="w-8 h-8 object-contain" />
+              <img
+                src={nextBadge.image}
+                alt={nextBadge.name}
+                className="w-8 h-8 object-contain"
+                style={{ imageRendering: 'pixelated', mixBlendMode: 'multiply' }}
+              />
             ) : (
               <span className="text-lg">{nextBadge.emoji}</span>
             )}

@@ -225,7 +225,7 @@ const ShopScreen: React.FC<ShopScreenProps> = ({ username }) => {
           src={item.image}
           alt={item.name}
           className="w-full h-full object-contain"
-          style={{ imageRendering: 'pixelated' }}
+          style={{ imageRendering: 'pixelated', mixBlendMode: 'multiply' }}
         />
       );
     }
@@ -304,74 +304,58 @@ const ShopScreen: React.FC<ShopScreenProps> = ({ username }) => {
               <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-sky-500" />
             </div>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pb-20">
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 pb-20">
               {activeItems.map(item => {
                 const owned = isOwned(item.id);
                 const active = isEquipped(item.id);
+                const { locked, reason } = checkUnlockCondition(item);
 
                 return (
                   <div
                     key={item.id}
-                    className={`p-4 rounded-2xl border transition-all ${getItemCardClass(active)}`}
+                    className={`relative flex flex-col p-4 rounded-2xl border transition-all h-full ${getItemCardClass(active)} bg-white/50 dark:bg-slate-800/50 backdrop-blur-sm`}
                   >
-                    <div className="flex items-start justify-between mb-3">
-                      <div className="flex items-center gap-3">
-                        <div
-                          role="button"
-                          tabIndex={0}
-                          onClick={() => {
-                            if (activeTab === 'titles') {
-                              setFlavorModal(item);
-                            }
-                          }}
-                          onKeyDown={e => {
-                            if ((e.key === 'Enter' || e.key === ' ') && activeTab === 'titles') {
-                              setFlavorModal(item);
-                            }
-                          }}
-                          className={`w-12 h-12 rounded-xl bg-transparent flex items-center justify-center text-2xl relative overflow-hidden shrink-0 ${activeTab === 'titles' ? 'cursor-pointer hover:scale-105 transition-transform' : ''} border-2 border-slate-300 dark:border-slate-600 shadow-sm`}
-                          style={{ imageRendering: 'pixelated' }}
-                        >
-                          {renderItemIcon(item)}
-                        </div>
+                    {/* Locked Overlay */}
+                    {locked && !owned && (
+                      <div className="absolute inset-0 z-10 bg-slate-100/80 dark:bg-slate-900/80 backdrop-blur-[2px] rounded-2xl flex flex-col items-center justify-center text-center p-4">
+                        <span className="text-2xl mb-2">🔒</span>
+                        <p className="text-xs font-bold text-slate-500 dark:text-slate-400">
+                          {reason}
+                        </p>
+                      </div>
+                    )}
 
-                        <div>
-                          <h3 className="font-bold text-sm leading-tight font-inter">
-                            {t(item.name || '') || item.name}
-                          </h3>
-                          <p className="text-xs opacity-60 mt-1 line-clamp-2 font-inter">
-                            {activeTab === 'titles' && item.flavorText
-                              ? `&quot;${item.flavorText}&quot;`
-                              : t(item.description || '') || item.description}
-                          </p>
-                        </div>
+                    <div className="flex-1 flex flex-col items-center text-center mb-3">
+                      <div
+                        role="button"
+                        tabIndex={0}
+                        onClick={() => {
+                          if (activeTab === 'titles') {
+                            setFlavorModal(item);
+                          }
+                        }}
+                        className={`w-16 h-16 rounded-2xl mb-3 flex items-center justify-center text-3xl relative overflow-hidden shrink-0 ${activeTab === 'titles' ? 'cursor-pointer hover:scale-105 transition-transform shadow-md' : 'shadow-sm'} bg-slate-100 dark:bg-slate-700`}
+                        style={{ imageRendering: 'pixelated' }}
+                      >
+                        {renderItemIcon(item)}
                       </div>
 
-                      <div className="text-right ml-2 shrink-0">
-                        {owned ? (
-                          <span className="text-xs font-bold text-emerald-500 bg-emerald-500/20 px-2 py-1 rounded-full whitespace-nowrap font-inter">
-                            ✓ {t('owned')}
-                          </span>
-                        ) : (
-                          <div
-                            className="flex items-center gap-1 justify-end font-inter"
-                            aria-label={`Cost: ${item.cost || item.price || 0} Giuros`}
-                          >
-                            <img src="/giuro.png" alt="" className="h-4 w-auto object-contain" />
-                            <span className="font-black text-yellow-600 dark:text-yellow-400 text-sm">
-                              {item.cost || item.price || 0}
-                            </span>
-                          </div>
-                        )}
-                      </div>
+                      <h3 className="font-bold text-sm leading-tight font-inter mb-1 min-h-[1.25em]">
+                        {t(item.name || '') || item.name}
+                      </h3>
+                      <p className="text-xs opacity-60 line-clamp-2 font-inter leading-relaxed h-[2.5em]">
+                        {activeTab === 'titles' && item.flavorText
+                          ? `"${item.flavorText}"`
+                          : t(item.description || '') || item.description}
+                      </p>
                     </div>
 
-                    <div className="flex gap-2 mt-3">
+                    <div className="mt-auto pt-2 w-full">
                       {owned ? (
                         activeTab !== 'special' && (
                           <button
                             onClick={() => handleEquip(item, activeTab)}
-                            className={`flex-1 py-2 rounded-xl font-bold text-xs transition-all font-inter ${getEquipButtonClass(active)}`}
+                            className={`w-full py-2 rounded-xl font-bold text-xs transition-all font-inter shadow-sm ${getEquipButtonClass(active)}`}
                             type="button"
                           >
                             {active ? `✓ ${t('equipped')}` : t('equip')}
@@ -380,21 +364,23 @@ const ShopScreen: React.FC<ShopScreenProps> = ({ username }) => {
                       ) : (
                         <button
                           onClick={() => handlePurchase(item, activeTab)}
-                          disabled={
-                            balance < (item.cost || item.price || 0) ||
-                            checkUnlockCondition(item).locked
-                          }
-                          className={`flex-1 py-2 rounded-xl font-bold text-xs transition-all font-inter
+                          disabled={balance < (item.cost || item.price || 0) || locked}
+                          className={`w-full py-2 rounded-xl font-bold text-xs transition-all font-inter flex items-center justify-center gap-1.5
                             ${
-                              checkUnlockCondition(item).locked
-                                ? 'bg-slate-300 dark:bg-slate-700 text-slate-500 cursor-not-allowed'
+                              locked
+                                ? 'bg-slate-200 dark:bg-slate-700 text-slate-400 cursor-not-allowed opacity-0' // Hidden by overlay mainly
                                 : balance >= (item.cost || item.price || 0)
-                                  ? 'bg-yellow-500 hover:bg-yellow-600 text-white shadow-lg shadow-yellow-500/20'
-                                  : 'bg-slate-300 text-slate-500 cursor-not-allowed'
+                                  ? 'bg-yellow-500 hover:bg-yellow-600 text-white shadow-lg shadow-yellow-500/20 transform active:scale-95'
+                                  : 'bg-slate-200 dark:bg-slate-700 text-slate-400 cursor-not-allowed'
                             }`}
                           type="button"
                         >
-                          {checkUnlockCondition(item).locked ? '🔒 Locked' : t('buy')}
+                          <img
+                            src="/giuro.png"
+                            alt=""
+                            className="h-3 w-auto object-contain opacity-80"
+                          />
+                          {item.cost || item.price || 0}
                         </button>
                       )}
                     </div>
