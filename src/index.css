@@ -115,6 +115,9 @@
   /* Gradient text utilities */
   .text-gradient {
     @apply bg-clip-text text-transparent;
+    -webkit-box-decoration-break: clone;
+    box-decoration-break: clone;
+    padding-bottom: 0.1em; /* Prevents descender clipping */
   }
 
   .text-gradient-primary {

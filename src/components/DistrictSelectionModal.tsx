@@ -67,6 +67,7 @@ const DistrictSelectionModal: React.FC<DistrictSelectionModalProps> = ({
           <select
             value={district}
             onChange={e => setDistrict(e.target.value)}
+            aria-label={t('chooseATeam') || 'Choose a team'}
             className={`w-full px-4 py-3 rounded-xl border font-medium outline-none focus:ring-2 focus:ring-sky-500 transition-all appearance-none cursor-pointer ${
               theme === 'dark'
                 ? 'bg-slate-800 border-slate-700 text-white placeholder-slate-600'

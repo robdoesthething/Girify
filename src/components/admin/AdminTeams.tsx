@@ -166,11 +166,23 @@ const AdminTeams: React.FC = () => {
                 <tr key={team.id} className="hover:bg-black/5 transition-colors">
                   <td className="px-6 py-4 font-medium">{team.name}</td>
                   <td className="px-6 py-4">
-                    <span
-                      className={`font-black bg-gradient-to-r ${team.color} bg-clip-text text-transparent`}
-                    >
-                      {team.teamName}
-                    </span>
+                    <div className="flex items-center gap-2">
+                      {(() => {
+                        const district = DISTRICTS.find(d => d.id === team.id);
+                        return district?.logo ? (
+                          <img
+                            src={district.logo}
+                            alt=""
+                            className="w-6 h-6 rounded-full object-cover"
+                          />
+                        ) : null;
+                      })()}
+                      <span
+                        className={`font-black bg-gradient-to-r ${team.color} bg-clip-text text-transparent`}
+                      >
+                        {team.teamName}
+                      </span>
+                    </div>
                   </td>
                   <td className="px-6 py-4 text-right font-mono">
                     {team.members.toLocaleString()}
