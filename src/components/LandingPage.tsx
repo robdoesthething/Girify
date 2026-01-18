@@ -187,7 +187,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onLogin, theme }) => {
                             src={district.logo}
                             alt={district.teamName}
                             className="w-16 h-16 object-contain drop-shadow-lg"
-                            style={{ imageRendering: 'pixelated' }}
+                            style={{ imageRendering: 'pixelated', mixBlendMode: 'multiply' }}
                           />
                         </div>
                       </div>

@@ -390,7 +390,8 @@ export const getTeamLeaderboard = async (
 
     // Fetch individual scores for the period
     // Fetch individual scores for the period with higher limit to ensure team accuracy
-    const individualScores = await getLeaderboard(period, 1000);
+    // Using a very large limit to capture all active players for accurate team totals
+    const individualScores = await getLeaderboard(period, 10000);
 
     // Aggregate by team
     const teamScores: Record<string, { score: number; members: Set<string>; id: string }> = {};
@@ -414,7 +415,10 @@ export const getTeamLeaderboard = async (
       // Try resolving by team name first, then district ID
       const district = findDistrict(info.team) || findDistrict(info.district);
       if (district) {
-        normalizedUserTeamMap[user] = { teamName: district.teamName, id: district.id };
+        normalizedUserTeamMap[user.toLowerCase()] = {
+          teamName: district.teamName,
+          id: district.id,
+        };
       }
     });
 
