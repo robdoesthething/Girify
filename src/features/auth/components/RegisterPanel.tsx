@@ -398,7 +398,7 @@ const RegisterPanel: React.FC<RegisterPanelProps> = ({
                     src={d.logo}
                     alt={d.teamName}
                     className="w-8 h-8 object-contain"
-                    style={{ imageRendering: 'pixelated' }}
+                    style={{ imageRendering: 'pixelated', mixBlendMode: 'multiply' }}
                   />
                   <div className="flex-1 min-w-0">
                     <p
@@ -550,7 +550,7 @@ const RegisterPanel: React.FC<RegisterPanelProps> = ({
                         src={d.logo}
                         alt={d.teamName}
                         className="w-8 h-8 object-contain"
-                        style={{ imageRendering: 'pixelated' }}
+                        style={{ imageRendering: 'pixelated', mixBlendMode: 'multiply' }}
                       />
                       <div className="flex-1 min-w-0">
                         <p
