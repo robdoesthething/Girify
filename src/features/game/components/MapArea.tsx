@@ -375,4 +375,4 @@ const MapArea: React.FC<MapAreaProps> = ({
   }
 };
 
-export default MapArea;
+export default React.memo(MapArea);

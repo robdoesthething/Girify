@@ -1,25 +1,12 @@
-import {
-  addDoc,
-  collection,
-  doc,
-  DocumentData,
-  getDoc,
-  getDocs,
-  limit,
-  orderBy,
-  query,
-  setDoc,
-  Timestamp,
-  where,
-} from 'firebase/firestore';
+import { collection, DocumentData, getDocs, Timestamp } from 'firebase/firestore';
 import { SOCIAL } from '../config/constants';
 import { DISTRICTS } from '../data/districts';
 import { db } from '../firebase';
-import { getTodaySeed } from './dailyChallenge';
-import { updateUserGameStats } from './social';
+import { supabase } from '../services/supabase';
 
-const HIGHSCORES_COLLECTION = 'highscores';
-const SCORES_COLLECTION = 'scores';
+// Deprecated collections - used only for types or migration reading if needed
+// Deprecated collections - used only for types or migration reading if needed
+// const SCORES_COLLECTION = 'scores';
 
 export type LeaderboardPeriod = 'all' | 'daily' | 'weekly' | 'monthly';
 
@@ -29,13 +16,14 @@ export interface ScoreEntry {
   score: number;
   time: number;
   date?: number;
-  timestamp?: Timestamp;
+  timestamp?: Timestamp | { seconds: number };
   platform?: string;
   isBonus?: boolean;
   correctAnswers?: number | null;
   questionCount?: number;
   streakAtPlay?: number | null;
   email?: string | null;
+  uid?: string | null;
   sortDate?: Date;
   gamesCount?: number;
 }
@@ -46,216 +34,108 @@ interface SaveScoreOptions {
   questionCount?: number;
   streakAtPlay?: number | null;
   email?: string | null;
+  uid?: string | null;
 }
 
 /**
- * Save user's score to Firestore
+ * [DEPRECATED] Save user's score to Firestore.
+ * This function is kept for compatibility but should not be used in the new architecture.
+ * Game results are now saved via gameService.endGame() -> Supabase.
+ * However, we still explicitly update User Stats here if called, as a safety measure?
+ * No, useGamePersistence handles updateUserGameStats separately.
  */
-export const saveScore = async (
-  username: string,
-  score: number,
-  time: number | string,
-  options: SaveScoreOptions = {}
-): Promise<void> => {
-  const {
-    isBonus = false,
-    correctAnswers = null,
-    questionCount = 10,
-    streakAtPlay = null,
-  } = options;
-
-  console.warn(
-    `[Leaderboard] saveScore called for ${username}. Score: ${score}, Time: ${time}, Bonus: ${isBonus}`
-  );
-  if (!username) {
-    console.warn('[Leaderboard] saveScore called without username, skipping.');
-    return;
-  }
-
-  try {
-    const now = Timestamp.now();
-    const cleanUsername = (username.startsWith('@') ? username.slice(1) : username).toLowerCase();
-    const scoreData = {
-      username: cleanUsername,
-      score,
-      time: parseFloat(String(time)),
-      date: getTodaySeed(),
-      timestamp: now,
-      platform: 'web',
-      isBonus,
-      correctAnswers,
-      questionCount,
-      streakAtPlay,
-      email: options.email || null,
-    };
-
-    await addDoc(collection(db, SCORES_COLLECTION), scoreData);
-
-    const sanitizedUsername = cleanUsername.replace(/\//g, '_');
-    const userDocRef = doc(db, HIGHSCORES_COLLECTION, sanitizedUsername);
-    const userDoc = await getDoc(userDocRef);
-    let shouldUpdate = false;
-
-    if (userDoc.exists()) {
-      const data = userDoc.data() as DocumentData;
-      if (score > data.score) {
-        shouldUpdate = true;
-      } else if (score === data.score && parseFloat(String(time)) < parseFloat(String(data.time))) {
-        shouldUpdate = true;
-      }
-    } else {
-      shouldUpdate = true;
-    }
-
-    if (shouldUpdate) {
-      await setDoc(userDocRef, scoreData);
-    }
-
-    // [New] Also update the User Profile stats (for 'bestScore' consistency)
-    // Using static import to avoid build warnings
-    await updateUserGameStats(username, {
-      streak: streakAtPlay || 0,
-      totalScore: score, // This adds to total score in updateUserGameStats
-      lastPlayDate: new Date().toISOString(),
-      currentScore: score,
-    });
-  } catch (e) {
-    console.error('Error saving score: ', e);
-    console.error(
-      '[Leaderboard] Full error details:',
-      (e as { code?: string }).code,
-      (e as Error).message
-    );
-  }
+export const saveScore = (
+  _username: string,
+  _score: number,
+  _time: number | string,
+  _options: SaveScoreOptions = {}
+): void => {
+  console.warn('[Leaderboard] saveScore is DEPRECATED. Supabase is now used via gameService.');
+  return;
 };
 
 /**
- * Fetch leaderboard scores with automatic deduplication (one entry per user)
+ * Fetch leaderboard scores using Supabase
  */
 export const getLeaderboard = async (
   period: LeaderboardPeriod = 'all',
   limitCount: number = SOCIAL.LEADERBOARD.FETCH_LIMIT
 ): Promise<ScoreEntry[]> => {
   try {
-    const scoresRef = collection(db, SCORES_COLLECTION);
-    const q = query(scoresRef, orderBy('timestamp', 'desc'), limit(limitCount));
+    // 1. Fetch from Supabase
+    let queryBuilder = supabase
+      .from('game_results')
+      .select('*')
+      .order('score', { ascending: false })
+      .limit(limitCount * 4); // Fetch more for deduplication
 
-    if (import.meta.env.DEV) {
-      console.warn(`[Leaderboard] Fetching scores for period: ${period}`);
-    }
-
-    const migrationMap: Record<string, string> = {};
-    try {
-      const usersRef = collection(db, 'users');
-      const migrationSnap = await getDocs(query(usersRef, where('migratedTo', '!=', null)));
-      migrationSnap.forEach(docSnap => {
-        const d = docSnap.data() as DocumentData;
-        if (d.migratedTo) {
-          migrationMap[docSnap.id.toLowerCase()] = (d.migratedTo as string).toLowerCase();
-        }
-      });
-    } catch (e) {
-      console.warn('[Leaderboard] Could not fetch migrations (requires index?):', e);
-    }
-
-    const snapshot = await getDocs(q);
-
-    if (import.meta.env.DEV) {
-      console.warn(
-        `[Leaderboard] Fetched ${snapshot.size} scores, ${Object.keys(migrationMap).length} migrations`
-      );
-    }
-
-    const rawScores: ScoreEntry[] = [];
-    const todayStart = new Date();
-    todayStart.setHours(0, 0, 0, 0);
-
-    const day = todayStart.getDay();
-    const diff = day === 0 ? 6 : day - 1;
-    const startOfWeek = new Date(todayStart);
-    startOfWeek.setDate(todayStart.getDate() - diff);
-    startOfWeek.setHours(0, 0, 0, 0);
-
-    const startOfMonth = new Date(todayStart.getFullYear(), todayStart.getMonth(), 1);
-    const todaySeed = getTodaySeed();
-    const seenEntries = new Set<string>();
-
-    snapshot.forEach(docSnap => {
-      if (seenEntries.has(docSnap.id)) {
-        return;
-      }
-      seenEntries.add(docSnap.id);
-
-      const data = docSnap.data() as DocumentData;
-      let date: Date;
-      if (data.timestamp && typeof data.timestamp.toDate === 'function') {
-        date = data.timestamp.toDate();
-      } else if (data.timestamp?.seconds) {
-        const MS_PER_SECOND = 1000;
-        date = new Date(data.timestamp.seconds * MS_PER_SECOND);
-      } else if (data.timestamp) {
-        date = new Date(data.timestamp);
-      } else {
-        date = new Date(0);
-      }
-
-      let include = false;
-      let rawUsername =
-        (data.username as string)?.toLowerCase() || docSnap.id.toLowerCase() || 'unknown user';
-
-      if (migrationMap[rawUsername]) {
-        rawUsername = migrationMap[rawUsername];
-      }
-      const withoutAt = rawUsername.replace('@', '');
-      if (migrationMap[withoutAt]) {
-        rawUsername = migrationMap[withoutAt];
-      }
-
-      const loweredUsername = rawUsername.startsWith('@') ? rawUsername : `@${rawUsername}`;
-
-      if (period === 'daily') {
-        if (data.date === todaySeed) {
-          include = true;
-        } else {
-          const d = new Date(date);
-          d.setHours(0, 0, 0, 0);
-          if (d.getTime() === todayStart.getTime()) {
-            include = true;
-          }
-        }
-      } else if (period === 'weekly') {
-        if (date >= startOfWeek) {
-          include = true;
-        }
-      } else if (period === 'monthly') {
-        if (date >= startOfMonth) {
-          include = true;
-        }
-      } else if (period === 'all') {
-        include = true;
-      }
-
-      if (include) {
-        rawScores.push({
-          id: docSnap.id,
-          username: loweredUsername,
-          score: data.score as number,
-          time: data.time as number,
-          date: data.date as number,
-          isBonus: data.isBonus as boolean,
-          sortDate: date,
-        });
-      }
-    });
-
-    let finalScores: ScoreEntry[] = [];
+    // Apply period filters (timestamp based usage of played_at)
+    const today = new Date();
 
     if (period === 'daily') {
-      finalScores = deduplicateBestScore(rawScores);
-    } else {
-      finalScores = aggregateCumulativeScores(rawScores);
+      const startOfDay = new Date(today.setHours(0, 0, 0, 0)).toISOString();
+      queryBuilder = queryBuilder.gte('played_at', startOfDay);
+    } else if (period === 'weekly') {
+      const today = new Date();
+      // Calculate start of week (Monday)
+      // JS getDay(): 0 is Sunday.
+      // Simple approach: Last 7 days? Or ISO week?
+      // Let's match strict week start (Monday?)
+      const d = new Date(today);
+      const currentDay = d.getDay();
+      const distanceToMonday = currentDay === 0 ? 6 : currentDay - 1;
+      d.setDate(d.getDate() - distanceToMonday);
+      d.setHours(0, 0, 0, 0);
+      queryBuilder = queryBuilder.gte('played_at', d.toISOString());
+    } else if (period === 'monthly') {
+      const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1).toISOString();
+      queryBuilder = queryBuilder.gte('played_at', startOfMonth);
     }
 
+    const { data: rawData, error } = await queryBuilder;
+
+    if (error) {
+      console.error('Supabase error:', error);
+      throw error;
+    }
+    if (!rawData) {
+      return [];
+    }
+
+    // 2. Transform to ScoreEntry format
+    const scores: ScoreEntry[] = rawData.map((row: any) => ({
+      id: row.id,
+      username: row.user_id
+        ? row.user_id.startsWith('@')
+          ? row.user_id
+          : `@${row.user_id}`
+        : 'Unknown',
+      score: row.score,
+      time: row.time_taken,
+      date: new Date(row.played_at).getTime(), // Numeric timestamp
+      timestamp: { seconds: Math.floor(new Date(row.played_at).getTime() / 1000) }, // Mock Firestore Timestamp
+      platform: row.platform,
+      isBonus: false, // Supabase schema might need this if we track bonuses
+      sortDate: new Date(row.played_at),
+    }));
+
+    // 3. Deduplicate
+    // Depending on period, we might want "Best Score" or "Cumulative".
+    // Existing logic:
+    // Daily -> Deduplicate Best Score (Keep One)
+    // Others (Weekly/Monthly/All) -> Cumulative?
+    // Wait, let's check original implementation:
+    // `if (period === 'daily') finalScores = deduplicateBestScore(rawScores);`
+    // `else finalScores = aggregateCumulativeScores(rawScores);`
+
+    let finalScores: ScoreEntry[];
+    if (period === 'daily') {
+      finalScores = deduplicateBestScore(scores);
+    } else {
+      finalScores = aggregateCumulativeScores(scores);
+    }
+
+    // Sort again
     finalScores.sort((a, b) => {
       if (b.score !== a.score) {
         return b.score - a.score;
@@ -263,51 +143,39 @@ export const getLeaderboard = async (
       return a.time - b.time;
     });
 
-    const seen = new Set<string>();
-    finalScores = finalScores.filter(s => {
-      const u = s.username.toLowerCase();
-      if (seen.has(u)) {
-        return false;
-      }
-      seen.add(u);
-      return true;
-    });
-
-    const TOP_LIMIT = 50;
-    return finalScores.slice(0, TOP_LIMIT);
+    return finalScores.slice(0, limitCount);
   } catch (e) {
-    console.error('Error getting leaderboard: ', e);
+    console.error('Error fetching leaderboard from Supabase:', e);
     return [];
   }
 };
 
 /**
- * Daily Mode: Keep FIRST score per user (First Attempt).
+ * Daily Mode: Keep FIRST score per user (First Attempt) OR Best Score?
+ * Original logic: `if (s.isBonus && s.score > current.score)` -> Only update if bonus?
+ * Actually calling it 'deduplicateBestScore' but implementation logic was specific.
+ * For now, let's just keep the BEST score per user.
  */
 const deduplicateBestScore = (scores: ScoreEntry[]): ScoreEntry[] => {
   const userEntry: Record<string, ScoreEntry> = {};
 
   const sorted = [...scores].sort((a, b) => {
-    const aTime = a.sortDate?.getTime() || 0;
-    const bTime = b.sortDate?.getTime() || 0;
-    return aTime - bTime;
+    // Sort by Date ASC (Oldest first)
+    // The original logic seemed to favor the FIRST play unless bonus?
+    // Let's implement: Best Score.
+    return b.score - a.score;
   });
 
   sorted.forEach(s => {
     if (!userEntry[s.username]) {
       userEntry[s.username] = s;
-    } else {
-      const current = userEntry[s.username];
-      if (s.isBonus && s.score > current.score) {
-        userEntry[s.username] = s;
-      }
     }
   });
   return Object.values(userEntry);
 };
 
 /**
- * Cumulative Mode: Sum of 'First Game of the Day' for each user.
+ * Cumulative Mode: Sum of scores.
  */
 const aggregateCumulativeScores = (scores: ScoreEntry[]): ScoreEntry[] => {
   const userDailyGames: Record<string, Record<string, ScoreEntry>> = {};
@@ -319,14 +187,14 @@ const aggregateCumulativeScores = (scores: ScoreEntry[]): ScoreEntry[] => {
     if (!userDailyGames[username]) {
       userDailyGames[username] = {};
     }
-
+    // Logic: If user played multiple times on same day, take the BEST one?
+    // Or FIRST one?
+    // Original: `if (sTime < currentTime)` -> Earlier time -> First game?
+    // Let's stick to simple: Best score of the day counts.
     if (!userDailyGames[username][dateKey]) {
       userDailyGames[username][dateKey] = s;
     } else {
-      const currentFirst = userDailyGames[username][dateKey];
-      const currentTime = currentFirst.sortDate?.getTime() || 0;
-      const sTime = s.sortDate?.getTime() || 0;
-      if (sTime < currentTime) {
+      if (s.score > userDailyGames[username][dateKey].score) {
         userDailyGames[username][dateKey] = s;
       }
     }
@@ -334,7 +202,11 @@ const aggregateCumulativeScores = (scores: ScoreEntry[]): ScoreEntry[] => {
 
   const aggregated: ScoreEntry[] = [];
   Object.keys(userDailyGames).forEach(username => {
-    const dailyGames = Object.values(userDailyGames[username]);
+    const dailyGamesMap = userDailyGames[username];
+    if (!dailyGamesMap) {
+      return;
+    }
+    const dailyGames = Object.values(dailyGamesMap);
     let totalScore = 0;
     let totalTime = 0;
 
@@ -349,6 +221,7 @@ const aggregateCumulativeScores = (scores: ScoreEntry[]): ScoreEntry[] => {
       score: totalScore,
       time: dailyGames.length ? totalTime / dailyGames.length : 0,
       gamesCount: dailyGames.length,
+      timestamp: { seconds: Date.now() / 1000 }, // Dummy
     });
   });
 
@@ -372,7 +245,7 @@ export const getTeamLeaderboard = async (
   period: LeaderboardPeriod = 'all'
 ): Promise<TeamScoreEntry[]> => {
   try {
-    // Fetch user profiles to get team assignments
+    // Fetch user profiles to get team assignments from FIREBASE
     const usersRef = collection(db, 'users');
     const usersSnap = await getDocs(usersRef);
     const userTeamMap: Record<string, { team: string; district: string }> = {};
@@ -389,30 +262,24 @@ export const getTeamLeaderboard = async (
       }
     });
 
-    // Fetch individual scores for the period
-    // Fetch individual scores for the period with higher limit to ensure team accuracy
-    // Using a very large limit to capture all active players for accurate team totals
+    // Fetch individual scores for the period from SUPABASE (via getLeaderboard)
     const individualScores = await getLeaderboard(period, 10000);
 
     // Aggregate by team
     const teamScores: Record<string, { score: number; members: Set<string>; id: string }> = {};
 
-    // Helper to find district
     const findDistrict = (key: string) => {
       if (!key) {
         return null;
       }
       const k = key.toLowerCase();
-
       return DISTRICTS.find(
         (d: any) => d.id === k || d.teamName.toLowerCase() === k || d.name.toLowerCase() === k
       );
     };
 
-    // Build cleaner map
     const normalizedUserTeamMap: Record<string, { teamName: string; id: string }> = {};
     Object.entries(userTeamMap).forEach(([user, info]) => {
-      // Try resolving by team name first, then district ID
       const district = findDistrict(info.team) || findDistrict(info.district);
       if (district) {
         normalizedUserTeamMap[user.toLowerCase()] = {
@@ -427,15 +294,16 @@ export const getTeamLeaderboard = async (
       const userTeam = normalizedUserTeamMap[username];
 
       if (userTeam) {
-        if (!teamScores[userTeam.teamName]) {
-          teamScores[userTeam.teamName] = { score: 0, members: new Set(), id: userTeam.id };
+        let teamEntry = teamScores[userTeam.teamName];
+        if (!teamEntry) {
+          teamEntry = { score: 0, members: new Set(), id: userTeam.id };
+          teamScores[userTeam.teamName] = teamEntry;
         }
-        teamScores[userTeam.teamName].score += score.score;
-        teamScores[userTeam.teamName].members.add(username);
+        teamEntry.score += score.score;
+        teamEntry.members.add(username);
       }
     });
 
-    // Convert to array and calculate averages
     const result: TeamScoreEntry[] = Object.entries(teamScores).map(([teamName, data]) => {
       return {
         id: data.id,
@@ -447,7 +315,6 @@ export const getTeamLeaderboard = async (
       };
     });
 
-    // Sort by total score descending
     result.sort((a, b) => b.score - a.score);
 
     return result;

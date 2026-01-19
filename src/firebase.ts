@@ -1,9 +1,9 @@
 /// <reference types='vite/client' />
 import { initializeApp } from 'firebase/app';
-import { getAuth, GoogleAuthProvider, FacebookAuthProvider, OAuthProvider } from 'firebase/auth';
+import { FacebookAuthProvider, getAuth, GoogleAuthProvider, OAuthProvider } from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
-import { getStorage } from 'firebase/storage';
 import { getMessaging } from 'firebase/messaging';
+import { getStorage } from 'firebase/storage';
 
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
@@ -15,6 +15,8 @@ const firebaseConfig = {
 };
 
 // Initialize Firebase
+// The modular SDK is tree-shakable by default when using these imports.
+// We just need to make sure we don't import 'firebase/compat/*' anywhere.
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
@@ -28,4 +30,4 @@ googleProvider.addScope('email');
 const facebookProvider = new FacebookAuthProvider();
 const appleProvider = new OAuthProvider('apple.com');
 
-export { auth, db, storage, messaging, googleProvider, facebookProvider, appleProvider };
+export { appleProvider, auth, db, facebookProvider, googleProvider, messaging, storage };

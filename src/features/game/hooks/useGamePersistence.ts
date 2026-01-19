@@ -1,20 +1,13 @@
 import { useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 // @ts-ignore
-import { auth } from '../../../firebase';
 import { getTodaySeed, markTodayAsPlayed } from '../../../utils/dailyChallenge';
 // @ts-ignore
+import { endGame } from '../../../services/gameService';
 import { calculateStreak } from '../../../utils/stats';
 // @ts-ignore
-import { saveScore } from '../../../utils/leaderboard';
-// @ts-ignore
 import { shouldPromptFeedback } from '../../../config/gameConfig';
-import {
-  getReferrer,
-  hasDailyReferral,
-  saveUserGameResult,
-  updateUserGameStats,
-} from '../../../utils/social';
+import { getReferrer, saveUserGameResult, updateUserGameStats } from '../../../utils/social';
 // @ts-ignore
 import { awardChallengeBonus, awardReferralBonus } from '../../../utils/giuros';
 // @ts-ignore
@@ -62,17 +55,19 @@ export const useGamePersistence = () => {
               timestamp: { seconds: Math.floor(localRecord.timestamp / 1000) },
             };
 
-            // @ts-ignore - GameData type mismatch with GameHistory fields is handled by loose typing in social.ts
+            // Save individual game history to Firebase User Profile
+            // @ts-ignore
             await saveUserGameResult(state.username, firestoreData);
 
-            const isBonus = await hasDailyReferral(state.username);
-            await saveScore(state.username, state.score, Number(localRecord.avgTime), {
-              isBonus,
-              correctAnswers: state.correct,
-              questionCount: state.questions?.length || 0,
-              // @ts-ignore
-              email: auth.currentUser?.email,
-            });
+            // [MIGRATION] Use Game Service to end game (Redis -> Supabase)
+            // Replaces legacy saveScore() logic
+            if (state.gameId) {
+              await endGame(state.gameId, state.score, Number(localRecord.avgTime));
+            } else {
+              console.warn(
+                '[Migration] Skipping Supabase save: No gameId found (Redis session missing)'
+              );
+            }
 
             const historyForStreak = storage.get<GameHistory[]>(STORAGE_KEYS.HISTORY, []);
             const streak = calculateStreak(

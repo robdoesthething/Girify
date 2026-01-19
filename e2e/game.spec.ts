@@ -1,19 +1,32 @@
-import { test, expect } from '@playwright/test';
+import { expect, test } from '@playwright/test';
 
 test.describe('Game Flow', () => {
-    // Skipping actual e2e/network logic since we don't know if backend is reachable in test env
-    // Testing basic landing page render
-    test('landing page loads', async ({ page }) => {
-        await page.goto('/');
+  test.beforeEach(async ({ page }) => {
+    await page.goto('/');
+  });
 
-        // Expect title or some text
-        await expect(page).toHaveTitle(/Girify/i);
+  test('landing page loads and allows navigation to game', async ({ page }) => {
+    // 1. Verify Title
+    await expect(page).toHaveTitle(/Girify/i);
 
-        // Check for "Play" button (either text or role)
-        // Adjust selector based on actual rendering
-        const playButton = page.locator('button', { hasText: /Play/i });
-        if (await playButton.count() > 0) {
-            await expect(playButton).toBeVisible();
-        }
-    });
+    // 2. Find and Click Play Button
+    // Strategy: Look for the main CTA button. Based on LandingPage.tsx, it likely text "Play Daily Challenge" or similar
+    const playButton = page.getByRole('button', { name: /Play|Start/i }).first();
+    await expect(playButton).toBeVisible();
+    await playButton.click();
+
+    // 3. Verify Navigation to Game Screen
+    // URL should contain /game OR logic should mount GameScreen (which might be at root / if logged in/guest)
+    // If the app stays on /, we check for GameScreen specific elements
+
+    // Wait for potential lazy loading
+    await page.waitForLoadState('networkidle');
+
+    // Check for Game UI elements
+    const mapContainer = page.locator('.leaflet-container');
+    // const _questionPanel = page.locator('text=Which street is this?'); // Hypothetical text
+
+    // At least the map should be visible
+    await expect(mapContainer).toBeVisible({ timeout: 10000 });
+  });
 });
