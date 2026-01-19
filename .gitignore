@@ -32,3 +32,4 @@ dist-ssr
 storybook-static
 .env.development
 service-account.json
+.env.production
