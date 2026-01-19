@@ -28,6 +28,7 @@ import { MIGRATION, STORAGE_KEYS, TIME } from '../../../config/constants';
 import { logger } from '../../../utils/logger';
 
 export interface UseAuthResult {
+  user: User | null;
   emailVerified: boolean | null;
   isLoading: boolean;
   handleLogout: (navigate: (path: string) => void) => void;
@@ -47,6 +48,7 @@ export const useAuth = (
   onAnnouncementsCheck?: () => void
 ): UseAuthResult => {
   const [emailVerified, setEmailVerified] = useState<boolean | null>(true);
+  const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const { notify } = useNotification();
   const { execute } = useAsyncOperation(); // [NEW] Use async loader
@@ -65,6 +67,7 @@ export const useAuth = (
     const unsubscribe = onAuthStateChanged(auth, async (user: User | null) => {
       // Logic for initial load isn't easily wrapped in atomic async op because it's an event listener,
       // but we can wrap the syncUserProfile part.
+      setUser(user);
       if (user) {
         // Refresh user data to get latest emailVerified status
         try {
@@ -126,7 +129,7 @@ export const useAuth = (
     [dispatch, execute] // Removed notify dependency as it's handled by execute
   );
 
-  return { emailVerified, isLoading, handleLogout };
+  return { user, emailVerified, isLoading, handleLogout };
 };
 
 /**

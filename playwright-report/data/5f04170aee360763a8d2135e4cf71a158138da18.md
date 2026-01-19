@@ -1,0 +1,285 @@
+# Page snapshot
+
+```yaml
+- generic [ref=e2]:
+    - generic [ref=e4]:
+        - button "Open menu" [ref=e5] [cursor=pointer]:
+            - img [ref=e6]
+        - button "Go to home" [ref=e8] [cursor=pointer]:
+            - img "Girify" [ref=e9]
+    - generic [ref=e10]:
+        - generic:
+            - generic:
+                - generic:
+                    - generic:
+                        - generic:
+                            - generic:
+                                - img
+                            - generic:
+                                - button "⛪" [ref=e11] [cursor=pointer]:
+                                    - generic [ref=e12]: ⛪
+                                - button "🥒" [ref=e13] [cursor=pointer]:
+                                    - generic [ref=e14]: 🥒
+                                - button "🎡" [ref=e15] [cursor=pointer]:
+                                    - generic [ref=e16]: 🎡
+                                - button "🦎" [ref=e17] [cursor=pointer]:
+                                    - generic [ref=e18]: 🦎
+                                - button "⚽" [ref=e19] [cursor=pointer]:
+                                    - generic [ref=e20]: ⚽
+                                - button "🏛️" [ref=e21] [cursor=pointer]:
+                                    - generic [ref=e22]: 🏛️
+                                - button "⛵" [ref=e23] [cursor=pointer]:
+                                    - generic [ref=e24]: ⛵
+                                - button "🎭" [ref=e25] [cursor=pointer]:
+                                    - generic [ref=e26]: 🎭
+                                - button "🗿" [ref=e27] [cursor=pointer]:
+                                    - generic [ref=e28]: 🗿
+                                - button "🧱" [ref=e29] [cursor=pointer]:
+                                    - generic [ref=e30]: 🧱
+                                - button "⛪" [ref=e31] [cursor=pointer]:
+                                    - generic [ref=e32]: ⛪
+                                - button "👉" [ref=e33] [cursor=pointer]:
+                                    - generic [ref=e34]: 👉
+                                - button "🍇" [ref=e35] [cursor=pointer]:
+                                    - generic [ref=e36]: 🍇
+                                - button "🎻" [ref=e37] [cursor=pointer]:
+                                    - generic [ref=e38]: 🎻
+                                - button "⛪" [ref=e39] [cursor=pointer]:
+                                    - generic [ref=e40]: ⛪
+                                - button "🏘️" [ref=e41] [cursor=pointer]:
+                                    - generic [ref=e42]: 🏘️
+                                - button "🌳" [ref=e43] [cursor=pointer]:
+                                    - generic [ref=e44]: 🌳
+                                - button "🌳" [ref=e45] [cursor=pointer]:
+                                    - generic [ref=e46]: 🌳
+                                - button "🌳" [ref=e47] [cursor=pointer]:
+                                    - generic [ref=e48]: 🌳
+                                - button "🌳" [ref=e49] [cursor=pointer]:
+                                    - generic [ref=e50]: 🌳
+                                - button "🌵" [ref=e51] [cursor=pointer]:
+                                    - generic [ref=e52]: 🌵
+                                - button "🌳" [ref=e53] [cursor=pointer]:
+                                    - generic [ref=e54]: 🌳
+                                - button "🌳" [ref=e55] [cursor=pointer]:
+                                    - generic [ref=e56]: 🌳
+                                - button "🌳" [ref=e57] [cursor=pointer]:
+                                    - generic [ref=e58]: 🌳
+                                - button "🖼️" [ref=e59] [cursor=pointer]:
+                                    - generic [ref=e60]: 🖼️
+                                - button "🖼️" [ref=e61] [cursor=pointer]:
+                                    - generic [ref=e62]: 🖼️
+                                - button "⚓" [ref=e63] [cursor=pointer]:
+                                    - generic [ref=e64]: ⚓
+                                - button "🔬" [ref=e65] [cursor=pointer]:
+                                    - generic [ref=e66]: 🔬
+                                - button "🖼️" [ref=e67] [cursor=pointer]:
+                                    - generic [ref=e68]: 🖼️
+                                - button "🖼️" [ref=e69] [cursor=pointer]:
+                                    - generic [ref=e70]: 🖼️
+                                - button "🏺" [ref=e71] [cursor=pointer]:
+                                    - generic [ref=e72]: 🏺
+                                - button "⛰️" [ref=e73] [cursor=pointer]:
+                                    - generic [ref=e74]: ⛰️
+                                - button "🏔️" [ref=e75] [cursor=pointer]:
+                                    - generic [ref=e76]: 🏔️
+                                - button "👀" [ref=e77] [cursor=pointer]:
+                                    - generic [ref=e78]: 👀
+                                - button "📡" [ref=e79] [cursor=pointer]:
+                                    - generic [ref=e80]: 📡
+                                - button "🛍️" [ref=e81] [cursor=pointer]:
+                                    - generic [ref=e82]: 🛍️
+                                - button "🛍️" [ref=e83] [cursor=pointer]:
+                                    - generic [ref=e84]: 🛍️
+                                - button "🛍️" [ref=e85] [cursor=pointer]:
+                                    - generic [ref=e86]: 🛍️
+                                - button "🛍️" [ref=e87] [cursor=pointer]:
+                                    - generic [ref=e88]: 🛍️
+                                - button "🛍️" [ref=e89] [cursor=pointer]:
+                                    - generic [ref=e90]: 🛍️
+                                - button "🛍️" [ref=e91] [cursor=pointer]:
+                                    - generic [ref=e92]: 🛍️
+                                - button "🛍️" [ref=e93] [cursor=pointer]:
+                                    - generic [ref=e94]: 🛍️
+                                - button "🛍️" [ref=e95] [cursor=pointer]:
+                                    - generic [ref=e96]: 🛍️
+                                - button "🏖️" [ref=e97] [cursor=pointer]:
+                                    - generic [ref=e98]: 🏖️
+                                - button "🏖️" [ref=e99] [cursor=pointer]:
+                                    - generic [ref=e100]: 🏖️
+                                - button "🏖️" [ref=e101] [cursor=pointer]:
+                                    - generic [ref=e102]: 🏖️
+                                - button "🏖️" [ref=e103] [cursor=pointer]:
+                                    - generic [ref=e104]: 🏖️
+                                - button "🏖️" [ref=e105] [cursor=pointer]:
+                                    - generic [ref=e106]: 🏖️
+                                - button "🏖️" [ref=e107] [cursor=pointer]:
+                                    - generic [ref=e108]: 🏖️
+                                - button "🏖️" [ref=e109] [cursor=pointer]:
+                                    - generic [ref=e110]: 🏖️
+                                - button "🏖️" [ref=e111] [cursor=pointer]:
+                                    - generic [ref=e112]: 🏖️
+                                - button "🏥" [ref=e113] [cursor=pointer]:
+                                    - generic [ref=e114]: 🏥
+                                - button "🏥" [ref=e115] [cursor=pointer]:
+                                    - generic [ref=e116]: 🏥
+                                - button "🏥" [ref=e117] [cursor=pointer]:
+                                    - generic [ref=e118]: 🏥
+                                - button "🏥" [ref=e119] [cursor=pointer]:
+                                    - generic [ref=e120]: 🏥
+                                - button "⛪" [ref=e121] [cursor=pointer]:
+                                    - generic [ref=e122]: ⛪
+                                - button "🌳" [ref=e123] [cursor=pointer]:
+                                    - generic [ref=e124]: 🌳
+                                - button "🌹" [ref=e125] [cursor=pointer]:
+                                    - generic [ref=e126]: 🌹
+                                - button "🌳" [ref=e127] [cursor=pointer]:
+                                    - generic [ref=e128]: 🌳
+                                - button "🌳" [ref=e129] [cursor=pointer]:
+                                    - generic [ref=e130]: 🌳
+                                - button "🏘️" [ref=e131] [cursor=pointer]:
+                                    - generic [ref=e132]: 🏘️
+                                - button "⛲" [ref=e133] [cursor=pointer]:
+                                    - generic [ref=e134]: ⛲
+                                - button "🏭" [ref=e135] [cursor=pointer]:
+                                    - generic [ref=e136]: 🏭
+                                - button "🌳" [ref=e137] [cursor=pointer]:
+                                    - generic [ref=e138]: 🌳
+                                - button "🛒" [ref=e139] [cursor=pointer]:
+                                    - generic [ref=e140]: 🛒
+                                - button "⛲" [ref=e141] [cursor=pointer]:
+                                    - generic [ref=e142]: ⛲
+                                - button "🏟️" [ref=e143] [cursor=pointer]:
+                                    - generic [ref=e144]: 🏟️
+                                - button "🌳" [ref=e145] [cursor=pointer]:
+                                    - generic [ref=e146]: 🌳
+                                - button "🌳" [ref=e147] [cursor=pointer]:
+                                    - generic [ref=e148]: 🌳
+                                - button "🌳" [ref=e149] [cursor=pointer]:
+                                    - generic [ref=e150]: 🌳
+                                - button "🏫" [ref=e151] [cursor=pointer]:
+                                    - generic [ref=e152]: 🏫
+                                - button "🏘️" [ref=e153] [cursor=pointer]:
+                                    - generic [ref=e154]: 🏘️
+                                - button "🏔️" [ref=e155] [cursor=pointer]:
+                                    - generic [ref=e156]: 🏔️
+                                - button "🏘️" [ref=e157] [cursor=pointer]:
+                                    - generic [ref=e158]: 🏘️
+                                - button "💧" [ref=e159] [cursor=pointer]:
+                                    - generic [ref=e160]: 💧
+                                - button "🏟️" [ref=e161] [cursor=pointer]:
+                                    - generic [ref=e162]: 🏟️
+                        - button "Re-center Map" [ref=e164] [cursor=pointer]:
+                            - img [ref=e165]
+        - generic [ref=e167]:
+            - main [ref=e168]:
+                - generic [ref=e169]:
+                    - generic [ref=e170]:
+                        - img "Barcelona Streets" [ref=e171]
+                        - generic [ref=e172]:
+                            - heading "Become the Ultimate Local" [level=2] [ref=e173]
+                            - paragraph [ref=e174]: Show you know the real Barcelona... street by street
+                    - heading "Master Selected Streets!" [level=1] [ref=e175]
+                    - paragraph [ref=e176]: Navigate the city without a map. Earn Giuros, climb the rankings, and celebrate your neighborhood.
+                    - button "Sign Up to Play" [ref=e178] [cursor=pointer]:
+                        - generic [ref=e180]:
+                            - text: Sign Up to Play
+                            - img [ref=e181]
+                    - generic [ref=e183]:
+                        - generic [ref=e184] [cursor=pointer]:
+                            - generic [ref=e185]: 🏆
+                            - heading "Rankings" [level=3] [ref=e186]
+                            - paragraph [ref=e187]: Compete with friends and neighbors for the top spot.
+                        - generic [ref=e188] [cursor=pointer]:
+                            - generic [ref=e189]: 🤝
+                            - heading "Friendship" [level=3] [ref=e190]
+                            - paragraph [ref=e191]: Challenge your friends and track their progress.
+                        - generic [ref=e192] [cursor=pointer]:
+                            - generic [ref=e193]: 💰
+                            - heading "Rewards" [level=3] [ref=e194]
+                            - paragraph [ref=e195]: Earn Giuros to customize your profile and unlock badges.
+                    - generic [ref=e196]:
+                        - heading "Choose Your Allegiance" [level=2] [ref=e199]
+                        - generic [ref=e202]:
+                            - generic [ref=e204]:
+                                - img "Ciutat Vella Bats" [ref=e207]
+                                - generic [ref=e208]:
+                                    - heading "Ciutat Vella Bats" [level=3] [ref=e209]
+                                    - paragraph [ref=e210]: Ciutat Vella
+                            - generic [ref=e212]:
+                                - img "Eixample Dragons" [ref=e215]
+                                - generic [ref=e216]:
+                                    - heading "Eixample Dragons" [level=3] [ref=e217]
+                                    - paragraph [ref=e218]: Eixample
+                            - generic [ref=e220]:
+                                - img "Sants Lions" [ref=e223]
+                                - generic [ref=e224]:
+                                    - heading "Sants Lions" [level=3] [ref=e225]
+                                    - paragraph [ref=e226]: Sants-Montjuïc
+                            - generic [ref=e228]:
+                                - img "Les Corts Eagles" [ref=e231]
+                                - generic [ref=e232]:
+                                    - heading "Les Corts Eagles" [level=3] [ref=e233]
+                                    - paragraph [ref=e234]: Les Corts
+                            - generic [ref=e236]:
+                                - img "Sarrià Foxes" [ref=e239]
+                                - generic [ref=e240]:
+                                    - heading "Sarrià Foxes" [level=3] [ref=e241]
+                                    - paragraph [ref=e242]: Sarrià-Sant Gervasi
+                            - generic [ref=e244]:
+                                - img "Gràcia Cats" [ref=e247]
+                                - generic [ref=e248]:
+                                    - heading "Gràcia Cats" [level=3] [ref=e249]
+                                    - paragraph [ref=e250]: Gràcia
+                            - generic [ref=e252]:
+                                - img "Horta Boars" [ref=e255]
+                                - generic [ref=e256]:
+                                    - heading "Horta Boars" [level=3] [ref=e257]
+                                    - paragraph [ref=e258]: Horta-Guinardó
+                            - generic [ref=e260]:
+                                - img "Nou Barris Wolves" [ref=e263]
+                                - generic [ref=e264]:
+                                    - heading "Nou Barris Wolves" [level=3] [ref=e265]
+                                    - paragraph [ref=e266]: Nou Barris
+                            - generic [ref=e268]:
+                                - img "Sant Andreu Bears" [ref=e271]
+                                - generic [ref=e272]:
+                                    - heading "Sant Andreu Bears" [level=3] [ref=e273]
+                                    - paragraph [ref=e274]: Sant Andreu
+                            - generic [ref=e276]:
+                                - img "Sant Martí Sharks" [ref=e279]
+                                - generic [ref=e280]:
+                                    - heading "Sant Martí Sharks" [level=3] [ref=e281]
+                                    - paragraph [ref=e282]: Sant Martí
+                    - generic [ref=e284]:
+                        - generic: NEWS
+                        - generic [ref=e285]:
+                            - img "Mayor Jaume" [ref=e286]
+                            - generic [ref=e287]: MAYOR
+                        - generic [ref=e288]:
+                            - generic [ref=e289]: 🎙️ Mayor Jaume Reports
+                            - paragraph [ref=e291]: '"SCANDAL: Pidgeon steals whole croissant from tourist."'
+            - contentinfo [ref=e292]:
+                - paragraph [ref=e293]: © 2026 Girify · Barcelona
+                - generic [ref=e294]:
+                    - link "Privacy" [ref=e295] [cursor=pointer]:
+                        - /url: /privacy
+                    - link "Terms" [ref=e296] [cursor=pointer]:
+                        - /url: /terms
+        - dialog "Welcome to the Neighborhood!" [ref=e298]:
+            - generic [ref=e299]:
+                - img "Mayor Jaume" [ref=e301]
+                - generic [ref=e302]:
+                    - heading "Mayor Jaume" [level=2] [ref=e303]
+                    - paragraph [ref=e304]: District Manager
+            - generic [ref=e305]:
+                - heading "Welcome to the Neighborhood!" [level=2] [ref=e306]
+                - generic [ref=e307]:
+                    - generic [ref=e308]: ❝
+                    - text: Hola! I am Mayor Jaume. I run this district, and I'm looking for someone who knows these streets.
+                    - generic [ref=e309]: ❞
+                - generic [ref=e310]:
+                    - button "Skip" [ref=e311] [cursor=pointer]
+                    - button "Next ➤" [ref=e312] [cursor=pointer]
+    - generic:
+        - paragraph: © 2025 Girify. All rights reserved.
+```

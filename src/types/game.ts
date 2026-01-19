@@ -56,4 +56,5 @@ export interface GameStateObject {
   selectedAnswer: Street | null; // Added
   isInputLocked: boolean; // Added
   activePage: string | null; // Added
+  gameId: string | null; // Added for Redis/Supabase session
 }

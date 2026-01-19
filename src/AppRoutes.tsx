@@ -5,9 +5,9 @@ import { Route, Routes, useLocation, useNavigate } from 'react-router-dom';
 // Eagerly loaded (needed immediately)
 import AnnouncementModal from './components/AnnouncementModal';
 import TopBar from './components/TopBar';
-import GameScreen from './features/game/components/GameScreen';
 
 // Lazy loaded (route-based code splitting)
+const GameScreen = lazy(() => import('./features/game/components/GameScreen'));
 const AboutScreen = lazy(() => import('./components/AboutScreen'));
 const AdminPanel = lazy(() => import('./components/admin/AdminPanel'));
 const AdminRoute = lazy(() => import('./components/admin/AdminRoute'));
@@ -87,11 +87,11 @@ const AppRoutes: React.FC = () => {
   );
 
   // Auth hook
-  const { emailVerified, handleLogout: performLogout } = useAuth(
-    dispatch,
-    state.gameState,
-    checkAnnouncements
-  );
+  const {
+    user,
+    emailVerified,
+    handleLogout: performLogout,
+  } = useAuth(dispatch, state.gameState, checkAnnouncements);
   const handleLogout = () => performLogout(navigate);
 
   const [showDistrictModal, setShowDistrictModal] = React.useState(false);
@@ -158,6 +158,7 @@ const AppRoutes: React.FC = () => {
               correctAnswers: state.correct,
               questionCount: state.currentQuestionIndex + 1,
               streakAtPlay: state.streak || 0,
+              uid: user?.uid,
             });
           });
         }

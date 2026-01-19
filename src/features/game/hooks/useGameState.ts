@@ -1,4 +1,5 @@
 import { Dispatch, useCallback, useEffect, useMemo, useReducer } from 'react';
+import { startGame } from '../../../services/gameService';
 // @ts-ignore
 // @ts-ignore
 import { gameReducer, initialState } from '../../../reducers/gameReducer';
@@ -99,11 +100,13 @@ export const useGameState = (
 
   // ...
 
+  // ...
+
   /**
    * Setup a new game session
    */
   const setupGame = useCallback(
-    (freshName?: string) => {
+    async (freshName?: string) => {
       const activeName = freshName || state.username;
       if (!activeName) {
         dispatch({ type: 'SET_GAME_STATE', payload: 'register' });
@@ -115,6 +118,15 @@ export const useGameState = (
       if (!setupResult) {
         dispatch({ type: 'SET_GAME_STATE', payload: 'intro' });
         return;
+      }
+
+      // Initialize Redis session
+      try {
+        const gameId = await startGame(activeName);
+        dispatch({ type: 'SET_GAME_ID', payload: gameId });
+      } catch (e) {
+        console.error('Failed to start game session in Redis:', e);
+        // Continue anyway? Or show error? For now continue
       }
 
       dispatch({

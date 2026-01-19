@@ -37,6 +37,7 @@ export interface GameState {
   plannedQuestions: PlannedQuestion[] | null;
   registerMode: RegisterMode;
   isInputLocked: boolean;
+  gameId: string | null;
 }
 
 // Action types
@@ -70,6 +71,7 @@ export type GameAction =
   | { type: 'SET_ACTIVE_PAGE'; payload: string | null }
   | { type: 'SET_AUTO_ADVANCE'; payload: boolean }
   | { type: 'SET_REGISTER_MODE'; payload: RegisterMode }
+  | { type: 'SET_GAME_ID'; payload: string | null }
   | { type: 'UNLOCK_INPUT' }
   | { type: 'LOGOUT' };
 
@@ -99,6 +101,7 @@ export const initialState: GameState = {
   plannedQuestions: null,
   registerMode: 'signin',
   isInputLocked: false,
+  gameId: null,
 };
 
 const MAX_SCORE = 1000;
@@ -235,6 +238,12 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
       return {
         ...state,
         registerMode: action.payload,
+      };
+
+    case 'SET_GAME_ID':
+      return {
+        ...state,
+        gameId: action.payload,
       };
 
     case 'UNLOCK_INPUT':

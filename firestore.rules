@@ -37,25 +37,39 @@ service cloud.firestore {
       allow write: if isAdmin();
     }
 
-    // Highscores: Public Read, Auth Write
+    // Highscores: Public Read, Auth Write (Strict ownership)
     match /highscores/{document} {
       allow read: if true;
-      allow write: if request.auth != null;
+      allow write: if request.auth != null && (
+        (request.resource.data.uid == request.auth.uid) ||
+        isAdmin()
+      );
     }
 
-    // Scores: Public Read, Auth Write
+    // Scores: Public Read, Auth Write (Strict ownership)
     match /scores/{document} {
       allow read: if true;
-      allow write: if request.auth != null;
+      allow write: if request.auth != null && (
+        (request.resource.data.uid == request.auth.uid) ||
+        isAdmin()
+      );
     }
 
     // Users: Public Read (for search/profiles), Self or Admin Write
     // Fixed: Prevents UID injection by only checking resource.data.uid
     match /users/{userId} {
       allow read: if true;
+      // Allow write if:
+      // 1. User is authenticated
+      // 2. AND EITHER:
+      //    a. (Create/Update) The document ID matches the auth UID (best practice)
+      //    b. (Update existing) The existing document has uid matching auth UID
+      //    c. (Create new) The new data has uid matching auth UID
       allow write: if request.auth != null && (
-        (resource.data.uid != null && resource.data.uid == request.auth.uid) ||
-        isAdmin()
+         userId == request.auth.uid ||
+         (resource.data.uid == request.auth.uid) ||
+         (request.resource.data.uid == request.auth.uid) ||
+         isAdmin()
       );
 
       // Friendships & Requests: Auth Read/Write
