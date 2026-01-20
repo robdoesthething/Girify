@@ -69,26 +69,26 @@ export const getLeaderboard = async (
       .limit(limitCount * 4); // Fetch more for deduplication
 
     // Apply period filters (timestamp based usage of played_at)
-    const today = new Date();
+    const now = new Date();
 
     if (period === 'daily') {
-      const startOfDay = new Date(today.setHours(0, 0, 0, 0)).toISOString();
-      queryBuilder = queryBuilder.gte('played_at', startOfDay);
+      // Create a new date for start of day to avoid mutation
+      const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0, 0);
+      console.warn('[Leaderboard] Daily filter - start of day:', startOfDay.toISOString());
+      queryBuilder = queryBuilder.gte('played_at', startOfDay.toISOString());
     } else if (period === 'weekly') {
-      const today = new Date();
       // Calculate start of week (Monday)
-      // JS getDay(): 0 is Sunday.
-      // Simple approach: Last 7 days? Or ISO week?
-      // Let's match strict week start (Monday?)
-      const d = new Date(today);
-      const currentDay = d.getDay();
+      const d = new Date(now);
+      const currentDay = d.getDay(); // 0 = Sunday
       const distanceToMonday = currentDay === 0 ? 6 : currentDay - 1;
       d.setDate(d.getDate() - distanceToMonday);
       d.setHours(0, 0, 0, 0);
+      console.warn('[Leaderboard] Weekly filter - start of week:', d.toISOString());
       queryBuilder = queryBuilder.gte('played_at', d.toISOString());
     } else if (period === 'monthly') {
-      const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1).toISOString();
-      queryBuilder = queryBuilder.gte('played_at', startOfMonth);
+      const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1, 0, 0, 0, 0);
+      console.warn('[Leaderboard] Monthly filter - start of month:', startOfMonth.toISOString());
+      queryBuilder = queryBuilder.gte('played_at', startOfMonth.toISOString());
     }
 
     const { data: rawData, error } = await queryBuilder;
@@ -244,10 +244,18 @@ export const getTeamLeaderboard = async (
   period: LeaderboardPeriod = 'all'
 ): Promise<TeamScoreEntry[]> => {
   try {
+    // Define type for the query result
+    interface UserTeamData {
+      username: string;
+      team: string | null;
+      district: string | null;
+    }
+
     // Fetch user profiles to get team assignments from SUPABASE
     const { data: usersData, error: usersError } = await supabase
       .from('users')
-      .select('username, team, district');
+      .select('username, team, district')
+      .returns<UserTeamData[]>();
 
     if (usersError) {
       console.error('Error fetching users for team leaderboard:', usersError);
