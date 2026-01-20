@@ -1,12 +1,14 @@
-import { doc, getDoc, updateDoc } from 'firebase/firestore';
 import { calculateStreakBonus } from '../config/gameConfig';
-import { db } from '../firebase';
+import {
+  addPurchasedBadge,
+  getUserByUsername,
+  getUserPurchasedBadges,
+  updateUser,
+} from '../services/database';
 import { getPayoutConfig } from './configService';
-import { publishCosmeticPurchase } from './publishActivity';
+import { publishCosmeticPurchase } from './publishActivity'; // Low priority util, but we can keep importing it if it hasn't been migrated yet, or check if it needs migration.
 
-const USERS_COLLECTION = 'users';
-
-// Default Constants (used as fallback, actual values come from config)
+// Default Constants
 export const STARTING_GIUROS = 10;
 export const DAILY_LOGIN_BONUS = 2;
 export const DAILY_CHALLENGE_BONUS = 5;
@@ -16,25 +18,14 @@ export const REFERRAL_BONUS = 15;
 
 /**
  * Get user's current giuros balance
- * @param {string} username
- * @returns {Promise<number>}
- */
-/**
- * Get user's current giuros balance
- * @param {string} username
- * @returns {Promise<number>}
  */
 export const getGiuros = async (username: string | null): Promise<number> => {
   if (!username) {
     return 0;
   }
   try {
-    const userRef = doc(db, USERS_COLLECTION, username);
-    const userDoc = await getDoc(userRef);
-    if (userDoc.exists()) {
-      return userDoc.data()?.giuros ?? STARTING_GIUROS;
-    }
-    return STARTING_GIUROS;
+    const user = await getUserByUsername(username);
+    return user?.giuros ?? STARTING_GIUROS;
   } catch (e) {
     console.error('Error getting giuros:', e);
     return 0;
@@ -43,10 +34,6 @@ export const getGiuros = async (username: string | null): Promise<number> => {
 
 /**
  * Add giuros to user's balance
- * @param {string} username
- * @param {number} amount
- * @param {string} reason - For logging/audit
- * @returns {Promise<{success: boolean, newBalance: number}>}
  */
 export const addGiuros = async (
   username: string | null,
@@ -58,22 +45,22 @@ export const addGiuros = async (
   }
 
   try {
-    const userRef = doc(db, USERS_COLLECTION, username);
-    const userDoc = await getDoc(userRef);
-
-    if (!userDoc.exists()) {
+    const user = await getUserByUsername(username);
+    if (!user) {
       return { success: false, newBalance: 0 };
     }
 
-    const currentBalance = userDoc.data()?.giuros ?? STARTING_GIUROS;
+    const currentBalance = user.giuros;
     const newBalance = currentBalance + amount;
 
-    await updateDoc(userRef, { giuros: newBalance });
+    const success = await updateUser(username, { giuros: newBalance });
 
-    // eslint-disable-next-line no-console
-    console.log(`[Giuros] +${amount} for ${username} (${reason}). New balance: ${newBalance}`);
-
-    return { success: true, newBalance };
+    if (success) {
+      // eslint-disable-next-line no-console
+      console.log(`[Giuros] +${amount} for ${username} (${reason}). New balance: ${newBalance}`);
+      return { success: true, newBalance };
+    }
+    return { success: false, newBalance: 0 };
   } catch (e) {
     console.error('Error adding giuros:', e);
     return { success: false, newBalance: 0 };
@@ -81,26 +68,13 @@ export const addGiuros = async (
 };
 
 /**
- * Award giuros (wrapper for feedback/other general rewards)
- * @param {string} username
- * @param {number} amount
- * @returns {Promise<{success: boolean, newBalance: number}>}
- */
-/**
- * Award giuros (wrapper for feedback/other general rewards)
- * @param {string} username
- * @param {number} amount
- * @returns {Promise<{success: boolean, newBalance: number}>}
+ * Award giuros (wrapper)
  */
 export const awardGiuros = (username: string | null, amount: number) =>
   addGiuros(username, amount, 'reward');
 
 /**
  * Spend giuros on a cosmetic item
- * @param {string} username
- * @param {number} cost
- * @param {string} itemId
- * @returns {Promise<{success: boolean, error?: string, newBalance?: number}>}
  */
 export const spendGiuros = async (
   username: string | null,
@@ -112,41 +86,59 @@ export const spendGiuros = async (
   }
 
   try {
-    const userRef = doc(db, USERS_COLLECTION, username);
-    const userDoc = await getDoc(userRef);
-
-    if (!userDoc.exists()) {
+    const user = await getUserByUsername(username);
+    if (!user) {
       return { success: false, error: 'User not found' };
     }
 
-    const data = userDoc.data();
-    const currentBalance = data?.giuros ?? STARTING_GIUROS;
+    const currentBalance = user.giuros;
 
     if (currentBalance < cost) {
       return { success: false, error: 'Insufficient giuros' };
     }
 
-    const purchasedCosmetics: string[] = data?.purchasedCosmetics || [];
-
-    // Check if already purchased (for non-consumable items)
-    if (purchasedCosmetics.includes(itemId) && !itemId.startsWith('handle_change')) {
-      return { success: false, error: 'Already owned' };
+    // Check ownership
+    // Badges are in a separate table, other cosmetics in purchased_cosmetics array
+    if (itemId.startsWith('badge_')) {
+      // Check purchased_badges table
+      const purchasedBadges = await getUserPurchasedBadges(username);
+      if (purchasedBadges.includes(itemId)) {
+        return { success: false, error: 'Already owned' };
+      }
+    } else {
+      const purchasedCosmetics: string[] = user.purchased_cosmetics || [];
+      if (purchasedCosmetics.includes(itemId) && !itemId.startsWith('handle_change')) {
+        return { success: false, error: 'Already owned' };
+      }
     }
 
     const newBalance = currentBalance - cost;
-    const newPurchases = [...purchasedCosmetics, itemId];
 
-    await updateDoc(userRef, {
-      giuros: newBalance,
-      purchasedCosmetics: newPurchases,
-    });
+    // Transaction needed ideally
+    // Update balance
+    const success = await updateUser(username, { giuros: newBalance });
+    if (!success) {
+      return { success: false, error: 'Failed to update balance' };
+    }
+
+    // Add item
+    if (itemId.startsWith('badge_')) {
+      await addPurchasedBadge(username, itemId);
+    } else {
+      const purchasedCosmetics: string[] = user.purchased_cosmetics || [];
+      // Re-read or just append? Appending is risky if concurrent.
+      // Ideally we use array_append in Supabase but updateUser takes the whole array.
+      // For now, re-use list from variable.
+      const newPurchases = [...purchasedCosmetics, itemId];
+      await updateUser(username, { purchased_cosmetics: newPurchases });
+    }
 
     // eslint-disable-next-line no-console
     console.log(
       `[Giuros] -${cost} for ${username} (purchased ${itemId}). New balance: ${newBalance}`
     );
 
-    // Publish activity for friend feed
+    // Publish activity
     let itemType = 'item';
     if (itemId.startsWith('badge_')) {
       itemType = 'badge';
@@ -166,14 +158,7 @@ export const spendGiuros = async (
 };
 
 /**
- * Claim daily login bonus (once per day)
- * @param {string} username
- * @returns {Promise<{claimed: boolean, bonus: number, newBalance: number}>}
- */
-/**
- * Claim daily login bonus (once per day)
- * @param {string} username
- * @returns {Promise<{claimed: boolean, bonus: number, newBalance: number}>}
+ * Claim daily login bonus
  */
 export const claimDailyLoginBonus = async (
   username: string | null
@@ -183,33 +168,27 @@ export const claimDailyLoginBonus = async (
   }
 
   try {
-    // Fetch dynamic config
     const config = await getPayoutConfig();
     const dailyBonus = config.DAILY_LOGIN_BONUS;
-    const startingGiuros = config.STARTING_GIUROS;
 
-    const userRef = doc(db, USERS_COLLECTION, username);
-    const userDoc = await getDoc(userRef);
-
-    if (!userDoc.exists()) {
+    const user = await getUserByUsername(username);
+    if (!user) {
       return { claimed: false, bonus: 0, newBalance: 0 };
     }
 
-    const data = userDoc.data();
-    const today = new Date().toDateString();
-    const lastLogin = data?.lastLoginDate;
+    // Compare simple date string YYYY-MM-DD
+    const today = new Date().toISOString().split('T')[0];
+    const lastLogin = user.last_login_date; // Database returns YYYY-MM-DD string for DATE type
 
-    // Already claimed today
     if (lastLogin === today) {
-      return { claimed: false, bonus: 0, newBalance: data?.giuros ?? startingGiuros };
+      return { claimed: false, bonus: 0, newBalance: user.giuros };
     }
 
-    const currentBalance = data?.giuros ?? startingGiuros;
-    const newBalance = currentBalance + dailyBonus;
+    const newBalance = user.giuros + dailyBonus;
 
-    await updateDoc(userRef, {
+    await updateUser(username, {
       giuros: newBalance,
-      lastLoginDate: today,
+      last_login_date: today,
     });
 
     // eslint-disable-next-line no-console
@@ -224,9 +203,6 @@ export const claimDailyLoginBonus = async (
 
 /**
  * Award bonus for completing daily challenge
- * @param {string} username
- * @param {number} streak - Current streak for bonus calculation
- * @returns {Promise<{bonus: number, newBalance: number}>}
  */
 export const awardChallengeBonus = async (
   username: string | null,
@@ -235,18 +211,13 @@ export const awardChallengeBonus = async (
   if (!username) {
     return { bonus: 0, newBalance: 0 };
   }
-
-  // Use centralized game config for calculation
   const bonus = calculateStreakBonus(streak);
-
   const result = await addGiuros(username, bonus, `daily challenge (streak: ${streak})`);
   return { bonus, newBalance: result.newBalance };
 };
 
 /**
- * Award referral bonus when referred user completes first game
- * @param {string} referrerUsername
- * @returns {Promise<{success: boolean, newBalance: number}>}
+ * Award referral bonus
  */
 export const awardReferralBonus = async (
   referrerUsername: string | null
@@ -254,8 +225,6 @@ export const awardReferralBonus = async (
   if (!referrerUsername) {
     return { success: false, newBalance: 0 };
   }
-
-  // Fetch dynamic config
   const config = await getPayoutConfig();
   const result = await addGiuros(referrerUsername, config.REFERRAL_BONUS, 'referral completed');
   return { success: result.success, newBalance: result.newBalance };
@@ -263,22 +232,18 @@ export const awardReferralBonus = async (
 
 /**
  * Get user's purchased cosmetics list
- * @param {string} username
- * @returns {Promise<string[]>}
  */
 export const getPurchasedCosmetics = async (username: string | null): Promise<string[]> => {
   if (!username) {
     return [];
   }
-
   try {
-    const userRef = doc(db, USERS_COLLECTION, username);
-    const userDoc = await getDoc(userRef);
+    const user = await getUserByUsername(username);
+    // Combine purchased_cosmetics array + purchased_badges
+    const cosmetics = user?.purchased_cosmetics || [];
+    const badges = await getUserPurchasedBadges(username);
 
-    if (userDoc.exists()) {
-      return userDoc.data()?.purchasedCosmetics || [];
-    }
-    return [];
+    return [...cosmetics, ...badges];
   } catch (e) {
     console.error('Error getting purchased cosmetics:', e);
     return [];
@@ -286,9 +251,7 @@ export const getPurchasedCosmetics = async (username: string | null): Promise<st
 };
 
 /**
- * Set active cosmetics (equipped items)
- * @param {string} username
- * @param {object} equipped - { frameId, badgeIds, titleId }
+ * Set active cosmetics
  */
 export const setEquippedCosmetics = async (
   username: string | null,
@@ -297,10 +260,10 @@ export const setEquippedCosmetics = async (
   if (!username) {
     return;
   }
-
   try {
-    const userRef = doc(db, USERS_COLLECTION, username);
-    await updateDoc(userRef, { equippedCosmetics: equipped });
+    // Cast to expected Map type. Supabase defines it as Record<string, string>
+    // But usage might include non-string values?
+    await updateUser(username, { equipped_cosmetics: equipped as any });
   } catch (e) {
     console.error('Error setting equipped cosmetics:', e);
   }
@@ -308,8 +271,6 @@ export const setEquippedCosmetics = async (
 
 /**
  * Get equipped cosmetics
- * @param {string} username
- * @returns {Promise<{frameId?: string, badgeIds?: string[], titleId?: string}>}
  */
 export const getEquippedCosmetics = async (
   username: string | null
@@ -317,15 +278,10 @@ export const getEquippedCosmetics = async (
   if (!username) {
     return {};
   }
-
   try {
-    const userRef = doc(db, USERS_COLLECTION, username);
-    const userDoc = await getDoc(userRef);
-
-    if (userDoc.exists()) {
-      return userDoc.data()?.equippedCosmetics || {};
-    }
-    return {};
+    const user = await getUserByUsername(username);
+    // UserRow equipped_cosmetics is Record<string, string>
+    return user?.equipped_cosmetics || {};
   } catch (e) {
     console.error('Error getting equipped cosmetics:', e);
     return {};

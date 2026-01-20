@@ -1,20 +1,26 @@
-import { doc, getDoc } from 'firebase/firestore';
-import { auth, db } from '../firebase';
+import { supabase } from '../services/supabase';
 import { logger } from './logger';
 
 /**
  * Check if the current user is an admin
- * @returns true if the current user has an admin document
+ * @returns true if the current user is in the admins table
  */
 export const isCurrentUserAdmin = async (): Promise<boolean> => {
-  const user = auth.currentUser;
-  if (!user) {
-    return false;
-  }
-
   try {
-    const adminDoc = await getDoc(doc(db, 'admins', user.uid));
-    return adminDoc.exists();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (!user) {
+      return false;
+    }
+
+    // Check admins table
+    const { data, error } = await supabase.from('admins').select('uid').eq('uid', user.id).single();
+
+    if (error || !data) {
+      return false;
+    }
+    return true;
   } catch (error) {
     logger.error('Error checking admin status', { error });
     return false;
@@ -26,13 +32,8 @@ export const isCurrentUserAdmin = async (): Promise<boolean> => {
  * @throws Error if not authenticated or not an admin
  */
 export const requireAdmin = async (): Promise<void> => {
-  const user = auth.currentUser;
-  if (!user) {
-    throw new Error('Not authenticated');
-  }
-
-  const adminDoc = await getDoc(doc(db, 'admins', user.uid));
-  if (!adminDoc.exists()) {
+  const isAdmin = await isCurrentUserAdmin();
+  if (!isAdmin) {
     throw new Error('Not authorized: Admin access required');
   }
 };
@@ -41,10 +42,12 @@ export const requireAdmin = async (): Promise<void> => {
  * Get the current user's UID
  * @throws Error if not authenticated
  */
-export const requireAuth = (): string => {
-  const user = auth.currentUser;
+export const requireAuth = async (): Promise<string> => {
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) {
     throw new Error('Not authenticated');
   }
-  return user.uid;
+  return user.id;
 };

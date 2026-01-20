@@ -1,36 +1,30 @@
-import {
-  DocumentData,
-  Timestamp,
-  addDoc,
-  collection,
-  deleteDoc,
-  doc,
-  getDoc,
-  getDocs,
-  increment,
-  limit,
-  orderBy,
-  query,
-  setDoc,
-  updateDoc,
-  where,
-  writeBatch,
-} from 'firebase/firestore';
-import { SOCIAL } from '../config/constants';
+import { Timestamp } from 'firebase/firestore';
 import { DISTRICTS } from '../data/districts';
-import { db } from '../firebase';
+import {
+  getUserByUsername,
+  getUserByUid as dbGetUserByUid,
+  createUser,
+  updateUser,
+  upsertUser,
+  getBadgeStats,
+  upsertBadgeStats,
+  submitFeedback as dbSubmitFeedback,
+  getApprovedFeedbackRewards,
+  markFeedbackNotified,
+  blockUser as dbBlockUser,
+  unblockUser as dbUnblockUser,
+  isUserBlocked,
+  createReferral,
+  getUserGameHistory as dbGetUserGameHistory,
+  saveUserGame,
+  getDistricts,
+  updateDistrictScore as dbUpdateDistrictScore,
+} from '../services/database';
+import { supabase } from '../services/supabase';
+import type { UserRow, FeedbackRow } from '../types/supabase';
 
-const USERS_COLLECTION = 'users';
-const FRIENDSHIPS_COLLECTION = 'friendships';
-const REFERRALS_COLLECTION = 'referrals';
-const FEEDBACK_COLLECTION = 'feedback';
-const BLOCKS_COLLECTION = 'blocks';
-const GAMES_SUBCOLLECTION = 'games';
 const DEFAULT_AVATAR_COUNT = 20;
 const DEFAULT_GIUROS = 10;
-const MS_PER_SECOND = 1000;
-const SCORES_LIMIT = 50;
-const HISTORY_LIMIT = 100;
 
 export interface NotificationSettings {
   dailyReminder: boolean;
@@ -45,9 +39,9 @@ export interface UserProfile {
   email?: string | null;
   realName?: string;
   avatarId?: number;
-  joinedAt?: Timestamp;
-  createdAt?: Timestamp;
-  updatedAt?: Timestamp;
+  joinedAt?: Timestamp | string;
+  createdAt?: Timestamp | string;
+  updatedAt?: Timestamp | string;
   friendCount?: number;
   banned?: boolean;
   gamesPlayed?: number;
@@ -78,16 +72,16 @@ export interface FeedbackItem {
   text: string;
   status: 'pending' | 'approved' | 'rejected';
   reward?: number | null;
-  createdAt?: Timestamp;
-  approvedAt?: Timestamp;
-  rejectedAt?: Timestamp;
+  createdAt?: Timestamp | string;
+  approvedAt?: Timestamp | string;
+  rejectedAt?: Timestamp | string;
   notified?: boolean;
 }
 
 export interface GameData {
   score: number;
-  date?: number;
-  timestamp?: Timestamp | { seconds: number };
+  date?: number | string;
+  timestamp?: Timestamp | { seconds: number } | number;
   time?: number;
   [key: string]: unknown;
 }
@@ -115,8 +109,45 @@ interface GameStatsUpdate {
   currentScore?: number;
 }
 
+// Helper to convert Supabase UserRow to UserProfile
+function rowToProfile(row: UserRow): UserProfile {
+  return {
+    id: row.username,
+    username: row.username,
+    uid: row.uid,
+    email: row.email,
+    realName: row.real_name || '',
+    avatarId: row.avatar_id,
+    joinedAt: row.joined_at || undefined,
+    createdAt: row.created_at || undefined,
+    updatedAt: row.updated_at || undefined,
+    friendCount: row.friend_count,
+    banned: row.banned,
+    gamesPlayed: row.games_played,
+    bestScore: row.best_score,
+    totalScore: row.total_score,
+    referralCode: row.referral_code || undefined,
+    streak: row.streak,
+    maxStreak: row.max_streak,
+    lastPlayDate: row.last_play_date,
+    giuros: row.giuros,
+    purchasedCosmetics: row.purchased_cosmetics,
+    equippedCosmetics: row.equipped_cosmetics,
+    equippedBadges: row.equipped_badges,
+    lastLoginDate: row.last_login_date,
+    language: row.language,
+    theme: row.theme as 'dark' | 'light' | 'auto',
+    notificationSettings: row.notification_settings,
+    migratedTo: row.migrated_to,
+    migratedFrom: row.migrated_from,
+    referredBy: row.referred_by,
+    district: row.district || undefined,
+    team: row.team || undefined,
+  };
+}
+
 /**
- * Get or create user profile document in Firestore.
+ * Get or create user profile document in Supabase.
  */
 export const ensureUserProfile = async (
   usernameInput: string,
@@ -128,143 +159,89 @@ export const ensureUserProfile = async (
   }
   const username = usernameInput.toLowerCase();
 
-  const userRef = doc(db, USERS_COLLECTION, username);
-  const userDoc = await getDoc(userRef);
+  // Check if user exists
+  const existingUser = await getUserByUsername(username);
 
-  if (additionalData.email && !userDoc.exists()) {
-    const existingUser = await getUserByEmail(additionalData.email);
-    if (existingUser) {
+  // Check by email if provided and user doesn't exist
+  if (additionalData.email && !existingUser) {
+    const userByEmail = await getUserByEmail(additionalData.email);
+    if (userByEmail) {
       console.warn(
-        `[Auth] Found existing user by email ${additionalData.email}: ${existingUser.username}`
+        `[Auth] Found existing user by email ${additionalData.email}: ${userByEmail.username}`
       );
-      return existingUser;
+      return userByEmail;
     }
   }
 
-  if (!userDoc.exists()) {
-    const now = Timestamp.now();
-    const profileData: UserProfile = {
-      username,
-      uid: uid,
-      email: additionalData.email ? additionalData.email.toLowerCase().trim() : null,
-      realName: additionalData.realName || '',
-      avatarId: additionalData.avatarId || Math.floor(Math.random() * DEFAULT_AVATAR_COUNT) + 1,
-      joinedAt: now,
-      createdAt: now,
-      updatedAt: now,
-      friendCount: 0,
-      gamesPlayed: 0,
-      bestScore: 0,
-      totalScore: 0,
-      referralCode: username.toLowerCase().replace(/[^a-z0-9]/g, ''),
-      streak: 0,
-      maxStreak: 0,
-      lastPlayDate: null,
-      giuros: DEFAULT_GIUROS,
-      purchasedCosmetics: [],
-      equippedCosmetics: {},
-      lastLoginDate: null,
-      language: additionalData.language || 'en',
-      theme: 'auto',
-      notificationSettings: {
-        dailyReminder: true,
-        friendActivity: true,
-        newsUpdates: true,
-      },
-      migratedTo: null,
-      migratedFrom: null,
-      referredBy: null,
-      district:
-        additionalData.district || DISTRICTS[Math.floor(Math.random() * DISTRICTS.length)].id,
-      team: additionalData.district
-        ? DISTRICTS.find(d => d.id === additionalData.district)?.teamName
-        : (() => {
-            // Need to ensure team matches the random district if fallback was used.
-            // Since we can't easily sync two random calls inline, let's fix the logic by
-            // utilizing the fact that we can't capture the previous random value here easily.
-            // A better approach is to rely on 'updateUserGameStats' or just accept that this
-            // fallback is a last resort. However, correctness is key.
-            // Let's assume the previous random call gave us a valid ID.
-            // Actually, to be safe, we should determine the values BEFORE this object.
-            return undefined;
-          })(),
-    };
-
-    // Fix: Refactor to calculate district first
+  if (!existingUser) {
+    // Create new user
     const selectedDistrictId =
       additionalData.district || DISTRICTS[Math.floor(Math.random() * DISTRICTS.length)].id;
     const selectedTeamName = DISTRICTS.find(d => d.id === selectedDistrictId)?.teamName;
 
-    profileData.district = selectedDistrictId;
-    profileData.team = selectedTeamName;
+    const newUser = await createUser({
+      username,
+      uid: uid,
+      email: additionalData.email ? additionalData.email.toLowerCase().trim() : null,
+      real_name: additionalData.realName || null,
+      avatar_id: additionalData.avatarId || Math.floor(Math.random() * DEFAULT_AVATAR_COUNT) + 1,
+      friend_count: 0,
+      games_played: 0,
+      best_score: 0,
+      total_score: 0,
+      referral_code: username.toLowerCase().replace(/[^a-z0-9]/g, ''),
+      streak: 0,
+      max_streak: 0,
+      last_play_date: null,
+      giuros: DEFAULT_GIUROS,
+      purchased_cosmetics: [],
+      equipped_cosmetics: {},
+      equipped_badges: [],
+      last_login_date: null,
+      language: additionalData.language || 'en',
+      theme: 'auto',
+      notification_settings: {
+        dailyReminder: true,
+        friendActivity: true,
+        newsUpdates: true,
+      },
+      migrated_to: null,
+      migrated_from: null,
+      referred_by: null,
+      district: selectedDistrictId,
+      team: selectedTeamName || null,
+      banned: false,
+    });
 
-    await setDoc(userRef, profileData);
-    return profileData;
+    if (newUser) {
+      return rowToProfile(newUser);
+    }
+    return null;
   }
 
-  const data = userDoc.data() as DocumentData;
+  // Update existing user if needed
   const updates: Record<string, unknown> = {};
-  const now = Timestamp.now();
 
-  if (uid && data.uid !== uid) {
+  if (uid && existingUser.uid !== uid) {
     updates.uid = uid;
   }
-  if (additionalData.email && !data.email) {
+  if (additionalData.email && !existingUser.email) {
     updates.email = additionalData.email.toLowerCase().trim();
   }
-  if (!data.createdAt && data.joinedAt) {
-    updates.createdAt = data.joinedAt;
-  }
-  if (!data.updatedAt) {
-    updates.updatedAt = now;
-  }
-  if (data.streak === undefined) {
-    updates.streak = 0;
-  }
-  if (data.maxStreak === undefined) {
-    updates.maxStreak = 0;
-  }
-  if (data.lastPlayDate === undefined) {
-    updates.lastPlayDate = null;
-  }
-  if (data.totalScore === undefined) {
-    updates.totalScore = 0;
-  }
-  if (data.language === undefined) {
-    updates.language = additionalData.language || 'en';
-  }
-  if (data.theme === undefined) {
-    updates.theme = 'auto';
-  }
-  if (data.notificationSettings === undefined) {
-    updates.notificationSettings = {
-      dailyReminder: true,
-      friendActivity: true,
-      newsUpdates: true,
-    };
-  }
-  if (data.gamesPlayed === undefined) {
-    updates.gamesPlayed = 0;
-  }
-  if (data.bestScore === undefined) {
-    updates.bestScore = 0;
-  }
-  // Update district if provided and different from current
-  if (additionalData.district && data.district !== additionalData.district) {
+  if (additionalData.district && existingUser.district !== additionalData.district) {
     updates.district = additionalData.district;
-    updates.team = DISTRICTS.find(d => d.id === additionalData.district)?.teamName;
+    updates.team = DISTRICTS.find(d => d.id === additionalData.district)?.teamName || null;
   }
-  // Backfill team if missing and district exists
-  if (!data.team && data.district && !updates.team) {
-    updates.team = DISTRICTS.find(d => d.id === data.district)?.teamName;
+  if (!existingUser.team && existingUser.district) {
+    updates.team = DISTRICTS.find(d => d.id === existingUser.district)?.teamName || null;
   }
 
   if (Object.keys(updates).length > 0) {
-    await updateDoc(userRef, updates);
-    Object.assign(data, updates);
+    await updateUser(username, updates);
+    Object.assign(existingUser, updates);
   }
 
-  return { id: userDoc.id, ...data } as UserProfile;
+  return rowToProfile(existingUser);
 };
 
 /**
@@ -275,14 +252,19 @@ export const getUserByEmail = async (email: string): Promise<UserProfile | null>
     return null;
   }
   const cleanEmail = email.toLowerCase().trim();
+
   try {
-    const q = query(collection(db, USERS_COLLECTION), where('email', '==', cleanEmail), limit(1));
-    const snapshot = await getDocs(q);
-    if (!snapshot.empty) {
-      const docSnap = snapshot.docs[0];
-      return { id: docSnap.id, ...docSnap.data() } as UserProfile;
+    const { data, error } = await supabase
+      .from('users')
+      .select('*')
+      .eq('email', cleanEmail)
+      .limit(1)
+      .single();
+
+    if (error || !data) {
+      return null;
     }
-    return null;
+    return rowToProfile(data);
   } catch (e) {
     console.error('Error fetching user by email:', e);
     return null;
@@ -296,18 +278,12 @@ export const getUserByUid = async (uid: string): Promise<UserProfile | null> => 
   if (!uid) {
     return null;
   }
-  try {
-    const q = query(collection(db, USERS_COLLECTION), where('uid', '==', uid), limit(1));
-    const snapshot = await getDocs(q);
-    if (!snapshot.empty) {
-      const docSnap = snapshot.docs[0];
-      return { id: docSnap.id, ...docSnap.data() } as UserProfile;
-    }
-    return null;
-  } catch (e) {
-    console.error('Error fetching user by uid:', e);
-    return null;
+
+  const user = await dbGetUserByUid(uid);
+  if (user) {
+    return rowToProfile(user);
   }
+  return null;
 };
 
 /**
@@ -321,39 +297,33 @@ export const updateUserGameStats = async (
     return;
   }
   const lowername = username.toLowerCase();
-  const userRef = doc(db, USERS_COLLECTION, lowername);
 
   try {
-    const userDoc = await getDoc(userRef);
-    if (!userDoc.exists()) {
+    const existingUser = await getUserByUsername(lowername);
+    if (!existingUser) {
       return;
     }
 
-    const currentData = userDoc.data() as DocumentData;
     const updates: Record<string, unknown> = {
-      gamesPlayed: ((currentData.gamesPlayed as number) || 0) + 1,
-      totalScore: totalScore,
-      streak: Math.min(streak, ((currentData.gamesPlayed as number) || 0) + 1),
-      lastPlayDate: lastPlayDate,
-      updatedAt: Timestamp.now(),
+      games_played: existingUser.games_played + 1,
+      total_score: totalScore,
+      streak: Math.min(streak, existingUser.games_played + 1),
+      last_play_date: lastPlayDate,
     };
 
-    if (streak > ((currentData.maxStreak as number) || 0)) {
-      updates.maxStreak = streak;
+    if (streak > existingUser.max_streak) {
+      updates.max_streak = streak;
     }
 
-    if (currentScore !== undefined) {
-      const currentBest = (currentData.bestScore as number) || 0;
-      if (currentScore > currentBest) {
-        updates.bestScore = currentScore;
-      }
+    if (currentScore !== undefined && currentScore > existingUser.best_score) {
+      updates.best_score = currentScore;
     }
 
-    await updateDoc(userRef, updates);
+    await updateUser(lowername, updates);
 
     // Update district score if user has one
-    if (currentData.district) {
-      await updateDistrictScore(currentData.district, currentScore || 0);
+    if (existingUser.district && currentScore) {
+      await dbUpdateDistrictScore(existingUser.district, currentScore);
     }
   } catch (e) {
     console.error('Error updating game stats:', e);
@@ -367,13 +337,7 @@ export const submitFeedback = async (username: string, text: string): Promise<vo
   if (!username || !text) {
     return;
   }
-  await addDoc(collection(db, FEEDBACK_COLLECTION), {
-    username,
-    text,
-    status: 'pending',
-    reward: null,
-    createdAt: Timestamp.now(),
-  });
+  await dbSubmitFeedback(username, text);
 };
 
 /**
@@ -381,9 +345,27 @@ export const submitFeedback = async (username: string, text: string): Promise<vo
  */
 export const getFeedbackList = async (): Promise<FeedbackItem[]> => {
   try {
-    const q = query(collection(db, FEEDBACK_COLLECTION), limit(HISTORY_LIMIT));
-    const snapshot = await getDocs(q);
-    return snapshot.docs.map(docSnap => ({ id: docSnap.id, ...docSnap.data() })) as FeedbackItem[];
+    const { data, error } = await supabase
+      .from('feedback')
+      .select('*')
+      .order('created_at', { ascending: false })
+      .limit(100);
+
+    if (error || !data) {
+      return [];
+    }
+
+    return data.map((f: FeedbackRow) => ({
+      id: f.id.toString(),
+      username: f.username,
+      text: f.text,
+      status: f.status,
+      reward: f.reward,
+      createdAt: f.created_at,
+      approvedAt: f.approved_at || undefined,
+      rejectedAt: f.rejected_at || undefined,
+      notified: f.notified,
+    }));
   } catch (e) {
     console.error('Error fetching feedback:', e);
     return [];
@@ -398,26 +380,33 @@ export const approveFeedback = async (
   giurosAmount = 50
 ): Promise<OperationResult> => {
   try {
-    const feedbackRef = doc(db, FEEDBACK_COLLECTION, feedbackId);
-    const feedbackDoc = await getDoc(feedbackRef);
+    const { data: feedback, error: fetchError } = await supabase
+      .from('feedback')
+      .select('*')
+      .eq('id', parseInt(feedbackId, 10))
+      .single();
 
-    if (!feedbackDoc.exists()) {
+    if (fetchError || !feedback) {
       throw new Error('Feedback not found');
     }
 
-    const feedbackData = feedbackDoc.data() as DocumentData;
-    const username = feedbackData.username as string;
-
     const { awardGiuros } = await import('./giuros');
-    await awardGiuros(username, giurosAmount);
+    await awardGiuros(feedback.username, giurosAmount);
 
-    await updateDoc(feedbackRef, {
-      status: 'approved',
-      reward: giurosAmount,
-      approvedAt: Timestamp.now(),
-    });
+    const { error: updateError } = await supabase
+      .from('feedback')
+      .update({
+        status: 'approved',
+        reward: giurosAmount,
+        approved_at: new Date().toISOString(),
+      })
+      .eq('id', parseInt(feedbackId, 10));
 
-    return { success: true, username, reward: giurosAmount };
+    if (updateError) {
+      throw new Error(updateError.message);
+    }
+
+    return { success: true, username: feedback.username, reward: giurosAmount };
   } catch (e) {
     console.error('Error approving feedback:', e);
     return { success: false, error: (e as Error).message };
@@ -429,11 +418,17 @@ export const approveFeedback = async (
  */
 export const rejectFeedback = async (feedbackId: string): Promise<OperationResult> => {
   try {
-    const feedbackRef = doc(db, FEEDBACK_COLLECTION, feedbackId);
-    await updateDoc(feedbackRef, {
-      status: 'rejected',
-      rejectedAt: Timestamp.now(),
-    });
+    const { error } = await supabase
+      .from('feedback')
+      .update({
+        status: 'rejected',
+        rejected_at: new Date().toISOString(),
+      })
+      .eq('id', parseInt(feedbackId, 10));
+
+    if (error) {
+      throw new Error(error.message);
+    }
     return { success: true };
   } catch (e) {
     console.error('Error rejecting feedback:', e);
@@ -446,8 +441,11 @@ export const rejectFeedback = async (feedbackId: string): Promise<OperationResul
  */
 export const deleteFeedback = async (feedbackId: string): Promise<OperationResult> => {
   try {
-    const feedbackRef = doc(db, FEEDBACK_COLLECTION, feedbackId);
-    await deleteDoc(feedbackRef);
+    const { error } = await supabase.from('feedback').delete().eq('id', parseInt(feedbackId, 10));
+
+    if (error) {
+      throw new Error(error.message);
+    }
     return { success: true };
   } catch (e) {
     console.error('Error deleting feedback:', e);
@@ -462,31 +460,26 @@ export const checkUnseenFeedbackRewards = async (username: string): Promise<Feed
   if (!username) {
     return [];
   }
-  try {
-    const q = query(
-      collection(db, FEEDBACK_COLLECTION),
-      where('username', '==', username),
-      where('status', '==', 'approved'),
-      where('notified', '!=', true)
-    );
-    const snapshot = await getDocs(q);
-    return snapshot.docs.map(docSnap => ({ id: docSnap.id, ...docSnap.data() })) as FeedbackItem[];
-  } catch (e) {
-    console.error('Error checking feedback rewards:', e);
-    return [];
-  }
+
+  const rewards = await getApprovedFeedbackRewards(username);
+  return rewards.map((f: FeedbackRow) => ({
+    id: f.id.toString(),
+    username: f.username,
+    text: f.text,
+    status: f.status,
+    reward: f.reward,
+    createdAt: f.created_at,
+    approvedAt: f.approved_at || undefined,
+    rejectedAt: f.rejected_at || undefined,
+    notified: f.notified,
+  }));
 };
 
 /**
  * Mark feedback reward as seen
  */
 export const markFeedbackRewardSeen = async (feedbackId: string): Promise<void> => {
-  try {
-    const feedbackRef = doc(db, FEEDBACK_COLLECTION, feedbackId);
-    await updateDoc(feedbackRef, { notified: true });
-  } catch (e) {
-    console.error('Error marking feedback reward seen:', e);
-  }
+  await markFeedbackNotified(parseInt(feedbackId, 10));
 };
 
 /**
@@ -494,9 +487,13 @@ export const markFeedbackRewardSeen = async (feedbackId: string): Promise<void> 
  */
 export const getAllUsers = async (limitCount = 50): Promise<UserProfile[]> => {
   try {
-    const q = query(collection(db, USERS_COLLECTION), limit(limitCount));
-    const snapshot = await getDocs(q);
-    return snapshot.docs.map(docSnap => ({ id: docSnap.id, ...docSnap.data() })) as UserProfile[];
+    const { data, error } = await supabase.from('users').select('*').limit(limitCount);
+
+    if (error || !data) {
+      return [];
+    }
+
+    return data.map(rowToProfile);
   } catch (e) {
     console.error('Error fetching all users:', e);
     return [];
@@ -505,7 +502,6 @@ export const getAllUsers = async (limitCount = 50): Promise<UserProfile[]> => {
 
 /**
  * Update user data as Admin
- * @throws Error if not authenticated or not an admin
  */
 export const updateUserAsAdmin = async (
   targetUsername: string,
@@ -515,12 +511,34 @@ export const updateUserAsAdmin = async (
     return;
   }
 
-  // Security: Verify admin before write
   const { requireAdmin } = await import('./auth');
   await requireAdmin();
 
-  const userRef = doc(db, USERS_COLLECTION, targetUsername);
-  await updateDoc(userRef, data as DocumentData);
+  // Convert UserProfile to database format
+  const dbData: Record<string, unknown> = {};
+  if (data.realName !== undefined) {
+    dbData.real_name = data.realName;
+  }
+  if (data.avatarId !== undefined) {
+    dbData.avatar_id = data.avatarId;
+  }
+  if (data.giuros !== undefined) {
+    dbData.giuros = data.giuros;
+  }
+  if (data.banned !== undefined) {
+    dbData.banned = data.banned;
+  }
+  if (data.streak !== undefined) {
+    dbData.streak = data.streak;
+  }
+  if (data.district !== undefined) {
+    dbData.district = data.district;
+  }
+  if (data.team !== undefined) {
+    dbData.team = data.team;
+  }
+
+  await updateUser(targetUsername, dbData);
 };
 
 /**
@@ -534,28 +552,14 @@ export const deleteUserAndData = async (username: string): Promise<OperationResu
   try {
     const cleanUsername = username.startsWith('@') ? username.slice(1) : username;
 
-    await deleteDoc(doc(db, USERS_COLLECTION, username));
+    // Delete user (cascade will handle related tables)
+    const { error } = await supabase.from('users').delete().eq('username', cleanUsername);
 
-    const sanitizedHighscoreId = cleanUsername.replace(/\//g, '_');
-    await deleteDoc(doc(db, 'highscores', sanitizedHighscoreId));
-
-    const scoresRef = collection(db, 'scores');
-    const q = query(scoresRef, where('username', '==', cleanUsername));
-    const snapshot = await getDocs(q);
-
-    const batch = writeBatch(db);
-    let operationCount = 0;
-
-    snapshot.docs.forEach(scoreDoc => {
-      batch.delete(scoreDoc.ref);
-      operationCount++;
-    });
-
-    if (operationCount > 0) {
-      await batch.commit();
+    if (error) {
+      throw new Error(error.message);
     }
 
-    return { success: true, count: operationCount };
+    return { success: true };
   } catch (e) {
     console.error('Error deleting user:', e);
     return { success: false, error: (e as Error).message };
@@ -563,105 +567,19 @@ export const deleteUserAndData = async (username: string): Promise<OperationResu
 };
 
 /**
- * Fetch user profile from Firestore by username
+ * Fetch user profile from Supabase by username
  */
 export const getUserProfile = async (username: string): Promise<UserProfile | null> => {
   if (!username) {
     return null;
   }
 
-  const userRef = doc(db, USERS_COLLECTION, username);
-  const userDoc = await getDoc(userRef);
-  const profileData = userDoc.exists()
-    ? ({ id: userDoc.id, ...userDoc.data() } as UserProfile)
-    : null;
-
-  if (profileData && (profileData.gamesPlayed || 0) > 0) {
-    return profileData;
+  const user = await getUserByUsername(username.toLowerCase());
+  if (user) {
+    return rowToProfile(user);
   }
 
-  try {
-    const highscoreRef = doc(db, 'highscores', username);
-    const highscoreDoc = await getDoc(highscoreRef);
-    let bestScore = 0;
-    if (highscoreDoc.exists()) {
-      bestScore = (highscoreDoc.data().score as number) || 0;
-    }
-
-    const q = query(collection(db, 'scores'), where('username', '==', username));
-    const snapshot = await getDocs(q);
-    const gamesPlayed = snapshot.size;
-
-    const friendsSnapshot = await getDocs(collection(db, USERS_COLLECTION, username, 'friends'));
-    const friendCount = friendsSnapshot.size;
-
-    let joinedAt = profileData?.joinedAt || Timestamp.now();
-
-    if (!snapshot.empty) {
-      // Use reduce pattern instead of forEach to help TypeScript track the type
-      const earliestGame = snapshot.docs.reduce<Date | null>((earliest, docSnap) => {
-        const d = docSnap.data() as DocumentData;
-        let t: Date | null = null;
-        if (typeof d.timestamp?.toDate === 'function') {
-          t = d.timestamp.toDate();
-        } else if (d.timestamp?.seconds) {
-          t = new Date((d.timestamp.seconds as number) * MS_PER_SECOND);
-        } else if (d.timestamp) {
-          t = new Date(d.timestamp as string | number);
-        }
-
-        if (t && (!earliest || t < earliest)) {
-          return t;
-        }
-        return earliest;
-      }, null);
-
-      const currentJoinedDate =
-        typeof (joinedAt as Timestamp).toDate === 'function'
-          ? (joinedAt as Timestamp).toDate()
-          : new Date(((joinedAt as { seconds: number }).seconds || 0) * MS_PER_SECOND);
-
-      if (earliestGame && earliestGame < currentJoinedDate) {
-        joinedAt = Timestamp.fromDate(earliestGame);
-      }
-    }
-
-    const correctedData: Partial<UserProfile> = {
-      username,
-      gamesPlayed: Math.max(profileData?.gamesPlayed || 0, gamesPlayed),
-      bestScore: Math.max(profileData?.bestScore || 0, bestScore),
-      friendCount: Math.max(profileData?.friendCount || 0, friendCount),
-      joinedAt: joinedAt as Timestamp,
-      migratedTo: profileData?.migratedTo || null,
-    };
-
-    const needsUpdate =
-      correctedData.gamesPlayed !== (profileData?.gamesPlayed || 0) ||
-      correctedData.bestScore !== (profileData?.bestScore || 0) ||
-      correctedData.friendCount !== (profileData?.friendCount || 0);
-
-    if (needsUpdate || (correctedData.gamesPlayed || 0) > 0) {
-      if (userDoc.exists()) {
-        await updateDoc(userRef, {
-          gamesPlayed: correctedData.gamesPlayed,
-          bestScore: correctedData.bestScore,
-          friendCount: correctedData.friendCount,
-          joinedAt: correctedData.joinedAt,
-        });
-        console.warn(`[UserProfile] Healed stats for ${username}`);
-      } else {
-        await setDoc(userRef, {
-          ...correctedData,
-          createdAt: Timestamp.now(),
-        });
-      }
-    }
-
-    return correctedData as UserProfile;
-  } catch (e) {
-    console.error('Error healing user profile:', e);
-    return profileData || { username, gamesPlayed: 0, bestScore: 0, friendCount: 0 };
-  }
+  return null;
 };
 
 /**
@@ -672,25 +590,21 @@ export const updateUserStats = async (username: string, score: number): Promise<
     return;
   }
 
-  const userRef = doc(db, USERS_COLLECTION, username);
-  const userDoc = await getDoc(userRef);
+  const existingUser = await getUserByUsername(username);
 
-  if (userDoc.exists()) {
-    const data = userDoc.data() as DocumentData;
-    const newGamesPlayed = ((data.gamesPlayed as number) || 0) + 1;
-    const currentBest = Number(data.bestScore) || 0;
-    const currentScore = Number(score) || 0;
-    const newBestScore = Math.max(currentBest, currentScore);
+  if (existingUser) {
+    const newGamesPlayed = existingUser.games_played + 1;
+    const newBestScore = Math.max(existingUser.best_score, score);
 
-    await updateDoc(userRef, {
-      gamesPlayed: newGamesPlayed,
-      bestScore: newBestScore,
+    await updateUser(username, {
+      games_played: newGamesPlayed,
+      best_score: newBestScore,
     });
   } else {
     await ensureUserProfile(username);
-    await updateDoc(userRef, {
-      gamesPlayed: 1,
-      bestScore: score,
+    await updateUser(username, {
+      games_played: 1,
+      best_score: score,
     });
   }
 };
@@ -705,60 +619,47 @@ export const recordReferral = async (referrer: string, referred: string): Promis
 
   let referrerEmail: string | null = null;
   let referredEmail: string | null = null;
+
   try {
-    const [r1Doc, r2Doc] = await Promise.all([
-      getDoc(doc(db, USERS_COLLECTION, referrer)),
-      getDoc(doc(db, USERS_COLLECTION, referred)),
-    ]);
-    if (r1Doc.exists()) {
-      referrerEmail = (r1Doc.data().email as string) || null;
+    const [r1, r2] = await Promise.all([getUserByUsername(referrer), getUserByUsername(referred)]);
+
+    if (r1) {
+      referrerEmail = r1.email;
     }
-    if (r2Doc.exists()) {
-      referredEmail = (r2Doc.data().email as string) || null;
+    if (r2) {
+      referredEmail = r2.email;
     }
   } catch (e) {
     console.error('Error fetching emails for referral:', e);
   }
 
-  const batch = writeBatch(db);
-  const referralRef = doc(collection(db, REFERRALS_COLLECTION));
-  batch.set(referralRef, {
-    referrer,
-    referred,
-    referrerEmail,
-    referredEmail,
-    createdAt: Timestamp.now(),
+  await createReferral(referrer, referred, referrerEmail || undefined, referredEmail || undefined);
+
+  // Update badge stats for referrer
+  const stats = await getBadgeStats(referrer);
+  await upsertBadgeStats(referrer, {
+    invite_count: (stats?.invite_count || 0) + 1,
   });
 
-  const referrerStatsRef = doc(db, USERS_COLLECTION, referrer, 'badgeStats', 'current');
-  batch.set(referrerStatsRef, { inviteCount: increment(1) }, { merge: true });
-
-  const referredUserRef = doc(db, USERS_COLLECTION, referred);
-  batch.update(referredUserRef, { referredBy: referrer });
-
-  await batch.commit();
+  // Update referred user
+  await updateUser(referred, { referred_by: referrer });
 };
 
 /**
  * Get pending friend requests for a user
+ * (Moved to friends.ts, but keeping for backward compatibility)
  */
 export const getPendingFriendRequests = async (
   username: string
 ): Promise<Array<{ id: string; [key: string]: unknown }>> => {
-  if (!username) {
-    return [];
-  }
-
-  const q = query(
-    collection(db, FRIENDSHIPS_COLLECTION),
-    where('user2', '==', username),
-    where('status', '==', 'pending')
-  );
-
-  const snapshot = await getDocs(q);
-  const requests: Array<{ id: string; [key: string]: unknown }> = [];
-  snapshot.forEach(docSnap => requests.push({ id: docSnap.id, ...docSnap.data() }));
-  return requests;
+  const { getPendingRequests } = await import('./friends');
+  const requests = await getPendingRequests(username);
+  return requests.map(r => ({
+    id: r.id.toString(),
+    from: r.from_user,
+    timestamp: r.created_at,
+    status: r.status,
+  }));
 };
 
 /**
@@ -768,13 +669,7 @@ export const blockUser = async (blocker: string, blocked: string): Promise<void>
   if (!blocker || !blocked || blocker === blocked) {
     return;
   }
-
-  const blockId = `${blocker}_${blocked}`;
-  await setDoc(doc(db, BLOCKS_COLLECTION, blockId), {
-    blocker,
-    blocked,
-    createdAt: Timestamp.now(),
-  });
+  await dbBlockUser(blocker, blocked);
 };
 
 /**
@@ -784,25 +679,14 @@ export const unblockUser = async (blocker: string, blocked: string): Promise<voi
   if (!blocker || !blocked) {
     return;
   }
-
-  const blockId = `${blocker}_${blocked}`;
-  const blockRef = doc(db, BLOCKS_COLLECTION, blockId);
-  await deleteDoc(blockRef);
+  await dbUnblockUser(blocker, blocked);
 };
 
 /**
  * Check if user1 has blocked user2
  */
 export const getBlockStatus = async (user1: string, user2: string): Promise<boolean> => {
-  try {
-    const blockId = `${user1}_${user2}`;
-    const blockRef = doc(db, BLOCKS_COLLECTION, blockId);
-    const blockDoc = await getDoc(blockRef);
-    return blockDoc.exists();
-  } catch (e) {
-    console.error('Error checking block status:', e);
-    return false;
-  }
+  return isUserBlocked(user1, user2);
 };
 
 /**
@@ -816,8 +700,58 @@ export const updateUserProfile = async (
     return;
   }
 
-  const userRef = doc(db, USERS_COLLECTION, username);
-  await updateDoc(userRef, data as DocumentData);
+  // Convert UserProfile to database format
+  const dbData: Record<string, unknown> = {};
+  if (data.realName !== undefined) {
+    dbData.real_name = data.realName;
+  }
+  if (data.avatarId !== undefined) {
+    dbData.avatar_id = data.avatarId;
+  }
+  if (data.giuros !== undefined) {
+    dbData.giuros = data.giuros;
+  }
+  if (data.streak !== undefined) {
+    dbData.streak = data.streak;
+  }
+  if (data.maxStreak !== undefined) {
+    dbData.max_streak = data.maxStreak;
+  }
+  if (data.totalScore !== undefined) {
+    dbData.total_score = data.totalScore;
+  }
+  if (data.lastPlayDate !== undefined) {
+    dbData.last_play_date = data.lastPlayDate;
+  }
+  if (data.lastLoginDate !== undefined) {
+    dbData.last_login_date = data.lastLoginDate;
+  }
+  if (data.language !== undefined) {
+    dbData.language = data.language;
+  }
+  if (data.theme !== undefined) {
+    dbData.theme = data.theme;
+  }
+  if (data.notificationSettings !== undefined) {
+    dbData.notification_settings = data.notificationSettings;
+  }
+  if (data.purchasedCosmetics !== undefined) {
+    dbData.purchased_cosmetics = data.purchasedCosmetics;
+  }
+  if (data.equippedCosmetics !== undefined) {
+    dbData.equipped_cosmetics = data.equippedCosmetics;
+  }
+  if (data.equippedBadges !== undefined) {
+    dbData.equipped_badges = data.equippedBadges;
+  }
+  if (data.district !== undefined) {
+    dbData.district = data.district;
+  }
+  if (data.team !== undefined) {
+    dbData.team = data.team;
+  }
+
+  await updateUser(username, dbData);
 };
 
 /**
@@ -829,101 +763,45 @@ export const migrateUser = async (oldUsername: string, newHandle: string): Promi
   }
 
   try {
-    const oldRef = doc(db, USERS_COLLECTION, oldUsername);
-    const oldDoc = await getDoc(oldRef);
-    let profileData: DocumentData = {};
+    const oldUser = await getUserByUsername(oldUsername);
 
-    if (oldDoc.exists()) {
-      profileData = oldDoc.data();
-      await updateDoc(oldRef, { migratedTo: newHandle });
-    }
+    if (oldUser) {
+      // Mark old user as migrated
+      await updateUser(oldUsername, { migrated_to: newHandle });
 
-    const newRef = doc(db, USERS_COLLECTION, newHandle);
-    const newData = {
-      ...profileData,
-      username: newHandle,
-      realName: (profileData.realName as string) || oldUsername,
-      avatarId:
-        (profileData.avatarId as number) || Math.floor(Math.random() * DEFAULT_AVATAR_COUNT) + 1,
-      purchasedCosmetics: (profileData.purchasedCosmetics as string[]) || [],
-      equippedCosmetics: (profileData.equippedCosmetics as Record<string, string>) || {},
-      giuros: (profileData.giuros as number) ?? DEFAULT_GIUROS,
-      streak: (profileData.streak as number) || 0,
-      maxStreak: (profileData.maxStreak as number) || 0,
-      totalScore: (profileData.totalScore as number) || 0,
-      lastPlayDate: (profileData.lastPlayDate as string) || null,
-      notificationSettings: (profileData.notificationSettings as NotificationSettings) || {
-        dailyReminder: true,
-        friendActivity: true,
-        newsUpdates: true,
-      },
-      theme: (profileData.theme as string) || 'auto',
-      language: (profileData.language as string) || 'en',
-      joinedAt: (profileData.joinedAt as Timestamp) || Timestamp.now(),
-      migratedFrom: oldUsername,
-      updatedAt: Timestamp.now(),
-      id: newHandle,
-    };
-    await setDoc(newRef, newData);
-
-    const oldHighscoreRef = doc(db, 'highscores', oldUsername);
-    const oldHighscoreDoc = await getDoc(oldHighscoreRef);
-
-    if (oldHighscoreDoc.exists()) {
-      const hsData = oldHighscoreDoc.data();
-      const newHighscoreRef = doc(db, 'highscores', newHandle);
-      await setDoc(newHighscoreRef, {
-        ...hsData,
+      // Create new user with old user's data
+      await upsertUser({
         username: newHandle,
-        migratedFrom: oldUsername,
+        uid: oldUser.uid,
+        email: oldUser.email,
+        real_name: oldUser.real_name || oldUsername,
+        avatar_id: oldUser.avatar_id,
+        friend_count: oldUser.friend_count,
+        games_played: oldUser.games_played,
+        best_score: oldUser.best_score,
+        total_score: oldUser.total_score,
+        referral_code: newHandle.toLowerCase().replace(/[^a-z0-9]/g, ''),
+        streak: oldUser.streak,
+        max_streak: oldUser.max_streak,
+        last_play_date: oldUser.last_play_date,
+        giuros: oldUser.giuros,
+        purchased_cosmetics: oldUser.purchased_cosmetics,
+        equipped_cosmetics: oldUser.equipped_cosmetics,
+        equipped_badges: oldUser.equipped_badges,
+        last_login_date: oldUser.last_login_date,
+        language: oldUser.language,
+        theme: oldUser.theme,
+        notification_settings: oldUser.notification_settings,
+        migrated_from: oldUsername,
+        district: oldUser.district,
+        team: oldUser.team,
       });
-      await deleteDoc(oldHighscoreRef);
+
+      // Update game_results to point to new username
+      await supabase.from('game_results').update({ user_id: newHandle }).eq('user_id', oldUsername);
+
+      console.warn(`[Migration] Successfully migrated ${oldUsername} to ${newHandle}`);
     }
-
-    try {
-      const scoresQ = query(
-        collection(db, 'scores'),
-        where('username', '==', oldUsername),
-        limit(SCORES_LIMIT)
-      );
-      const scoresSnap = await getDocs(scoresQ);
-      const batch = writeBatch(db);
-
-      let batchCount = 0;
-      scoresSnap.forEach(scoreDoc => {
-        batch.update(scoreDoc.ref, { username: newHandle });
-        batchCount++;
-      });
-
-      if (batchCount > 0) {
-        await batch.commit();
-        console.warn(`[Migration] Migrated ${batchCount} recent scores.`);
-      }
-    } catch (e) {
-      console.warn('[Migration] Failed to migrate scores (non-critical):', e);
-    }
-
-    const subcollections = ['requests', 'friends', 'games'];
-    for (const sub of subcollections) {
-      try {
-        const subQ = query(collection(db, USERS_COLLECTION, oldUsername, sub));
-        const subSnap = await getDocs(subQ);
-
-        for (const docMsg of subSnap.docs) {
-          const data = docMsg.data();
-          await setDoc(doc(db, USERS_COLLECTION, newHandle, sub, docMsg.id), data);
-          await deleteDoc(docMsg.ref);
-        }
-
-        if (!subSnap.empty) {
-          console.warn(`[Migration] Migrated ${subSnap.size} documents in '${sub}'`);
-        }
-      } catch (e) {
-        console.warn(`[Migration] Failed to migrate subcollection ${sub}:`, e);
-      }
-    }
-
-    console.warn(`[Migration] Successfully migrated ${oldUsername} to ${newHandle}`);
   } catch (error) {
     console.error('[Migration] Error migrating user:', error);
     throw error;
@@ -937,33 +815,19 @@ export const healMigration = async (handle: string): Promise<void> => {
   if (!handle) {
     return;
   }
+
   try {
-    const userRef = doc(db, USERS_COLLECTION, handle);
-    const userDoc = await getDoc(userRef);
-    if (!userDoc.exists()) {
+    const user = await getUserByUsername(handle);
+    if (!user) {
       return;
     }
 
-    const data = userDoc.data() as DocumentData;
-    const oldName = data.migratedFrom as string | undefined;
-
+    const oldName = user.migrated_from;
     if (oldName && oldName !== handle) {
-      const oldUserRef = doc(db, USERS_COLLECTION, oldName);
-      const oldUserDoc = await getDoc(oldUserRef);
-
-      if (oldUserDoc.exists()) {
-        const oldData = oldUserDoc.data() as DocumentData;
-        if (oldData.migratedTo !== handle) {
-          await updateDoc(oldUserRef, { migratedTo: handle });
-          console.warn(`[Heal] Fixed migratedTo link for ${oldName}`);
-        }
-      }
-
-      const oldHsRef = doc(db, 'highscores', oldName);
-      const oldHsDoc = await getDoc(oldHsRef);
-      if (oldHsDoc.exists()) {
-        await deleteDoc(oldHsRef);
-        console.warn(`[Heal] Removed ghost highscore for ${oldName}`);
+      const oldUser = await getUserByUsername(oldName);
+      if (oldUser && oldUser.migrated_to !== handle) {
+        await updateUser(oldName, { migrated_to: handle });
+        console.warn(`[Heal] Fixed migratedTo link for ${oldName}`);
       }
     }
   } catch (e) {
@@ -983,14 +847,18 @@ export const hasDailyReferral = async (username: string): Promise<boolean> => {
     const startOfDay = new Date();
     startOfDay.setHours(0, 0, 0, 0);
 
-    const q = query(
-      collection(db, REFERRALS_COLLECTION),
-      where('referrer', '==', username),
-      where('createdAt', '>=', Timestamp.fromDate(startOfDay))
-    );
+    const { data, error } = await supabase
+      .from('referrals')
+      .select('id')
+      .eq('referrer', username.toLowerCase())
+      .gte('created_at', startOfDay.toISOString())
+      .limit(1);
 
-    const snap = await getDocs(q);
-    return !snap.empty;
+    if (error) {
+      return false;
+    }
+
+    return data && data.length > 0;
   } catch (e) {
     console.error('Error checking daily referral:', e);
     return false;
@@ -1006,27 +874,25 @@ export const getReferrer = async (username: string): Promise<string | null> => {
   }
 
   try {
-    const q = query(
-      collection(db, REFERRALS_COLLECTION),
-      orderBy('timestamp', 'desc'),
-      limit(SOCIAL.NEWS.MAX_ITEMS)
-    );
+    const { data, error } = await supabase
+      .from('referrals')
+      .select('referrer, bonus_awarded')
+      .eq('referred', username.toLowerCase())
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .single();
 
-    const snap = await getDocs(q);
-    if (snap.empty) {
+    if (error || !data || data.bonus_awarded) {
       return null;
     }
 
-    const referralDoc = snap.docs[0];
-    const data = referralDoc.data() as DocumentData;
+    // Mark as awarded
+    await supabase
+      .from('referrals')
+      .update({ bonus_awarded: true })
+      .eq('referred', username.toLowerCase());
 
-    if (data.bonusAwarded) {
-      return null;
-    }
-
-    await updateDoc(referralDoc.ref, { bonusAwarded: true });
-
-    return data.referrer as string;
+    return data.referrer;
   } catch (e) {
     console.error('Error getting referrer:', e);
     return null;
@@ -1034,17 +900,35 @@ export const getReferrer = async (username: string): Promise<string | null> => {
 };
 
 /**
- * Save game result to user's personal history subcollection
+ * Save game result to user's personal history
  */
 export const saveUserGameResult = async (username: string, gameData: GameData): Promise<void> => {
   if (!username) {
     return;
   }
+
   try {
-    const gamesRef = collection(db, USERS_COLLECTION, username.toLowerCase(), GAMES_SUBCOLLECTION);
-    await addDoc(gamesRef, {
-      ...gameData,
-      savedAt: Timestamp.now(),
+    let dateStr: string;
+    if (gameData.date) {
+      if (typeof gameData.date === 'number') {
+        // Convert YYYYMMDD to YYYY-MM-DD
+        const d = gameData.date;
+        const year = Math.floor(d / 10000);
+        const month = Math.floor((d % 10000) / 100);
+        const day = d % 100;
+        dateStr = `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+      } else {
+        dateStr = gameData.date;
+      }
+    } else {
+      dateStr = new Date().toISOString().split('T')[0];
+    }
+
+    await saveUserGame({
+      username: username.toLowerCase(),
+      date: dateStr,
+      score: gameData.score,
+      avgTime: gameData.time,
     });
   } catch (e) {
     console.error('Error saving user game result:', e);
@@ -1054,124 +938,20 @@ export const saveUserGameResult = async (username: string, gameData: GameData): 
 /**
  * Get user's game history
  */
-/**
- * Get user's game history
- */
 export const getUserGameHistory = async (username: string): Promise<GameData[]> => {
   if (!username) {
     return [];
   }
+
   try {
-    const cleanUsername = username.toLowerCase().replace(/^@/, '');
-    const originalUsername = username.toLowerCase();
+    const games = await dbGetUserGameHistory(username.toLowerCase());
 
-    // Strategy: Fetch from both sources in parallel and merge them.
-    // 1. 'games' subcollection (personal history)
-    // 2. 'scores' collection (global leaderboard entries)
-
-    // Prepare queries
-    const gamesRef = collection(db, USERS_COLLECTION, cleanUsername, GAMES_SUBCOLLECTION);
-    const gamesQuery = query(gamesRef, limit(HISTORY_LIMIT));
-
-    const scoresRef = collection(db, 'scores');
-    const scoresQueryClean = query(
-      scoresRef,
-      where('username', '==', cleanUsername),
-      limit(HISTORY_LIMIT)
-    );
-    const scoresQueryOriginal =
-      originalUsername !== cleanUsername
-        ? query(scoresRef, where('username', '==', originalUsername), limit(HISTORY_LIMIT))
-        : null;
-
-    // Execute all queries
-    const [gamesSnap, scoresCleanSnap, scoresOriginalSnap] = await Promise.all([
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      getDocs(gamesQuery).catch(() => ({ docs: [] }) as any), // safely handle error if subcollection doesn't exist
-      getDocs(scoresQueryClean),
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      scoresQueryOriginal ? getDocs(scoresQueryOriginal) : Promise.resolve({ docs: [] } as any),
-    ]);
-
-    // Merge strategy: Use a Map keyed by a unique identifier relative to the game.
-    // Since IDs might differ between collections, we'll try to dedup by timestamp/date if possible,
-    // or just simply merge all unique document IDs if they represent unique games.
-    // Note: 'scores' docs and 'games' docs are different documents.
-    // 'scores' are definitive for completed daily games.
-    // 'games' might contain local history syncs.
-    // We will prioritize 'scores' data for display as it's the official record.
-
-    const allGames: GameData[] = [];
-    const seenSignatures = new Set<string>();
-
-    const processDoc = (d: DocumentData) => {
-      const data = d.data ? d.data() : d; // Handle both QueryDocumentSnapshot and raw data
-
-      // Normalize Date
-      let timestamp = 0;
-      if (data.timestamp?.toMillis) {
-        timestamp = data.timestamp.toMillis();
-      } else if (data.timestamp?.seconds) {
-        timestamp = data.timestamp.seconds * 1000;
-      } else if (typeof data.timestamp === 'number') {
-        timestamp = data.timestamp;
-      } else if (data.date) {
-        // Try to parse YYYYMMDD
-        const dStr = data.date.toString();
-        // eslint-disable-next-line no-magic-numbers
-        if (dStr.length === 8) {
-          // eslint-disable-next-line no-magic-numbers
-          const y = parseInt(dStr.slice(0, 4), 10);
-          // eslint-disable-next-line no-magic-numbers
-          const m = parseInt(dStr.slice(4, 6), 10) - 1;
-          // eslint-disable-next-line no-magic-numbers
-          const dd = parseInt(dStr.slice(6, 8), 10);
-          timestamp = new Date(y, m, dd).getTime();
-        }
-      }
-
-      // Generate a signature to deduplicate: Date + Score
-      // This handles the case where the same game exists in both collections
-      const dateKey =
-        (data.date as number) ||
-        parseInt(new Date(timestamp).toISOString().slice(0, 10).replace(/-/g, ''), 10);
-
-      const signature = `${dateKey}_${data.score}`;
-
-      if (!seenSignatures.has(signature)) {
-        seenSignatures.add(signature);
-        allGames.push({
-          ...data,
-          date: dateKey,
-          score: (data.score as number) || 0,
-          timestamp: timestamp || Date.now(), // Ensure valid timestamp
-        } as GameData);
-      }
-    };
-
-    // Process scores first (highest priority/validity)
-    scoresCleanSnap.docs.forEach((d: DocumentData) => processDoc(d));
-    scoresOriginalSnap.docs.forEach((d: DocumentData) => processDoc(d));
-
-    // Then process games (personal history, might contain partials or unsynced)
-    gamesSnap.docs.forEach((d: DocumentData) => processDoc(d));
-
-    // If we still found nothing and clean != original, try 'games' on original username as last resort
-    if (allGames.length === 0 && cleanUsername !== originalUsername) {
-      const altGamesRef = collection(db, USERS_COLLECTION, originalUsername, GAMES_SUBCOLLECTION);
-      const altSnap = await getDocs(query(altGamesRef, limit(HISTORY_LIMIT)));
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      altSnap.docs.forEach((d: any) => processDoc(d));
-    }
-
-    // Sort by Date descending
-    allGames.sort((a, b) => {
-      const dateA = a.date ? Number(a.date.toString().replace(/-/g, '')) : 0;
-      const dateB = b.date ? Number(b.date.toString().replace(/-/g, '')) : 0;
-      return dateB - dateA;
-    });
-
-    return allGames;
+    return games.map(g => ({
+      score: g.score,
+      date: parseInt(g.date.replace(/-/g, ''), 10),
+      time: g.avg_time || undefined,
+      timestamp: new Date(g.played_at).getTime(),
+    }));
   } catch (e) {
     console.error('Error fetching user game history:', e);
     return [];
@@ -1185,20 +965,7 @@ export const updateDistrictScore = async (districtId: string, score: number): Pr
   if (!districtId || !score) {
     return;
   }
-
-  try {
-    const districtRef = doc(db, 'districts', districtId);
-    await setDoc(
-      districtRef,
-      {
-        score: increment(score),
-        name: districtId, // We can improve this to rely on ID mapping or store name
-      },
-      { merge: true }
-    );
-  } catch (e) {
-    console.error('Error updating district score:', e);
-  }
+  await dbUpdateDistrictScore(districtId, score);
 };
 
 /**
@@ -1206,9 +973,8 @@ export const updateDistrictScore = async (districtId: string, score: number): Pr
  */
 export const getDistrictRankings = async (): Promise<{ id: string; score: number }[]> => {
   try {
-    const q = query(collection(db, 'districts'), orderBy('score', 'desc'));
-    const snapshot = await getDocs(q);
-    return snapshot.docs.map(d => ({ id: d.id, ...d.data() }) as { id: string; score: number });
+    const districts = await getDistricts();
+    return districts.map(d => ({ id: d.id, score: d.score }));
   } catch (e) {
     console.error('Error fetching district rankings:', e);
     return [];

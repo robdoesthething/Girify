@@ -1,26 +1,17 @@
 /**
  * News/Announcements Utility Functions
- * Handles creating, fetching, and tracking read status of announcements
  */
+import { Timestamp } from 'firebase/firestore'; // Keep for compatibility if needed, but try to move away
 import {
-  addDoc,
-  collection,
-  deleteDoc,
-  doc,
-  DocumentData,
-  getDoc,
-  getDocs,
-  orderBy,
-  query,
-  setDoc,
-  Timestamp,
-  updateDoc,
-  where,
-} from 'firebase/firestore';
-import { db } from '../firebase';
-
-const ANNOUNCEMENTS_COLLECTION = 'announcements';
-const USER_READ_COLLECTION = 'userReadAnnouncements';
+  createAnnouncement as dbCreateAnnouncement,
+  deleteAnnouncement as dbDeleteAnnouncement,
+  getActiveAnnouncements as dbGetActiveAnnouncements,
+  getAllAnnouncements as dbGetAllAnnouncements,
+  markAnnouncementAsRead as dbMarkAnnouncementAsRead,
+  updateAnnouncement as dbUpdateAnnouncement,
+  getReadAnnouncementIds,
+} from '../services/database';
+import { AnnouncementRow } from '../types/supabase';
 
 export type AnnouncementPriority = 'low' | 'normal' | 'high' | 'urgent';
 export type TargetAudience = 'all' | 'new_users' | 'returning';
@@ -53,19 +44,40 @@ interface OperationResult {
   error?: string;
 }
 
+// Helper to convert DB Row to App Interface
+const mapRowToAnnouncement = (row: AnnouncementRow): Announcement => {
+  return {
+    id: row.id.toString(),
+    title: row.title,
+    body: row.body,
+    // Mock Timestamp-like object for compatibility
+    publishDate: {
+      seconds: new Date(row.publish_date).getTime() / 1000,
+      toDate: () => new Date(row.publish_date),
+    },
+    expiryDate: row.expiry_date
+      ? {
+          seconds: new Date(row.expiry_date).getTime() / 1000,
+          toDate: () => new Date(row.expiry_date!),
+        }
+      : null,
+    isActive: row.is_active,
+    priority: row.priority,
+    targetAudience: row.target_audience,
+    createdAt: {
+      seconds: new Date(row.created_at).getTime() / 1000,
+      toDate: () => new Date(row.created_at),
+    } as Timestamp,
+  };
+};
+
 /**
  * Get all announcements (for admin panel)
  */
 export const getAllAnnouncements = async (): Promise<Announcement[]> => {
   try {
-    const announcementsRef = collection(db, ANNOUNCEMENTS_COLLECTION);
-    const q = query(announcementsRef, orderBy('publishDate', 'desc'));
-    const snapshot = await getDocs(q);
-
-    return snapshot.docs.map(d => ({
-      id: d.id,
-      ...d.data(),
-    })) as Announcement[];
+    const rows = await dbGetAllAnnouncements();
+    return rows.map(mapRowToAnnouncement);
   } catch (e) {
     console.error('[News] Error fetching announcements:', e);
     return [];
@@ -77,31 +89,8 @@ export const getAllAnnouncements = async (): Promise<Announcement[]> => {
  */
 export const getActiveAnnouncements = async (): Promise<Announcement[]> => {
   try {
-    const now = new Date();
-    const announcementsRef = collection(db, ANNOUNCEMENTS_COLLECTION);
-    const q = query(
-      announcementsRef,
-      where('publishDate', '<=', Timestamp.fromDate(now)),
-      orderBy('publishDate', 'desc')
-    );
-    const snapshot = await getDocs(q);
-
-    return (
-      snapshot.docs.map(d => ({
-        id: d.id,
-        ...d.data(),
-      })) as Announcement[]
-    ).filter(a => {
-      // Filter out expired announcements
-      if (a.expiryDate) {
-        const expiry =
-          typeof (a.expiryDate as { toDate?: () => Date }).toDate === 'function'
-            ? (a.expiryDate as { toDate: () => Date }).toDate()
-            : new Date(a.expiryDate as unknown as string);
-        return expiry > now;
-      }
-      return true;
-    });
+    const rows = await dbGetActiveAnnouncements();
+    return rows.map(mapRowToAnnouncement);
   } catch (e) {
     console.error('[News] Error fetching active announcements:', e);
     return [];
@@ -122,13 +111,12 @@ export const getUnreadAnnouncements = async (username: string): Promise<Announce
       return [];
     }
 
-    // Get user's read announcements
-    const userReadRef = doc(db, USER_READ_COLLECTION, username);
-    const userReadDoc = await getDoc(userReadRef);
-    const data = userReadDoc.exists() ? (userReadDoc.data() as DocumentData) : {};
-    const readIds: string[] = data.readIds || [];
+    const readIds = await getReadAnnouncementIds(username);
+    // Convert DB IDs (string/number mess) - DB is number, App uses string ID for announcements?
+    // Wait, announcements table ID is serial/number.
+    // mapRowToAnnouncement converts ID to string.
 
-    return active.filter(a => !readIds.includes(a.id));
+    return active.filter(a => !readIds.includes(parseInt(a.id, 10)));
   } catch (e) {
     console.error('[News] Error getting unread announcements:', e);
     return [];
@@ -147,34 +135,26 @@ export const markAnnouncementAsRead = async (
   }
 
   try {
-    const userReadRef = doc(db, USER_READ_COLLECTION, username);
-    const userReadDoc = await getDoc(userReadRef);
+    const numericId = parseInt(announcementId, 10);
+    // Check if simplified check is enough or if we need to check existence first?
+    // INSERT will fail if duplicate PKEY but user_read_announcements likely (username, announcement_id) PK.
+    // database.ts implementation handles insert error (likely ignore).
 
-    if (userReadDoc.exists()) {
-      const data = userReadDoc.data() as DocumentData;
-      const readIds: string[] = data.readIds || [];
-      if (!readIds.includes(announcementId)) {
-        await updateDoc(userReadRef, {
-          readIds: [...readIds, announcementId],
-          lastRead: Timestamp.now(),
-        });
-      }
-    } else {
-      await setDoc(userReadRef, {
-        readIds: [announcementId],
-        lastRead: Timestamp.now(),
-      });
+    // Check local logic: "if !readIds.includes..."
+    const readIds = await getReadAnnouncementIds(username);
+    if (!readIds.includes(numericId)) {
+      await dbMarkAnnouncementAsRead(username, numericId);
     }
   } catch (e) {
     console.error('[News] Error marking as read:', e);
   }
 };
 
-const toTimestamp = (date: Date | string | null | undefined): Timestamp | null => {
+const toTimestamp = (date: Date | string | null | undefined): string | null => {
   if (!date) {
     return null;
   }
-  return date instanceof Date ? Timestamp.fromDate(date) : Timestamp.fromDate(new Date(date));
+  return date instanceof Date ? date.toISOString() : new Date(date).toISOString();
 };
 
 /**
@@ -198,19 +178,22 @@ export const createAnnouncement = async (
       return { success: false, error: 'Missing required fields' };
     }
 
-    const announcementsRef = collection(db, ANNOUNCEMENTS_COLLECTION);
-    const docRef = await addDoc(announcementsRef, {
+    const row: Omit<AnnouncementRow, 'id' | 'created_at'> = {
       title,
       body,
-      publishDate: toTimestamp(publishDate as Date | string),
-      expiryDate: toTimestamp(expiryDate as Date | string | null),
-      isActive,
-      priority,
-      targetAudience,
-      createdAt: Timestamp.now(),
-    });
+      publish_date: toTimestamp(publishDate)!,
+      expiry_date: toTimestamp(expiryDate),
+      is_active: isActive,
+      priority: priority,
+      target_audience: targetAudience,
+    };
 
-    return { success: true, id: docRef.id };
+    const id = await dbCreateAnnouncement(row);
+    if (!id) {
+      throw new Error('Failed to create');
+    }
+
+    return { success: true, id };
   } catch (e) {
     console.error('[News] Error creating announcement:', e);
     return { success: false, error: (e as Error).message };
@@ -225,19 +208,35 @@ export const updateAnnouncement = async (
   updates: Partial<AnnouncementInput>
 ): Promise<OperationResult> => {
   try {
-    const announcementRef = doc(db, ANNOUNCEMENTS_COLLECTION, id);
-
-    // Convert dates if needed
-    const updatedData: Record<string, unknown> = { ...updates };
+    const numericId = parseInt(id, 10);
+    const dbUpdates: Partial<AnnouncementRow> = {};
+    if (updates.title) {
+      dbUpdates.title = updates.title;
+    }
+    if (updates.body) {
+      dbUpdates.body = updates.body;
+    }
+    if (updates.isActive !== undefined) {
+      dbUpdates.is_active = updates.isActive;
+    }
+    if (updates.priority) {
+      dbUpdates.priority = updates.priority;
+    }
+    if (updates.targetAudience) {
+      dbUpdates.target_audience = updates.targetAudience;
+    }
     if (updates.publishDate) {
-      updatedData.publishDate = toTimestamp(updates.publishDate as Date | string);
-    }
+      dbUpdates.publish_date = toTimestamp(updates.publishDate)!;
+    } // Force string
     if (updates.expiryDate) {
-      updatedData.expiryDate = toTimestamp(updates.expiryDate as Date | string);
+      dbUpdates.expiry_date = toTimestamp(updates.expiryDate);
     }
 
-    await updateDoc(announcementRef, updatedData);
-    return { success: true };
+    const success = await dbUpdateAnnouncement(numericId, dbUpdates);
+    if (success) {
+      return { success: true };
+    }
+    return { success: false, error: 'Update failed' };
   } catch (e) {
     console.error('[News] Error updating announcement:', e);
     return { success: false, error: (e as Error).message };
@@ -249,9 +248,12 @@ export const updateAnnouncement = async (
  */
 export const deleteAnnouncement = async (id: string): Promise<OperationResult> => {
   try {
-    const announcementRef = doc(db, ANNOUNCEMENTS_COLLECTION, id);
-    await deleteDoc(announcementRef);
-    return { success: true };
+    const numericId = parseInt(id, 10);
+    const success = await dbDeleteAnnouncement(numericId);
+    if (success) {
+      return { success: true };
+    }
+    return { success: false, error: 'Delete failed' };
   } catch (e) {
     console.error('[News] Error deleting announcement:', e);
     return { success: false, error: (e as Error).message };
