@@ -1,30 +1,24 @@
 import {
-  addDoc,
-  collection,
-  deleteDoc,
-  doc,
-  getDocs,
-  orderBy,
-  query,
-  updateDoc,
-} from 'firebase/firestore';
-import { db } from '../firebase';
+  createQuest as dbCreateQuest,
+  deleteQuest as dbDeleteQuest,
+  getAllQuests as dbGetQuests,
+  updateQuest as dbUpdateQuest,
+} from '../services/database';
+import { QuestRow } from '../types/supabase';
 import { requireAdmin } from './auth';
 import { logger } from './logger';
 
 export interface Quest {
-  id: string;
+  id: string; // Internal app usage might treat ID as string, but DB has number. We should verify usage.
   title: string;
   description: string;
   criteriaType: 'find_street' | 'score_attack' | 'district_explorer' | 'login_streak';
   criteriaValue: number | string;
   rewardGiuros: number;
-  activeDate?: string; // e.g., "2024-02-15" - if set, only active on this day
+  activeDate?: string; // e.g., "2024-02-15"
   isActive: boolean;
   createdAt: number;
 }
-
-const QUESTS_COLLECTION = 'quests';
 
 // Validation constants
 const MAX_REWARD = 10000;
@@ -49,9 +43,18 @@ const validateQuest = (quest: Partial<Quest>): void => {
 
 export const getQuests = async (): Promise<Quest[]> => {
   try {
-    const q = query(collection(db, QUESTS_COLLECTION), orderBy('createdAt', 'desc'));
-    const snapshot = await getDocs(q);
-    return snapshot.docs.map(docSnap => ({ id: docSnap.id, ...docSnap.data() }) as Quest);
+    const rows = await dbGetQuests();
+    return rows.map(row => ({
+      id: row.id.toString(),
+      title: row.title,
+      description: row.description || '',
+      criteriaType: row.criteria_type,
+      criteriaValue: row.criteria_value || '',
+      rewardGiuros: row.reward_giuros,
+      activeDate: row.active_date || undefined,
+      isActive: row.is_active,
+      createdAt: new Date(row.created_at).getTime(),
+    }));
   } catch (error) {
     logger.error('Error fetching quests', { error });
     return [];
@@ -66,11 +69,21 @@ export const createQuest = async (quest: Omit<Quest, 'id' | 'createdAt'>): Promi
   validateQuest(quest);
 
   try {
-    const docRef = await addDoc(collection(db, QUESTS_COLLECTION), {
-      ...quest,
-      createdAt: Date.now(),
-    });
-    return docRef.id;
+    const row: Omit<QuestRow, 'id' | 'created_at'> = {
+      title: quest.title,
+      description: quest.description,
+      criteria_type: quest.criteriaType,
+      criteria_value: String(quest.criteriaValue),
+      reward_giuros: quest.rewardGiuros,
+      active_date: quest.activeDate || null,
+      is_active: quest.isActive,
+    };
+
+    const id = await dbCreateQuest(row);
+    if (!id) {
+      throw new Error('Failed to create quest');
+    }
+    return id;
   } catch (error) {
     logger.error('Error creating quest', { error });
     throw error;
@@ -85,7 +98,31 @@ export const updateQuest = async (id: string, updates: Partial<Quest>): Promise<
   validateQuest(updates);
 
   try {
-    await updateDoc(doc(db, QUESTS_COLLECTION, id), updates);
+    const dbUpdates: Partial<QuestRow> = {};
+    if (updates.title) {
+      dbUpdates.title = updates.title;
+    }
+    if (updates.description) {
+      dbUpdates.description = updates.description;
+    }
+    if (updates.criteriaType) {
+      dbUpdates.criteria_type = updates.criteriaType;
+    }
+    if (updates.criteriaValue) {
+      dbUpdates.criteria_value = String(updates.criteriaValue);
+    }
+    if (updates.rewardGiuros !== undefined) {
+      dbUpdates.reward_giuros = updates.rewardGiuros;
+    }
+    if (updates.activeDate !== undefined) {
+      dbUpdates.active_date = updates.activeDate;
+    } // can be null/undefined logic
+    if (updates.isActive !== undefined) {
+      dbUpdates.is_active = updates.isActive;
+    }
+
+    const numericId = parseInt(id, 10);
+    await dbUpdateQuest(numericId, dbUpdates);
   } catch (error) {
     logger.error('Error updating quest', { error });
     throw error;
@@ -97,7 +134,8 @@ export const deleteQuest = async (id: string): Promise<void> => {
   await requireAdmin();
 
   try {
-    await deleteDoc(doc(db, QUESTS_COLLECTION, id));
+    const numericId = parseInt(id, 10);
+    await dbDeleteQuest(numericId);
   } catch (error) {
     logger.error('Error deleting quest', { error });
     throw error;

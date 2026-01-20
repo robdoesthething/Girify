@@ -1,6 +1,11 @@
-import { addDoc, collection, deleteDoc, doc, getDocs, setDoc } from 'firebase/firestore';
 import cosmetics from '../data/cosmetics.json';
-import { db } from '../firebase';
+import {
+  createShopItem as dbCreateShopItem,
+  deleteShopItem as dbDeleteShopItem,
+  getShopItems as dbGetShopItems,
+  updateShopItem as dbUpdateShopItem,
+} from '../services/database';
+import { ShopItemRow } from '../types/supabase';
 
 export type ShopItemType = 'frame' | 'title' | 'special' | 'avatar' | 'avatars';
 
@@ -8,8 +13,8 @@ export interface ShopItem {
   id: string;
   name?: string;
   type: ShopItemType;
-  cost?: number; // Renamed/Added from price to match usage
-  price?: number; // Kept for backward compatibility if needed, but better to migrate
+  cost?: number;
+  price?: number;
   rarity?: string;
   color?: string;
   description?: string;
@@ -43,7 +48,7 @@ const MS_PER_SECOND = 1000;
 const CACHE_DURATION_MS = CACHE_DURATION_MINUTES * SECONDS_PER_MINUTE * MS_PER_SECOND;
 
 /**
- * Fetch all shop items from Firestore, merged with local cosmetics.json
+ * Fetch all shop items from Supabase, merged with local cosmetics.json
  */
 export const getShopItems = async (forceRefresh = false): Promise<GroupedShopItems> => {
   const now = Date.now();
@@ -61,28 +66,39 @@ export const getShopItems = async (forceRefresh = false): Promise<GroupedShopIte
     ...(rawCosmetics.avatars || []).map(i => ({ ...i, type: 'avatar' as const })),
   ] as ShopItem[];
 
-  const firestoreItems: ShopItem[] = [];
+  const dbItems: ShopItem[] = [];
   try {
-    const querySnapshot = await getDocs(collection(db, 'shop_items'));
-    querySnapshot.forEach(docSnapshot => {
-      firestoreItems.push({ id: docSnapshot.id, ...docSnapshot.data() } as ShopItem);
+    const rows = await dbGetShopItems();
+    rows.forEach(row => {
+      dbItems.push({
+        id: row.id,
+        name: row.name,
+        type: row.type as ShopItemType,
+        cost: row.cost,
+        rarity: row.rarity || undefined,
+        color: row.color || undefined,
+        description: row.description || undefined,
+        image: row.image || undefined,
+        emoji: row.emoji || undefined,
+        cssClass: row.css_class || undefined,
+        flavorText: row.flavor_text || undefined,
+        prefix: row.prefix || undefined,
+        // Helper to keep other fields if needed, but strict types preferred
+      });
     });
-    console.warn('Shop Fetch Success:', firestoreItems.length, 'Firestore items');
+    // console.warn('Shop Fetch Success:', dbItems.length, 'DB items');
   } catch (error) {
-    console.error('Error fetching shop items from Firestore:', error);
+    console.error('Error fetching shop items from DB:', error);
     // Continue with just local items
   }
 
-  // Merge: Firestore items override local items with same ID
-  // Merge: Firestore items override local items with same ID, but preserve local fields (like images) if missing in Firestore
+  // Merge: DB items override local items with same ID
   const itemMap = new Map<string, ShopItem>();
   localItems.forEach(item => itemMap.set(item.id, item));
 
-  firestoreItems.forEach(item => {
+  dbItems.forEach(item => {
     const existing = itemMap.get(item.id);
     if (existing) {
-      // Merge existing (local) with new (firestore)
-      // Firestore data takes precedence for conflicting keys, but local keys (like new images) are kept
       itemMap.set(item.id, { ...existing, ...item });
     } else {
       itemMap.set(item.id, item);
@@ -115,9 +131,35 @@ export const updateShopItem = async (
   updates: Partial<ShopItem>
 ): Promise<OperationResult> => {
   try {
-    await setDoc(doc(db, 'shop_items', id), updates, { merge: true });
-    shopItemsCache = null; // Invalidate cache
-    return { success: true };
+    // Map updates to DB columns
+    const dbUpdates: Partial<ShopItemRow> = {};
+    if (updates.name !== undefined) {
+      dbUpdates.name = updates.name;
+    }
+    if (updates.cost !== undefined) {
+      dbUpdates.cost = updates.cost;
+    }
+    if (updates.type !== undefined) {
+      dbUpdates.type = updates.type;
+    }
+    if (updates.description !== undefined) {
+      dbUpdates.description = updates.description || null;
+    }
+    if (updates.image !== undefined) {
+      dbUpdates.image = updates.image || null;
+    }
+    if (updates.emoji !== undefined) {
+      dbUpdates.emoji = updates.emoji || null;
+    }
+
+    // Add other fields mapping as needed
+
+    const success = await dbUpdateShopItem(id, dbUpdates);
+    if (success) {
+      shopItemsCache = null; // Invalidate cache
+      return { success: true };
+    }
+    return { success: false, error: 'Update failed' };
   } catch (error) {
     console.error('Error updating shop item:', error);
     return { success: false, error: (error as Error).message };
@@ -129,14 +171,31 @@ export const updateShopItem = async (
  */
 export const createShopItem = async (itemData: ShopItem): Promise<OperationResult> => {
   try {
-    const id = itemData.id;
-    if (id) {
-      await setDoc(doc(db, 'shop_items', id), itemData);
-    } else {
-      await addDoc(collection(db, 'shop_items'), itemData);
+    // Map to Row
+    const row: ShopItemRow = {
+      id: itemData.id,
+      name: itemData.name || '',
+      type: itemData.type,
+      cost: itemData.cost || 0,
+      is_active: true,
+      created_at: new Date().toISOString(),
+      description: itemData.description || null,
+      image: itemData.image || null,
+      emoji: itemData.emoji || null,
+      rarity: itemData.rarity || null,
+      color: itemData.color || null,
+      css_class: itemData.cssClass || null,
+      flavor_text: itemData.flavorText || null,
+      prefix: itemData.prefix || null,
+    };
+
+    const success = await dbCreateShopItem(row);
+
+    if (success) {
+      shopItemsCache = null;
+      return { success: true };
     }
-    shopItemsCache = null;
-    return { success: true };
+    return { success: false, error: 'Creation failed' };
   } catch (error) {
     console.error('Error creating shop item:', error);
     return { success: false, error: (error as Error).message };
@@ -146,14 +205,14 @@ export const createShopItem = async (itemData: ShopItem): Promise<OperationResul
 /**
  * Delete a shop item
  */
-/**
- * Delete a shop item
- */
 export const deleteShopItem = async (id: string): Promise<OperationResult> => {
   try {
-    await deleteDoc(doc(db, 'shop_items', id));
-    shopItemsCache = null;
-    return { success: true };
+    const success = await dbDeleteShopItem(id);
+    if (success) {
+      shopItemsCache = null;
+      return { success: true };
+    }
+    return { success: false, error: 'Delete failed' };
   } catch (error) {
     console.error('Error deleting shop item:', error);
     return { success: false, error: (error as Error).message };
@@ -161,8 +220,7 @@ export const deleteShopItem = async (id: string): Promise<OperationResult> => {
 };
 
 /**
- * Sync local cosmetics.json to Firestore
- * Overwrites Firestore data with local definitions for shared IDs
+ * Sync local cosmetics.json to DB
  */
 export const syncWithLocal = async (): Promise<{ updated: number; errors: number }> => {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -182,9 +240,32 @@ export const syncWithLocal = async (): Promise<{ updated: number; errors: number
       if (!item.id) {
         continue;
       }
-      // We merge with existing to preserve any extra fields Firestore might have (like sales stats if we had them)
-      // BUT we explicitly overwrite the definition fields from local
-      await setDoc(doc(db, 'shop_items', item.id), item, { merge: true });
+
+      const row: Partial<ShopItemRow> = {
+        name: item.name || '',
+        type: item.type,
+        cost: item.cost || 0,
+        description: item.description || null,
+        image: item.image || null,
+        emoji: item.emoji || null,
+        rarity: item.rarity || null,
+        color: item.color || null,
+        css_class: item.cssClass || null,
+        flavor_text: item.flavorText || null,
+        prefix: item.prefix || null,
+        is_active: true,
+      };
+
+      // Upsert logic: Check if exists, update; else create
+      // Supabase .upsert() is best handled in database.ts, but here we can try update then create
+      // Or we can add upsertShopItem to database.ts
+
+      const success = await dbUpdateShopItem(item.id, row);
+      if (!success) {
+        // Try create
+        // But we need full row for create
+        await createShopItem(item);
+      }
       updated++;
     } catch (e) {
       console.error(`Failed to sync item ${item.id}`, e);

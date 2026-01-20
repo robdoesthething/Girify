@@ -1,41 +1,72 @@
 /**
  * Utility to publish activity events to friend feed
  */
-import { addDoc, collection, Timestamp } from 'firebase/firestore';
-import { ActivityType } from '../data/activityTypes';
-import { db } from '../firebase';
+import { publishActivity as dbPublishActivity } from '../services/database';
+import { ActivityFeedRow } from '../types/supabase';
 
-const ACTIVITY_COLLECTION = 'activityFeed';
+// Helper to map ActivityData to ActivityFeedRow columns
+const mapToRow = (
+  username: string,
+  type: string,
+  data: Record<string, unknown>
+): Omit<ActivityFeedRow, 'id'> => {
+  const row: Omit<ActivityFeedRow, 'id'> = {
+    username,
+    type: type as any, // Cast to specific union type if possible
+    created_at: new Date().toISOString(),
+    score: typeof data.score === 'number' ? data.score : null,
+    time_taken: typeof data.time === 'number' ? data.time : null,
+    badge_id: typeof data.badgeId === 'string' ? data.badgeId : null,
+    badge_name: typeof data.badgeName === 'string' ? data.badgeName : null,
+    old_username: typeof data.oldUsername === 'string' ? data.oldUsername : null,
+    item_id: typeof data.itemId === 'string' ? data.itemId : null,
+    item_name: typeof data.itemName === 'string' ? data.itemName : null,
+    item_type: typeof data.itemType === 'string' ? data.itemType : null,
+    metadata: {},
+  };
 
-interface ActivityData {
-  [key: string]: unknown;
-}
+  // Put everything else in metadata
+  const explicitKeys = [
+    'score',
+    'time',
+    'badgeId',
+    'badgeName',
+    'oldUsername',
+    'itemId',
+    'itemName',
+    'itemType',
+  ];
+
+  const metadata: Record<string, unknown> = {};
+  for (const [key, value] of Object.entries(data)) {
+    if (!explicitKeys.includes(key)) {
+      metadata[key] = value;
+    }
+  }
+  row.metadata = metadata;
+
+  return row;
+};
 
 /**
  * Publish an activity for friend feeds
  * @param username - The user performing the action
- * @param type - Activity type from ACTIVITY_TYPES
+ * @param type - Activity type
  * @param data - Additional data for the activity
  */
 export const publishActivity = async (
   username: string,
-  type: ActivityType | string,
-  data: ActivityData = {}
+  type: string,
+  data: Record<string, unknown> = {}
 ): Promise<void> => {
   if (!username || !type) {
     return;
   }
 
   try {
-    const activityRef = collection(db, ACTIVITY_COLLECTION);
-    await addDoc(activityRef, {
-      username,
-      type,
-      ...data,
-      timestamp: Timestamp.now(),
-    });
-
-    console.warn(`[Activity] Published ${type} for ${username}`);
+    const row = mapToRow(username, type, data);
+    await dbPublishActivity(row);
+    // console.warn(`[Activity] Published ${type} for ${username}`);
   } catch (e) {
     console.error('[Activity] Error publishing activity:', e);
   }

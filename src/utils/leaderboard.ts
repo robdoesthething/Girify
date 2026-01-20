@@ -1,7 +1,6 @@
-import { collection, DocumentData, getDocs, Timestamp } from 'firebase/firestore';
+import { Timestamp } from 'firebase/firestore';
 import { SOCIAL } from '../config/constants';
 import { DISTRICTS } from '../data/districts';
-import { db } from '../firebase';
 import { supabase } from '../services/supabase';
 
 // Deprecated collections - used only for types or migration reading if needed
@@ -245,19 +244,24 @@ export const getTeamLeaderboard = async (
   period: LeaderboardPeriod = 'all'
 ): Promise<TeamScoreEntry[]> => {
   try {
-    // Fetch user profiles to get team assignments from FIREBASE
-    const usersRef = collection(db, 'users');
-    const usersSnap = await getDocs(usersRef);
+    // Fetch user profiles to get team assignments from SUPABASE
+    const { data: usersData, error: usersError } = await supabase
+      .from('users')
+      .select('username, team, district');
+
+    if (usersError) {
+      console.error('Error fetching users for team leaderboard:', usersError);
+      return [];
+    }
+
     const userTeamMap: Record<string, { team: string; district: string }> = {};
 
-    usersSnap.forEach(docSnap => {
-      const data = docSnap.data() as DocumentData;
-      const username =
-        (data.username as string)?.toLowerCase().replace('@', '') || docSnap.id.toLowerCase();
-      if (data.team && data.district) {
+    (usersData || []).forEach(user => {
+      const username = user.username.toLowerCase().replace('@', '');
+      if (user.team && user.district) {
         userTeamMap[username] = {
-          team: data.team as string,
-          district: data.district as string,
+          team: user.team,
+          district: user.district,
         };
       }
     });

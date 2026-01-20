@@ -1,6 +1,11 @@
-import { collection, deleteDoc, doc, getDocs, setDoc } from 'firebase/firestore';
 import { ACHIEVEMENT_BADGES, Achievement } from '../data/achievements';
-import { db } from '../firebase';
+import {
+  createAchievement as dbCreateAchievement,
+  deleteAchievement as dbDeleteAchievement,
+  getAchievements as dbGetAchievements,
+  updateAchievement as dbUpdateAchievement,
+} from '../services/database';
+import { AchievementRow } from '../types/supabase';
 import { requireAdmin } from './auth';
 import { logger } from './logger';
 
@@ -11,7 +16,7 @@ let cacheTimestamp = 0;
 const CACHE_DURATION = 60 * 60 * 1000; // 1 hour
 
 /**
- * Fetch all achievements from Firestore, merged with local static data
+ * Fetch all achievements from Supabase, merged with local static data
  */
 export const getAllAchievements = async (forceRefresh = false): Promise<Achievement[]> => {
   const now = Date.now();
@@ -21,26 +26,34 @@ export const getAllAchievements = async (forceRefresh = false): Promise<Achievem
     }
   }
 
-  const firestoreItems: Achievement[] = [];
+  const dbItems: Achievement[] = [];
   try {
-    const querySnapshot = await getDocs(collection(db, 'achievements'));
-    querySnapshot.forEach(docSnapshot => {
-      // @ts-ignore
-      firestoreItems.push({ id: docSnapshot.id, ...docSnapshot.data() });
+    const rows = await dbGetAchievements();
+    rows.forEach(row => {
+      dbItems.push({
+        id: row.id,
+        name: row.name,
+        description: row.description || '',
+        emoji: row.emoji || '',
+        criteria: row.criteria || '',
+        rarity: (row.rarity as any) || 'common',
+        category: (row.category as any) || 'general',
+        unlockCondition: (row.unlock_condition as any) || undefined,
+      });
     });
   } catch (error) {
-    logger.error('Error fetching achievements from Firestore', { error });
+    logger.error('Error fetching achievements from DB', { error });
     // Fallback to strict local usage if completely failed
   }
 
-  // Merge: Firestore overrides local static rules with same ID
+  // Merge: DB overrides local static rules with same ID
   const itemMap = new Map<string, Achievement>();
 
   // 1. Load static base
   ACHIEVEMENT_BADGES.forEach(item => itemMap.set(item.id, item));
 
-  // 2. Override/Append with Firestore
-  firestoreItems.forEach(item => itemMap.set(item.id, item));
+  // 2. Override/Append with DB
+  dbItems.forEach(item => itemMap.set(item.id, item));
 
   const allItems = Array.from(itemMap.values());
 
@@ -60,9 +73,36 @@ export const updateAchievement = async (
     // Security: Verify admin before write
     await requireAdmin();
 
-    await setDoc(doc(db, 'achievements', id), updates, { merge: true });
-    achievementsCache = null; // Invalidate cache
-    return { success: true };
+    const dbUpdates: Partial<AchievementRow> = {};
+    if (updates.name) {
+      dbUpdates.name = updates.name;
+    }
+    if (updates.description) {
+      dbUpdates.description = updates.description;
+    }
+    if (updates.emoji) {
+      dbUpdates.emoji = updates.emoji;
+    }
+    if (updates.criteria) {
+      dbUpdates.criteria = updates.criteria;
+    }
+    if (updates.rarity) {
+      dbUpdates.rarity = updates.rarity;
+    }
+    if (updates.category) {
+      dbUpdates.category = updates.category;
+    }
+    if (updates.unlockCondition) {
+      dbUpdates.unlock_condition = updates.unlockCondition as any;
+    }
+
+    const success = await dbUpdateAchievement(id, dbUpdates);
+
+    if (success) {
+      achievementsCache = null; // Invalidate cache
+      return { success: true };
+    }
+    return { success: false, error: 'Update failed' };
   } catch (error) {
     logger.error('Error updating achievement', { error });
     return { success: false, error: (error as Error).message };
@@ -79,9 +119,27 @@ export const createAchievement = async (
     // Security: Verify admin before write
     await requireAdmin();
 
-    await setDoc(doc(db, 'achievements', itemData.id), itemData);
-    achievementsCache = null;
-    return { success: true };
+    const row: AchievementRow = {
+      id: itemData.id,
+      name: itemData.name,
+      description: itemData.description,
+      emoji: itemData.emoji,
+      criteria: itemData.criteria,
+      rarity: itemData.rarity,
+      category: itemData.category,
+      unlock_condition: itemData.unlockCondition || null,
+      is_active: true,
+      sort_order: 0, // Default
+      created_at: new Date().toISOString(),
+    };
+
+    const success = await dbCreateAchievement(row);
+
+    if (success) {
+      achievementsCache = null;
+      return { success: true };
+    }
+    return { success: false, error: 'Creation failed' };
   } catch (error) {
     logger.error('Error creating achievement', { error });
     return { success: false, error: (error as Error).message };
@@ -98,9 +156,12 @@ export const deleteAchievement = async (
     // Security: Verify admin before write
     await requireAdmin();
 
-    await deleteDoc(doc(db, 'achievements', id));
-    achievementsCache = null;
-    return { success: true };
+    const success = await dbDeleteAchievement(id);
+    if (success) {
+      achievementsCache = null;
+      return { success: true };
+    }
+    return { success: false, error: 'Delete failed' };
   } catch (error) {
     logger.error('Error deleting achievement', { error });
     return { success: false, error: (error as Error).message };
