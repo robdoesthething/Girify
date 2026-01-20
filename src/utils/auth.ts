@@ -1,3 +1,4 @@
+import { auth } from '../firebase';
 import { supabase } from '../services/supabase';
 import { logger } from './logger';
 
@@ -7,15 +8,17 @@ import { logger } from './logger';
  */
 export const isCurrentUserAdmin = async (): Promise<boolean> => {
   try {
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
+    const user = auth.currentUser;
     if (!user) {
       return false;
     }
 
     // Check admins table
-    const { data, error } = await supabase.from('admins').select('uid').eq('uid', user.id).single();
+    const { data, error } = await supabase
+      .from('admins')
+      .select('uid')
+      .eq('uid', user.uid)
+      .single();
 
     if (error || !data) {
       return false;
@@ -43,11 +46,9 @@ export const requireAdmin = async (): Promise<void> => {
  * @throws Error if not authenticated
  */
 export const requireAuth = async (): Promise<string> => {
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const user = auth.currentUser;
   if (!user) {
     throw new Error('Not authenticated');
   }
-  return user.id;
+  return user.uid;
 };
