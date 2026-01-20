@@ -1,6 +1,5 @@
 import {
   createUserWithEmailAndPassword,
-  getRedirectResult,
   sendEmailVerification,
   signInWithEmailAndPassword,
   signInWithPopup,
@@ -63,7 +62,7 @@ const validateUsername = (username: string, t: (key: string) => string) => {
 };
 
 const generateHandle = (baseName: string) => {
-  const cleanName = baseName.split(' ')[0].replace(/[^a-zA-Z0-9]/g, '');
+  const cleanName = (baseName.split(' ')[0] || 'User').replace(/[^a-zA-Z0-9]/g, '');
   const randomId = Math.floor(1000 + Math.random() * 9000);
   return `@${cleanName}${randomId}`;
 };
@@ -137,21 +136,9 @@ const RegisterPanel: React.FC<RegisterPanelProps> = ({
     !/CriOS|FxiOS/.test(navigator.userAgent);
 
   // Handle redirect result on mount (for mobile Safari flow)
-  useEffect(() => {
-    const checkRedirectResult = async () => {
-      try {
-        const result = await getRedirectResult(auth);
-        if (result?.user) {
-          setLoading(true);
-          await processGoogleUser(result.user);
-        }
-      } catch (err) {
-        console.error('Redirect result error:', err);
-        setError('Authentication failed. Please try again.');
-      }
-    };
-    checkRedirectResult();
-  }, []);
+  // NOTE: This is now handled in AppRoutes.tsx to avoid race conditions.
+  // getRedirectResult can only return the result ONCE, so having two handlers
+  // causes whichever runs first to consume the result, leaving the other with null.
 
   const [pendingGoogleUser, setPendingGoogleUser] = useState<{
     user: import('firebase/auth').User;
