@@ -1,7 +1,7 @@
+import { getRedirectResult, updateProfile } from 'firebase/auth';
 import { AnimatePresence } from 'framer-motion';
 import React, { Suspense, lazy, useEffect } from 'react';
 import { Route, Routes, useLocation, useNavigate } from 'react-router-dom';
-import { getRedirectResult, updateProfile } from 'firebase/auth';
 import { auth } from './firebase';
 import { ensureUserProfile, getUserByEmail, getUserByUid, recordReferral } from './utils/social';
 
@@ -101,23 +101,36 @@ const AppRoutes: React.FC = () => {
   // Handle Google redirect result for Mobile Safari
   useEffect(() => {
     const handleRedirectResult = async () => {
+      console.warn('[Auth Redirect] Starting redirect result check...');
       try {
         setIsProcessingRedirect(true);
         const result = await getRedirectResult(auth);
 
+        console.warn(
+          '[Auth Redirect] getRedirectResult returned:',
+          result ? 'User found' : 'No user'
+        );
+
         if (result?.user) {
-          // Processing Google redirect - logged for debugging
+          console.warn('[Auth Redirect] Processing user:', result.user.uid, result.user.email);
 
           const user = result.user;
           let handle = user.displayName || '';
+          // eslint-disable-next-line no-magic-numbers
           let avatarId = Math.floor(Math.random() * 20) + 1;
           const fullName = user.displayName || user.email?.split('@')[0] || 'User';
 
           // Check for existing profile by UID first, then email
+          console.warn('[Auth Redirect] Checking for existing profile...');
           let existingProfile = (await getUserByUid(user.uid)) as any;
+          console.warn('[Auth Redirect] Profile by UID:', existingProfile ? 'Found' : 'Not found');
 
           if (!existingProfile) {
             existingProfile = (await getUserByEmail(user.email || '')) as any;
+            console.warn(
+              '[Auth Redirect] Profile by email:',
+              existingProfile ? 'Found' : 'Not found'
+            );
           }
 
           if (existingProfile) {
@@ -127,6 +140,12 @@ const AppRoutes: React.FC = () => {
               handle = `@${handle}`;
             }
             avatarId = existingProfile.avatarId || avatarId;
+            console.warn(
+              '[Auth Redirect] Existing user handle:',
+              handle,
+              'district:',
+              existingProfile.district
+            );
 
             // Ensure profile is up to date
             if (existingProfile.district) {
@@ -145,9 +164,11 @@ const AppRoutes: React.FC = () => {
               }
 
               // Complete registration
+              console.warn('[Auth Redirect] Calling handleRegister with:', handle);
               handleRegister(handle);
             } else {
               // Existing user but no district - show district modal
+              console.warn('[Auth Redirect] User exists but no district, showing modal');
               if (user.displayName !== handle) {
                 await updateProfile(user, { displayName: handle });
               }
@@ -158,7 +179,10 @@ const AppRoutes: React.FC = () => {
             }
           } else {
             // New user - generate handle and show district modal
-            handle = `@${fullName.split(' ')[0].replace(/[^a-zA-Z0-9]/g, '')}${Math.floor(1000 + Math.random() * 9000)}`;
+            const namePart = (fullName.split(' ')[0] || 'User').replace(/[^a-zA-Z0-9]/g, '');
+            // eslint-disable-next-line no-magic-numbers
+            handle = `@${namePart}${Math.floor(1000 + Math.random() * 9000)}`;
+            console.warn('[Auth Redirect] New user, generated handle:', handle);
 
             if (user.displayName !== handle) {
               await updateProfile(user, { displayName: handle });
@@ -169,13 +193,16 @@ const AppRoutes: React.FC = () => {
             dispatch({ type: 'SET_USERNAME', payload: handle });
 
             // Will need district selection before completing registration
+            console.warn('[Auth Redirect] Showing district modal for new user');
             setShowDistrictModal(true);
           }
 
-          // Google redirect handled successfully
+          console.warn('[Auth Redirect] Completed successfully');
+        } else {
+          console.warn('[Auth Redirect] No redirect result to process');
         }
       } catch (err) {
-        console.error('[Auth] Redirect result error:', err);
+        console.error('[Auth Redirect] Error:', err);
       } finally {
         setIsProcessingRedirect(false);
       }
