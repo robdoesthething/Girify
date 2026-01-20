@@ -272,7 +272,9 @@ export const getFriends = async (username: string): Promise<Friend[]> => {
   }
 };
 
-const FEED_LIMIT = 50;
+// Increased limit for debugging data persistence issues
+// TODO: Consider implementing proper pagination once data is confirmed working
+const FEED_LIMIT = 200;
 
 /**
  * Get Friend Activity Feed

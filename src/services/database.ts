@@ -593,14 +593,18 @@ export async function deleteQuest(id: number): Promise<boolean> {
 // ============================================================================
 
 export async function getActiveAnnouncements(): Promise<AnnouncementRow[]> {
-  const now = new Date().toISOString();
+  // TEMPORARY: Date filters relaxed for debugging data persistence issues
+  // TODO: Re-enable date filters once announcements are confirmed working
+  // Original filters:
+  // const now = new Date().toISOString();
+  // .lte('publish_date', now)
+  // .or(`expiry_date.is.null,expiry_date.gte.${now}`)
 
   const { data, error } = await supabase
     .from('announcements')
     .select('*')
     .eq('is_active', true)
-    .lte('publish_date', now)
-    .or(`expiry_date.is.null,expiry_date.gte.${now}`)
+    // Temporarily show all announcements regardless of publish/expiry dates
     .order('priority', { ascending: false })
     .order('publish_date', { ascending: false });
 
@@ -608,6 +612,7 @@ export async function getActiveAnnouncements(): Promise<AnnouncementRow[]> {
     console.error('[DB] getActiveAnnouncements error:', error.message);
     return [];
   }
+
   return data || [];
 }
 
@@ -738,7 +743,11 @@ export async function markFeedbackNotified(feedbackId: number): Promise<boolean>
 // ACTIVITY FEED
 // ============================================================================
 
-export async function getActivityFeed(usernames: string[], limit = 50): Promise<ActivityFeedRow[]> {
+export async function getActivityFeed(
+  usernames: string[],
+  limit = 50,
+  offset = 0
+): Promise<ActivityFeedRow[]> {
   if (usernames.length === 0) {
     return [];
   }
@@ -751,7 +760,7 @@ export async function getActivityFeed(usernames: string[], limit = 50): Promise<
       usernames.map(u => u.toLowerCase())
     )
     .order('created_at', { ascending: false })
-    .limit(limit);
+    .range(offset, offset + limit - 1);
 
   if (error) {
     console.error('[DB] getActivityFeed error:', error.message);

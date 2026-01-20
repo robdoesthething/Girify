@@ -17,6 +17,41 @@ import { STORAGE_KEYS, TIME } from '../../../config/constants';
 import { useAsyncOperation } from '../../../hooks/useAsyncOperation';
 import { GameStateObject, QuizResult } from '../../../types/game';
 import { GameHistory } from '../../../types/user';
+import { auth } from '../../../firebase';
+import { supabase } from '../../../services/supabase';
+
+/**
+ * Fallback function to save score directly to Supabase without Redis
+ * Used when Redis session is missing or endGame fails
+ */
+const fallbackSaveScore = async (state: GameStateObject, avgTime: number): Promise<void> => {
+  const user = auth.currentUser;
+  if (!user) {
+    console.warn('[Fallback] No authenticated user, cannot save to Supabase');
+    return;
+  }
+
+  try {
+    const { error } = await supabase.from('game_results').insert({
+      user_id: user.uid,
+      score: state.score,
+      time_taken: avgTime,
+      correct_answers: state.score,
+      question_count: state.quizStreets.length,
+      platform: 'web',
+      is_bonus: false,
+      played_at: new Date().toISOString(),
+    });
+
+    if (error) {
+      console.error('[Fallback] Failed to save directly to Supabase:', error);
+    } else {
+      console.warn('[Fallback] Score saved directly to Supabase');
+    }
+  } catch (err) {
+    console.error('[Fallback] Exception during direct save:', err);
+  }
+};
 
 export const useGamePersistence = () => {
   const navigate = useNavigate();
@@ -62,11 +97,31 @@ export const useGamePersistence = () => {
             // [MIGRATION] Use Game Service to end game (Redis -> Supabase)
             // Replaces legacy saveScore() logic
             if (state.gameId) {
-              await endGame(state.gameId, state.score, Number(localRecord.avgTime));
+              try {
+                const result = await endGame(
+                  state.gameId,
+                  state.score,
+                  Number(localRecord.avgTime)
+                );
+
+                if (!result.success) {
+                  console.error('[Save Error] Failed to save game:', result.error);
+                  // Try fallback: direct Supabase insert without Redis
+                  await fallbackSaveScore(state, Number(localRecord.avgTime));
+                } else {
+                  console.warn('[Save Success] Game saved:', result.gameId);
+                }
+              } catch (error) {
+                console.error('[Save Exception] Critical error:', error);
+                // Last resort: Try direct Supabase insert
+                await fallbackSaveScore(state, Number(localRecord.avgTime));
+              }
             } else {
               console.warn(
-                '[Migration] Skipping Supabase save: No gameId found (Redis session missing)'
+                '[Migration] No gameId found - using fallback save (Redis session missing)'
               );
+              // No gameId = no Redis session, use fallback directly
+              await fallbackSaveScore(state, Number(localRecord.avgTime));
             }
 
             const historyForStreak = storage.get<GameHistory[]>(STORAGE_KEYS.HISTORY, []);
