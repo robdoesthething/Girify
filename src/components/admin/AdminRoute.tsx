@@ -1,30 +1,21 @@
 import { onAuthStateChanged } from 'firebase/auth';
-import { doc, getDoc } from 'firebase/firestore';
 import React, { useEffect, useState } from 'react';
 import { Navigate, Outlet } from 'react-router-dom';
-import { auth, db } from '../../firebase';
+import { auth } from '../../firebase';
+import { isCurrentUserAdmin } from '../../utils/auth';
 
 const AdminRoute: React.FC = () => {
   const [isAdmin, setIsAdmin] = useState<boolean | null>(null); // null = checking, true/false
 
   useEffect(() => {
+    // Listen for auth changes
     const unsubscribe = onAuthStateChanged(auth, async user => {
       if (!user) {
         setIsAdmin(false);
-        return;
-      }
-      try {
-        const adminRef = doc(db, 'admins', user.uid);
-        const adminDoc = await getDoc(adminRef);
-
-        if (adminDoc.exists()) {
-          setIsAdmin(true);
-        } else {
-          setIsAdmin(false);
-        }
-      } catch (e) {
-        console.error('Error checking admin status:', e);
-        setIsAdmin(false);
+      } else {
+        // Check admin status against Supabase (handled by isCurrentUserAdmin)
+        const admin = await isCurrentUserAdmin();
+        setIsAdmin(admin);
       }
     });
 
