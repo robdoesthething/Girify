@@ -2,13 +2,13 @@ import booleanDisjoint from '@turf/boolean-disjoint';
 import centroid from '@turf/centroid';
 import turfDistance from '@turf/distance';
 import { multiLineString, point } from '@turf/helpers';
-import { useCallback } from 'react';
-// @ts-ignore
-import rawStreets from '../../../data/streets.json';
+import { useCallback, useEffect, useState } from 'react';
 import { Street } from '../../../types/game';
 
-// --- Static Data Initialization ---
-// Calculate this once at module load time, not on every render
+// --- Constants ---
+const HINTS_LIMIT = 3;
+
+// --- Helper Functions ---
 
 const isValidType = (name: string): boolean => {
   if (!name) {
@@ -23,8 +23,8 @@ const isValidType = (name: string): boolean => {
   );
 };
 
-const validStreetsData: Street[] = (() => {
-  const streets = rawStreets as Street[];
+const processStreetsData = (rawStreets: Street[]): Street[] => {
+  const streets = rawStreets;
   const rawValidStreets = streets.filter(
     s => isValidType(s.name) && s.geometry && s.geometry.length > 0
   );
@@ -45,83 +45,145 @@ const validStreetsData: Street[] = (() => {
   });
 
   return Array.from(uniqueStreetsMap.values());
-})();
+};
+
+// Use 'any' return type compatible with Turf's Position[] expectation to avoid type errors
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const toTurf = (lines: number[][][]): any[][] =>
+  lines.map(line =>
+    line
+      .filter(p => p && typeof p[0] === 'number' && typeof p[1] === 'number')
+      .map(p => [p[1], p[0]])
+  );
 
 /**
  * Hook for managing street data - validation and hint calculation
- * @returns {Object} { validStreets, getHintStreets }
+ * @returns {Object} { validStreets, getHintStreets, isLoading }
  */
 export const useStreets = () => {
-  /**
-   * Calculate hint streets (streets that intersect with target)
-   * @param {Object} targetStreet - The current street to find hints for
-   * @returns {Array} Up to 3 streets that intersect or are near target
-   */
-  const getHintStreets = useCallback((targetStreet: Street) => {
-    if (!targetStreet) {
-      return [];
-    }
+  const [validStreets, setValidStreets] = useState<Street[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
-    const toTurf = (lines: number[][][]) => lines.map(line => line.map(p => [p[1], p[0]]));
-    let hints: Street[] = [];
+  useEffect(() => {
+    let mounted = true;
 
-    try {
-      const currentGeo = multiLineString(toTurf(targetStreet.geometry));
+    const loadStreets = async () => {
+      try {
+        // Dynamic import to split chunk
+        // @ts-ignore
+        const module = await import('../../../data/streets.json');
+        const rawStreets = module.default as Street[];
 
-      // OPTIMIZATION: Iterate over validStreetsData instead of rawStreets
-      // This is smaller and already filtered/deduped
-      for (const street of validStreetsData) {
-        if (street.id === targetStreet.id) {
+        if (mounted) {
+          const processed = processStreetsData(rawStreets);
+          setValidStreets(processed);
+          setIsLoading(false);
+        }
+      } catch (error) {
+        console.error('Failed to load streets data:', error);
+        if (mounted) {
+          setIsLoading(false);
+        }
+      }
+    };
+
+    loadStreets();
+
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const getIntersectionHints = useCallback(
+    (currentGeo: any, targetId: string | number, streets: Street[]): Street[] => {
+      const hints: Street[] = [];
+
+      for (const street of streets) {
+        if (street.id === targetId) {
           continue;
         }
 
-        // No need to check isValidType here as validStreetsData is already filtered
-
-        if (street.geometry) {
-          const otherGeo = multiLineString(toTurf(street.geometry));
-          if (!booleanDisjoint(currentGeo, otherGeo)) {
-            hints.push(street);
-            if (hints.length >= 3) {
-              break;
+        if (street.geometry && street.geometry.length > 0) {
+          const processedGeo = toTurf(street.geometry!);
+          if (processedGeo.length > 0 && processedGeo[0].length > 0) {
+            const otherGeo = multiLineString(processedGeo);
+            if (!booleanDisjoint(currentGeo, otherGeo)) {
+              hints.push(street);
+              if (hints.length >= HINTS_LIMIT) {
+                break;
+              }
             }
           }
         }
       }
+      return hints;
+    },
+    []
+  );
 
-      // If not enough intersecting streets, find nearest
-      if (hints.length < 3) {
-        const currentCentroid = centroid(currentGeo);
-        const candidates: { street: Street; dist: number }[] = [];
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const getDistanceHints = useCallback(
+    (
+      currentGeo: any,
+      targetId: string | number,
+      streets: Street[],
+      existingHints: Street[]
+    ): Street[] => {
+      const candidates: { street: Street; dist: number }[] = [];
+      const currentCentroid = centroid(currentGeo);
 
-        for (const street of validStreetsData) {
-          if (street.id === targetStreet.id) {
-            continue;
-          }
-          if (hints.some(h => h.id === street.id)) {
-            continue;
-          }
+      for (const street of streets) {
+        if (street.id === targetId) {
+          continue;
+        }
+        if (existingHints.some(h => h.id === street.id)) {
+          continue;
+        }
 
-          if (street.geometry) {
-            const p1 = street.geometry[0][0];
+        if (street.geometry && street.geometry.length > 0 && street.geometry[0].length > 0) {
+          const p1 = street.geometry[0]?.[0];
+          if (p1 && typeof p1[0] === 'number' && typeof p1[1] === 'number') {
             const otherPoint = point([p1[1], p1[0]]);
             const dist = turfDistance(currentCentroid, otherPoint);
             candidates.push({ street, dist });
           }
         }
-
-        candidates.sort((a, b) => a.dist - b.dist);
-        const needed = 3 - hints.length;
-        const extra = candidates.slice(0, needed).map(c => c.street);
-        hints = [...hints, ...extra];
       }
-    } catch (e) {
-      console.error('Turf error in getHintStreets:', e);
-    }
 
-    return hints;
-  }, []);
+      candidates.sort((a, b) => a.dist - b.dist);
+      const needed = HINTS_LIMIT - existingHints.length;
+      return candidates.slice(0, needed).map(c => c.street);
+    },
+    []
+  );
 
-  return { validStreets: validStreetsData, getHintStreets, rawStreets: rawStreets as Street[] };
+  const getHintStreets = useCallback(
+    (targetStreet: Street) => {
+      if (!targetStreet || validStreets.length === 0) {
+        return [];
+      }
+
+      try {
+        const currentGeo = multiLineString(toTurf(targetStreet.geometry));
+
+        let hints = getIntersectionHints(currentGeo, targetStreet.id, validStreets);
+
+        if (hints.length < HINTS_LIMIT) {
+          const distanceHints = getDistanceHints(currentGeo, targetStreet.id, validStreets, hints);
+          hints = [...hints, ...distanceHints];
+        }
+
+        return hints;
+      } catch (e) {
+        console.error('Turf error in getHintStreets:', e);
+        return [];
+      }
+    },
+    [validStreets, getIntersectionHints, getDistanceHints]
+  );
+
+  return { validStreets, getHintStreets, isLoading };
 };
 
 export default useStreets;

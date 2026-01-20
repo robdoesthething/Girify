@@ -57,12 +57,12 @@ const AppRoutes: React.FC = () => {
   const location = useLocation();
   const navigate = useNavigate();
   // Street data hook
-  const { validStreets, getHintStreets } = useStreets();
+  const { validStreets, getHintStreets, isLoading: isLoadingStreets } = useStreets();
 
   // Confirmation Hook
   const { confirm, confirmConfig, handleClose } = useConfirm();
 
-  // Game Logic Hook
+  // Game Logic Hook - Always call this, even if streets are empty initially
   const {
     state,
     dispatch,
@@ -115,6 +115,12 @@ const AppRoutes: React.FC = () => {
     const timeout = setTimeout(checkDistrict, 2000);
     return () => clearTimeout(timeout);
   }, [state.username]);
+
+  // Show loader while streets are initializing
+  // This MUST be after all hooks are declared
+  if (isLoadingStreets) {
+    return <PageLoader />;
+  }
 
   const handleOpenPage = async (page: string | null) => {
     // Check if user is in the middle of a game
