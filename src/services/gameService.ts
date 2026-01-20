@@ -63,42 +63,66 @@ export async function updateGameScore(gameId: string, newScore: number): Promise
   }
 }
 
+export interface EndGameResult {
+  success: boolean;
+  error?: string;
+  gameId?: string;
+}
+
 /**
  * End the game.
  * 1. Retrieve session from Redis.
  * 2. Save result to Supabase.
  * 3. Delete from Redis.
+ * @returns EndGameResult with success status and optional error message
  */
 export async function endGame(
   gameId: string,
   finalScore: number,
   finalTime: number
-): Promise<void> {
+): Promise<EndGameResult> {
   const sessionKey = `game:${gameId}`;
-  const rawData = await redis.get(sessionKey);
 
-  if (!rawData) {
-    console.error('Game session not found (expired or invalid)');
-    return;
+  try {
+    const rawData = await redis.get(sessionKey);
+
+    if (!rawData) {
+      console.warn('[Redis] Session not found:', gameId);
+      return {
+        success: false,
+        error: 'Session not found or expired. Please ensure Redis is running and accessible.',
+      };
+    }
+
+    const session = (typeof rawData === 'string' ? JSON.parse(rawData) : rawData) as GameSession;
+
+    // Save to Supabase
+    const { error } = await supabase.from('game_results').insert({
+      user_id: session.userId || null,
+      score: finalScore,
+      time_taken: finalTime,
+      played_at: new Date().toISOString(),
+      platform: 'web',
+    });
+
+    if (error) {
+      console.error('[Supabase] Failed to save game:', error);
+      // Keep Redis data for potential retry
+      return {
+        success: false,
+        error: `Database error: ${error.message}`,
+      };
+    }
+
+    // Clean up Redis only after successful save
+    await redis.del(sessionKey);
+
+    return { success: true, gameId };
+  } catch (error) {
+    console.error('[Game] Unexpected error in endGame:', error);
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : String(error),
+    };
   }
-
-  const session = (typeof rawData === 'string' ? JSON.parse(rawData) : rawData) as GameSession;
-
-  // Save to Supabase
-  const { error } = await supabase.from('game_results').insert({
-    user_id: session.userId || null, // Assuming Supabase 'user_id' can be nullable for guest? or use auth.uid()
-    score: finalScore,
-    time_taken: finalTime,
-    played_at: new Date().toISOString(),
-    platform: 'web',
-  });
-
-  if (error) {
-    console.error('Failed to save game to Supabase:', error);
-    // Logic: Should we keep Redis data if save failed?
-    // For now, log and delete to prevent stale data.
-  }
-
-  // Clean up Redis
-  await redis.del(sessionKey);
 }

@@ -1,6 +1,9 @@
 import { AnimatePresence } from 'framer-motion';
-import React, { Suspense, lazy } from 'react';
+import React, { Suspense, lazy, useEffect } from 'react';
 import { Route, Routes, useLocation, useNavigate } from 'react-router-dom';
+import { getRedirectResult, updateProfile } from 'firebase/auth';
+import { auth } from './firebase';
+import { ensureUserProfile, getUserByEmail, getUserByUid, recordReferral } from './utils/social';
 
 // Eagerly loaded (needed immediately)
 import AnnouncementModal from './components/AnnouncementModal';
@@ -38,8 +41,6 @@ import { useAchievements } from './hooks/useAchievements';
 import { useAnnouncements } from './hooks/useAnnouncements';
 import { GameHistory } from './types/user';
 import { getTodaySeed, hasPlayedToday } from './utils/dailyChallenge';
-import { saveScore } from './utils/leaderboard';
-import { hasDailyReferral } from './utils/social';
 import { storage } from './utils/storage';
 
 import { useConfirm } from './hooks/useConfirm';
@@ -87,19 +88,106 @@ const AppRoutes: React.FC = () => {
   );
 
   // Auth hook
-  const {
-    user,
-    emailVerified,
-    handleLogout: performLogout,
-  } = useAuth(dispatch, state.gameState, checkAnnouncements);
+  const { emailVerified, handleLogout: performLogout } = useAuth(
+    dispatch,
+    state.gameState,
+    checkAnnouncements
+  );
   const handleLogout = () => performLogout(navigate);
 
   const [showDistrictModal, setShowDistrictModal] = React.useState(false);
+  const [isProcessingRedirect, setIsProcessingRedirect] = React.useState(false);
+
+  // Handle Google redirect result for Mobile Safari
+  useEffect(() => {
+    const handleRedirectResult = async () => {
+      try {
+        setIsProcessingRedirect(true);
+        const result = await getRedirectResult(auth);
+
+        if (result?.user) {
+          // Processing Google redirect - logged for debugging
+
+          const user = result.user;
+          let handle = user.displayName || '';
+          let avatarId = Math.floor(Math.random() * 20) + 1;
+          const fullName = user.displayName || user.email?.split('@')[0] || 'User';
+
+          // Check for existing profile by UID first, then email
+          let existingProfile = (await getUserByUid(user.uid)) as any;
+
+          if (!existingProfile) {
+            existingProfile = (await getUserByEmail(user.email || '')) as any;
+          }
+
+          if (existingProfile) {
+            // Existing user - use their handle and district
+            handle = existingProfile.username;
+            if (!handle.startsWith('@')) {
+              handle = `@${handle}`;
+            }
+            avatarId = existingProfile.avatarId || avatarId;
+
+            // Ensure profile is up to date
+            if (existingProfile.district) {
+              await ensureUserProfile(handle, user.uid, {
+                realName: fullName,
+                avatarId,
+                email: user.email || undefined,
+                district: existingProfile.district,
+              });
+
+              // Handle referral if any
+              const referrer = storage.get(STORAGE_KEYS.REFERRER, '');
+              if (referrer && referrer !== handle) {
+                await recordReferral(referrer, handle);
+                storage.remove(STORAGE_KEYS.REFERRER);
+              }
+
+              // Complete registration
+              handleRegister(handle);
+            } else {
+              // Existing user but no district - show district modal
+              if (user.displayName !== handle) {
+                await updateProfile(user, { displayName: handle });
+              }
+              // Set username so district modal can use it
+              storage.set(STORAGE_KEYS.USERNAME, handle);
+              dispatch({ type: 'SET_USERNAME', payload: handle });
+              setShowDistrictModal(true);
+            }
+          } else {
+            // New user - generate handle and show district modal
+            handle = `@${fullName.split(' ')[0].replace(/[^a-zA-Z0-9]/g, '')}${Math.floor(1000 + Math.random() * 9000)}`;
+
+            if (user.displayName !== handle) {
+              await updateProfile(user, { displayName: handle });
+            }
+
+            // Set username so district modal can use it
+            storage.set(STORAGE_KEYS.USERNAME, handle);
+            dispatch({ type: 'SET_USERNAME', payload: handle });
+
+            // Will need district selection before completing registration
+            setShowDistrictModal(true);
+          }
+
+          // Google redirect handled successfully
+        }
+      } catch (err) {
+        console.error('[Auth] Redirect result error:', err);
+      } finally {
+        setIsProcessingRedirect(false);
+      }
+    };
+
+    handleRedirectResult();
+  }, []); // Run only once on mount
 
   // Check for missing district
   React.useEffect(() => {
     const checkDistrict = async () => {
-      if (state.username && !state.username.startsWith('guest')) {
+      if (state.username && !state.username.startsWith('guest') && !showDistrictModal) {
         try {
           const profile = await getUserProfile(state.username);
           if (profile && !profile.district) {
@@ -114,11 +202,11 @@ const AppRoutes: React.FC = () => {
     // Simple debounce/delay to avoid checking too early or too often
     const timeout = setTimeout(checkDistrict, 2000);
     return () => clearTimeout(timeout);
-  }, [state.username]);
+  }, [state.username, showDistrictModal]);
 
-  // Show loader while streets are initializing
+  // Show loader while streets are initializing or processing redirect
   // This MUST be after all hooks are declared
-  if (isLoadingStreets) {
+  if (isLoadingStreets || isProcessingRedirect) {
     return <PageLoader />;
   }
 
@@ -156,18 +244,9 @@ const AppRoutes: React.FC = () => {
         history.push(partialRecord);
         storage.set(STORAGE_KEYS.HISTORY, history);
 
-        if (state.username) {
-          const username = state.username;
-          hasDailyReferral(username).then(isBonus => {
-            saveScore(username, state.score, partialRecord.avgTime as any, {
-              isBonus,
-              correctAnswers: state.correct,
-              questionCount: state.currentQuestionIndex + 1,
-              streakAtPlay: state.streak || 0,
-              uid: user?.uid,
-            });
-          });
-        }
+        // Deprecated: saveScore() is legacy code
+        // Scores are now saved via useGamePersistence hook using Redis → Supabase flow
+        // Partial games (interrupted) are stored locally but not submitted to leaderboard
       } catch (e) {
         console.error('[Game] Error saving partial progress:', e);
       }
@@ -219,7 +298,13 @@ const AppRoutes: React.FC = () => {
           <Suspense fallback={null}>
             <DistrictSelectionModal
               username={state.username || ''}
-              onComplete={() => setShowDistrictModal(false)}
+              onComplete={() => {
+                setShowDistrictModal(false);
+                // If user has a username set, complete the registration
+                if (state.username) {
+                  handleRegister(state.username);
+                }
+              }}
             />
           </Suspense>
         )}

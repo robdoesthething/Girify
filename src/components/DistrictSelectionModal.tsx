@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import { useTheme } from '../context/ThemeContext';
 import { DISTRICTS } from '../data/districts';
 import { ensureUserProfile } from '../utils/social';
+import { auth } from '../firebase';
 
 interface DistrictSelectionModalProps {
   username: string;
@@ -29,9 +30,15 @@ const DistrictSelectionModal: React.FC<DistrictSelectionModalProps> = ({
       setLoading(true);
       setError('');
 
+      // Get current auth user
+      const currentUser = auth.currentUser;
+      if (!currentUser) {
+        throw new Error('No authenticated user found');
+      }
+
       // Update user profile with selected district
       // ensureUserProfile handles the team name logic automatically
-      await ensureUserProfile(username, null, { district });
+      await ensureUserProfile(username, currentUser.uid, { district });
 
       setLoading(false);
       onComplete();
