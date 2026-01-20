@@ -7,7 +7,15 @@ import globals from 'globals';
 import tseslint from 'typescript-eslint';
 
 export default defineConfig([
-  globalIgnores(['dist', 'node_modules', 'coverage', 'storybook-static', 'build', 'public']),
+  globalIgnores([
+    'dist',
+    'node_modules',
+    'coverage',
+    'storybook-static',
+    'build',
+    'public',
+    'scripts/**/*.ts',
+  ]),
 
   // 1. Core JS Recommended
   js.configs.recommended,
