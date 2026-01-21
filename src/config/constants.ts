@@ -37,11 +37,11 @@ export const GAME = {
   TIME_BONUS_THRESHOLD: 3, // seconds for max bonus
   TIME_DECAY_RATE: 20, // seconds after which bonus reaches 0
 
-  // Scoring
+  // Scoring (scaled to 0-100 per question, 0-1000 total for 10 questions)
   POINTS: {
-    CORRECT_BASE: 100,
-    TIME_BONUS_MAX: 900, // Max bonus for fast answers (total max: 1000)
-    HINT_PENALTY: 50,
+    CORRECT_BASE: 100, // Base points (scaled to 10 per question)
+    TIME_BONUS_MAX: 900, // Max time bonus (scaled to 90 per question)
+    HINT_PENALTY: 50, // Penalty per hint (scaled to 5 per question)
     STREAK_MULTIPLIER: 1.1,
   },
 

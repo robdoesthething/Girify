@@ -104,13 +104,14 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({
                         isSelected
                           ? 'border-sky-500 ring-2 ring-sky-500/30 ring-offset-2 dark:ring-offset-slate-900'
                           : 'border-transparent hover:border-slate-300 dark:hover:border-slate-600'
-                      } ${theme === 'dark' ? 'bg-slate-800' : 'bg-slate-100'}`}
+                      }`}
                     >
                       {img ? (
                         <img
                           src={img as string}
                           alt={avatar.name}
                           className="w-full h-full object-cover"
+                          style={{ imageRendering: 'pixelated', mixBlendMode: 'multiply' }}
                         />
                       ) : (
                         <span className="text-2xl">{avatar.emoji}</span> // Fallback
@@ -140,7 +141,7 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({
                         isSelected
                           ? 'border-sky-500 ring-2 ring-sky-500/30 ring-offset-2 dark:ring-offset-slate-900'
                           : 'border-transparent hover:border-slate-300 dark:hover:border-slate-600'
-                      } ${theme === 'dark' ? 'bg-slate-800' : 'bg-slate-100'}`}
+                      }`}
                     >
                       <div
                         className={`w-12 h-12 rounded-full ${frame.cssClass || ''} bg-slate-400/20`}

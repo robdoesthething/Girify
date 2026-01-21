@@ -224,8 +224,8 @@ const ShopScreen: React.FC<ShopScreenProps> = ({ username }) => {
         <img
           src={item.image}
           alt={item.name}
-          className="w-full h-full object-contain"
-          style={{ imageRendering: 'pixelated', mixBlendMode: 'multiply' }}
+          className="w-full h-full object-contain mix-blend-multiply"
+          style={{ imageRendering: 'pixelated' }}
         />
       );
     }
@@ -325,7 +325,7 @@ const ShopScreen: React.FC<ShopScreenProps> = ({ username }) => {
                       </div>
                     )}
 
-                    <div className="flex-1 flex flex-col items-center text-center mb-3">
+                    <div className="flex-1 flex flex-col items-center text-center mb-3 min-h-0">
                       <div
                         role="button"
                         tabIndex={0}
@@ -334,16 +334,16 @@ const ShopScreen: React.FC<ShopScreenProps> = ({ username }) => {
                             setFlavorModal(item);
                           }
                         }}
-                        className={`w-16 h-16 rounded-2xl mb-3 flex items-center justify-center text-3xl relative overflow-hidden shrink-0 ${activeTab === 'titles' ? 'cursor-pointer hover:scale-105 transition-transform shadow-md' : 'shadow-sm'} bg-slate-100 dark:bg-slate-700`}
+                        className={`w-16 h-16 rounded-2xl mb-3 flex items-center justify-center text-3xl relative overflow-hidden shrink-0 ${activeTab === 'titles' ? 'cursor-pointer hover:scale-105 transition-transform shadow-md' : ''}`}
                         style={{ imageRendering: 'pixelated' }}
                       >
                         {renderItemIcon(item)}
                       </div>
 
-                      <h3 className="font-bold text-sm leading-tight font-inter mb-1 min-h-[1.25em]">
+                      <h3 className="font-bold text-sm leading-tight font-inter mb-1.5 min-h-[1.25em]">
                         {t(item.name || '') || item.name}
                       </h3>
-                      <p className="text-xs opacity-60 line-clamp-2 font-inter leading-relaxed h-[2.5em]">
+                      <p className="text-xs opacity-60 font-inter leading-relaxed">
                         {activeTab === 'titles' && item.flavorText
                           ? `"${item.flavorText}"`
                           : t(item.description || '') || item.description}
@@ -403,7 +403,7 @@ const ShopScreen: React.FC<ShopScreenProps> = ({ username }) => {
               onClick={e => e.stopPropagation()}
             >
               <div className="text-center mb-6">
-                <div className="w-20 h-20 mx-auto bg-slate-100 dark:bg-slate-700 rounded-full flex items-center justify-center text-5xl mb-4 shadow-inner">
+                <div className="w-20 h-20 mx-auto rounded-full flex items-center justify-center text-5xl mb-4">
                   {flavorModal.prefix || flavorModal.emoji || '✨'}
                 </div>
                 <h3 className="text-xl font-bold mb-1 font-inter">

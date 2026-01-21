@@ -12,30 +12,28 @@ describe('Scoring Logic (gameConfig)', () => {
   it('awards maximum points for fast answers', () => {
     // timeElapsed <= TIME_BONUS_THRESHOLD (3s) should give full bonus
     const score = calculateScore(0, true, 0);
-    // Base + max time bonus = 100 + 900 = 1000
-    const expected = GAME.POINTS.CORRECT_BASE + GAME.POINTS.TIME_BONUS_MAX;
-    expect(score).toBe(expected);
-    expect(score).toBe(1000);
+    // Scaled: (100 + 900) / 10 = 100 per question
+    expect(score).toBe(100);
   });
 
   it('reduces score based on time (linear decay)', () => {
     const fastScore = calculateScore(1, true, 0); // < 3s = max
     const slowScore = calculateScore(10, true, 0); // 10s = partial bonus
-    expect(fastScore).toBe(1000);
+    expect(fastScore).toBe(100);
     expect(slowScore).toBeLessThan(fastScore);
-    expect(slowScore).toBeGreaterThan(GAME.POINTS.CORRECT_BASE);
+    expect(slowScore).toBeGreaterThan(10); // Scaled base: 100/10 = 10
   });
 
   it('gives base score only after TIME_DECAY_RATE (20s)', () => {
     const score = calculateScore(GAME.TIME_DECAY_RATE, true, 0);
-    expect(score).toBe(GAME.POINTS.CORRECT_BASE);
+    expect(score).toBe(10); // Scaled base: 100/10 = 10
   });
 
   it('subtracts points for using hints', () => {
     const scoreWithoutHints = calculateScore(2, true, 0);
     const scoreWithHints = calculateScore(2, true, 1);
 
-    expect(scoreWithHints).toBe(scoreWithoutHints - GAME.POINTS.HINT_PENALTY);
+    expect(scoreWithHints).toBe(scoreWithoutHints - 5); // Scaled penalty: 50/10 = 5
   });
 
   it('never returns negative scores', () => {
