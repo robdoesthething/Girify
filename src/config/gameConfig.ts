@@ -29,7 +29,10 @@ export const calculateScore = (
   // Hint penalty
   score -= hintsUsed * GAME.POINTS.HINT_PENALTY;
 
-  return Math.max(0, Math.min(1000, score));
+  // Scale from 0-1000 range to 0-100 range (10 questions × 100 = 1000 max total)
+  const scaledScore = Math.round(score / 10);
+
+  return Math.max(0, Math.min(100, scaledScore));
 };
 
 export const calculateStreakBonus = (streakDays: number): number => {

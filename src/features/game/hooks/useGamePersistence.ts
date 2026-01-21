@@ -36,7 +36,7 @@ const fallbackSaveScore = async (state: GameStateObject, avgTime: number): Promi
       user_id: user.uid,
       score: state.score,
       time_taken: avgTime,
-      correct_answers: state.score,
+      correct_answers: state.correct,
       question_count: state.quizStreets.length,
       platform: 'web',
       is_bonus: false,
@@ -101,7 +101,9 @@ export const useGamePersistence = () => {
                 const result = await endGame(
                   state.gameId,
                   state.score,
-                  Number(localRecord.avgTime)
+                  Number(localRecord.avgTime),
+                  state.correct,
+                  state.quizStreets.length
                 );
 
                 if (!result.success) {

@@ -79,7 +79,9 @@ export interface EndGameResult {
 export async function endGame(
   gameId: string,
   finalScore: number,
-  finalTime: number
+  finalTime: number,
+  correctAnswers: number,
+  questionCount: number
 ): Promise<EndGameResult> {
   const sessionKey = `game:${gameId}`;
 
@@ -101,8 +103,11 @@ export async function endGame(
       user_id: session.userId || null,
       score: finalScore,
       time_taken: finalTime,
+      correct_answers: correctAnswers,
+      question_count: questionCount,
       played_at: new Date().toISOString(),
       platform: 'web',
+      is_bonus: false,
     });
 
     if (error) {

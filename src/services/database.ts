@@ -593,18 +593,14 @@ export async function deleteQuest(id: number): Promise<boolean> {
 // ============================================================================
 
 export async function getActiveAnnouncements(): Promise<AnnouncementRow[]> {
-  // TEMPORARY: Date filters relaxed for debugging data persistence issues
-  // TODO: Re-enable date filters once announcements are confirmed working
-  // Original filters:
-  // const now = new Date().toISOString();
-  // .lte('publish_date', now)
-  // .or(`expiry_date.is.null,expiry_date.gte.${now}`)
+  const now = new Date().toISOString();
 
   const { data, error } = await supabase
     .from('announcements')
     .select('*')
     .eq('is_active', true)
-    // Temporarily show all announcements regardless of publish/expiry dates
+    .lte('publish_date', now)
+    .or(`expiry_date.is.null,expiry_date.gte.${now}`)
     .order('priority', { ascending: false })
     .order('publish_date', { ascending: false });
 
