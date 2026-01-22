@@ -157,7 +157,8 @@ export const ensureUserProfile = async (
   if (!usernameInput) {
     return null;
   }
-  const username = usernameInput.toLowerCase();
+  // Normalize username: remove @ prefix for DB operations and lowercase
+  const username = usernameInput.toLowerCase().replace(/^@/, '');
 
   // Check if user exists
   const existingUser = await getUserByUsername(username);
@@ -577,7 +578,9 @@ export const getUserProfile = async (username: string): Promise<UserProfile | nu
     return null;
   }
 
-  const user = await getUserByUsername(username.toLowerCase());
+  // Normalize username: remove @ prefix for DB operations
+  const normalizedUsername = username.toLowerCase().replace(/^@/, '');
+  const user = await getUserByUsername(normalizedUsername);
   if (user) {
     return rowToProfile(user);
   }

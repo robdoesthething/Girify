@@ -97,9 +97,18 @@ const AppRoutes: React.FC = () => {
 
   const [showDistrictModal, setShowDistrictModal] = React.useState(false);
   const [isProcessingRedirect, setIsProcessingRedirect] = React.useState(false);
+  const [hasProcessedRedirect, setHasProcessedRedirect] = React.useState(false);
+
+  // Track if we already set the district in this session to prevent re-checking loops
+  const districtSetInSession = React.useRef(false);
 
   // Handle Google redirect result for Mobile Safari
   useEffect(() => {
+    // Skip if we've already processed a redirect result this session
+    if (hasProcessedRedirect) {
+      return;
+    }
+
     const handleRedirectResult = async () => {
       console.warn('[Auth Redirect] Starting redirect result check...');
       try {
@@ -112,6 +121,7 @@ const AppRoutes: React.FC = () => {
         );
 
         if (result?.user) {
+          setHasProcessedRedirect(true);
           console.warn('[Auth Redirect] Processing user:', result.user.uid, result.user.email);
 
           const user = result.user;
@@ -219,12 +229,16 @@ const AppRoutes: React.FC = () => {
     };
 
     handleRedirectResult();
-  }, []); // Run only once on mount
+  }, [hasProcessedRedirect]); // Run only once on mount (guard prevents re-runs)
 
   // Check for missing district
   React.useEffect(() => {
     const checkDistrict = async () => {
-      if (state.username && !state.username.startsWith('guest') && !showDistrictModal) {
+      // Skip if modal is showing or we already set district this session
+      if (showDistrictModal || districtSetInSession.current) {
+        return;
+      }
+      if (state.username && !state.username.startsWith('guest')) {
         try {
           const profile = await getUserProfile(state.username);
           if (profile && !profile.district) {
@@ -239,7 +253,7 @@ const AppRoutes: React.FC = () => {
     // Simple debounce/delay to avoid checking too early or too often
     const timeout = setTimeout(checkDistrict, 2000);
     return () => clearTimeout(timeout);
-  }, [state.username, showDistrictModal]);
+  }, [state.username]); // Remove showDistrictModal from deps to prevent re-check loop
 
   // Show loader while streets are initializing or processing redirect
   // This MUST be after all hooks are declared
@@ -336,6 +350,7 @@ const AppRoutes: React.FC = () => {
             <DistrictSelectionModal
               username={state.username || ''}
               onComplete={() => {
+                districtSetInSession.current = true; // Prevent re-checking district
                 setShowDistrictModal(false);
                 // If user has a username set, complete the registration
                 if (state.username) {
