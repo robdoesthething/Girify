@@ -11,6 +11,7 @@ import { useEffect, useState } from 'react';
 import { useTheme } from '../../../context/ThemeContext';
 import { DISTRICTS } from '../../../data/districts';
 import { auth, googleProvider } from '../../../firebase';
+import { isMobileSafari } from '../../../utils/platform';
 import { ensureUserProfile, getUserByEmail, recordReferral } from '../../../utils/social';
 import { storage } from '../../../utils/storage';
 
@@ -97,8 +98,18 @@ const getAuthErrorMessage = (code: string, message?: string) => {
       return 'Invalid email or password. Please check your credentials.';
     case 'auth/user-disabled':
       return 'This account has been disabled. Please contact support.';
+    case 'auth/unauthorized-domain':
+      return 'This domain is not authorized for sign-in. Please contact support.';
+    case 'auth/operation-not-allowed':
+      return 'Google sign-in is not enabled. Please contact support.';
+    case 'auth/internal-error':
+      return message
+        ? `Authentication error: ${message}`
+        : 'An internal error occurred. Please try again.';
     default:
-      return 'Authentication failed. Please try again.';
+      return message
+        ? `Authentication failed: ${message}`
+        : 'Authentication failed. Please try again.';
   }
 };
 
@@ -130,10 +141,7 @@ const RegisterPanel: React.FC<RegisterPanelProps> = ({
   const [loading, setLoading] = useState(false);
 
   // Check if mobile Safari (popups often blocked)
-  const isMobileSafari =
-    /iPhone|iPad|iPod/.test(navigator.userAgent) &&
-    /Safari/.test(navigator.userAgent) &&
-    !/CriOS|FxiOS/.test(navigator.userAgent);
+  const isOnMobileSafari = isMobileSafari();
 
   // Handle redirect result on mount (for mobile Safari flow)
   // NOTE: This is now handled in AppRoutes.tsx to avoid race conditions.
@@ -150,65 +158,75 @@ const RegisterPanel: React.FC<RegisterPanelProps> = ({
 
   // Shared logic for processing Google user after popup or redirect
   const processGoogleUser = async (user: import('firebase/auth').User) => {
-    console.warn('[AuthDebug] Processing Google User:', user.uid, user.email);
-    let handle = user.displayName || '';
-    let avatarId = getRandomAvatarId();
-    const fullName = user.displayName || user.email?.split('@')[0] || 'User';
+    try {
+      console.warn('[AuthDebug] Processing Google User:', user.uid, user.email);
+      let handle = user.displayName || '';
+      let avatarId = getRandomAvatarId();
+      const fullName = user.displayName || user.email?.split('@')[0] || 'User';
 
-    // Critical: Check by UID first (most reliable), then by email
-    const { getUserByUid } = await import('../../../utils/social');
-    let existingProfile = (await getUserByUid(user.uid)) as any;
-    console.warn('[AuthDebug] Profile check by UID:', existingProfile ? 'Found' : 'Not Found');
+      // Critical: Check by UID first (most reliable), then by email
+      const { getUserByUid } = await import('../../../utils/social');
+      let existingProfile = (await getUserByUid(user.uid)) as any;
+      console.warn('[AuthDebug] Profile check by UID:', existingProfile ? 'Found' : 'Not Found');
 
-    if (!existingProfile) {
-      console.warn('[AuthDebug] Checking by email fallback...');
-      existingProfile = (await getUserByEmail(user.email || '')) as any;
-      console.warn('[AuthDebug] Profile check by Email:', existingProfile ? 'Found' : 'Not Found');
-    }
-
-    if (existingProfile) {
-      handle = existingProfile.username;
-      if (!handle.startsWith('@')) {
-        handle = `@${handle}`;
+      if (!existingProfile) {
+        console.warn('[AuthDebug] Checking by email fallback...');
+        existingProfile = (await getUserByEmail(user.email || '')) as any;
+        console.warn(
+          '[AuthDebug] Profile check by Email:',
+          existingProfile ? 'Found' : 'Not Found'
+        );
       }
-      avatarId = existingProfile.avatarId || avatarId;
-    } else {
-      handle = generateHandle(fullName);
-      if (!handle.startsWith('@')) {
-        handle = `@${handle}`;
-      }
-      console.warn('[AuthDebug] New user, generated handle:', handle);
 
-      if (user.displayName !== handle) {
-        await updateProfile(user, { displayName: handle });
-      }
-    }
+      if (existingProfile) {
+        handle = existingProfile.username;
+        if (!handle.startsWith('@')) {
+          handle = `@${handle}`;
+        }
+        avatarId = existingProfile.avatarId || avatarId;
+      } else {
+        handle = generateHandle(fullName);
+        if (!handle.startsWith('@')) {
+          handle = `@${handle}`;
+        }
+        console.warn('[AuthDebug] New user, generated handle:', handle);
 
-    // Force district selection for new users or those without a district
-    if (!existingProfile?.district) {
-      console.warn('[AuthDebug] No district in profile. Stopping to show District Modal.');
-      setPendingGoogleUser({
-        user,
-        handle,
-        fullName,
+        if (user.displayName !== handle) {
+          await updateProfile(user, { displayName: handle });
+        }
+      }
+
+      // Force district selection for new users or those without a district
+      if (!existingProfile?.district) {
+        console.warn('[AuthDebug] No district in profile. Stopping to show District Modal.');
+        setPendingGoogleUser({
+          user,
+          handle,
+          fullName,
+          avatarId,
+          email: user.email || null,
+        });
+        setLoading(false);
+        return;
+      }
+
+      console.warn('[AuthDebug] District found in profile:', existingProfile.district);
+      console.warn('[AuthDebug] Calling ensureUserProfile...');
+      await ensureUserProfile(handle, user.uid, {
+        realName: fullName,
         avatarId,
-        email: user.email || null,
+        email: user.email || undefined,
+        district: existingProfile.district,
       });
+
+      console.warn('[AuthDebug] Calls handlePostLogin...');
+      await handlePostLogin(handle, true);
+    } catch (err) {
+      console.error('[AuthDebug] Error in processGoogleUser:', err);
+      const error = err instanceof Error ? err : new Error(String(err));
+      setError(`Login processing failed: ${error.message}`);
       setLoading(false);
-      return;
     }
-
-    console.warn('[AuthDebug] District found in profile:', existingProfile.district);
-    console.warn('[AuthDebug] Calling ensureUserProfile...');
-    await ensureUserProfile(handle, user.uid, {
-      realName: fullName,
-      avatarId,
-      email: user.email || undefined,
-      district: existingProfile.district,
-    });
-
-    console.warn('[AuthDebug] Calls handlePostLogin...');
-    await handlePostLogin(handle, true);
   };
 
   const completeGoogleSignup = async () => {
@@ -240,7 +258,7 @@ const RegisterPanel: React.FC<RegisterPanelProps> = ({
       setError('');
 
       // Use redirect on mobile Safari (popups are blocked)
-      if (isMobileSafari) {
+      if (isOnMobileSafari) {
         console.warn('[AuthDebug] Mobile Safari detected, using redirect');
         await signInWithRedirect(auth, googleProvider);
         return; // Will be handled by getRedirectResult on page reload
@@ -253,8 +271,11 @@ const RegisterPanel: React.FC<RegisterPanelProps> = ({
       await processGoogleUser(result.user);
     } catch (err: unknown) {
       console.error('[AuthDebug] Google Login Error:', err);
-      const error = err instanceof Error ? err : new Error(String(err));
-      setError(getAuthErrorMessage('auth/error', error.message));
+      const firebaseError = err as { code?: string; message?: string };
+      const errorCode = firebaseError.code || 'auth/error';
+      const errorMessage = firebaseError.message;
+      console.error('[AuthDebug] Error code:', errorCode, 'Message:', errorMessage);
+      setError(getAuthErrorMessage(errorCode, errorMessage));
       setLoading(false);
     }
   };

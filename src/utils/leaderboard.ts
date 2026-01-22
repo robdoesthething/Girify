@@ -3,10 +3,6 @@ import { SOCIAL } from '../config/constants';
 import { DISTRICTS } from '../data/districts';
 import { supabase } from '../services/supabase';
 
-// Deprecated collections - used only for types or migration reading if needed
-// Deprecated collections - used only for types or migration reading if needed
-// const SCORES_COLLECTION = 'scores';
-
 export type LeaderboardPeriod = 'all' | 'daily' | 'weekly' | 'monthly';
 
 export interface ScoreEntry {
@@ -26,32 +22,6 @@ export interface ScoreEntry {
   sortDate?: Date;
   gamesCount?: number;
 }
-
-interface SaveScoreOptions {
-  isBonus?: boolean;
-  correctAnswers?: number | null;
-  questionCount?: number;
-  streakAtPlay?: number | null;
-  email?: string | null;
-  uid?: string | null;
-}
-
-/**
- * [DEPRECATED] Save user's score to Firestore.
- * This function is kept for compatibility but should not be used in the new architecture.
- * Game results are now saved via gameService.endGame() -> Supabase.
- * However, we still explicitly update User Stats here if called, as a safety measure?
- * No, useGamePersistence handles updateUserGameStats separately.
- */
-export const saveScore = (
-  _username: string,
-  _score: number,
-  _time: number | string,
-  _options: SaveScoreOptions = {}
-): void => {
-  console.warn('[Leaderboard] saveScore is DEPRECATED. Supabase is now used via gameService.');
-  return;
-};
 
 /**
  * Fetch leaderboard scores using Supabase
