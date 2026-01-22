@@ -70,7 +70,7 @@ const generateCaptcha = (canvas: HTMLCanvasElement, theme: string): string => {
     ctx.translate(x, y);
     ctx.rotate(angle);
     ctx.fillStyle = theme === 'dark' ? '#38bdf8' : '#0284c7';
-    ctx.fillText(char, 0, 0);
+    ctx.fillText(char || '', 0, 0);
     ctx.restore();
   }
 
@@ -144,7 +144,7 @@ const FeedbackForm: React.FC<FeedbackFormProps> = ({ username, onSuccess, onClos
 
     setIsSubmitting(true);
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    await (submitFeedback as any)(username, feedback);
+    await (submitFeedback as any)(username, feedback || '');
     setIsSubmitting(false);
     onSuccess();
   };

@@ -91,7 +91,7 @@ const FriendsScreen: React.FC<FriendsScreenProps> = ({ onClose, username }) => {
     setLoading(true);
     const list = await getFriends(username);
     const activity = await getFriendFeed(list);
-    setFeed(activity);
+    setFeed(activity as unknown as FeedItem[]);
     setLoading(false);
   };
 

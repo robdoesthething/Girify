@@ -70,7 +70,7 @@ const OnboardingTour: React.FC<OnboardingTourProps> = ({ onComplete }) => {
             : 'bg-white text-slate-900'
         }`}
         role="dialog"
-        aria-label={steps[step].title}
+        aria-label={steps[step]?.title || 'Onboarding'}
       >
         {/* Dialogue Header with Mayor Jaume */}
         <div className="bg-gradient-to-r from-sky-600 to-blue-600 p-6 pb-12 relative">
@@ -89,7 +89,7 @@ const OnboardingTour: React.FC<OnboardingTourProps> = ({ onComplete }) => {
         </div>
 
         <div className="flex flex-col pt-12 p-8 space-y-6">
-          <h2 className="text-2xl font-black">{steps[step].title}</h2>
+          <h2 className="text-2xl font-black">{steps[step]?.title}</h2>
 
           {/* Dialogue Box Style */}
           <div
@@ -98,7 +98,7 @@ const OnboardingTour: React.FC<OnboardingTourProps> = ({ onComplete }) => {
             }`}
           >
             <span className="text-4xl absolute -top-4 -left-2 opacity-20">❝</span>
-            {steps[step].content}
+            {steps[step]?.content}
             <span className="text-4xl absolute -bottom-6 -right-2 opacity-20">❞</span>
           </div>
 
