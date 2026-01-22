@@ -288,7 +288,7 @@ async function backfillJoinDate(displayName: string, profile: UserProfile | null
       const sorted = [...history].sort(
         (a: GameHistory, b: GameHistory) => (a.timestamp || 0) - (b.timestamp || 0)
       );
-      if (sorted[0].timestamp) {
+      if (sorted[0]?.timestamp) {
         earliestDate = new Date(sorted[0].timestamp);
       }
     }
