@@ -36,9 +36,12 @@ const DistrictSelectionModal: React.FC<DistrictSelectionModalProps> = ({
         throw new Error('No authenticated user found');
       }
 
-      // Update user profile with selected district
+      // Update user profile with selected district and email
       // ensureUserProfile handles the team name logic automatically
-      await ensureUserProfile(username, currentUser.uid, { district });
+      await ensureUserProfile(username, currentUser.uid, {
+        district,
+        email: currentUser.email || undefined,
+      });
 
       setLoading(false);
       onComplete();

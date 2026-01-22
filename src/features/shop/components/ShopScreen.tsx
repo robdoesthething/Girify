@@ -403,8 +403,17 @@ const ShopScreen: React.FC<ShopScreenProps> = ({ username }) => {
               onClick={e => e.stopPropagation()}
             >
               <div className="text-center mb-6">
-                <div className="w-20 h-20 mx-auto rounded-full flex items-center justify-center text-5xl mb-4">
-                  {flavorModal.prefix || flavorModal.emoji || '✨'}
+                <div className="w-20 h-20 mx-auto rounded-full flex items-center justify-center text-5xl mb-4 overflow-hidden">
+                  {flavorModal.image ? (
+                    <img
+                      src={flavorModal.image}
+                      alt={flavorModal.name}
+                      className="w-full h-full object-contain"
+                      style={{ imageRendering: 'pixelated' }}
+                    />
+                  ) : (
+                    flavorModal.prefix || flavorModal.emoji || '✨'
+                  )}
                 </div>
                 <h3 className="text-xl font-bold mb-1 font-inter">
                   {t(flavorModal.name || '') || flavorModal.name}
