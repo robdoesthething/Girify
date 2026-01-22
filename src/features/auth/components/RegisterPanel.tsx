@@ -257,12 +257,21 @@ const RegisterPanel: React.FC<RegisterPanelProps> = ({
       setLoading(true);
       setError('');
 
+      // Force account selection to allow switching accounts
+      googleProvider.setCustomParameters({ prompt: 'select_account' });
+
       // Use redirect on mobile devices (popups are often blocked or fail in in-app browsers)
       // This covers iOS (Safari/Chrome) and Android (Chrome/etc)
       const isMobileDevice = isMobile();
 
       if (isOnMobileSafari || isMobileDevice) {
         console.warn('[AuthDebug] Mobile device detected, using redirect');
+        try {
+          // Set tracking flag to debug loops
+          sessionStorage.setItem('girify_redirect_pending', 'true');
+        } catch (e) {
+          console.warn('Storage failed', e);
+        }
         await signInWithRedirect(auth, googleProvider);
         return; // Will be handled by getRedirectResult on page reload
       }

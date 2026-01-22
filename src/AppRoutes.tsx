@@ -200,6 +200,16 @@ const AppRoutes: React.FC = () => {
           console.warn('[Auth Redirect] Completed successfully');
         } else {
           console.warn('[Auth Redirect] No redirect result to process');
+
+          // Check if we were expecting a redirect
+          const pendingRedirect = sessionStorage.getItem('girify_redirect_pending');
+          if (pendingRedirect) {
+            console.error(
+              '[Auth Redirect] Redirect flow incomplete. Possible mobile browser storage issue.'
+            );
+            sessionStorage.removeItem('girify_redirect_pending');
+            // We could show a toast here, but for now just logging is critical for debugging
+          }
         }
       } catch (err) {
         console.error('[Auth Redirect] Error:', err);
