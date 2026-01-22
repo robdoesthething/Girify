@@ -79,6 +79,9 @@ export const useAuth = (
           setEmailVerified(user.emailVerified);
         }
 
+        // CRITICAL: Check for existing username FIRST (set by handleRegister callback during login)
+        const existingUsername = storage.get(STORAGE_KEYS.USERNAME, '');
+
         let displayName = sanitizeInput(
           user.displayName || user.email?.split('@')[0] || 'User'
         ).toLowerCase();
@@ -86,19 +89,21 @@ export const useAuth = (
         // Handle format migration
         displayName = await UserMigrationService.migrateToNewFormat(user, displayName);
 
+        // Use stored username if available (from handleRegister), otherwise use derived displayName
+        const usernameToUse = existingUsername || displayName;
+
         // Ensure Firestore profile and sync data - Wrapped in execute for global loading
         await execute(
           async () => {
-            await syncUserProfile(displayName, user, dispatch, onAnnouncementsCheck, notify);
+            await syncUserProfile(usernameToUse, user, dispatch, onAnnouncementsCheck, notify);
           },
           { loadingKey: 'profile-sync', errorMessage: undefined } // Suppress annoying error on load if passive
         );
 
-        // Update state - only set username if not already set by handleRegister callback
-        const existingUsername = storage.get(STORAGE_KEYS.USERNAME, '');
-        if (!existingUsername) {
-          dispatch({ type: 'SET_USERNAME', payload: displayName });
-        }
+        // Update React state with the correct username
+        // Always dispatch to ensure state matches storage (handles page reload scenarios)
+        dispatch({ type: 'SET_USERNAME', payload: usernameToUse });
+
         if (currentGameState === 'register') {
           dispatch({ type: 'SET_GAME_STATE', payload: 'intro' });
         }
