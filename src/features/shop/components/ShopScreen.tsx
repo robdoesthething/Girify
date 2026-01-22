@@ -23,6 +23,12 @@ interface EquippedCosmetics {
   avatarId?: string;
 }
 
+interface UserStats {
+  streak?: number;
+  gamesPlayed?: number;
+  bestScore?: number;
+}
+
 const ShopScreen: React.FC<ShopScreenProps> = ({ username }) => {
   const { theme, t } = useTheme();
   const navigate = useNavigate();
@@ -44,7 +50,7 @@ const ShopScreen: React.FC<ShopScreenProps> = ({ username }) => {
     all: [],
   });
 
-  const [userStats, setUserStats] = useState<any>(null); // Store user stats for unlock logic
+  const [userStats, setUserStats] = useState<UserStats | null>(null);
 
   useEffect(() => {
     const loadData = async () => {

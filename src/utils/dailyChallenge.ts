@@ -173,15 +173,19 @@ export function selectDistractors(validStreets: Street[], target: Street, seed: 
     pool = validStreets.filter(s => s.id !== target.id);
   }
 
-  // Try to find a "neighbor" street first
+  // Try to include nearby "neighbor" streets as distractors for added difficulty
   const neighbors = validStreets.filter(s => {
     const latDiff = Math.abs((s.lat || 0) - (target.lat || 0));
     const lngDiff = Math.abs((s.lng || 0) - (target.lng || 0));
     return latDiff < NEARBY_THRESHOLD && lngDiff < NEARBY_THRESHOLD && s.name !== target.name;
   });
 
-  if (neighbors.length >= PRNG.MOD_4) {
-    return [neighbors[seed % neighbors.length]];
+  // If we have neighbors, include one as a distractor and fill the rest from pool
+  if (neighbors.length > 0) {
+    const neighbor = neighbors[seed % neighbors.length];
+    const remainingPool = pool.filter(s => s.id !== neighbor.id);
+    const shuffledRemaining = seededShuffle(remainingPool, seed + 1);
+    return [neighbor, ...shuffledRemaining.slice(0, MIN_DISTRACTORS - 1)];
   }
 
   const shuffledPool = seededShuffle(pool, seed);

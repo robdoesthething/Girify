@@ -2,10 +2,7 @@ import { doc, serverTimestamp, setDoc } from 'firebase/firestore';
 import { getToken } from 'firebase/messaging';
 import { useState } from 'react';
 import { auth, db, messaging } from '../firebase';
-
-interface MSStreamWindow extends Window {
-  MSStream?: unknown;
-}
+import { getPlatform, isIOS as checkIsIOS } from '../utils/platform';
 
 interface UseNotificationsReturn {
   isSupported: boolean;
@@ -22,17 +19,13 @@ export const useNotifications = (): UseNotificationsReturn => {
   const [permission, setPermission] = useState<NotificationPermission | 'default'>('default');
 
   // Lazy initialization to avoid effect side-effects
-  const [isIOS] = useState<boolean>(() => {
-    return /iPad|iPhone|iPod/.test(navigator.userAgent) && !(window as MSStreamWindow).MSStream;
-  });
+  const [isIOS] = useState<boolean>(() => checkIsIOS());
 
   const [isSupported] = useState<boolean>(() => {
     if (!('Notification' in window)) {
       return false;
     }
-    const ios =
-      /iPad|iPhone|iPod/.test(navigator.userAgent) && !(window as MSStreamWindow).MSStream;
-    return !ios; // Disable if iOS
+    return !checkIsIOS(); // Disable if iOS
   });
 
   /**
@@ -45,8 +38,7 @@ export const useNotifications = (): UseNotificationsReturn => {
     }
 
     try {
-      // Platform detection
-      const platform = /Mobi|Android/i.test(navigator.userAgent) ? 'mobile' : 'desktop';
+      const platform = getPlatform();
 
       const tokenRef = doc(db, 'users', user.uid, 'fcmTokens', token);
       await setDoc(tokenRef, {
