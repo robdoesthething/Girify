@@ -94,8 +94,11 @@ export const useAuth = (
           { loadingKey: 'profile-sync', errorMessage: undefined } // Suppress annoying error on load if passive
         );
 
-        // Update state
-        dispatch({ type: 'SET_USERNAME', payload: displayName });
+        // Update state - only set username if not already set by handleRegister callback
+        const existingUsername = storage.get(STORAGE_KEYS.USERNAME, '');
+        if (!existingUsername) {
+          dispatch({ type: 'SET_USERNAME', payload: displayName });
+        }
         if (currentGameState === 'register') {
           dispatch({ type: 'SET_GAME_STATE', payload: 'intro' });
         }
