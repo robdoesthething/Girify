@@ -162,19 +162,22 @@ export const ensureUserProfile = async (
   // Check if user exists
   const existingUser = await getUserByUsername(username);
 
-  // Check by email if provided and user doesn't exist
+  // Check by email if provided and user doesn't exist by username
+  // If found by email, get the DB record so we can update it properly
+  let userDbRecord = existingUser;
   if (additionalData.email && !existingUser) {
-    const userByEmail = await getUserByEmail(additionalData.email);
-    if (userByEmail) {
+    const foundByEmail = await getUserByEmail(additionalData.email);
+    if (foundByEmail) {
       console.warn(
-        `[Auth] Found existing user by email ${additionalData.email}: ${userByEmail.username}`
+        `[Auth] Found existing user by email ${additionalData.email}: ${foundByEmail.username}`
       );
-      return userByEmail;
+      // Get the actual DB record for this user so we can update it
+      userDbRecord = await getUserByUsername(foundByEmail.username);
     }
   }
 
-  if (!existingUser) {
-    // Create new user
+  // If no user found by username or email, create a new user
+  if (!userDbRecord) {
     const selectedDistrictId =
       additionalData.district || DISTRICTS[Math.floor(Math.random() * DISTRICTS.length)].id;
     const selectedTeamName = DISTRICTS.find(d => d.id === selectedDistrictId)?.teamName;
@@ -219,29 +222,29 @@ export const ensureUserProfile = async (
     return null;
   }
 
-  // Update existing user if needed
+  // Update existing user if needed (found by username OR by email)
   const updates: Record<string, unknown> = {};
 
-  if (uid && existingUser.uid !== uid) {
+  if (uid && userDbRecord.uid !== uid) {
     updates.uid = uid;
   }
-  if (additionalData.email && !existingUser.email) {
+  if (additionalData.email && !userDbRecord.email) {
     updates.email = additionalData.email.toLowerCase().trim();
   }
-  if (additionalData.district && existingUser.district !== additionalData.district) {
+  if (additionalData.district && userDbRecord.district !== additionalData.district) {
     updates.district = additionalData.district;
     updates.team = DISTRICTS.find(d => d.id === additionalData.district)?.teamName || null;
   }
-  if (!existingUser.team && existingUser.district) {
-    updates.team = DISTRICTS.find(d => d.id === existingUser.district)?.teamName || null;
+  if (!userDbRecord.team && userDbRecord.district) {
+    updates.team = DISTRICTS.find(d => d.id === userDbRecord.district)?.teamName || null;
   }
 
   if (Object.keys(updates).length > 0) {
-    await updateUser(username, updates);
-    Object.assign(existingUser, updates);
+    await updateUser(userDbRecord.username, updates);
+    Object.assign(userDbRecord, updates);
   }
 
-  return rowToProfile(existingUser);
+  return rowToProfile(userDbRecord);
 };
 
 /**
