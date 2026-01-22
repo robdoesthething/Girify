@@ -17,7 +17,6 @@ import { STORAGE_KEYS, TIME } from '../../../config/constants';
 import { useAsyncOperation } from '../../../hooks/useAsyncOperation';
 import { GameStateObject, QuizResult } from '../../../types/game';
 import { GameHistory } from '../../../types/user';
-import { auth } from '../../../firebase';
 import { supabase } from '../../../services/supabase';
 
 /**
@@ -25,15 +24,16 @@ import { supabase } from '../../../services/supabase';
  * Used when Redis session is missing or endGame fails
  */
 const fallbackSaveScore = async (state: GameStateObject, avgTime: number): Promise<void> => {
-  const user = auth.currentUser;
-  if (!user) {
-    console.warn('[Fallback] No authenticated user, cannot save to Supabase');
+  // Use username from state (consistent with how gameService stores it)
+  // This ensures leaderboard queries work correctly
+  if (!state.username) {
+    console.warn('[Fallback] No username in state, cannot save to Supabase');
     return;
   }
 
   try {
     const { error } = await supabase.from('game_results').insert({
-      user_id: user.uid,
+      user_id: state.username, // Use username, not Firebase UID
       score: state.score,
       time_taken: avgTime,
       correct_answers: state.correct,

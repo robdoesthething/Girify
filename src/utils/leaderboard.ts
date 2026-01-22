@@ -72,10 +72,12 @@ export const getLeaderboard = async (
     const now = new Date();
 
     if (period === 'daily') {
-      // Create a new date for start of day to avoid mutation
-      const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0, 0);
-      console.warn('[Leaderboard] Daily filter - start of day:', startOfDay.toISOString());
-      queryBuilder = queryBuilder.gte('played_at', startOfDay.toISOString());
+      // Create a new date for start of day (UTC) to avoid timezone issues
+      const startOfDay = new Date(
+        Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(), 0, 0, 0, 0)
+      ).toISOString();
+      console.warn('[Leaderboard] Daily filter - start of day:', startOfDay);
+      queryBuilder = queryBuilder.gte('played_at', startOfDay);
     } else if (period === 'weekly') {
       // Calculate start of week (Monday)
       const d = new Date(now);
