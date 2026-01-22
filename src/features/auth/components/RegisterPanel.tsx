@@ -11,7 +11,7 @@ import { useEffect, useState } from 'react';
 import { useTheme } from '../../../context/ThemeContext';
 import { DISTRICTS } from '../../../data/districts';
 import { auth, googleProvider } from '../../../firebase';
-import { isMobileSafari } from '../../../utils/platform';
+import { isMobile, isMobileSafari } from '../../../utils/platform';
 import { ensureUserProfile, getUserByEmail, recordReferral } from '../../../utils/social';
 import { storage } from '../../../utils/storage';
 
@@ -257,9 +257,12 @@ const RegisterPanel: React.FC<RegisterPanelProps> = ({
       setLoading(true);
       setError('');
 
-      // Use redirect on mobile Safari (popups are blocked)
-      if (isOnMobileSafari) {
-        console.warn('[AuthDebug] Mobile Safari detected, using redirect');
+      // Use redirect on mobile devices (popups are often blocked or fail in in-app browsers)
+      // This covers iOS (Safari/Chrome) and Android (Chrome/etc)
+      const isMobileDevice = isMobile();
+
+      if (isOnMobileSafari || isMobileDevice) {
+        console.warn('[AuthDebug] Mobile device detected, using redirect');
         await signInWithRedirect(auth, googleProvider);
         return; // Will be handled by getRedirectResult on page reload
       }
