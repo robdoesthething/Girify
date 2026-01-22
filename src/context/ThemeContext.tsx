@@ -88,7 +88,7 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
       return saved;
     }
     const browserLang = navigator.language?.split('-')[0];
-    if (['es', 'ca'].includes(browserLang)) {
+    if (browserLang && ['es', 'ca'].includes(browserLang)) {
       return browserLang;
     }
     return 'en';

@@ -205,7 +205,7 @@ export const useGameState = (
     } else {
       // Next question
       const nextStreet = state.quizStreets[nextIndex];
-      let nextOptions;
+      let nextOptions: Street[] = [];
 
       if (state.plannedQuestions && state.plannedQuestions[nextIndex]) {
         const plannedQ = state.plannedQuestions[nextIndex];
@@ -216,18 +216,20 @@ export const useGameState = (
 
         if (distractorStreets.length >= GAME_LOGIC.DISTRACTORS_COUNT) {
           const todaySeed = getTodaySeed();
-          const opts = [nextStreet, ...distractorStreets.slice(0, GAME_LOGIC.DISTRACTORS_COUNT)];
+          // const opts = [nextStreet, ...distractorStreets.slice(0, GAME_LOGIC.DISTRACTORS_COUNT)];
           nextOptions = shuffleOptions(
-            opts,
+            distractorStreets as Street[],
             todaySeed +
               nextIndex * GAME_LOGIC.QUESTION_SEED_MULTIPLIER +
               GAME_LOGIC.SHUFFLE_SEED_OFFSET
           );
         } else {
-          nextOptions = generateOptionsList(nextStreet, validStreets, nextIndex);
+          nextOptions = generateOptionsList(nextStreet!, validStreets, nextIndex);
         }
-      } else {
+      } else if (nextStreet) {
         nextOptions = generateOptionsList(nextStreet, validStreets, nextIndex);
+      } else {
+        nextOptions = [];
       }
 
       dispatch({
@@ -258,7 +260,7 @@ export const useGameState = (
   return {
     state,
     dispatch,
-    currentStreet,
+    currentStreet: currentStreet || null,
     setupGame,
     processAnswer,
     handleSelectAnswer,
