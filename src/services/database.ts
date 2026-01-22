@@ -530,7 +530,7 @@ export async function getTodaysQuest(): Promise<QuestRow | null> {
     .from('quests')
     .select('*')
     .eq('is_active', true)
-    .eq('active_date', today)
+    .eq('active_date', today ?? '')
     .single();
 
   if (error) {
@@ -905,7 +905,7 @@ export async function saveUserGame(game: {
 // ============================================================================
 
 export async function getDistricts(): Promise<
-  Array<{ id: string; name: string; team_name: string | null; score: number }>
+  Array<{ id: string; name: string; team_name: string | null; score: number | null }>
 > {
   const { data, error } = await supabase
     .from('districts')
@@ -937,7 +937,7 @@ export async function updateDistrictScore(
 
   const { error } = await supabase
     .from('districts')
-    .update({ score: district.score + scoreToAdd })
+    .update({ score: (district.score ?? 0) + scoreToAdd })
     .eq('id', districtId);
 
   if (error) {
