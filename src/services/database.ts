@@ -832,7 +832,10 @@ export async function getLeaderboardScores(
   const now = new Date();
 
   if (period === 'daily') {
-    const startOfDay = new Date(now.setHours(0, 0, 0, 0)).toISOString();
+    // Create a new date for start of day (UTC) to avoid mutation and timezone issues
+    const startOfDay = new Date(
+      Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(), 0, 0, 0, 0)
+    ).toISOString();
     query = query.gte('played_at', startOfDay);
   } else if (period === 'weekly') {
     const d = new Date(now);
@@ -887,6 +890,7 @@ export async function saveUserGame(game: {
     incomplete: game.incomplete ?? false,
     correct_answers: game.correctAnswers ?? null,
     question_count: game.questionCount ?? null,
+    played_at: new Date().toISOString(),
   });
 
   if (error) {
