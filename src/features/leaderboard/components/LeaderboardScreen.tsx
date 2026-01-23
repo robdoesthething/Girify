@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import TopBar from '../../../components/TopBar';
 import { useTheme } from '../../../context/ThemeContext';
 import { DISTRICTS } from '../../../data/districts';
-import { formatUsername } from '../../../utils/format';
+import { formatUsername, usernamesMatch } from '../../../utils/format';
 import { getLeaderboard, getTeamLeaderboard, TeamScoreEntry } from '../../../utils/leaderboard';
 
 interface ScoreEntry {
@@ -278,10 +278,7 @@ const LeaderboardScreen: React.FC<LeaderboardScreenProps> = ({ currentUser }) =>
                     dateStr = '--';
                   }
 
-                  const isMe =
-                    currentUser &&
-                    s.username?.toLowerCase().replace(/^@/, '') ===
-                      currentUser.toLowerCase().replace(/^@/, '');
+                  const isMe = currentUser && usernamesMatch(s.username, currentUser);
 
                   return (
                     <motion.div
@@ -290,9 +287,7 @@ const LeaderboardScreen: React.FC<LeaderboardScreenProps> = ({ currentUser }) =>
                       transition={{ delay: index * 0.05 }}
                       key={s.id || index}
                       onClick={() => {
-                        const cleanClicked = s.username?.replace(/^@/, '') || '';
-                        const myClean = currentUser?.replace(/^@/, '') || '';
-                        if (cleanClicked.toLowerCase() === myClean.toLowerCase()) {
+                        if (usernamesMatch(s.username, currentUser)) {
                           navigate('/profile');
                         } else {
                           navigate(`/user/${encodeURIComponent(s.username)}`);
@@ -302,9 +297,7 @@ const LeaderboardScreen: React.FC<LeaderboardScreenProps> = ({ currentUser }) =>
                       tabIndex={0}
                       onKeyDown={e => {
                         if (e.key === 'Enter' || e.key === ' ') {
-                          const cleanClicked = s.username?.replace(/^@/, '') || '';
-                          const myClean = currentUser?.replace(/^@/, '') || '';
-                          if (cleanClicked.toLowerCase() === myClean.toLowerCase()) {
+                          if (usernamesMatch(s.username, currentUser)) {
                             navigate('/profile');
                           } else {
                             navigate(`/user/${encodeURIComponent(s.username)}`);

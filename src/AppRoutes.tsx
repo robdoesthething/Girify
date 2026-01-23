@@ -99,8 +99,9 @@ const AppRoutes: React.FC = () => {
   const [isProcessingRedirect, setIsProcessingRedirect] = React.useState(false);
   const [hasProcessedRedirect, setHasProcessedRedirect] = React.useState(false);
 
-  // Track if we already set the district in this session to prevent re-checking loops
-  const districtSetInSession = React.useRef(false);
+  // Track district selection state with a ref (not affected by closures)
+  // This is set to true BEFORE showing modal and stays true for the session
+  const districtFlowActive = React.useRef(false);
 
   // Handle Google redirect result for Mobile Safari
   useEffect(() => {
@@ -113,6 +114,8 @@ const AppRoutes: React.FC = () => {
       console.warn('[Auth Redirect] Starting redirect result check...');
       try {
         setIsProcessingRedirect(true);
+        // Signal to useAuth that we're handling the redirect
+        sessionStorage.setItem('girify_processing_redirect', 'true');
         const result = await getRedirectResult(auth);
 
         console.warn(
@@ -185,6 +188,8 @@ const AppRoutes: React.FC = () => {
               // Set username so district modal can use it
               storage.set(STORAGE_KEYS.USERNAME, handle);
               dispatch({ type: 'SET_USERNAME', payload: handle });
+              // Mark district flow as active BEFORE showing modal to prevent race conditions
+              districtFlowActive.current = true;
               setShowDistrictModal(true);
             }
           } else {
@@ -204,6 +209,8 @@ const AppRoutes: React.FC = () => {
 
             // Will need district selection before completing registration
             console.warn('[Auth Redirect] Showing district modal for new user');
+            // Mark district flow as active BEFORE showing modal to prevent race conditions
+            districtFlowActive.current = true;
             setShowDistrictModal(true);
           }
 
@@ -225,6 +232,8 @@ const AppRoutes: React.FC = () => {
         console.error('[Auth Redirect] Error:', err);
       } finally {
         setIsProcessingRedirect(false);
+        // Clear the redirect processing flag
+        sessionStorage.removeItem('girify_processing_redirect');
       }
     };
 
@@ -234,14 +243,24 @@ const AppRoutes: React.FC = () => {
   // Check for missing district
   React.useEffect(() => {
     const checkDistrict = async () => {
-      // Skip if modal is showing or we already set district this session
-      if (showDistrictModal || districtSetInSession.current) {
+      // Skip if district flow is already active (set before modal shows)
+      // Using ref instead of state to avoid stale closure issues
+      if (districtFlowActive.current) {
+        console.warn('[District Check] Skipping - district flow already active');
         return;
       }
       if (state.username && !state.username.startsWith('guest')) {
+        console.warn('[District Check] Checking district for:', state.username);
         try {
           const profile = await getUserProfile(state.username);
+          console.warn('[District Check] Profile district:', profile?.district);
           if (profile && !profile.district) {
+            // Double-check ref again after async operation
+            if (districtFlowActive.current) {
+              console.warn('[District Check] Skipping modal - flow became active during fetch');
+              return;
+            }
+            districtFlowActive.current = true;
             setShowDistrictModal(true);
           }
         } catch (e) {
@@ -253,7 +272,7 @@ const AppRoutes: React.FC = () => {
     // Simple debounce/delay to avoid checking too early or too often
     const timeout = setTimeout(checkDistrict, 2000);
     return () => clearTimeout(timeout);
-  }, [state.username]); // Remove showDistrictModal from deps to prevent re-check loop
+  }, [state.username]);
 
   // Show loader while streets are initializing or processing redirect
   // This MUST be after all hooks are declared
@@ -350,7 +369,8 @@ const AppRoutes: React.FC = () => {
             <DistrictSelectionModal
               username={state.username || ''}
               onComplete={() => {
-                districtSetInSession.current = true; // Prevent re-checking district
+                console.warn('[District Modal] Completing district selection');
+                // districtFlowActive.current stays true (was set before modal opened)
                 setShowDistrictModal(false);
                 // If user has a username set, complete the registration
                 if (state.username) {
