@@ -162,8 +162,8 @@ export const getIncomingRequests = async (username: string): Promise<FriendReque
   return requests.map(r => ({
     id: r.id.toString(),
     from: r.from_user,
-    timestamp: r.created_at,
-    status: r.status,
+    timestamp: r.created_at || new Date().toISOString(),
+    status: r.status || 'pending',
   }));
 };
 
@@ -242,7 +242,7 @@ export const getFriends = async (username: string): Promise<Friend[]> => {
 
       if (friendProfile) {
         badges = friendProfile.equipped_badges || [];
-        avatarId = friendProfile.avatar_id;
+        avatarId = friendProfile.avatar_id || undefined;
         equippedCosmetics = (friendProfile.equipped_cosmetics as Friend['equippedCosmetics']) || {};
       }
 
@@ -295,7 +295,7 @@ export const getFriendFeed = async (friendsList: Friend[]): Promise<FeedActivity
       username: a.username,
       score: a.score || undefined,
       time: a.time_taken || undefined,
-      timestamp: a.created_at,
+      timestamp: a.created_at || new Date().toISOString(),
       oldUsername: a.old_username || undefined,
       avatarId: undefined, // Need to fetch or map from friendsList
       itemName: a.item_name || undefined,

@@ -38,7 +38,7 @@ export const calculateStreak = (history: HistoryRecord[]): number => {
   const yesterdaySeed = getSeed(yesterday);
 
   let streak = 0;
-  const lastPlayed = sorted[0].date;
+  const lastPlayed = sorted[0]?.date ?? 0;
 
   // If lastPlayed < yesterdaySeed, streak is broken.
   if (lastPlayed < yesterdaySeed) {

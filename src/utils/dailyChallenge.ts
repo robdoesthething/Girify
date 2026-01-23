@@ -39,7 +39,7 @@ function seededShuffle<T>(array: T[], seed: number): T[] {
 
   for (let i = shuffled.length - 1; i > 0; i--) {
     const j = Math.floor(seededRandom(currentSeed) * (i + 1));
-    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+    [shuffled[i]!, shuffled[j]!] = [shuffled[j]!, shuffled[i]!];
     currentSeed++;
   }
 
@@ -182,7 +182,7 @@ export function selectDistractors(validStreets: Street[], target: Street, seed: 
 
   // If we have neighbors, include one as a distractor and fill the rest from pool
   if (neighbors.length > 0) {
-    const neighbor = neighbors[seed % neighbors.length];
+    const neighbor = neighbors[seed % neighbors.length]!;
     const remainingPool = pool.filter(s => s.id !== neighbor.id);
     const shuffledRemaining = seededShuffle(remainingPool, seed + 1);
     return [neighbor, ...shuffledRemaining.slice(0, MIN_DISTRACTORS - 1)];

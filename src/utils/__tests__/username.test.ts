@@ -17,7 +17,7 @@ describe('Username Validation Logic', () => {
 
   const generateNewHandle = (displayName: string): string => {
     const randomId = 1234;
-    let coreName = displayName.replace(/^@/, '').split(/\d/)[0];
+    let coreName = displayName.replace(/^@/, '').split(/\d/)[0] ?? '';
     coreName = coreName.replace(/[^a-zA-Z]/g, '').slice(0, 10) || 'User';
     return `@${coreName}${randomId}`;
   };

@@ -1,28 +1,29 @@
 import { Timestamp } from 'firebase/firestore';
 import { DISTRICTS } from '../data/districts';
-import { normalizeUsername } from './format';
 import {
-  getUserByUsername,
-  getUserByUid as dbGetUserByUid,
-  createUser,
-  updateUser,
-  upsertUser,
-  getBadgeStats,
-  upsertBadgeStats,
-  submitFeedback as dbSubmitFeedback,
-  getApprovedFeedbackRewards,
-  markFeedbackNotified,
-  blockUser as dbBlockUser,
-  unblockUser as dbUnblockUser,
-  isUserBlocked,
   createReferral,
+  createUser,
+  blockUser as dbBlockUser,
+  getPendingFriendRequests as dbGetPendingFriendRequests,
+  getUserByUid as dbGetUserByUid,
   getUserGameHistory as dbGetUserGameHistory,
-  saveUserGame,
-  getDistricts,
+  submitFeedback as dbSubmitFeedback,
+  unblockUser as dbUnblockUser,
   updateDistrictScore as dbUpdateDistrictScore,
+  getApprovedFeedbackRewards,
+  getBadgeStats,
+  getDistricts,
+  getUserByUsername,
+  isUserBlocked,
+  markFeedbackNotified,
+  saveUserGame,
+  updateUser,
+  upsertBadgeStats,
+  upsertUser,
 } from '../services/database';
 import { supabase } from '../services/supabase';
-import type { UserRow, FeedbackRow } from '../types/supabase';
+import type { FeedbackRow, UserRow } from '../types/supabase';
+import { normalizeUsername } from './format';
 
 const DEFAULT_AVATAR_COUNT = 20;
 const DEFAULT_GIUROS = 10;
@@ -118,27 +119,28 @@ function rowToProfile(row: UserRow): UserProfile {
     uid: row.uid,
     email: row.email,
     realName: row.real_name || '',
-    avatarId: row.avatar_id,
+    avatarId: row.avatar_id || undefined,
     joinedAt: row.joined_at || undefined,
     createdAt: row.created_at || undefined,
     updatedAt: row.updated_at || undefined,
-    friendCount: row.friend_count,
-    banned: row.banned,
-    gamesPlayed: row.games_played,
-    bestScore: row.best_score,
-    totalScore: row.total_score,
+    friendCount: row.friend_count ?? 0,
+    banned: row.banned ?? false,
+    gamesPlayed: row.games_played ?? 0,
+    bestScore: row.best_score ?? 0,
+    totalScore: row.total_score ?? 0,
     referralCode: row.referral_code || undefined,
-    streak: row.streak,
-    maxStreak: row.max_streak,
+    streak: row.streak ?? 0,
+    maxStreak: row.max_streak ?? 0,
     lastPlayDate: row.last_play_date,
-    giuros: row.giuros,
-    purchasedCosmetics: row.purchased_cosmetics,
-    equippedCosmetics: row.equipped_cosmetics,
-    equippedBadges: row.equipped_badges,
+    giuros: row.giuros ?? 0,
+    purchasedCosmetics: row.purchased_cosmetics || [],
+    equippedCosmetics: (row.equipped_cosmetics as Record<string, string>) || {},
+    equippedBadges: row.equipped_badges || [],
     lastLoginDate: row.last_login_date,
-    language: row.language,
-    theme: row.theme as 'dark' | 'light' | 'auto',
-    notificationSettings: row.notification_settings,
+    language: row.language || 'en',
+    theme: (row.theme as 'dark' | 'light' | 'auto') || 'auto',
+    notificationSettings:
+      (row.notification_settings as unknown as NotificationSettings) || undefined,
     migratedTo: row.migrated_to,
     migratedFrom: row.migrated_from,
     referredBy: row.referred_by,
@@ -181,8 +183,12 @@ export const ensureUserProfile = async (
   // If no user found by username or email, create a new user
   if (!userDbRecord) {
     const selectedDistrictId =
-      additionalData.district || DISTRICTS[Math.floor(Math.random() * DISTRICTS.length)].id;
-    const selectedTeamName = DISTRICTS.find(d => d.id === selectedDistrictId)?.teamName;
+      additionalData.district ||
+      (DISTRICTS.length > 0
+        ? DISTRICTS[Math.floor(Math.random() * DISTRICTS.length)]!.id
+        : 'ciutat_vella');
+    const selectedTeamName =
+      DISTRICTS.find(d => d.id === selectedDistrictId)?.teamName || 'Giraffe Team';
 
     const newUser = await createUser({
       username,
@@ -310,17 +316,17 @@ export const updateUserGameStats = async (
     }
 
     const updates: Record<string, unknown> = {
-      games_played: existingUser.games_played + 1,
+      games_played: (existingUser.games_played ?? 0) + 1,
       total_score: totalScore,
-      streak: Math.min(streak, existingUser.games_played + 1),
+      streak: Math.min(streak, (existingUser.games_played ?? 0) + 1),
       last_play_date: lastPlayDate,
     };
 
-    if (streak > existingUser.max_streak) {
+    if (streak > (existingUser.max_streak ?? 0)) {
       updates.max_streak = streak;
     }
 
-    if (currentScore !== undefined && currentScore > existingUser.best_score) {
+    if (currentScore !== undefined && currentScore > (existingUser.best_score ?? 0)) {
       updates.best_score = currentScore;
     }
 
@@ -364,12 +370,12 @@ export const getFeedbackList = async (): Promise<FeedbackItem[]> => {
       id: f.id.toString(),
       username: f.username,
       text: f.text,
-      status: f.status,
+      status: (f.status as 'pending' | 'approved' | 'rejected') || 'pending',
       reward: f.reward,
-      createdAt: f.created_at,
+      createdAt: f.created_at || undefined,
       approvedAt: f.approved_at || undefined,
       rejectedAt: f.rejected_at || undefined,
-      notified: f.notified,
+      notified: f.notified === true,
     }));
   } catch (e) {
     console.error('Error fetching feedback:', e);
@@ -471,12 +477,12 @@ export const checkUnseenFeedbackRewards = async (username: string): Promise<Feed
     id: f.id.toString(),
     username: f.username,
     text: f.text,
-    status: f.status,
+    status: (f.status as 'pending' | 'approved' | 'rejected') || 'approved',
     reward: f.reward,
-    createdAt: f.created_at,
+    createdAt: f.created_at || undefined,
     approvedAt: f.approved_at || undefined,
     rejectedAt: f.rejected_at || undefined,
-    notified: f.notified,
+    notified: f.notified === true,
   }));
 };
 
@@ -599,8 +605,8 @@ export const updateUserStats = async (username: string, score: number): Promise<
   const existingUser = await getUserByUsername(username);
 
   if (existingUser) {
-    const newGamesPlayed = existingUser.games_played + 1;
-    const newBestScore = Math.max(existingUser.best_score, score);
+    const newGamesPlayed = (existingUser.games_played ?? 0) + 1;
+    const newBestScore = Math.max(existingUser.best_score ?? 0, score);
 
     await updateUser(username, {
       games_played: newGamesPlayed,
@@ -658,8 +664,7 @@ export const recordReferral = async (referrer: string, referred: string): Promis
 export const getPendingFriendRequests = async (
   username: string
 ): Promise<Array<{ id: string; [key: string]: unknown }>> => {
-  const { getPendingRequests } = await import('./friends');
-  const requests = await getPendingRequests(username);
+  const requests = await dbGetPendingFriendRequests(username);
   return requests.map(r => ({
     id: r.id.toString(),
     from: r.from_user,
@@ -917,15 +922,21 @@ export const saveUserGameResult = async (username: string, gameData: GameData): 
       if (typeof gameData.date === 'number') {
         // Convert YYYYMMDD to YYYY-MM-DD
         const d = gameData.date;
+        // eslint-disable-next-line no-magic-numbers
         const year = Math.floor(d / 10000);
+        // eslint-disable-next-line no-magic-numbers
         const month = Math.floor((d % 10000) / 100);
         const day = d % 100;
         dateStr = `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
       } else {
-        dateStr = gameData.date;
+        dateStr = String(gameData.date);
       }
     } else {
-      dateStr = new Date().toISOString().split('T')[0];
+      dateStr = new Date().toISOString().split('T')[0]!;
+    }
+
+    if (!dateStr) {
+      dateStr = new Date().toISOString().split('T')[0]!;
     }
 
     await saveUserGame({
@@ -954,7 +965,7 @@ export const getUserGameHistory = async (username: string): Promise<GameData[]> 
       score: g.score,
       date: parseInt(g.date.replace(/-/g, ''), 10),
       time: g.avg_time || undefined,
-      timestamp: new Date(g.played_at).getTime(),
+      timestamp: g.played_at ? new Date(g.played_at).getTime() : Date.now(),
     }));
   } catch (e) {
     console.error('Error fetching user game history:', e);
@@ -978,7 +989,7 @@ export const updateDistrictScore = async (districtId: string, score: number): Pr
 export const getDistrictRankings = async (): Promise<{ id: string; score: number }[]> => {
   try {
     const districts = await getDistricts();
-    return districts.map(d => ({ id: d.id, score: d.score }));
+    return districts.map(d => ({ id: d.id, score: d.score ?? 0 }));
   } catch (e) {
     console.error('Error fetching district rankings:', e);
     return [];

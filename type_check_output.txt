@@ -1,0 +1,211 @@
+
+> girify@0.2.0 type-check
+> tsc --noEmit
+
+src/data/curiosities.ts(457,3): error TS2322: Type 'string | undefined' is not assignable to type 'string'.
+  Type 'undefined' is not assignable to type 'string'.
+src/data/curiosities.ts(500,14): error TS18048: 'random' is possibly 'undefined'.
+src/data/curiosities.ts(501,30): error TS2345: Argument of type 'Curiosity | undefined' is not assignable to parameter of type 'Curiosity'.
+  Type 'undefined' is not assignable to type 'Curiosity'.
+src/data/curiosities.ts(502,7): error TS2322: Type 'string | undefined' is not assignable to type 'string'.
+  Type 'undefined' is not assignable to type 'string'.
+src/data/curiosities.ts(502,14): error TS18048: 'random' is possibly 'undefined'.
+src/data/curiosities.ts(503,17): error TS18048: 'random' is possibly 'undefined'.
+src/data/curiosities.ts(532,12): error TS18048: 'random' is possibly 'undefined'.
+src/data/curiosities.ts(533,28): error TS2345: Argument of type 'Curiosity | undefined' is not assignable to parameter of type 'Curiosity'.
+  Type 'undefined' is not assignable to type 'Curiosity'.
+src/data/curiosities.ts(534,5): error TS2322: Type 'string | undefined' is not assignable to type 'string'.
+  Type 'undefined' is not assignable to type 'string'.
+src/data/curiosities.ts(534,12): error TS18048: 'random' is possibly 'undefined'.
+src/data/curiosities.ts(535,15): error TS18048: 'random' is possibly 'undefined'.
+src/features/game/components/StreetsFetcher.tsx(111,36): error TS2538: Type 'undefined' cannot be used as an index type.
+src/features/game/hooks/useStreets.ts(109,42): error TS2532: Object is possibly 'undefined'.
+src/features/game/hooks/useStreets.ts(144,62): error TS2532: Object is possibly 'undefined'.
+src/hooks/useAnnouncements.ts(30,32): error TS2345: Argument of type 'Announcement | undefined' is not assignable to parameter of type 'SetStateAction<Announcement | null>'.
+  Type 'undefined' is not assignable to type 'SetStateAction<Announcement | null>'.
+src/services/gameService.ts(102,5): error TS2304: Cannot find name 'debugLog'.
+src/services/gameService.ts(116,7): error TS2304: Cannot find name 'debugLog'.
+src/services/gameService.ts(124,5): error TS2304: Cannot find name 'debugLog'.
+src/services/userMigration.ts(43,7): error TS18048: 'coreName' is possibly 'undefined'.
+src/utils/__tests__/leaderboard.test.ts(97,14): error TS2532: Object is possibly 'undefined'.
+src/utils/__tests__/leaderboard.test.ts(98,14): error TS2532: Object is possibly 'undefined'.
+src/utils/__tests__/username.test.ts(21,16): error TS18048: 'coreName' is possibly 'undefined'.
+src/utils/badgeTracking.ts(89,3): error TS2322: Type 'number | null' is not assignable to type 'number'.
+  Type 'null' is not assignable to type 'number'.
+src/utils/badgeTracking.ts(90,3): error TS2322: Type 'number | null' is not assignable to type 'number'.
+  Type 'null' is not assignable to type 'number'.
+src/utils/badgeTracking.ts(91,3): error TS2322: Type 'number | null' is not assignable to type 'number'.
+  Type 'null' is not assignable to type 'number'.
+src/utils/badgeTracking.ts(92,3): error TS2322: Type 'number | null' is not assignable to type 'number'.
+  Type 'null' is not assignable to type 'number'.
+src/utils/badgeTracking.ts(93,3): error TS2322: Type 'number | null' is not assignable to type 'number'.
+  Type 'null' is not assignable to type 'number'.
+src/utils/badgeTracking.ts(94,3): error TS2322: Type 'number | null' is not assignable to type 'number'.
+  Type 'null' is not assignable to type 'number'.
+src/utils/badgeTracking.ts(95,3): error TS2322: Type 'number | null' is not assignable to type 'number'.
+  Type 'null' is not assignable to type 'number'.
+src/utils/badgeTracking.ts(96,3): error TS2322: Type 'number | null' is not assignable to type 'number'.
+  Type 'null' is not assignable to type 'number'.
+src/utils/badgeTracking.ts(97,3): error TS2322: Type 'number | null' is not assignable to type 'number'.
+  Type 'null' is not assignable to type 'number'.
+src/utils/badgeTracking.ts(98,3): error TS2322: Type 'number | null' is not assignable to type 'number'.
+  Type 'null' is not assignable to type 'number'.
+src/utils/badgeTracking.ts(99,3): error TS2322: Type 'number | null' is not assignable to type 'number'.
+  Type 'null' is not assignable to type 'number'.
+src/utils/badgeTracking.ts(100,3): error TS2322: Type 'boolean | null' is not assignable to type 'boolean'.
+  Type 'null' is not assignable to type 'boolean'.
+src/utils/badgeTracking.ts(101,3): error TS2322: Type 'boolean | null' is not assignable to type 'boolean'.
+  Type 'null' is not assignable to type 'boolean'.
+src/utils/badgeTracking.ts(102,3): error TS2322: Type 'boolean | null' is not assignable to type 'boolean'.
+  Type 'null' is not assignable to type 'boolean'.
+src/utils/badgeTracking.ts(103,3): error TS2322: Type 'number | null' is not assignable to type 'number'.
+  Type 'null' is not assignable to type 'number'.
+src/utils/badgeTracking.ts(104,3): error TS2322: Type 'boolean | null' is not assignable to type 'boolean'.
+  Type 'null' is not assignable to type 'boolean'.
+src/utils/badgeTracking.ts(105,3): error TS2322: Type 'boolean | null' is not assignable to type 'boolean'.
+  Type 'null' is not assignable to type 'boolean'.
+src/utils/badgeTracking.ts(106,3): error TS2322: Type 'number | null' is not assignable to type 'number'.
+  Type 'null' is not assignable to type 'number'.
+src/utils/dailyChallenge.ts(42,6): error TS2322: Type 'T | undefined' is not assignable to type 'T'.
+  'T' could be instantiated with an arbitrary type which could be unrelated to 'T | undefined'.
+src/utils/dailyChallenge.ts(42,19): error TS2322: Type 'T | undefined' is not assignable to type 'T'.
+  'T' could be instantiated with an arbitrary type which could be unrelated to 'T | undefined'.
+src/utils/dailyChallenge.ts(186,53): error TS18048: 'neighbor' is possibly 'undefined'.
+src/utils/dailyChallenge.ts(188,13): error TS2322: Type 'Street | undefined' is not assignable to type 'Street'.
+  Type 'undefined' is not assignable to type 'Street'.
+src/utils/friends.ts(162,3): error TS2322: Type '{ id: string; from: string; timestamp: string | null; status: string | null; }[]' is not assignable to type 'FriendRequest[]'.
+  Type '{ id: string; from: string; timestamp: string | null; status: string | null; }' is not assignable to type 'FriendRequest'.
+    Types of property 'timestamp' are incompatible.
+      Type 'string | null' is not assignable to type 'string | Timestamp'.
+        Type 'null' is not assignable to type 'string | Timestamp'.
+src/utils/friends.ts(245,9): error TS2322: Type 'number | null' is not assignable to type 'number | undefined'.
+  Type 'null' is not assignable to type 'number | undefined'.
+src/utils/friends.ts(292,5): error TS2322: Type '{ id: string; type: "cosmetic_purchased" | "daily_score" | "badge_earned" | "username_changed"; username: string; score: number | undefined; time: number | undefined; timestamp: string | null; oldUsername: string | undefined; avatarId: undefined; itemName: string | undefined; badge: { ...; } | undefined; }[]' is not assignable to type 'FeedActivity[]'.
+  Type '{ id: string; type: FeedActivity["type"]; username: string; score: number | undefined; time: number | undefined; timestamp: string | null; oldUsername: string | undefined; avatarId: undefined; itemName: string | undefined; badge: { ...; } | undefined; }' is not assignable to type 'FeedActivity'.
+    Types of property 'timestamp' are incompatible.
+      Type 'string | null' is not assignable to type 'string | Timestamp | { seconds: number; } | undefined'.
+        Type 'null' is not assignable to type 'string | Timestamp | { seconds: number; } | undefined'.
+src/utils/gameHelpers.ts(54,43): error TS18048: 'firstQ' is possibly 'undefined'.
+src/utils/gameHelpers.ts(55,33): error TS18048: 'firstQ' is possibly 'undefined'.
+src/utils/gameHelpers.ts(63,46): error TS2345: Argument of type 'Street | undefined' is not assignable to parameter of type 'Street'.
+  Type 'undefined' is not assignable to type 'Street'.
+src/utils/gameHelpers.ts(70,64): error TS2345: Argument of type 'Street | undefined' is not assignable to parameter of type 'Street'.
+  Type 'undefined' is not assignable to type 'Street'.
+src/utils/giuros.ts(54,24): error TS18047: 'currentBalance' is possibly 'null'.
+src/utils/giuros.ts(96,9): error TS18047: 'currentBalance' is possibly 'null'.
+src/utils/giuros.ts(115,24): error TS18047: 'currentBalance' is possibly 'null'.
+src/utils/giuros.ts(184,42): error TS2322: Type 'number | null' is not assignable to type 'number'.
+  Type 'null' is not assignable to type 'number'.
+src/utils/giuros.ts(187,24): error TS18047: 'user.giuros' is possibly 'null'.
+src/utils/news.ts(55,25): error TS2769: No overload matches this call.
+  Overload 1 of 4, '(value: string | number | Date): Date', gave the following error.
+    Argument of type 'string | null' is not assignable to parameter of type 'string | number | Date'.
+      Type 'null' is not assignable to type 'string | number | Date'.
+  Overload 2 of 4, '(value: string | number): Date', gave the following error.
+    Argument of type 'string | null' is not assignable to parameter of type 'string | number'.
+      Type 'null' is not assignable to type 'string | number'.
+src/utils/news.ts(56,30): error TS2769: No overload matches this call.
+  Overload 1 of 4, '(value: string | number | Date): Date', gave the following error.
+    Argument of type 'string | null' is not assignable to parameter of type 'string | number | Date'.
+      Type 'null' is not assignable to type 'string | number | Date'.
+  Overload 2 of 4, '(value: string | number): Date', gave the following error.
+    Argument of type 'string | null' is not assignable to parameter of type 'string | number'.
+      Type 'null' is not assignable to type 'string | number'.
+src/utils/news.ts(64,5): error TS2322: Type 'boolean | null' is not assignable to type 'boolean | undefined'.
+  Type 'null' is not assignable to type 'boolean | undefined'.
+src/utils/news.ts(65,5): error TS2322: Type 'string | null' is not assignable to type 'AnnouncementPriority | undefined'.
+  Type 'null' is not assignable to type 'AnnouncementPriority | undefined'.
+src/utils/news.ts(66,5): error TS2322: Type 'string | null' is not assignable to type 'TargetAudience | undefined'.
+  Type 'null' is not assignable to type 'TargetAudience | undefined'.
+src/utils/news.ts(68,25): error TS2769: No overload matches this call.
+  Overload 1 of 4, '(value: string | number | Date): Date', gave the following error.
+    Argument of type 'string | null' is not assignable to parameter of type 'string | number | Date'.
+      Type 'null' is not assignable to type 'string | number | Date'.
+  Overload 2 of 4, '(value: string | number): Date', gave the following error.
+    Argument of type 'string | null' is not assignable to parameter of type 'string | number'.
+      Type 'null' is not assignable to type 'string | number'.
+src/utils/news.ts(69,30): error TS2769: No overload matches this call.
+  Overload 1 of 4, '(value: string | number | Date): Date', gave the following error.
+    Argument of type 'string | null' is not assignable to parameter of type 'string | number | Date'.
+      Type 'null' is not assignable to type 'string | number | Date'.
+  Overload 2 of 4, '(value: string | number): Date', gave the following error.
+    Argument of type 'string | null' is not assignable to parameter of type 'string | number'.
+      Type 'null' is not assignable to type 'string | number'.
+src/utils/publishActivity.ts(46,3): error TS2322: Type 'Record<string, unknown>' is not assignable to type 'Json'.
+  Type 'Record<string, unknown>' is missing the following properties from type 'Json[]': length, pop, push, concat, and 28 more.
+src/utils/quests.ts(47,5): error TS2322: Type '{ id: string; title: string; description: string; criteriaType: string; criteriaValue: string; rewardGiuros: number | null; activeDate: string | undefined; isActive: boolean | null; createdAt: number; }[]' is not assignable to type 'Quest[]'.
+  Type '{ id: string; title: string; description: string; criteriaType: string; criteriaValue: string; rewardGiuros: number | null; activeDate: string | undefined; isActive: boolean | null; createdAt: number; }' is not assignable to type 'Quest'.
+    Types of property 'criteriaType' are incompatible.
+      Type 'string' is not assignable to type '"find_street" | "score_attack" | "district_explorer" | "login_streak"'.
+src/utils/quests.ts(56,27): error TS2769: No overload matches this call.
+  Overload 1 of 4, '(value: string | number | Date): Date', gave the following error.
+    Argument of type 'string | null' is not assignable to parameter of type 'string | number | Date'.
+      Type 'null' is not assignable to type 'string | number | Date'.
+  Overload 2 of 4, '(value: string | number): Date', gave the following error.
+    Argument of type 'string | null' is not assignable to parameter of type 'string | number'.
+      Type 'null' is not assignable to type 'string | number'.
+src/utils/social.ts(121,5): error TS2322: Type 'number | null' is not assignable to type 'number | undefined'.
+  Type 'null' is not assignable to type 'number | undefined'.
+src/utils/social.ts(125,5): error TS2322: Type 'number | null' is not assignable to type 'number | undefined'.
+  Type 'null' is not assignable to type 'number | undefined'.
+src/utils/social.ts(126,5): error TS2322: Type 'boolean | null' is not assignable to type 'boolean | undefined'.
+  Type 'null' is not assignable to type 'boolean | undefined'.
+src/utils/social.ts(127,5): error TS2322: Type 'number | null' is not assignable to type 'number | undefined'.
+  Type 'null' is not assignable to type 'number | undefined'.
+src/utils/social.ts(128,5): error TS2322: Type 'number | null' is not assignable to type 'number | undefined'.
+  Type 'null' is not assignable to type 'number | undefined'.
+src/utils/social.ts(129,5): error TS2322: Type 'number | null' is not assignable to type 'number | undefined'.
+  Type 'null' is not assignable to type 'number | undefined'.
+src/utils/social.ts(131,5): error TS2322: Type 'number | null' is not assignable to type 'number | undefined'.
+  Type 'null' is not assignable to type 'number | undefined'.
+src/utils/social.ts(132,5): error TS2322: Type 'number | null' is not assignable to type 'number | undefined'.
+  Type 'null' is not assignable to type 'number | undefined'.
+src/utils/social.ts(134,5): error TS2322: Type 'number | null' is not assignable to type 'number | undefined'.
+  Type 'null' is not assignable to type 'number | undefined'.
+src/utils/social.ts(135,5): error TS2322: Type 'string[] | null' is not assignable to type 'string[] | undefined'.
+  Type 'null' is not assignable to type 'string[] | undefined'.
+src/utils/social.ts(136,5): error TS2322: Type 'Json' is not assignable to type 'Record<string, string> | undefined'.
+  Type 'null' is not assignable to type 'Record<string, string> | undefined'.
+src/utils/social.ts(137,5): error TS2322: Type 'string[] | null' is not assignable to type 'string[] | undefined'.
+  Type 'null' is not assignable to type 'string[] | undefined'.
+src/utils/social.ts(139,5): error TS2322: Type 'string | null' is not assignable to type 'string | undefined'.
+  Type 'null' is not assignable to type 'string | undefined'.
+src/utils/social.ts(141,5): error TS2322: Type 'Json' is not assignable to type 'NotificationSettings | undefined'.
+  Type 'null' is not assignable to type 'NotificationSettings | undefined'.
+src/utils/social.ts(184,34): error TS2532: Object is possibly 'undefined'.
+src/utils/social.ts(313,21): error TS18047: 'existingUser.games_played' is possibly 'null'.
+src/utils/social.ts(315,32): error TS18047: 'existingUser.games_played' is possibly 'null'.
+src/utils/social.ts(319,18): error TS18047: 'existingUser.max_streak' is possibly 'null'.
+src/utils/social.ts(323,54): error TS18047: 'existingUser.best_score' is possibly 'null'.
+src/utils/social.ts(363,5): error TS2322: Type '{ id: string; username: string; text: string; status: string | null; reward: number | null; createdAt: string | null; approvedAt: string | undefined; rejectedAt: string | undefined; notified: boolean | null; }[]' is not assignable to type 'FeedbackItem[]'.
+  Type '{ id: string; username: string; text: string; status: string | null; reward: number | null; createdAt: string | null; approvedAt: string | undefined; rejectedAt: string | undefined; notified: boolean | null; }' is not assignable to type 'FeedbackItem'.
+    Types of property 'status' are incompatible.
+      Type 'string | null' is not assignable to type '"pending" | "rejected" | "approved"'.
+        Type 'null' is not assignable to type '"pending" | "rejected" | "approved"'.
+src/utils/social.ts(470,3): error TS2322: Type '{ id: string; username: string; text: string; status: string | null; reward: number | null; createdAt: string | null; approvedAt: string | undefined; rejectedAt: string | undefined; notified: boolean | null; }[]' is not assignable to type 'FeedbackItem[]'.
+  Type '{ id: string; username: string; text: string; status: string | null; reward: number | null; createdAt: string | null; approvedAt: string | undefined; rejectedAt: string | undefined; notified: boolean | null; }' is not assignable to type 'FeedbackItem'.
+    Types of property 'status' are incompatible.
+      Type 'string | null' is not assignable to type '"pending" | "rejected" | "approved"'.
+        Type 'null' is not assignable to type '"pending" | "rejected" | "approved"'.
+src/utils/social.ts(602,28): error TS18047: 'existingUser.games_played' is possibly 'null'.
+src/utils/social.ts(603,35): error TS2345: Argument of type 'number | null' is not assignable to parameter of type 'number'.
+  Type 'null' is not assignable to type 'number'.
+src/utils/social.ts(661,11): error TS2339: Property 'getPendingRequests' does not exist on type 'typeof import("/Users/robertosanchezgallego/Desktop/Girify/src/utils/friends")'.
+src/utils/social.ts(663,23): error TS7006: Parameter 'r' implicitly has an 'any' type.
+src/utils/social.ts(928,7): error TS2322: Type 'string | undefined' is not assignable to type 'string'.
+  Type 'undefined' is not assignable to type 'string'.
+src/utils/social.ts(957,27): error TS2769: No overload matches this call.
+  Overload 1 of 4, '(value: string | number | Date): Date', gave the following error.
+    Argument of type 'string | null' is not assignable to parameter of type 'string | number | Date'.
+      Type 'null' is not assignable to type 'string | number | Date'.
+  Overload 2 of 4, '(value: string | number): Date', gave the following error.
+    Argument of type 'string | null' is not assignable to parameter of type 'string | number'.
+      Type 'null' is not assignable to type 'string | number'.
+src/utils/social.ts(981,5): error TS2322: Type '{ id: string; score: number | null; }[]' is not assignable to type '{ id: string; score: number; }[]'.
+  Type '{ id: string; score: number | null; }' is not assignable to type '{ id: string; score: number; }'.
+    Types of property 'score' are incompatible.
+      Type 'number | null' is not assignable to type 'number'.
+        Type 'null' is not assignable to type 'number'.
+src/utils/stats.ts(41,22): error TS2532: Object is possibly 'undefined'.
+src/utils/wiki.ts(58,28): error TS2538: Type 'undefined' cannot be used as an index type.
+src/utils/wiki.ts(79,27): error TS2532: Object is possibly 'undefined'.

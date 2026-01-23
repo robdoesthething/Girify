@@ -50,7 +50,7 @@ export const addGiuros = async (
       return { success: false, newBalance: 0 };
     }
 
-    const currentBalance = user.giuros;
+    const currentBalance = user.giuros ?? 0;
     const newBalance = currentBalance + amount;
 
     const success = await updateUser(username, { giuros: newBalance });
@@ -91,7 +91,7 @@ export const spendGiuros = async (
       return { success: false, error: 'User not found' };
     }
 
-    const currentBalance = user.giuros;
+    const currentBalance = user.giuros ?? 0;
 
     if (currentBalance < cost) {
       return { success: false, error: 'Insufficient giuros' };
@@ -181,10 +181,10 @@ export const claimDailyLoginBonus = async (
     const lastLogin = user.last_login_date; // Database returns YYYY-MM-DD string for DATE type
 
     if (lastLogin === today) {
-      return { claimed: false, bonus: 0, newBalance: user.giuros };
+      return { claimed: false, bonus: 0, newBalance: user.giuros ?? 0 };
     }
 
-    const newBalance = user.giuros + dailyBonus;
+    const newBalance = (user.giuros ?? 0) + dailyBonus;
 
     await updateUser(username, {
       giuros: newBalance,

@@ -52,8 +52,8 @@ const mapRowToAnnouncement = (row: AnnouncementRow): Announcement => {
     body: row.body,
     // Mock Timestamp-like object for compatibility
     publishDate: {
-      seconds: new Date(row.publish_date).getTime() / 1000,
-      toDate: () => new Date(row.publish_date),
+      seconds: new Date(row.publish_date || 0).getTime() / 1000,
+      toDate: () => new Date(row.publish_date || 0),
     },
     expiryDate: row.expiry_date
       ? {
@@ -61,12 +61,12 @@ const mapRowToAnnouncement = (row: AnnouncementRow): Announcement => {
           toDate: () => new Date(row.expiry_date!),
         }
       : null,
-    isActive: row.is_active,
-    priority: row.priority,
-    targetAudience: row.target_audience,
+    isActive: row.is_active || false,
+    priority: (row.priority as AnnouncementPriority) || undefined,
+    targetAudience: (row.target_audience as TargetAudience) || undefined,
     createdAt: {
-      seconds: new Date(row.created_at).getTime() / 1000,
-      toDate: () => new Date(row.created_at),
+      seconds: new Date(row.created_at || 0).getTime() / 1000,
+      toDate: () => new Date(row.created_at || 0),
     } as Timestamp,
   };
 };

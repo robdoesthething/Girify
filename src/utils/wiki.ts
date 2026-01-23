@@ -54,9 +54,9 @@ export const fetchWikiImage = async (query: string): Promise<string | null> => {
 
     if (pages) {
       const pageId = Object.keys(pages)[0];
-      if (pageId !== '-1') {
+      if (pageId && pageId !== '-1') {
         const page = pages[pageId];
-        if (page.thumbnail?.source) {
+        if (page?.thumbnail?.source) {
           return page.thumbnail.source;
         }
       }
@@ -75,8 +75,9 @@ export const fetchWikiImage = async (query: string): Promise<string | null> => {
       const searchResp = await fetch(`${WIKI_API_BASE}?${searchParams.toString()}`);
       const searchData = (await searchResp.json()) as WikiQueryResponse;
 
-      if (searchData.query?.search?.length && searchData.query.search.length > 0) {
-        const bestTitle = searchData.query.search[0].title;
+      const searchResults = searchData.query?.search;
+      if (searchResults && searchResults.length > 0) {
+        const bestTitle = searchResults[0]!.title;
         // Recursively try one more time with the found best title
         if (bestTitle && bestTitle !== cleanQuery) {
           return await fetchWikiImage(bestTitle);

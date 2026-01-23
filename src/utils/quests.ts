@@ -23,6 +23,8 @@ export interface Quest {
 // Validation constants
 const MAX_REWARD = 10000;
 const MIN_REWARD = 0;
+const MAX_TITLE_LENGTH = 100;
+const MAX_DESCRIPTION_LENGTH = 500;
 
 /**
  * Validate quest data
@@ -33,11 +35,11 @@ const validateQuest = (quest: Partial<Quest>): void => {
       throw new Error(`rewardGiuros must be between ${MIN_REWARD} and ${MAX_REWARD}`);
     }
   }
-  if (quest.title !== undefined && quest.title.length > 100) {
-    throw new Error('Quest title too long (max 100 chars)');
+  if (quest.title !== undefined && quest.title.length > MAX_TITLE_LENGTH) {
+    throw new Error(`Quest title too long (max ${MAX_TITLE_LENGTH} chars)`);
   }
-  if (quest.description !== undefined && quest.description.length > 500) {
-    throw new Error('Quest description too long (max 500 chars)');
+  if (quest.description !== undefined && quest.description.length > MAX_DESCRIPTION_LENGTH) {
+    throw new Error(`Quest description too long (max ${MAX_DESCRIPTION_LENGTH} chars)`);
   }
 };
 
@@ -48,12 +50,13 @@ export const getQuests = async (): Promise<Quest[]> => {
       id: row.id.toString(),
       title: row.title,
       description: row.description || '',
-      criteriaType: row.criteria_type,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      criteriaType: row.criteria_type as any,
       criteriaValue: row.criteria_value || '',
-      rewardGiuros: row.reward_giuros,
+      rewardGiuros: row.reward_giuros ?? 0,
       activeDate: row.active_date || undefined,
-      isActive: row.is_active,
-      createdAt: new Date(row.created_at).getTime(),
+      isActive: row.is_active ?? false,
+      createdAt: new Date(row.created_at || 0).getTime(),
     }));
   } catch (error) {
     logger.error('Error fetching quests', { error });
