@@ -258,8 +258,8 @@ const RegisterPanel: React.FC<RegisterPanelProps> = ({
       setLoading(true);
       setError('');
 
-      // Force account selection to allow switching accounts
-      googleProvider.setCustomParameters({ prompt: 'select_account' });
+      // Force account selection to allow switching accounts - REMOVED for mobile redirect fix
+      // googleProvider.setCustomParameters({ prompt: 'select_account' });
 
       // Use redirect on mobile devices (popups are often blocked or fail in in-app browsers)
       // This covers iOS (Safari/Chrome) and Android (Chrome/etc)
