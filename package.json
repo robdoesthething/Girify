@@ -60,7 +60,7 @@
     "@upstash/redis": "^1.36.1",
     "firebase": "^12.7.0",
     "framer-motion": "^12.23.26",
-    "i18next": "^25.7.4",
+    "i18next": "^25.8.0",
     "leaflet": "^1.9.4",
     "lucide-react": "^0.562.0",
     "prop-types": "^15.8.1",
