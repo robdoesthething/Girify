@@ -18,6 +18,7 @@ import { useAsyncOperation } from '../../../hooks/useAsyncOperation';
 import { supabase } from '../../../services/supabase';
 import { GameStateObject, QuizResult } from '../../../types/game';
 import { GameHistory } from '../../../types/user';
+import { debugLog } from '../../../utils/debug';
 
 /**
  * Fallback function to save score directly to Supabase without Redis
