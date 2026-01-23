@@ -17,7 +17,7 @@ Thank you for your interest in contributing to Girify! This guide will help you 
 
 ### 1. Fork the Repository
 
-1. Visit the [Girify repository](https://github.com/USERNAME/REPO)
+1. Visit the [Girify repository](https://github.com/robdoesthething/Girify)
 2. Click the **Fork** button in the top-right corner
 3. This creates a copy of the repository in your GitHub account
 
@@ -31,15 +31,15 @@ git clone https://github.com/YOUR_USERNAME/Girify.git
 cd Girify
 
 # Add the original repository as "upstream"
-git remote add upstream https://github.com/ORIGINAL_OWNER/Girify.git
+git remote add upstream https://github.com/robdoesthething/Girify.git
 
 # Verify remotes
 git remote -v
 # Should show:
 # origin    https://github.com/YOUR_USERNAME/Girify.git (fetch)
 # origin    https://github.com/YOUR_USERNAME/Girify.git (push)
-# upstream  https://github.com/ORIGINAL_OWNER/Girify.git (fetch)
-# upstream  https://github.com/ORIGINAL_OWNER/Girify.git (push)
+# upstream  https://github.com/robdoesthething/Girify.git (fetch)
+# upstream  https://github.com/robdoesthething/Girify.git (push)
 ```
 
 ### 3. Install Dependencies
@@ -272,8 +272,6 @@ git commit -m "chore(deps): bump react to v19.2.0"
 - ❌ Don't capitalize the subject
 
 **Note**: Commitlint will automatically validate your commit messages. If your message doesn't follow the format, the commit will be rejected.
-
-For more details, see our [Commitlint Guide](/.gemini/antigravity/brain/.../commitlint_guide.md).
 
 ## Creating a Pull Request
 
@@ -511,8 +509,8 @@ npm run lint:fix    # Auto-fix errors
 
 ## Getting Help
 
-- **Questions?** Open a [GitHub Discussion](https://github.com/USERNAME/REPO/discussions)
-- **Bug reports** Open a [GitHub Issue](https://github.com/USERNAME/REPO/issues)
+- **Questions?** Open a [GitHub Discussion](https://github.com/robdoesthething/Girify/discussions)
+- **Bug reports** Open a [GitHub Issue](https://github.com/robdoesthething/Girify/issues)
 - **Security issues** See [SECURITY.md](SECURITY.md)
 
 ## Additional Resources

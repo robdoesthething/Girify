@@ -19,15 +19,13 @@ We take the security of Girify seriously. If you believe you have found a securi
 
 ### How to Report
 
-Please report security vulnerabilities by emailing:
+Please use GitHub's private vulnerability reporting feature:
 
-**Email**: [Your email here - replace with actual email]
-
-You can also use GitHub's private vulnerability reporting feature:
-
-1. Go to the repository's "Security" tab
+1. Go to the [repository's Security tab](https://github.com/robdoesthething/Girify/security)
 2. Click "Report a vulnerability"
 3. Fill out the form with details
+
+Alternatively, you can open a private security advisory in the repository.
 
 ### What to Include
 
@@ -133,19 +131,18 @@ _No security vulnerabilities have been reported yet._
 
 ## Additional Resources
 
-- [GitHub Security Advisories](https://github.com/USERNAME/REPO/security/advisories)
+- [GitHub Security Advisories](https://github.com/robdoesthething/Girify/security/advisories)
 - [Firebase Security Rules](https://firebase.google.com/docs/rules)
 - [OWASP Top 10](https://owasp.org/www-project-top-ten/)
-- [Security Remediation Guide](/.gemini/antigravity/brain/9682c9a7-5671-4cd8-b3ab-aac7b8abaf60/security_remediation.md)
 
 ## Contact
 
 For security-related questions or concerns:
 
-- **Security Issues**: [Email - replace with actual]
-- **General Questions**: Open a GitHub Discussion
-- **Non-Security Bugs**: Open a GitHub Issue
+- **Security Issues**: Use [GitHub Security Advisories](https://github.com/robdoesthething/Girify/security/advisories)
+- **General Questions**: Open a [GitHub Discussion](https://github.com/robdoesthething/Girify/discussions)
+- **Non-Security Bugs**: Open a [GitHub Issue](https://github.com/robdoesthething/Girify/issues)
 
 ---
 
-**Last Updated**: January 2, 2026
+**Last Updated**: January 23, 2026
