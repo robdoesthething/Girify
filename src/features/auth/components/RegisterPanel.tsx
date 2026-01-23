@@ -3,7 +3,6 @@ import {
   sendEmailVerification,
   signInWithEmailAndPassword,
   signInWithPopup,
-  signInWithRedirect,
   updateProfile,
 } from 'firebase/auth';
 import { motion } from 'framer-motion';
@@ -12,7 +11,6 @@ import { STORAGE_KEYS } from '../../../config/constants';
 import { useTheme } from '../../../context/ThemeContext';
 import { DISTRICTS } from '../../../data/districts';
 import { auth, googleProvider } from '../../../firebase';
-import { isMobile, isMobileSafari } from '../../../utils/platform';
 import { ensureUserProfile, getUserByEmail, recordReferral } from '../../../utils/social';
 import { storage } from '../../../utils/storage';
 
@@ -142,7 +140,7 @@ const RegisterPanel: React.FC<RegisterPanelProps> = ({
   const [loading, setLoading] = useState(false);
 
   // Check if mobile Safari (popups often blocked)
-  const isOnMobileSafari = isMobileSafari();
+  // const isOnMobileSafari = isMobileSafari();
 
   // Handle redirect result on mount (for mobile Safari flow)
   // NOTE: This is now handled in AppRoutes.tsx to avoid race conditions.
@@ -263,22 +261,23 @@ const RegisterPanel: React.FC<RegisterPanelProps> = ({
 
       // Use redirect on mobile devices (popups are often blocked or fail in in-app browsers)
       // This covers iOS (Safari/Chrome) and Android (Chrome/etc)
-      const isMobileDevice = isMobile();
+      // const isMobileDevice = isMobile();
 
-      if (isOnMobileSafari || isMobileDevice) {
-        console.warn('[AuthDebug] Mobile device detected, using redirect');
-        try {
-          // Set tracking flag to debug loops
-          sessionStorage.setItem('girify_redirect_pending', 'true');
-        } catch (e) {
-          console.warn('Storage failed', e);
-        }
-        await signInWithRedirect(auth, googleProvider);
-        return; // Will be handled by getRedirectResult on page reload
-      }
+      // DEBUG: Temporarily disable redirect to see if Popup works better on this device
+      // if (isOnMobileSafari || isMobileDevice) {
+      //   console.warn('[AuthDebug] Mobile device detected, using redirect');
+      //   try {
+      //     // Set tracking flag to debug loops
+      //     sessionStorage.setItem('girify_redirect_pending', 'true');
+      //   } catch (e) {
+      //     console.warn('Storage failed', e);
+      //   }
+      //   await signInWithRedirect(auth, googleProvider);
+      //   return; // Will be handled by getRedirectResult on page reload
+      // }
 
       // Use popup for desktop and other browsers
-      console.warn('[AuthDebug] Using popup for sign in');
+      console.warn('[AuthDebug] Using popup for sign in (Forced for Debug)');
       const result = await signInWithPopup(auth, googleProvider);
       console.warn('[AuthDebug] Popup success, user:', result.user.uid);
       await processGoogleUser(result.user);
