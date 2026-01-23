@@ -43,7 +43,7 @@ const mapToRow = (
       metadata[key] = value;
     }
   }
-  row.metadata = metadata;
+  row.metadata = metadata as any;
 
   return row;
 };

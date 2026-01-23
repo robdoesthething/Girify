@@ -50,7 +50,7 @@ export const calculateGameSetup = (
       .filter(Boolean) as Street[];
 
     if (selected.length > 0) {
-      const firstQ = plannedQuiz.questions[0];
+      const firstQ = plannedQuiz.questions[0]!;
       const correctStreet = streetMap.get(firstQ.correctId);
       const distractorStreets = firstQ.distractorIds
         .map((id: string) => streetMap.get(id))
@@ -60,14 +60,14 @@ export const calculateGameSetup = (
         const opts = [correctStreet, ...distractorStreets.slice(0, GAME_LOGIC.DISTRACTORS_COUNT)];
         initialOptions = shuffleOptions(opts, todaySeed + GAME_LOGIC.SHUFFLE_SEED_OFFSET);
       } else {
-        initialOptions = generateOptionsList(selected[0], validStreets, 0);
+        initialOptions = generateOptionsList(selected[0]!, validStreets, 0);
       }
     }
   }
 
   if (!selected || selected.length === 0) {
     selected = selectDailyStreets(validStreets, todaySeed);
-    initialOptions = selected.length > 0 ? generateOptionsList(selected[0], validStreets, 0) : [];
+    initialOptions = selected.length > 0 ? generateOptionsList(selected[0]!, validStreets, 0) : [];
   }
 
   return {

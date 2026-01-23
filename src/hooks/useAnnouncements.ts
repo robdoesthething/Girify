@@ -27,7 +27,7 @@ export const useAnnouncements = (username: string): UseAnnouncementsReturn => {
       const unread = await getUnreadAnnouncements(username);
       if (unread && unread.length > 0) {
         // Show the most recent unread announcement
-        setPendingAnnouncement(unread[0]);
+        setPendingAnnouncement(unread[0]!);
       }
     } catch (err) {
       console.warn('Failed to fetch announcements:', err);

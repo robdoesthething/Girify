@@ -454,7 +454,7 @@ const GENERIC_IMAGES: string[] = [
 ];
 
 function getRandomImage(): string {
-  return GENERIC_IMAGES[Math.floor(Math.random() * GENERIC_IMAGES.length)];
+  return GENERIC_IMAGES[Math.floor(Math.random() * GENERIC_IMAGES.length)] || GENERIC_IMAGES[0]!;
 }
 
 /**
@@ -494,12 +494,12 @@ export function getCuriosityByStreets(
 
   if (!quizStreets || quizStreets.length === 0) {
     const index = Math.floor(seededRandom(seed) * CURIOSITIES_DATA.length);
-    const random = CURIOSITIES_DATA[index];
+    const random = CURIOSITIES_DATA[index] || CURIOSITIES_DATA[0]!;
     const imgIndex = Math.floor(seededRandom(seed + 1) * GENERIC_IMAGES.length);
     return {
       title: random.location,
       fact: getLocalizedText(random),
-      image: random.image || GENERIC_IMAGES[imgIndex],
+      image: random.image || GENERIC_IMAGES[imgIndex] || GENERIC_IMAGES[0]!,
       location: random.location,
       matchedStreet: null,
     };
@@ -525,13 +525,13 @@ export function getCuriosityByStreets(
   }
 
   const index = Math.floor(seededRandom(seed + 2) * CURIOSITIES_DATA.length);
-  const random = CURIOSITIES_DATA[index];
+  const random = CURIOSITIES_DATA[index] || CURIOSITIES_DATA[0]!;
   const imgIndex = Math.floor(seededRandom(seed + 3) * GENERIC_IMAGES.length);
 
   return {
     title: random.location,
     fact: getLocalizedText(random),
-    image: random.image || GENERIC_IMAGES[imgIndex],
+    image: random.image || GENERIC_IMAGES[imgIndex] || GENERIC_IMAGES[0]!,
     location: random.location,
     matchedStreet: null,
   };

@@ -94,8 +94,8 @@ describe('Leaderboard Service', () => {
 
       // Deduplication logic: Both scores are same day, should take best (1800)
       expect(result).toHaveLength(1);
-      expect(result[0].score).toBe(1800);
-      expect(result[0].username).toBe('@User1');
+      expect(result[0]!.score).toBe(1800);
+      expect(result[0]!.username).toBe('@User1');
     });
 
     it('should handle Supabase errors gracefully', async () => {

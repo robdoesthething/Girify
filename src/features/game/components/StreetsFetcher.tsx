@@ -108,7 +108,7 @@ const StreetsFetcher: React.FC = () => {
 
           const name = element.tags.name;
           const highway = element.tags.highway;
-          const tier = tierMapping[highway] || 4;
+          const tier = (highway && tierMapping[highway]) || 4;
 
           const geometry =
             element.geometry?.map((coord: { lat: number; lon: number }) => [

@@ -38,7 +38,7 @@ export class UserMigrationService {
       USER.USERNAME.SUFFIX_MIN +
         Math.random() * (USER.USERNAME.SUFFIX_MAX - USER.USERNAME.SUFFIX_MIN + 1)
     );
-    let coreName = handle.replace(/^@/, '').split(/\d/)[0];
+    let coreName = handle.replace(/^@/, '').split(/\d/)[0] ?? '';
     coreName =
       coreName.replace(/[^a-zA-Z]/g, '').slice(0, USER.USERNAME.CORE_NAME_MAX) ||
       USER.USERNAME.DEFAULT_NAME;

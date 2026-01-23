@@ -94,7 +94,6 @@ export const useStreets = () => {
     };
   }, []);
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const getIntersectionHints = useCallback(
     (currentGeo: any, targetId: string | number, streets: Street[]): Street[] => {
       const hints: Street[] = [];
@@ -106,7 +105,7 @@ export const useStreets = () => {
 
         if (street.geometry && street.geometry.length > 0) {
           const processedGeo = toTurf(street.geometry!);
-          if (processedGeo.length > 0 && processedGeo[0].length > 0) {
+          if (processedGeo.length > 0 && processedGeo[0] && processedGeo[0]!.length > 0) {
             const otherGeo = multiLineString(processedGeo);
             if (!booleanDisjoint(currentGeo, otherGeo)) {
               hints.push(street);
@@ -122,7 +121,6 @@ export const useStreets = () => {
     []
   );
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const getDistanceHints = useCallback(
     (
       currentGeo: any,
@@ -141,7 +139,12 @@ export const useStreets = () => {
           continue;
         }
 
-        if (street.geometry && street.geometry.length > 0 && street.geometry[0].length > 0) {
+        if (
+          street.geometry &&
+          street.geometry.length > 0 &&
+          street.geometry[0] &&
+          street.geometry[0]!.length > 0
+        ) {
           const p1 = street.geometry[0]?.[0];
           if (p1 && typeof p1[0] === 'number' && typeof p1[1] === 'number') {
             const otherPoint = point([p1[1], p1[0]]);
