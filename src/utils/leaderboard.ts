@@ -48,6 +48,7 @@ export const getLeaderboard = async (
         Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(), 0, 0, 0, 0)
       ).toISOString();
       console.warn('[Leaderboard] Daily filter - start of day:', startOfDay);
+      debugLog(`[Leaderboard] Fetching Daily >= ${startOfDay}`);
       queryBuilder = queryBuilder.gte('played_at', startOfDay);
     } else if (period === 'weekly') {
       // Calculate start of week (Monday)
@@ -57,6 +58,7 @@ export const getLeaderboard = async (
       d.setDate(d.getDate() - distanceToMonday);
       d.setHours(0, 0, 0, 0);
       console.warn('[Leaderboard] Weekly filter - start of week:', d.toISOString());
+      debugLog(`[Leaderboard] Fetching Weekly >= ${d.toISOString()}`);
       queryBuilder = queryBuilder.gte('played_at', d.toISOString());
     } else if (period === 'monthly') {
       const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1, 0, 0, 0, 0);
@@ -68,8 +70,12 @@ export const getLeaderboard = async (
 
     if (error) {
       console.error('Supabase error:', error);
+      debugLog(`[Leaderboard] DB Error: ${error.message}`);
       throw error;
     }
+
+    debugLog(`[Leaderboard] Fetched ${rawData?.length || 0} rows for ${period}`);
+
     if (!rawData) {
       return [];
     }

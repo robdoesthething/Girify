@@ -52,7 +52,7 @@ const DebugOverlay: React.FC = () => {
   return (
     <div className="fixed inset-0 z-[9999] bg-black/80 text-green-400 font-mono text-[10px] p-4 overflow-auto pointer-events-auto">
       <div className="flex justify-between items-center mb-4">
-        <h3 className="font-bold text-white text-sm">Auth Debugger</h3>
+        <h3 className="font-bold text-white text-sm">Auth/Leaderboard Debugger</h3>
         <button
           onClick={() => setIsOpen(false)}
           className="bg-red-900 text-white px-3 py-1 rounded"
@@ -66,16 +66,7 @@ const DebugOverlay: React.FC = () => {
           <span className="text-white">UID:</span> {info.uid}
         </div>
         <div>
-          <span className="text-white">Email:</span> {info.email}
-        </div>
-        <div>
-          <span className="text-white">Storage User:</span> {info.storageUser}
-        </div>
-        <div>
-          <span className="text-white">Redirect Pending:</span> {info.redirectPending}
-        </div>
-        <div>
-          <span className="text-white">Processing:</span> {info.processing}
+          <span className="text-white">User:</span> {info.storageUser}
         </div>
       </div>
 
