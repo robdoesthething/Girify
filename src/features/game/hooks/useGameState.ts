@@ -216,9 +216,9 @@ export const useGameState = (
 
         if (distractorStreets.length >= GAME_LOGIC.DISTRACTORS_COUNT) {
           const todaySeed = getTodaySeed();
-          // const opts = [nextStreet, ...distractorStreets.slice(0, GAME_LOGIC.DISTRACTORS_COUNT)];
+          const opts = [nextStreet, ...distractorStreets.slice(0, GAME_LOGIC.DISTRACTORS_COUNT)];
           nextOptions = shuffleOptions(
-            distractorStreets as Street[],
+            opts as Street[],
             todaySeed +
               nextIndex * GAME_LOGIC.QUESTION_SEED_MULTIPLIER +
               GAME_LOGIC.SHUFFLE_SEED_OFFSET
@@ -252,8 +252,11 @@ export const useGameState = (
    * Handle user registration
    */
   const handleRegister = useCallback((name: string) => {
-    storage.set(STORAGE_KEYS.USERNAME, name);
-    dispatch({ type: 'SET_USERNAME', payload: name });
+    // Only set storage - useAuth listener will dispatch if needed
+    const currentUsername = storage.get(STORAGE_KEYS.USERNAME, '');
+    if (currentUsername !== name) {
+      storage.set(STORAGE_KEYS.USERNAME, name);
+    }
     dispatch({ type: 'SET_GAME_STATE', payload: 'intro' });
   }, []);
 

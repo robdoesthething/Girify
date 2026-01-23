@@ -8,6 +8,7 @@ import {
 } from 'firebase/auth';
 import { motion } from 'framer-motion';
 import { useEffect, useState } from 'react';
+import { STORAGE_KEYS } from '../../../config/constants';
 import { useTheme } from '../../../context/ThemeContext';
 import { DISTRICTS } from '../../../data/districts';
 import { auth, googleProvider } from '../../../firebase';
@@ -377,18 +378,26 @@ const RegisterPanel: React.FC<RegisterPanelProps> = ({
         return;
       }
 
-      const profile = await ensureUserProfile(
-        userCredential.user.displayName || '',
-        userCredential.user.uid,
-        { email }
-      );
+      // Email signin - DO NOT call ensureUserProfile here to avoid overwriting district
+      // useAuth's syncUserProfile will handle it globally
+      // Just make sure we have the username in storage so useAuth uses it
+      const displayName = userCredential.user.displayName || '';
+      const storedUsername = storage.get(STORAGE_KEYS.USERNAME, '');
 
-      let handle = profile?.username || userCredential.user.displayName || 'User';
+      if (!storedUsername && displayName) {
+        storage.set(STORAGE_KEYS.USERNAME, displayName);
+      }
+
+      let handle = storedUsername || displayName || 'User';
+
+      // We don't have the full profile here, but that's fine, useAuth will fetch it
+      // We just need the handle for the welcome message/post-login flow
+
       if (!handle.startsWith('@')) {
         handle = `@${handle}`;
       }
 
-      await handlePostLogin(handle, !!profile);
+      await handlePostLogin(handle, true);
     } catch (err: unknown) {
       const error = err instanceof Error ? err : new Error(String(err));
       setError(getAuthErrorMessage((error as any).code || 'auth/error'));

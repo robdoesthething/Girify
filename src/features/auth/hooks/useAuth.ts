@@ -7,6 +7,7 @@ import {
   checkUnseenFeedbackRewards,
   ensureUserProfile,
   getUserGameHistory,
+  getUserProfile,
   healMigration,
   markFeedbackRewardSeen,
   saveUserGameResult,
@@ -91,6 +92,7 @@ export const useAuth = (
         }
 
         // CRITICAL: Check for existing username FIRST (set by handleRegister callback during login)
+        // Re-check storage in case it was updated by redirect handler
         const existingUsername = storage.get(STORAGE_KEYS.USERNAME, '');
 
         let displayName = sanitizeInput(
@@ -167,8 +169,12 @@ async function syncUserProfile(
     | null
 ) {
   try {
+    // First, get existing profile to preserve district
+    const existingProfile = await getUserProfile(displayName);
     const profile = (await ensureUserProfile(displayName, user.uid, {
       email: user.email || undefined,
+      // Preserve existing district if user already has one so we don't overwrite with random
+      district: existingProfile?.district,
     })) as unknown as UserProfile;
 
     if (profile) {

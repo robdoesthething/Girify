@@ -3,7 +3,7 @@ import { AnimatePresence } from 'framer-motion';
 import React, { Suspense, lazy, useEffect } from 'react';
 import { Route, Routes, useLocation, useNavigate } from 'react-router-dom';
 import { auth } from './firebase';
-import { ensureUserProfile, getUserByEmail, getUserByUid, recordReferral } from './utils/social';
+import { ensureUserProfile, getUserByEmail, getUserByUid } from './utils/social';
 
 // Eagerly loaded (needed immediately)
 import AnnouncementModal from './components/AnnouncementModal';
@@ -44,6 +44,7 @@ import { getTodaySeed, hasPlayedToday } from './utils/dailyChallenge';
 import { storage } from './utils/storage';
 
 import { useConfirm } from './hooks/useConfirm';
+import { normalizeUsername } from './utils/format';
 import { getUserProfile } from './utils/social';
 
 // Loading fallback component
@@ -114,9 +115,13 @@ const AppRoutes: React.FC = () => {
       console.warn('[Auth Redirect] Starting redirect result check...');
       try {
         setIsProcessingRedirect(true);
-        // Signal to useAuth that we're handling the redirect
-        sessionStorage.setItem('girify_processing_redirect', 'true');
         const result = await getRedirectResult(auth);
+
+        // Only block useAuth if we actually have a redirect result to process
+        // This prevents blocking useAuth when there's no redirect (normal app load)
+        if (result?.user) {
+          sessionStorage.setItem('girify_processing_redirect', 'true');
+        }
 
         console.warn(
           '[Auth Redirect] getRedirectResult returned:',
@@ -125,6 +130,8 @@ const AppRoutes: React.FC = () => {
 
         if (result?.user) {
           setHasProcessedRedirect(true);
+          // Clear the redirect pending flag on successful redirect
+          sessionStorage.removeItem('girify_redirect_pending');
           console.warn('[Auth Redirect] Processing user:', result.user.uid, result.user.email);
 
           const user = result.user;
@@ -148,7 +155,7 @@ const AppRoutes: React.FC = () => {
 
           if (existingProfile) {
             // Existing user - use their handle and district
-            handle = existingProfile.username;
+            handle = existingProfile.username || handle || fullName;
             if (!handle.startsWith('@')) {
               handle = `@${handle}`;
             }
@@ -169,12 +176,8 @@ const AppRoutes: React.FC = () => {
                 district: existingProfile.district,
               });
 
-              // Handle referral if any
-              const referrer = storage.get(STORAGE_KEYS.REFERRER, '');
-              if (referrer && referrer !== handle) {
-                await recordReferral(referrer, handle);
-                storage.remove(STORAGE_KEYS.REFERRER);
-              }
+              // Clear referrer for existing users (they can't be referred again)
+              storage.remove(STORAGE_KEYS.REFERRER);
 
               // Complete registration
               console.warn('[Auth Redirect] Calling handleRegister with:', handle);
@@ -187,7 +190,8 @@ const AppRoutes: React.FC = () => {
               }
               // Set username so district modal can use it
               storage.set(STORAGE_KEYS.USERNAME, handle);
-              dispatch({ type: 'SET_USERNAME', payload: handle });
+              // dispatch({ type: 'SET_USERNAME', payload: handle }); // Handled by useAuth
+
               // Mark district flow as active BEFORE showing modal to prevent race conditions
               districtFlowActive.current = true;
               setShowDistrictModal(true);
@@ -205,7 +209,7 @@ const AppRoutes: React.FC = () => {
 
             // Set username so district modal can use it
             storage.set(STORAGE_KEYS.USERNAME, handle);
-            dispatch({ type: 'SET_USERNAME', payload: handle });
+            // dispatch({ type: 'SET_USERNAME', payload: handle }); // Handled by useAuth
 
             // Will need district selection before completing registration
             console.warn('[Auth Redirect] Showing district modal for new user');
@@ -225,14 +229,14 @@ const AppRoutes: React.FC = () => {
               '[Auth Redirect] Redirect flow incomplete. Possible mobile browser storage issue.'
             );
             sessionStorage.removeItem('girify_redirect_pending');
-            // We could show a toast here, but for now just logging is critical for debugging
           }
+          // No redirect result - useAuth will handle the auth state normally
         }
       } catch (err) {
         console.error('[Auth Redirect] Error:', err);
       } finally {
         setIsProcessingRedirect(false);
-        // Clear the redirect processing flag
+        // Clear the redirect processing flag (if not already cleared)
         sessionStorage.removeItem('girify_processing_redirect');
       }
     };
@@ -249,7 +253,7 @@ const AppRoutes: React.FC = () => {
         console.warn('[District Check] Skipping - district flow already active');
         return;
       }
-      if (state.username && !state.username.startsWith('guest')) {
+      if (state.username && !normalizeUsername(state.username).startsWith('guest')) {
         console.warn('[District Check] Checking district for:', state.username);
         try {
           const profile = await getUserProfile(state.username);
