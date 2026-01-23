@@ -7,6 +7,7 @@ import { ensureUserProfile, getUserByEmail, getUserByUid } from './utils/social'
 
 // Eagerly loaded (needed immediately)
 import AnnouncementModal from './components/AnnouncementModal';
+import DebugOverlay from './components/DebugOverlay';
 import TopBar from './components/TopBar';
 
 // Lazy loaded (route-based code splitting)
@@ -494,6 +495,9 @@ const AppRoutes: React.FC = () => {
           onCancel={() => handleClose(false)}
         />
       </Suspense>
+
+      {/* DEBUG OVERLAY - TEMPORARY */}
+      <DebugOverlay />
     </div>
   );
 };
