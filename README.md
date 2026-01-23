@@ -76,7 +76,7 @@ src/
 
 ### Daily Challenge System
 
-- Date-based seeding: `hash("2026-01-18") → deterministic shuffle`
+- Date-based seeding: `hash(YYYY-MM-DD) → deterministic shuffle`
 - Everyone gets the same 10 streets per day
 - No backend coordination needed!
 

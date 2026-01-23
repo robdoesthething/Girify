@@ -33,3 +33,11 @@ storybook-static
 .env.development
 service-account.json
 .env.production
+
+# Temporary documentation and reports
+*_report*.txt
+*_report*.html
+lint-results.json
+eslint-report.html
+IMPLEMENTATION_*.md
+NEXT_STEPS*.md

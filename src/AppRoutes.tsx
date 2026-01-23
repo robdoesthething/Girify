@@ -249,10 +249,10 @@ const AppRoutes: React.FC = () => {
     handleRedirectResult();
   }, [hasProcessedRedirect]); // Run only once on mount (guard prevents re-runs)
 
-  // Track if we've already checked district this app lifecycle
-  const hasCheckedDistrict = React.useRef(false);
+  // Track which username we've checked for district this app lifecycle
+  const checkedDistrictForUsername = React.useRef<string | null>(null);
 
-  // Check for missing district - only once per app lifecycle
+  // Check for missing district - only once per username
   React.useEffect(() => {
     const checkDistrict = async () => {
       // Skip if district flow is already active (set before modal shows)
@@ -260,32 +260,38 @@ const AppRoutes: React.FC = () => {
         console.warn('[District Check] Skipping - district flow already active');
         return;
       }
-      // Skip if we've already checked this app lifecycle
-      if (hasCheckedDistrict.current) {
-        console.warn('[District Check] Skipping - already checked this app lifecycle');
+
+      const currentUsername = state.username;
+      if (!currentUsername || normalizeUsername(currentUsername).startsWith('guest')) {
         return;
       }
-      if (state.username && !normalizeUsername(state.username).startsWith('guest')) {
-        // Mark as checked immediately to prevent duplicate checks
-        hasCheckedDistrict.current = true;
-        console.warn('[District Check] Checking district for:', state.username);
-        try {
-          const profile = await getUserProfile(state.username);
-          console.warn('[District Check] Profile district:', profile?.district);
-          if (profile && !profile.district) {
-            // Double-check ref again after async operation
-            if (districtFlowActive.current) {
-              console.warn('[District Check] Skipping modal - flow became active during fetch');
-              return;
-            }
-            districtFlowActive.current = true;
-            setShowDistrictModal(true);
+
+      // Skip if we've already checked this specific username
+      if (checkedDistrictForUsername.current === currentUsername) {
+        console.warn('[District Check] Skipping - already checked for username:', currentUsername);
+        return;
+      }
+
+      // Mark this username as checked immediately to prevent duplicate checks
+      checkedDistrictForUsername.current = currentUsername;
+      console.warn('[District Check] Checking district for:', currentUsername);
+
+      try {
+        const profile = await getUserProfile(currentUsername);
+        console.warn('[District Check] Profile district:', profile?.district);
+        if (profile && !profile.district) {
+          // Double-check ref again after async operation
+          if (districtFlowActive.current) {
+            console.warn('[District Check] Skipping modal - flow became active during fetch');
+            return;
           }
-        } catch (e) {
-          console.error('Error checking district:', e);
-          // Reset the check flag on error so it can retry
-          hasCheckedDistrict.current = false;
+          districtFlowActive.current = true;
+          setShowDistrictModal(true);
         }
+      } catch (e) {
+        console.error('Error checking district:', e);
+        // Reset the check flag on error so it can retry
+        checkedDistrictForUsername.current = null;
       }
     };
 
