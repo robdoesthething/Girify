@@ -42,6 +42,7 @@ import { useAchievements } from './hooks/useAchievements';
 import { useAnnouncements } from './hooks/useAnnouncements';
 import { GameHistory } from './types/user';
 import { getTodaySeed, hasPlayedToday } from './utils/dailyChallenge';
+import { debugLog } from './utils/debug';
 import { storage } from './utils/storage';
 
 import { useConfirm } from './hooks/useConfirm';
@@ -113,10 +114,12 @@ const AppRoutes: React.FC = () => {
     }
 
     const handleRedirectResult = async () => {
+      debugLog('Running handleRedirectResult...');
       console.warn('[Auth Redirect] Starting redirect result check...');
       try {
         setIsProcessingRedirect(true);
         const result = await getRedirectResult(auth);
+        debugLog(`getRedirectResult: ${result ? 'User found' : 'NULL'}`);
 
         // Only block useAuth if we actually have a redirect result to process
         // This prevents blocking useAuth when there's no redirect (normal app load)
@@ -133,6 +136,7 @@ const AppRoutes: React.FC = () => {
           setHasProcessedRedirect(true);
           // Clear the redirect pending flag on successful redirect
           sessionStorage.removeItem('girify_redirect_pending');
+          debugLog(`Processing User UID: ${result.user.uid}`);
           console.warn('[Auth Redirect] Processing user:', result.user.uid, result.user.email);
 
           const user = result.user;

@@ -5,6 +5,7 @@ import { storage } from '../utils/storage';
 const DebugOverlay: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [info, setInfo] = useState<any>({});
+  const [logs, setLogs] = useState<string[]>([]);
 
   useEffect(() => {
     const updateInfo = () => {
@@ -17,13 +18,25 @@ const DebugOverlay: React.FC = () => {
         processing: sessionStorage.getItem('girify_processing_redirect') || 'null',
         ua: navigator.userAgent,
       });
+
+      try {
+        const storedLogs = JSON.parse(localStorage.getItem('girify_debug_logs') || '[]');
+        setLogs(storedLogs.slice(-20).reverse());
+      } catch {
+        // ignore
+      }
     };
 
-    const interval = setInterval(updateInfo, 1000);
+    const interval = setInterval(updateInfo, 500);
     updateInfo();
 
     return () => clearInterval(interval);
   }, []);
+
+  const clearLogs = () => {
+    localStorage.setItem('girify_debug_logs', '[]');
+    setLogs([]);
+  };
 
   if (!isOpen) {
     return (
@@ -48,7 +61,7 @@ const DebugOverlay: React.FC = () => {
         </button>
       </div>
 
-      <div className="space-y-2">
+      <div className="space-y-2 mb-4 border-b border-gray-700 pb-4">
         <div>
           <span className="text-white">UID:</span> {info.uid}
         </div>
@@ -56,19 +69,33 @@ const DebugOverlay: React.FC = () => {
           <span className="text-white">Email:</span> {info.email}
         </div>
         <div>
-          <span className="text-white">Display:</span> {info.displayName}
-        </div>
-        <div>
           <span className="text-white">Storage User:</span> {info.storageUser}
         </div>
-        <hr className="border-gray-700" />
         <div>
           <span className="text-white">Redirect Pending:</span> {info.redirectPending}
         </div>
         <div>
           <span className="text-white">Processing:</span> {info.processing}
         </div>
-        <div className="mt-4 break-all text-gray-500">{info.ua}</div>
+      </div>
+
+      <div>
+        <div className="flex justify-between mb-2">
+          <span className="text-white font-bold">Logs (LS)</span>
+          <button
+            onClick={clearLogs}
+            className="text-xs text-red-400 border border-red-900 px-2 rounded"
+          >
+            Clear
+          </button>
+        </div>
+        <div className="text-[9px] font-mono opacity-90 h-64 overflow-y-auto flex flex-col-reverse bg-black p-2 rounded border border-gray-800">
+          {logs.map((l, i) => (
+            <div key={i} className="border-b border-gray-800 pb-1 mb-1 break-all">
+              {l}
+            </div>
+          ))}
+        </div>
       </div>
     </div>
   );
