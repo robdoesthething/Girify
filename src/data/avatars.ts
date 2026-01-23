@@ -34,8 +34,8 @@ export const DEFAULT_AVATAR = '🐼';
  */
 export const getAvatar = (avatarId?: number): string => {
   if (!avatarId || avatarId <= 0) {
-    return AVATARS[0];
+    return AVATARS[0]!;
   }
   const index = Math.max(0, Math.min(avatarId - 1, AVATARS.length - 1));
-  return AVATARS[index];
+  return AVATARS[index]!;
 };

@@ -78,6 +78,8 @@ export interface Achievement {
   cost?: number;
   emoji?: string;
   progress?: number;
+  rarity?: string;
+  unlockCondition?: string;
 }
 
 // Emoji mapping for badges (fallback if no image)
@@ -402,7 +404,7 @@ export const getBadgesByCategory = (
     if (!grouped[badge.category]) {
       grouped[badge.category] = [];
     }
-    grouped[badge.category].push(badge);
+    grouped[badge.category]!.push(badge);
   }
   return grouped;
 };
