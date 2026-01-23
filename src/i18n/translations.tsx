@@ -773,7 +773,7 @@ const translations: Translations = {
 };
 
 export const getTranslation = (lang: string, key: string): string => {
-  return translations[lang]?.[key] || translations.en[key] || key;
+  return translations[lang]?.[key] || translations?.['en']?.[key] || key;
 };
 
 export default translations;

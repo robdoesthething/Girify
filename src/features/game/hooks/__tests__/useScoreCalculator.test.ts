@@ -1,6 +1,5 @@
 import { renderHook } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
-import { GAME } from '../../../../config/constants';
 import { useScoreCalculator } from '../useScoreCalculator';
 
 describe('useScoreCalculator', () => {

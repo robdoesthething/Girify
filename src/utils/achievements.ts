@@ -35,7 +35,8 @@ export const getAllAchievements = async (forceRefresh = false): Promise<Achievem
         name: row.name,
         description: row.description || '',
         emoji: row.emoji || '',
-        criteria: row.criteria || '',
+        criteria: (row.criteria as any) || undefined,
+        type: 'merit',
         rarity: (row.rarity as any) || 'common',
         category: (row.category as any) || 'general',
         unlockCondition: (row.unlock_condition as any) || undefined,
@@ -84,7 +85,7 @@ export const updateAchievement = async (
       dbUpdates.emoji = updates.emoji;
     }
     if (updates.criteria) {
-      dbUpdates.criteria = updates.criteria;
+      dbUpdates.criteria = updates.criteria as any;
     }
     if (updates.rarity) {
       dbUpdates.rarity = updates.rarity;
@@ -123,9 +124,9 @@ export const createAchievement = async (
       id: itemData.id,
       name: itemData.name,
       description: itemData.description,
-      emoji: itemData.emoji,
-      criteria: itemData.criteria,
-      rarity: itemData.rarity,
+      emoji: itemData.emoji || null,
+      criteria: (itemData.criteria as any) || null,
+      rarity: itemData.rarity || null,
       category: itemData.category,
       unlock_condition: itemData.unlockCondition || null,
       is_active: true,

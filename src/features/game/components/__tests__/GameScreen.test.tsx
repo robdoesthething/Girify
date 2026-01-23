@@ -107,6 +107,7 @@ const mockProcessAnswer = vi.fn();
 const defaultProps = {
   state: {
     username: null,
+    gameId: 'test-game-id',
     gameState: 'intro' as GameState,
     score: 0,
     streak: 0,
