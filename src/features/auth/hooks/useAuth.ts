@@ -68,6 +68,17 @@ export const useAuth = (
       // Logic for initial load isn't easily wrapped in atomic async op because it's an event listener,
       // but we can wrap the syncUserProfile part.
       setUser(user);
+
+      // Skip user profile setup if redirect is being processed (AppRoutes handles this case)
+      // This prevents race conditions where useAuth creates a profile with random district
+      // before the redirect handler can show the district selection modal
+      const isRedirectProcessing = sessionStorage.getItem('girify_processing_redirect');
+      if (isRedirectProcessing) {
+        console.warn('[useAuth] Skipping profile sync - redirect is being processed');
+        setIsLoading(false);
+        return;
+      }
+
       if (user) {
         // Refresh user data to get latest emailVerified status
         try {
@@ -101,7 +112,6 @@ export const useAuth = (
         );
 
         // Update React state with the correct username
-        // Always dispatch to ensure state matches storage (handles page reload scenarios)
         dispatch({ type: 'SET_USERNAME', payload: usernameToUse });
 
         if (currentGameState === 'register') {

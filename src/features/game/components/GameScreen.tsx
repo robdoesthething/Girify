@@ -2,6 +2,7 @@ import React, { FC, useEffect, useState } from 'react';
 // @ts-ignore
 // @ts-ignore
 import MapArea from './MapArea';
+import { displayUsername } from '../../../utils/format';
 // @ts-ignore
 import Logo from '../../../components/Logo';
 import RegisterPanel from '../../auth/components/RegisterPanel';
@@ -189,7 +190,7 @@ const GameScreen: FC<GameScreenProps> = ({
                 className={`text-lg mb-10 font-medium ${theme === 'dark' ? 'text-slate-300' : 'text-slate-600'}`}
               >
                 {t('welcomeBack') || 'Welcome back'},{' '}
-                {state.profileLoaded ? state.realName || state.username.replace('@', '') : '...'}!
+                {state.profileLoaded ? state.realName || displayUsername(state.username) : '...'}!
               </p>
               <button
                 onClick={() => setupGame()}

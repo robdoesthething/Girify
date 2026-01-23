@@ -1,5 +1,6 @@
 import { Timestamp } from 'firebase/firestore';
 import { DISTRICTS } from '../data/districts';
+import { normalizeUsername } from './format';
 import {
   getUserByUsername,
   getUserByUid as dbGetUserByUid,
@@ -157,8 +158,8 @@ export const ensureUserProfile = async (
   if (!usernameInput) {
     return null;
   }
-  // Normalize username: remove @ prefix for DB operations and lowercase
-  const username = usernameInput.toLowerCase().replace(/^@/, '');
+  // Normalize username for DB operations (removes @ prefix, lowercase)
+  const username = normalizeUsername(usernameInput);
 
   // Check if user exists
   const existingUser = await getUserByUsername(username);
@@ -300,10 +301,10 @@ export const updateUserGameStats = async (
   if (!username) {
     return;
   }
-  const lowername = username.toLowerCase();
+  const normalizedName = normalizeUsername(username);
 
   try {
-    const existingUser = await getUserByUsername(lowername);
+    const existingUser = await getUserByUsername(normalizedName);
     if (!existingUser) {
       return;
     }
@@ -323,7 +324,7 @@ export const updateUserGameStats = async (
       updates.best_score = currentScore;
     }
 
-    await updateUser(lowername, updates);
+    await updateUser(normalizedName, updates);
 
     // Update district score if user has one
     if (existingUser.district && currentScore) {
@@ -554,10 +555,11 @@ export const deleteUserAndData = async (username: string): Promise<OperationResu
   }
 
   try {
-    const cleanUsername = username.startsWith('@') ? username.slice(1) : username;
-
     // Delete user (cascade will handle related tables)
-    const { error } = await supabase.from('users').delete().eq('username', cleanUsername);
+    const { error } = await supabase
+      .from('users')
+      .delete()
+      .eq('username', normalizeUsername(username));
 
     if (error) {
       throw new Error(error.message);
@@ -578,9 +580,7 @@ export const getUserProfile = async (username: string): Promise<UserProfile | nu
     return null;
   }
 
-  // Normalize username: remove @ prefix for DB operations
-  const normalizedUsername = username.toLowerCase().replace(/^@/, '');
-  const user = await getUserByUsername(normalizedUsername);
+  const user = await getUserByUsername(normalizeUsername(username));
   if (user) {
     return rowToProfile(user);
   }
@@ -856,7 +856,7 @@ export const hasDailyReferral = async (username: string): Promise<boolean> => {
     const { data, error } = await supabase
       .from('referrals')
       .select('id')
-      .eq('referrer', username.toLowerCase())
+      .eq('referrer', normalizeUsername(username))
       .gte('created_at', startOfDay.toISOString())
       .limit(1);
 
@@ -879,11 +879,12 @@ export const getReferrer = async (username: string): Promise<string | null> => {
     return null;
   }
 
+  const normalizedName = normalizeUsername(username);
   try {
     const { data, error } = await supabase
       .from('referrals')
       .select('referrer, bonus_awarded')
-      .eq('referred', username.toLowerCase())
+      .eq('referred', normalizedName)
       .order('created_at', { ascending: false })
       .limit(1)
       .single();
@@ -893,10 +894,7 @@ export const getReferrer = async (username: string): Promise<string | null> => {
     }
 
     // Mark as awarded
-    await supabase
-      .from('referrals')
-      .update({ bonus_awarded: true })
-      .eq('referred', username.toLowerCase());
+    await supabase.from('referrals').update({ bonus_awarded: true }).eq('referred', normalizedName);
 
     return data.referrer;
   } catch (e) {
@@ -931,7 +929,7 @@ export const saveUserGameResult = async (username: string, gameData: GameData): 
     }
 
     await saveUserGame({
-      username: username.toLowerCase(),
+      username: normalizeUsername(username),
       date: dateStr,
       score: gameData.score,
       avgTime: gameData.time,
@@ -950,7 +948,7 @@ export const getUserGameHistory = async (username: string): Promise<GameData[]> 
   }
 
   try {
-    const games = await dbGetUserGameHistory(username.toLowerCase());
+    const games = await dbGetUserGameHistory(normalizeUsername(username));
 
     return games.map(g => ({
       score: g.score,

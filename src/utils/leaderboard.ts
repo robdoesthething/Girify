@@ -2,6 +2,7 @@ import { Timestamp } from 'firebase/firestore';
 import { SOCIAL } from '../config/constants';
 import { DISTRICTS } from '../data/districts';
 import { supabase } from '../services/supabase';
+import { normalizeUsername } from './format';
 
 export type LeaderboardPeriod = 'all' | 'daily' | 'weekly' | 'monthly';
 
@@ -237,7 +238,7 @@ export const getTeamLeaderboard = async (
     const userTeamMap: Record<string, { team: string; district: string }> = {};
 
     (usersData || []).forEach(user => {
-      const username = user.username.toLowerCase().replace('@', '');
+      const username = normalizeUsername(user.username);
       if (user.team && user.district) {
         userTeamMap[username] = {
           team: user.team,
@@ -266,7 +267,8 @@ export const getTeamLeaderboard = async (
     Object.entries(userTeamMap).forEach(([user, info]) => {
       const district = findDistrict(info.team) || findDistrict(info.district);
       if (district) {
-        normalizedUserTeamMap[user.toLowerCase()] = {
+        // user key is already normalized from userTeamMap construction
+        normalizedUserTeamMap[user] = {
           teamName: district.teamName,
           id: district.id,
         };
@@ -274,7 +276,7 @@ export const getTeamLeaderboard = async (
     });
 
     individualScores.forEach(score => {
-      const username = score.username.toLowerCase().replace('@', '');
+      const username = normalizeUsername(score.username);
       const userTeam = normalizedUserTeamMap[username];
 
       if (userTeam) {
