@@ -99,12 +99,17 @@ export const getShopItems = async (forceRefresh = false): Promise<GroupedShopIte
   dbItems.forEach(item => {
     const existing = itemMap.get(item.id);
     if (existing) {
-      // Merge DB item over existing, but preserve existing image if DB image is null/undefined
+      // Merge DB item over existing, but strictly preserve local assets (image, cssClass)
+      // This ensures we always show the correct pixel art from the bundle
       const merged = { ...existing, ...item };
-      // If DB item has no image but local does, keep local image
-      if (!item.image && existing.image) {
+
+      if (existing.image) {
         merged.image = existing.image;
       }
+      if (existing.cssClass) {
+        merged.cssClass = existing.cssClass;
+      }
+
       itemMap.set(item.id, merged);
     } else {
       itemMap.set(item.id, item);

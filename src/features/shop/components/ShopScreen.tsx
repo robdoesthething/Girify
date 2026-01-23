@@ -55,6 +55,7 @@ const ShopScreen: React.FC<ShopScreenProps> = ({ username }) => {
   useEffect(() => {
     const loadData = async () => {
       if (!username) {
+        setLoading(false);
         return;
       }
       setLoading(true);
@@ -308,6 +309,22 @@ const ShopScreen: React.FC<ShopScreenProps> = ({ username }) => {
           {loading ? (
             <div className="flex justify-center py-16">
               <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-sky-500" />
+            </div>
+          ) : !username ? (
+            <div className="flex flex-col items-center justify-center py-20 text-center">
+              <div className="text-6xl mb-4">🔐</div>
+              <h2 className="text-2xl font-bold mb-2 font-inter">
+                {t('loginRequired') || 'Login Required'}
+              </h2>
+              <p className="text-slate-500 mb-6">
+                {t('loginToShop') || 'Please log in to access the shop.'}
+              </p>
+              <button
+                onClick={() => navigate('/?auth=login')}
+                className="px-6 py-3 rounded-xl bg-sky-500 text-white font-bold font-inter hover:bg-sky-600 transition-colors shadow-lg shadow-sky-500/20"
+              >
+                {t('login') || 'Log In'}
+              </button>
             </div>
           ) : (
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 pb-20">
