@@ -500,7 +500,7 @@ const AppRoutes: React.FC = () => {
         />
       </Suspense>
 
-      {/* DEBUG OVERLAY - TEMPORARY */}
+      {/* DEBUG OVERLAY - RESTORED FOR LEADERBOARD DEBUG */}
       <DebugOverlay />
     </div>
   );
