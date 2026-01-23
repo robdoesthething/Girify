@@ -99,7 +99,13 @@ export const getShopItems = async (forceRefresh = false): Promise<GroupedShopIte
   dbItems.forEach(item => {
     const existing = itemMap.get(item.id);
     if (existing) {
-      itemMap.set(item.id, { ...existing, ...item });
+      // Merge DB item over existing, but preserve existing image if DB image is null/undefined
+      const merged = { ...existing, ...item };
+      // If DB item has no image but local does, keep local image
+      if (!item.image && existing.image) {
+        merged.image = existing.image;
+      }
+      itemMap.set(item.id, merged);
     } else {
       itemMap.set(item.id, item);
     }
