@@ -99,6 +99,7 @@ export async function endGame(
     const session = (typeof rawData === 'string' ? JSON.parse(rawData) : rawData) as GameSession;
 
     // Save to Supabase
+    debugLog(`[GameService] Saving game ${gameId} to DB...`);
     const { error } = await supabase.from('game_results').insert({
       user_id: session.userId || null,
       score: finalScore,
@@ -112,6 +113,7 @@ export async function endGame(
 
     if (error) {
       console.error('[Supabase] Failed to save game:', error);
+      debugLog(`[GameService] DB Save Error: ${error.message}`);
       // Keep Redis data for potential retry
       return {
         success: false,
@@ -119,6 +121,7 @@ export async function endGame(
       };
     }
 
+    debugLog(`[GameService] DB Save Success for ${gameId}`);
     // Clean up Redis only after successful save
     await redis.del(sessionKey);
 

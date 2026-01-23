@@ -15,9 +15,9 @@ import { storage } from '../../../utils/storage';
 // @ts-ignore
 import { STORAGE_KEYS, TIME } from '../../../config/constants';
 import { useAsyncOperation } from '../../../hooks/useAsyncOperation';
+import { supabase } from '../../../services/supabase';
 import { GameStateObject, QuizResult } from '../../../types/game';
 import { GameHistory } from '../../../types/user';
-import { supabase } from '../../../services/supabase';
 
 /**
  * Fallback function to save score directly to Supabase without Redis
@@ -32,6 +32,7 @@ const fallbackSaveScore = async (state: GameStateObject, avgTime: number): Promi
   }
 
   try {
+    debugLog(`[Fallback] Saving directly to DB...`);
     const { error } = await supabase.from('game_results').insert({
       user_id: state.username, // Use username, not Firebase UID
       score: state.score,
@@ -45,11 +46,14 @@ const fallbackSaveScore = async (state: GameStateObject, avgTime: number): Promi
 
     if (error) {
       console.error('[Fallback] Failed to save directly to Supabase:', error);
+      debugLog(`[Fallback] DB Save Error: ${error.message}`);
     } else {
       console.warn('[Fallback] Score saved directly to Supabase');
+      debugLog(`[Fallback] DB Save Success`);
     }
   } catch (err) {
     console.error('[Fallback] Exception during direct save:', err);
+    debugLog(`[Fallback] Exception: ${String(err)}`);
   }
 };
 
@@ -108,10 +112,12 @@ export const useGamePersistence = () => {
 
                 if (!result.success) {
                   console.error('[Save Error] Failed to save game:', result.error);
+                  debugLog(`[Persistence] Save Failed: ${result.error}. Trying fallback.`);
                   // Try fallback: direct Supabase insert without Redis
                   await fallbackSaveScore(state, Number(localRecord.avgTime));
                 } else {
                   console.warn('[Save Success] Game saved:', result.gameId);
+                  debugLog(`[Persistence] Save Success (GameID: ${result.gameId})`);
                 }
               } catch (error) {
                 console.error('[Save Exception] Critical error:', error);

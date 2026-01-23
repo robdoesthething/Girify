@@ -44,11 +44,10 @@ export const getLeaderboard = async (
     const now = new Date();
 
     if (period === 'daily') {
-      // Create a new date for start of day (UTC) to avoid timezone issues
-      const startOfDay = new Date(
-        Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(), 0, 0, 0, 0)
-      ).toISOString();
-      console.warn('[Leaderboard] Daily filter - start of day:', startOfDay);
+      // Use rolling 24 hours to ensure games from any timezone played "recently" are shown
+      // This fixes issues where "UTC Midnight" is in the future for Western hemisphere or cuts off early games
+      const startOfDay = new Date(now.getTime() - 24 * 60 * 60 * 1000).toISOString();
+      console.warn('[Leaderboard] Daily filter - rolling 24h:', startOfDay);
       debugLog(`[Leaderboard] Fetching Daily >= ${startOfDay}`);
       queryBuilder = queryBuilder.gte('played_at', startOfDay);
     } else if (period === 'weekly') {
