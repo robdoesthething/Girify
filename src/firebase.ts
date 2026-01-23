@@ -19,6 +19,9 @@ const firebaseConfig = {
 // We just need to make sure we don't import 'firebase/compat/*' anywhere.
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
+// Explicitly set persistence to local to allow session survival across reloads/redirects
+import { browserLocalPersistence, setPersistence } from 'firebase/auth';
+setPersistence(auth, browserLocalPersistence).catch(e => console.error('Persistence error:', e));
 const db = getFirestore(app);
 const storage = getStorage(app);
 const messaging = getMessaging(app);
