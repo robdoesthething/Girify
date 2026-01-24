@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useTheme } from '../../context/ThemeContext';
 import { approveFeedback, deleteFeedback, FeedbackItem, rejectFeedback } from '../../utils/social';
 import { themeClasses } from '../../utils/themeUtils';
+import FormInput from '../FormInput';
 
 interface AdminFeedbackProps {
   feedback: FeedbackItem[];
@@ -123,17 +124,18 @@ const AdminFeedback: React.FC<AdminFeedbackProps> = ({ feedback, onRefresh, noti
                 </td>
                 <td className="p-4">
                   {item.status === 'pending' && (
-                    <input
+                    <FormInput
                       type="number"
                       value={getReward(item.id)}
-                      onChange={e =>
+                      onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                         setRewardAmount(prev => ({
                           ...prev,
                           [item.id]: parseInt(e.target.value, 10),
                         }))
                       }
                       aria-label="Reward Amount"
-                      className="w-20 p-2 rounded-lg bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-xs font-bold text-center"
+                      containerClassName="w-20 mb-0"
+                      className="text-center font-bold text-xs p-2 h-9"
                     />
                   )}
                   {item.status === 'approved' && (

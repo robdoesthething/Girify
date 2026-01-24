@@ -1,6 +1,7 @@
 import { AnimatePresence } from 'framer-motion';
 import React, { useEffect, useState } from 'react';
 import { useAdminAchievements } from '../../features/admin/hooks/useAdminAchievements';
+import FormInput from '../FormInput';
 import AchievementEditor from './AchievementEditor';
 
 interface AdminAchievementsProps {
@@ -52,12 +53,12 @@ const AdminAchievements: React.FC<AdminAchievementsProps> = ({ onNotify, confirm
       </div>
 
       <div className="flex gap-4 mb-4">
-        <input
-          type="text"
+        <FormInput
           placeholder="Search achievements..."
           value={searchTerm}
-          onChange={e => setSearchTerm(e.target.value)}
-          className="w-full px-4 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800"
+          onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchTerm(e.target.value)}
+          containerClassName="w-full mb-0"
+          className="bg-white dark:bg-slate-800"
         />
         <button
           onClick={() => loadInitial()}
