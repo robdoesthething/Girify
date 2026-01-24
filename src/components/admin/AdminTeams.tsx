@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useTheme } from '../../context/ThemeContext';
 import { DISTRICTS } from '../../data/districts';
 import { getAllUsers, getDistrictRankings } from '../../utils/social';
+import { themeClasses } from '../../utils/themeUtils';
 
 interface TeamStats {
   id: string;
@@ -113,19 +114,19 @@ const AdminTeams: React.FC = () => {
       </div>
 
       <div
-        className={`rounded-xl border overflow-hidden ${theme === 'dark' ? 'bg-slate-800 border-slate-700' : 'bg-white border-slate-200'}`}
+        className={`rounded-xl border overflow-hidden ${themeClasses(theme, 'bg-slate-800 border-slate-700', 'bg-white border-slate-200')}`}
       >
         <div className="overflow-x-auto">
           <table className="w-full text-sm text-left">
             <thead
-              className={`text-xs uppercase font-bold ${theme === 'dark' ? 'bg-slate-900/50 text-slate-400' : 'bg-slate-50 text-slate-500'}`}
+              className={`text-xs uppercase font-bold ${themeClasses(theme, 'bg-slate-900/50 text-slate-400', 'bg-slate-50 text-slate-500')}`}
             >
               <tr>
                 <th
                   className="px-6 py-4 cursor-pointer hover:bg-black/5"
                   onClick={() => handleSort('name')}
                 >
-                  <div className="flex items-center gap-1">
+                  <div className="flex items-center gap-2">
                     {t('district') || 'District'} <SortIcon field="name" />
                   </div>
                 </th>
@@ -133,7 +134,7 @@ const AdminTeams: React.FC = () => {
                   className="px-6 py-4 cursor-pointer hover:bg-black/5"
                   onClick={() => handleSort('teamName')}
                 >
-                  <div className="flex items-center gap-1">
+                  <div className="flex items-center gap-2">
                     {t('team') || 'Team'} <SortIcon field="teamName" />
                   </div>
                 </th>
@@ -141,7 +142,7 @@ const AdminTeams: React.FC = () => {
                   className="px-6 py-4 text-right cursor-pointer hover:bg-black/5"
                   onClick={() => handleSort('members')}
                 >
-                  <div className="flex items-center justify-end gap-1">
+                  <div className="flex items-center justify-end gap-2">
                     {t('members') || 'Members'} <SortIcon field="members" />
                   </div>
                 </th>
@@ -149,7 +150,7 @@ const AdminTeams: React.FC = () => {
                   className="px-6 py-4 text-right cursor-pointer hover:bg-black/5"
                   onClick={() => handleSort('score')}
                 >
-                  <div className="flex items-center justify-end gap-1">
+                  <div className="flex items-center justify-end gap-2">
                     {t('totalScore') || 'Total Score'} <SortIcon field="score" />
                   </div>
                 </th>
@@ -157,7 +158,7 @@ const AdminTeams: React.FC = () => {
                   className="px-6 py-4 text-right cursor-pointer hover:bg-black/5"
                   onClick={() => handleSort('avgScore')}
                 >
-                  <div className="flex items-center justify-end gap-1">
+                  <div className="flex items-center justify-end gap-2">
                     {t('avgScore') || 'Avg Score'} <SortIcon field="avgScore" />
                   </div>
                 </th>

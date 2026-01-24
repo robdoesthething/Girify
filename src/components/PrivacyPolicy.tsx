@@ -1,13 +1,14 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { useTheme } from '../context/ThemeContext';
+import { themeClasses } from '../utils/themeUtils';
 
 const PrivacyPolicy: React.FC = () => {
   const { theme } = useTheme();
 
   return (
     <div
-      className={`min-h-screen p-8 ${theme === 'dark' ? 'bg-slate-950 text-slate-300' : 'bg-slate-50 text-slate-700'}`}
+      className={`min-h-screen p-8 ${themeClasses(theme, 'bg-slate-950 text-slate-300', 'bg-slate-50 text-slate-700')}`}
     >
       <div className="max-w-3xl mx-auto">
         <div className="mb-8">
@@ -24,7 +25,7 @@ const PrivacyPolicy: React.FC = () => {
             <p className="opacity-80 font-inter">
               We collect minimal information to provide the Girify experience:
             </p>
-            <ul className="list-disc pl-5 mt-2 space-y-1 opacity-80 font-inter">
+            <ul className="list-disc pl-5 mt-2 space-y-2 opacity-80 font-inter">
               <li>Authentication data (via Google or Email) to secure your account.</li>
               <li>Game progress, scores, and shop purchases.</li>
               <li>Basic analytics to understand how the app is used.</li>
@@ -34,7 +35,7 @@ const PrivacyPolicy: React.FC = () => {
           <section>
             <h2 className="text-2xl font-bold mb-3 font-inter">2. How We Use Information</h2>
             <p className="opacity-80 font-inter">Your data is used solely to:</p>
-            <ul className="list-disc pl-5 mt-2 space-y-1 opacity-80 font-inter">
+            <ul className="list-disc pl-5 mt-2 space-y-2 opacity-80 font-inter">
               <li>Maintain your profile and game history.</li>
               <li>Display leaderboards and rankings.</li>
               <li>Improve game mechanics and content.</li>

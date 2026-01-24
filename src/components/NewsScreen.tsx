@@ -2,6 +2,7 @@ import { motion } from 'framer-motion';
 import React, { useEffect, useState } from 'react';
 import { useTheme } from '../context/ThemeContext';
 import { Announcement, getActiveAnnouncements, markAnnouncementAsRead } from '../utils/news';
+import { themeClasses } from '../utils/themeUtils';
 
 interface NewsScreenProps {
   onClose: () => void;
@@ -54,9 +55,7 @@ const NewsScreen: React.FC<NewsScreenProps> = ({ onClose, username }) => {
 
   return (
     <div
-      className={`fixed inset-0 z-[8000] flex flex-col pt-16 pb-6 px-4 md:px-8 overflow-hidden pointer-events-auto backdrop-blur-md ${
-        theme === 'dark' ? 'bg-neutral-950 text-white' : 'bg-slate-50 text-slate-900'
-      }`}
+      className={`fixed inset-0 z-[8000] flex flex-col pt-16 pb-6 px-4 md:px-8 overflow-hidden pointer-events-auto backdrop-blur-md ${themeClasses(theme, 'bg-neutral-950 text-white', 'bg-slate-50 text-slate-900')}`}
     >
       {/* Header */}
       <div className="flex items-center justify-between max-w-2xl mx-auto w-full mb-8 shrink-0 relative">
@@ -117,9 +116,7 @@ const NewsScreen: React.FC<NewsScreenProps> = ({ onClose, username }) => {
                 key={announcement.id}
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
-                className={`p-6 rounded-2xl border ${
-                  theme === 'dark' ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200'
-                } shadow-sm`}
+                className={`p-6 rounded-2xl border ${themeClasses(theme, 'bg-slate-900 border-slate-800', 'bg-white border-slate-200')} shadow-sm`}
               >
                 <div className="flex items-start justify-between mb-3">
                   <h2 className="text-xl font-bold font-inter">{announcement.title}</h2>

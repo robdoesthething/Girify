@@ -1,9 +1,7 @@
 import { useCallback } from 'react';
 import { useLoading } from '../context/LoadingContext';
-// @ts-ignore
-import { useNotification } from './useNotification'; // Assuming useNotification is exported from hooks, or context
-// @ts-ignore
 import { logger } from '../utils/logger';
+import { useNotification } from './useNotification';
 
 interface AsyncOptions<T = unknown> {
   loadingKey?: string;

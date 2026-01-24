@@ -2,6 +2,7 @@ import { AnimatePresence, motion } from 'framer-motion';
 import React, { useState } from 'react';
 import { useTheme } from '../../context/ThemeContext';
 import { Announcement, createAnnouncement, deleteAnnouncement } from '../../utils/news';
+import { themeClasses } from '../../utils/themeUtils';
 
 interface AdminAnnouncementsProps {
   announcements: Announcement[];
@@ -105,10 +106,10 @@ const AdminAnnouncements: React.FC<AdminAnnouncementsProps> = ({
       </div>
 
       <div
-        className={`rounded-2xl overflow-hidden border ${theme === 'dark' ? 'border-slate-700' : 'border-slate-200'}`}
+        className={`rounded-2xl overflow-hidden border ${themeClasses(theme, 'border-slate-700', 'border-slate-200')}`}
       >
         <table className="w-full text-left">
-          <thead className={theme === 'dark' ? 'bg-slate-800' : 'bg-slate-100'}>
+          <thead className={themeClasses(theme, 'bg-slate-800', 'bg-slate-100')}>
             <tr>
               <th className="p-4 text-xs uppercase opacity-50">Date</th>
               <th className="p-4 text-xs uppercase opacity-50">Title</th>
@@ -121,7 +122,7 @@ const AdminAnnouncements: React.FC<AdminAnnouncementsProps> = ({
             {announcements.map(item => (
               <tr
                 key={item.id}
-                className={theme === 'dark' ? 'hover:bg-slate-800/50' : 'hover:bg-slate-50'}
+                className={themeClasses(theme, 'hover:bg-slate-800/50', 'hover:bg-slate-50')}
               >
                 <td className="p-4 text-sm font-mono opacity-70">{formatDate(item.publishDate)}</td>
                 <td className="p-4">
@@ -172,7 +173,7 @@ const AdminAnnouncements: React.FC<AdminAnnouncementsProps> = ({
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.9 }}
-              className={`w-full max-w-lg p-6 rounded-3xl shadow-2xl ${theme === 'dark' ? 'bg-slate-800' : 'bg-white'}`}
+              className={`w-full max-w-lg p-6 rounded-3xl shadow-2xl ${themeClasses(theme, 'bg-slate-800', 'bg-white')}`}
             >
               <h3 className="text-2xl font-black mb-6">New Announcement</h3>
               <form onSubmit={handleCreate} className="space-y-4">
@@ -249,7 +250,7 @@ const AdminAnnouncements: React.FC<AdminAnnouncementsProps> = ({
                   </div>
                 </div>
 
-                <div className="flex gap-3 pt-4">
+                <div className="flex gap-4 pt-4">
                   <button
                     type="button"
                     onClick={() => setIsCreating(false)}

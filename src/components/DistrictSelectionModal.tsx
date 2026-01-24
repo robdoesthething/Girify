@@ -3,8 +3,9 @@ import PropTypes from 'prop-types';
 import React, { useState } from 'react';
 import { useTheme } from '../context/ThemeContext';
 import { DISTRICTS } from '../data/districts';
-import { ensureUserProfile } from '../utils/social';
 import { auth } from '../firebase';
+import { ensureUserProfile } from '../utils/social';
+import { themeClasses } from '../utils/themeUtils';
 
 interface DistrictSelectionModalProps {
   username: string;
@@ -57,18 +58,14 @@ const DistrictSelectionModal: React.FC<DistrictSelectionModalProps> = ({
       <motion.div
         initial={{ scale: 0.9, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
-        className={`w-full max-w-sm p-8 rounded-3xl shadow-2xl border ${
-          theme === 'dark'
-            ? 'bg-slate-900 border-slate-700 text-white'
-            : 'bg-white border-slate-200 text-slate-900'
-        }`}
+        className={`w-full max-w-sm p-8 rounded-3xl shadow-2xl border ${themeClasses(theme, 'bg-slate-900 border-slate-700 text-white', 'bg-white border-slate-200 text-slate-900')}`}
       >
         <div className="text-center mb-6">
           <span className="text-4xl mb-2 block">🏆</span>
           <h2 className="text-2xl font-black mb-2 tracking-tight">
             {t('joinATeam') || 'Join a Team!'}
           </h2>
-          <p className={`text-sm ${theme === 'dark' ? 'text-slate-400' : 'text-slate-500'}`}>
+          <p className={`text-sm ${themeClasses(theme, 'text-slate-400', 'text-slate-500')}`}>
             {t('teamRequiredDetails') ||
               'Pick your Barcelona district and compete with your team in the global leaderboard!'}
           </p>
@@ -79,11 +76,7 @@ const DistrictSelectionModal: React.FC<DistrictSelectionModalProps> = ({
             value={district}
             onChange={e => setDistrict(e.target.value)}
             aria-label={t('chooseATeam') || 'Choose a team'}
-            className={`w-full px-4 py-3 rounded-xl border font-medium outline-none focus:ring-2 focus:ring-sky-500 transition-all appearance-none cursor-pointer ${
-              theme === 'dark'
-                ? 'bg-slate-800 border-slate-700 text-white placeholder-slate-600'
-                : 'bg-white border-slate-200 text-slate-900 placeholder-slate-400'
-            }`}
+            className={`w-full px-4 py-3 rounded-xl border font-medium outline-none focus:ring-2 focus:ring-sky-500 transition-all appearance-none cursor-pointer ${themeClasses(theme, 'bg-slate-800 border-slate-700 text-white placeholder-slate-600', 'bg-white border-slate-200 text-slate-900 placeholder-slate-400')}`}
           >
             <option value="" disabled>
               {t('chooseATeam') || '🏆 Choose a team...'}

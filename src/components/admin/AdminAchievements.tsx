@@ -165,7 +165,7 @@ const AdminAchievements: React.FC<AdminAchievementsProps> = ({ onNotify, confirm
                 </button>
               </div>
 
-              <div className="flex items-center gap-3 mb-2">
+              <div className="flex items-center gap-4 mb-2">
                 {item.image ? (
                   <img
                     src={item.image}
@@ -272,8 +272,9 @@ const AdminAchievements: React.FC<AdminAchievementsProps> = ({ onNotify, confirm
                     <select
                       id="achieve-cat"
                       value={editingItem.category || 'starter'}
-                      // @ts-ignore
-                      onChange={e => setEditingItem({ ...editingItem, category: e.target.value })}
+                      onChange={e =>
+                        setEditingItem({ ...editingItem, category: e.target.value as any })
+                      }
                       className="w-full px-3 py-2 rounded-lg border dark:bg-slate-800 dark:border-slate-700 outline-none focus:ring-2 focus:ring-sky-500 transition-all"
                     >
                       <option value="social">Social</option>
@@ -294,8 +295,9 @@ const AdminAchievements: React.FC<AdminAchievementsProps> = ({ onNotify, confirm
                     <select
                       id="achieve-type"
                       value={editingItem.type || 'merit'}
-                      // @ts-ignore
-                      onChange={e => setEditingItem({ ...editingItem, type: e.target.value })}
+                      onChange={e =>
+                        setEditingItem({ ...editingItem, type: e.target.value as any })
+                      }
                       className="w-full px-3 py-2 rounded-lg border dark:bg-slate-800 dark:border-slate-700 outline-none focus:ring-2 focus:ring-sky-500 transition-all"
                     >
                       <option value="merit">Merit (Unlockable)</option>
@@ -433,7 +435,6 @@ const AdminAchievements: React.FC<AdminAchievementsProps> = ({ onNotify, confirm
                     id="achieve-criteria"
                     rows={3}
                     value={JSON.stringify(editingItem.criteria || {}, null, 2)}
-                    // @ts-ignore
                     onChange={e => {
                       try {
                         const criteria = JSON.parse(e.target.value);
@@ -450,7 +451,7 @@ const AdminAchievements: React.FC<AdminAchievementsProps> = ({ onNotify, confirm
                 </div>
               </div>
 
-              <div className="flex gap-3 mt-8">
+              <div className="flex gap-4 mt-8">
                 <button
                   onClick={() => setEditingItem(null)}
                   className="flex-1 py-3 rounded-xl bg-slate-100 dark:bg-slate-800 font-bold"

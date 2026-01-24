@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useTheme } from '../../context/ThemeContext';
 import { approveFeedback, deleteFeedback, FeedbackItem, rejectFeedback } from '../../utils/social';
+import { themeClasses } from '../../utils/themeUtils';
 
 interface AdminFeedbackProps {
   feedback: FeedbackItem[];
@@ -90,10 +91,10 @@ const AdminFeedback: React.FC<AdminFeedbackProps> = ({ feedback, onRefresh, noti
       </div>
 
       <div
-        className={`rounded-2xl overflow-hidden border ${theme === 'dark' ? 'border-slate-700' : 'border-slate-200'}`}
+        className={`rounded-2xl overflow-hidden border ${themeClasses(theme, 'border-slate-700', 'border-slate-200')}`}
       >
         <table className="w-full text-left">
-          <thead className={theme === 'dark' ? 'bg-slate-800' : 'bg-slate-100'}>
+          <thead className={themeClasses(theme, 'bg-slate-800', 'bg-slate-100')}>
             <tr>
               <th className="p-4 text-xs uppercase opacity-50">User</th>
               <th className="p-4 text-xs uppercase opacity-50 w-1/2">Message</th>
@@ -106,7 +107,7 @@ const AdminFeedback: React.FC<AdminFeedbackProps> = ({ feedback, onRefresh, noti
             {feedback.map(item => (
               <tr
                 key={item.id}
-                className={theme === 'dark' ? 'hover:bg-slate-800/50' : 'hover:bg-slate-50'}
+                className={themeClasses(theme, 'hover:bg-slate-800/50', 'hover:bg-slate-50')}
               >
                 <td className="p-4">
                   <div className="font-bold">{item.username}</div>

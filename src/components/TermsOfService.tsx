@@ -1,13 +1,14 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { useTheme } from '../context/ThemeContext';
+import { themeClasses } from '../utils/themeUtils';
 
 const TermsOfService: React.FC = () => {
   const { theme } = useTheme();
 
   return (
     <div
-      className={`min-h-screen p-8 ${theme === 'dark' ? 'bg-slate-950 text-slate-300' : 'bg-slate-50 text-slate-700'}`}
+      className={`min-h-screen p-8 ${themeClasses(theme, 'bg-slate-950 text-slate-300', 'bg-slate-50 text-slate-700')}`}
     >
       <div className="max-w-3xl mx-auto">
         <div className="mb-8">
@@ -29,7 +30,7 @@ const TermsOfService: React.FC = () => {
           <section>
             <h2 className="text-2xl font-bold mb-3 font-inter">2. User Conduct</h2>
             <p className="opacity-80 font-inter">You agree not to:</p>
-            <ul className="list-disc pl-5 mt-2 space-y-1 opacity-80 font-inter">
+            <ul className="list-disc pl-5 mt-2 space-y-2 opacity-80 font-inter">
               <li>Use the service for any illegal purpose.</li>
               <li>Attempt to cheat, exploit, or manipulate game mechanics or leaderboards.</li>
               <li>Harass or harm other users.</li>

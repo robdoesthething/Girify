@@ -11,7 +11,7 @@ const PlaytestScreen: React.FC = () => {
           Girify Admin Playtest
         </h1>
         <div className="flex gap-4 text-[10px] text-slate-400 font-mono">
-          <span className="flex items-center gap-1">
+          <span className="flex items-center gap-2">
             <div className="w-2 h-2 rounded-full bg-emerald-500" /> Live Sync (Simulated)
           </span>
           <button

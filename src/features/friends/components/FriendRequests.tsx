@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useTheme } from '../../../context/ThemeContext';
 import { acceptFriendRequest, getIncomingRequests } from '../../../utils/friends';
+import { themeClasses } from '../../../utils/themeUtils';
 
 interface FriendRequest {
   id: string;
@@ -61,7 +62,7 @@ const FriendRequests: React.FC<FriendRequestsProps> = ({ username }) => {
 
   return (
     <div
-      className={`mb-6 p-4 rounded-2xl border ${theme === 'dark' ? 'bg-neutral-800/50 border-neutral-700' : 'bg-slate-50 border-slate-100'}`}
+      className={`mb-6 p-4 rounded-2xl border ${themeClasses(theme, 'bg-neutral-800/50 border-neutral-700', 'bg-slate-50 border-slate-100')}`}
     >
       <h3 className="text-sm font-bold uppercase tracking-wider mb-3 flex items-center gap-2 font-inter">
         <span className="w-2 h-2 rounded-full bg-orange-500 animate-pulse" />
@@ -71,7 +72,7 @@ const FriendRequests: React.FC<FriendRequestsProps> = ({ username }) => {
         {requests.map(req => (
           <div
             key={req.id}
-            className={`flex items-center justify-between p-2 rounded-xl border ${theme === 'dark' ? 'bg-neutral-900 border-neutral-800' : 'bg-white border-slate-200 shadow-sm'}`}
+            className={`flex items-center justify-between p-2 rounded-xl border ${themeClasses(theme, 'bg-neutral-900 border-neutral-800', 'bg-white border-slate-200 shadow-sm')}`}
           >
             <div className="flex items-center gap-2">
               <div className="w-8 h-8 rounded-full bg-gradient-to-br from-indigo-400 to-purple-500 flex items-center justify-center text-white font-bold text-xs ring-2 ring-white dark:ring-neutral-800 font-inter">

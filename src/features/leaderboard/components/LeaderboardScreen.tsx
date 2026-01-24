@@ -2,10 +2,12 @@ import { motion } from 'framer-motion';
 import React, { useCallback, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import TopBar from '../../../components/TopBar';
+import { API_TIMEOUT_MS } from '../../../config/appConstants';
 import { useTheme } from '../../../context/ThemeContext';
 import { DISTRICTS } from '../../../data/districts';
 import { formatUsername, usernamesMatch } from '../../../utils/format';
 import { getLeaderboard, getTeamLeaderboard, TeamScoreEntry } from '../../../utils/leaderboard';
+import { themeClasses } from '../../../utils/themeUtils';
 
 interface ScoreEntry {
   id?: string;
@@ -36,7 +38,10 @@ const LeaderboardScreen: React.FC<LeaderboardScreenProps> = ({ currentUser }) =>
 
     try {
       const timeoutPromise = new Promise((_, reject) =>
-        setTimeout(() => reject(new Error('Timeout: Server response took too long')), 5000)
+        setTimeout(
+          () => reject(new Error('Timeout: Server response took too long')),
+          API_TIMEOUT_MS
+        )
       );
 
       if (viewMode === 'teams') {
@@ -91,7 +96,7 @@ const LeaderboardScreen: React.FC<LeaderboardScreenProps> = ({ currentUser }) =>
 
   return (
     <div
-      className={`fixed inset-0 w-full h-full flex flex-col overflow-hidden transition-colors duration-500 ${theme === 'dark' ? 'bg-slate-900 text-white' : 'bg-slate-50 text-slate-900'}`}
+      className={`fixed inset-0 w-full h-full flex flex-col overflow-hidden transition-colors duration-500 ${themeClasses(theme, 'bg-slate-900 text-white', 'bg-slate-50 text-slate-900')}`}
     >
       <TopBar
         onOpenPage={page => navigate(page ? `/${page}` : '/')}
@@ -126,7 +131,7 @@ const LeaderboardScreen: React.FC<LeaderboardScreenProps> = ({ currentUser }) =>
           {/* Individual/Teams Toggle */}
           <div className="flex justify-center mb-4">
             <div
-              className={`flex p-1 rounded-xl ${theme === 'dark' ? 'bg-slate-800' : 'bg-slate-200'}`}
+              className={`flex p-1 rounded-xl ${themeClasses(theme, 'bg-slate-800', 'bg-slate-200')}`}
             >
               <button
                 onClick={() => setViewMode('individual')}
@@ -150,7 +155,7 @@ const LeaderboardScreen: React.FC<LeaderboardScreenProps> = ({ currentUser }) =>
           {/* Period Tabs */}
           <div className="flex justify-center mb-6">
             <div
-              className={`flex p-1 rounded-xl ${theme === 'dark' ? 'bg-slate-800' : 'bg-slate-200'}`}
+              className={`flex p-1 rounded-xl ${themeClasses(theme, 'bg-slate-800', 'bg-slate-200')}`}
             >
               {TABS.map(tab => (
                 <button
@@ -205,7 +210,7 @@ const LeaderboardScreen: React.FC<LeaderboardScreenProps> = ({ currentUser }) =>
                         transition={{ delay: index * 0.05 }}
                         key={team.id}
                         className={`flex items-center justify-between p-4 rounded-2xl border transition-all
-                          ${theme === 'dark' ? 'bg-slate-800 border-slate-700' : 'bg-white border-slate-200 shadow-sm'}
+                          ${themeClasses(theme, 'bg-slate-800 border-slate-700', 'bg-white border-slate-200 shadow-sm')}
                         `}
                       >
                         <div className="flex items-center gap-4">
@@ -305,7 +310,7 @@ const LeaderboardScreen: React.FC<LeaderboardScreenProps> = ({ currentUser }) =>
                         }
                       }}
                       className={`flex items-center justify-between p-4 rounded-2xl border cursor-pointer transition-all hover:scale-[1.02]
-                          ${isMe ? 'border-sky-500 bg-sky-500/10 shadow-lg shadow-sky-500/10' : theme === 'dark' ? 'bg-slate-800 border-slate-700 hover:border-slate-600' : 'bg-white border-slate-200 hover:border-sky-200 shadow-sm'}
+                          ${isMe ? 'border-sky-500 bg-sky-500/10 shadow-lg shadow-sky-500/10' : themeClasses(theme, 'bg-slate-800 border-slate-700 hover:border-slate-600', 'bg-white border-slate-200 hover:border-sky-200 shadow-sm')}
                         `}
                     >
                       <div className="flex items-center gap-4">
@@ -317,7 +322,7 @@ const LeaderboardScreen: React.FC<LeaderboardScreenProps> = ({ currentUser }) =>
                           {index + 1}
                         </div>
                         <div>
-                          <div className="font-bold text-sm flex items-center gap-1 font-inter">
+                          <div className="font-bold text-sm flex items-center gap-2 font-inter">
                             {formatUsername(s.username)}
                             {isMe && (
                               <span className="text-[10px] bg-sky-500 text-white px-1.5 rounded-full font-inter">

@@ -1,72 +1,62 @@
-import { getRedirectResult, updateProfile } from 'firebase/auth';
 import { AnimatePresence } from 'framer-motion';
-import React, { Suspense, lazy, useEffect } from 'react';
+import React, { Suspense } from 'react';
 import { Route, Routes, useLocation, useNavigate } from 'react-router-dom';
-import { auth } from './firebase';
-import { ensureUserProfile, getUserByEmail, getUserByUid } from './utils/social';
-
-// Eagerly loaded (needed immediately)
-import AnnouncementModal from './components/AnnouncementModal';
-import DebugOverlay from './components/DebugOverlay';
-import TopBar from './components/TopBar';
-
-// Lazy loaded (route-based code splitting)
-const GameScreen = lazy(() => import('./features/game/components/GameScreen'));
-const AboutScreen = lazy(() => import('./components/AboutScreen'));
-const AdminPanel = lazy(() => import('./components/admin/AdminPanel'));
-const AdminRoute = lazy(() => import('./components/admin/AdminRoute'));
-const FeedbackScreen = lazy(() => import('./components/FeedbackScreen'));
-const FriendsScreen = lazy(() => import('./features/friends/components/FriendsScreen'));
-const LeaderboardScreen = lazy(() => import('./features/leaderboard/components/LeaderboardScreen'));
-const NewsScreen = lazy(() => import('./components/NewsScreen'));
-const ProfileScreen = lazy(() => import('./features/profile/components/ProfileScreen'));
-const PublicProfileScreen = lazy(() => import('./features/profile/components/PublicProfileScreen'));
-const SettingsScreen = lazy(() => import('./components/SettingsScreen'));
-const ShopScreen = lazy(() => import('./features/shop/components/ShopScreen'));
-const StreetsFetcher = lazy(() => import('./features/game/components/StreetsFetcher'));
-const PrivacyPolicy = lazy(() => import('./components/PrivacyPolicy'));
-const TermsOfService = lazy(() => import('./components/TermsOfService'));
-const VerifyEmailScreen = lazy(() => import('./features/auth/components/VerifyEmailScreen'));
-const AchievementModal = lazy(() => import('./components/AchievementModal'));
-const ConfirmDialog = lazy(() =>
-  import('./components/ConfirmDialog').then(m => ({ default: m.ConfirmDialog }))
-);
-const DistrictSelectionModal = lazy(() => import('./components/DistrictSelectionModal'));
-
 import { STORAGE_KEYS } from './config/constants';
+import { GameProvider } from './context/GameContext';
 import { useTheme } from './context/ThemeContext';
 import { useAuth } from './features/auth/hooks/useAuth';
 import { useGameState } from './features/game/hooks/useGameState';
 import { useStreets } from './features/game/hooks/useStreets';
 import { useAchievements } from './hooks/useAchievements';
 import { useAnnouncements } from './hooks/useAnnouncements';
+import { useAuthRedirect } from './hooks/useAuthRedirect';
+import { useConfirm } from './hooks/useConfirm';
 import { GameHistory } from './types/user';
 import { getTodaySeed, hasPlayedToday } from './utils/dailyChallenge';
-import { debugLog } from './utils/debug';
 import { storage } from './utils/storage';
+import { themeClasses } from './utils/themeUtils';
 
-import { useConfirm } from './hooks/useConfirm';
-import { normalizeUsername } from './utils/format';
-import { getUserProfile } from './utils/social';
+// Eagerly loaded components
+import AnnouncementModal from './components/AnnouncementModal';
+import DebugOverlay from './components/DebugOverlay';
+import TopBar from './components/TopBar';
 
-// Loading fallback component
-const PageLoader = () => (
-  <div className="flex items-center justify-center h-full">
-    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-sky-500" />
-  </div>
-);
+// Lazy loaded routes
+import {
+  AboutScreen,
+  AchievementModal,
+  AdminPanel,
+  AdminRoute,
+  ConfirmDialog,
+  DistrictSelectionModal,
+  FeedbackScreen,
+  FriendsScreen,
+  GameScreen,
+  LeaderboardScreen,
+  NewsScreen,
+  PageLoader,
+  PrivacyPolicy,
+  ProfileScreen,
+  PublicProfileScreen,
+  SettingsScreen,
+  ShopScreen,
+  StreetsFetcher,
+  TermsOfService,
+  VerifyEmailScreen,
+} from './routes';
 
 const AppRoutes: React.FC = () => {
-  const { theme, t, deviceMode } = useTheme();
+  const { theme, t } = useTheme();
   const location = useLocation();
   const navigate = useNavigate();
+
   // Street data hook
   const { validStreets, getHintStreets, isLoading: isLoadingStreets } = useStreets();
 
   // Confirmation Hook
   const { confirm, confirmConfig, handleClose } = useConfirm();
 
-  // Game Logic Hook - Always call this, even if streets are empty initially
+  // Game Logic Hook
   const {
     state,
     dispatch,
@@ -77,6 +67,12 @@ const AppRoutes: React.FC = () => {
     handleRegister,
     processAnswer,
   } = useGameState(validStreets, getHintStreets);
+
+  // Auth redirect handling (Google OAuth + district modal)
+  const { showDistrictModal, isProcessingRedirect, handleDistrictComplete } = useAuthRedirect({
+    username: state.username,
+    handleRegister,
+  });
 
   // Announcement hook
   const { pendingAnnouncement, dismissAnnouncement, checkAnnouncements } = useAnnouncements(
@@ -98,210 +94,7 @@ const AppRoutes: React.FC = () => {
   );
   const handleLogout = () => performLogout(navigate);
 
-  const [showDistrictModal, setShowDistrictModal] = React.useState(false);
-  const [isProcessingRedirect, setIsProcessingRedirect] = React.useState(false);
-  const [hasProcessedRedirect, setHasProcessedRedirect] = React.useState(false);
-
-  // Track district selection state with a ref (not affected by closures)
-  // This is set to true BEFORE showing modal and stays true for the session
-  const districtFlowActive = React.useRef(false);
-
-  // Handle Google redirect result for Mobile Safari
-  useEffect(() => {
-    // Skip if we've already processed a redirect result this session
-    if (hasProcessedRedirect) {
-      return;
-    }
-
-    const handleRedirectResult = async () => {
-      debugLog('Running handleRedirectResult...');
-      console.warn('[Auth Redirect] Starting redirect result check...');
-      try {
-        setIsProcessingRedirect(true);
-        const result = await getRedirectResult(auth);
-        debugLog(`getRedirectResult: ${result ? 'User found' : 'NULL'}`);
-
-        // Only block useAuth if we actually have a redirect result to process
-        // This prevents blocking useAuth when there's no redirect (normal app load)
-        if (result?.user) {
-          sessionStorage.setItem('girify_processing_redirect', 'true');
-        }
-
-        console.warn(
-          '[Auth Redirect] getRedirectResult returned:',
-          result ? 'User found' : 'No user'
-        );
-
-        if (result?.user) {
-          setHasProcessedRedirect(true);
-          // Clear the redirect pending flag on successful redirect
-          sessionStorage.removeItem('girify_redirect_pending');
-          debugLog(`Processing User UID: ${result.user.uid}`);
-          console.warn('[Auth Redirect] Processing user:', result.user.uid, result.user.email);
-
-          const user = result.user;
-          let handle = user.displayName || '';
-          // eslint-disable-next-line no-magic-numbers
-          let avatarId = Math.floor(Math.random() * 20) + 1;
-          const fullName = user.displayName || user.email?.split('@')[0] || 'User';
-
-          // Check for existing profile by UID first, then email
-          console.warn('[Auth Redirect] Checking for existing profile...');
-          let existingProfile = (await getUserByUid(user.uid)) as any;
-          console.warn('[Auth Redirect] Profile by UID:', existingProfile ? 'Found' : 'Not found');
-
-          if (!existingProfile) {
-            existingProfile = (await getUserByEmail(user.email || '')) as any;
-            console.warn(
-              '[Auth Redirect] Profile by email:',
-              existingProfile ? 'Found' : 'Not found'
-            );
-          }
-
-          if (existingProfile) {
-            // Existing user - use their handle and district
-            handle = existingProfile.username || handle || fullName;
-            if (!handle.startsWith('@')) {
-              handle = `@${handle}`;
-            }
-            avatarId = existingProfile.avatarId || avatarId;
-            console.warn(
-              '[Auth Redirect] Existing user handle:',
-              handle,
-              'district:',
-              existingProfile.district
-            );
-
-            // Ensure profile is up to date
-            if (existingProfile.district) {
-              await ensureUserProfile(handle, user.uid, {
-                realName: fullName,
-                avatarId,
-                email: user.email || undefined,
-                district: existingProfile.district,
-              });
-
-              // Clear referrer for existing users (they can't be referred again)
-              storage.remove(STORAGE_KEYS.REFERRER);
-
-              // Complete registration
-              console.warn('[Auth Redirect] Calling handleRegister with:', handle);
-              handleRegister(handle);
-            } else {
-              // Existing user but no district - show district modal
-              console.warn('[Auth Redirect] User exists but no district, showing modal');
-              if (user.displayName !== handle) {
-                await updateProfile(user, { displayName: handle });
-              }
-              // Set username so district modal can use it
-              storage.set(STORAGE_KEYS.USERNAME, handle);
-              // dispatch({ type: 'SET_USERNAME', payload: handle }); // Handled by useAuth
-
-              // Mark district flow as active BEFORE showing modal to prevent race conditions
-              districtFlowActive.current = true;
-              setShowDistrictModal(true);
-            }
-          } else {
-            // New user - generate handle and show district modal
-            const namePart = (fullName.split(' ')[0] || 'User').replace(/[^a-zA-Z0-9]/g, '');
-            // eslint-disable-next-line no-magic-numbers
-            handle = `@${namePart}${Math.floor(1000 + Math.random() * 9000)}`;
-            console.warn('[Auth Redirect] New user, generated handle:', handle);
-
-            if (user.displayName !== handle) {
-              await updateProfile(user, { displayName: handle });
-            }
-
-            // Set username so district modal can use it
-            storage.set(STORAGE_KEYS.USERNAME, handle);
-            // dispatch({ type: 'SET_USERNAME', payload: handle }); // Handled by useAuth
-
-            // Will need district selection before completing registration
-            console.warn('[Auth Redirect] Showing district modal for new user');
-            // Mark district flow as active BEFORE showing modal to prevent race conditions
-            districtFlowActive.current = true;
-            setShowDistrictModal(true);
-          }
-
-          console.warn('[Auth Redirect] Completed successfully');
-        } else {
-          console.warn('[Auth Redirect] No redirect result to process');
-
-          // Check if we were expecting a redirect
-          const pendingRedirect = sessionStorage.getItem('girify_redirect_pending');
-          if (pendingRedirect) {
-            console.error(
-              '[Auth Redirect] Redirect flow incomplete. Possible mobile browser storage issue.'
-            );
-            sessionStorage.removeItem('girify_redirect_pending');
-          }
-          // No redirect result - useAuth will handle the auth state normally
-        }
-      } catch (err) {
-        console.error('[Auth Redirect] Error:', err);
-      } finally {
-        setIsProcessingRedirect(false);
-        // Clear the redirect processing flag (if not already cleared)
-        sessionStorage.removeItem('girify_processing_redirect');
-      }
-    };
-
-    handleRedirectResult();
-  }, [hasProcessedRedirect]); // Run only once on mount (guard prevents re-runs)
-
-  // Track which username we've checked for district this app lifecycle
-  const checkedDistrictForUsername = React.useRef<string | null>(null);
-
-  // Check for missing district - only once per username
-  React.useEffect(() => {
-    const checkDistrict = async () => {
-      // Skip if district flow is already active (set before modal shows)
-      if (districtFlowActive.current) {
-        console.warn('[District Check] Skipping - district flow already active');
-        return;
-      }
-
-      const currentUsername = state.username;
-      if (!currentUsername || normalizeUsername(currentUsername).startsWith('guest')) {
-        return;
-      }
-
-      // Skip if we've already checked this specific username
-      if (checkedDistrictForUsername.current === currentUsername) {
-        console.warn('[District Check] Skipping - already checked for username:', currentUsername);
-        return;
-      }
-
-      // Mark this username as checked immediately to prevent duplicate checks
-      checkedDistrictForUsername.current = currentUsername;
-      console.warn('[District Check] Checking district for:', currentUsername);
-
-      try {
-        const profile = await getUserProfile(currentUsername);
-        console.warn('[District Check] Profile district:', profile?.district);
-        if (profile && !profile.district) {
-          // Double-check ref again after async operation
-          if (districtFlowActive.current) {
-            console.warn('[District Check] Skipping modal - flow became active during fetch');
-            return;
-          }
-          districtFlowActive.current = true;
-          setShowDistrictModal(true);
-        }
-      } catch (e) {
-        console.error('Error checking district:', e);
-        // Reset the check flag on error so it can retry
-        checkedDistrictForUsername.current = null;
-      }
-    };
-
-    // Simple debounce/delay to avoid checking too early
-    const timeout = setTimeout(checkDistrict, 2000);
-    return () => clearTimeout(timeout);
-  }, [state.username]);
-
-  // Show loader while streets are initializing or processing redirect
-  // This MUST be after all hooks are declared
+  // Show loader while initializing
   if (isLoadingStreets || isProcessingRedirect) {
     return <PageLoader />;
   }
@@ -310,16 +103,15 @@ const AppRoutes: React.FC = () => {
     // Check if user is in the middle of a game
     if (state.gameState === 'playing' && state.currentQuestionIndex < state.quizStreets.length) {
       const confirmed = await confirm(
-        t('exitGameWarning') ||
-          'Exit game? Your current score will be saved. You can play again anytime!',
+        t('exitGameWarning') || 'Exit game? Your current score will be saved.',
         'Exit Game',
         true
       );
       if (!confirmed) {
         return;
-      } // Don't navigate if user cancels
+      }
 
-      // User confirmed - save current progress before exiting
+      // Save partial progress
       try {
         const history = storage.get<GameHistory[]>(STORAGE_KEYS.HISTORY, []);
         const avgTime = state.quizResults.length
@@ -329,37 +121,28 @@ const AppRoutes: React.FC = () => {
             ).toFixed(1)
           : 0;
 
-        const partialRecord = {
+        history.push({
           date: getTodaySeed().toString(),
           score: state.score,
           avgTime: avgTime.toString(),
           timestamp: Date.now(),
           username: state.username || 'guest',
-          incomplete: true, // Mark as incomplete
-        };
-        history.push(partialRecord);
+          incomplete: true,
+        });
         storage.set(STORAGE_KEYS.HISTORY, history);
-
-        // Deprecated: saveScore() is legacy code
-        // Scores are now saved via useGamePersistence hook using Redis → Supabase flow
-        // Partial games (interrupted) are stored locally but not submitted to leaderboard
       } catch (e) {
         console.error('[Game] Error saving partial progress:', e);
       }
 
-      // Reset game state to intro so game can be restarted
       dispatch({ type: 'SET_GAME_STATE', payload: 'summary' });
     }
 
-    // If null/undefined, go home. Else go to page.
     navigate(page ? `/${page}` : '/');
   };
 
   return (
     <div
-      className={`fixed inset-0 w-full h-full flex flex-col overflow-hidden transition-colors duration-500
-            bg-slate-50 ${theme === 'dark' ? 'text-white' : 'text-slate-900'}
-        `}
+      className={`fixed inset-0 w-full h-full flex flex-col overflow-hidden transition-colors duration-500 bg-slate-50 ${themeClasses(theme, 'text-white', 'text-slate-900')}`}
     >
       <TopBar
         onOpenPage={handleOpenPage}
@@ -372,14 +155,12 @@ const AppRoutes: React.FC = () => {
         onLogout={handleLogout}
       />
 
-      {/* Announcement Modal */}
+      {/* Modals */}
       <AnimatePresence>
         {pendingAnnouncement && (
           <AnnouncementModal announcement={pendingAnnouncement} onDismiss={dismissAnnouncement} />
         )}
       </AnimatePresence>
-
-      {/* Achievement Modal */}
       <AnimatePresence>
         {newlyUnlockedBadge && (
           <Suspense fallback={null}>
@@ -387,27 +168,18 @@ const AppRoutes: React.FC = () => {
           </Suspense>
         )}
       </AnimatePresence>
-
-      {/* District Selection Modal */}
       <AnimatePresence>
         {showDistrictModal && (
           <Suspense fallback={null}>
             <DistrictSelectionModal
               username={state.username || ''}
-              onComplete={() => {
-                console.warn('[District Modal] Completing district selection');
-                // districtFlowActive.current stays true (was set before modal opened)
-                setShowDistrictModal(false);
-                // If user has a username set, complete the registration
-                if (state.username) {
-                  handleRegister(state.username);
-                }
-              }}
+              onComplete={handleDistrictComplete}
             />
           </Suspense>
         )}
       </AnimatePresence>
 
+      {/* Routes */}
       <Suspense fallback={<PageLoader />}>
         <AnimatePresence mode="wait">
           <Routes location={location} key={location.pathname}>
@@ -419,20 +191,23 @@ const AppRoutes: React.FC = () => {
                 state.username && !emailVerified ? (
                   <VerifyEmailScreen theme={theme as 'light' | 'dark'} />
                 ) : (
-                  <GameScreen
-                    state={state}
-                    dispatch={dispatch}
-                    theme={theme as 'light' | 'dark'}
-                    deviceMode={deviceMode}
-                    t={t}
-                    currentStreet={currentStreet}
-                    handleSelectAnswer={handleSelectAnswer}
-                    handleNext={handleNext}
-                    processAnswer={processAnswer}
-                    setupGame={setupGame}
-                    handleRegister={handleRegister}
-                    hasPlayedToday={hasPlayedToday}
-                  />
+                  <GameProvider
+                    value={{
+                      state,
+                      dispatch,
+                      currentStreet,
+                      handlers: {
+                        handleSelectAnswer,
+                        handleNext,
+                        processAnswer,
+                        setupGame,
+                        handleRegister,
+                        hasPlayedToday,
+                      },
+                    }}
+                  >
+                    <GameScreen />
+                  </GameProvider>
                 )
               }
             />
@@ -489,8 +264,6 @@ const AppRoutes: React.FC = () => {
                 />
               }
             />
-
-            {/* Admin Route */}
             <Route element={<AdminRoute />}>
               <Route path="/admin" element={<AdminPanel />} />
               <Route path="/fetch-streets" element={<StreetsFetcher />} />
@@ -499,7 +272,7 @@ const AppRoutes: React.FC = () => {
         </AnimatePresence>
       </Suspense>
 
-      {/* Global Copyright Footer */}
+      {/* Footer */}
       <div className="absolute bottom-1 left-0 right-0 text-center pointer-events-none opacity-40 mix-blend-difference pb-4">
         <p className="text-[10px] font-medium text-slate-500 dark:text-slate-400 font-inter">
           © 2025 Girify. All rights reserved.
@@ -517,7 +290,6 @@ const AppRoutes: React.FC = () => {
         />
       </Suspense>
 
-      {/* DEBUG OVERLAY - RESTORED FOR LEADERBOARD DEBUG */}
       <DebugOverlay />
     </div>
   );

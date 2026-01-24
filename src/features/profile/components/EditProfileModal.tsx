@@ -2,6 +2,7 @@ import { AnimatePresence, motion } from 'framer-motion';
 import React, { useState } from 'react';
 import { useTheme } from '../../../context/ThemeContext';
 import { ShopItem } from '../../../utils/shop';
+import { themeClasses } from '../../../utils/themeUtils';
 
 interface EditProfileModalProps {
   isOpen: boolean;
@@ -52,9 +53,7 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
           exit={{ opacity: 0, scale: 0.95 }}
-          className={`w-full max-w-md rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh] ${
-            theme === 'dark' ? 'bg-slate-900 text-white' : 'bg-white text-slate-900'
-          }`}
+          className={`w-full max-w-md rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh] ${themeClasses(theme, 'bg-slate-900 text-white', 'bg-white text-slate-900')}`}
         >
           {/* Header */}
           <div className="p-4 border-b border-slate-200 dark:border-slate-800 flex justify-between items-center">
@@ -78,11 +77,7 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({
                 type="text"
                 value={name}
                 onChange={e => setName(e.target.value)}
-                className={`w-full px-4 py-3 rounded-xl outline-none border-2 focus:border-sky-500 transition-colors ${
-                  theme === 'dark'
-                    ? 'bg-slate-800 border-slate-700'
-                    : 'bg-slate-50 border-slate-200'
-                }`}
+                className={`w-full px-4 py-3 rounded-xl outline-none border-2 focus:border-sky-500 transition-colors ${themeClasses(theme, 'bg-slate-800 border-slate-700', 'bg-slate-50 border-slate-200')}`}
                 placeholder="Enter your name"
               />
             </div>
@@ -92,7 +87,7 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({
               <label className="block text-sm font-bold mb-2 opacity-70">
                 {t('avatar') || 'Avatar'}
               </label>
-              <div className="grid grid-cols-4 gap-3">
+              <div className="grid grid-cols-4 gap-4">
                 {ownedAvatars.map(avatar => {
                   const isSelected = selectedAvatarId === avatar.id;
                   const img = getAvatarImage(avatar.id);
@@ -130,7 +125,7 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({
               <label className="block text-sm font-bold mb-2 opacity-70">
                 {t('frame') || 'Frame'}
               </label>
-              <div className="grid grid-cols-4 gap-3">
+              <div className="grid grid-cols-4 gap-4">
                 {ownedFrames.map(frame => {
                   const isSelected = selectedFrameId === frame.id;
                   return (
@@ -157,7 +152,7 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({
           </div>
 
           {/* Footer */}
-          <div className="p-4 border-t border-slate-200 dark:border-slate-800 flex gap-3">
+          <div className="p-4 border-t border-slate-200 dark:border-slate-800 flex gap-4">
             <button
               onClick={onClose}
               className="flex-1 py-3 font-bold rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"

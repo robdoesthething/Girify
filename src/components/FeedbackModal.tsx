@@ -1,7 +1,8 @@
 import { AnimatePresence, motion } from 'framer-motion';
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useReducer, useRef, useState } from 'react';
 import { useTheme } from '../context/ThemeContext';
 import { submitFeedback } from '../utils/social';
+import { themeClasses, themeValue } from '../utils/themeUtils';
 
 // Constants
 const CAPTCHA_CHARS = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
@@ -44,7 +45,7 @@ const generateCaptcha = (canvas: HTMLCanvasElement, theme: string): string => {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 
   // Background
-  ctx.fillStyle = theme === 'dark' ? '#1e293b' : '#f1f5f9';
+  ctx.fillStyle = themeValue(theme as 'light' | 'dark', '#1e293b', '#f1f5f9');
   ctx.fillRect(0, 0, canvas.width, canvas.height);
 
   // Generate random string
@@ -69,7 +70,7 @@ const generateCaptcha = (canvas: HTMLCanvasElement, theme: string): string => {
 
     ctx.translate(x, y);
     ctx.rotate(angle);
-    ctx.fillStyle = theme === 'dark' ? '#38bdf8' : '#0284c7';
+    ctx.fillStyle = themeValue(theme as 'light' | 'dark', '#38bdf8', '#0284c7');
     ctx.fillText(char || '', 0, 0);
     ctx.restore();
   }
@@ -77,7 +78,7 @@ const generateCaptcha = (canvas: HTMLCanvasElement, theme: string): string => {
   // Add lines/dots for noise
   for (let i = 0; i < CAPTCHA_NOISE_COUNT; i++) {
     ctx.beginPath();
-    ctx.strokeStyle = theme === 'dark' ? '#ffffff20' : '#00000010';
+    ctx.strokeStyle = themeValue(theme as 'light' | 'dark', '#ffffff20', '#00000010');
     ctx.lineWidth = CAPTCHA_LINE_WIDTH;
     ctx.moveTo(Math.random() * canvas.width, Math.random() * canvas.height);
     ctx.lineTo(Math.random() * canvas.width, Math.random() * canvas.height);
@@ -105,20 +106,57 @@ const FeedbackSuccess: React.FC<{ t: (key: string) => string }> = ({ t }) => (
   </motion.div>
 );
 
+interface FormState {
+  feedback: string;
+  isSubmitting: boolean;
+  captchaString: string;
+  captchaAnswer: string;
+  error: string | null;
+}
+
+type FormAction =
+  | { type: 'SET_FEEDBACK'; payload: string }
+  | { type: 'SET_SUBMITTING'; payload: boolean }
+  | { type: 'SET_CAPTCHA_STRING'; payload: string }
+  | { type: 'SET_CAPTCHA_ANSWER'; payload: string }
+  | { type: 'SET_ERROR'; payload: string | null };
+
+function formReducer(state: FormState, action: FormAction): FormState {
+  switch (action.type) {
+    case 'SET_FEEDBACK':
+      return { ...state, feedback: action.payload };
+    case 'SET_SUBMITTING':
+      return { ...state, isSubmitting: action.payload };
+    case 'SET_CAPTCHA_STRING':
+      return { ...state, captchaString: action.payload };
+    case 'SET_CAPTCHA_ANSWER':
+      return { ...state, captchaAnswer: action.payload };
+    case 'SET_ERROR':
+      return { ...state, error: action.payload };
+    default:
+      return state;
+  }
+}
+
 const FeedbackForm: React.FC<FeedbackFormProps> = ({ username, onSuccess, onClose, isInline }) => {
   const { theme, t } = useTheme();
-  const [feedback, setFeedback] = useState('');
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [captchaString, setCaptchaString] = useState('');
-  const [captchaAnswer, setCaptchaAnswer] = useState('');
-  const [error, setError] = useState<string | null>(null);
+
+  const [formState, dispatch] = useReducer(formReducer, {
+    feedback: '',
+    isSubmitting: false,
+    captchaString: '',
+    captchaAnswer: '',
+    error: null,
+  });
+
+  const { feedback, isSubmitting, captchaString, captchaAnswer, error } = formState;
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   const handleDrawCaptcha = useCallback(() => {
     const canvas = canvasRef.current;
     if (canvas) {
       const str = generateCaptcha(canvas, theme);
-      setCaptchaString(str);
+      dispatch({ type: 'SET_CAPTCHA_STRING', payload: str });
     }
   }, [theme]);
 
@@ -135,17 +173,17 @@ const FeedbackForm: React.FC<FeedbackFormProps> = ({ username, onSuccess, onClos
     }
 
     if (captchaAnswer.toUpperCase() !== captchaString) {
-      setError('Incorrect code. Please try again.');
+      dispatch({ type: 'SET_ERROR', payload: 'Incorrect code. Please try again.' });
       handleDrawCaptcha();
-      setCaptchaAnswer('');
+      dispatch({ type: 'SET_CAPTCHA_ANSWER', payload: '' });
       return;
     }
-    setError(null);
+    dispatch({ type: 'SET_ERROR', payload: null });
 
-    setIsSubmitting(true);
+    dispatch({ type: 'SET_SUBMITTING', payload: true });
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     await (submitFeedback as any)(username, feedback || '');
-    setIsSubmitting(false);
+    dispatch({ type: 'SET_SUBMITTING', payload: false });
     onSuccess();
   };
 
@@ -159,7 +197,7 @@ const FeedbackForm: React.FC<FeedbackFormProps> = ({ username, onSuccess, onClos
           {t('whatFeaturesTitle') || 'What features do you want?'}
         </h3>
         <div className="bg-yellow-100 dark:bg-yellow-900/30 px-3 py-1 rounded-full border border-yellow-200 dark:border-yellow-700/50">
-          <p className="text-xs font-bold text-yellow-700 dark:text-yellow-400 flex items-center gap-1 font-inter">
+          <p className="text-xs font-bold text-yellow-700 dark:text-yellow-400 flex items-center gap-2 font-inter">
             <img src="/giuro.png" className="w-4 h-4" alt="G" />
             {t('earnForFeedback') || 'Payout depends on quality'}
           </p>
@@ -169,18 +207,14 @@ const FeedbackForm: React.FC<FeedbackFormProps> = ({ username, onSuccess, onClos
       <form onSubmit={handleSubmit}>
         <textarea
           value={feedback}
-          onChange={e => setFeedback(e.target.value)}
+          onChange={e => dispatch({ type: 'SET_FEEDBACK', payload: e.target.value })}
           placeholder={t('feedbackPlaceholderFeatures') || 'I wish the game had...'}
-          className={`w-full h-32 p-4 rounded-xl resize-none outline-none border focus:ring-2 focus:ring-sky-500 transition-all mb-4 font-inter ${
-            theme === 'dark'
-              ? 'bg-slate-900 border-slate-700 placeholder-slate-600'
-              : 'bg-slate-50 border-slate-200 placeholder-slate-400'
-          }`}
+          className={`w-full h-32 p-4 rounded-xl resize-none outline-none border focus:ring-2 focus:ring-sky-500 transition-all mb-4 font-inter ${themeClasses(theme, 'bg-slate-900 border-slate-700 placeholder-slate-600', 'bg-slate-50 border-slate-200 placeholder-slate-400')}`}
         />
 
         {/* Canvas Captcha */}
         <div className="flex flex-col gap-2 mb-4">
-          <div className="flex items-center gap-3 bg-slate-50 dark:bg-slate-900/50 p-3 rounded-lg border border-slate-200 dark:border-slate-700">
+          <div className="flex items-center gap-4 bg-slate-50 dark:bg-slate-900/50 p-3 rounded-lg border border-slate-200 dark:border-slate-700">
             <canvas
               ref={canvasRef}
               width={CAPTCHA_WIDTH}
@@ -207,7 +241,7 @@ const FeedbackForm: React.FC<FeedbackFormProps> = ({ username, onSuccess, onClos
             <input
               type="text"
               value={captchaAnswer}
-              onChange={e => setCaptchaAnswer(e.target.value)}
+              onChange={e => dispatch({ type: 'SET_CAPTCHA_ANSWER', payload: e.target.value })}
               placeholder="Type Code"
               className="flex-1 p-2 rounded-md border outline-none focus:ring-2 focus:ring-sky-500 uppercase tracking-widest text-center font-bold dark:bg-slate-800 dark:border-slate-600 dark:text-white font-inter"
               maxLength={CAPTCHA_LENGTH}
@@ -224,16 +258,12 @@ const FeedbackForm: React.FC<FeedbackFormProps> = ({ username, onSuccess, onClos
           </div>
         )}
 
-        <div className="flex gap-3">
+        <div className="flex gap-4">
           {!isInline && (
             <button
               type="button"
               onClick={onClose}
-              className={`flex-1 py-3 rounded-xl font-bold text-sm transition-colors font-inter ${
-                theme === 'dark'
-                  ? 'bg-slate-700 hover:bg-slate-600'
-                  : 'bg-slate-100 hover:bg-slate-200'
-              }`}
+              className={`flex-1 py-3 rounded-xl font-bold text-sm transition-colors font-inter ${themeClasses(theme, 'bg-slate-700 hover:bg-slate-600', 'bg-slate-100 hover:bg-slate-200')}`}
             >
               {t('cancel')}
             </button>
@@ -264,10 +294,8 @@ const FeedbackModal: React.FC<FeedbackModalProps> = ({ username, onClose, isInli
   }, [onClose]);
 
   const containerClasses = isInline
-    ? `w-full max-w-md p-6 rounded-[2.5rem] shadow-xl border ${theme === 'dark' ? 'bg-slate-800 border-slate-700' : 'bg-white border-slate-200'}`
-    : `w-full max-w-md p-6 rounded-3xl shadow-2xl ${
-        theme === 'dark' ? 'bg-slate-800 text-white' : 'bg-white text-slate-900'
-      }`;
+    ? `w-full max-w-md p-6 rounded-[2.5rem] shadow-xl border ${themeClasses(theme, 'bg-slate-800 border-slate-700', 'bg-white border-slate-200')}`
+    : `w-full max-w-md p-6 rounded-3xl shadow-2xl ${themeClasses(theme, 'bg-slate-800 text-white', 'bg-white text-slate-900')}`;
 
   const wrapperClasses = isInline
     ? ''

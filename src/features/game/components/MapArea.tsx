@@ -13,6 +13,7 @@ import {
 } from 'react-leaflet';
 import { LANDMARKS } from '../../../data/landmarks';
 import { logger } from '../../../utils/logger';
+import { themeClasses, themeValue } from '../../../utils/themeUtils';
 
 // Constants
 /* eslint-disable no-magic-numbers */
@@ -217,10 +218,11 @@ const MapArea: React.FC<MapAreaProps> = ({
 
   const [useFallbackTiles, setUseFallbackTiles] = useState(false);
 
-  const cartoUrl =
-    theme === 'dark'
-      ? 'https://{s}.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}{r}.png'
-      : 'https://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}{r}.png';
+  const cartoUrl = themeValue(
+    theme,
+    'https://{s}.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}{r}.png',
+    'https://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}{r}.png'
+  );
 
   const fallbackUrl = 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
 
@@ -286,7 +288,7 @@ const MapArea: React.FC<MapAreaProps> = ({
             <Polyline
               positions={boundary}
               pathOptions={{
-                color: theme === 'dark' ? '#334155' : '#cbd5e1',
+                color: themeValue(theme, '#334155', '#cbd5e1'),
                 weight: 2,
                 opacity: OPACITY_LOW,
                 dashArray: '5, 10',
@@ -344,7 +346,7 @@ const MapArea: React.FC<MapAreaProps> = ({
             <Polyline
               positions={geometry as L.LatLngExpression[][]}
               pathOptions={{
-                color: theme === 'dark' ? '#38bdf8' : '#000080', // Sky-400 for dark, Navy for light
+                color: themeValue(theme, '#38bdf8', '#000080'), // Sky-400 for dark, Navy for light
                 weight: currentZoom < INITIAL_ZOOM ? WEIGHT_NORMAL : WEIGHT_THIN,
                 opacity: OPACITY_HIGH,
                 lineCap: 'round',
@@ -355,10 +357,10 @@ const MapArea: React.FC<MapAreaProps> = ({
         </MapContainer>
 
         <div
-          className={`absolute top-0 left-0 w-full h-32 bg-gradient-to-b ${theme === 'dark' ? 'from-slate-900' : 'from-slate-50'} to-transparent pointer-events-none z-[400]`}
+          className={`absolute top-0 left-0 w-full h-32 bg-gradient-to-b ${themeClasses(theme, 'from-slate-900', 'from-slate-50')} to-transparent pointer-events-none z-[400]`}
         />
         <div
-          className={`absolute bottom-0 left-0 w-full h-32 bg-gradient-to-t ${theme === 'dark' ? 'from-slate-900' : 'from-slate-50'} to-transparent pointer-events-none z-[400]`}
+          className={`absolute bottom-0 left-0 w-full h-32 bg-gradient-to-t ${themeClasses(theme, 'from-slate-900', 'from-slate-50')} to-transparent pointer-events-none z-[400]`}
         />
       </div>
     );

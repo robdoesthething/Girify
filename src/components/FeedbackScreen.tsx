@@ -2,6 +2,7 @@ import { AnimatePresence, motion } from 'framer-motion';
 import React, { useState } from 'react';
 import { useTheme } from '../context/ThemeContext';
 import { submitFeedback } from '../utils/social';
+import { themeClasses } from '../utils/themeUtils';
 
 interface FeedbackScreenProps {
   username: string;
@@ -41,7 +42,7 @@ const FeedbackScreen: React.FC<FeedbackScreenProps> = ({ username, onClose }) =>
 
   return (
     <div
-      className={`fixed inset-0 z-[8000] flex flex-col pt-16 pb-6 px-4 md:px-8 overflow-hidden pointer-events-auto backdrop-blur-md ${theme === 'dark' ? 'bg-neutral-950 text-white' : 'bg-slate-50 text-slate-900'}`}
+      className={`fixed inset-0 z-[8000] flex flex-col pt-16 pb-6 px-4 md:px-8 overflow-hidden pointer-events-auto backdrop-blur-md ${themeClasses(theme, 'bg-neutral-950 text-white', 'bg-slate-50 text-slate-900')}`}
     >
       {/* Header */}
       <div className="flex items-center justify-between max-w-2xl mx-auto w-full mb-8 shrink-0 relative">
@@ -96,9 +97,7 @@ const FeedbackScreen: React.FC<FeedbackScreenProps> = ({ username, onClose }) =>
               </div>
 
               <div
-                className={`p-6 rounded-3xl border shadow-sm ${
-                  theme === 'dark' ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200'
-                }`}
+                className={`p-6 rounded-3xl border shadow-sm ${themeClasses(theme, 'bg-slate-900 border-slate-800', 'bg-white border-slate-200')}`}
               >
                 <form onSubmit={handleSubmit}>
                   <textarea
@@ -106,11 +105,7 @@ const FeedbackScreen: React.FC<FeedbackScreenProps> = ({ username, onClose }) =>
                     onChange={e => setFeedback(e.target.value)}
                     placeholder={t('feedbackPlaceholderFeatures') || 'I wish the game had...'}
                     aria-label="Your Feedback"
-                    className={`w-full h-48 p-4 rounded-xl resize-none outline-none border focus:ring-2 focus:ring-sky-500 transition-all mb-4 text-lg font-inter ${
-                      theme === 'dark'
-                        ? 'bg-slate-800 border-slate-700 placeholder-slate-600 text-white'
-                        : 'bg-slate-50 border-slate-200 placeholder-slate-400 text-slate-900'
-                    }`}
+                    className={`w-full h-48 p-4 rounded-xl resize-none outline-none border focus:ring-2 focus:ring-sky-500 transition-all mb-4 text-lg font-inter ${themeClasses(theme, 'bg-slate-800 border-slate-700 placeholder-slate-600 text-white', 'bg-slate-50 border-slate-200 placeholder-slate-400 text-slate-900')}`}
                   />
 
                   {/* Math Captcha */}
@@ -161,11 +156,7 @@ const FeedbackScreen: React.FC<FeedbackScreenProps> = ({ username, onClose }) =>
                   "Your feedback is under review. You'll be notified when approved!"}
               </p>
               <div
-                className={`px-6 py-3 rounded-xl font-bold border ${
-                  theme === 'dark'
-                    ? 'bg-yellow-900/20 text-yellow-400 border-yellow-700/50'
-                    : 'bg-yellow-50 text-yellow-700 border-yellow-200'
-                } flex items-center gap-2`}
+                className={`px-6 py-3 rounded-xl font-bold border ${themeClasses(theme, 'bg-yellow-900/20 text-yellow-400 border-yellow-700/50', 'bg-yellow-50 text-yellow-700 border-yellow-200')} flex items-center gap-2`}
               >
                 <img src="/giuro.png" className="w-5 h-5" alt="Giuros" />
                 <span className="font-inter">Reward Pending</span>

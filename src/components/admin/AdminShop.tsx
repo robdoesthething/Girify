@@ -8,6 +8,7 @@ import {
   syncWithLocal,
   updateShopItem,
 } from '../../utils/shop';
+import { themeClasses } from '../../utils/themeUtils';
 import AdminShopForm from './AdminShopForm';
 
 interface AdminShopProps {
@@ -75,7 +76,7 @@ const AdminShop: React.FC<AdminShopProps> = ({ items, onRefresh, notify, confirm
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <h2 className="text-3xl font-black">Shop Management</h2>
-        <div className="flex gap-3">
+        <div className="flex gap-4">
           <button
             onClick={async () => {
               if (
@@ -115,10 +116,10 @@ const AdminShop: React.FC<AdminShopProps> = ({ items, onRefresh, notify, confirm
       </div>
 
       <div
-        className={`rounded-2xl overflow-hidden border ${theme === 'dark' ? 'border-slate-700' : 'border-slate-200'}`}
+        className={`rounded-2xl overflow-hidden border ${themeClasses(theme, 'border-slate-700', 'border-slate-200')}`}
       >
         <table className="w-full text-left">
-          <thead className={theme === 'dark' ? 'bg-slate-800' : 'bg-slate-100'}>
+          <thead className={themeClasses(theme, 'bg-slate-800', 'bg-slate-100')}>
             <tr>
               <th className="p-4 text-xs uppercase opacity-50">Preview</th>
               <th className="p-4 text-xs uppercase opacity-50">ID / Name</th>
@@ -131,7 +132,7 @@ const AdminShop: React.FC<AdminShopProps> = ({ items, onRefresh, notify, confirm
             {items.all.map(item => (
               <tr
                 key={item.id}
-                className={theme === 'dark' ? 'hover:bg-slate-800/50' : 'hover:bg-slate-50'}
+                className={themeClasses(theme, 'hover:bg-slate-800/50', 'hover:bg-slate-50')}
               >
                 <td className="p-4">
                   {item.image ? (

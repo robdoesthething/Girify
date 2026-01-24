@@ -3,7 +3,7 @@ import { UI } from '../config/constants';
 import { getTranslation, LANGUAGES } from '../i18n/translations';
 
 interface ThemeContextType {
-  theme: string;
+  theme: 'light' | 'dark';
   themeMode: string;
   changeTheme: (mode: 'light' | 'dark' | 'auto') => void;
   toggleTheme: () => void;

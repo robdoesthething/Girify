@@ -70,7 +70,6 @@ export const useStreets = () => {
     const loadStreets = async () => {
       try {
         // Dynamic import to split chunk
-        // @ts-ignore
         const module = await import('../../../data/streets.json');
         const rawStreets = module.default as Street[];
 

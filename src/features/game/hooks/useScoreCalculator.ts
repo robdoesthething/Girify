@@ -1,5 +1,4 @@
 import { useCallback } from 'react';
-// @ts-ignore
 import { calculateScore as calculateScoreConfig } from '../../../config/gameConfig';
 
 /**

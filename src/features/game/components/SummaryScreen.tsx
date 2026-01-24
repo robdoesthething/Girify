@@ -6,6 +6,7 @@ import { useTheme } from '../../../context/ThemeContext';
 import { getCuriosityByStreets } from '../../../data/curiosities';
 import { calculateStreak } from '../../../utils/stats';
 import { storage } from '../../../utils/storage';
+import { themeClasses } from '../../../utils/themeUtils';
 import { fetchWikiImage } from '../../../utils/wiki';
 
 import { TIME, UI } from '../../../config/constants';
@@ -130,7 +131,7 @@ const SummaryScreen: React.FC<SummaryScreenProps> = ({
   return (
     <div
       className={`absolute inset-0 flex flex-col items-center justify-center p-6 text-center backdrop-blur-md transition-colors duration-500 pointer-events-auto overflow-y-auto font-inter z-[5000]
-            ${theme === 'dark' ? 'bg-slate-950/95 text-white' : 'bg-slate-50/95 text-slate-800'}`}
+            ${themeClasses(theme, 'bg-slate-950/95 text-white', 'bg-slate-50/95 text-slate-800')}`}
     >
       {view === 'curiosity' && (
         <motion.div
@@ -175,7 +176,7 @@ const SummaryScreen: React.FC<SummaryScreenProps> = ({
             </div>
           </div>
 
-          <div className="flex gap-3 w-full">
+          <div className="flex gap-4 w-full">
             <button
               onClick={handleShare}
               className="flex-1 py-4 bg-slate-200 dark:bg-white/5 hover:bg-slate-300 dark:hover:bg-white/10 border border-slate-300 dark:border-white/10 text-slate-800 dark:text-white rounded-2xl font-bold text-sm transition-all"
@@ -234,7 +235,7 @@ const SummaryScreen: React.FC<SummaryScreenProps> = ({
 
           <button
             onClick={handleShare}
-            className="w-full py-5 bg-gradient-to-r from-emerald-500 to-sky-500 hover:from-emerald-400 hover:to-sky-400 text-white rounded-2xl shadow-2xl font-black text-lg transition-all transform hover:scale-[1.02] mb-4 flex items-center justify-center gap-3 group"
+            className="w-full py-5 bg-gradient-to-r from-emerald-500 to-sky-500 hover:from-emerald-400 hover:to-sky-400 text-white rounded-2xl shadow-2xl font-black text-lg transition-all transform hover:scale-[1.02] mb-4 flex items-center justify-center gap-4 group"
           >
             <span className="text-2xl group-hover:rotate-12 transition-transform">🎁</span>
             <div className="flex flex-col items-start leading-none">

@@ -2,6 +2,7 @@ import { sendEmailVerification } from 'firebase/auth';
 import React from 'react';
 import { useTheme } from '../../../context/ThemeContext';
 import { auth } from '../../../firebase';
+import { themeClasses } from '../../../utils/themeUtils';
 
 interface VerifyEmailScreenProps {
   theme: 'light' | 'dark';
@@ -20,9 +21,7 @@ const VerifyEmailScreen: React.FC<VerifyEmailScreenProps> = ({ theme }) => {
 
   return (
     <div
-      className={`min-h-screen flex flex-col items-center justify-center p-6 text-center ${
-        theme === 'dark' ? 'bg-slate-950 text-white' : 'bg-slate-50 text-slate-900'
-      }`}
+      className={`min-h-screen flex flex-col items-center justify-center p-6 text-center ${themeClasses(theme, 'bg-slate-950 text-white', 'bg-slate-50 text-slate-900')}`}
     >
       <div className="max-w-md w-full glass-panel p-8">
         <div className="text-6xl mb-6">📧</div>

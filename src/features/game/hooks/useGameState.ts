@@ -1,27 +1,17 @@
 import { Dispatch, useCallback, useEffect, useMemo, useReducer } from 'react';
-import { startGame } from '../../../services/gameService';
-// @ts-ignore
-// @ts-ignore
-import { gameReducer, initialState } from '../../../reducers/gameReducer';
-import { getTodaySeed, shuffleOptions } from '../../../utils/dailyChallenge';
-// @ts-ignore
-// @ts-ignore
-// @ts-ignore
-import { calculateScore } from '../../../config/gameConfig';
-// @ts-ignore
-// @ts-ignore
-// @ts-ignore
-import { storage } from '../../../utils/storage';
-// @ts-ignore
-import quizPlan from '../../../data/quizPlan.json';
-// @ts-ignore
 import { GAME_LOGIC, STORAGE_KEYS, TIME } from '../../../config/constants';
+import { calculateScore } from '../../../config/gameConfig';
+import quizPlan from '../../../data/quizPlan.json';
+import { gameReducer, initialState } from '../../../reducers/gameReducer';
+import { startGame } from '../../../services/gameService';
 import { GameStateObject, QuizResult, Street } from '../../../types/game';
+import { getTodaySeed, shuffleOptions } from '../../../utils/dailyChallenge';
 import {
   calculateGameSetup,
   GameSetupResult,
   generateOptionsList,
 } from '../../../utils/gameHelpers';
+import { storage } from '../../../utils/storage';
 import { useGamePersistence } from './useGamePersistence';
 
 interface GameAction {

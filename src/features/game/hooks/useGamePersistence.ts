@@ -1,24 +1,18 @@
 import { useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-// @ts-ignore
-import { getTodaySeed, markTodayAsPlayed } from '../../../utils/dailyChallenge';
-// @ts-ignore
-import { endGame } from '../../../services/gameService';
-import { calculateStreak } from '../../../utils/stats';
-// @ts-ignore
-import { shouldPromptFeedback } from '../../../config/gameConfig';
-import { getReferrer, saveUserGameResult, updateUserGameStats } from '../../../utils/social';
-// @ts-ignore
-import { awardChallengeBonus, awardReferralBonus } from '../../../utils/giuros';
-// @ts-ignore
-import { storage } from '../../../utils/storage';
-// @ts-ignore
 import { STORAGE_KEYS, TIME } from '../../../config/constants';
+import { shouldPromptFeedback } from '../../../config/gameConfig';
 import { useAsyncOperation } from '../../../hooks/useAsyncOperation';
+import { endGame } from '../../../services/gameService';
 import { supabase } from '../../../services/supabase';
 import { GameStateObject, QuizResult } from '../../../types/game';
 import { GameHistory } from '../../../types/user';
+import { getTodaySeed, markTodayAsPlayed } from '../../../utils/dailyChallenge';
 import { debugLog } from '../../../utils/debug';
+import { awardChallengeBonus, awardReferralBonus } from '../../../utils/giuros';
+import { getReferrer, saveUserGameResult, updateUserGameStats } from '../../../utils/social';
+import { calculateStreak } from '../../../utils/stats';
+import { storage } from '../../../utils/storage';
 
 /**
  * Fallback function to save score directly to Supabase without Redis
@@ -96,7 +90,6 @@ export const useGamePersistence = () => {
             };
 
             // Save individual game history to Firebase User Profile
-            // @ts-ignore
             await saveUserGameResult(state.username, firestoreData);
 
             // [MIGRATION] Use Game Service to end game (Redis -> Supabase)

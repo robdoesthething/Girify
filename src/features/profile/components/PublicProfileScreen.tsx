@@ -15,6 +15,7 @@ import {
 } from '../../../utils/friends';
 import { getEquippedCosmetics } from '../../../utils/giuros';
 import { getUserGameHistory, getUserProfile, UserProfile } from '../../../utils/social';
+import { themeClasses } from '../../../utils/themeUtils';
 
 interface PublicProfileScreenProps {
   currentUser?: string;
@@ -163,7 +164,7 @@ const PublicProfileScreen: React.FC<PublicProfileScreenProps> = ({ currentUser }
 
   return (
     <div
-      className={`fixed inset-0 w-full h-full flex flex-col overflow-hidden transition-colors duration-500 ${theme === 'dark' ? 'bg-slate-900 text-white' : 'bg-slate-50 text-slate-900'}`}
+      className={`fixed inset-0 w-full h-full flex flex-col overflow-hidden transition-colors duration-500 ${themeClasses(theme, 'bg-slate-900 text-white', 'bg-slate-50 text-slate-900')}`}
     >
       <TopBar
         onOpenPage={page => navigate(page ? `/${page}` : '/')}
@@ -193,10 +194,10 @@ const PublicProfileScreen: React.FC<PublicProfileScreenProps> = ({ currentUser }
           </div>
 
           <div
-            className={`rounded-3xl shadow-xl overflow-hidden border ${theme === 'dark' ? 'bg-slate-800 border-slate-700' : 'bg-white border-slate-100'}`}
+            className={`rounded-3xl shadow-xl overflow-hidden border ${themeClasses(theme, 'bg-slate-800 border-slate-700', 'bg-white border-slate-100')}`}
           >
             <div
-              className={`p-8 flex flex-col items-center border-b relative ${theme === 'dark' ? 'border-slate-700 bg-slate-800/50' : 'border-slate-50'}`}
+              className={`p-8 flex flex-col items-center border-b relative ${themeClasses(theme, 'border-slate-700 bg-slate-800/50', 'border-slate-50')}`}
             >
               {loading ? (
                 <div className="w-24 h-24 rounded-full bg-slate-200 dark:bg-slate-700 animate-pulse mb-4" />
@@ -308,11 +309,11 @@ const PublicProfileScreen: React.FC<PublicProfileScreenProps> = ({ currentUser }
                       {t('achievements')} ({unlockedBadges.length})
                     </h3>
                     {unlockedBadges.length > 0 ? (
-                      <div className="grid grid-cols-4 sm:grid-cols-5 gap-3">
+                      <div className="grid grid-cols-4 sm:grid-cols-5 gap-4">
                         {unlockedBadges.map(badge => (
                           <div
                             key={badge.id}
-                            className={`flex flex-col items-center p-2 rounded-xl ${theme === 'dark' ? 'bg-slate-700/50' : 'bg-slate-50'}`}
+                            className={`flex flex-col items-center p-2 rounded-xl ${themeClasses(theme, 'bg-slate-700/50', 'bg-slate-50')}`}
                             title={badge.description}
                           >
                             {badge.image ? (
@@ -344,11 +345,11 @@ const PublicProfileScreen: React.FC<PublicProfileScreenProps> = ({ currentUser }
                         No recent games
                       </p>
                     ) : (
-                      <div className="space-y-3">
+                      <div className="space-y-4">
                         {history.slice(0, 5).map((game, i) => (
                           <div
                             key={i}
-                            className={`flex items-center justify-between p-3 rounded-xl border ${theme === 'dark' ? 'bg-slate-800/50 border-slate-700' : 'bg-white border-slate-100'}`}
+                            className={`flex items-center justify-between p-3 rounded-xl border ${themeClasses(theme, 'bg-slate-800/50 border-slate-700', 'bg-white border-slate-100')}`}
                           >
                             <div>
                               <p className="font-bold text-xs font-inter uppercase tracking-wider opacity-70">
@@ -402,7 +403,7 @@ const PublicProfileScreen: React.FC<PublicProfileScreenProps> = ({ currentUser }
                         <button
                           onClick={handleBlock}
                           disabled={blocking}
-                          className={`w-full py-3 rounded-xl text-sm font-bold transition-all opacity-60 hover:opacity-100 ${theme === 'dark' ? 'text-red-400 hover:bg-red-500/10' : 'text-red-500 hover:bg-red-50'}`}
+                          className={`w-full py-3 rounded-xl text-sm font-bold transition-all opacity-60 hover:opacity-100 ${themeClasses(theme, 'text-red-400 hover:bg-red-500/10', 'text-red-500 hover:bg-red-50')}`}
                           type="button"
                         >
                           {blocking ? 'Blocking...' : '🚫 Block User'}

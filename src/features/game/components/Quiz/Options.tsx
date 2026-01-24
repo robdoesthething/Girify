@@ -10,8 +10,6 @@ interface OptionsProps {
   onSelect: (option: Option) => void;
   selectedAnswer: Option | null;
   feedback: 'idle' | 'selected' | 'transitioning';
-  correctName?: string;
-  autoAdvance: boolean;
   disabled?: boolean;
 }
 
@@ -20,12 +18,11 @@ const Options: React.FC<OptionsProps> = ({
   onSelect,
   selectedAnswer,
   feedback,
-  autoAdvance: _autoAdvance,
   disabled,
 }) => {
   return (
     <div className="flex-1 min-h-0 flex flex-col justify-center px-4 pb-4">
-      <div className="grid grid-cols-2 sm:flex sm:flex-col gap-3 w-full max-w-lg mx-auto h-full sm:h-auto">
+      <div className="grid grid-cols-2 sm:flex sm:flex-col gap-4 w-full max-w-lg mx-auto h-full sm:h-auto">
         {options.map(opt => {
           const isSelected = selectedAnswer && opt.id === selectedAnswer.id;
           const isSubmitted = feedback !== 'idle' && feedback !== 'selected';
