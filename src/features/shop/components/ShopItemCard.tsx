@@ -5,8 +5,8 @@
  */
 
 import React from 'react';
+import { getActionButtonClass, getItemCardClass } from '../../../utils/buttonClasses';
 import type { ShopItem } from '../../../utils/shop';
-import { themeClasses } from '../../../utils/themeUtils';
 
 interface ShopItemCardProps {
   item: ShopItem;
@@ -37,27 +37,7 @@ const ShopItemCard: React.FC<ShopItemCardProps> = ({
   onEquip,
   onTitleClick,
 }) => {
-  const getItemCardClass = () => {
-    if (isEquipped) {
-      return 'border-4 border-sky-500 bg-sky-500/10 shadow-sky-500/20 shadow-xl';
-    }
-    return themeClasses(
-      theme,
-      'border-4 border-slate-700 bg-slate-800',
-      'border-4 border-slate-200 bg-white/50 backdrop-blur-sm shadow-lg'
-    );
-  };
-
-  const getEquipButtonClass = () => {
-    if (isEquipped) {
-      return 'bg-sky-500 text-white';
-    }
-    return themeClasses(
-      theme,
-      'bg-slate-700 hover:bg-slate-600',
-      'bg-slate-100 hover:bg-slate-200'
-    );
-  };
+  // Utility functions handled by buttonClasses.ts usage below
 
   const renderItemIcon = () => {
     if (item.cssClass) {
@@ -81,7 +61,7 @@ const ShopItemCard: React.FC<ShopItemCardProps> = ({
 
   return (
     <div
-      className={`relative flex flex-col p-4 rounded-2xl border transition-all h-full ${getItemCardClass()} bg-white/50 dark:bg-slate-800/50 backdrop-blur-sm`}
+      className={`relative flex flex-col p-4 rounded-2xl border transition-all h-full ${getItemCardClass(theme, isEquipped)} bg-white/50 dark:bg-slate-800/50 backdrop-blur-sm`}
     >
       {/* Locked Overlay */}
       {isLocked && !isOwned && (
@@ -122,7 +102,7 @@ const ShopItemCard: React.FC<ShopItemCardProps> = ({
           activeTab !== 'special' && (
             <button
               onClick={onEquip}
-              className={`w-full py-2 rounded-xl font-bold text-xs transition-all font-inter shadow-sm ${getEquipButtonClass()}`}
+              className={`w-full py-2 rounded-xl font-bold text-xs transition-all font-inter shadow-sm ${getActionButtonClass(theme, isEquipped)}`}
               type="button"
             >
               {isEquipped ? `✓ ${t('equipped')}` : t('equip')}
