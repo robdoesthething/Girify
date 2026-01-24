@@ -1,17 +1,18 @@
 import { AnimatePresence, motion } from 'framer-motion';
 import React, { useState } from 'react';
 import { useTheme } from '../../context/ThemeContext';
+import { useAdminCRUD } from '../../hooks/useAdminCRUD';
 import { Announcement, createAnnouncement, deleteAnnouncement } from '../../utils/news';
 import { themeClasses } from '../../utils/themeUtils';
+import FormInput from '../FormInput';
 
 interface AdminAnnouncementsProps {
   announcements: Announcement[];
   onRefresh: () => void;
-  notify: (msg: string, type: 'success' | 'error') => void;
+  notify: (msg: string, type: 'success' | 'error' | 'info') => void;
   confirm: (message: string, title?: string, isDangerous?: boolean) => Promise<boolean>;
 }
 
-// eslint-disable-next-line max-lines-per-function
 const AdminAnnouncements: React.FC<AdminAnnouncementsProps> = ({
   announcements,
   onRefresh,
@@ -20,7 +21,7 @@ const AdminAnnouncements: React.FC<AdminAnnouncementsProps> = ({
 }) => {
   const { theme } = useTheme();
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const [newAnnouncement, setNewAnnouncement] = useState<any>({
+  const [formData, setFormData] = useState<any>({
     title: '',
     body: '',
     priority: 'normal',
@@ -28,57 +29,46 @@ const AdminAnnouncements: React.FC<AdminAnnouncementsProps> = ({
     isActive: true,
     daysToLive: 7,
   });
-  const [isCreating, setIsCreating] = useState(false);
 
-  const handleCreate = async (e: React.FormEvent) => {
-    e.preventDefault();
-    try {
-      if (!newAnnouncement.title || !newAnnouncement.body) {
-        notify('Missing title or body', 'error');
-        return;
-      }
-
+  const { isCreating, setIsCreating, handleDelete, handleCreate } = useAdminCRUD({
+    notify,
+    confirm,
+    refreshFn: onRefresh,
+    deleteFn: deleteAnnouncement,
+    createFn: async data => {
       const publishDate = new Date();
       const expiryDate = new Date();
-      expiryDate.setDate(expiryDate.getDate() + parseInt(newAnnouncement.daysToLive, 10));
+      expiryDate.setDate(expiryDate.getDate() + parseInt(data.daysToLive, 10));
 
       await createAnnouncement({
-        title: newAnnouncement.title,
-        body: newAnnouncement.body,
-        publishDate: publishDate,
-        expiryDate: expiryDate,
-        priority: newAnnouncement.priority,
-        targetAudience: newAnnouncement.targetAudience,
-        isActive: newAnnouncement.isActive,
+        title: data.title,
+        body: data.body,
+        publishDate,
+        expiryDate,
+        priority: data.priority,
+        targetAudience: data.targetAudience,
+        isActive: data.isActive,
       });
+    },
+  });
 
-      notify('Announcement published', 'success');
-      setIsCreating(false);
-      setNewAnnouncement({
-        title: '',
-        body: '',
-        priority: 'normal',
-        targetAudience: 'all',
-        isActive: true,
-        daysToLive: 7,
-      });
-      onRefresh();
-    } catch {
-      notify('Publication failed', 'error');
-    }
-  };
-
-  const handleDelete = async (id: string) => {
-    if (!(await confirm('Delete this announcement?', 'Delete Announcement', true))) {
+  const onSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!formData.title || !formData.body) {
+      notify('Missing title or body', 'error');
       return;
     }
-    try {
-      await deleteAnnouncement(id);
-      notify('Announcement deleted', 'success');
-      onRefresh();
-    } catch {
-      notify('Deletion failed', 'error');
-    }
+    handleCreate(formData);
+    // Reset form after successful create (handled by hook implies close, but we need to clear state)
+    // Actually hook sets isCreating false. We should reset form when opening dialog or success.
+    setFormData({
+      title: '',
+      body: '',
+      priority: 'normal',
+      targetAudience: 'all',
+      isActive: true,
+      daysToLive: 7,
+    });
   };
 
   const formatDate = (date: unknown) => {
@@ -176,24 +166,15 @@ const AdminAnnouncements: React.FC<AdminAnnouncementsProps> = ({
               className={`w-full max-w-lg p-6 rounded-3xl shadow-2xl ${themeClasses(theme, 'bg-slate-800', 'bg-white')}`}
             >
               <h3 className="text-2xl font-black mb-6">New Announcement</h3>
-              <form onSubmit={handleCreate} className="space-y-4">
-                <div>
-                  <label
-                    htmlFor="announce-title"
-                    className="text-xs uppercase font-bold opacity-50 block mb-1"
-                  >
-                    Title
-                  </label>
-                  <input
-                    id="announce-title"
-                    value={newAnnouncement.title}
-                    onChange={e =>
-                      setNewAnnouncement({ ...newAnnouncement, title: e.target.value })
-                    }
-                    className="w-full p-3 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 font-bold outline-none focus:ring-2 focus:ring-sky-500 transition-all"
-                    placeholder="Headline"
-                  />
-                </div>
+              <form onSubmit={onSubmit} className="space-y-4">
+                <FormInput
+                  id="announce-title"
+                  label="Title"
+                  value={formData.title}
+                  onChange={e => setFormData({ ...formData, title: e.target.value })}
+                  placeholder="Headline"
+                />
+
                 <div>
                   <label
                     htmlFor="announce-body"
@@ -203,12 +184,13 @@ const AdminAnnouncements: React.FC<AdminAnnouncementsProps> = ({
                   </label>
                   <textarea
                     id="announce-body"
-                    value={newAnnouncement.body}
-                    onChange={e => setNewAnnouncement({ ...newAnnouncement, body: e.target.value })}
+                    value={formData.body}
+                    onChange={e => setFormData({ ...formData, body: e.target.value })}
                     className="w-full p-3 h-32 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 outline-none focus:ring-2 focus:ring-sky-500 transition-all"
                     placeholder="Message body..."
                   />
                 </div>
+
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <label
@@ -219,10 +201,8 @@ const AdminAnnouncements: React.FC<AdminAnnouncementsProps> = ({
                     </label>
                     <select
                       id="announce-priority"
-                      value={newAnnouncement.priority}
-                      onChange={e =>
-                        setNewAnnouncement({ ...newAnnouncement, priority: e.target.value })
-                      }
+                      value={formData.priority}
+                      onChange={e => setFormData({ ...formData, priority: e.target.value })}
                       className="w-full p-3 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 outline-none focus:ring-2 focus:ring-sky-500 transition-all"
                     >
                       <option value="low">Low</option>
@@ -231,23 +211,14 @@ const AdminAnnouncements: React.FC<AdminAnnouncementsProps> = ({
                       <option value="urgent">Urgent</option>
                     </select>
                   </div>
-                  <div>
-                    <label
-                      htmlFor="announce-days"
-                      className="text-xs uppercase font-bold opacity-50 block mb-1"
-                    >
-                      Duration (Days)
-                    </label>
-                    <input
-                      id="announce-days"
-                      type="number"
-                      value={newAnnouncement.daysToLive}
-                      onChange={e =>
-                        setNewAnnouncement({ ...newAnnouncement, daysToLive: e.target.value })
-                      }
-                      className="w-full p-3 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 outline-none focus:ring-2 focus:ring-sky-500 transition-all"
-                    />
-                  </div>
+
+                  <FormInput
+                    id="announce-days"
+                    label="Duration (Days)"
+                    type="number"
+                    value={formData.daysToLive}
+                    onChange={e => setFormData({ ...formData, daysToLive: e.target.value })}
+                  />
                 </div>
 
                 <div className="flex gap-4 pt-4">

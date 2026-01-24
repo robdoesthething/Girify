@@ -5,6 +5,7 @@ import { getUserProfile, updateUserAsAdmin } from '../../utils/social';
 
 import { doc, setDoc } from 'firebase/firestore';
 import { db } from '../../firebase';
+import FormInput from '../FormInput';
 
 interface AdminGameMasterProps {
   onNotify: (msg: string, type: 'success' | 'error' | 'info') => void;
@@ -164,14 +165,16 @@ const AdminGameMaster: React.FC<AdminGameMasterProps> = ({ onNotify, confirm }) 
 
       {/* SEARCH */}
       <div className="flex gap-4 p-4 bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700">
-        <input
-          type="text"
-          placeholder="Search by exact username..."
+        <FormInput
           value={searchTerm}
-          onChange={e => setSearchTerm(e.target.value)}
-          onKeyDown={e => e.key === 'Enter' && handleSearch()}
+          onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchTerm(e.target.value)}
+          onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) =>
+            e.key === 'Enter' && handleSearch()
+          }
+          placeholder="Search by exact username..."
           aria-label="Search User by Username"
-          className="flex-1 px-4 py-3 rounded-xl border bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-slate-600 font-bold outline-none focus:ring-2 focus:ring-sky-500 transition-all"
+          className="font-bold flex-1"
+          containerClassName="flex-1"
         />
         <button
           onClick={handleSearch}
@@ -248,12 +251,15 @@ const AdminGameMaster: React.FC<AdminGameMasterProps> = ({ onNotify, confirm }) 
               <h3 className="text-lg font-bold mb-4">🎒 Inventory Editor</h3>
 
               <div className="flex gap-2 mb-6">
-                <input
-                  className="flex-1 px-3 py-2 rounded-lg border dark:bg-slate-900 dark:border-slate-600 font-mono text-sm outline-none focus:ring-2 focus:ring-sky-500 transition-all"
+                <FormInput
                   placeholder="Item ID (e.g. frame_gold)"
                   value={newItemId}
-                  onChange={e => setNewItemId(e.target.value)}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                    setNewItemId(e.target.value)
+                  }
                   aria-label="Item ID to add"
+                  className="font-mono text-sm"
+                  containerClassName="flex-1"
                 />
                 <button
                   onClick={handleAddItem}

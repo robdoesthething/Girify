@@ -3,6 +3,8 @@ import { motion } from 'framer-motion';
 import React, { useEffect, useState } from 'react';
 import { Achievement } from '../../data/achievements';
 
+import FormInput from '../FormInput';
+
 interface AchievementEditorProps {
   initialItem: Partial<Achievement>;
   existingAchievements: Achievement[];
@@ -40,38 +42,21 @@ const AchievementEditor: React.FC<AchievementEditorProps> = ({
         <h3 className="text-xl font-black mb-4">{isEdit ? 'Edit' : 'Create'} Achievement</h3>
 
         <div className="space-y-4">
-          <div>
-            <label
-              htmlFor="achieve-id"
-              className="block text-xs font-bold uppercase opacity-50 mb-1"
-            >
-              ID (Unique)
-            </label>
-            <input
-              id="achieve-id"
-              type="text"
-              value={editingItem.id || ''}
-              disabled={!!isEdit}
-              onChange={e => setEditingItem({ ...editingItem, id: e.target.value })}
-              className="w-full px-3 py-2 rounded-lg border dark:bg-slate-800 dark:border-slate-700 font-mono text-sm outline-none focus:ring-2 focus:ring-sky-500 transition-all"
-            />
-          </div>
+          <FormInput
+            id="achieve-id"
+            label="ID (Unique)"
+            value={editingItem.id || ''}
+            disabled={!!isEdit}
+            onChange={e => setEditingItem({ ...editingItem, id: e.target.value })}
+            className="font-mono text-sm"
+          />
 
-          <div>
-            <label
-              htmlFor="achieve-name"
-              className="block text-xs font-bold uppercase opacity-50 mb-1"
-            >
-              Name
-            </label>
-            <input
-              id="achieve-name"
-              type="text"
-              value={editingItem.name || ''}
-              onChange={e => setEditingItem({ ...editingItem, name: e.target.value })}
-              className="w-full px-3 py-2 rounded-lg border dark:bg-slate-800 dark:border-slate-700 outline-none focus:ring-2 focus:ring-sky-500 transition-all"
-            />
-          </div>
+          <FormInput
+            id="achieve-name"
+            label="Name"
+            value={editingItem.name || ''}
+            onChange={e => setEditingItem({ ...editingItem, name: e.target.value })}
+          />
 
           <div>
             <label
@@ -133,55 +118,31 @@ const AchievementEditor: React.FC<AchievementEditorProps> = ({
           </div>
 
           <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label
-                htmlFor="achieve-image"
-                className="block text-xs font-bold uppercase opacity-50 mb-1"
-              >
-                Image URL
-              </label>
-              <input
-                id="achieve-image"
-                type="text"
-                value={editingItem.image || ''}
-                onChange={e => setEditingItem({ ...editingItem, image: e.target.value })}
-                className="w-full px-3 py-2 rounded-lg border dark:bg-slate-800 dark:border-slate-700 text-xs outline-none focus:ring-2 focus:ring-sky-500 transition-all"
-                placeholder="/badges/file.png"
-              />
-            </div>
-            <div>
-              <label
-                htmlFor="achieve-emoji"
-                className="block text-xs font-bold uppercase opacity-50 mb-1"
-              >
-                Emoji (Alt)
-              </label>
-              <input
-                id="achieve-emoji"
-                type="text"
-                value={editingItem.emoji || ''}
-                onChange={e => setEditingItem({ ...editingItem, emoji: e.target.value })}
-                className="w-full px-3 py-2 rounded-lg border dark:bg-slate-800 dark:border-slate-700 text-center outline-none focus:ring-2 focus:ring-sky-500 transition-all"
-              />
-            </div>
+            <FormInput
+              id="achieve-image"
+              label="Image URL"
+              value={editingItem.image || ''}
+              onChange={e => setEditingItem({ ...editingItem, image: e.target.value })}
+              className="text-xs"
+              placeholder="/badges/file.png"
+            />
+            <FormInput
+              id="achieve-emoji"
+              label="Emoji (Alt)"
+              value={editingItem.emoji || ''}
+              onChange={e => setEditingItem({ ...editingItem, emoji: e.target.value })}
+              className="text-center"
+            />
           </div>
 
           {editingItem.type === 'shop' && (
-            <div>
-              <label
-                htmlFor="achieve-cost"
-                className="block text-xs font-bold uppercase opacity-50 mb-1"
-              >
-                Cost (Giuros)
-              </label>
-              <input
-                id="achieve-cost"
-                type="number"
-                value={editingItem.cost || 0}
-                onChange={e => setEditingItem({ ...editingItem, cost: Number(e.target.value) })}
-                className="w-full px-3 py-2 rounded-lg border dark:bg-slate-800 dark:border-slate-700 outline-none focus:ring-2 focus:ring-sky-500 transition-all"
-              />
-            </div>
+            <FormInput
+              id="achieve-cost"
+              label="Cost (Giuros)"
+              type="number"
+              value={editingItem.cost || 0}
+              onChange={e => setEditingItem({ ...editingItem, cost: Number(e.target.value) })}
+            />
           )}
 
           <div className="bg-slate-100 dark:bg-slate-800 p-4 rounded-xl border border-slate-200 dark:border-slate-700">

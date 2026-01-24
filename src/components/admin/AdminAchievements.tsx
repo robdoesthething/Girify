@@ -1,12 +1,6 @@
 import { AnimatePresence } from 'framer-motion';
-import React, { useCallback, useEffect, useState } from 'react';
-import { Achievement } from '../../data/achievements';
-import {
-  createAchievement,
-  deleteAchievement,
-  getAllAchievements,
-  updateAchievement,
-} from '../../utils/achievements';
+import React, { useEffect, useState } from 'react';
+import { useAdminAchievements } from '../../features/admin/hooks/useAdminAchievements';
 import AchievementEditor from './AchievementEditor';
 
 interface AdminAchievementsProps {
@@ -15,83 +9,25 @@ interface AdminAchievementsProps {
 }
 
 const AdminAchievements: React.FC<AdminAchievementsProps> = ({ onNotify, confirm }) => {
-  const [achievements, setAchievements] = useState<Achievement[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [editingItem, setEditingItem] = useState<Partial<Achievement> | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
 
-  const fetchAchievements = useCallback(async () => {
-    setLoading(true);
-    try {
-      const items = await getAllAchievements(true);
-      // Sort by category then name
-      const sorted = items.sort((a, b) => {
-        if (a.category !== b.category) {
-          return a.category.localeCompare(b.category);
-        }
-        return a.name.localeCompare(b.name);
-      });
-      setAchievements(sorted);
-    } catch (err) {
-      console.error(err);
-      onNotify('Failed to fetch achievements', 'error');
-    } finally {
-      setLoading(false);
-    }
-  }, [onNotify]);
+  const {
+    items: achievements,
+    editingItem,
+    isCreating,
+    loading,
+    handleCreate,
+    handleUpdate,
+    handleDelete,
+    startEdit,
+    startCreate,
+    cancelEdit,
+    loadInitial,
+  } = useAdminAchievements({ notify: onNotify, confirm });
 
   useEffect(() => {
-    fetchAchievements();
-  }, [fetchAchievements]);
-
-  const handleSave = async (item: Partial<Achievement>) => {
-    if (!item || !item.id || !item.name) {
-      onNotify('ID and Name are required', 'error');
-      return;
-    }
-
-    try {
-      const isNew = !achievements.find(a => a.id === item.id);
-      let result;
-
-      if (isNew) {
-        result = await createAchievement(item as Achievement);
-      } else {
-        result = await updateAchievement(item.id, item);
-      }
-
-      if (result.success) {
-        onNotify(`Achievement ${isNew ? 'created' : 'updated'} successfully`, 'success');
-        setEditingItem(null);
-        fetchAchievements();
-      } else {
-        onNotify(`Error: ${result.error}`, 'error');
-      }
-    } catch (e) {
-      console.error(e);
-      onNotify('Save operation failed', 'error');
-    }
-  };
-
-  const handleDelete = async (id: string) => {
-    if (
-      !(await confirm(
-        `Are you sure you want to delete achievement "${id}"? This might break user profiles if they have it equipped/unlocked.`,
-        'Delete Achievement',
-        true
-      ))
-    ) {
-      return;
-    }
-
-    const result = await deleteAchievement(id);
-    if (result.success) {
-      onNotify('Achievement deleted', 'success');
-      fetchAchievements();
-    } else {
-      onNotify(`Error: ${result.error}`, 'error');
-    }
-  };
+    loadInitial();
+  }, [loadInitial]);
 
   const filteredItems = achievements.filter(
     a =>
@@ -108,17 +44,7 @@ const AdminAchievements: React.FC<AdminAchievementsProps> = ({ onNotify, confirm
           <p className="text-sm opacity-60">Manage dynamic achievements and shop items.</p>
         </div>
         <button
-          onClick={() =>
-            setEditingItem({
-              id: '',
-              name: '',
-              description: '',
-              category: 'starter',
-              type: 'merit',
-              image: '',
-              emoji: '🏆',
-            })
-          }
+          onClick={startCreate}
           className="px-4 py-2 bg-emerald-500 text-white rounded-xl font-bold hover:bg-emerald-600 transition-transform hover:scale-105 shadow-lg shadow-emerald-500/20"
         >
           + New Achievement
@@ -134,7 +60,7 @@ const AdminAchievements: React.FC<AdminAchievementsProps> = ({ onNotify, confirm
           className="w-full px-4 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800"
         />
         <button
-          onClick={fetchAchievements}
+          onClick={() => loadInitial()}
           className="p-2 rounded-xl bg-slate-100 dark:bg-slate-800"
         >
           🔄
@@ -152,7 +78,7 @@ const AdminAchievements: React.FC<AdminAchievementsProps> = ({ onNotify, confirm
             >
               <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity flex gap-2">
                 <button
-                  onClick={() => setEditingItem(item)}
+                  onClick={() => startEdit(item)}
                   className="p-1.5 bg-sky-500 text-white rounded-lg text-xs"
                 >
                   ✏️
@@ -195,12 +121,30 @@ const AdminAchievements: React.FC<AdminAchievementsProps> = ({ onNotify, confirm
       )}
 
       <AnimatePresence>
-        {editingItem && (
+        {(editingItem || isCreating) && (
           <AchievementEditor
-            initialItem={editingItem}
+            initialItem={
+              editingItem || {
+                id: '',
+                name: '',
+                description: '',
+                category: 'starter',
+                type: 'merit',
+                image: '',
+                emoji: '🏆',
+              }
+            }
             existingAchievements={achievements}
-            onSave={handleSave}
-            onCancel={() => setEditingItem(null)}
+            onSave={item => {
+              // Logic: if item exists in list, update, else create.
+              // We should rely on ID presence check.
+              if (item.id && achievements.some(a => a.id === item.id)) {
+                handleUpdate(item.id, item);
+              } else {
+                handleCreate(item);
+              }
+            }}
+            onCancel={cancelEdit}
           />
         )}
       </AnimatePresence>

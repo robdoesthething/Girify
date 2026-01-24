@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { Quest } from '../../utils/quests';
+import FormInput from '../FormInput';
 
 interface QuestEditorProps {
-  initialQuest?: Quest | null;
+  initialQuest?: Partial<Quest> | null;
   onSave: (questData: Partial<Quest>) => void;
   onCancel: () => void;
 }
@@ -29,13 +30,13 @@ const QuestEditor: React.FC<QuestEditorProps> = ({ initialQuest, onSave, onCance
     if (initialQuest) {
       // eslint-disable-next-line react-hooks/set-state-in-effect
       setFormData({
-        title: initialQuest.title,
-        description: initialQuest.description,
-        criteriaType: initialQuest.criteriaType,
-        criteriaValue: String(initialQuest.criteriaValue),
-        rewardGiuros: String(initialQuest.rewardGiuros),
+        title: initialQuest.title || '',
+        description: initialQuest.description || '',
+        criteriaType: initialQuest.criteriaType || 'find_street',
+        criteriaValue: String(initialQuest.criteriaValue || ''),
+        rewardGiuros: String(initialQuest.rewardGiuros || '10'),
         activeDate: initialQuest.activeDate || '',
-        isActive: initialQuest.isActive,
+        isActive: initialQuest.isActive ?? true,
       });
     } else {
       setFormData({
@@ -72,18 +73,15 @@ const QuestEditor: React.FC<QuestEditorProps> = ({ initialQuest, onSave, onCance
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
         <div className="md:col-span-2">
-          <label
-            htmlFor="quest-title"
-            className="block text-xs font-bold uppercase opacity-50 mb-1"
-          >
-            Quest Title
-          </label>
-          <input
+          <FormInput
             id="quest-title"
-            className="w-full px-3 py-2 rounded-lg border dark:bg-slate-900 dark:border-slate-600 font-bold outline-none focus:ring-2 focus:ring-sky-500 transition-all"
+            label="Quest Title"
             placeholder="e.g. Gracia Explorer"
             value={formData.title}
-            onChange={e => setFormData({ ...formData, title: e.target.value })}
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+              setFormData({ ...formData, title: e.target.value })
+            }
+            className="font-bold"
           />
         </div>
 
@@ -109,7 +107,9 @@ const QuestEditor: React.FC<QuestEditorProps> = ({ initialQuest, onSave, onCance
             id="quest-type"
             className="w-full px-3 py-2 rounded-lg border dark:bg-slate-900 dark:border-slate-600 outline-none focus:ring-2 focus:ring-sky-500 transition-all"
             value={formData.criteriaType}
-            onChange={e => setFormData({ ...formData, criteriaType: e.target.value })}
+            onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
+              setFormData({ ...formData, criteriaType: e.target.value })
+            }
           >
             {CRITERIA_TYPES.map(t => (
               <option key={t.value} value={t.value}>
@@ -119,37 +119,25 @@ const QuestEditor: React.FC<QuestEditorProps> = ({ initialQuest, onSave, onCance
           </select>
         </div>
 
-        <div>
-          <label
-            htmlFor="quest-criteria"
-            className="block text-xs font-bold uppercase opacity-50 mb-1"
-          >
-            Criteria Value
-          </label>
-          <input
-            id="quest-criteria"
-            className="w-full px-3 py-2 rounded-lg border dark:bg-slate-900 dark:border-slate-600 outline-none focus:ring-2 focus:ring-sky-500 transition-all"
-            placeholder="e.g. 5, 2000, 'Main St'"
-            value={formData.criteriaValue}
-            onChange={e => setFormData({ ...formData, criteriaValue: e.target.value })}
-          />
-        </div>
+        <FormInput
+          id="quest-criteria"
+          label="Criteria Value"
+          placeholder="e.g. 5, 2000, 'Main St'"
+          value={formData.criteriaValue}
+          onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+            setFormData({ ...formData, criteriaValue: e.target.value })
+          }
+        />
 
-        <div>
-          <label
-            htmlFor="quest-reward"
-            className="block text-xs font-bold uppercase opacity-50 mb-1"
-          >
-            Reward (Giuros)
-          </label>
-          <input
-            id="quest-reward"
-            type="number"
-            className="w-full px-3 py-2 rounded-lg border dark:bg-slate-900 dark:border-slate-600 outline-none focus:ring-2 focus:ring-sky-500 transition-all"
-            value={formData.rewardGiuros}
-            onChange={e => setFormData({ ...formData, rewardGiuros: e.target.value })}
-          />
-        </div>
+        <FormInput
+          id="quest-reward"
+          label="Reward (Giuros)"
+          type="number"
+          value={formData.rewardGiuros}
+          onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+            setFormData({ ...formData, rewardGiuros: e.target.value })
+          }
+        />
 
         <div>
           <label htmlFor="quest-date" className="block text-xs font-bold uppercase opacity-50 mb-1">
@@ -158,9 +146,11 @@ const QuestEditor: React.FC<QuestEditorProps> = ({ initialQuest, onSave, onCance
           <input
             id="quest-date"
             type="date"
-            className="w-full px-3 py-2 rounded-lg border dark:bg-slate-900 dark:border-slate-600 outline-none focus:ring-2 focus:ring-sky-500 transition-all"
+            className="w-full px-3 py-2 rounded-lg border dark:bg-slate-900 dark:border-slate-600 outline-none focus:ring-2 focus:ring-sky-500 transition-all font-mono text-sm"
             value={formData.activeDate}
-            onChange={e => setFormData({ ...formData, activeDate: e.target.value })}
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+              setFormData({ ...formData, activeDate: e.target.value })
+            }
           />
           <p className="text-[10px] opacity-40 mt-1">
             Leave empty for &quot;Always Available&quot;

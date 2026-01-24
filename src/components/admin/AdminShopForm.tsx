@@ -6,11 +6,15 @@ import { themeClasses } from '../../utils/themeUtils';
 interface AdminShopFormProps {
   editingItem: Partial<ShopItem>;
   isCreating: boolean;
-  theme: string;
+  theme: 'light' | 'dark';
   onSave: (e: React.FormEvent) => void;
   onCancel: () => void;
   onChange: (updates: Partial<ShopItem>) => void;
 }
+
+import FormInput from '../FormInput';
+
+// ... existing imports
 
 const AdminShopForm: React.FC<AdminShopFormProps> = ({
   editingItem,
@@ -31,22 +35,15 @@ const AdminShopForm: React.FC<AdminShopFormProps> = ({
         <h3 className="text-2xl font-black mb-6">{isCreating ? 'New Item' : 'Edit Item'}</h3>
         <form onSubmit={onSave} className="space-y-4">
           <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label
-                htmlFor="shop-item-id"
-                className="text-xs uppercase font-bold opacity-50 block mb-1"
-              >
-                ID (Unique)
-              </label>
-              <input
-                id="shop-item-id"
-                value={editingItem.id || ''}
-                onChange={e => onChange({ id: e.target.value })}
-                disabled={!isCreating}
-                className="w-full p-3 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 font-mono outline-none focus:ring-2 focus:ring-sky-500 transition-all"
-                placeholder="e.g. avatar_fox"
-              />
-            </div>
+            <FormInput
+              id="shop-item-id"
+              label="ID (Unique)"
+              value={editingItem.id || ''}
+              onChange={e => onChange({ id: e.target.value })}
+              disabled={!isCreating}
+              placeholder="e.g. avatar_fox"
+              className="font-mono"
+            />
             <div>
               <label
                 htmlFor="shop-item-type"
@@ -58,7 +55,7 @@ const AdminShopForm: React.FC<AdminShopFormProps> = ({
                 id="shop-item-type"
                 value={editingItem.type || 'avatar'}
                 onChange={e => onChange({ type: e.target.value as ShopItemType })}
-                className="w-full p-3 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 outline-none focus:ring-2 focus:ring-sky-500 transition-all"
+                className="w-full p-3 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 outline-none focus:ring-2 focus:ring-sky-500 transition-all font-bold"
               >
                 <option value="avatar">Avatar</option>
                 <option value="frame">Frame</option>
@@ -68,79 +65,50 @@ const AdminShopForm: React.FC<AdminShopFormProps> = ({
             </div>
           </div>
 
-          <div>
-            <label
-              htmlFor="shop-item-name"
-              className="text-xs uppercase font-bold opacity-50 block mb-1"
-            >
-              Name
-            </label>
-            <input
-              id="shop-item-name"
-              value={editingItem.name || ''}
-              onChange={e => onChange({ name: e.target.value })}
-              className="w-full p-3 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 outline-none focus:ring-2 focus:ring-sky-500 transition-all"
-              placeholder="Display Name"
-            />
-          </div>
+          <FormInput
+            id="shop-item-name"
+            label="Name"
+            value={editingItem.name || ''}
+            onChange={e => onChange({ name: e.target.value })}
+            placeholder="Display Name"
+          />
 
           <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="text-xs uppercase font-bold opacity-50 block mb-1">
-                Cost (Giuros)
-              </label>
-              <input
-                id="shop-item-cost"
-                type="number"
-                value={editingItem.cost || 0}
-                onChange={e => onChange({ cost: parseInt(e.target.value, 10) })}
-                aria-label="Cost in Giuros"
-                className="w-full p-3 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 font-mono text-yellow-500 font-bold outline-none focus:ring-2 focus:ring-sky-500 transition-all"
-              />
-            </div>
-            <div>
-              <label className="text-xs uppercase font-bold opacity-50 block mb-1">
-                Emoji (Optional)
-              </label>
-              <input
-                id="shop-item-emoji"
-                value={editingItem.emoji || ''}
-                onChange={e => onChange({ emoji: e.target.value })}
-                aria-label="Emoji Icon"
-                className="w-full p-3 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-center outline-none focus:ring-2 focus:ring-sky-500 transition-all"
-                placeholder="🦊"
-              />
-            </div>
-          </div>
-
-          <div>
-            <label
-              htmlFor="shop-item-image"
-              className="text-xs uppercase font-bold opacity-50 block mb-1"
-            >
-              Image URL (Optional)
-            </label>
-            <input
-              id="shop-item-image"
-              value={editingItem.image || ''}
-              onChange={e => onChange({ image: e.target.value })}
-              className="w-full p-3 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-xs font-mono outline-none focus:ring-2 focus:ring-sky-500 transition-all"
-              placeholder="/images/avatars/..."
+            <FormInput
+              id="shop-item-cost"
+              label="Cost (Giuros)"
+              type="number"
+              value={editingItem.cost || 0}
+              onChange={e => onChange({ cost: parseInt(e.target.value, 10) })}
+              className="font-mono text-yellow-500 font-bold"
+            />
+            <FormInput
+              id="shop-item-emoji"
+              label="Emoji (Optional)"
+              value={editingItem.emoji || ''}
+              onChange={e => onChange({ emoji: e.target.value })}
+              className="text-center"
+              placeholder="🦊"
             />
           </div>
 
+          <FormInput
+            id="shop-item-image"
+            label="Image URL (Optional)"
+            value={editingItem.image || ''}
+            onChange={e => onChange({ image: e.target.value })}
+            className="text-xs font-mono"
+            placeholder="/images/avatars/..."
+          />
+
           {editingItem.type === 'frame' && (
-            <div>
-              <label className="text-xs uppercase font-bold opacity-50 block mb-1">
-                CSS Class (for Frames)
-              </label>
-              <input
-                value={editingItem.cssClass || ''}
-                onChange={e => onChange({ cssClass: e.target.value })}
-                className="w-full p-3 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 font-mono text-xs"
-                placeholder="ring-4 ring-orange-500"
-              />
-            </div>
+            <FormInput
+              label="CSS Class (for Frames)"
+              value={editingItem.cssClass || ''}
+              onChange={e => onChange({ cssClass: e.target.value })}
+              className="font-mono text-xs"
+              placeholder="ring-4 ring-orange-500"
+            />
           )}
 
           <div className="flex gap-4 pt-4">
