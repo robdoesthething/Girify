@@ -195,8 +195,6 @@ const ShopScreen: React.FC<ShopScreenProps> = ({ username }) => {
                     lockReason={reason}
                     balance={balance}
                     activeTab={activeTab}
-                    theme={theme}
-                    t={t}
                     onPurchase={() => handlePurchase(item)}
                     onEquip={() => handleEquip(item)}
                     onTitleClick={() => {

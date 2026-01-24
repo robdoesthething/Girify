@@ -1,6 +1,7 @@
 import { AnimatePresence } from 'framer-motion';
-import React, { useState } from 'react';
+import React from 'react';
 import { useTheme } from '../../context/ThemeContext';
+import { useAdminCRUD } from '../../hooks/useAdminCRUD';
 import {
   createShopItem,
   deleteShopItem,
@@ -14,14 +15,31 @@ import AdminShopForm from './AdminShopForm';
 interface AdminShopProps {
   items: { all: ShopItem[] };
   onRefresh: () => void;
-  notify: (msg: string, type: 'success' | 'error') => void;
+  notify: (msg: string, type: 'success' | 'error' | 'info') => void;
   confirm: (message: string, title?: string, isDangerous?: boolean) => Promise<boolean>;
 }
 
 const AdminShop: React.FC<AdminShopProps> = ({ items, onRefresh, notify, confirm }) => {
   const { theme } = useTheme();
-  const [editingItem, setEditingItem] = useState<Partial<ShopItem> | null>(null);
-  const [isCreating, setIsCreating] = useState(false);
+  const {
+    editingItem,
+    setEditingItem,
+    isCreating,
+    loading,
+    handleCreate,
+    handleUpdate,
+    handleDelete,
+    startEdit,
+    startCreate,
+    cancelEdit,
+  } = useAdminCRUD<ShopItem>({
+    createFn: createShopItem,
+    updateFn: updateShopItem,
+    deleteFn: deleteShopItem,
+    refreshFn: onRefresh,
+    notify,
+    confirm,
+  });
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -29,36 +47,14 @@ const AdminShop: React.FC<AdminShopProps> = ({ items, onRefresh, notify, confirm
       return;
     }
 
-    try {
-      if (isCreating) {
-        if (!editingItem.id || !editingItem.type || !editingItem.cost) {
-          notify('Missing required fields', 'error');
-          return;
-        }
-        await createShopItem(editingItem as ShopItem);
-        notify('Item created', 'success');
-      } else {
-        await updateShopItem(editingItem.id!, editingItem);
-        notify('Item updated', 'success');
+    if (isCreating) {
+      if (!editingItem.id || !editingItem.type || !editingItem.cost) {
+        notify('Missing required fields', 'error');
+        return;
       }
-      setEditingItem(null);
-      setIsCreating(false);
-      onRefresh();
-    } catch {
-      notify('Operation failed', 'error');
-    }
-  };
-
-  const handleDelete = async (id: string) => {
-    if (!(await confirm('Are you sure you want to delete this item?', 'Delete Item', true))) {
-      return;
-    }
-    try {
-      await deleteShopItem(id);
-      notify('Item deleted', 'success');
-      onRefresh();
-    } catch {
-      notify('Delete failed', 'error');
+      handleCreate(editingItem);
+    } else {
+      handleUpdate(editingItem.id!, editingItem);
     }
   };
 
@@ -104,10 +100,7 @@ const AdminShop: React.FC<AdminShopProps> = ({ items, onRefresh, notify, confirm
             ↻ Sync Local
           </button>
           <button
-            onClick={() => {
-              setEditingItem({ type: 'avatar', cost: 100 });
-              setIsCreating(true);
-            }}
+            onClick={startCreate}
             className="px-4 py-2 bg-sky-500 hover:bg-sky-600 text-white rounded-lg font-bold shadow-lg shadow-sky-500/20 transition-all"
           >
             + Add Item
@@ -128,7 +121,9 @@ const AdminShop: React.FC<AdminShopProps> = ({ items, onRefresh, notify, confirm
               <th className="p-4 text-xs uppercase opacity-50">Actions</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-slate-200 dark:divide-slate-700">
+          <tbody
+            className={`divide-y divide-slate-200 dark:divide-slate-700 ${loading ? 'opacity-50 pointer-events-none' : ''}`}
+          >
             {items.all.map(item => (
               <tr
                 key={item.id}
@@ -161,10 +156,7 @@ const AdminShop: React.FC<AdminShopProps> = ({ items, onRefresh, notify, confirm
                 <td className="p-4">
                   <div className="flex gap-2">
                     <button
-                      onClick={() => {
-                        setEditingItem(item);
-                        setIsCreating(false);
-                      }}
+                      onClick={() => startEdit(item)}
                       className="px-3 py-1 bg-sky-500/10 text-sky-500 rounded hover:bg-sky-500 hover:text-white transition-colors text-xs font-bold"
                     >
                       Edit
@@ -184,13 +176,13 @@ const AdminShop: React.FC<AdminShopProps> = ({ items, onRefresh, notify, confirm
       </div>
 
       <AnimatePresence>
-        {editingItem && (
+        {(editingItem || isCreating) && (
           <AdminShopForm
-            editingItem={editingItem}
+            editingItem={editingItem || { type: 'avatar', cost: 100 }}
             isCreating={isCreating}
             theme={theme}
             onSave={handleSave}
-            onCancel={() => setEditingItem(null)}
+            onCancel={cancelEdit}
             onChange={updates => setEditingItem({ ...editingItem, ...updates })}
           />
         )}

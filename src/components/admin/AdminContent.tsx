@@ -1,5 +1,6 @@
 import { motion } from 'framer-motion';
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect } from 'react';
+import { useAdminCRUD } from '../../hooks/useAdminCRUD';
 import { createQuest, deleteQuest, getQuests, Quest, updateQuest } from '../../utils/quests';
 import QuestEditor from './QuestEditor';
 
@@ -9,19 +10,30 @@ interface AdminContentProps {
 }
 
 const AdminContent: React.FC<AdminContentProps> = ({ onNotify, confirm }) => {
-  const [quests, setQuests] = useState<Quest[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [editingId, setEditingId] = useState<string | null>(null);
+  const {
+    items: quests,
+    setItems: setQuests,
+    editingItem,
+    loading,
+    handleCreate,
+    handleUpdate,
+    handleDelete: hookHandleDelete,
+    startEdit,
+    setEditingItem,
+  } = useAdminCRUD<Quest>({
+    createFn: createQuest,
+    updateFn: updateQuest,
+    deleteFn: deleteQuest,
+    notify: onNotify,
+    confirm,
+  });
 
   const fetchQuests = useCallback(async () => {
-    setLoading(true);
     const data = await getQuests();
     setQuests(data);
-    setLoading(false);
-  }, []);
+  }, [setQuests]);
 
   useEffect(() => {
-    // eslint-disable-next-line
     fetchQuests();
   }, [fetchQuests]);
 
@@ -32,41 +44,21 @@ const AdminContent: React.FC<AdminContentProps> = ({ onNotify, confirm }) => {
     }
 
     try {
-      // Cast to Quest for creation (required fields assumed checked)
-      const data = questData as Omit<Quest, 'id' | 'createdAt'>;
-
-      if (editingId) {
-        await updateQuest(editingId, data);
-        onNotify('Quest updated successfully', 'success');
+      if (editingItem) {
+        await handleUpdate(editingItem.id!, questData);
       } else {
-        await createQuest(data as any);
-        // createQuest expects full quest? Actually createQuest in utils/quests usually ignores ID.
-        // Assuming createQuest handles it. Utils/quests signature: (quest: Omit<Quest, 'id' | 'createdAt'>)
-        onNotify('Quest created successfully', 'success');
+        await handleCreate(questData);
       }
-      setEditingId(null);
       fetchQuests();
-    } catch (e) {
-      console.error(e);
-      onNotify('Operation failed', 'error');
+    } catch {
+      // handled by hook
     }
   };
 
   const handleDelete = async (id: string) => {
-    if (!(await confirm('Delete this quest? cannot be undone.', 'Delete Quest', true))) {
-      return;
-    }
-
-    try {
-      await deleteQuest(id);
-      onNotify('Quest deleted', 'info');
-      fetchQuests();
-    } catch {
-      onNotify('Failed to delete', 'error');
-    }
+    await hookHandleDelete(id);
+    fetchQuests();
   };
-
-  const editingQuest = editingId ? quests.find(q => q.id === editingId) : null;
 
   return (
     <div className="space-y-8 max-w-4xl mx-auto">
@@ -80,15 +72,13 @@ const AdminContent: React.FC<AdminContentProps> = ({ onNotify, confirm }) => {
         </button>
       </div>
 
-      {/* EDITOR FORM */}
       <QuestEditor
-        initialQuest={editingQuest}
+        initialQuest={editingItem}
         onSave={handleCreateOrUpdate}
-        onCancel={() => setEditingId(null)}
+        onCancel={() => setEditingItem(null)}
       />
 
-      {/* LIST OF QUESTS */}
-      <div className="space-y-4">
+      <div className={`space-y-4 ${loading ? 'opacity-50 pointer-events-none' : ''}`}>
         {quests.map(quest => (
           <motion.div
             key={quest.id}
@@ -127,7 +117,7 @@ const AdminContent: React.FC<AdminContentProps> = ({ onNotify, confirm }) => {
             <div className="flex gap-2">
               <button
                 onClick={() => {
-                  setEditingId(quest.id);
+                  startEdit(quest);
                   window.scrollTo({ top: 0, behavior: 'smooth' });
                 }}
                 className="p-2 text-blue-500 hover:bg-blue-50 rounded-lg transition-colors"
