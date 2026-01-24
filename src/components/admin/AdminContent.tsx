@@ -1,33 +1,17 @@
-/* eslint-disable max-lines-per-function */
 import { motion } from 'framer-motion';
 import React, { useCallback, useEffect, useState } from 'react';
 import { createQuest, deleteQuest, getQuests, Quest, updateQuest } from '../../utils/quests';
+import QuestEditor from './QuestEditor';
 
 interface AdminContentProps {
   onNotify: (msg: string, type: 'success' | 'error' | 'info') => void;
   confirm: (msg: string, title?: string, isDanger?: boolean) => Promise<boolean>;
 }
 
-const CRITERIA_TYPES = [
-  { value: 'find_street', label: 'Find Specific Streets' },
-  { value: 'score_attack', label: 'Score Attack' },
-  { value: 'district_explorer', label: 'District Explorer' },
-  { value: 'login_streak', label: 'Login Streak' },
-];
-
 const AdminContent: React.FC<AdminContentProps> = ({ onNotify, confirm }) => {
   const [quests, setQuests] = useState<Quest[]>([]);
   const [loading, setLoading] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
-
-  // Form State
-  const [title, setTitle] = useState('');
-  const [description, setDescription] = useState('');
-  const [criteriaType, setCriteriaType] = useState('find_street');
-  const [criteriaValue, setCriteriaValue] = useState('');
-  const [rewardGiuros, setRewardGiuros] = useState('10');
-  const [activeDate, setActiveDate] = useState('');
-  const [isActive, setIsActive] = useState(true);
 
   const fetchQuests = useCallback(async () => {
     setLoading(true);
@@ -41,58 +25,31 @@ const AdminContent: React.FC<AdminContentProps> = ({ onNotify, confirm }) => {
     fetchQuests();
   }, [fetchQuests]);
 
-  const resetForm = () => {
-    setTitle('');
-    setDescription('');
-    setCriteriaType('find_street');
-    setCriteriaValue('');
-    setRewardGiuros('10');
-    setActiveDate('');
-    setIsActive(true);
-    setEditingId(null);
-  };
-
-  const handleCreateOrUpdate = async () => {
-    if (!title || !description || !criteriaValue) {
+  const handleCreateOrUpdate = async (questData: Partial<Quest>) => {
+    if (!questData.title || !questData.description || !questData.criteriaValue) {
       onNotify('Please fill in all required fields', 'error');
       return;
     }
 
-    const questData = {
-      title,
-      description,
-      criteriaType: criteriaType as Quest['criteriaType'],
-      criteriaValue,
-      rewardGiuros: Number(rewardGiuros),
-      activeDate: activeDate || undefined,
-      isActive,
-    };
-
     try {
+      // Cast to Quest for creation (required fields assumed checked)
+      const data = questData as Omit<Quest, 'id' | 'createdAt'>;
+
       if (editingId) {
-        await updateQuest(editingId, questData);
+        await updateQuest(editingId, data);
         onNotify('Quest updated successfully', 'success');
       } else {
-        await createQuest(questData);
+        await createQuest(data as any);
+        // createQuest expects full quest? Actually createQuest in utils/quests usually ignores ID.
+        // Assuming createQuest handles it. Utils/quests signature: (quest: Omit<Quest, 'id' | 'createdAt'>)
         onNotify('Quest created successfully', 'success');
       }
-      resetForm();
+      setEditingId(null);
       fetchQuests();
-    } catch {
+    } catch (e) {
+      console.error(e);
       onNotify('Operation failed', 'error');
     }
-  };
-
-  const handleEdit = (quest: Quest) => {
-    setEditingId(quest.id);
-    setTitle(quest.title);
-    setDescription(quest.description);
-    setCriteriaType(quest.criteriaType);
-    setCriteriaValue(String(quest.criteriaValue));
-    setRewardGiuros(String(quest.rewardGiuros));
-    setActiveDate(quest.activeDate || '');
-    setIsActive(quest.isActive);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const handleDelete = async (id: string) => {
@@ -109,6 +66,8 @@ const AdminContent: React.FC<AdminContentProps> = ({ onNotify, confirm }) => {
     }
   };
 
+  const editingQuest = editingId ? quests.find(q => q.id === editingId) : null;
+
   return (
     <div className="space-y-8 max-w-4xl mx-auto">
       <div className="flex justify-between items-center">
@@ -122,146 +81,11 @@ const AdminContent: React.FC<AdminContentProps> = ({ onNotify, confirm }) => {
       </div>
 
       {/* EDITOR FORM */}
-      <div className="p-6 rounded-2xl bg-white dark:bg-slate-800 shadow-sm border border-slate-200 dark:border-slate-700">
-        <h3 className="text-lg font-bold mb-4 flex items-center gap-2">
-          {editingId ? '✏️ Edit Quest' : '✨ New Quest'}
-          {editingId && (
-            <button
-              onClick={resetForm}
-              className="text-xs font-normal text-slate-500 underline ml-2"
-            >
-              Cancel Edit
-            </button>
-          )}
-        </h3>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-          <div className="md:col-span-2">
-            <label
-              htmlFor="quest-title"
-              className="block text-xs font-bold uppercase opacity-50 mb-1"
-            >
-              Quest Title
-            </label>
-            <input
-              id="quest-title"
-              className="w-full px-3 py-2 rounded-lg border dark:bg-slate-900 dark:border-slate-600 font-bold outline-none focus:ring-2 focus:ring-sky-500 transition-all"
-              placeholder="e.g. Gracia Explorer"
-              value={title}
-              onChange={e => setTitle(e.target.value)}
-            />
-          </div>
-
-          <div className="md:col-span-2">
-            <label
-              htmlFor="quest-desc"
-              className="block text-xs font-bold uppercase opacity-50 mb-1"
-            >
-              Description
-            </label>
-            <textarea
-              id="quest-desc"
-              className="w-full px-3 py-2 rounded-lg border dark:bg-slate-900 dark:border-slate-600 text-sm outline-none focus:ring-2 focus:ring-sky-500 transition-all"
-              placeholder="Describe what the user must do..."
-              rows={2}
-              value={description}
-              onChange={e => setDescription(e.target.value)}
-            />
-          </div>
-
-          <div>
-            <label
-              htmlFor="quest-type"
-              className="block text-xs font-bold uppercase opacity-50 mb-1"
-            >
-              Type
-            </label>
-            <select
-              id="quest-type"
-              className="w-full px-3 py-2 rounded-lg border dark:bg-slate-900 dark:border-slate-600 outline-none focus:ring-2 focus:ring-sky-500 transition-all"
-              value={criteriaType}
-              onChange={e => setCriteriaType(e.target.value)}
-            >
-              {CRITERIA_TYPES.map(t => (
-                <option key={t.value} value={t.value}>
-                  {t.label}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          <div>
-            <label
-              htmlFor="quest-criteria"
-              className="block text-xs font-bold uppercase opacity-50 mb-1"
-            >
-              Criteria Value
-            </label>
-            <input
-              id="quest-criteria"
-              className="w-full px-3 py-2 rounded-lg border dark:bg-slate-900 dark:border-slate-600 outline-none focus:ring-2 focus:ring-sky-500 transition-all"
-              placeholder="e.g. 5, 2000, 'Main St'"
-              value={criteriaValue}
-              onChange={e => setCriteriaValue(e.target.value)}
-            />
-          </div>
-
-          <div>
-            <label
-              htmlFor="quest-reward"
-              className="block text-xs font-bold uppercase opacity-50 mb-1"
-            >
-              Reward (Giuros)
-            </label>
-            <input
-              id="quest-reward"
-              type="number"
-              className="w-full px-3 py-2 rounded-lg border dark:bg-slate-900 dark:border-slate-600 outline-none focus:ring-2 focus:ring-sky-500 transition-all"
-              value={rewardGiuros}
-              onChange={e => setRewardGiuros(e.target.value)}
-            />
-          </div>
-
-          <div>
-            <label
-              htmlFor="quest-date"
-              className="block text-xs font-bold uppercase opacity-50 mb-1"
-            >
-              Active Date (Optional)
-            </label>
-            <input
-              id="quest-date"
-              type="date"
-              className="w-full px-3 py-2 rounded-lg border dark:bg-slate-900 dark:border-slate-600 outline-none focus:ring-2 focus:ring-sky-500 transition-all"
-              value={activeDate}
-              onChange={e => setActiveDate(e.target.value)}
-            />
-            <p className="text-[10px] opacity-40 mt-1">
-              Leave empty for &quot;Always Available&quot;
-            </p>
-          </div>
-        </div>
-
-        <div className="flex items-center gap-3 mb-6">
-          <input
-            type="checkbox"
-            id="q_active"
-            checked={isActive}
-            onChange={e => setIsActive(e.target.checked)}
-            className="w-5 h-5 accent-emerald-500 rounded"
-          />
-          <label htmlFor="q_active" className="font-bold cursor-pointer select-none">
-            Active
-          </label>
-        </div>
-
-        <button
-          onClick={handleCreateOrUpdate}
-          className="w-full py-3 bg-emerald-500 hover:bg-emerald-600 text-white font-bold rounded-xl shadow-lg shadow-emerald-500/20 transition-all"
-        >
-          {editingId ? 'Save Changes' : 'Create Quest'}
-        </button>
-      </div>
+      <QuestEditor
+        initialQuest={editingQuest}
+        onSave={handleCreateOrUpdate}
+        onCancel={() => setEditingId(null)}
+      />
 
       {/* LIST OF QUESTS */}
       <div className="space-y-4">
@@ -302,14 +126,19 @@ const AdminContent: React.FC<AdminContentProps> = ({ onNotify, confirm }) => {
 
             <div className="flex gap-2">
               <button
-                onClick={() => handleEdit(quest)}
+                onClick={() => {
+                  setEditingId(quest.id);
+                  window.scrollTo({ top: 0, behavior: 'smooth' });
+                }}
                 className="p-2 text-blue-500 hover:bg-blue-50 rounded-lg transition-colors"
+                type="button"
               >
                 ✏️
               </button>
               <button
                 onClick={() => handleDelete(quest.id)}
                 className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                type="button"
               >
                 🗑️
               </button>

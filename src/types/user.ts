@@ -23,6 +23,7 @@ export interface UserProfile {
   avatarId?: number;
   notificationSettings?: NotificationSettings;
   banned?: boolean;
+  role?: 'admin' | 'user';
 }
 
 export interface NotificationSettings {
