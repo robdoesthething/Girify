@@ -9,6 +9,7 @@ import React from 'react';
 import { useTheme } from '../../context/ThemeContext';
 import { UserProfile } from '../../types/user';
 import { themeClasses } from '../../utils/themeUtils';
+import FormInput from '../FormInput';
 
 interface EditUserModalProps {
   user: UserProfile;
@@ -38,51 +39,34 @@ const EditUserModal: React.FC<EditUserModalProps> = ({ user, setUser, onSave }) 
         <h3 className="text-2xl font-black mb-6">Edit User</h3>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label
-                htmlFor="edit-username"
-                className="text-xs uppercase font-bold opacity-50 block mb-1"
-              >
-                Username
-              </label>
-              <input
-                id="edit-username"
-                value={user.username}
-                onChange={e => setUser({ ...user, username: e.target.value.toLowerCase() })}
-                className="w-full p-3 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 font-bold"
-              />
-            </div>
-            <div>
-              <label
-                htmlFor="edit-email"
-                className="text-xs uppercase font-bold opacity-50 block mb-1"
-              >
-                Email
-              </label>
-              <input
-                id="edit-email"
-                disabled
-                value={user.email || ''}
-                className="w-full p-3 rounded-xl bg-slate-100 dark:bg-slate-900 opacity-50 cursor-not-allowed font-mono"
-              />
-            </div>
-          </div>
-
-          <div>
-            <label
-              htmlFor="edit-giuros"
-              className="text-xs uppercase font-bold opacity-50 block mb-1"
-            >
-              Giuros Balance
-            </label>
-            <input
-              id="edit-giuros"
-              type="number"
-              value={user.giuros}
-              onChange={e => setUser({ ...user, giuros: Number(e.target.value) })}
-              className="w-full p-3 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 font-mono"
+            <FormInput
+              id="edit-username"
+              label="Username"
+              value={user.username}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                setUser({ ...user, username: e.target.value.toLowerCase() })
+              }
+              className="font-bold"
+            />
+            <FormInput
+              id="edit-email"
+              label="Email"
+              value={user.email || ''}
+              disabled
+              className="opacity-50 cursor-not-allowed font-mono bg-slate-100 dark:bg-slate-900"
             />
           </div>
+
+          <FormInput
+            id="edit-giuros"
+            label="Giuros Balance"
+            type="number"
+            value={user.giuros}
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+              setUser({ ...user, giuros: Number(e.target.value) })
+            }
+            className="font-mono"
+          />
 
           <div className="flex gap-3 pt-4">
             <button

@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { GameConfig, getGameConfig, updateGameConfig } from '../../utils/adminConfig';
+import FormInput from '../FormInput';
 
 interface AdminConfigProps {
   onNotify: (msg: string, type: 'success' | 'error' | 'info') => void;
@@ -80,38 +81,31 @@ const AdminConfig: React.FC<AdminConfigProps> = ({ onNotify }) => {
           </h3>
           <div className="space-y-4">
             <div>
-              <label
-                htmlFor="config-score-mult"
-                className="block text-xs font-bold uppercase opacity-50 mb-1"
-              >
-                Score Multiplier (Global)
-              </label>
-              <input
+              <FormInput
                 id="config-score-mult"
+                label="Score Multiplier (Global)"
                 type="number"
+                value={config.scoreMultiplier}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                  setConfig({ ...config, scoreMultiplier: Number(e.target.value) })
+                }
                 step="0.1"
                 min="0.1"
-                value={config.scoreMultiplier}
-                onChange={e => setConfig({ ...config, scoreMultiplier: Number(e.target.value) })}
-                className="w-full px-3 py-2 rounded-lg border dark:bg-slate-900 dark:border-slate-600 outline-none focus:ring-2 focus:ring-sky-500 transition-all"
+                containerClassName="mb-1"
               />
-              <p className="text-[10px] opacity-40 mt-1">Default: 1.0. Set to 2.0 for Double XP.</p>
+              <p className="text-[10px] opacity-40">Default: 1.0. Set to 2.0 for Double XP.</p>
             </div>
             <div>
-              <label
-                htmlFor="config-giuros-mult"
-                className="block text-xs font-bold uppercase opacity-50 mb-1"
-              >
-                Giuros Multiplier (Global)
-              </label>
-              <input
+              <FormInput
                 id="config-giuros-mult"
+                label="Giuros Multiplier (Global)"
                 type="number"
                 step="0.1"
                 min="0.1"
                 value={config.giurosMultiplier}
-                onChange={e => setConfig({ ...config, giurosMultiplier: Number(e.target.value) })}
-                className="w-full px-3 py-2 rounded-lg border dark:bg-slate-900 dark:border-slate-600 outline-none focus:ring-2 focus:ring-sky-500 transition-all"
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                  setConfig({ ...config, giurosMultiplier: Number(e.target.value) })
+                }
               />
             </div>
           </div>
@@ -124,19 +118,15 @@ const AdminConfig: React.FC<AdminConfigProps> = ({ onNotify }) => {
           </h3>
           <div className="space-y-4">
             <div>
-              <label
-                htmlFor="config-game-limit"
-                className="block text-xs font-bold uppercase opacity-50 mb-1"
-              >
-                Daily Game Limit (0 = Unlimited)
-              </label>
-              <input
+              <FormInput
                 id="config-game-limit"
+                label="Daily Game Limit (0 = Unlimited)"
                 type="number"
                 min="0"
                 value={config.dailyGameLimit}
-                onChange={e => setConfig({ ...config, dailyGameLimit: Number(e.target.value) })}
-                className="w-full px-3 py-2 rounded-lg border dark:bg-slate-900 dark:border-slate-600 outline-none focus:ring-2 focus:ring-sky-500 transition-all"
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                  setConfig({ ...config, dailyGameLimit: Number(e.target.value) })
+                }
               />
             </div>
             <div className="flex items-center gap-4 p-3 rounded-lg bg-red-500/10 border border-red-500/20">
@@ -166,19 +156,15 @@ const AdminConfig: React.FC<AdminConfigProps> = ({ onNotify }) => {
             <span>📢</span> Global Notice
           </h3>
           <div>
-            <label
-              htmlFor="config-announcement"
-              className="block text-xs font-bold uppercase opacity-50 mb-1"
-            >
-              Top Bar Announcement (Optional)
-            </label>
-            <input
+            <FormInput
               id="config-announcement"
+              label="Top Bar Announcement (Optional)"
               type="text"
               placeholder="e.g., 'Double Giuros Weekend is LIVE!'"
               value={config.announcementBar || ''}
-              onChange={e => setConfig({ ...config, announcementBar: e.target.value })}
-              className="w-full px-3 py-2 rounded-lg border dark:bg-slate-900 dark:border-slate-600 outline-none focus:ring-2 focus:ring-sky-500 transition-all"
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                setConfig({ ...config, announcementBar: e.target.value })
+              }
             />
           </div>
         </div>
