@@ -1,5 +1,6 @@
 import { ReactNode, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { TOAST_TIMEOUT_MS } from '../../../config/appConstants';
 import { useTheme } from '../../../context/ThemeContext';
 import { ACTIVITY_TYPES } from '../../../data/activityTypes';
 import { getAvatar } from '../../../data/avatars';
@@ -14,6 +15,7 @@ import {
   searchUsers,
   sendFriendRequest,
 } from '../../../utils/friends';
+import { themeClasses } from '../../../utils/themeUtils';
 import FriendItem from './FriendItem';
 
 interface FriendsScreenProps {
@@ -115,7 +117,7 @@ const FriendsScreen: React.FC<FriendsScreenProps> = ({ onClose, username }) => {
     } else {
       setAddMessage(`Error: ${res.error}`);
     }
-    setTimeout(() => setAddMessage(null), 3000);
+    setTimeout(() => setAddMessage(null), TOAST_TIMEOUT_MS);
   };
 
   const handleAccept = async (requester: string) => {
@@ -180,7 +182,7 @@ const FriendsScreen: React.FC<FriendsScreenProps> = ({ onClose, username }) => {
   return (
     <div
       className={`fixed inset-0 z-[5000] flex flex-col pt-16 pb-6 px-4 md:px-8 overflow-hidden pointer-events-auto backdrop-blur-md
-        ${theme === 'dark' ? 'bg-neutral-950 text-white' : 'bg-slate-50 text-slate-900'}`}
+        ${themeClasses(theme, 'bg-neutral-950 text-white', 'bg-slate-50 text-slate-900')}`}
     >
       <div className="flex justify-between items-center max-w-2xl mx-auto w-full mb-6 shrink-0">
         <h2 className="text-3xl font-black tracking-tight">Friends</h2>
@@ -400,7 +402,7 @@ const FriendsScreen: React.FC<FriendsScreenProps> = ({ onClose, username }) => {
                     className="p-4 rounded-xl border bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 shadow-sm"
                   >
                     <div className="flex justify-between items-start mb-2">
-                      <div className="flex items-center gap-3">
+                      <div className="flex items-center gap-4">
                         <UserLink name={item.username} avatar={avatar}>
                           <div>
                             <span className="font-black text-lg text-sky-500 block leading-none">

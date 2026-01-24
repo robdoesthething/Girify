@@ -31,7 +31,7 @@ const FriendItem: React.FC<FriendItemProps> = ({ friend, onRemove, onBlock }) =>
 
   return (
     <div className="p-3 rounded-lg border flex justify-between items-center bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 transition-colors relative">
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-4">
         <div
           className={`w-10 h-10 rounded-full flex items-center justify-center text-xl bg-gradient-to-br from-sky-400 to-indigo-600 border-2 border-white dark:border-slate-800 shadow-sm overflow-hidden`}
         >

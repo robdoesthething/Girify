@@ -1,52 +1,20 @@
-import React, { FC, useEffect, useState } from 'react';
-// @ts-ignore
-// @ts-ignore
-import MapArea from './MapArea';
-import { displayUsername } from '../../../utils/format';
-// @ts-ignore
-import Logo from '../../../components/Logo';
+import { FC, useEffect, useState } from 'react';
+import LandingPage from '../../../components/LandingPage';
+import { useGameContext } from '../../../context/GameContext';
+import { useTheme } from '../../../context/ThemeContext';
+import { Street } from '../../../types/game';
+import { themeClasses } from '../../../utils/themeUtils';
 import RegisterPanel from '../../auth/components/RegisterPanel';
+import InstructionsOverlay from './InstructionsOverlay';
+import MapArea from './MapArea';
+import OnboardingTour from './OnboardingTour';
+import PlayOverlay from './PlayOverlay';
 import Quiz from './Quiz';
 import SummaryScreen from './SummaryScreen';
-// @ts-ignore
-import LandingPage from '../../../components/LandingPage';
-import { GameStateObject, Street } from '../../../types/game';
-import OnboardingTour from './OnboardingTour';
 
-interface AppAction {
-  type: string;
-  payload?: any;
-}
-
-interface GameScreenProps {
-  state: GameStateObject;
-  dispatch: React.Dispatch<AppAction>;
-  theme: 'light' | 'dark';
-  deviceMode: 'mobile' | 'tablet' | 'desktop';
-  t: (key: string) => string;
-  currentStreet: Street | null;
-  handleSelectAnswer: (street: Street) => void;
-  handleNext: () => void;
-  processAnswer: (street: Street) => void;
-  setupGame: (freshName?: string) => void;
-  handleRegister: (name: string) => void;
-  hasPlayedToday: () => boolean;
-}
-
-const GameScreen: FC<GameScreenProps> = ({
-  state,
-  dispatch,
-  theme,
-  deviceMode,
-  t,
-  currentStreet,
-  handleSelectAnswer,
-  handleNext,
-  processAnswer,
-  setupGame,
-  handleRegister,
-  hasPlayedToday,
-}) => {
+const GameScreen: FC = () => {
+  const { theme, deviceMode, t } = useTheme();
+  const { state, dispatch, currentStreet, handlers } = useGameContext();
   const [showOnboarding, setShowOnboarding] = useState<boolean>(() => {
     const completed = localStorage.getItem('girify_onboarding_completed');
     return !completed && !state.username;
@@ -69,18 +37,18 @@ const GameScreen: FC<GameScreenProps> = ({
 
   const handleManualNext = () => {
     if (state.feedback === 'selected' && state.selectedAnswer) {
-      processAnswer(state.selectedAnswer);
+      handlers.processAnswer(state.selectedAnswer);
       setTimeout(() => {
-        handleNext();
+        handlers.handleNext();
       }, 1500);
     } else if (state.feedback === 'transitioning') {
-      handleNext();
+      handlers.handleNext();
     }
   };
 
   return (
     <div
-      className={`flex-1 flex flex-col w-full h-full relative overflow-hidden font-inter ${theme === 'dark' ? 'bg-slate-950 text-white' : 'bg-slate-50 text-slate-900'}`}
+      className={`flex-1 flex flex-col w-full h-full relative overflow-hidden font-inter ${themeClasses(theme, 'bg-slate-950 text-white', 'bg-slate-50 text-slate-900')}`}
     >
       {state.gameState === 'playing' && (
         <Quiz.Banner
@@ -132,15 +100,13 @@ const GameScreen: FC<GameScreenProps> = ({
                         return;
                       }
                       if (state.autoAdvance) {
-                        handleSelectAnswer(street);
+                        handlers.handleSelectAnswer(street);
                       } else {
                         dispatch({ type: 'SELECT_ANSWER', payload: street });
                       }
                     }}
                     selectedAnswer={state.selectedAnswer}
                     feedback={state.feedback as any}
-                    correctName={currentStreet?.name}
-                    autoAdvance={state.autoAdvance}
                     disabled={state.isInputLocked}
                   />
                 </Quiz.Content>
@@ -168,52 +134,13 @@ const GameScreen: FC<GameScreenProps> = ({
       </div>
 
       {/* For logged-in users in intro state: show map with play overlay */}
-      {state.gameState === 'intro' && state.username && (
-        <>
-          {/* Map Background */}
-          {/* Map Background Removed - reusing underlay */}
-
-          {/* Translucent Play Overlay */}
-          <div
-            className={`absolute inset-0 z-[500] flex flex-col items-center justify-center backdrop-blur-sm ${theme === 'dark' ? 'bg-slate-950/70' : 'bg-white/70'}`}
-          >
-            <div className="text-center animate-fade-in-up">
-              <div className="mb-6 flex justify-center">
-                <Logo className="h-16 w-auto" />
-              </div>
-              <h2
-                className={`text-2xl md:text-4xl font-extrabold mb-4 p-4 rounded-xl backdrop-blur-md ${theme === 'dark' ? 'text-white bg-slate-900/40' : 'text-slate-800 bg-white/40'} tracking-tight`}
-              >
-                {t('proveLocal') || 'Prove you are a local'}
-              </h2>
-              <p
-                className={`text-lg mb-10 font-medium ${theme === 'dark' ? 'text-slate-300' : 'text-slate-600'}`}
-              >
-                {t('welcomeBack') || 'Welcome back'},{' '}
-                {state.profileLoaded ? state.realName || displayUsername(state.username) : '...'}!
-              </p>
-              <button
-                onClick={() => setupGame()}
-                className={`px-10 py-4 rounded-xl text-white shadow-lg transform hover:scale-105 transition-all duration-300 flex items-center justify-center mx-auto ${
-                  hasPlayedToday()
-                    ? 'bg-slate-700 hover:bg-slate-600 shadow-slate-700/30'
-                    : 'bg-emerald-500 hover:bg-emerald-400 shadow-emerald-500/30'
-                }`}
-              >
-                <span className="font-bold text-lg tracking-wide">
-                  {hasPlayedToday() ? t('replay') || 'Replay' : t('play') || 'Play'}
-                </span>
-              </button>
-            </div>
-          </div>
-        </>
-      )}
+      {state.gameState === 'intro' && state.username && <PlayOverlay />}
 
       {/* For non-logged users: show full LandingPage */}
       {state.gameState === 'intro' && !state.username && (
         <LandingPage
           theme={theme}
-          hasPlayedToday={hasPlayedToday()}
+          hasPlayedToday={handlers.hasPlayedToday()}
           onStart={() => {
             const seen = localStorage.getItem('girify_instructions_seen');
             if (seen === 'true') {
@@ -228,60 +155,26 @@ const GameScreen: FC<GameScreenProps> = ({
         />
       )}
 
-      {state.gameState === 'instructions' && (
-        <div
-          className={`absolute inset-0 z-[2000] flex flex-col items-center justify-center p-6 text-center backdrop-blur-md transition-colors duration-1000 ${theme === 'dark' ? 'bg-slate-950/80 text-white' : 'bg-slate-50/80 text-slate-900'}`}
-        >
-          <h2 className="heading-lg mb-8 text-sky-400">{t('howToPlay')}</h2>
-          <ul className="text-left space-y-6 text-xl mb-12 max-w-md mx-auto">
-            <li className="flex gap-4 items-center">
-              <span className="text-2xl">📍</span>
-              <span>{t('instructionsPoint1')}</span>
-            </li>
-            <li className="flex gap-4 items-center">
-              <span className="text-2xl">🤔</span>
-              <span>{t('instructionsPoint2')}</span>
-            </li>
-            <li className="flex gap-4 items-center">
-              <span className="text-2xl">💡</span>
-              <span>{t('instructionsPoint3')}</span>
-            </li>
-            <li className="flex gap-4 items-center text-emerald-400 font-bold">
-              <span className="text-2xl">⏳</span>
-              <span>{t('instructionsPoint4')}</span>
-            </li>
-          </ul>
-          <button
-            onClick={() => {
-              localStorage.setItem('girify_instructions_seen', 'true');
-              if (state.username) {
-                setupGame();
-              } else {
-                dispatch({ type: 'SET_GAME_STATE', payload: 'register' });
-              }
-            }}
-            className="px-10 py-4 bg-emerald-500 hover:bg-emerald-600 text-white rounded-2xl shadow-lg shadow-emerald-500/20 font-bold text-xl transition-all transform hover:scale-105"
-          >
-            {state.username ? t('imReady') : t('next')}
-          </button>
-        </div>
-      )}
+      {state.gameState === 'instructions' && <InstructionsOverlay />}
 
       {state.gameState === 'register' && (
-        <RegisterPanel theme={theme} onRegister={handleRegister} initialMode={state.registerMode} />
+        <RegisterPanel
+          theme={theme}
+          onRegister={handlers.handleRegister}
+          initialMode={state.registerMode}
+        />
       )}
 
       {state.gameState === 'summary' && (
         <div className="absolute inset-0 z-50 pointer-events-auto">
           <SummaryScreen
             score={state.score}
-            // @ts-ignore
             total={state.quizStreets.length}
             theme={theme}
             username={state.username ?? undefined}
             realName={state.realName ?? undefined} // Pass real name
             streak={state.streak} // Pass streak
-            onRestart={() => setupGame()}
+            onRestart={() => handlers.setupGame()}
             quizResults={state.quizResults}
             quizStreets={state.quizStreets}
             t={t}

@@ -2,6 +2,7 @@ import { motion } from 'framer-motion';
 import { useState } from 'react';
 import { useTheme } from '../../../context/ThemeContext';
 import { storage } from '../../../utils/storage';
+import { themeClasses } from '../../../utils/themeUtils';
 
 interface Step {
   target: string;
@@ -64,11 +65,7 @@ const OnboardingTour: React.FC<OnboardingTourProps> = ({ onComplete }) => {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         exit={{ opacity: 0, y: -20 }}
-        className={`max-w-xl w-full p-0 rounded-3xl shadow-2xl overflow-hidden ${
-          theme === 'dark'
-            ? 'bg-slate-900 border border-slate-700 text-white'
-            : 'bg-white text-slate-900'
-        }`}
+        className={`max-w-xl w-full p-0 rounded-3xl shadow-2xl overflow-hidden ${themeClasses(theme, 'bg-slate-900 border border-slate-700 text-white', 'bg-white text-slate-900')}`}
         role="dialog"
         aria-label={steps[step]?.title || 'Onboarding'}
       >
@@ -93,9 +90,7 @@ const OnboardingTour: React.FC<OnboardingTourProps> = ({ onComplete }) => {
 
           {/* Dialogue Box Style */}
           <div
-            className={`p-5 rounded-2xl italic text-lg leading-relaxed relative ${
-              theme === 'dark' ? 'bg-slate-800 text-slate-200' : 'bg-slate-100 text-slate-700'
-            }`}
+            className={`p-5 rounded-2xl italic text-lg leading-relaxed relative ${themeClasses(theme, 'bg-slate-800 text-slate-200', 'bg-slate-100 text-slate-700')}`}
           >
             <span className="text-4xl absolute -top-4 -left-2 opacity-20">❝</span>
             {steps[step]?.content}

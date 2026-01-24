@@ -1,25 +1,14 @@
 import React, { useEffect, useMemo, useState } from 'react';
-// @ts-ignore
 import { UserProfile } from '../../types/user';
 import { getPayoutConfig, PayoutConfig, updatePayoutConfig } from '../../utils/configService';
+import { themeClasses } from '../../utils/themeUtils';
 
-interface ShopItem {
-  id: string;
-  name: string;
-  type: string;
-  cost: number;
-  emoji?: string;
-  prefix?: string;
-  flavorText?: string;
-  description?: string;
-  cssClass?: string;
-  image?: string;
-}
+import { ShopItem } from '../../utils/shop';
 
 interface AdminGiurosProps {
   users: UserProfile[];
   shopItems: { all: ShopItem[] };
-  theme: string;
+  theme: 'light' | 'dark';
   onUpdateShopItem?: (id: string, updates: Partial<ShopItem>) => Promise<void>;
 }
 
@@ -131,7 +120,7 @@ const AdminGiuros: React.FC<AdminGiurosProps> = ({
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Income Sources (Editable) */}
         <div
-          className={`p-6 rounded-2xl border ${theme === 'dark' ? 'bg-slate-800 border-slate-700' : 'bg-white border-slate-200'}`}
+          className={`p-6 rounded-2xl border ${themeClasses(theme, 'bg-slate-800 border-slate-700', 'bg-white border-slate-200')}`}
         >
           <h3 className="text-xl font-bold mb-4 flex items-center gap-2">
             <span>📈</span> Income Sources (Rewards)
@@ -192,14 +181,14 @@ const AdminGiuros: React.FC<AdminGiurosProps> = ({
 
         {/* Sinks (Shop Prices) */}
         <div
-          className={`p-6 rounded-2xl border ${theme === 'dark' ? 'bg-slate-800 border-slate-700' : 'bg-white border-slate-200'}`}
+          className={`p-6 rounded-2xl border ${themeClasses(theme, 'bg-slate-800 border-slate-700', 'bg-white border-slate-200')}`}
         >
           <h3 className="text-xl font-bold mb-4 flex items-center gap-2">
             <span>📉</span> Sinks (Shop Prices)
           </h3>
           <div className="space-y-3 max-h-64 overflow-y-auto pr-2">
             {shopItems.all
-              ?.sort((a, b) => a.cost - b.cost)
+              ?.sort((a, b) => (a.cost || 0) - (b.cost || 0))
               .map(item => (
                 <div
                   key={item.id}
@@ -231,7 +220,7 @@ const AdminGiuros: React.FC<AdminGiurosProps> = ({
 
       {/* Richest Users */}
       <div
-        className={`p-6 rounded-2xl border ${theme === 'dark' ? 'bg-slate-800 border-slate-700' : 'bg-white border-slate-200'}`}
+        className={`p-6 rounded-2xl border ${themeClasses(theme, 'bg-slate-800 border-slate-700', 'bg-white border-slate-200')}`}
       >
         <h3 className="text-xl font-bold mb-4">👑 Richest Users (Top 5)</h3>
         <div className="overflow-x-auto">
@@ -270,14 +259,16 @@ interface MetricCardProps {
   title: string;
   value: string | number;
   color?: string;
-  theme: string;
+  theme: 'light' | 'dark';
 }
 
 const MetricCard: React.FC<MetricCardProps> = ({ title, value, color, theme }) => (
   <div
-    className={`p-6 rounded-2xl shadow-sm border ${
-      theme === 'dark' ? 'bg-slate-800 border-slate-700' : 'bg-white border-slate-200'
-    }`}
+    className={`p-6 rounded-2xl shadow-sm border ${themeClasses(
+      theme,
+      'bg-slate-800 border-slate-700',
+      'bg-white border-slate-200'
+    )}`}
   >
     <h3 className="text-sm font-bold opacity-60 uppercase mb-2">{title}</h3>
     <p className={`text-3xl font-black ${color}`}>{value}</p>
@@ -303,24 +294,24 @@ interface EditableSourceRowProps {
   label: string;
   value: number;
   onChange: (val: string) => void;
-  theme: string;
+  theme: 'light' | 'dark';
 }
 
 const EditableSourceRow: React.FC<EditableSourceRowProps> = ({ label, value, onChange, theme }) => (
   <div className="flex justify-between items-center p-2 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors">
     <span className="font-medium text-sm text-slate-700 dark:text-slate-300">{label}</span>
-    <div className="flex items-center gap-1">
+    <div className="flex items-center gap-2">
       <span className="text-emerald-500 font-bold">+</span>
       <input
         type="number"
         value={value}
         onChange={e => onChange(e.target.value)}
         aria-label={`Value for ${label}`}
-        className={`w-20 p-1 rounded text-right font-mono font-bold ${
-          theme === 'dark'
-            ? 'bg-slate-700 text-emerald-400 border-slate-600'
-            : 'bg-slate-100 text-emerald-600 border-slate-200'
-        } border outline-none focus:ring-2 focus:ring-sky-500 transition-all`}
+        className={`w-20 p-1 rounded text-right font-mono font-bold ${themeClasses(
+          theme,
+          'bg-slate-700 text-emerald-400 border-slate-600',
+          'bg-slate-100 text-emerald-600 border-slate-200'
+        )} border outline-none focus:ring-2 focus:ring-sky-500 transition-all`}
         min="0"
       />
     </div>

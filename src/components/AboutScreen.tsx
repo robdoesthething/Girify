@@ -1,6 +1,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTheme } from '../context/ThemeContext';
+import { themeClasses } from '../utils/themeUtils';
 import TopBar from './TopBar';
 
 interface AboutScreenProps {
@@ -14,7 +15,7 @@ const AboutScreen: React.FC<AboutScreenProps> = ({ onClose: _onClose }) => {
   return (
     <div
       className={`fixed inset-0 w-full h-full flex flex-col overflow-hidden transition-colors duration-500
-           ${theme === 'dark' ? 'bg-slate-900 text-white' : 'bg-slate-50 text-slate-900'}
+           ${themeClasses(theme, 'bg-slate-900 text-white', 'bg-slate-50 text-slate-900')}
       `}
     >
       <TopBar
@@ -50,7 +51,7 @@ const AboutScreen: React.FC<AboutScreenProps> = ({ onClose: _onClose }) => {
             <p className="text-base font-medium">{t('aboutDescription')}</p>
 
             <h3 className="font-bold text-lg mt-8 text-sky-500">Tech Stack</h3>
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-2 gap-4">
               <div className="p-3 bg-slate-100 dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700">
                 <div className="font-bold mb-1">React 18</div>
                 <div className="text-xs opacity-60">Vite, Hooks, Context</div>
@@ -84,16 +85,16 @@ const AboutScreen: React.FC<AboutScreenProps> = ({ onClose: _onClose }) => {
             </div>
 
             <h3 className="font-bold text-lg mt-6 text-sky-500">{t('howToPlay')}</h3>
-            <ul className="space-y-3">
-              <li className="flex items-start gap-3">
+            <ul className="space-y-4">
+              <li className="flex items-start gap-4">
                 <span className="mt-1 w-1.5 h-1.5 rounded-full bg-slate-400 shrink-0" />
                 <span>{t('aboutPoint1')}</span>
               </li>
-              <li className="flex items-start gap-3">
+              <li className="flex items-start gap-4">
                 <span className="mt-1 w-1.5 h-1.5 rounded-full bg-slate-400 shrink-0" />
                 <span>{t('aboutPoint2')}</span>
               </li>
-              <li className="flex items-start gap-3">
+              <li className="flex items-start gap-4">
                 <span className="mt-1 w-1.5 h-1.5 rounded-full bg-slate-400 shrink-0" />
                 <span>{t('aboutPoint3')}</span>
               </li>

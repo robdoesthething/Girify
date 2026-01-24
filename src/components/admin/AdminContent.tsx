@@ -289,7 +289,7 @@ const AdminContent: React.FC<AdminContentProps> = ({ onNotify, confirm }) => {
                     📅 {quest.activeDate}
                   </span>
                 )}
-                <h4 className="font-bold flex items-center gap-1">
+                <h4 className="font-bold flex items-center gap-2">
                   {quest.title}
                   <span className="text-amber-500 text-xs">+{quest.rewardGiuros} G</span>
                 </h4>

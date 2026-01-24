@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useReducer } from 'react';
 import { STORAGE_KEYS } from '../config/constants';
 import { useTheme } from '../context/ThemeContext';
 import { useConfirm } from '../hooks/useConfirm';
@@ -8,6 +8,7 @@ import { useNotifications } from '../hooks/useNotifications';
 import { UserProfile } from '../types/user';
 import { getUserProfile, updateUserProfile } from '../utils/social';
 import { storage } from '../utils/storage';
+import { themeClasses } from '../utils/themeUtils';
 import { ConfirmDialog } from './ConfirmDialog';
 
 interface SettingsScreenProps {
@@ -16,6 +17,51 @@ interface SettingsScreenProps {
   autoAdvance: boolean;
   setAutoAdvance: (val: boolean) => void;
   username?: string;
+}
+
+interface SettingsState {
+  isAdmin: boolean;
+  devTapCount: number;
+  profileSettings: {
+    notificationSettings: {
+      dailyReminder: boolean;
+      friendActivity: boolean;
+      newsUpdates: boolean;
+    };
+  };
+}
+
+type SettingsAction =
+  | { type: 'SET_ADMIN'; payload: boolean }
+  | { type: 'SET_DEV_TAP_COUNT'; payload: number }
+  | { type: 'RESET_DEV_TAP_COUNT' }
+  | { type: 'SET_PROFILE_SETTINGS'; payload: SettingsState['profileSettings'] }
+  | {
+      type: 'UPDATE_NOTIFICATION_SETTINGS';
+      payload: SettingsState['profileSettings']['notificationSettings'];
+    };
+
+function settingsReducer(state: SettingsState, action: SettingsAction): SettingsState {
+  switch (action.type) {
+    case 'SET_ADMIN':
+      return { ...state, isAdmin: action.payload };
+    case 'SET_DEV_TAP_COUNT':
+      return { ...state, devTapCount: action.payload };
+    case 'RESET_DEV_TAP_COUNT':
+      return { ...state, devTapCount: 0 };
+    case 'SET_PROFILE_SETTINGS':
+      return { ...state, profileSettings: action.payload };
+    case 'UPDATE_NOTIFICATION_SETTINGS':
+      return {
+        ...state,
+        profileSettings: {
+          ...state.profileSettings,
+          notificationSettings: action.payload,
+        },
+      };
+    default:
+      return state;
+  }
 }
 
 const SettingsScreen: React.FC<SettingsScreenProps> = ({
@@ -34,27 +80,34 @@ const SettingsScreen: React.FC<SettingsScreenProps> = ({
     isIOS: boolean;
     requestPermission: () => Promise<boolean>;
   };
-  const [isAdmin, setIsAdmin] = useState(false);
-  const [devTapCount, setDevTapCount] = useState(0);
 
-  const [profileSettings, setProfileSettings] = useState({
-    notificationSettings: {
-      dailyReminder: true,
-      friendActivity: true,
-      newsUpdates: true,
+  const [settingsState, dispatch] = useReducer(settingsReducer, {
+    isAdmin: false,
+    devTapCount: 0,
+    profileSettings: {
+      notificationSettings: {
+        dailyReminder: true,
+        friendActivity: true,
+        newsUpdates: true,
+      },
     },
   });
+
+  const { isAdmin, devTapCount, profileSettings } = settingsState;
 
   useEffect(() => {
     if (username) {
       getUserProfile(username).then(data => {
         const profile = data as UserProfile;
         if (profile) {
-          setProfileSettings({
-            notificationSettings: profile.notificationSettings || {
-              dailyReminder: true,
-              friendActivity: true,
-              newsUpdates: true,
+          dispatch({
+            type: 'SET_PROFILE_SETTINGS',
+            payload: {
+              notificationSettings: profile.notificationSettings || {
+                dailyReminder: true,
+                friendActivity: true,
+                newsUpdates: true,
+              },
             },
           });
         }
@@ -67,10 +120,10 @@ const SettingsScreen: React.FC<SettingsScreenProps> = ({
       return;
     }
     const newCount = devTapCount + 1;
-    setDevTapCount(newCount);
+    dispatch({ type: 'SET_DEV_TAP_COUNT', payload: newCount });
     if (newCount >= 7) {
       handleAdminAccess();
-      setDevTapCount(0);
+      dispatch({ type: 'RESET_DEV_TAP_COUNT' });
     }
   };
 
@@ -84,7 +137,7 @@ const SettingsScreen: React.FC<SettingsScreenProps> = ({
           const docRef = doc(db, 'admins', auth.currentUser.uid);
           const snap = await getDoc(docRef);
           if (snap.exists()) {
-            setIsAdmin(true);
+            dispatch({ type: 'SET_ADMIN', payload: true });
           }
         } catch (e) {
           console.error('Admin check failed', e);
@@ -142,7 +195,7 @@ const SettingsScreen: React.FC<SettingsScreenProps> = ({
           }
 
           notify('Success! You are now an Admin.', 'success');
-          setIsAdmin(true);
+          dispatch({ type: 'SET_ADMIN', payload: true });
           setTimeout(() => window.location.reload(), 1000);
         }
       } catch (e: unknown) {
@@ -163,15 +216,15 @@ const SettingsScreen: React.FC<SettingsScreenProps> = ({
         initial={{ scale: 0.9, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
         exit={{ scale: 0.9, opacity: 0 }}
-        className={`w-full max-w-md max-h-[80vh] flex flex-col rounded-3xl shadow-2xl overflow-hidden ${theme === 'dark' ? 'bg-slate-900 text-white' : 'bg-white text-slate-900'}`}
+        className={`w-full max-w-md max-h-[80vh] flex flex-col rounded-3xl shadow-2xl overflow-hidden ${themeClasses(theme, 'bg-slate-900 text-white', 'bg-white text-slate-900')}`}
       >
         <div
-          className={`p-6 border-b shrink-0 flex justify-between items-center ${theme === 'dark' ? 'border-slate-800' : 'border-slate-100'}`}
+          className={`p-6 border-b shrink-0 flex justify-between items-center ${themeClasses(theme, 'border-slate-800', 'border-slate-100')}`}
         >
           <h2 className="text-2xl font-black tracking-tight font-inter">{t('settings')}</h2>
           <button
             onClick={onClose}
-            className={`p-2 rounded-full transition-colors ${theme === 'dark' ? 'hover:bg-slate-800' : 'hover:bg-slate-100'}`}
+            className={`p-2 rounded-full transition-colors ${themeClasses(theme, 'hover:bg-slate-800', 'hover:bg-slate-100')}`}
             type="button"
             aria-label={t('close') || 'Close'}
           >
@@ -192,7 +245,7 @@ const SettingsScreen: React.FC<SettingsScreenProps> = ({
               {t('language')}
             </h3>
             <div
-              className={`p-4 rounded-xl border ${theme === 'dark' ? 'border-slate-800 bg-slate-800/50' : 'border-slate-100 bg-slate-50'}`}
+              className={`p-4 rounded-xl border ${themeClasses(theme, 'border-slate-800 bg-slate-800/50', 'border-slate-100 bg-slate-50')}`}
             >
               <div className="flex gap-2">
                 {languages.map(lang => {
@@ -200,9 +253,11 @@ const SettingsScreen: React.FC<SettingsScreenProps> = ({
                     if (language === lang.code) {
                       return 'bg-sky-500 text-white shadow-md';
                     }
-                    return theme === 'dark'
-                      ? 'bg-slate-700 hover:bg-slate-600 text-slate-300'
-                      : 'bg-white hover:bg-slate-100 text-slate-700 border border-slate-200';
+                    return themeClasses(
+                      theme,
+                      'bg-slate-700 hover:bg-slate-600 text-slate-300',
+                      'bg-white hover:bg-slate-100 text-slate-700 border border-slate-200'
+                    );
                   };
 
                   return (
@@ -225,7 +280,7 @@ const SettingsScreen: React.FC<SettingsScreenProps> = ({
               {t('appearance') || 'Appearance'}
             </h3>
             <div
-              className={`p-1.5 rounded-xl border flex ${theme === 'dark' ? 'border-slate-800 bg-slate-800/50' : 'border-slate-100 bg-slate-50'}`}
+              className={`p-1.5 rounded-xl border flex ${themeClasses(theme, 'border-slate-800 bg-slate-800/50', 'border-slate-100 bg-slate-50')}`}
             >
               {[
                 { id: 'light', icon: '☀️', label: 'Light' },
@@ -255,11 +310,11 @@ const SettingsScreen: React.FC<SettingsScreenProps> = ({
               Gameplay
             </h3>
             <div
-              className={`flex items-center justify-between p-4 rounded-xl border ${theme === 'dark' ? 'border-slate-800 bg-slate-800/50' : 'border-slate-100 bg-slate-50'}`}
+              className={`flex items-center justify-between p-4 rounded-xl border ${themeClasses(theme, 'border-slate-800 bg-slate-800/50', 'border-slate-100 bg-slate-50')}`}
             >
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-4">
                 <div
-                  className={`p-2 rounded-full ${theme === 'dark' ? 'bg-emerald-500/20 text-emerald-400' : 'bg-emerald-100 text-emerald-600'}`}
+                  className={`p-2 rounded-full ${themeClasses(theme, 'bg-emerald-500/20 text-emerald-400', 'bg-emerald-100 text-emerald-600')}`}
                 >
                   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path
@@ -295,11 +350,11 @@ const SettingsScreen: React.FC<SettingsScreenProps> = ({
               Notifications
             </h3>
             <div
-              className={`flex items-center justify-between p-4 rounded-xl border ${theme === 'dark' ? 'border-slate-800 bg-slate-800/50' : 'border-slate-100 bg-slate-50'}`}
+              className={`flex items-center justify-between p-4 rounded-xl border ${themeClasses(theme, 'border-slate-800 bg-slate-800/50', 'border-slate-100 bg-slate-50')}`}
             >
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-4">
                 <div
-                  className={`p-2 rounded-full ${theme === 'dark' ? 'bg-amber-500/20 text-amber-400' : 'bg-amber-100 text-amber-600'}`}
+                  className={`p-2 rounded-full ${themeClasses(theme, 'bg-amber-500/20 text-amber-400', 'bg-amber-100 text-amber-600')}`}
                 >
                   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path
@@ -337,7 +392,7 @@ const SettingsScreen: React.FC<SettingsScreenProps> = ({
                     ...profileSettings.notificationSettings,
                     dailyReminder: !isEnabled,
                   };
-                  setProfileSettings(prev => ({ ...prev, notificationSettings: newSettings }));
+                  dispatch({ type: 'UPDATE_NOTIFICATION_SETTINGS', payload: newSettings });
                   if (username) {
                     await updateUserProfile(username, { notificationSettings: newSettings });
                   }
@@ -366,7 +421,7 @@ const SettingsScreen: React.FC<SettingsScreenProps> = ({
             </h3>
             <button
               onClick={handleClearHistory}
-              className="w-full flex items-center gap-3 p-4 rounded-xl border border-rose-200 bg-rose-50 text-rose-700 hover:bg-rose-100 transition-colors font-medium dark:bg-rose-900/20 dark:border-rose-900/50 dark:text-rose-400 font-inter"
+              className="w-full flex items-center gap-4 p-4 rounded-xl border border-rose-200 bg-rose-50 text-rose-700 hover:bg-rose-100 transition-colors font-medium dark:bg-rose-900/20 dark:border-rose-900/50 dark:text-rose-400 font-inter"
               type="button"
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -382,7 +437,7 @@ const SettingsScreen: React.FC<SettingsScreenProps> = ({
 
             <button
               onClick={handleSignOut}
-              className={`w-full flex items-center gap-3 p-4 rounded-xl border transition-colors font-medium font-inter ${theme === 'dark' ? 'border-slate-700 hover:bg-slate-800' : 'border-slate-200 hover:bg-slate-50'}`}
+              className={`w-full flex items-center gap-4 p-4 rounded-xl border transition-colors font-medium font-inter ${themeClasses(theme, 'border-slate-700 hover:bg-slate-800', 'border-slate-200 hover:bg-slate-50')}`}
               type="button"
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

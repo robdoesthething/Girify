@@ -139,7 +139,7 @@ const AdminConfig: React.FC<AdminConfigProps> = ({ onNotify }) => {
                 className="w-full px-3 py-2 rounded-lg border dark:bg-slate-900 dark:border-slate-600 outline-none focus:ring-2 focus:ring-sky-500 transition-all"
               />
             </div>
-            <div className="flex items-center gap-3 p-3 rounded-lg bg-red-500/10 border border-red-500/20">
+            <div className="flex items-center gap-4 p-3 rounded-lg bg-red-500/10 border border-red-500/20">
               <input
                 type="checkbox"
                 id="maintenance"

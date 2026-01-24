@@ -1,6 +1,7 @@
 import { AnimatePresence, motion } from 'framer-motion';
 import { useState } from 'react';
 import { useTheme } from '../context/ThemeContext';
+import { themeClasses } from '../utils/themeUtils';
 import Logo from './Logo';
 
 interface TopBarProps {
@@ -50,14 +51,14 @@ const TopBar: React.FC<TopBarProps> = ({ onOpenPage, username, onTriggerLogin, o
     <>
       <div
         className={`fixed top-0 left-0 right-0 h-12 z-[4000] flex items-center justify-between px-3 md:px-6 transition-colors duration-300
-                ${theme === 'dark' ? 'bg-slate-700/90 text-white' : 'bg-white/90 text-slate-800'}
-backdrop-blur-md border-b ${theme === 'dark' ? 'border-slate-600' : 'border-slate-200'}
+                ${themeClasses(theme, 'bg-slate-700/90 text-white', 'bg-white/90 text-slate-800')}
+backdrop-blur-md border-b ${themeClasses(theme, 'border-slate-600', 'border-slate-200')}
 `}
       >
-        <div className="flex items-center gap-3 md:gap-4">
+        <div className="flex items-center gap-4 md:gap-4">
           <button
             onClick={() => setMenuOpen(!menuOpen)}
-            className={`p-2 rounded-full transition-colors shrink-0 ${theme === 'dark' ? 'hover:bg-neutral-300' : 'hover:bg-slate-100'} `}
+            className={`p-2 rounded-full transition-colors shrink-0 ${themeClasses(theme, 'hover:bg-neutral-300', 'hover:bg-slate-100')} `}
             type="button"
             aria-label="Open menu"
             aria-expanded={menuOpen}
@@ -100,7 +101,7 @@ backdrop-blur-md border-b ${theme === 'dark' ? 'border-slate-600' : 'border-slat
               exit={{ x: '-100%' }}
               transition={{ type: 'spring', damping: 25, stiffness: 200 }}
               className={`fixed top-0 bottom-0 left-0 w-64 z-[7000] shadow-2xl flex flex-col
-                                    ${theme === 'dark' ? 'bg-neutral-200 text-neutral-900' : 'bg-white text-slate-800'}
+                                    ${themeClasses(theme, 'bg-neutral-200 text-neutral-900', 'bg-white text-slate-800')}
 `}
             >
               <div className="flex justify-between items-center p-6 pb-4 shrink-0">
@@ -125,63 +126,63 @@ backdrop-blur-md border-b ${theme === 'dark' ? 'border-slate-600' : 'border-slat
               <nav className="flex-1 flex flex-col gap-2 overflow-y-auto px-6 pb-20">
                 <button
                   onClick={() => handleMenuClick(null)}
-                  className="text-left py-2 px-3 rounded-lg hover:bg-slate-500/10 font-medium text-sky-500 bg-sky-500/10 flex items-center gap-3 shrink-0"
+                  className="text-left py-2 px-3 rounded-lg hover:bg-slate-500/10 font-medium text-sky-500 bg-sky-500/10 flex items-center gap-4 shrink-0"
                   type="button"
                 >
                   <span className="text-xl">🏠</span> {t('home')}
                 </button>
                 <button
                   onClick={() => handleMenuClick('profile')}
-                  className="text-left py-2 px-3 rounded-lg hover:bg-slate-500/10 font-medium flex items-center gap-3 shrink-0"
+                  className="text-left py-2 px-3 rounded-lg hover:bg-slate-500/10 font-medium flex items-center gap-4 shrink-0"
                   type="button"
                 >
                   <span className="text-xl">👤</span> {t('myProfile')}
                 </button>
                 <button
                   onClick={() => handleMenuClick('friends')}
-                  className="text-left py-2 px-3 rounded-lg hover:bg-slate-500/10 font-medium flex items-center gap-3 shrink-0"
+                  className="text-left py-2 px-3 rounded-lg hover:bg-slate-500/10 font-medium flex items-center gap-4 shrink-0"
                   type="button"
                 >
                   <span className="text-xl">👥</span> {t('friends')}
                 </button>
                 <button
                   onClick={() => handleMenuClick('leaderboard')}
-                  className="text-left py-2 px-3 rounded-lg hover:bg-slate-500/10 font-medium flex items-center gap-3 shrink-0"
+                  className="text-left py-2 px-3 rounded-lg hover:bg-slate-500/10 font-medium flex items-center gap-4 shrink-0"
                   type="button"
                 >
                   <span className="text-xl">🏆</span> {t('leaderboard')}
                 </button>
                 <button
                   onClick={() => handleMenuClick('shop')}
-                  className="text-left py-2 px-3 rounded-lg hover:bg-slate-500/10 font-medium flex items-center gap-3 shrink-0"
+                  className="text-left py-2 px-3 rounded-lg hover:bg-slate-500/10 font-medium flex items-center gap-4 shrink-0"
                   type="button"
                 >
                   <span className="text-xl">🛒</span> {t('shop')}
                 </button>
                 <button
                   onClick={() => handleMenuClick('about')}
-                  className="text-left py-2 px-3 rounded-lg hover:bg-slate-500/10 font-medium flex items-center gap-3 shrink-0"
+                  className="text-left py-2 px-3 rounded-lg hover:bg-slate-500/10 font-medium flex items-center gap-4 shrink-0"
                   type="button"
                 >
                   <span className="text-xl">ℹ️</span> {t('about')}
                 </button>
                 <button
                   onClick={() => handleMenuClick('news')}
-                  className="text-left py-2 px-3 rounded-lg hover:bg-slate-500/10 font-medium flex items-center gap-3 shrink-0"
+                  className="text-left py-2 px-3 rounded-lg hover:bg-slate-500/10 font-medium flex items-center gap-4 shrink-0"
                   type="button"
                 >
                   <span className="text-xl">📰</span> {t('news') || 'News'}
                 </button>
                 <button
                   onClick={() => handleMenuClick('feedback')}
-                  className="text-left py-2 px-3 rounded-lg hover:bg-slate-500/10 font-medium flex items-center gap-3 shrink-0"
+                  className="text-left py-2 px-3 rounded-lg hover:bg-slate-500/10 font-medium flex items-center gap-4 shrink-0"
                   type="button"
                 >
                   <span className="text-xl">📝</span> {t('feedback') || 'Feedback'}
                 </button>
                 <button
                   onClick={() => handleMenuClick('settings')}
-                  className="text-left py-2 px-3 rounded-lg hover:bg-slate-500/10 font-medium flex items-center gap-3 shrink-0"
+                  className="text-left py-2 px-3 rounded-lg hover:bg-slate-500/10 font-medium flex items-center gap-4 shrink-0"
                   type="button"
                 >
                   <span className="text-xl">⚙️</span> {t('settings')}
@@ -193,14 +194,14 @@ backdrop-blur-md border-b ${theme === 'dark' ? 'border-slate-600' : 'border-slat
                   <>
                     <button
                       onClick={() => handleMenuClick('login')}
-                      className="text-left py-2 px-3 rounded-lg hover:bg-emerald-500/10 font-bold text-emerald-600 dark:text-emerald-400 flex items-center gap-3 shrink-0"
+                      className="text-left py-2 px-3 rounded-lg hover:bg-emerald-500/10 font-bold text-emerald-600 dark:text-emerald-400 flex items-center gap-4 shrink-0"
                       type="button"
                     >
                       <span className="text-xl">🔑</span> Sign In
                     </button>
                     <button
                       onClick={() => handleMenuClick('signup')}
-                      className="text-left py-2 px-3 rounded-lg hover:bg-sky-500/10 font-bold text-sky-500 flex items-center gap-3 shrink-0"
+                      className="text-left py-2 px-3 rounded-lg hover:bg-sky-500/10 font-bold text-sky-500 flex items-center gap-4 shrink-0"
                       type="button"
                     >
                       <span className="text-xl">✨</span> Sign Up
@@ -209,7 +210,7 @@ backdrop-blur-md border-b ${theme === 'dark' ? 'border-slate-600' : 'border-slat
                 ) : (
                   <button
                     onClick={() => handleMenuClick('logout')}
-                    className="text-left py-2 px-3 rounded-lg hover:bg-red-500/10 font-bold text-red-500 flex items-center gap-3 shrink-0"
+                    className="text-left py-2 px-3 rounded-lg hover:bg-red-500/10 font-bold text-red-500 flex items-center gap-4 shrink-0"
                     type="button"
                   >
                     <span className="text-xl">🚪</span> Log Out
@@ -240,7 +241,7 @@ backdrop-blur-md border-b ${theme === 'dark' ? 'border-slate-600' : 'border-slat
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.9, opacity: 0 }}
               className={`relative z-10 w-full max-w-sm p-6 rounded-2xl shadow-xl text-center
-                        ${theme === 'dark' ? 'bg-slate-800 text-white' : 'bg-white text-slate-800'}
+                        ${themeClasses(theme, 'bg-slate-800 text-white', 'bg-white text-slate-800')}
                     `}
             >
               <h3 className="text-xl font-black mb-2">{t('loginRequired') || 'Login Required'}</h3>
@@ -248,7 +249,7 @@ backdrop-blur-md border-b ${theme === 'dark' ? 'border-slate-600' : 'border-slat
                 {t('loginRequiredMessage') ||
                   'Join the Girify community! Create a profile to track your progress, earn badges, and compete on the leaderboard.'}
               </p>
-              <div className="flex flex-col gap-3">
+              <div className="flex flex-col gap-4">
                 <button
                   onClick={() => {
                     setShowLoginModal(false);

@@ -1,4 +1,6 @@
 // Game feature barrel export
+export { default as PlayOverlay } from './components/PlayOverlay';
+export { default as InstructionsOverlay } from './components/InstructionsOverlay';
 export { default as GameScreen } from './components/GameScreen';
 export { default as MapArea } from './components/MapArea';
 export { default as OnboardingTour } from './components/OnboardingTour';

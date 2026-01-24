@@ -1,6 +1,7 @@
 import { motion } from 'framer-motion';
 import React from 'react';
 import { ShopItem, ShopItemType } from '../../utils/shop';
+import { themeClasses } from '../../utils/themeUtils';
 
 interface AdminShopFormProps {
   editingItem: Partial<ShopItem>;
@@ -25,7 +26,7 @@ const AdminShopForm: React.FC<AdminShopFormProps> = ({
         initial={{ opacity: 0, scale: 0.9 }}
         animate={{ opacity: 1, scale: 1 }}
         exit={{ opacity: 0, scale: 0.9 }}
-        className={`w-full max-w-lg p-6 rounded-3xl shadow-2xl ${theme === 'dark' ? 'bg-slate-800' : 'bg-white'}`}
+        className={`w-full max-w-lg p-6 rounded-3xl shadow-2xl ${themeClasses(theme, 'bg-slate-800', 'bg-white')}`}
       >
         <h3 className="text-2xl font-black mb-6">{isCreating ? 'New Item' : 'Edit Item'}</h3>
         <form onSubmit={onSave} className="space-y-4">
@@ -142,7 +143,7 @@ const AdminShopForm: React.FC<AdminShopFormProps> = ({
             </div>
           )}
 
-          <div className="flex gap-3 pt-4">
+          <div className="flex gap-4 pt-4">
             <button
               type="button"
               onClick={onCancel}

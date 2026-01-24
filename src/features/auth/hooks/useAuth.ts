@@ -1,8 +1,14 @@
 import { onAuthStateChanged, signOut, User } from 'firebase/auth';
 import { Dispatch, useCallback, useEffect, useState } from 'react';
-// @ts-ignore
+import { MIGRATION, STORAGE_KEYS, TIME } from '../../../config/constants';
 import { auth } from '../../../firebase';
-// @ts-ignore
+import { useAsyncOperation } from '../../../hooks/useAsyncOperation';
+import { useNotification } from '../../../hooks/useNotification';
+import { UserMigrationService } from '../../../services/userMigration';
+import { FeedbackReward, GameHistory, UserProfile } from '../../../types/user';
+import { claimDailyLoginBonus } from '../../../utils/giuros';
+import { logger } from '../../../utils/logger';
+import { sanitizeInput } from '../../../utils/security';
 import {
   checkUnseenFeedbackRewards,
   ensureUserProfile,
@@ -14,19 +20,6 @@ import {
   updateUserProfile,
 } from '../../../utils/social';
 import { storage } from '../../../utils/storage';
-// @ts-ignore
-import { useAsyncOperation } from '../../../hooks/useAsyncOperation';
-import { useNotification } from '../../../hooks/useNotification';
-import { FeedbackReward, GameHistory, UserProfile } from '../../../types/user';
-import { claimDailyLoginBonus } from '../../../utils/giuros';
-// @ts-ignore
-import { sanitizeInput } from '../../../utils/security';
-// @ts-ignore
-import { UserMigrationService } from '../../../services/userMigration';
-// @ts-ignore
-import { MIGRATION, STORAGE_KEYS, TIME } from '../../../config/constants';
-// @ts-ignore
-import { logger } from '../../../utils/logger';
 
 export interface UseAuthResult {
   user: User | null;

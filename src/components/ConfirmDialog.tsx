@@ -70,7 +70,7 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
               {message}
             </p>
 
-            <div className="flex gap-3 justify-end font-bold">
+            <div className="flex gap-4 justify-end font-bold">
               <button
                 onClick={onCancel}
                 className="px-5 py-3 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors"

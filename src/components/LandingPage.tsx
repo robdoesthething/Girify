@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useTheme } from '../context/ThemeContext';
 import { DISTRICTS } from '../data/districts';
+import { themeClasses } from '../utils/themeUtils';
 import SeoHead from './SeoHead';
 
 const NEWS_HEADLINES = [
@@ -32,7 +33,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onLogin, theme }) => {
 
   return (
     <div
-      className={`min-h-screen flex flex-col relative ${theme === 'dark' ? 'bg-slate-950 text-white' : 'bg-gradient-to-br from-slate-50 via-blue-50/30 to-slate-50 text-slate-900'} font-inter overflow-x-hidden`}
+      className={`min-h-screen flex flex-col relative ${themeClasses(theme, 'bg-slate-900 text-white', 'bg-gradient-to-br from-slate-50 via-blue-50/30 to-slate-50 text-slate-900')} font-inter overflow-x-hidden`}
     >
       <SeoHead
         title="Girify - Become a Local"
@@ -178,7 +179,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onLogin, theme }) => {
                     transition={{ delay: i * 0.05 }}
                     className="flex-shrink-0 snap-center"
                   >
-                    <div className="w-48 p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-lg flex flex-col items-center gap-3 group hover:scale-105 transition-transform duration-300">
+                    <div className="w-48 p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-lg flex flex-col items-center gap-4 group hover:scale-105 transition-transform duration-300">
                       <div
                         className={`w-24 h-24 rounded-full bg-gradient-to-br ${district.color} p-1 shadow-inner relative overflow-hidden`}
                       >

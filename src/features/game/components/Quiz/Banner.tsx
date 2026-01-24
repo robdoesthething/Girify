@@ -1,5 +1,6 @@
 import React from 'react';
 import { useTheme } from '../../../../context/ThemeContext';
+import { themeClasses } from '../../../../utils/themeUtils';
 
 interface BannerProps {
   currentQuestionIndex: number;
@@ -36,7 +37,7 @@ const Banner: React.FC<BannerProps> = ({ currentQuestionIndex, totalQuestions })
 
           {/* Progress bar container with improved styling */}
           <div
-            className={`relative w-full h-1.5 ${theme === 'dark' ? 'bg-slate-800/50' : 'bg-slate-200/50'}`}
+            className={`relative w-full h-1.5 ${themeClasses(theme, 'bg-slate-800/50', 'bg-slate-200/50')}`}
           >
             {/* Animated progress bar with glow effect */}
             <div

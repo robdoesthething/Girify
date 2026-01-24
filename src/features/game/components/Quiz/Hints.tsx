@@ -1,5 +1,6 @@
 import React from 'react';
 import { useTheme } from '../../../../context/ThemeContext';
+import { themeClasses } from '../../../../utils/themeUtils';
 
 interface HintStreet {
   id: string;
@@ -27,9 +28,9 @@ const Hints: React.FC<HintsProps> = ({ hintStreets, hintsRevealed, onReveal, fee
 
   return (
     <div
-      className={`p-2 md:p-4 border-t ${theme === 'dark' ? 'border-neutral-800 bg-neutral-900' : 'border-slate-100 bg-slate-50'}`}
+      className={`p-2 md:p-4 border-t ${themeClasses(theme, 'border-neutral-800 bg-neutral-900', 'border-slate-100 bg-slate-50')}`}
     >
-      <div className="flex flex-col gap-1.5 md:gap-3">
+      <div className="flex flex-col gap-2 md:gap-4">
         <div className="flex justify-between items-center text-[10px] md:text-xs text-slate-500 uppercase font-bold tracking-wider">
           <span>{t('hints')}</span>
           {canReveal && (
@@ -43,16 +44,12 @@ const Hints: React.FC<HintsProps> = ({ hintStreets, hintsRevealed, onReveal, fee
           )}
         </div>
 
-        <div className="flex flex-col gap-1 md:gap-2">
+        <div className="flex flex-col gap-2 md:gap-2">
           {hintStreets.slice(0, hintsRevealed).map(street => (
             <div
               key={street.id}
               className={`text-xs md:text-sm px-2 md:px-3 py-1 md:py-2 rounded-lg border flex items-center gap-2 animate-fadeIn
-                            ${
-                              theme === 'dark'
-                                ? 'bg-slate-700 border-slate-600 text-slate-200'
-                                : 'bg-white border-slate-200 text-slate-600'
-                            }
+                            ${themeClasses(theme, 'bg-slate-700 border-slate-600 text-slate-200', 'bg-white border-slate-200 text-slate-600')}
                         `}
             >
               <div className="w-1.5 h-1.5 md:w-2 md:h-2 rounded-full bg-sky-500" />

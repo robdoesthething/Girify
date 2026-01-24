@@ -1,6 +1,7 @@
 import { motion } from 'framer-motion';
 import React from 'react';
 import { useTheme } from '../context/ThemeContext';
+import { themeClasses } from '../utils/themeUtils';
 
 interface Announcement {
   id: string;
@@ -58,9 +59,11 @@ const AnnouncementModal: React.FC<AnnouncementModalProps> = ({ announcement, onD
         initial={{ opacity: 0, scale: 0.9, y: 20 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
         exit={{ opacity: 0, scale: 0.9, y: 20 }}
-        className={`relative z-10 w-full max-w-md p-6 rounded-3xl shadow-2xl ${
-          theme === 'dark' ? 'bg-slate-800 text-white' : 'bg-white text-slate-900'
-        }`}
+        className={`relative z-10 w-full max-w-md p-6 rounded-3xl shadow-2xl ${themeClasses(
+          theme,
+          'bg-slate-800 text-white',
+          'bg-white text-slate-900'
+        )}`}
       >
         {/* Header */}
         <div className="text-center mb-6">

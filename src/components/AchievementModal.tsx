@@ -1,6 +1,7 @@
 import { motion } from 'framer-motion';
 import React from 'react';
 import { useTheme } from '../context/ThemeContext';
+import { themeClasses } from '../utils/themeUtils';
 
 interface Achievement {
   id?: string;
@@ -48,7 +49,7 @@ const AchievementModal: React.FC<AchievementModalProps> = ({ achievement, onDism
         exit={{ scale: 0.8, opacity: 0 }}
         transition={{ type: 'spring', damping: 15 }}
         className={`relative z-10 w-full max-w-sm p-8 rounded-3xl shadow-2xl text-center overflow-hidden
-                  ${theme === 'dark' ? 'bg-slate-900 text-white' : 'bg-white text-slate-900'}
+                  ${themeClasses(theme, 'bg-slate-900 text-white', 'bg-white text-slate-900')}
                   border-4 border-yellow-500
               `}
         role="dialog"

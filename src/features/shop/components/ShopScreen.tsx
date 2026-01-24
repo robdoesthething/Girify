@@ -11,6 +11,7 @@ import {
   spendGiuros,
 } from '../../../utils/giuros';
 import { getShopItems, GroupedShopItems, ShopItem } from '../../../utils/shop';
+import { themeClasses } from '../../../utils/themeUtils';
 
 interface ShopScreenProps {
   username: string;
@@ -201,25 +202,33 @@ const ShopScreen: React.FC<ShopScreenProps> = ({ username }) => {
     if (activeTab === tabId) {
       return 'bg-sky-500 text-white shadow-lg';
     }
-    return theme === 'dark'
-      ? 'bg-slate-800 text-slate-300 hover:bg-slate-700'
-      : 'bg-slate-100 text-slate-600 hover:bg-slate-200';
+    return themeClasses(
+      theme,
+      'bg-slate-800 text-slate-300 hover:bg-slate-700',
+      'bg-slate-100 text-slate-600 hover:bg-slate-200'
+    );
   };
 
   const getItemCardClass = (active: boolean) => {
     if (active) {
       return 'border-4 border-sky-500 bg-sky-500/10 shadow-sky-500/20 shadow-xl';
     }
-    return theme === 'dark'
-      ? 'border-4 border-slate-700 bg-slate-800'
-      : 'border-4 border-slate-200 bg-white/50 backdrop-blur-sm shadow-lg';
+    return themeClasses(
+      theme,
+      'border-4 border-slate-700 bg-slate-800',
+      'border-4 border-slate-200 bg-white/50 backdrop-blur-sm shadow-lg'
+    );
   };
 
   const getEquipButtonClass = (active: boolean) => {
     if (active) {
       return 'bg-sky-500 text-white';
     }
-    return theme === 'dark' ? 'bg-slate-700 hover:bg-slate-600' : 'bg-slate-100 hover:bg-slate-200';
+    return themeClasses(
+      theme,
+      'bg-slate-700 hover:bg-slate-600',
+      'bg-slate-100 hover:bg-slate-200'
+    );
   };
 
   const renderItemIcon = (item: ShopItem) => {
@@ -241,7 +250,7 @@ const ShopScreen: React.FC<ShopScreenProps> = ({ username }) => {
 
   return (
     <div
-      className={`fixed inset-0 w-full h-full flex flex-col overflow-hidden transition-colors duration-500 ${theme === 'dark' ? 'bg-slate-900 text-white' : 'bg-slate-50 text-slate-900'}`}
+      className={`fixed inset-0 w-full h-full flex flex-col overflow-hidden transition-colors duration-500 ${themeClasses(theme, 'bg-slate-900 text-white', 'bg-slate-50 text-slate-900')}`}
     >
       <TopBar
         onOpenPage={page => navigate(page ? `/${page}` : '/')}
@@ -422,7 +431,7 @@ const ShopScreen: React.FC<ShopScreenProps> = ({ username }) => {
             onClick={() => setFlavorModal(null)}
           >
             <div
-              className={`p-6 rounded-3xl w-full max-w-sm shadow-2xl transform transition-all relative ${theme === 'dark' ? 'bg-slate-800 text-white' : 'bg-white text-slate-900'}`}
+              className={`p-6 rounded-3xl w-full max-w-sm shadow-2xl transform transition-all relative ${themeClasses(theme, 'bg-slate-800 text-white', 'bg-white text-slate-900')}`}
               onClick={e => e.stopPropagation()}
             >
               <div className="text-center mb-6">
