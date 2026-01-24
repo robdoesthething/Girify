@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { UserProfile } from '../../types/user';
-import { getPayoutConfig, PayoutConfig, updatePayoutConfig } from '../../utils/configService';
+import { getPayoutConfig, PayoutConfig, updatePayoutConfig } from '../../services/db/config';
 import { ShopItem } from '../../utils/shop';
 import EconomyMetrics from './EconomyMetrics';
 import IncomeConfig from './IncomeConfig';

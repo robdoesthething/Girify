@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { PayoutConfig } from '../../utils/configService';
+import { PayoutConfig } from '../../services/db/config';
 import { themeClasses } from '../../utils/themeUtils';
 import FormInput from '../FormInput';
 

@@ -1,5 +1,5 @@
 import React from 'react';
-import { PayoutConfig } from '../../utils/configService';
+import { PayoutConfig } from '../../services/db/config';
 import { themeClasses } from '../../utils/themeUtils';
 
 interface EconomyMetricsProps {

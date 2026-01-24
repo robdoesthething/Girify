@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { GameConfig, getGameConfig, updateGameConfig } from '../../utils/adminConfig';
+import { GameConfig, getGameConfig, updateGameConfig } from '../../services/db/config';
 import FormInput from '../FormInput';
 
 interface AdminConfigProps {

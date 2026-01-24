@@ -5,7 +5,7 @@ import {
   getUserPurchasedBadges,
   updateUser,
 } from '../services/database';
-import { getPayoutConfig } from './configService';
+import { getPayoutConfig } from '../services/db/config';
 import { publishCosmeticPurchase } from './publishActivity'; // Low priority util, but we can keep importing it if it hasn't been migrated yet, or check if it needs migration.
 
 // Default Constants
