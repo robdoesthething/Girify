@@ -13,6 +13,8 @@ import {
 
 /**
  * Get pending friend requests for a user
+ * @param username - The username to check
+ * @returns Promise resolving to list of pending requests
  */
 export const getPendingFriendRequests = async (
   username: string

@@ -50,6 +50,8 @@ const CACHE_DURATION_MS = CACHE_DURATION_MINUTES * SECONDS_PER_MINUTE * MS_PER_S
 
 /**
  * Fetch all shop items from Supabase, merged with local cosmetics.json
+ * @param forceRefresh - If true, bypasses the in-memory cache
+ * @returns Promise resolving to helper object containing grouped shop items
  */
 export const getShopItems = async (forceRefresh = false): Promise<GroupedShopItems> => {
   const now = Date.now();
@@ -137,6 +139,9 @@ export const getShopItems = async (forceRefresh = false): Promise<GroupedShopIte
 
 /**
  * Update a shop item
+ * @param id - The ID of the item to update
+ * @param updates - The updates to apply
+ * @returns Promise resolving to operation result
  */
 export const updateShopItem = async (
   id: string,
@@ -180,6 +185,8 @@ export const updateShopItem = async (
 
 /**
  * Create a new shop item
+ * @param itemData - The item data to create
+ * @returns Promise resolving to operation result
  */
 export const createShopItem = async (itemData: ShopItem): Promise<OperationResult> => {
   try {
@@ -216,6 +223,8 @@ export const createShopItem = async (itemData: ShopItem): Promise<OperationResul
 
 /**
  * Delete a shop item
+ * @param id - The ID of the item to delete
+ * @returns Promise resolving to operation result
  */
 export const deleteShopItem = async (id: string): Promise<OperationResult> => {
   try {
@@ -233,6 +242,7 @@ export const deleteShopItem = async (id: string): Promise<OperationResult> => {
 
 /**
  * Sync local cosmetics.json to DB
+ * @returns Promise resolving to sync stats { updated, errors }
  */
 export const syncWithLocal = async (): Promise<{ updated: number; errors: number }> => {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -291,6 +301,12 @@ export const syncWithLocal = async (): Promise<{ updated: number; errors: number
 
 import { UserProfile } from '../../types/user';
 
+/**
+ * Check if a shop item is locked for the user
+ * @param item - The shop item to check
+ * @param userStats - The user's stats
+ * @returns Object indicating lock status and reason if locked
+ */
 export const checkUnlockCondition = (
   item: ShopItem,
   userStats: Partial<UserProfile> | null

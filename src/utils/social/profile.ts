@@ -23,6 +23,8 @@ const DEFAULT_GIUROS = 10;
 
 /**
  * Helper to convert Supabase UserRow to UserProfile
+ * @param row - The raw database row
+ * @returns The structured UserProfile object
  */
 export function rowToProfile(row: UserRow): UserProfile {
   return {
@@ -58,12 +60,16 @@ export function rowToProfile(row: UserRow): UserProfile {
     referredBy: row.referred_by,
     district: row.district || undefined,
     team: row.team || undefined,
-    role: (row as any).role || undefined,
+    role: ((row as unknown as { role?: string }).role as 'admin' | 'user' | undefined) || undefined,
   };
 }
 
 /**
  * Get or create user profile document in Supabase.
+ * @param usernameInput - The desired username (will be normalized)
+ * @param uid - Optional Auth UID to link
+ * @param additionalData - Optional metadata to populate profile
+ * @returns Promise resolving to the user profile or null if failed
  */
 export const ensureUserProfile = async (
   usernameInput: string,
@@ -163,6 +169,8 @@ export const ensureUserProfile = async (
 
 /**
  * Look up a user profile by email address
+ * @param email - The email to search for
+ * @returns Promise resolving to profile or null if not found
  */
 export const getUserByEmail = async (email: string): Promise<UserProfile | null> => {
   if (!email) {
@@ -190,6 +198,8 @@ export const getUserByEmail = async (email: string): Promise<UserProfile | null>
 
 /**
  * Look up a user profile by UID
+ * @param uid - The firebase auth UID
+ * @returns Promise resolving to profile or null if not found
  */
 export const getUserByUid = async (uid: string): Promise<UserProfile | null> => {
   if (!uid) {
@@ -205,6 +215,8 @@ export const getUserByUid = async (uid: string): Promise<UserProfile | null> => 
 
 /**
  * Fetch user profile from Supabase by username
+ * @param username - The username to search for
+ * @returns Promise resolving to profile or null if not found
  */
 export const getUserProfile = async (username: string): Promise<UserProfile | null> => {
   if (!username) {
@@ -221,6 +233,9 @@ export const getUserProfile = async (username: string): Promise<UserProfile | nu
 
 /**
  * Update user profile data
+ * @param username - The username to update
+ * @param data - The partial profile data to update
+ * @returns Promise resolving when update is complete
  */
 export const updateUserProfile = async (
   username: string,
@@ -285,6 +300,8 @@ export const updateUserProfile = async (
 
 /**
  * Get all users for admin table
+ * @param limitCount - Max users to return (default 50)
+ * @returns Promise resolving to list of all user profiles
  */
 export const getAllUsers = async (limitCount = 50): Promise<UserProfile[]> => {
   try {
@@ -303,6 +320,9 @@ export const getAllUsers = async (limitCount = 50): Promise<UserProfile[]> => {
 
 /**
  * Update user data as Admin
+ * @param targetUsername - The user to update
+ * @param data - The data fields to change
+ * @returns Promise resolving when update is complete
  */
 export const updateUserAsAdmin = async (
   targetUsername: string,
@@ -343,6 +363,8 @@ export const updateUserAsAdmin = async (
 
 /**
  * Delete a user and all their associated data
+ * @param username - The username to delete
+ * @returns Promise resolving to operation success status
  */
 export const deleteUserAndData = async (
   username: string
@@ -370,6 +392,9 @@ export const deleteUserAndData = async (
 
 /**
  * Migrate a user from an old username to a new handle
+ * @param oldUsername - The username to migrate from
+ * @param newHandle - The new username handle
+ * @returns Promise resolving when migration is complete
  */
 export const migrateUser = async (oldUsername: string, newHandle: string): Promise<void> => {
   if (!oldUsername || !newHandle || oldUsername === newHandle) {
@@ -421,6 +446,8 @@ export const migrateUser = async (oldUsername: string, newHandle: string): Promi
 
 /**
  * Self-healing/Repair function for migrations
+ * @param handle - The current or potential handle to check
+ * @returns Promise resolving when check/repair is complete
  */
 export const healMigration = async (handle: string): Promise<void> => {
   if (!handle) {

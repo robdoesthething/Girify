@@ -43,6 +43,10 @@ const validateQuest = (quest: Partial<Quest>): void => {
   }
 };
 
+/**
+ * Get all quests
+ * @returns Promise resolving to list of quests
+ */
 export const getQuests = async (): Promise<Quest[]> => {
   try {
     const rows = await dbGetQuests();
@@ -64,6 +68,11 @@ export const getQuests = async (): Promise<Quest[]> => {
   }
 };
 
+/**
+ * Create a new quest
+ * @param quest - The quest data (excluding ID)
+ * @returns Promise resolving to the new quest ID
+ */
 export const createQuest = async (quest: Omit<Quest, 'id' | 'createdAt'>): Promise<string> => {
   // Security: Verify admin before write
   await requireAdmin();
@@ -93,6 +102,12 @@ export const createQuest = async (quest: Omit<Quest, 'id' | 'createdAt'>): Promi
   }
 };
 
+/**
+ * Update a quest
+ * @param id - The ID of the quest to update
+ * @param updates - The updates to apply
+ * @returns Promise resolving when update is complete
+ */
 export const updateQuest = async (id: string, updates: Partial<Quest>): Promise<void> => {
   // Security: Verify admin before write
   await requireAdmin();
@@ -132,6 +147,11 @@ export const updateQuest = async (id: string, updates: Partial<Quest>): Promise<
   }
 };
 
+/**
+ * Delete a quest
+ * @param id - The ID of the quest to delete
+ * @returns Promise resolving when deleted
+ */
 export const deleteQuest = async (id: string): Promise<void> => {
   // Security: Verify admin before write
   await requireAdmin();

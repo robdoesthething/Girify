@@ -18,6 +18,8 @@ export const REFERRAL_BONUS = 15;
 
 /**
  * Get user's current giuros balance
+ * @param username - The username to fetch balance for
+ * @returns Promise resolving to the current giuros balance (defaults to STARTING_GIUROS)
  */
 export const getGiuros = async (username: string | null): Promise<number> => {
   if (!username) {
@@ -34,6 +36,10 @@ export const getGiuros = async (username: string | null): Promise<number> => {
 
 /**
  * Add giuros to user's balance
+ * @param username - The username to add giuros to
+ * @param amount - The amount to add
+ * @param reason - The reason for adding giuros (for logging)
+ * @returns Promise resolving to success status and new balance
  */
 export const addGiuros = async (
   username: string | null,
@@ -69,12 +75,19 @@ export const addGiuros = async (
 
 /**
  * Award giuros (wrapper)
+ * @param username - The username to award giuros to
+ * @param amount - The amount to award
+ * @returns Promise resolving to success status and new balance
  */
 export const awardGiuros = (username: string | null, amount: number) =>
   addGiuros(username, amount, 'reward');
 
 /**
  * Spend giuros on a cosmetic item
+ * @param username - The username spending giuros
+ * @param cost - The cost of the item
+ * @param itemId - The ID of the item being purchased
+ * @returns Promise resolving to success status, potential error, and new balance
  */
 export const spendGiuros = async (
   username: string | null,
@@ -159,6 +172,8 @@ export const spendGiuros = async (
 
 /**
  * Claim daily login bonus
+ * @param username - The username claiming the bonus
+ * @returns Promise resolving to claim status, bonus amount, and new balance
  */
 export const claimDailyLoginBonus = async (
   username: string | null
@@ -203,6 +218,9 @@ export const claimDailyLoginBonus = async (
 
 /**
  * Award bonus for completing daily challenge
+ * @param username - The username to award bonus to
+ * @param streak - The current streak of the user
+ * @returns Promise resolving to bonus amount and new balance
  */
 export const awardChallengeBonus = async (
   username: string | null,
@@ -218,6 +236,8 @@ export const awardChallengeBonus = async (
 
 /**
  * Award referral bonus
+ * @param referrerUsername - The username of the referrer
+ * @returns Promise resolving to success status and new balance
  */
 export const awardReferralBonus = async (
   referrerUsername: string | null
@@ -232,6 +252,8 @@ export const awardReferralBonus = async (
 
 /**
  * Get user's purchased cosmetics list
+ * @param username - The username to fetch cosmetics for
+ * @returns Promise resolving to a list of purchased item IDs
  */
 export const getPurchasedCosmetics = async (username: string | null): Promise<string[]> => {
   if (!username) {
@@ -252,6 +274,9 @@ export const getPurchasedCosmetics = async (username: string | null): Promise<st
 
 /**
  * Set active cosmetics
+ * @param username - The username updating cosmetics
+ * @param equipped - The equipped cosmetics object
+ * @returns Promise resolving when update is complete
  */
 export const setEquippedCosmetics = async (
   username: string | null,
@@ -263,6 +288,7 @@ export const setEquippedCosmetics = async (
   try {
     // Cast to expected Map type. Supabase defines it as Record<string, string>
     // But usage might include non-string values?
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     await updateUser(username, { equipped_cosmetics: equipped as any });
   } catch (e) {
     console.error('Error setting equipped cosmetics:', e);
@@ -271,6 +297,8 @@ export const setEquippedCosmetics = async (
 
 /**
  * Get equipped cosmetics
+ * @param username - The username to fetch equipped cosmetics for
+ * @returns Promise resolving to the equipped cosmetics object
  */
 export const getEquippedCosmetics = async (
   username: string | null

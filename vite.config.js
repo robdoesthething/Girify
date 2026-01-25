@@ -1,3 +1,4 @@
+import { sentryVitePlugin } from '@sentry/vite-plugin';
 import react from '@vitejs/plugin-react';
 import { visualizer } from 'rollup-plugin-visualizer';
 import { defineConfig } from 'vite';
@@ -7,6 +8,12 @@ import { VitePWA } from 'vite-plugin-pwa';
 export default defineConfig(({ mode }) => ({
   plugins: [
     react(),
+    sentryVitePlugin({
+      org: process.env.SENTRY_ORG,
+      project: process.env.SENTRY_PROJECT,
+      authToken: process.env.SENTRY_AUTH_TOKEN,
+      disable: !process.env.SENTRY_AUTH_TOKEN, // Disable if no token (prevents local build fail)
+    }),
     VitePWA({
       registerType: 'autoUpdate',
       includeAssets: ['favicon2.png', 'giuro.png', 'girify-logo.png'],
