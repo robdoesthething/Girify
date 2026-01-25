@@ -1,1 +1,4 @@
+# Ensure npx is found
+export PATH="/opt/homebrew/bin:/usr/local/bin:$PATH"
+
 npx --no -- commitlint --edit $1
