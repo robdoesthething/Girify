@@ -5,6 +5,21 @@ import { supabase } from '../../services/supabase';
 import { debugLog } from '../debug';
 import { normalizeUsername } from '../format';
 
+const formatLeaderboardUsername = (userId: string | null | undefined): string => {
+  if (!userId) {
+    return 'Unknown';
+  }
+  return userId.startsWith('@') ? userId : `@${userId}`;
+};
+
+const FETCH_BUFFER_MULTIPLIER = 4;
+const HOURS_PER_DAY = 24;
+const MINUTES_PER_HOUR = 60;
+const SECONDS_PER_MINUTE = 60;
+const MS_PER_SECOND = 1000;
+const DAY_IN_MS = HOURS_PER_DAY * MINUTES_PER_HOUR * SECONDS_PER_MINUTE * MS_PER_SECOND;
+const DAYS_IN_WEEK_MINUS_ONE = 6;
+
 export type LeaderboardPeriod = 'all' | 'daily' | 'weekly' | 'monthly';
 
 export interface ScoreEntry {
@@ -27,6 +42,9 @@ export interface ScoreEntry {
 
 /**
  * Fetch leaderboard scores using Supabase
+ * @param period - The time period to filter by (all, daily, weekly, monthly)
+ * @param limitCount - Max number of entries to return (default: constant)
+ * @returns Promise resolving to list of ranked score entries
  */
 export const getLeaderboard = async (
   period: LeaderboardPeriod = 'all',
@@ -38,7 +56,9 @@ export const getLeaderboard = async (
       .from('game_results')
       .select('*')
       .order('score', { ascending: false })
-      .limit(limitCount * 4); // Fetch more for deduplication
+      .select('*')
+      .order('score', { ascending: false })
+      .limit(limitCount * FETCH_BUFFER_MULTIPLIER); // Fetch more for deduplication
 
     // Apply period filters (timestamp based usage of played_at)
     const now = new Date();
@@ -46,7 +66,7 @@ export const getLeaderboard = async (
     if (period === 'daily') {
       // Use rolling 24 hours to ensure games from any timezone played "recently" are shown
       // This fixes issues where "UTC Midnight" is in the future for Western hemisphere or cuts off early games
-      const startOfDay = new Date(now.getTime() - 24 * 60 * 60 * 1000).toISOString();
+      const startOfDay = new Date(now.getTime() - DAY_IN_MS).toISOString();
       console.warn('[Leaderboard] Daily filter - rolling 24h:', startOfDay);
       debugLog(`[Leaderboard] Fetching Daily >= ${startOfDay}`);
       queryBuilder = queryBuilder.gte('played_at', startOfDay);
@@ -54,7 +74,7 @@ export const getLeaderboard = async (
       // Calculate start of week (Monday)
       const d = new Date(now);
       const currentDay = d.getDay(); // 0 = Sunday
-      const distanceToMonday = currentDay === 0 ? 6 : currentDay - 1;
+      const distanceToMonday = currentDay === 0 ? DAYS_IN_WEEK_MINUS_ONE : currentDay - 1;
       d.setDate(d.getDate() - distanceToMonday);
       d.setHours(0, 0, 0, 0);
       console.warn('[Leaderboard] Weekly filter - start of week:', d.toISOString());
@@ -81,13 +101,10 @@ export const getLeaderboard = async (
     }
 
     // 2. Transform to ScoreEntry format
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const scores: ScoreEntry[] = rawData.map((row: any) => ({
       id: row.id,
-      username: row.user_id
-        ? row.user_id.startsWith('@')
-          ? row.user_id
-          : `@${row.user_id}`
-        : 'Unknown',
+      username: formatLeaderboardUsername(row.user_id),
       score: row.score,
       time: row.time_taken,
       date: new Date(row.played_at).getTime(), // Numeric timestamp
@@ -218,6 +235,8 @@ export interface TeamScoreEntry {
 /**
  * Get team leaderboard with time period filtering
  * Aggregates individual scores by team for the given period
+ * @param period - The time period to filter scores by
+ * @returns Promise resolving to list of team entries sorted by score
  */
 export const getTeamLeaderboard = async (
   period: LeaderboardPeriod = 'all'
@@ -254,7 +273,8 @@ export const getTeamLeaderboard = async (
     });
 
     // Fetch individual scores for the period from SUPABASE (via getLeaderboard)
-    const individualScores = await getLeaderboard(period, 10000);
+    const TEAM_LEADERBOARD_LIMIT = 10000;
+    const individualScores = await getLeaderboard(period, TEAM_LEADERBOARD_LIMIT);
 
     // Aggregate by team
     const teamScores: Record<string, { score: number; members: Set<string>; id: string }> = {};
@@ -265,6 +285,7 @@ export const getTeamLeaderboard = async (
       }
       const k = key.toLowerCase();
       return DISTRICTS.find(
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         (d: any) => d.id === k || d.teamName.toLowerCase() === k || d.name.toLowerCase() === k
       );
     };

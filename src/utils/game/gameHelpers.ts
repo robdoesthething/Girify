@@ -1,14 +1,21 @@
 import { QuizPlan, QuizQuestion, Street } from '../../types/game';
+import { logger } from '../logger';
 import {
   getTodaySeed,
   selectDailyStreets,
   selectDistractors,
   shuffleOptions,
 } from './dailyChallenge';
-import { logger } from '../logger';
 
 import { GAME_LOGIC } from '../../config/constants';
 
+/**
+ * Generate a list of street options (target + distractors)
+ * @param target - The correct street
+ * @param allStreets - All available streets
+ * @param questionIndex - The index of the question
+ * @returns Shuffled array of options
+ */
 export const generateOptionsList = (
   target: Street,
   allStreets: Street[],
@@ -27,6 +34,12 @@ export interface GameSetupResult {
   plannedQuestions: QuizQuestion[] | null;
 }
 
+/**
+ * Calculate the setup for a game including quiz mode logic
+ * @param validStreets - The list of valid streets for today
+ * @param quizPlan - Optional quiz plan data
+ * @returns Game setup object or null if failed
+ */
 export const calculateGameSetup = (
   validStreets: Street[],
   quizPlan?: { quizzes: QuizPlan[] }

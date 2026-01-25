@@ -21,20 +21,17 @@ vi.mock('../../hooks/useNotifications', () => ({
   useNotifications: vi.fn(),
 }));
 
-// Mock Supabase to prevent unhandled rejections during profile load
-vi.mock('../../services/supabase', () => ({
-  supabase: {
-    from: vi.fn(() => ({
-      select: vi.fn(() => ({
-        eq: vi.fn(() => ({
-          single: vi.fn().mockResolvedValue({ data: null, error: null }),
-        })),
-      })),
-      update: vi.fn(() => ({
-        eq: vi.fn(() => Promise.resolve({ data: null, error: null })),
-      })),
-    })),
-  },
+// Mock Profile Service to avoid DB calls
+vi.mock('../../utils/social/profile', () => ({
+  ensureUserProfile: vi.fn(),
+  getUserProfile: vi.fn(),
+  updateUserProfile: vi.fn(),
+}));
+
+// Mock DB services if needed (users)
+vi.mock('../../services/db/users', () => ({
+  getUserByUsername: vi.fn(),
+  updateUser: vi.fn(),
 }));
 
 // Mock child components that might use complex logic

@@ -20,6 +20,11 @@ const CACHE_KEY = 'admin_metrics_cache';
 // eslint-disable-next-line no-magic-numbers
 const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
 
+/**
+ * Fetch dashboard metrics for admin panel
+ * @param forceRefresh - If true, bypasses the local cache
+ * @returns Promise resolving to dashboard metrics object
+ */
 export const getDashboardMetrics = async (forceRefresh = false): Promise<DashboardMetrics> => {
   // Check cache
   const cached = localStorage.getItem(CACHE_KEY);

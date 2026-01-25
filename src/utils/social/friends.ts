@@ -69,6 +69,8 @@ const sanitize = (name: string): string => name.toLowerCase().replace(/\//g, '_'
 
 /**
  * Search for users by username prefix
+ * @param searchText - The search string (min 2 chars)
+ * @returns Promise resolving to a list of matching users (username and best score)
  */
 export const searchUsers = async (searchText: string): Promise<UserSearchResult[]> => {
   if (!searchText || searchText.length < 2) {
@@ -85,6 +87,9 @@ export const searchUsers = async (searchText: string): Promise<UserSearchResult[
 
 /**
  * Send a friend request
+ * @param fromUsername - The username sending the request
+ * @param toUsername - The target username to befriend
+ * @returns Promise resolving to success status or error message
  */
 export const sendFriendRequest = async (
   fromUsername: string,
@@ -151,6 +156,8 @@ export const sendFriendRequest = async (
 
 /**
  * Get incoming friend requests
+ * @param username - The username to fetch requests for
+ * @returns Promise resolving to list of friend requests
  */
 export const getIncomingRequests = async (username: string): Promise<FriendRequest[]> => {
   if (!username) {
@@ -169,6 +176,9 @@ export const getIncomingRequests = async (username: string): Promise<FriendReque
 
 /**
  * Accept a friend request
+ * @param username - The username accepting the request
+ * @param fromUsername - The username of the requester
+ * @returns Promise resolving to operation result
  */
 export const acceptFriendRequest = async (
   username: string,
@@ -198,6 +208,9 @@ export const acceptFriendRequest = async (
 
 /**
  * Decline/Delete friend request
+ * @param username - The username declining the request
+ * @param fromUsername - The requester username
+ * @returns Promise resolving to operation result
  */
 export const declineFriendRequest = async (
   username: string,
@@ -215,6 +228,8 @@ export const declineFriendRequest = async (
 
 /**
  * Get my friends list
+ * @param username - The username to fetch friends for
+ * @returns Promise resolving to list of friends with their stats
  */
 export const getFriends = async (username: string): Promise<Friend[]> => {
   if (!username) {
@@ -278,6 +293,8 @@ const FEED_LIMIT = 200;
 
 /**
  * Get Friend Activity Feed
+ * @param friendsList - The list of friends to fetch activity for
+ * @returns Promise resolving to list of activity feed items
  */
 export const getFriendFeed = async (friendsList: Friend[]): Promise<FeedActivity[]> => {
   if (!friendsList || friendsList.length === 0) {
@@ -309,6 +326,9 @@ export const getFriendFeed = async (friendsList: Friend[]): Promise<FeedActivity
 
 /**
  * Remove a friend
+ * @param user1 - The username initiating removal
+ * @param user2 - The friend to remove
+ * @returns Promise resolving to operation result
  */
 export const removeFriend = async (user1: string, user2: string): Promise<OperationResult> => {
   if (!user1 || !user2) {
@@ -328,6 +348,9 @@ export const removeFriend = async (user1: string, user2: string): Promise<Operat
 
 /**
  * Get friendship status between two users
+ * @param user1 - The first user
+ * @param user2 - The second user
+ * @returns Promise resolving to status: 'friends', 'pending', or 'none'
  */
 export const getFriendshipStatus = async (
   user1: string,
@@ -365,6 +388,9 @@ export const getFriendshipStatus = async (
 
 /**
  * Block a user
+ * @param blocker - The username blocking the other
+ * @param blocked - The username to be blocked
+ * @returns Promise resolving when block is complete
  */
 export const blockUser = async (blocker: string, blocked: string): Promise<void> => {
   if (!blocker || !blocked || blocker === blocked) {
@@ -375,6 +401,9 @@ export const blockUser = async (blocker: string, blocked: string): Promise<void>
 
 /**
  * Unblock a user
+ * @param blocker - The username who blocked
+ * @param blocked - The username to unblock
+ * @returns Promise resolving when unblock is complete
  */
 export const unblockUser = async (blocker: string, blocked: string): Promise<void> => {
   if (!blocker || !blocked) {
@@ -385,6 +414,9 @@ export const unblockUser = async (blocker: string, blocked: string): Promise<voi
 
 /**
  * Check if user1 has blocked user2
+ * @param user1 - The potential blocker
+ * @param user2 - The potential blocked user
+ * @returns Promise resolving to true if blocked, false otherwise
  */
 export const getBlockStatus = async (user1: string, user2: string): Promise<boolean> => {
   return isUserBlocked(user1, user2);
@@ -392,6 +424,8 @@ export const getBlockStatus = async (user1: string, user2: string): Promise<bool
 
 /**
  * Get friend count for a user
+ * @param username - The username to check
+ * @returns Promise resolving to number of friends
  */
 export const getFriendCount = async (username: string): Promise<number> => {
   if (!username) {

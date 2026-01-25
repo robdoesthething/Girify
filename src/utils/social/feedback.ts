@@ -16,6 +16,9 @@ import type { FeedbackItem, OperationResult } from './types';
 
 /**
  * Submit user feedback
+ * @param username - The username submitting feedback
+ * @param text - The feedback text
+ * @returns Promise resolving when submitted
  */
 export const submitFeedback = async (username: string, text: string): Promise<void> => {
   if (!username || !text) {
@@ -26,6 +29,7 @@ export const submitFeedback = async (username: string, text: string): Promise<vo
 
 /**
  * Get all feedback (Admin only)
+ * @returns Promise resolving to list of feedback items
  */
 export const getFeedbackList = async (): Promise<FeedbackItem[]> => {
   try {
@@ -58,6 +62,9 @@ export const getFeedbackList = async (): Promise<FeedbackItem[]> => {
 
 /**
  * Approve feedback and award Giuros (Admin only)
+ * @param feedbackId - The ID of feedback to approve
+ * @param giurosAmount - Amount of giuros to award (default 50)
+ * @returns Promise resolving to operation result
  */
 export const approveFeedback = async (
   feedbackId: string,
@@ -99,6 +106,8 @@ export const approveFeedback = async (
 
 /**
  * Reject feedback (Admin only)
+ * @param feedbackId - The ID of feedback to reject
+ * @returns Promise resolving to operation result
  */
 export const rejectFeedback = async (feedbackId: string): Promise<OperationResult> => {
   try {
@@ -122,6 +131,8 @@ export const rejectFeedback = async (feedbackId: string): Promise<OperationResul
 
 /**
  * Delete feedback (Admin only)
+ * @param feedbackId - The ID of feedback to delete
+ * @returns Promise resolving to operation result
  */
 export const deleteFeedback = async (feedbackId: string): Promise<OperationResult> => {
   try {
@@ -139,6 +150,8 @@ export const deleteFeedback = async (feedbackId: string): Promise<OperationResul
 
 /**
  * Check for unseen feedback rewards for a user
+ * @param username - The username to check
+ * @returns Promise resolving to list of new feedback rewards
  */
 export const checkUnseenFeedbackRewards = async (username: string): Promise<FeedbackItem[]> => {
   if (!username) {
@@ -161,6 +174,8 @@ export const checkUnseenFeedbackRewards = async (username: string): Promise<Feed
 
 /**
  * Mark feedback reward as seen
+ * @param feedbackId - The ID of the feedback
+ * @returns Promise resolving when marked
  */
 export const markFeedbackRewardSeen = async (feedbackId: string): Promise<void> => {
   await markFeedbackNotified(parseInt(feedbackId, 10));

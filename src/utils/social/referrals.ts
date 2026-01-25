@@ -16,6 +16,9 @@ import { normalizeUsername } from '../format';
 
 /**
  * Record a referral when a new user signs up
+ * @param referrer - The username of the referrer
+ * @param referred - The username of the new user
+ * @returns Promise resolving when referral is recorded
  */
 export const recordReferral = async (referrer: string, referred: string): Promise<void> => {
   if (!referrer || !referred || referrer === referred) {
@@ -52,6 +55,8 @@ export const recordReferral = async (referrer: string, referred: string): Promis
 
 /**
  * Check if the user has a successful referral TODAY
+ * @param username - The username to check
+ * @returns Promise resolving to true if referral made today
  */
 export const hasDailyReferral = async (username: string): Promise<boolean> => {
   if (!username) {
@@ -82,6 +87,8 @@ export const hasDailyReferral = async (username: string): Promise<boolean> => {
 
 /**
  * Get the referrer of a user
+ * @param username - The username to find referrer for
+ * @returns Promise resolving to referrer username or null if not found/claimed
  */
 export const getReferrer = async (username: string): Promise<string | null> => {
   if (!username) {

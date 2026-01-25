@@ -1,11 +1,29 @@
+import * as Sentry from '@sentry/react';
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import App from './App';
-import ErrorBoundary from './components/ErrorBoundary';
+import { SentryErrorBoundary } from './components/SentryErrorBoundary';
 import './index.css';
 import { assertEnvValid } from './utils/envValidation';
 import { logger } from './utils/logger';
 import { reportWebVitals } from './utils/webVitals';
+
+// Initialize Sentry
+Sentry.init({
+  dsn: import.meta.env.VITE_SENTRY_DSN, // Will be undefined if not set, effectively disabling it
+  integrations: [
+    Sentry.browserTracingIntegration(),
+    Sentry.replayIntegration({
+      maskAllText: false,
+      blockAllMedia: false,
+    }),
+  ],
+  // Performance Monitoring
+  tracesSampleRate: 1.0, // Capture 100% of the transactions
+  // Session Replay
+  replaysSessionSampleRate: 0.1, // 10%
+  replaysOnErrorSampleRate: 1.0, // 100% when error occurs
+});
 
 // Validate environment variables on startup
 try {
@@ -24,9 +42,9 @@ if (rootElement) {
   try {
     createRoot(rootElement).render(
       <StrictMode>
-        <ErrorBoundary>
+        <SentryErrorBoundary>
           <App />
-        </ErrorBoundary>
+        </SentryErrorBoundary>
       </StrictMode>
     );
     logger.info('[main.tsx] App rendered successfully');

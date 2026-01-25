@@ -109,6 +109,8 @@ const rowToStats = (row: BadgeStatsRow): BadgeStats => ({
 
 /**
  * Get user's badge stats from Supabase
+ * @param username - The username to fetch stats for
+ * @returns Promise resolving to BadgeStats object or null
  */
 export async function getBadgeStats(username: string): Promise<BadgeStats | null> {
   if (!username) {
@@ -132,6 +134,9 @@ export async function getBadgeStats(username: string): Promise<BadgeStats | null
 
 /**
  * Update badge stats after a game
+ * @param username - The username to update
+ * @param gameResult - The result of the completed game
+ * @returns Promise resolving when update is complete
  */
 export async function updateBadgeStats(username: string, gameResult: GameResult): Promise<void> {
   if (!username || !gameResult) {
@@ -310,6 +315,7 @@ export async function updateBadgeStats(username: string, gameResult: GameResult)
     }
 
     if (Object.keys(dbUpdates).length > 0) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       await upsertBadgeStats(username, dbUpdates as any);
     }
   } catch (e) {
@@ -319,6 +325,8 @@ export async function updateBadgeStats(username: string, gameResult: GameResult)
 
 /**
  * Get user's purchased badges
+ * @param username - The username to fetch badges for
+ * @returns Promise resolving to list of badge IDs
  */
 export async function getPurchasedBadges(username: string): Promise<string[]> {
   return getUserPurchasedBadges(username);
@@ -326,6 +334,9 @@ export async function getPurchasedBadges(username: string): Promise<string[]> {
 
 /**
  * Purchase a badge
+ * @param username - The user purchasing the badge
+ * @param badgeId - The ID of the badge to purchase
+ * @returns Promise resolving to operation result
  */
 export async function purchaseBadge(username: string, badgeId: string): Promise<OperationResult> {
   if (!username || !badgeId) {
@@ -346,6 +357,9 @@ export async function purchaseBadge(username: string, badgeId: string): Promise<
 
 /**
  * Track map panning distance
+ * @param username - The username tracking distance
+ * @param distanceKm - The distance panned in KM
+ * @returns Promise resolving when tracking is recorded
  */
 export async function trackPanDistance(username: string, distanceKm: number): Promise<void> {
   if (!username || !distanceKm) {
@@ -355,6 +369,7 @@ export async function trackPanDistance(username: string, distanceKm: number): Pr
   try {
     const current = await getBadgeStats(username);
     const newTotal = (current?.totalPanKm || 0) + distanceKm;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     await upsertBadgeStats(username, { total_pan_km: newTotal } as any);
   } catch (e) {
     console.error('[BadgeStats] Error tracking pan distance:', e);

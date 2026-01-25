@@ -73,6 +73,7 @@ const mapRowToAnnouncement = (row: AnnouncementRow): Announcement => {
 
 /**
  * Get all announcements (for admin panel)
+ * @returns Promise resolving to list of all announcements
  */
 export const getAllAnnouncements = async (): Promise<Announcement[]> => {
   try {
@@ -86,6 +87,7 @@ export const getAllAnnouncements = async (): Promise<Announcement[]> => {
 
 /**
  * Get active announcements (published and not expired)
+ * @returns Promise resolving to list of active announcements
  */
 export const getActiveAnnouncements = async (): Promise<Announcement[]> => {
   try {
@@ -99,6 +101,8 @@ export const getActiveAnnouncements = async (): Promise<Announcement[]> => {
 
 /**
  * Get unread announcements for a user
+ * @param username - The username to fetch unread news for
+ * @returns Promise resolving to list of unread announcements
  */
 export const getUnreadAnnouncements = async (username: string): Promise<Announcement[]> => {
   if (!username) {
@@ -125,6 +129,9 @@ export const getUnreadAnnouncements = async (username: string): Promise<Announce
 
 /**
  * Mark announcement as read for user
+ * @param username - The username marking as read
+ * @param announcementId - The ID of the announcement
+ * @returns Promise resolving when marked
  */
 export const markAnnouncementAsRead = async (
   username: string,
@@ -159,6 +166,8 @@ const toTimestamp = (date: Date | string | null | undefined): string | null => {
 
 /**
  * Create a new announcement (admin only)
+ * @param announcement - The announcement data
+ * @returns Promise resolving to operation result
  */
 export const createAnnouncement = async (
   announcement: AnnouncementInput
@@ -202,6 +211,9 @@ export const createAnnouncement = async (
 
 /**
  * Update an announcement (admin only)
+ * @param id - The ID of the announcement to update
+ * @param updates - The updates to apply
+ * @returns Promise resolving to operation result
  */
 export const updateAnnouncement = async (
   id: string,
@@ -245,6 +257,8 @@ export const updateAnnouncement = async (
 
 /**
  * Delete an announcement (admin only)
+ * @param id - The ID of the announcement to delete
+ * @returns Promise resolving to operation result
  */
 export const deleteAnnouncement = async (id: string): Promise<OperationResult> => {
   try {

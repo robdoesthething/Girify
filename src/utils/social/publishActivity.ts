@@ -12,6 +12,7 @@ const mapToRow = (
 ): Omit<ActivityFeedRow, 'id'> => {
   const row: Omit<ActivityFeedRow, 'id'> = {
     username,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     type: type as any, // Cast to specific union type if possible
     created_at: new Date().toISOString(),
     score: typeof data.score === 'number' ? data.score : null,
@@ -43,6 +44,7 @@ const mapToRow = (
       metadata[key] = value;
     }
   }
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   row.metadata = metadata as any;
 
   return row;
@@ -74,6 +76,11 @@ export const publishActivity = async (
 
 /**
  * Publish cosmetic purchase activity
+ * @param username - The username who purchased
+ * @param itemId - The item ID
+ * @param itemName - The item name
+ * @param itemType - The item type (frame, title, etc)
+ * @returns Promise resolving when published
  */
 export const publishCosmeticPurchase = async (
   username: string,

@@ -19,6 +19,9 @@ import type { GameData, GameStatsUpdate } from './types';
 
 /**
  * Update user stats after a game
+ * @param username - The username to update
+ * @param updates - The stats updates (streak, score, etc)
+ * @returns Promise resolving when update is complete
  */
 export const updateUserGameStats = async (
   username: string,
@@ -61,7 +64,10 @@ export const updateUserGameStats = async (
 };
 
 /**
- * Update user statistics after completing a game
+ * Update user statistics after completing a game (Simple version)
+ * @param username - The username to update
+ * @param score - The score achieved
+ * @returns Promise resolving when update is complete
  */
 export const updateUserStats = async (username: string, score: number): Promise<void> => {
   if (!username) {
@@ -89,6 +95,9 @@ export const updateUserStats = async (username: string, score: number): Promise<
 
 /**
  * Save game result to user's personal history
+ * @param username - The username to save for
+ * @param gameData - The game result data
+ * @returns Promise resolving when saved
  */
 export const saveUserGameResult = async (username: string, gameData: GameData): Promise<void> => {
   if (!username) {
@@ -130,6 +139,8 @@ export const saveUserGameResult = async (username: string, gameData: GameData): 
 
 /**
  * Get user's game history
+ * @param username - The username to fetch history for
+ * @returns Promise resolving to list of past game results
  */
 export const getUserGameHistory = async (username: string): Promise<GameData[]> => {
   if (!username) {
@@ -153,6 +164,9 @@ export const getUserGameHistory = async (username: string): Promise<GameData[]> 
 
 /**
  * Update district score
+ * @param districtId - The district ID to update
+ * @param score - The score to add
+ * @returns Promise resolving when update is complete
  */
 export const updateDistrictScore = async (districtId: string, score: number): Promise<void> => {
   if (!districtId || !score) {
@@ -163,6 +177,7 @@ export const updateDistrictScore = async (districtId: string, score: number): Pr
 
 /**
  * Get district rankings
+ * @returns Promise resolving to list of districts with scores
  */
 export const getDistrictRankings = async (): Promise<{ id: string; score: number }[]> => {
   try {
