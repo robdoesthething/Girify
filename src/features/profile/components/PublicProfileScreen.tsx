@@ -7,14 +7,14 @@ import { getUnlockedAchievements } from '../../../data/achievements';
 import { getAvatar } from '../../../data/avatars';
 import cosmetics from '../../../data/cosmetics.json';
 import { formatUsername } from '../../../utils/format';
+import { getEquippedCosmetics } from '../../../utils/shop/giuros';
+import { getUserGameHistory, getUserProfile, UserProfile } from '../../../utils/social';
 import {
   blockUser,
   getBlockStatus,
   getFriendshipStatus,
   sendFriendRequest,
-} from '../../../utils/friends';
-import { getEquippedCosmetics } from '../../../utils/giuros';
-import { getUserGameHistory, getUserProfile, UserProfile } from '../../../utils/social';
+} from '../../../utils/social/friends';
 import { themeClasses } from '../../../utils/themeUtils';
 
 interface PublicProfileScreenProps {

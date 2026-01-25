@@ -1,18 +1,11 @@
 import { AnimatePresence } from 'framer-motion';
 import React, { Suspense } from 'react';
-import { Route, Routes, useLocation, useNavigate } from 'react-router-dom';
+import { Route, Routes } from 'react-router-dom';
 import { STORAGE_KEYS } from './config/constants';
 import { GameProvider } from './context/GameContext';
-import { useTheme } from './context/ThemeContext';
-import { useAuth } from './features/auth/hooks/useAuth';
-import { useGameState } from './features/game/hooks/useGameState';
-import { useStreets } from './features/game/hooks/useStreets';
-import { useAchievements } from './hooks/useAchievements';
-import { useAnnouncements } from './hooks/useAnnouncements';
-import { useAuthRedirect } from './hooks/useAuthRedirect';
-import { useConfirm } from './hooks/useConfirm';
+import { useAppInitialization } from './hooks/useAppInitialization';
 import { GameHistory } from './types/user';
-import { getTodaySeed, hasPlayedToday } from './utils/dailyChallenge';
+import { getTodaySeed, hasPlayedToday } from './utils/game/dailyChallenge';
 import { storage } from './utils/storage';
 import { themeClasses } from './utils/themeUtils';
 
@@ -46,56 +39,24 @@ import {
 } from './routes';
 
 const AppRoutes: React.FC = () => {
-  const { theme, t } = useTheme();
-  const location = useLocation();
-  const navigate = useNavigate();
-
-  // Street data hook
-  const { validStreets, getHintStreets, isLoading: isLoadingStreets } = useStreets();
-
-  // Confirmation Hook
-  const { confirm, confirmConfig, handleClose } = useConfirm();
-
-  // Game Logic Hook
   const {
+    theme,
+    t,
+    location,
+    navigate,
+    isLoading,
+    confirm,
+    confirmConfig,
+    handleConfirmClose,
     state,
     dispatch,
     currentStreet,
-    setupGame,
-    handleSelectAnswer,
-    handleNext,
-    handleRegister,
-    processAnswer,
-  } = useGameState(validStreets, getHintStreets);
-
-  // Auth redirect handling (Google OAuth + district modal)
-  const { showDistrictModal, isProcessingRedirect, handleDistrictComplete } = useAuthRedirect({
-    username: state.username,
-    handleRegister,
-  });
-
-  // Announcement hook
-  const { pendingAnnouncement, dismissAnnouncement, checkAnnouncements } = useAnnouncements(
-    state.username || ''
-  );
-
-  // Achievement hook
-  const { newlyUnlockedBadge, dismissAchievement } = useAchievements(
-    state.username,
-    state.gameState,
-    location.pathname
-  );
-
-  // Auth hook
-  const { emailVerified, handleLogout: performLogout } = useAuth(
-    dispatch,
-    state.gameState,
-    checkAnnouncements
-  );
-  const handleLogout = () => performLogout(navigate);
+    handlers,
+    uiState,
+  } = useAppInitialization();
 
   // Show loader while initializing
-  if (isLoadingStreets || isProcessingRedirect) {
+  if (isLoading) {
     return <PageLoader />;
   }
 
@@ -152,28 +113,34 @@ const AppRoutes: React.FC = () => {
           dispatch({ type: 'SET_GAME_STATE', payload: 'register' });
           navigate('/');
         }}
-        onLogout={handleLogout}
+        onLogout={handlers.handleLogout}
       />
 
       {/* Modals */}
       <AnimatePresence>
-        {pendingAnnouncement && (
-          <AnnouncementModal announcement={pendingAnnouncement} onDismiss={dismissAnnouncement} />
+        {uiState.pendingAnnouncement && (
+          <AnnouncementModal
+            announcement={uiState.pendingAnnouncement}
+            onDismiss={handlers.dismissAnnouncement}
+          />
         )}
       </AnimatePresence>
       <AnimatePresence>
-        {newlyUnlockedBadge && (
+        {uiState.newlyUnlockedBadge && (
           <Suspense fallback={null}>
-            <AchievementModal achievement={newlyUnlockedBadge} onDismiss={dismissAchievement} />
+            <AchievementModal
+              achievement={uiState.newlyUnlockedBadge}
+              onDismiss={handlers.dismissAchievement}
+            />
           </Suspense>
         )}
       </AnimatePresence>
       <AnimatePresence>
-        {showDistrictModal && (
+        {uiState.showDistrictModal && (
           <Suspense fallback={null}>
             <DistrictSelectionModal
               username={state.username || ''}
-              onComplete={handleDistrictComplete}
+              onComplete={handlers.handleDistrictComplete}
             />
           </Suspense>
         )}
@@ -188,7 +155,7 @@ const AppRoutes: React.FC = () => {
             <Route
               path="/"
               element={
-                state.username && !emailVerified ? (
+                state.username && !uiState.emailVerified ? (
                   <VerifyEmailScreen theme={theme as 'light' | 'dark'} />
                 ) : (
                   <GameProvider
@@ -197,11 +164,11 @@ const AppRoutes: React.FC = () => {
                       dispatch,
                       currentStreet,
                       handlers: {
-                        handleSelectAnswer,
-                        handleNext,
-                        processAnswer,
-                        setupGame,
-                        handleRegister,
+                        handleSelectAnswer: handlers.handleSelectAnswer,
+                        handleNext: handlers.handleNext,
+                        processAnswer: handlers.processAnswer,
+                        setupGame: handlers.setupGame,
+                        handleRegister: handlers.handleRegister,
                         hasPlayedToday,
                       },
                     }}
@@ -220,7 +187,7 @@ const AppRoutes: React.FC = () => {
               element={
                 <SettingsScreen
                   onClose={() => handleOpenPage(null)}
-                  onLogout={handleLogout}
+                  onLogout={handlers.handleLogout}
                   autoAdvance={state.autoAdvance}
                   setAutoAdvance={val => dispatch({ type: 'SET_AUTO_ADVANCE', payload: val })}
                   username={state.username || undefined}
@@ -285,8 +252,8 @@ const AppRoutes: React.FC = () => {
           title={confirmConfig?.title || ''}
           message={confirmConfig?.message || ''}
           isDangerous={confirmConfig?.isDangerous || false}
-          onConfirm={() => handleClose(true)}
-          onCancel={() => handleClose(false)}
+          onConfirm={() => handleConfirmClose(true)}
+          onCancel={() => handleConfirmClose(false)}
         />
       </Suspense>
 

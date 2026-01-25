@@ -1,8 +1,8 @@
 import { TOAST_SHORT_MS } from '../../../config/appConstants';
 import { useTheme } from '../../../context/ThemeContext';
 import { useToast } from '../../../hooks/useToast';
-import { setEquippedCosmetics as updateEquippedInDb } from '../../../utils/giuros';
 import { ShopItem } from '../../../utils/shop';
+import { setEquippedCosmetics as updateEquippedInDb } from '../../../utils/shop/giuros';
 import { EquippedCosmetics } from './useShopData';
 
 interface UseEquipProps {

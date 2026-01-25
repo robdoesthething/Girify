@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
-import { getEquippedCosmetics, getGiuros, getPurchasedCosmetics } from '../../../utils/giuros';
 import { getShopItems, GroupedShopItems } from '../../../utils/shop';
+import { getEquippedCosmetics, getGiuros, getPurchasedCosmetics } from '../../../utils/shop/giuros';
 import { getUserProfile } from '../../../utils/social';
 
 export interface EquippedCosmetics {

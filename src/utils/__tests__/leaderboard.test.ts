@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { getLeaderboard } from '../leaderboard';
+import { getLeaderboard } from '../social/leaderboard';
 
 // Mock Supabase using vi.hoisted to ensure accessibility in vi.mock
 const { mockSupabase, mockQueryBuilder } = vi.hoisted(() => {

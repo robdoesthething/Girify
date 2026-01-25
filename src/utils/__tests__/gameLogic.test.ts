@@ -6,7 +6,7 @@ import {
   hasPlayedToday,
   markTodayAsPlayed,
   selectDailyStreets,
-} from '../dailyChallenge';
+} from '../game/dailyChallenge';
 
 describe('Daily Challenge - Game Logic', () => {
   const mockStreets: Street[] = [

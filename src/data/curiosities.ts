@@ -1,7 +1,7 @@
 // Barcelona Curiosities Data
 // Source: User Provided JSON (25 Valid Entries)
 
-import { getTodaySeed, seededRandom } from '../utils/dailyChallenge';
+import { getTodaySeed, seededRandom } from '../utils/game/dailyChallenge';
 
 export type CuriosityType =
   | 'Legend'

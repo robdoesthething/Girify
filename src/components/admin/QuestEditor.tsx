@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Quest } from '../../utils/quests';
+import { Quest } from '../../utils/game/quests';
 import FormInput from '../FormInput';
 
 interface QuestEditorProps {

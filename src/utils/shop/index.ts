@@ -1,11 +1,11 @@
-import cosmetics from '../data/cosmetics.json';
+import cosmetics from '../../data/cosmetics.json';
 import {
   createShopItem as dbCreateShopItem,
   deleteShopItem as dbDeleteShopItem,
   getShopItems as dbGetShopItems,
   updateShopItem as dbUpdateShopItem,
-} from '../services/database';
-import { ShopItemRow } from '../types/supabase';
+} from '../../services/database';
+import { ShopItemRow } from '../../types/supabase';
 
 export type ShopItemType = 'frame' | 'title' | 'special' | 'avatar' | 'avatars';
 
@@ -289,7 +289,7 @@ export const syncWithLocal = async (): Promise<{ updated: number; errors: number
   return { updated, errors };
 };
 
-import { UserProfile } from '../types/user';
+import { UserProfile } from '../../types/user';
 
 export const checkUnlockCondition = (
   item: ShopItem,

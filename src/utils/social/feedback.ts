@@ -74,7 +74,7 @@ export const approveFeedback = async (
       throw new Error('Feedback not found');
     }
 
-    const { awardGiuros } = await import('../giuros');
+    const { awardGiuros } = await import('../shop/giuros');
     await awardGiuros(feedback.username, giurosAmount);
 
     const { error: updateError } = await supabase

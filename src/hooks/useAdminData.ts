@@ -6,9 +6,8 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import { UserProfile } from '../types/user';
+import { DashboardMetrics, getDashboardMetrics } from '../utils/game/metrics';
 import { logger } from '../utils/logger';
-import { DashboardMetrics, getDashboardMetrics } from '../utils/metrics';
-import { Announcement, getAllAnnouncements } from '../utils/news';
 import { getShopItems, ShopItem } from '../utils/shop';
 import {
   deleteUserAndData,
@@ -17,6 +16,7 @@ import {
   getFeedbackList,
   updateUserAsAdmin,
 } from '../utils/social';
+import { Announcement, getAllAnnouncements } from '../utils/social/news';
 
 export interface AdminDataState {
   users: UserProfile[];

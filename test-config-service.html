@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Supabase Config Service</title>
+</head>
+<body>
+    <h1>Testing Supabase Config Service</h1>
+    <div id="output"></div>
+    <button onclick="testConfig()">Test Config Fetch</button>
+
+    <script type="module">
+        import { getPayoutConfig, getGameConfig } from './src/services/db/config.ts';
+
+        window.testConfig = async function() {
+            const output = document.getElementById('output');
+            output.innerHTML = '<p>Testing...</p>';
+
+            try {
+                console.log('Fetching payout config...');
+                const payoutConfig = await getPayoutConfig();
+                console.log('Payout config:', payoutConfig);
+
+                console.log('Fetching game config...');
+                const gameConfig = await getGameConfig();
+                console.log('Game config:', gameConfig);
+
+                output.innerHTML = `
+                    <h2>✅ Success!</h2>
+                    <h3>Payout Config:</h3>
+                    <pre>${JSON.stringify(payoutConfig, null, 2)}</pre>
+                    <h3>Game Config:</h3>
+                    <pre>${JSON.stringify(gameConfig, null, 2)}</pre>
+                `;
+            } catch (error) {
+                console.error('Error:', error);
+                output.innerHTML = `
+                    <h2>❌ Error!</h2>
+                    <pre>${error.message}</pre>
+                    <p>Check console for details</p>
+                `;
+            }
+        };
+
+        // Auto-run on load
+        window.testConfig();
+    </script>
+</body>
+</html>
