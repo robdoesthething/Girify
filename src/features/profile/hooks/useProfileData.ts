@@ -1,9 +1,9 @@
 import { useCallback, useEffect, useState } from 'react';
 import { GameHistory, UserProfile } from '../../../types/user';
-import { getFriendCount } from '../../../utils/friends';
-import { getEquippedCosmetics, getGiuros } from '../../../utils/giuros';
 import { getShopItems, ShopItem } from '../../../utils/shop';
+import { getEquippedCosmetics, getGiuros } from '../../../utils/shop/giuros';
 import { getUserGameHistory, getUserProfile } from '../../../utils/social';
+import { getFriendCount } from '../../../utils/social/friends';
 import { parseJoinedDate } from '../utils/profileHelpers';
 
 export interface UseProfileDataResult {

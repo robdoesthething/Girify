@@ -6,9 +6,9 @@ import { useAsyncOperation } from '../../../hooks/useAsyncOperation';
 import { useNotification } from '../../../hooks/useNotification';
 import { UserMigrationService } from '../../../services/userMigration';
 import { FeedbackReward, GameHistory, UserProfile } from '../../../types/user';
-import { claimDailyLoginBonus } from '../../../utils/giuros';
 import { logger } from '../../../utils/logger';
 import { sanitizeInput } from '../../../utils/security';
+import { claimDailyLoginBonus } from '../../../utils/shop/giuros';
 import {
   checkUnseenFeedbackRewards,
   ensureUserProfile,
@@ -185,8 +185,7 @@ async function syncUserProfile(
       // Claim daily login bonus
       const bonusResult = await claimDailyLoginBonus(displayName);
       if (bonusResult.claimed) {
-        // eslint-disable-next-line no-console
-        console.log(`[Giuros] Daily login bonus claimed: +${bonusResult.bonus}`);
+        logger.info(`[Giuros] Daily login bonus claimed: +${bonusResult.bonus}`);
       }
 
       // Check for feedback rewards
@@ -232,8 +231,7 @@ async function syncLocalHistory(displayName: string) {
     if (Array.isArray(localHistory) && localHistory.length > 0) {
       const existing = await getUserGameHistory(displayName);
       if (existing.length === 0) {
-        // eslint-disable-next-line no-console
-        console.log(`[Migration] Syncing ${localHistory.length} games to Firestore...`);
+        logger.info(`[Migration] Syncing ${localHistory.length} games to Firestore...`);
         const toUpload = localHistory.slice(-MIGRATION.MAX_HISTORY_UPLOAD);
         toUpload.forEach((game: GameHistory) =>
           saveUserGameResult(displayName, {
@@ -271,8 +269,7 @@ async function syncLocalCosmetics(displayName: string) {
       (equipped && Object.keys(equipped).length > 0) ||
       (giuros !== undefined && giuros > 10) // giuros is number from storage.get if stored as number/JSON
     ) {
-      // eslint-disable-next-line no-console
-      console.log('[Migration] Syncing cosmetics and giuros to Firestore...');
+      logger.info('[Migration] Syncing cosmetics and giuros to Firestore...');
       await updateUserProfile(displayName, {
         purchasedCosmetics: purchased,
         equippedCosmetics: equipped,
@@ -318,8 +315,7 @@ async function backfillJoinDate(displayName: string, profile: UserProfile | null
   }
 
   if (earliestDate && (!profileDate || earliestDate < profileDate)) {
-    // eslint-disable-next-line no-console
-    console.log('[Migration] Backfilling registry date from history:', earliestDate);
+    logger.info('[Migration] Backfilling registry date from history:', earliestDate);
     // Cast to any to bypass strict Timestamp check for now, or convert if possible.
     // Ideally we import Timestamp from firebase/firestore but user helper handles conversion usually.
     await updateUserProfile(displayName, { joinedAt: earliestDate } as any);

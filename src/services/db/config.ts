@@ -80,7 +80,7 @@ export const getPayoutConfig = async (): Promise<PayoutConfig> => {
   }
 
   try {
-    const { data, error } = await supabase
+    const { data, error } = await (supabase as any)
       .from('app_config')
       .select('*')
       .eq('id', 'default')
@@ -144,7 +144,7 @@ export const updatePayoutConfig = async (
       dbUpdates.referral_bonus = updates.REFERRAL_BONUS;
     }
 
-    const { error } = await supabase
+    const { error } = await (supabase as any)
       .from('app_config')
       .update({ ...dbUpdates, updated_at: new Date().toISOString() })
       .eq('id', 'default');
@@ -227,7 +227,7 @@ export const getGameConfig = async (): Promise<GameConfig> => {
   }
 
   try {
-    const { data, error } = await supabase
+    const { data, error } = await (supabase as any)
       .from('game_config')
       .select('*')
       .eq('id', 'default')
@@ -300,7 +300,7 @@ export const updateGameConfig = async (
       dbUpdates.enabled_shop_categories = updates.enabledShopCategories;
     }
 
-    const { error } = await supabase
+    const { error } = await (supabase as any)
       .from('game_config')
       .update({ ...dbUpdates, updated_at: new Date().toISOString() })
       .eq('id', 'default');

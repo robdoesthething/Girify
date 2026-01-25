@@ -3,10 +3,10 @@ import {
   deleteQuest as dbDeleteQuest,
   getAllQuests as dbGetQuests,
   updateQuest as dbUpdateQuest,
-} from '../services/database';
-import { QuestRow } from '../types/supabase';
-import { requireAdmin } from './auth';
-import { logger } from './logger';
+} from '../../services/database';
+import { QuestRow } from '../../types/supabase';
+import { requireAdmin } from '../auth';
+import { logger } from '../logger';
 
 export interface Quest {
   id: string; // Internal app usage might treat ID as string, but DB has number. We should verify usage.

@@ -1,5 +1,5 @@
 import { Timestamp } from 'firebase/firestore'; // Keep for type compatibility if needed, or remove if unused. Types often used in UI.
-import { SOCIAL } from '../config/constants';
+import { SOCIAL } from '../../config/constants';
 import {
   addFriendship,
   areFriends,
@@ -16,8 +16,8 @@ import {
   isUserBlocked,
   removeFriendship,
   updateFriendRequestStatus,
-} from '../services/database';
-import { supabase } from '../services/supabase';
+} from '../../services/database';
+import { supabase } from '../../services/supabase';
 
 export interface UserSearchResult {
   username: string;

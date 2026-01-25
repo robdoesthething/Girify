@@ -1,5 +1,5 @@
-import { GAME_LOGIC, PRNG } from '../config/constants';
-import { Street } from '../types/game';
+import { GAME_LOGIC, PRNG } from '../../config/constants';
+import { Street } from '../../types/game';
 
 // Daily Challenge Utility
 // Generates consistent street selection based on date

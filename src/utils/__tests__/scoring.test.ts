@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { GAME, REWARDS } from '../../config/constants';
 import { calculateScore, calculateStreakBonus } from '../../config/gameConfig';
-import { getScoreTier, getScoreTierColor } from '../scoring';
+import { getScoreTier, getScoreTierColor } from '../game/scoring';
 
 describe('Scoring Logic (gameConfig)', () => {
   it('returns 0 for incorrect answers', () => {

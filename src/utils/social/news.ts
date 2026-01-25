@@ -10,8 +10,8 @@ import {
   markAnnouncementAsRead as dbMarkAnnouncementAsRead,
   updateAnnouncement as dbUpdateAnnouncement,
   getReadAnnouncementIds,
-} from '../services/database';
-import { AnnouncementRow } from '../types/supabase';
+} from '../../services/database';
+import { AnnouncementRow } from '../../types/supabase';
 
 export type AnnouncementPriority = 'low' | 'normal' | 'high' | 'urgent';
 export type TargetAudience = 'all' | 'new_users' | 'returning';

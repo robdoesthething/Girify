@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { UserProfile } from '../../types/user';
 import { getPayoutConfig, PayoutConfig, updatePayoutConfig } from '../../services/db/config';
+import { UserProfile } from '../../types/user';
 import { ShopItem } from '../../utils/shop';
 import EconomyMetrics from './EconomyMetrics';
 import IncomeConfig from './IncomeConfig';
@@ -25,9 +25,15 @@ const AdminGiuros: React.FC<AdminGiurosProps> = ({
 
   // Fetch payout config on mount
   useEffect(() => {
-    getPayoutConfig().then((config: PayoutConfig) => {
-      setPayouts(config);
-    });
+    console.warn('[AdminGiuros] Fetching payout config...');
+    getPayoutConfig()
+      .then((config: PayoutConfig) => {
+        console.warn('[AdminGiuros] Payout config loaded:', config);
+        setPayouts(config);
+      })
+      .catch(error => {
+        console.error('[AdminGiuros] Error loading payout config:', error);
+      });
   }, []);
 
   // Calculate Economy Stats

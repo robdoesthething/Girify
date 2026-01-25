@@ -1,8 +1,8 @@
 import { TOAST_SHORT_MS, TOAST_TIMEOUT_MS } from '../../../config/appConstants';
 import { useTheme } from '../../../context/ThemeContext';
 import { useToast } from '../../../hooks/useToast';
-import { spendGiuros } from '../../../utils/giuros';
 import { checkUnlockCondition, ShopItem } from '../../../utils/shop';
+import { spendGiuros } from '../../../utils/shop/giuros';
 import { UserStats } from './useShopData';
 
 interface UsePurchaseProps {

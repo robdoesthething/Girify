@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { Achievement, getUnlockedAchievements } from '../data/achievements';
-import { getAllAchievements } from '../utils/achievements';
+import { getAllAchievements } from '../utils/game/achievements';
 import { getUserProfile } from '../utils/social';
 
 export const useAchievements = (username: string | null, gameState: string, pathname: string) => {

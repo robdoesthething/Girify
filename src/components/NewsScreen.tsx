@@ -1,7 +1,7 @@
 import { motion } from 'framer-motion';
 import React, { useEffect, useState } from 'react';
 import { useTheme } from '../context/ThemeContext';
-import { Announcement, getActiveAnnouncements, markAnnouncementAsRead } from '../utils/news';
+import { Announcement, getActiveAnnouncements, markAnnouncementAsRead } from '../utils/social/news';
 import { themeClasses } from '../utils/themeUtils';
 
 interface NewsScreenProps {

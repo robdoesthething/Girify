@@ -7,14 +7,14 @@
 import { useEffect, useState } from 'react';
 import { TOAST_SHORT_MS, TOAST_TIMEOUT_MS } from '../../../config/appConstants';
 import { Toast, useToast } from '../../../hooks/useToast';
+import { getShopItems, GroupedShopItems, ShopItem } from '../../../utils/shop';
 import {
   getEquippedCosmetics,
   getGiuros,
   getPurchasedCosmetics,
   setEquippedCosmetics,
   spendGiuros,
-} from '../../../utils/giuros';
-import { getShopItems, GroupedShopItems, ShopItem } from '../../../utils/shop';
+} from '../../../utils/shop/giuros';
 
 export interface EquippedCosmetics {
   frameId?: string;

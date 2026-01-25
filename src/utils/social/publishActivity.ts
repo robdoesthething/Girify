@@ -1,8 +1,8 @@
 /**
  * Utility to publish activity events to friend feed
  */
-import { publishActivity as dbPublishActivity } from '../services/database';
-import { ActivityFeedRow } from '../types/supabase';
+import { publishActivity as dbPublishActivity } from '../../services/database';
+import { ActivityFeedRow } from '../../types/supabase';
 
 // Helper to map ActivityData to ActivityFeedRow columns
 const mapToRow = (

@@ -58,6 +58,7 @@ export function rowToProfile(row: UserRow): UserProfile {
     referredBy: row.referred_by,
     district: row.district || undefined,
     team: row.team || undefined,
+    role: (row as any).role || undefined,
   };
 }
 

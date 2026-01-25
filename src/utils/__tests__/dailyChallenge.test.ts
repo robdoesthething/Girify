@@ -4,7 +4,7 @@ import {
   selectDailyStreets,
   hasPlayedToday,
   markTodayAsPlayed,
-} from '../dailyChallenge';
+} from '../game/dailyChallenge';
 
 describe('dailyChallenge utils', () => {
   beforeEach(() => {

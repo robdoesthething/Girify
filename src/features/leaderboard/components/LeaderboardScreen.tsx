@@ -6,7 +6,11 @@ import { API_TIMEOUT_MS } from '../../../config/appConstants';
 import { useTheme } from '../../../context/ThemeContext';
 import { DISTRICTS } from '../../../data/districts';
 import { formatUsername, usernamesMatch } from '../../../utils/format';
-import { getLeaderboard, getTeamLeaderboard, TeamScoreEntry } from '../../../utils/leaderboard';
+import {
+  getLeaderboard,
+  getTeamLeaderboard,
+  TeamScoreEntry,
+} from '../../../utils/social/leaderboard';
 import { themeClasses } from '../../../utils/themeUtils';
 
 interface ScoreEntry {

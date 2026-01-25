@@ -44,6 +44,7 @@ export interface UserProfile {
   referredBy?: string | null;
   district?: string;
   team?: string;
+  role?: 'admin' | 'user';
 }
 
 export interface FeedbackItem {

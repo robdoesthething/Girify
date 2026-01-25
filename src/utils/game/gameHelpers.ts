@@ -1,13 +1,13 @@
-import { QuizPlan, QuizQuestion, Street } from '../types/game';
+import { QuizPlan, QuizQuestion, Street } from '../../types/game';
 import {
   getTodaySeed,
   selectDailyStreets,
   selectDistractors,
   shuffleOptions,
 } from './dailyChallenge';
-import { logger } from './logger';
+import { logger } from '../logger';
 
-import { GAME_LOGIC } from '../config/constants';
+import { GAME_LOGIC } from '../../config/constants';
 
 export const generateOptionsList = (
   target: Street,

@@ -1,5 +1,5 @@
-import { GAME } from '../config/constants';
-import { calculateScore } from '../config/gameConfig';
+import { GAME } from '../../config/constants';
+import { calculateScore } from '../../config/gameConfig';
 
 /**
  * Calculate score based on time taken and hints used

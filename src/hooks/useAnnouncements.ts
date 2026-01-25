@@ -1,5 +1,5 @@
 import { useCallback, useState } from 'react';
-import { Announcement, getUnreadAnnouncements, markAnnouncementAsRead } from '../utils/news';
+import { Announcement, getUnreadAnnouncements, markAnnouncementAsRead } from '../utils/social/news';
 
 interface UseAnnouncementsReturn {
   pendingAnnouncement: Announcement | null;

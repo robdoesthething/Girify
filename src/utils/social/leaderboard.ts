@@ -1,9 +1,9 @@
 import { Timestamp } from 'firebase/firestore';
-import { SOCIAL } from '../config/constants';
-import { DISTRICTS } from '../data/districts';
-import { supabase } from '../services/supabase';
-import { debugLog } from './debug';
-import { normalizeUsername } from './format';
+import { SOCIAL } from '../../config/constants';
+import { DISTRICTS } from '../../data/districts';
+import { supabase } from '../../services/supabase';
+import { debugLog } from '../debug';
+import { normalizeUsername } from '../format';
 
 export type LeaderboardPeriod = 'all' | 'daily' | 'weekly' | 'monthly';
 

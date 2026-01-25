@@ -2,14 +2,14 @@
  * Badge Tracking Utility
  */
 
-import { BADGES, TIME } from '../config/constants';
+import { BADGES, TIME } from '../../config/constants';
 import {
   addPurchasedBadge,
   getBadgeStats as dbGetBadgeStats,
   getUserPurchasedBadges,
   upsertBadgeStats,
-} from '../services/database';
-import { BadgeStatsRow } from '../types/supabase';
+} from '../../services/database';
+import { BadgeStatsRow } from '../../types/supabase';
 
 // Street name patterns
 const RAMBLAS_PATTERNS = /rambla|ramblas/i;

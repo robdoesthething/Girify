@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import { Street } from '../../../types/game';
-import { getTodaySeed, selectDailyStreets } from '../../../utils/dailyChallenge';
+import { getTodaySeed, selectDailyStreets } from '../../../utils/game/dailyChallenge';
 
 interface DailyChallengeData {
   dailyStreets: Street[];

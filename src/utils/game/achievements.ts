@@ -1,13 +1,13 @@
-import { ACHIEVEMENT_BADGES, Achievement } from '../data/achievements';
+import { ACHIEVEMENT_BADGES, Achievement } from '../../data/achievements';
 import {
   createAchievement as dbCreateAchievement,
   deleteAchievement as dbDeleteAchievement,
   getAchievements as dbGetAchievements,
   updateAchievement as dbUpdateAchievement,
-} from '../services/database';
-import { AchievementRow } from '../types/supabase';
-import { requireAdmin } from './auth';
-import { logger } from './logger';
+} from '../../services/database';
+import { AchievementRow } from '../../types/supabase';
+import { requireAdmin } from '../auth';
+import { logger } from '../logger';
 
 // Simple in-memory cache
 let achievementsCache: Achievement[] | null = null;

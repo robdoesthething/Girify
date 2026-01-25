@@ -2,7 +2,7 @@ import { AnimatePresence, motion } from 'framer-motion';
 import React, { useState } from 'react';
 import { useTheme } from '../../context/ThemeContext';
 import { useAdminCRUD } from '../../hooks/useAdminCRUD';
-import { Announcement, createAnnouncement, deleteAnnouncement } from '../../utils/news';
+import { Announcement, createAnnouncement, deleteAnnouncement } from '../../utils/social/news';
 import { themeClasses } from '../../utils/themeUtils';
 import FormInput from '../FormInput';
 

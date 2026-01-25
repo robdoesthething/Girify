@@ -9,7 +9,7 @@ import {
   removeFriend,
   searchUsers,
   sendFriendRequest,
-} from '../../../utils/friends';
+} from '../../../utils/social/friends';
 // import { FeedItem, Friend } from '../types'; // Removed to avoid redeclaration if defining locally
 
 // Define types locally for now or move to types file

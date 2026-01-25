@@ -5,12 +5,12 @@ import quizPlan from '../../../data/quizPlan.json';
 import { gameReducer, initialState } from '../../../reducers/gameReducer';
 import { startGame } from '../../../services/gameService';
 import { GameStateObject, QuizResult, Street } from '../../../types/game';
-import { getTodaySeed, shuffleOptions } from '../../../utils/dailyChallenge';
+import { getTodaySeed, shuffleOptions } from '../../../utils/game/dailyChallenge';
 import {
   calculateGameSetup,
   GameSetupResult,
   generateOptionsList,
-} from '../../../utils/gameHelpers';
+} from '../../../utils/game/gameHelpers';
 import { storage } from '../../../utils/storage';
 import { useGamePersistence } from './useGamePersistence';
 

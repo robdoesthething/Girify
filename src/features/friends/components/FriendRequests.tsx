@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useTheme } from '../../../context/ThemeContext';
-import { acceptFriendRequest, getIncomingRequests } from '../../../utils/friends';
+import { acceptFriendRequest, getIncomingRequests } from '../../../utils/social/friends';
 import { themeClasses } from '../../../utils/themeUtils';
 
 interface FriendRequest {
