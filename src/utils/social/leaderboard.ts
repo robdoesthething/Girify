@@ -52,20 +52,14 @@ export const getLeaderboard = async (
 ): Promise<ScoreEntry[]> => {
   try {
     // 1. Fetch from Supabase
-    let queryBuilder = supabase
-      .from('game_results')
-      .select('*')
-      .order('score', { ascending: false })
-      .select('*')
-      .order('score', { ascending: false })
-      .limit(limitCount * FETCH_BUFFER_MULTIPLIER); // Fetch more for deduplication
+    // Start building the query
+    let queryBuilder = supabase.from('game_results').select('*');
 
     // Apply period filters (timestamp based usage of played_at)
     const now = new Date();
 
     if (period === 'daily') {
       // Use rolling 24 hours to ensure games from any timezone played "recently" are shown
-      // This fixes issues where "UTC Midnight" is in the future for Western hemisphere or cuts off early games
       const startOfDay = new Date(now.getTime() - DAY_IN_MS).toISOString();
       console.warn('[Leaderboard] Daily filter - rolling 24h:', startOfDay);
       debugLog(`[Leaderboard] Fetching Daily >= ${startOfDay}`);
@@ -85,6 +79,11 @@ export const getLeaderboard = async (
       console.warn('[Leaderboard] Monthly filter - start of month:', startOfMonth.toISOString());
       queryBuilder = queryBuilder.gte('played_at', startOfMonth.toISOString());
     }
+
+    // Apply ordering and limit LAST to ensure we filter the dataset first
+    queryBuilder = queryBuilder
+      .order('score', { ascending: false })
+      .limit(limitCount * FETCH_BUFFER_MULTIPLIER);
 
     const { data: rawData, error } = await queryBuilder;
 
@@ -115,14 +114,6 @@ export const getLeaderboard = async (
     }));
 
     // 3. Deduplicate
-    // Depending on period, we might want "Best Score" or "Cumulative".
-    // Existing logic:
-    // Daily -> Deduplicate Best Score (Keep One)
-    // Others (Weekly/Monthly/All) -> Cumulative?
-    // Wait, let's check original implementation:
-    // `if (period === 'daily') finalScores = deduplicateBestScore(rawScores);`
-    // `else finalScores = aggregateCumulativeScores(rawScores);`
-
     let finalScores: ScoreEntry[];
     if (period === 'daily') {
       finalScores = deduplicateBestScore(scores);
