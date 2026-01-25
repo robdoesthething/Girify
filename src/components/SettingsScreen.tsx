@@ -99,36 +99,63 @@ const SettingsScreen: React.FC<SettingsScreenProps> = ({
         window.prompt('Enter admin key:')
       : null;
 
-    if (input === 'GIRIFY_ADMIN_ACCESS_2026_SECURE') {
-      try {
-        const { setDoc, doc, updateDoc } = await import('firebase/firestore');
-        const { db, auth } = await import('../firebase');
+    if (!input) {
+      return; // User cancelled
+    }
 
-        if (auth.currentUser) {
-          await setDoc(doc(db, 'admins', auth.currentUser.uid), {
-            email: auth.currentUser.email,
-            promotedAt: new Date(),
-          });
+    if (!username) {
+      showError('Username not found. Please log in again.');
+      return;
+    }
 
-          if (username) {
-            await updateDoc(doc(db, 'users', username), {
-              role: 'admin',
-            });
-          }
+    try {
+      const { auth } = await import('../firebase');
 
-          showSuccess('Success! You are now an Admin.');
-          dispatch({ type: 'SET_ADMIN', payload: true });
-          setTimeout(() => window.location.reload(), TOAST_SHORT_MS);
+      if (!auth.currentUser) {
+        showError('Not authenticated. Please log in again.');
+        return;
+      }
+
+      // Get Firebase ID token
+      const idToken = await auth.currentUser.getIdToken();
+
+      // Call API endpoint
+      const response = await fetch('/api/admin/promote', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${idToken}`,
+        },
+        body: JSON.stringify({
+          adminKey: input,
+          username,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok || !data.success) {
+        // Handle specific error cases
+        if (response.status === 429) {
+          showError('Too many attempts. Please try again later.');
+        } else if (response.status === 403) {
+          showError('Access Denied.');
+        } else if (response.status === 401) {
+          showError('Authentication failed. Please log in again.');
+        } else {
+          showError(data.error || 'Failed to promote to admin.');
         }
-      } catch (e: unknown) {
-        console.error(e);
-        const errorMessage = e instanceof Error ? e.message : String(e);
-        showError(`Error promoting: ${errorMessage}`);
+        return;
       }
-    } else {
-      if (input) {
-        showError('Access Denied.');
-      }
+
+      // Success
+      showSuccess('Success! You are now an Admin.');
+      dispatch({ type: 'SET_ADMIN', payload: true });
+      setTimeout(() => window.location.reload(), TOAST_SHORT_MS);
+    } catch (e: unknown) {
+      console.error('[Settings] Error promoting to admin:', e);
+      const errorMessage = e instanceof Error ? e.message : String(e);
+      showError(`Error promoting: ${errorMessage}`);
     }
   };
 

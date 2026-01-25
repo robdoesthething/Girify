@@ -54,6 +54,38 @@ export default defineConfig([
     },
   },
 
+  // 3. API TypeScript files - serverless functions
+  {
+    files: ['api/**/*.{ts,tsx}'],
+    languageOptions: {
+      parser: tseslint.parser,
+      globals: {
+        ...globals.node,
+      },
+    },
+    plugins: {
+      '@typescript-eslint': tseslint.plugin,
+    },
+    rules: {
+      'no-console': 'off',
+      '@typescript-eslint/no-unused-vars': [
+        'error',
+        { argsIgnorePattern: '^_', varsIgnorePattern: '^_', ignoreRestSiblings: true },
+      ],
+      '@typescript-eslint/no-explicit-any': 'warn',
+      'max-lines-per-function': ['warn', { max: 200, skipBlankLines: true, skipComments: true }],
+      'no-magic-numbers': [
+        'warn',
+        {
+          ignore: [0, 1, -1, 2, 10, 100, 200, 400, 401, 403, 404, 405, 429, 500, 1000],
+          ignoreArrayIndexes: true,
+          ignoreDefaultValues: true,
+          enforceConst: true,
+        },
+      ],
+    },
+  },
+
   // 4. General rules for all project files in src
   {
     files: ['src/**/*.{js,jsx,ts,tsx}'],
