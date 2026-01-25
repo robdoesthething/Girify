@@ -38,17 +38,17 @@ vi.mock('../../services/supabase', () => ({
   },
 }));
 
-// Mock Profile Service to avoid DB calls
-vi.mock('../../utils/social/profile', () => ({
-  ensureUserProfile: vi.fn(),
-  getUserProfile: vi.fn(),
-  updateUserProfile: vi.fn(),
+// Mock social utilities to avoid DB calls
+vi.mock('../../utils/social', () => ({
+  ensureUserProfile: vi.fn().mockResolvedValue(null),
+  getUserProfile: vi.fn().mockResolvedValue(null),
+  updateUserProfile: vi.fn().mockResolvedValue(null),
 }));
 
 // Mock DB services if needed (users)
 vi.mock('../../services/db/users', () => ({
-  getUserByUsername: vi.fn(),
-  updateUser: vi.fn(),
+  getUserByUsername: vi.fn().mockResolvedValue(null),
+  updateUser: vi.fn().mockResolvedValue(null),
 }));
 
 // Mock child components that might use complex logic
