@@ -21,6 +21,23 @@ vi.mock('../../hooks/useNotifications', () => ({
   useNotifications: vi.fn(),
 }));
 
+// Mock Supabase client
+vi.mock('../../services/supabase', () => ({
+  supabase: {
+    from: vi.fn(() => ({
+      select: vi.fn(() => ({
+        eq: vi.fn(() => ({
+          single: vi.fn(() => ({ data: null, error: null })),
+        })),
+      })),
+      insert: vi.fn(() => ({ error: null })),
+      update: vi.fn(() => ({
+        eq: vi.fn(() => ({ error: null })),
+      })),
+    })),
+  },
+}));
+
 // Mock Profile Service to avoid DB calls
 vi.mock('../../utils/social/profile', () => ({
   ensureUserProfile: vi.fn(),

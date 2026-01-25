@@ -4,6 +4,25 @@ import * as friendsUtils from '../../../utils/social/friends';
 import { useFriends } from '../hooks/useFriends';
 
 // Mock dependencies
+vi.mock('../../../services/supabase', () => ({
+  supabase: {
+    from: vi.fn(() => ({
+      select: vi.fn(() => ({
+        eq: vi.fn(() => ({
+          single: vi.fn(() => ({ data: null, error: null })),
+        })),
+      })),
+      insert: vi.fn(() => ({ error: null })),
+      update: vi.fn(() => ({
+        eq: vi.fn(() => ({ error: null })),
+      })),
+      delete: vi.fn(() => ({
+        eq: vi.fn(() => ({ error: null })),
+      })),
+    })),
+  },
+}));
+
 vi.mock('../../../utils/social/friends');
 
 describe('useFriends Integration Tests', () => {
