@@ -15,6 +15,7 @@ export default defineConfig([
     'build',
     'public',
     'scripts/**/*.ts',
+    'backups',
   ]),
 
   // 1. Core JS Recommended
