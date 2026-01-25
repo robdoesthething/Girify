@@ -1,1 +1,4 @@
+# Ensure npm is found
+export PATH="/opt/homebrew/bin:/usr/local/bin:$PATH"
+
 npm test -- --run && npm run build
