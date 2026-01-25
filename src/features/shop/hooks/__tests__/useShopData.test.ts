@@ -6,14 +6,11 @@ import { useShopData } from '../useShopData';
 
 // Mock database service directly, let giuros.ts logic run
 // Path from test: src/features/shop/hooks/__tests__/ -> ../../../../services/database
-vi.mock('../../../../services/database', () => ({
-  getUserByUsername: vi.fn().mockResolvedValue({
-    giuros: 1000,
-    purchased_cosmetics: ['frame_1'],
-    equipped_cosmetics: { frameId: 'frame_1' },
-    purchased_badges: [],
-  }),
-  getUserPurchasedBadges: vi.fn().mockResolvedValue([]),
+// Mock giuros utility directly
+vi.mock('../../../../utils/shop/giuros', () => ({
+  getGiuros: vi.fn().mockResolvedValue(1000),
+  getPurchasedCosmetics: vi.fn().mockResolvedValue(['frame_1']),
+  getEquippedCosmetics: vi.fn().mockResolvedValue({ frameId: 'frame_1' }),
 }));
 
 // Mock index import for shop items (as they come from DB or json)
