@@ -48,7 +48,7 @@ const ShopItemCard: React.FC<ShopItemCardProps> = memo(
           <img
             src={item.image}
             alt={item.name}
-            className="w-full h-full object-contain mix-blend-multiply"
+            className="w-full h-full object-contain"
             style={{ imageRendering: 'pixelated' }}
           />
         );
