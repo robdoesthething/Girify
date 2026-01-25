@@ -117,7 +117,7 @@ describe('usePurchase Integration Tests', () => {
       ...mockItem,
       id: 'avatar_special',
       unlockCondition: {
-        type: 'score',
+        type: 'bestScore',
         value: 10000,
       },
     };

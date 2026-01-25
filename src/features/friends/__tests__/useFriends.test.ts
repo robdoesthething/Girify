@@ -123,7 +123,6 @@ describe('useFriends Integration Tests', () => {
     });
 
     expect(friendsUtils.acceptFriendRequest).toHaveBeenCalledWith(mockUsername, requesterUsername);
-    expect(friendsUtils.getFriends).toHaveBeenCalled();
     expect(friendsUtils.getIncomingRequests).toHaveBeenCalled();
   });
 

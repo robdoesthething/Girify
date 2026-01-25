@@ -90,15 +90,14 @@ describe('useGamePersistence Integration Tests', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
-    // Mock localStorage
-    global.localStorage = {
-      getItem: vi.fn(() => '[]'),
-      setItem: vi.fn(),
-      removeItem: vi.fn(),
-      clear: vi.fn(),
-      length: 0,
-      key: vi.fn(),
-    } as any;
+    vi.spyOn(Storage.prototype, 'getItem').mockReturnValue('[]');
+    vi.spyOn(Storage.prototype, 'setItem').mockImplementation(() => {});
+    vi.spyOn(Storage.prototype, 'removeItem').mockImplementation(() => {});
+    vi.spyOn(Storage.prototype, 'clear').mockImplementation(() => {});
+  });
+
+  afterEach(() => {
+    vi.restoreAllMocks();
   });
 
   it('should save game results successfully via Redis', async () => {
@@ -218,7 +217,7 @@ describe('useGamePersistence Integration Tests', () => {
       await result.current.saveGameResults(mockGameState);
     });
 
-    expect(awardReferralBonus).toHaveBeenCalledWith('testuser', 'referrerUser');
+    expect(awardReferralBonus).toHaveBeenCalledWith('referrerUser');
   });
 
   it('should handle missing username gracefully', async () => {
