@@ -1,6 +1,6 @@
 import { onAuthStateChanged, signOut, User } from 'firebase/auth';
 import { Dispatch, useCallback, useEffect, useState } from 'react';
-import { MIGRATION, STORAGE_KEYS, TIME } from '../../../config/constants';
+import { STORAGE_KEYS, TIME } from '../../../config/constants';
 import { auth } from '../../../firebase';
 import { useAsyncOperation } from '../../../hooks/useAsyncOperation';
 import { useNotification } from '../../../hooks/useNotification';
@@ -16,7 +16,6 @@ import {
   getUserProfile,
   healMigration,
   markFeedbackRewardSeen,
-  saveUserGameResult,
   updateUserProfile,
 } from '../../../utils/social';
 import { storage } from '../../../utils/storage';
@@ -231,18 +230,11 @@ async function syncLocalHistory(displayName: string) {
     if (Array.isArray(localHistory) && localHistory.length > 0) {
       const existing = await getUserGameHistory(displayName);
       if (existing.length === 0) {
-        logger.info(`[Migration] Syncing ${localHistory.length} games to Firestore...`);
-        const toUpload = localHistory.slice(-MIGRATION.MAX_HISTORY_UPLOAD);
-        toUpload.forEach((game: GameHistory) =>
-          saveUserGameResult(displayName, {
-            ...game,
-            date: typeof game.date === 'string' ? new Date(game.date).getTime() : game.date || 0,
-            timestamp:
-              typeof game.timestamp === 'number'
-                ? { seconds: Math.floor(game.timestamp / 1000) }
-                : game.timestamp || undefined,
-          } as any)
+        logger.info(
+          `[Migration] Legacy history sync skipped - games now saved directly to game_results table`
         );
+        // Legacy migration code removed - games are now saved directly to game_results table
+        // when users play new games. Local history is preserved for reference.
       }
     }
     storage.set(STORAGE_KEYS.HISTORY_SYNCED, 'true');

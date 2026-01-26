@@ -1,4 +1,4 @@
-import { useCallback } from 'react';
+import { useCallback, useEffect, useRef } from 'react';
 import { Achievement } from '../../../data/achievements';
 import { useAdminCRUD } from '../../../hooks/useAdminCRUD';
 import {
@@ -49,27 +49,46 @@ export function useAdminAchievements({ notify, confirm }: UseAdminAchievementsPr
     return result;
   }, []);
 
+  // Use a ref to store the refresh implementation to avoid circular dependency
+  const refreshImplRef = useRef<(() => void) | null>(null);
+
+  // Create refresh trigger function that can be passed to useAdminCRUD
+  const refreshAchievementsTrigger = useCallback(() => {
+    refreshImplRef.current?.();
+  }, []);
+
   const crud = useAdminCRUD<Achievement>({
     notify,
     confirm,
     createFn,
     updateFn,
     deleteFn: deleteFnImpl,
+    refreshFn: refreshAchievementsTrigger,
   });
 
-  // Custom refresh that explicitly calls fetch and updates state
-  const refreshAchievements = useCallback(async () => {
-    crud.setLoading(true);
-    try {
-      const items = await fetchFn();
-      crud.setItems(items);
-    } catch (e) {
-      console.error(e);
-      notify('Failed to fetch achievements', 'error');
-    } finally {
-      crud.setLoading(false);
-    }
+  // Store the actual refresh implementation in the ref
+  // This updates the CRUD state after fetching
+  useEffect(() => {
+    refreshImplRef.current = () => {
+      crud.setLoading(true);
+      fetchFn()
+        .then(items => {
+          crud.setItems(items);
+        })
+        .catch(e => {
+          console.error(e);
+          notify('Failed to fetch achievements', 'error');
+        })
+        .finally(() => {
+          crud.setLoading(false);
+        });
+    };
   }, [crud, fetchFn, notify]);
+
+  // Wrapper for manual refresh calls
+  const refreshAchievements = useCallback(() => {
+    refreshImplRef.current?.();
+  }, []);
 
   // Initial load
   const loadInitial = useCallback(() => {

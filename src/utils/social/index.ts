@@ -46,7 +46,6 @@ export {
 export {
   getDistrictRankings,
   getUserGameHistory,
-  saveUserGameResult,
   updateDistrictScore,
   updateUserGameStats,
   updateUserStats,

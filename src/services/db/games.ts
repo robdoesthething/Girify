@@ -4,7 +4,7 @@
  * Leaderboards, game history, and district scores.
  */
 
-import type { GameResultRow, UserGameRow } from '../../types/supabase';
+import type { GameResultRow } from '../../types/supabase';
 import { supabase } from '../supabase';
 
 // ============================================================================
@@ -49,12 +49,12 @@ export async function getLeaderboardScores(
   return data || [];
 }
 
-export async function getUserGameHistory(username: string, limit = 30): Promise<UserGameRow[]> {
+export async function getUserGameHistory(username: string, limit = 30): Promise<GameResultRow[]> {
   const { data, error } = await supabase
-    .from('user_games')
+    .from('game_results')
     .select('*')
-    .eq('username', username.toLowerCase())
-    .order('date', { ascending: false })
+    .eq('user_id', username.toLowerCase())
+    .order('played_at', { ascending: false })
     .limit(limit);
 
   if (error) {
@@ -62,33 +62,6 @@ export async function getUserGameHistory(username: string, limit = 30): Promise<
     return [];
   }
   return data || [];
-}
-
-export async function saveUserGame(game: {
-  username: string;
-  date: string;
-  score: number;
-  avgTime?: number;
-  incomplete?: boolean;
-  correctAnswers?: number;
-  questionCount?: number;
-}): Promise<boolean> {
-  const { error } = await supabase.from('user_games').insert({
-    username: game.username.toLowerCase(),
-    date: game.date,
-    score: game.score,
-    avg_time: game.avgTime ?? null,
-    incomplete: game.incomplete ?? false,
-    correct_answers: game.correctAnswers ?? null,
-    question_count: game.questionCount ?? null,
-    played_at: new Date().toISOString(),
-  });
-
-  if (error) {
-    console.error('[DB] saveUserGame error:', error.message);
-    return false;
-  }
-  return true;
 }
 
 // ============================================================================
