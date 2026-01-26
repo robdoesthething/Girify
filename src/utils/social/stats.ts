@@ -9,7 +9,6 @@ import {
   updateDistrictScore as dbUpdateDistrictScore,
   getDistricts,
   getUserByUsername,
-  saveUserGame,
   updateUser,
 } from '../../services/database';
 import { normalizeUsername } from '../format';
@@ -94,50 +93,6 @@ export const updateUserStats = async (username: string, score: number): Promise<
 };
 
 /**
- * Save game result to user's personal history
- * @param username - The username to save for
- * @param gameData - The game result data
- * @returns Promise resolving when saved
- */
-export const saveUserGameResult = async (username: string, gameData: GameData): Promise<void> => {
-  if (!username) {
-    return;
-  }
-
-  try {
-    let dateStr: string;
-    if (gameData.date) {
-      if (typeof gameData.date === 'number') {
-        const d = gameData.date;
-        // eslint-disable-next-line no-magic-numbers
-        const year = Math.floor(d / 10000);
-        // eslint-disable-next-line no-magic-numbers
-        const month = Math.floor((d % 10000) / 100);
-        const day = d % 100;
-        dateStr = `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-      } else {
-        dateStr = String(gameData.date);
-      }
-    } else {
-      dateStr = new Date().toISOString().split('T')[0]!;
-    }
-
-    if (!dateStr) {
-      dateStr = new Date().toISOString().split('T')[0]!;
-    }
-
-    await saveUserGame({
-      username: normalizeUsername(username),
-      date: dateStr,
-      score: gameData.score,
-      avgTime: gameData.time,
-    });
-  } catch (e) {
-    console.error('Error saving user game result:', e);
-  }
-};
-
-/**
  * Get user's game history
  * @param username - The username to fetch history for
  * @returns Promise resolving to list of past game results
@@ -150,12 +105,17 @@ export const getUserGameHistory = async (username: string): Promise<GameData[]> 
   try {
     const games = await dbGetUserGameHistory(normalizeUsername(username));
 
-    return games.map(g => ({
-      score: g.score,
-      date: parseInt(g.date.replace(/-/g, ''), 10),
-      time: g.avg_time || undefined,
-      timestamp: g.played_at ? new Date(g.played_at).getTime() : Date.now(),
-    }));
+    return games
+      .filter(g => g.played_at) // Filter out games without played_at timestamp
+      .map(g => {
+        const playedAt = g.played_at!; // Non-null assertion safe after filter
+        return {
+          score: g.score,
+          date: parseInt(playedAt.split('T')[0]!.replace(/-/g, ''), 10),
+          time: g.time_taken || undefined,
+          timestamp: new Date(playedAt).getTime(),
+        };
+      });
   } catch (e) {
     console.error('Error fetching user game history:', e);
     return [];

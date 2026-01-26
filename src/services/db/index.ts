@@ -80,6 +80,5 @@ export {
   getDistricts,
   getLeaderboardScores,
   getUserGameHistory,
-  saveUserGame,
   updateDistrictScore,
 } from './games';

@@ -10,7 +10,7 @@ import { GameHistory } from '../../../types/user';
 import { debugLog } from '../../../utils/debug';
 import { getTodaySeed, markTodayAsPlayed } from '../../../utils/game/dailyChallenge';
 import { awardChallengeBonus, awardReferralBonus } from '../../../utils/shop/giuros';
-import { getReferrer, saveUserGameResult, updateUserGameStats } from '../../../utils/social';
+import { getReferrer, updateUserGameStats } from '../../../utils/social';
 import { calculateStreak } from '../../../utils/stats';
 import { storage } from '../../../utils/storage';
 
@@ -82,16 +82,6 @@ export const useGamePersistence = () => {
           storage.set(STORAGE_KEYS.HISTORY, history);
 
           if (state.username) {
-            // Firestore expects date as number (YYYYMMDD) and timestamp object
-            const firestoreData = {
-              ...localRecord,
-              date: getTodaySeed(),
-              timestamp: { seconds: Math.floor(localRecord.timestamp / 1000) },
-            };
-
-            // Save individual game history to Firebase User Profile
-            await saveUserGameResult(state.username, firestoreData);
-
             // [MIGRATION] Use Game Service to end game (Redis -> Supabase)
             // Replaces legacy saveScore() logic
             if (state.gameId) {
