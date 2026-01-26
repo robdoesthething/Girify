@@ -58,7 +58,7 @@ backdrop-blur-md border-b ${themeClasses(theme, 'border-slate-600', 'border-slat
         <div className="flex items-center gap-4 md:gap-4">
           <button
             onClick={() => setMenuOpen(!menuOpen)}
-            className={`p-2 rounded-full transition-colors shrink-0 ${themeClasses(theme, 'hover:bg-neutral-300', 'hover:bg-slate-100')} `}
+            className={`p-2 rounded-full transition-colors shrink-0 md:hidden ${themeClasses(theme, 'hover:bg-neutral-300', 'hover:bg-slate-100')} `}
             type="button"
             aria-label="Open menu"
             aria-expanded={menuOpen}
@@ -72,6 +72,7 @@ backdrop-blur-md border-b ${themeClasses(theme, 'border-slate-600', 'border-slat
               />
             </svg>
           </button>
+
           <button
             onClick={() => onOpenPage(null)}
             className="flex items-center hover:opacity-80 transition-opacity"
@@ -79,10 +80,72 @@ backdrop-blur-md border-b ${themeClasses(theme, 'border-slate-600', 'border-slat
             aria-label="Go to home"
           >
             <Logo className="h-5 md:h-7 w-auto object-contain" />
+            <span className="hidden md:block ml-2 font-bold text-lg font-inter">Girify</span>
           </button>
+
+          {/* Desktop Navigation */}
+          <nav className="hidden md:flex items-center gap-1 ml-4">
+            <button
+              onClick={() => handleMenuClick(null)}
+              className={`px-3 py-1.5 rounded-lg text-sm font-bold transition-colors ${themeClasses(theme, 'hover:bg-slate-600', 'hover:bg-slate-100')}`}
+            >
+              {t('home')}
+            </button>
+            <button
+              onClick={() => handleMenuClick('shop')}
+              className={`px-3 py-1.5 rounded-lg text-sm font-bold transition-colors ${themeClasses(theme, 'hover:bg-slate-600', 'hover:bg-slate-100')}`}
+            >
+              {t('shop')}
+            </button>
+            <button
+              onClick={() => handleMenuClick('leaderboard')}
+              className={`px-3 py-1.5 rounded-lg text-sm font-bold transition-colors ${themeClasses(theme, 'hover:bg-slate-600', 'hover:bg-slate-100')}`}
+            >
+              {t('leaderboard')}
+            </button>
+            <button
+              onClick={() => handleMenuClick('friends')}
+              className={`px-3 py-1.5 rounded-lg text-sm font-bold transition-colors ${themeClasses(theme, 'hover:bg-slate-600', 'hover:bg-slate-100')}`}
+            >
+              {t('friends')}
+            </button>
+            <button // User Menu / Settings
+              onClick={() => setMenuOpen(true)}
+              className={`px-3 py-1.5 rounded-lg text-sm font-bold transition-colors flex items-center gap-2 ${themeClasses(theme, 'hover:bg-slate-600', 'hover:bg-slate-100')}`}
+            >
+              <span className="text-lg">☰</span>
+            </button>
+          </nav>
         </div>
 
-        <div className="flex items-center gap-2 sm:gap-4" />
+        <div className="flex items-center gap-2 sm:gap-4">
+          {username ? (
+            <div
+              onClick={() => handleMenuClick('profile')}
+              className="hidden md:flex items-center gap-2 cursor-pointer hover:opacity-80 transition-opacity"
+            >
+              <div className="w-8 h-8 rounded-full bg-indigo-500 flex items-center justify-center text-white font-bold text-xs">
+                {username.substring(0, 2).toUpperCase()}
+              </div>
+              <span className="font-bold text-sm">{username}</span>
+            </div>
+          ) : (
+            <div className="hidden md:flex items-center gap-2">
+              <button
+                onClick={() => onTriggerLogin('signin')}
+                className={`px-4 py-1.5 rounded-lg text-sm font-bold transition-colors ${themeClasses(theme, 'hover:bg-slate-600', 'hover:bg-slate-100')}`}
+              >
+                Sign In
+              </button>
+              <button
+                onClick={() => onTriggerLogin('signup')}
+                className="px-4 py-1.5 rounded-lg text-sm font-bold bg-sky-500 hover:bg-sky-600 text-white transition-all shadow-lg shadow-sky-500/20"
+              >
+                Sign Up
+              </button>
+            </div>
+          )}
+        </div>
       </div>
 
       <AnimatePresence>
