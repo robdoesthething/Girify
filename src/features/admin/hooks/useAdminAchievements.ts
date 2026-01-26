@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef } from 'react';
+import { useCallback, useLayoutEffect, useRef } from 'react';
 import { Achievement } from '../../../data/achievements';
 import { useAdminCRUD } from '../../../hooks/useAdminCRUD';
 import {
@@ -68,7 +68,7 @@ export function useAdminAchievements({ notify, confirm }: UseAdminAchievementsPr
 
   // Store the actual refresh implementation in the ref
   // This updates the CRUD state after fetching
-  useEffect(() => {
+  useLayoutEffect(() => {
     refreshImplRef.current = () => {
       crud.setLoading(true);
       fetchFn()

@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react';
 import { useTheme } from '../../../context/ThemeContext';
 import { useTabs } from '../../../hooks/useTabs';
+import { useToast } from '../../../hooks/useToast';
 import { themeClasses } from '../../../utils/themeUtils';
 import { useFriends } from '../hooks/useFriends';
 import FeedList from './FeedList';
@@ -35,7 +36,17 @@ const FriendsScreen: React.FC<FriendsScreenProps> = ({ onClose, username }) => {
     declineRequest,
     removeFriend,
     blockUser,
+    error,
   } = useFriends(username);
+
+  const { error: showErrorToast } = useToast();
+
+  // Error handling
+  useEffect(() => {
+    if (error) {
+      showErrorToast(error);
+    }
+  }, [error, showErrorToast]);
 
   // Data loading effects
   useEffect(() => {

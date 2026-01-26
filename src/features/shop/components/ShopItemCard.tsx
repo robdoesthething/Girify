@@ -81,7 +81,9 @@ const ShopItemCard: React.FC<ShopItemCardProps> = memo(
                 onTitleClick?.();
               }
             }}
-            className={`w-16 h-16 rounded-2xl mb-3 flex items-center justify-center text-3xl relative overflow-hidden shrink-0 ${activeTab === 'titles' ? 'cursor-pointer hover:scale-105 transition-transform shadow-md' : ''}`}
+            className={`w-16 h-16 mb-3 flex items-center justify-center text-3xl relative overflow-hidden shrink-0 ${
+              activeTab === 'avatars' ? 'rounded-full' : 'rounded-2xl'
+            } ${activeTab === 'titles' ? 'cursor-pointer hover:scale-105 transition-transform shadow-md' : ''}`}
             style={{ imageRendering: 'pixelated' }}
           >
             {renderItemIcon()}
