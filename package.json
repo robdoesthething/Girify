@@ -95,7 +95,7 @@
     "@types/prop-types": "^15.7.15",
     "@types/react": "^19.2.5",
     "@types/react-dom": "^19.2.3",
-    "@vercel/node": "^3.0.0",
+    "@vercel/node": "^5.5.28",
     "@vitejs/plugin-react": "^5.1.1",
     "@vitest/browser-playwright": "^4.0.17",
     "@vitest/coverage-v8": "^4.0.17",
@@ -128,7 +128,10 @@
     "react-helmet-async": {
       "react": "$react",
       "react-dom": "$react-dom"
-    }
+    },
+    "path-to-regexp": "^6.3.0",
+    "undici": "^6.23.0",
+    "tar": "^7.5.7"
   },
   "lint-staged": {
     "*.{js,jsx,ts,tsx}": [
