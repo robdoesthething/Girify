@@ -1,5 +1,4 @@
 {
-  "name": "girify-barcelona-quiz",
   "rewrites": [
     {
       "source": "/__/auth/:path*",
