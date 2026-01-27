@@ -57,6 +57,8 @@ describe('useFriends Integration Tests', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
+    // Default mock to prevent undefined errors
+    vi.spyOn(friendsUtils, 'getFriendFeed').mockResolvedValue([]);
   });
 
   it('should load friends list successfully', async () => {
