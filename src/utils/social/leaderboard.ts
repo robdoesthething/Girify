@@ -79,19 +79,31 @@ export const getLeaderboard = async (
       debugLog(`[Leaderboard] Fetching Daily >= ${startOfDay}`);
       queryBuilder = queryBuilder.gte('played_at', startOfDay);
     } else if (period === 'weekly') {
-      // Calculate start of week (Monday)
-      const d = new Date(now);
-      const currentDay = d.getDay(); // 0 = Sunday
-      const distanceToMonday = currentDay === 0 ? DAYS_IN_WEEK_MINUS_ONE : currentDay - 1;
-      d.setDate(d.getDate() - distanceToMonday);
-      d.setHours(0, 0, 0, 0);
-      console.warn('[Leaderboard] Weekly filter - start of week:', d.toISOString());
-      debugLog(`[Leaderboard] Fetching Weekly >= ${d.toISOString()}`);
-      queryBuilder = queryBuilder.gte('played_at', d.toISOString());
+      // Calculate start of week (Monday) using UTC to match game save timestamps
+      const currentDayUTC = now.getUTCDay(); // 0 = Sunday
+      const distanceToMonday = currentDayUTC === 0 ? DAYS_IN_WEEK_MINUS_ONE : currentDayUTC - 1;
+      const startOfWeek = new Date(
+        Date.UTC(
+          now.getUTCFullYear(),
+          now.getUTCMonth(),
+          now.getUTCDate() - distanceToMonday,
+          0,
+          0,
+          0,
+          0
+        )
+      ).toISOString();
+      console.warn('[Leaderboard] Weekly filter - start of week (UTC):', startOfWeek);
+      debugLog(`[Leaderboard] Fetching Weekly >= ${startOfWeek}`);
+      queryBuilder = queryBuilder.gte('played_at', startOfWeek);
     } else if (period === 'monthly') {
-      const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1, 0, 0, 0, 0);
-      console.warn('[Leaderboard] Monthly filter - start of month:', startOfMonth.toISOString());
-      queryBuilder = queryBuilder.gte('played_at', startOfMonth.toISOString());
+      // Use UTC for consistent monthly boundaries
+      const startOfMonth = new Date(
+        Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1, 0, 0, 0, 0)
+      ).toISOString();
+      console.warn('[Leaderboard] Monthly filter - start of month (UTC):', startOfMonth);
+      debugLog(`[Leaderboard] Fetching Monthly >= ${startOfMonth}`);
+      queryBuilder = queryBuilder.gte('played_at', startOfMonth);
     }
 
     // Apply ordering and limit LAST to ensure we filter the dataset first

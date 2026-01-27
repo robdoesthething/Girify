@@ -99,7 +99,6 @@ export async function endGame(
     const session = (typeof rawData === 'string' ? JSON.parse(rawData) : rawData) as GameSession;
 
     // Save to Supabase
-    // Save to Supabase
     const { error } = await supabase.from('game_results').insert({
       user_id: session.userId || null,
       score: finalScore,
