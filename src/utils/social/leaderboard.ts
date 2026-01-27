@@ -13,11 +13,6 @@ const formatLeaderboardUsername = (userId: string | null | undefined): string =>
 };
 
 const FETCH_BUFFER_MULTIPLIER = 4;
-const HOURS_PER_DAY = 24;
-const MINUTES_PER_HOUR = 60;
-const SECONDS_PER_MINUTE = 60;
-const MS_PER_SECOND = 1000;
-const DAY_IN_MS = HOURS_PER_DAY * MINUTES_PER_HOUR * SECONDS_PER_MINUTE * MS_PER_SECOND;
 const DAYS_IN_WEEK_MINUS_ONE = 6;
 
 export type LeaderboardPeriod = 'all' | 'daily' | 'weekly' | 'monthly';
@@ -46,6 +41,22 @@ export interface ScoreEntry {
  * @param limitCount - Max number of entries to return (default: constant)
  * @returns Promise resolving to list of ranked score entries
  */
+// Database response interface
+interface DatabaseGameResult {
+  id: string;
+  user_id: string;
+  score: number;
+  time_taken: number;
+  played_at: string;
+  platform?: string;
+}
+
+/**
+ * Fetch leaderboard scores using Supabase
+ * @param period - The time period to filter by (all, daily, weekly, monthly)
+ * @param limitCount - Max number of entries to return (default: constant)
+ * @returns Promise resolving to list of ranked score entries
+ */
 export const getLeaderboard = async (
   period: LeaderboardPeriod = 'all',
   limitCount: number = SOCIAL.LEADERBOARD.FETCH_LIMIT
@@ -59,9 +70,12 @@ export const getLeaderboard = async (
     const now = new Date();
 
     if (period === 'daily') {
-      // Use rolling 24 hours to ensure games from any timezone played "recently" are shown
-      const startOfDay = new Date(now.getTime() - DAY_IN_MS).toISOString();
-      console.warn('[Leaderboard] Daily filter - rolling 24h:', startOfDay);
+      // Use Start of Day (UTC) to match standard daily leaderboard behavior
+      // This ensures games played "today" (universal time) are shown, rather than just last 24h
+      const startOfDay = new Date(
+        Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(), 0, 0, 0, 0)
+      ).toISOString();
+      console.warn('[Leaderboard] Daily filter - UTC start of day:', startOfDay);
       debugLog(`[Leaderboard] Fetching Daily >= ${startOfDay}`);
       queryBuilder = queryBuilder.gte('played_at', startOfDay);
     } else if (period === 'weekly') {
@@ -88,7 +102,7 @@ export const getLeaderboard = async (
     const { data: rawData, error } = await queryBuilder;
 
     if (error) {
-      console.error('Supabase error:', error);
+      console.error('[Leaderboard] Supabase error:', error);
       debugLog(`[Leaderboard] DB Error: ${error.message}`);
       throw error;
     }
@@ -100,8 +114,7 @@ export const getLeaderboard = async (
     }
 
     // 2. Transform to ScoreEntry format
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const scores: ScoreEntry[] = rawData.map((row: any) => ({
+    const scores: ScoreEntry[] = (rawData as unknown as DatabaseGameResult[]).map(row => ({
       id: row.id,
       username: formatLeaderboardUsername(row.user_id),
       score: row.score,
@@ -131,7 +144,7 @@ export const getLeaderboard = async (
 
     return finalScores.slice(0, limitCount);
   } catch (e) {
-    console.error('Error fetching leaderboard from Supabase:', e);
+    console.error('[Leaderboard] Error fetching leaderboard from Supabase:', e);
     return [];
   }
 };
@@ -142,26 +155,32 @@ export const getLeaderboard = async (
  * Actually calling it 'deduplicateBestScore' but implementation logic was specific.
  * For now, let's just keep the BEST score per user.
  */
+/**
+ * Daily Mode: Keep ONLY the BEST score per user.
+ * This ensures each user appears at most once on the daily leaderboard with their highest score.
+ */
 const deduplicateBestScore = (scores: ScoreEntry[]): ScoreEntry[] => {
-  const userEntry: Record<string, ScoreEntry> = {};
+  const bestScoreByUser: Record<string, ScoreEntry> = {};
 
-  const sorted = [...scores].sort((a, b) => {
-    // Sort by Date ASC (Oldest first)
-    // The original logic seemed to favor the FIRST play unless bonus?
-    // Let's implement: Best Score.
-    return b.score - a.score;
-  });
+  // Sort by score DESC first to easily pick the top one
+  const sorted = [...scores].sort((a, b) => b.score - a.score);
 
   sorted.forEach(s => {
-    if (!userEntry[s.username]) {
-      userEntry[s.username] = s;
+    // If not present, add it (since we sorted by score DESC, the first one encountered is the best)
+    if (!bestScoreByUser[s.username]) {
+      bestScoreByUser[s.username] = s;
     }
   });
-  return Object.values(userEntry);
+
+  return Object.values(bestScoreByUser);
 };
 
 /**
  * Cumulative Mode: Sum of scores.
+ */
+/**
+ * Cumulative Mode: Sum of scores.
+ * For users who played multiple times on the same day, we take their BEST score of that day.
  */
 const aggregateCumulativeScores = (scores: ScoreEntry[]): ScoreEntry[] => {
   const userDailyGames: Record<string, Record<string, ScoreEntry>> = {};
@@ -173,16 +192,10 @@ const aggregateCumulativeScores = (scores: ScoreEntry[]): ScoreEntry[] => {
     if (!userDailyGames[username]) {
       userDailyGames[username] = {};
     }
-    // Logic: If user played multiple times on same day, take the BEST one?
-    // Or FIRST one?
-    // Original: `if (sTime < currentTime)` -> Earlier time -> First game?
-    // Let's stick to simple: Best score of the day counts.
-    if (!userDailyGames[username][dateKey]) {
+
+    // Logic: Keep the highest score for each day
+    if (!userDailyGames[username][dateKey] || s.score > userDailyGames[username][dateKey].score) {
       userDailyGames[username][dateKey] = s;
-    } else {
-      if (s.score > userDailyGames[username][dateKey].score) {
-        userDailyGames[username][dateKey] = s;
-      }
     }
   });
 
@@ -207,7 +220,7 @@ const aggregateCumulativeScores = (scores: ScoreEntry[]): ScoreEntry[] => {
       score: totalScore,
       time: dailyGames.length ? totalTime / dailyGames.length : 0,
       gamesCount: dailyGames.length,
-      timestamp: { seconds: Date.now() / 1000 }, // Dummy
+      timestamp: { seconds: Date.now() / 1000 },
     });
   });
 
@@ -275,10 +288,13 @@ export const getTeamLeaderboard = async (
         return null;
       }
       const k = key.toLowerCase();
-      return DISTRICTS.find(
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        (d: any) => d.id === k || d.teamName.toLowerCase() === k || d.name.toLowerCase() === k
-      );
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      return DISTRICTS.find((d: any) => {
+        const dId = d.id?.toLowerCase();
+        const dTeam = d.teamName?.toLowerCase();
+        const dName = d.name?.toLowerCase();
+        return dId === k || dTeam === k || dName === k;
+      });
     };
 
     const normalizedUserTeamMap: Record<string, { teamName: string; id: string }> = {};
@@ -323,7 +339,7 @@ export const getTeamLeaderboard = async (
 
     return result;
   } catch (e) {
-    console.error('Error getting team leaderboard:', e);
+    console.error('[Leaderboard] Error getting team leaderboard:', e);
     return [];
   }
 };
