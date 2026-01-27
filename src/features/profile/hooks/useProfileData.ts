@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import { GameHistory, UserProfile } from '../../../types/user';
+import { normalizeUsername } from '../../../utils/format';
 import { getShopItems, ShopItem } from '../../../utils/shop';
 import { getEquippedCosmetics, getGiuros } from '../../../utils/shop/giuros';
 import { getUserGameHistory, getUserProfile } from '../../../utils/social';
@@ -24,6 +25,7 @@ export interface UseProfileDataResult {
  * Hook for fetching profile data, game history, friend count, giuros, and shop items
  */
 export const useProfileData = (username: string): UseProfileDataResult => {
+  const normalizedUsername = normalizeUsername(username);
   const [profileData, setProfileData] = useState<UserProfile | null>(null);
   const [allHistory, setAllHistory] = useState<GameHistory[]>([]);
   const [friendCount, setFriendCount] = useState(0);
@@ -36,18 +38,18 @@ export const useProfileData = (username: string): UseProfileDataResult => {
   const [shopTitles, setShopTitles] = useState<ShopItem[]>([]);
 
   const loadProfile = useCallback(async () => {
-    if (!username) {
+    if (!normalizedUsername) {
       return;
     }
 
     try {
       setLoading(true);
       const [count, bal, equipped, history, profile, shopItems] = await Promise.all([
-        getFriendCount(username),
-        getGiuros(username),
-        getEquippedCosmetics(username),
-        getUserGameHistory(username),
-        getUserProfile(username),
+        getFriendCount(normalizedUsername),
+        getGiuros(normalizedUsername),
+        getEquippedCosmetics(normalizedUsername),
+        getUserGameHistory(normalizedUsername),
+        getUserProfile(normalizedUsername),
         getShopItems(),
       ]);
 
@@ -80,7 +82,7 @@ export const useProfileData = (username: string): UseProfileDataResult => {
           score: h.score,
           avgTime: '0s',
           timestamp: ts,
-          username: username,
+          username: normalizedUsername,
         };
       });
 
@@ -102,7 +104,7 @@ export const useProfileData = (username: string): UseProfileDataResult => {
     } finally {
       setLoading(false);
     }
-  }, [username]);
+  }, [normalizedUsername]);
 
   useEffect(() => {
     loadProfile();

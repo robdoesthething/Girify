@@ -3,8 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import { STORAGE_KEYS, TIME } from '../../../config/constants';
 import { shouldPromptFeedback } from '../../../config/gameConfig';
 import { useAsyncOperation } from '../../../hooks/useAsyncOperation';
+import { insertGameResult } from '../../../services/db/games';
 import { endGame } from '../../../services/gameService';
-import { supabase } from '../../../services/supabase';
 import { GameStateObject, QuizResult } from '../../../types/game';
 import { GameHistory } from '../../../types/user';
 import { debugLog } from '../../../utils/debug';
@@ -28,8 +28,8 @@ const fallbackSaveScore = async (state: GameStateObject, avgTime: number): Promi
 
   try {
     debugLog(`[Fallback] Saving directly to DB...`);
-    const { error } = await supabase.from('game_results').insert({
-      user_id: state.username, // Use username, not Firebase UID
+    const { success, error } = await insertGameResult({
+      user_id: state.username,
       score: state.score,
       time_taken: avgTime,
       correct_answers: state.correct,
@@ -39,9 +39,11 @@ const fallbackSaveScore = async (state: GameStateObject, avgTime: number): Promi
       played_at: new Date().toISOString(),
     });
 
-    if (error) {
+    if (!success) {
       console.error('[Fallback] Failed to save directly to Supabase:', error);
-      debugLog(`[Fallback] DB Save Error: ${error.message}`);
+      debugLog(
+        `[Fallback] DB Save Error: ${error instanceof Error ? error.message : String(error)}`
+      );
     } else {
       console.warn('[Fallback] Score saved directly to Supabase');
       debugLog(`[Fallback] DB Save Success`);
