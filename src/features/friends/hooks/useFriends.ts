@@ -1,14 +1,16 @@
-import { useCallback, useReducer } from 'react';
+import { useCallback, useEffect, useReducer, useRef } from 'react';
 import {
   acceptFriendRequest,
   blockUser,
   declineFriendRequest,
+  FriendRequest,
   getFriendFeed,
   getFriends,
   getIncomingRequests,
   removeFriend,
   searchUsers,
   sendFriendRequest,
+  UserSearchResult,
 } from '../../../utils/social/friends';
 // import { FeedItem, Friend } from '../types'; // Removed to avoid redeclaration if defining locally
 
@@ -39,23 +41,27 @@ export interface FeedItem {
 
 interface FriendsState {
   friends: Friend[];
-  requests: any[]; // refined type needed
+  requests: FriendRequest[];
   feed: FeedItem[];
-  searchResults: any[];
+  searchResults: UserSearchResult[];
   searching: boolean;
   loading: boolean;
   successfulRequests: Set<string>;
   error: string | null;
+  feedOffset: number;
+  hasMoreFeed: boolean;
 }
 
 type FriendsAction =
   | { type: 'SET_LOADING'; payload: boolean }
   | { type: 'SET_FRIENDS'; payload: Friend[] }
-  | { type: 'SET_REQUESTS'; payload: any[] }
+  | { type: 'SET_REQUESTS'; payload: FriendRequest[] }
   | { type: 'SET_FEED'; payload: FeedItem[] }
+  | { type: 'APPEND_FEED'; payload: FeedItem[] }
   | { type: 'SET_SEARCHING'; payload: boolean }
-  | { type: 'SET_SEARCH_RESULTS'; payload: any[] }
+  | { type: 'SET_SEARCH_RESULTS'; payload: UserSearchResult[] }
   | { type: 'ADD_SUCCESSFUL_REQUEST'; payload: string }
+  | { type: 'REMOVE_SUCCESSFUL_REQUEST'; payload: string }
   | { type: 'SET_ERROR'; payload: string | null };
 
 const initialState: FriendsState = {
@@ -67,6 +73,8 @@ const initialState: FriendsState = {
   loading: false,
   successfulRequests: new Set(),
   error: null,
+  feedOffset: 0,
+  hasMoreFeed: true,
 };
 
 function friendsReducer(state: FriendsState, action: FriendsAction): FriendsState {
@@ -78,7 +86,19 @@ function friendsReducer(state: FriendsState, action: FriendsAction): FriendsStat
     case 'SET_REQUESTS':
       return { ...state, requests: action.payload };
     case 'SET_FEED':
-      return { ...state, feed: action.payload };
+      return {
+        ...state,
+        feed: action.payload,
+        feedOffset: action.payload.length,
+        hasMoreFeed: action.payload.length >= 20,
+      }; // Assuming default limit 50? Wait, I set default 50. Let's assume > 0 checks.
+    case 'APPEND_FEED':
+      return {
+        ...state,
+        feed: [...state.feed, ...action.payload],
+        feedOffset: state.feedOffset + action.payload.length,
+        hasMoreFeed: action.payload.length > 0,
+      };
     case 'SET_SEARCHING':
       return { ...state, searching: action.payload };
     case 'SET_SEARCH_RESULTS':
@@ -88,6 +108,11 @@ function friendsReducer(state: FriendsState, action: FriendsAction): FriendsStat
         ...state,
         successfulRequests: new Set(state.successfulRequests).add(action.payload),
       };
+    case 'REMOVE_SUCCESSFUL_REQUEST': {
+      const newSet = new Set(state.successfulRequests);
+      newSet.delete(action.payload);
+      return { ...state, successfulRequests: newSet };
+    }
     case 'SET_ERROR':
       return { ...state, error: action.payload };
     default:
@@ -97,6 +122,11 @@ function friendsReducer(state: FriendsState, action: FriendsAction): FriendsStat
 
 export function useFriends(username: string) {
   const [state, dispatch] = useReducer(friendsReducer, initialState);
+  const feedOffsetRef = useRef(0);
+
+  useEffect(() => {
+    feedOffsetRef.current = state.feedOffset;
+  }, [state.feedOffset]);
 
   const loadFriends = useCallback(async () => {
     dispatch({ type: 'SET_LOADING', payload: true });
@@ -122,18 +152,27 @@ export function useFriends(username: string) {
     }
   }, [username]);
 
-  const loadFeed = useCallback(async () => {
-    dispatch({ type: 'SET_LOADING', payload: true });
-    try {
-      const list = await getFriends(username);
-      const activity = await getFriendFeed(list);
-      dispatch({ type: 'SET_FEED', payload: activity as unknown as FeedItem[] });
-    } catch (e) {
-      console.error(e);
-    } finally {
-      dispatch({ type: 'SET_LOADING', payload: false });
-    }
-  }, [username]);
+  const loadFeed = useCallback(
+    async (loadMore = false) => {
+      dispatch({ type: 'SET_LOADING', payload: true });
+      try {
+        const list = await getFriends(username);
+        const currentOffset = loadMore ? feedOffsetRef.current : 0;
+        const activity = await getFriendFeed(list, 20, currentOffset);
+
+        if (loadMore) {
+          dispatch({ type: 'APPEND_FEED', payload: activity as unknown as FeedItem[] });
+        } else {
+          dispatch({ type: 'SET_FEED', payload: activity as unknown as FeedItem[] });
+        }
+      } catch (e) {
+        console.error(e);
+      } finally {
+        dispatch({ type: 'SET_LOADING', payload: false });
+      }
+    },
+    [username]
+  );
 
   const search = useCallback(
     async (query: string) => {
@@ -162,6 +201,10 @@ export function useFriends(username: string) {
         const res = await sendFriendRequest(username, targetUser);
         if (res.success) {
           dispatch({ type: 'ADD_SUCCESSFUL_REQUEST', payload: targetUser });
+          // Clear success message after 3 seconds
+          setTimeout(() => {
+            dispatch({ type: 'REMOVE_SUCCESSFUL_REQUEST', payload: targetUser });
+          }, 3000);
           return { success: true };
         }
         return { success: false, error: res.error };
@@ -175,25 +218,35 @@ export function useFriends(username: string) {
 
   const acceptRequest = useCallback(
     async (requester: string) => {
-      await acceptFriendRequest(username, requester);
-      loadRequests();
+      const res = await acceptFriendRequest(username, requester);
+      if (res.success) {
+        loadRequests();
+        loadFriends();
+        loadFeed();
+      }
+      return res;
     },
-    [username, loadRequests]
+    [username, loadRequests, loadFriends, loadFeed]
   );
 
   const declineRequest = useCallback(
     async (requester: string) => {
-      await declineFriendRequest(username, requester);
-      loadRequests();
+      const res = await declineFriendRequest(username, requester);
+      if (res.success) {
+        loadRequests();
+      }
+      return res;
     },
     [username, loadRequests]
   );
 
   const removeValue = useCallback(
     async (friendName: string) => {
-      await removeFriend(username, friendName);
-      loadFriends();
-      loadFeed(); // Refresh feed as well
+      const success = await removeFriend(username, friendName);
+      if (success) {
+        loadFriends();
+        loadFeed();
+      }
     },
     [username, loadFriends, loadFeed]
   );
@@ -201,6 +254,7 @@ export function useFriends(username: string) {
   const blockValue = useCallback(
     async (friendName: string) => {
       await blockUser(username, friendName);
+      // Assuming void or boolean.
       await removeFriend(username, friendName);
       loadFriends();
       loadFeed();

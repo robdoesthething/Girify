@@ -533,9 +533,12 @@ CREATE POLICY "Users can submit feedback" ON feedback
 -- ============================================================================
 -- RLS POLICIES: BLOCKS
 -- ============================================================================
-CREATE POLICY "Users can view their own blocks" ON blocks
+-- Allow users to see blocks they created OR blocks targeting them (to know they are blocked)
+CREATE POLICY "Users can view blocks involving themselves" ON blocks
     FOR SELECT USING (
         blocker IN (SELECT username FROM users WHERE uid = current_setting('request.jwt.claims', true)::json->>'sub')
+        OR
+        blocked IN (SELECT username FROM users WHERE uid = current_setting('request.jwt.claims', true)::json->>'sub')
     );
 
 CREATE POLICY "Users can manage their own blocks" ON blocks
@@ -559,8 +562,24 @@ CREATE POLICY "Service role can manage referrals" ON referrals
 -- RLS POLICIES: ACTIVITY_FEED
 -- ============================================================================
 -- Activity feed is readable by friends (complex logic, simplified here)
-CREATE POLICY "Activity feed is viewable by everyone" ON activity_feed
-    FOR SELECT USING (true);
+-- Activity feed is readable by non-blocked users
+CREATE POLICY "Activity feed is viewable by non-blocked users" ON activity_feed
+    FOR SELECT USING (
+        -- Basic check: allow access, but filter based on blocks
+        -- The user must NOT be blocked by the feed owner, and feed owner must NOT be blocked by user
+        NOT EXISTS (
+            SELECT 1 FROM blocks
+            WHERE (
+                blocker = activity_feed.username -- Feed owner blocked me
+                AND
+                blocked = (SELECT username FROM users WHERE uid = current_setting('request.jwt.claims', true)::json->>'sub') -- Me
+            ) OR (
+                blocked = activity_feed.username -- I blocked feed owner
+                AND
+                blocker = (SELECT username FROM users WHERE uid = current_setting('request.jwt.claims', true)::json->>'sub') -- Me
+            )
+        )
+    );
 
 CREATE POLICY "Users can create their own activity" ON activity_feed
     FOR INSERT WITH CHECK (

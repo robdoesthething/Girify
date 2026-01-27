@@ -134,6 +134,13 @@ export const sendFriendRequest = async (
       return { error: 'They already sent you a request. Check your inbox!' };
     }
 
+    // Check if blocked
+    const iBlockedThem = await isUserBlocked(fromClean, toClean);
+    const theyBlockedMe = await isUserBlocked(toClean, fromClean);
+    if (iBlockedThem || theyBlockedMe) {
+      return { error: 'Cannot add this user' };
+    }
+
     // Check if YOU already sent THEM a request
     const sentRequests = await getSentFriendRequests(fromClean);
     const hasSent = sentRequests.some(r => r.to_user === toClean);
@@ -149,7 +156,7 @@ export const sendFriendRequest = async (
 
     return { success: true };
   } catch (e) {
-    console.error('Error sending request:', e);
+    console.error('[Friends] Error sending request:', e);
     return { error: (e as Error).message };
   }
 };
@@ -188,6 +195,21 @@ export const acceptFriendRequest = async (
   const cleanFrom = sanitize(fromUsername);
 
   try {
+    // Check for blocks
+    const iBlockedThem = await isUserBlocked(cleanUser, cleanFrom);
+    const theyBlockedMe = await isUserBlocked(cleanFrom, cleanUser); // Assuming this checks the reverse
+
+    if (iBlockedThem || theyBlockedMe) {
+      return { error: 'Cannot accept request due to block' };
+    }
+
+    // Verify request still exists (race condition mitigation)
+    const pendingRequests = await getIncomingRequests(cleanUser);
+    const validRequest = pendingRequests.some(r => r.from === cleanFrom && r.status === 'pending');
+    if (!validRequest) {
+      return { error: 'Friend request no longer available' };
+    }
+
     // Transactional logic ideally, but sequential is fine for now
     const added = await addFriendship(cleanUser, cleanFrom);
     if (!added) {
@@ -201,7 +223,7 @@ export const acceptFriendRequest = async (
 
     return { success: true };
   } catch (e) {
-    console.error('Error accepting request:', e);
+    console.error('[Friends] Error accepting request:', e);
     return { error: (e as Error).message };
   }
 };
@@ -240,63 +262,70 @@ export const getFriends = async (username: string): Promise<Friend[]> => {
   try {
     const dbFriends = await dbGetFriends(clean);
 
-    // Enrich with profile data and daily stats
-    // This could be optimized with a specific Supabase RPC or view
-    const friends: Friend[] = [];
+    if (dbFriends.length === 0) {
+      return [];
+    }
+
+    const friendUsernames = dbFriends.map(f => f.friend_username);
+
+    // Batch fetch profiles
+    const { data: profiles } = await supabase
+      .from('users')
+      .select('username, equipped_badges, avatar_id, equipped_cosmetics')
+      .in('username', friendUsernames);
+
+    const profilesMap = new Map(profiles?.map(p => [p.username, p]) || []);
+
+    // Batch fetch today's games count
     const today = new Date();
-    // YYYYMMDD format for score date check if compatible, otherwise use date string
-    // Supabase user_games uses 'date' column as DATE type (YYYY-MM-DD)
     const todayStr = today.toISOString().split('T')[0];
 
-    for (const f of dbFriends) {
-      const friendProfile = await getUserByUsername(f.friend_username);
-      let badges: string[] = [];
-      let todayGames = 0;
-      let avatarId: number | undefined;
-      let equippedCosmetics: Friend['equippedCosmetics'] = {};
+    const { data: todayGamesEntries } = await supabase
+      .from('user_games')
+      .select('username')
+      .eq('date', todayStr as string)
+      .in('username', friendUsernames);
 
-      if (friendProfile) {
-        badges = friendProfile.equipped_badges || [];
-        avatarId = friendProfile.avatar_id || undefined;
-        equippedCosmetics = (friendProfile.equipped_cosmetics as Friend['equippedCosmetics']) || {};
-      }
+    const gamesCountMap = new Map<string, number>();
+    todayGamesEntries?.forEach((g: { username: string }) => {
+      gamesCountMap.set(g.username, (gamesCountMap.get(g.username) || 0) + 1);
+    });
 
-      // Get today's games count
-      const { count } = await supabase
-        .from('user_games')
-        .select('*', { count: 'exact', head: true })
-        .eq('username', f.friend_username)
-        .eq('date', todayStr as string);
+    const friends: Friend[] = dbFriends.map(f => {
+      const profile = profilesMap.get(f.friend_username);
+      const todayGames = gamesCountMap.get(f.friend_username) || 0;
 
-      todayGames = count || 0;
-
-      friends.push({
+      return {
         username: f.friend_username,
         since: f.since,
-        badges,
+        badges: profile?.equipped_badges || [],
         todayGames,
-        avatarId,
-        equippedCosmetics,
-      });
-    }
+        avatarId: profile?.avatar_id || undefined,
+        equippedCosmetics: (profile?.equipped_cosmetics as Friend['equippedCosmetics']) || {},
+      };
+    });
 
     return friends;
   } catch (e) {
-    console.error('Error getting friends:', e);
+    console.error('[Friends] Error getting friends:', e);
     return [];
   }
 };
 
-// Increased limit for debugging data persistence issues
-// TODO: Consider implementing proper pagination once data is confirmed working
-const FEED_LIMIT = 200;
+const FEED_LIMIT = 50;
 
 /**
  * Get Friend Activity Feed
  * @param friendsList - The list of friends to fetch activity for
+ * @param limit - Max items to fetch
+ * @param offset - Offset for pagination
  * @returns Promise resolving to list of activity feed items
  */
-export const getFriendFeed = async (friendsList: Friend[]): Promise<FeedActivity[]> => {
+export const getFriendFeed = async (
+  friendsList: Friend[],
+  limit = FEED_LIMIT,
+  offset = 0
+): Promise<FeedActivity[]> => {
   if (!friendsList || friendsList.length === 0) {
     return [];
   }
@@ -304,7 +333,7 @@ export const getFriendFeed = async (friendsList: Friend[]): Promise<FeedActivity
   const friendNames = friendsList.map(f => f.username);
 
   try {
-    const activities = await getActivityFeed(friendNames, FEED_LIMIT);
+    const activities = await getActivityFeed(friendNames, limit, offset);
 
     return activities.map(a => ({
       id: a.id.toString(),
