@@ -6,6 +6,7 @@ import {
   updateUser,
 } from '../../services/database';
 import { getPayoutConfig } from '../../services/db/config';
+import { normalizeUsername } from '../format';
 import { publishCosmeticPurchase } from '../social/publishActivity';
 
 // Default Constants
@@ -26,7 +27,7 @@ export const getGiuros = async (username: string | null): Promise<number> => {
     return 0;
   }
   try {
-    const user = await getUserByUsername(username);
+    const user = await getUserByUsername(normalizeUsername(username));
     return user?.giuros ?? STARTING_GIUROS;
   } catch (e) {
     console.error('Error getting giuros:', e);
@@ -51,7 +52,7 @@ export const addGiuros = async (
   }
 
   try {
-    const user = await getUserByUsername(username);
+    const user = await getUserByUsername(normalizeUsername(username));
     if (!user) {
       return { success: false, newBalance: 0 };
     }
@@ -59,7 +60,7 @@ export const addGiuros = async (
     const currentBalance = user.giuros ?? 0;
     const newBalance = currentBalance + amount;
 
-    const success = await updateUser(username, { giuros: newBalance });
+    const success = await updateUser(normalizeUsername(username), { giuros: newBalance });
 
     if (success) {
       // eslint-disable-next-line no-console
@@ -99,7 +100,7 @@ export const spendGiuros = async (
   }
 
   try {
-    const user = await getUserByUsername(username);
+    const user = await getUserByUsername(normalizeUsername(username));
     if (!user) {
       return { success: false, error: 'User not found' };
     }
@@ -114,7 +115,7 @@ export const spendGiuros = async (
     // Badges are in a separate table, other cosmetics in purchased_cosmetics array
     if (itemId.startsWith('badge_')) {
       // Check purchased_badges table
-      const purchasedBadges = await getUserPurchasedBadges(username);
+      const purchasedBadges = await getUserPurchasedBadges(normalizeUsername(username));
       if (purchasedBadges.includes(itemId)) {
         return { success: false, error: 'Already owned' };
       }
@@ -129,21 +130,21 @@ export const spendGiuros = async (
 
     // Transaction needed ideally
     // Update balance
-    const success = await updateUser(username, { giuros: newBalance });
+    const success = await updateUser(normalizeUsername(username), { giuros: newBalance });
     if (!success) {
       return { success: false, error: 'Failed to update balance' };
     }
 
     // Add item
     if (itemId.startsWith('badge_')) {
-      await addPurchasedBadge(username, itemId);
+      await addPurchasedBadge(normalizeUsername(username), itemId);
     } else {
       const purchasedCosmetics: string[] = user.purchased_cosmetics || [];
       // Re-read or just append? Appending is risky if concurrent.
       // Ideally we use array_append in Supabase but updateUser takes the whole array.
       // For now, re-use list from variable.
       const newPurchases = [...purchasedCosmetics, itemId];
-      await updateUser(username, { purchased_cosmetics: newPurchases });
+      await updateUser(normalizeUsername(username), { purchased_cosmetics: newPurchases });
     }
 
     // eslint-disable-next-line no-console
@@ -160,7 +161,7 @@ export const spendGiuros = async (
     } else if (itemId.startsWith('title_')) {
       itemType = 'title';
     }
-    publishCosmeticPurchase(username, itemId, itemId, itemType);
+    publishCosmeticPurchase(normalizeUsername(username), itemId, itemId, itemType);
 
     return { success: true, newBalance };
   } catch (e: unknown) {
@@ -186,7 +187,7 @@ export const claimDailyLoginBonus = async (
     const config = await getPayoutConfig();
     const dailyBonus = config.DAILY_LOGIN_BONUS;
 
-    const user = await getUserByUsername(username);
+    const user = await getUserByUsername(normalizeUsername(username));
     if (!user) {
       return { claimed: false, bonus: 0, newBalance: 0 };
     }
@@ -201,7 +202,7 @@ export const claimDailyLoginBonus = async (
 
     const newBalance = (user.giuros ?? 0) + dailyBonus;
 
-    await updateUser(username, {
+    await updateUser(normalizeUsername(username), {
       giuros: newBalance,
       last_login_date: today,
     });
@@ -260,10 +261,10 @@ export const getPurchasedCosmetics = async (username: string | null): Promise<st
     return [];
   }
   try {
-    const user = await getUserByUsername(username);
+    const user = await getUserByUsername(normalizeUsername(username));
     // Combine purchased_cosmetics array + purchased_badges
     const cosmetics = user?.purchased_cosmetics || [];
-    const badges = await getUserPurchasedBadges(username);
+    const badges = await getUserPurchasedBadges(normalizeUsername(username));
 
     return [...cosmetics, ...badges];
   } catch (e) {
@@ -289,7 +290,7 @@ export const setEquippedCosmetics = async (
     // Cast to expected Map type. Supabase defines it as Record<string, string>
     // But usage might include non-string values?
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    await updateUser(username, { equipped_cosmetics: equipped as any });
+    await updateUser(normalizeUsername(username), { equipped_cosmetics: equipped as any });
   } catch (e) {
     console.error('Error setting equipped cosmetics:', e);
   }
@@ -307,7 +308,7 @@ export const getEquippedCosmetics = async (
     return {};
   }
   try {
-    const user = await getUserByUsername(username);
+    const user = await getUserByUsername(normalizeUsername(username));
     // UserRow equipped_cosmetics is Record<string, string>
     return user?.equipped_cosmetics || {};
   } catch (e) {

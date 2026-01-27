@@ -18,6 +18,7 @@ import {
   updateFriendRequestStatus,
 } from '../../services/database';
 import { supabase } from '../../services/supabase';
+import { normalizeUsername } from '../format';
 
 export interface UserSearchResult {
   username: string;
@@ -65,7 +66,7 @@ interface OperationResult {
 }
 
 // Helper to normalize usernames
-const sanitize = (name: string): string => name.toLowerCase().replace(/\//g, '_');
+const sanitize = (name: string): string => normalizeUsername(name).replace(/\//g, '_');
 
 /**
  * Search for users by username prefix
@@ -462,7 +463,7 @@ export const getFriendCount = async (username: string): Promise<number> => {
   }
   // We can query the friends view/function, or just rely on user profile count
   try {
-    const user = await getUserByUsername(username);
+    const user = await getUserByUsername(normalizeUsername(username));
     return user?.friend_count || 0;
   } catch (e) {
     console.error('Error getting friend count:', e);

@@ -5,11 +5,45 @@
  */
 
 import type { GameResultRow } from '../../types/supabase';
+import { normalizeUsername } from '../../utils/format';
 import { supabase } from '../supabase';
 
 // ============================================================================
 // GAME RESULTS / LEADERBOARD
 // ============================================================================
+
+export interface GameResultData {
+  user_id: string | null;
+  score: number;
+  time_taken: number;
+  correct_answers: number;
+  question_count: number;
+  played_at: string;
+  platform: string;
+  is_bonus: boolean;
+}
+
+/**
+ * Saves a game result to the database.
+ * Handles username normalization.
+ */
+export async function insertGameResult(
+  data: GameResultData
+): Promise<{ success: boolean; error?: unknown }> {
+  // Ensure username is normalized if present
+  const payload = {
+    ...data,
+    user_id: data.user_id ? normalizeUsername(data.user_id) : null,
+  };
+
+  const { error } = await supabase.from('game_results').insert(payload);
+
+  if (error) {
+    console.error('[DB] insertGameResult error:', error.message);
+    return { success: false, error };
+  }
+  return { success: true };
+}
 
 export async function getLeaderboardScores(
   period: 'all' | 'daily' | 'weekly' | 'monthly',
@@ -63,7 +97,7 @@ export async function getLeaderboardScores(
 }
 
 export async function getUserGameHistory(username: string, limit = 30): Promise<GameResultRow[]> {
-  const normalizedUsername = username.toLowerCase();
+  const normalizedUsername = normalizeUsername(username);
 
   const { data, error } = await supabase
     .from('game_results')

@@ -1,5 +1,5 @@
+import { insertGameResult } from './db/games';
 import { redis } from './redis';
-import { supabase } from './supabase';
 
 export interface GameSession {
   userId: string;
@@ -99,7 +99,7 @@ export async function endGame(
     const session = (typeof rawData === 'string' ? JSON.parse(rawData) : rawData) as GameSession;
 
     // Save to Supabase
-    const { error } = await supabase.from('game_results').insert({
+    const { success, error } = await insertGameResult({
       user_id: session.userId || null,
       score: finalScore,
       time_taken: finalTime,
@@ -110,12 +110,12 @@ export async function endGame(
       is_bonus: false,
     });
 
-    if (error) {
+    if (!success) {
       console.error('[Supabase] Failed to save game:', error);
       // Keep Redis data for potential retry
       return {
         success: false,
-        error: `Database error: ${error.message}`,
+        error: `Database error: ${error instanceof Error ? error.message : String(error)}`,
       };
     }
 
