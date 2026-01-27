@@ -5,53 +5,36 @@
  */
 
 import type { UserInsert, UserRow, UserUpdate } from '../../types/supabase';
+import { normalizeUsername } from '../../utils/format';
 import { supabase } from '../supabase';
+import { executeQuery } from './utils';
 
 export async function getUserByUsername(username: string): Promise<UserRow | null> {
-  const { data, error } = await supabase
-    .from('users')
-    .select('*')
-    .eq('username', username.toLowerCase())
-    .single();
-
-  if (error) {
-    if (error.code === 'PGRST116') {
-      return null;
-    }
-    console.error('[DB] getUserByUsername error:', error.message);
-    return null;
-  }
-  return data;
+  const cleanUsername = normalizeUsername(username);
+  return executeQuery<UserRow>(
+    supabase.from('users').select('*').eq('username', cleanUsername).single(),
+    'getUserByUsername'
+  );
 }
 
 export async function getUserByUid(uid: string): Promise<UserRow | null> {
-  const { data, error } = await supabase.from('users').select('*').eq('uid', uid).single();
-
-  if (error) {
-    if (error.code === 'PGRST116') {
-      return null;
-    }
-    console.error('[DB] getUserByUid error:', error.message);
-    return null;
-  }
-  return data;
+  return executeQuery<UserRow>(
+    supabase.from('users').select('*').eq('uid', uid).single(),
+    'getUserByUid'
+  );
 }
 
 export async function createUser(user: UserInsert): Promise<UserRow | null> {
-  const { data, error } = await supabase.from('users').insert(user).select().single();
-
-  if (error) {
-    console.error('[DB] createUser error:', error.message);
-    return null;
-  }
-  return data;
+  return executeQuery<UserRow>(supabase.from('users').insert(user).select().single(), 'createUser');
 }
 
 export async function updateUser(username: string, updates: UserUpdate): Promise<boolean> {
-  const { error } = await supabase
-    .from('users')
-    .update(updates)
-    .eq('username', username.toLowerCase());
+  const cleanUsername = normalizeUsername(username);
+  // We can't use executeQuery easily for boolean checks without changing its signature,
+  // so let's use the explicit error check pattern here for clarity and correctness.
+  // Or usage of executeQuery returns null on error.
+
+  const { error } = await supabase.from('users').update(updates).eq('username', cleanUsername);
 
   if (error) {
     console.error('[DB] updateUser error:', error.message);
@@ -61,30 +44,17 @@ export async function updateUser(username: string, updates: UserUpdate): Promise
 }
 
 export async function upsertUser(user: UserInsert): Promise<UserRow | null> {
-  const { data, error } = await supabase
-    .from('users')
-    .upsert(user, { onConflict: 'username' })
-    .select()
-    .single();
-
-  if (error) {
-    console.error('[DB] upsertUser error:', error.message);
-    return null;
-  }
-  return data;
+  return executeQuery<UserRow>(
+    supabase.from('users').upsert(user, { onConflict: 'username' }).select().single(),
+    'upsertUser'
+  );
 }
 
 export async function searchUsers(query: string, limit = 20): Promise<UserRow[]> {
   const searchTerm = query.toLowerCase().replace(/^@/, '');
-  const { data, error } = await supabase
-    .from('users')
-    .select('*')
-    .ilike('username', `${searchTerm}%`)
-    .limit(limit);
-
-  if (error) {
-    console.error('[DB] searchUsers error:', error.message);
-    return [];
-  }
-  return data || [];
+  const result = await executeQuery<UserRow[]>(
+    supabase.from('users').select('*').ilike('username', `${searchTerm}%`).limit(limit),
+    'searchUsers'
+  );
+  return result || [];
 }

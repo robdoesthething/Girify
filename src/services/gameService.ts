@@ -1,5 +1,8 @@
+import { createLogger } from '../utils/logger';
 import { insertGameResult } from './db/games';
 import { redis } from './redis';
+
+const logger = createLogger('GameService');
 
 export interface GameSession {
   userId: string;
@@ -89,7 +92,7 @@ export async function endGame(
     const rawData = await redis.get(sessionKey);
 
     if (!rawData) {
-      console.warn('[Redis] Session not found:', gameId);
+      logger.warn('Session not found:', gameId);
       return {
         success: false,
         error: 'Session not found or expired. Please ensure Redis is running and accessible.',
@@ -111,7 +114,7 @@ export async function endGame(
     });
 
     if (!success) {
-      console.error('[Supabase] Failed to save game:', error);
+      logger.error('Failed to save game:', error);
       // Keep Redis data for potential retry
       return {
         success: false,
@@ -124,7 +127,7 @@ export async function endGame(
 
     return { success: true, gameId };
   } catch (error) {
-    console.error('[Game] Unexpected error in endGame:', error);
+    logger.error('Unexpected error in endGame:', error);
     return {
       success: false,
       error: error instanceof Error ? error.message : String(error),
