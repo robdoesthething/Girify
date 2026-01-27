@@ -15,30 +15,43 @@ export async function getLeaderboardScores(
   period: 'all' | 'daily' | 'weekly' | 'monthly',
   limit = 100
 ): Promise<GameResultRow[]> {
-  let query = supabase
-    .from('game_results')
-    .select('*')
-    .order('score', { ascending: false })
-    .limit(limit * 4); // Fetch more for deduplication
+  // Start with base query - apply filters first, then order and limit
+  let query = supabase.from('game_results').select('*');
 
   const now = new Date();
 
+  // Apply period filters first to reduce dataset before ordering/limiting
   if (period === 'daily') {
     const startOfDay = new Date(
       Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(), 0, 0, 0, 0)
     ).toISOString();
     query = query.gte('played_at', startOfDay);
   } else if (period === 'weekly') {
-    const d = new Date(now);
-    const currentDay = d.getDay();
-    const distanceToMonday = currentDay === 0 ? 6 : currentDay - 1;
-    d.setDate(d.getDate() - distanceToMonday);
-    d.setHours(0, 0, 0, 0);
-    query = query.gte('played_at', d.toISOString());
+    // Calculate start of week (Monday) using UTC to match game save timestamps
+    const currentDayUTC = now.getUTCDay(); // 0 = Sunday
+    const distanceToMonday = currentDayUTC === 0 ? 6 : currentDayUTC - 1;
+    const startOfWeek = new Date(
+      Date.UTC(
+        now.getUTCFullYear(),
+        now.getUTCMonth(),
+        now.getUTCDate() - distanceToMonday,
+        0,
+        0,
+        0,
+        0
+      )
+    ).toISOString();
+    query = query.gte('played_at', startOfWeek);
   } else if (period === 'monthly') {
-    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
+    // Use UTC for consistent monthly boundaries
+    const startOfMonth = new Date(
+      Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1, 0, 0, 0, 0)
+    ).toISOString();
     query = query.gte('played_at', startOfMonth);
   }
+
+  // Apply ordering and limit AFTER filtering to ensure correct results
+  query = query.order('score', { ascending: false }).limit(limit * 4);
 
   const { data, error } = await query;
 
@@ -50,10 +63,12 @@ export async function getLeaderboardScores(
 }
 
 export async function getUserGameHistory(username: string, limit = 30): Promise<GameResultRow[]> {
+  const normalizedUsername = username.toLowerCase();
+
   const { data, error } = await supabase
     .from('game_results')
     .select('*')
-    .eq('user_id', username.toLowerCase())
+    .eq('user_id', normalizedUsername)
     .order('played_at', { ascending: false })
     .limit(limit);
 
@@ -61,6 +76,7 @@ export async function getUserGameHistory(username: string, limit = 30): Promise<
     console.error('[DB] getUserGameHistory error:', error.message);
     return [];
   }
+
   return data || [];
 }
 
