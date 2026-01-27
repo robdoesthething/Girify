@@ -5,7 +5,11 @@
  */
 
 import type { FriendRequestRow } from '../../types/supabase';
+import { createLogger } from '../../utils/logger';
 import { supabase } from '../supabase';
+import { executeQuery } from './utils';
+
+const logger = createLogger('DB:Friends');
 
 // ============================================================================
 // FRIENDSHIPS
@@ -14,54 +18,46 @@ import { supabase } from '../supabase';
 export async function getFriends(
   username: string
 ): Promise<Array<{ friend_username: string; since: string }>> {
-  const { data, error } = await supabase.rpc('get_friends', {
-    user_username: username.toLowerCase(),
-  });
-
-  if (error) {
-    console.error('[DB] getFriends error:', error.message);
-    return [];
-  }
+  const data = await executeQuery<Array<{ friend_username: string; since: string }>>(
+    supabase.rpc('get_friends', {
+      user_username: username.toLowerCase(),
+    }),
+    'getFriends'
+  );
   return data || [];
 }
 
 export async function areFriends(user1: string, user2: string): Promise<boolean> {
-  const { data, error } = await supabase.rpc('are_friends', {
-    user1: user1.toLowerCase(),
-    user2: user2.toLowerCase(),
-  });
-
-  if (error) {
-    console.error('[DB] areFriends error:', error.message);
-    return false;
-  }
-  return data || false;
+  const data = await executeQuery<boolean>(
+    supabase.rpc('are_friends', {
+      user1: user1.toLowerCase(),
+      user2: user2.toLowerCase(),
+    }),
+    'areFriends'
+  );
+  return !!data;
 }
 
 export async function addFriendship(user1: string, user2: string): Promise<boolean> {
-  const { data, error } = await supabase.rpc('add_friendship', {
-    user1: user1.toLowerCase(),
-    user2: user2.toLowerCase(),
-  });
-
-  if (error) {
-    console.error('[DB] addFriendship error:', error.message);
-    return false;
-  }
-  return data || false;
+  const data = await executeQuery<boolean>(
+    supabase.rpc('add_friendship', {
+      user1: user1.toLowerCase(),
+      user2: user2.toLowerCase(),
+    }),
+    'addFriendship'
+  );
+  return !!data;
 }
 
 export async function removeFriendship(user1: string, user2: string): Promise<boolean> {
-  const { data, error } = await supabase.rpc('remove_friendship', {
-    user1: user1.toLowerCase(),
-    user2: user2.toLowerCase(),
-  });
-
-  if (error) {
-    console.error('[DB] removeFriendship error:', error.message);
-    return false;
-  }
-  return data || false;
+  const data = await executeQuery<boolean>(
+    supabase.rpc('remove_friendship', {
+      user1: user1.toLowerCase(),
+      user2: user2.toLowerCase(),
+    }),
+    'removeFriendship'
+  );
+  return !!data;
 }
 
 // ============================================================================
@@ -69,31 +65,27 @@ export async function removeFriendship(user1: string, user2: string): Promise<bo
 // ============================================================================
 
 export async function getPendingFriendRequests(username: string): Promise<FriendRequestRow[]> {
-  const { data, error } = await supabase
-    .from('friend_requests')
-    .select('*')
-    .eq('to_user', username.toLowerCase())
-    .eq('status', 'pending')
-    .order('created_at', { ascending: false });
-
-  if (error) {
-    console.error('[DB] getPendingFriendRequests error:', error.message);
-    return [];
-  }
+  const data = await executeQuery<FriendRequestRow[]>(
+    supabase
+      .from('friend_requests')
+      .select('*')
+      .eq('to_user', username.toLowerCase())
+      .eq('status', 'pending')
+      .order('created_at', { ascending: false }),
+    'getPendingFriendRequests'
+  );
   return data || [];
 }
 
 export async function getSentFriendRequests(username: string): Promise<FriendRequestRow[]> {
-  const { data, error } = await supabase
-    .from('friend_requests')
-    .select('*')
-    .eq('from_user', username.toLowerCase())
-    .eq('status', 'pending');
-
-  if (error) {
-    console.error('[DB] getSentFriendRequests error:', error.message);
-    return [];
-  }
+  const data = await executeQuery<FriendRequestRow[]>(
+    supabase
+      .from('friend_requests')
+      .select('*')
+      .eq('from_user', username.toLowerCase())
+      .eq('status', 'pending'),
+    'getSentFriendRequests'
+  );
   return data || [];
 }
 
@@ -105,7 +97,7 @@ export async function createFriendRequest(fromUser: string, toUser: string): Pro
   });
 
   if (error) {
-    console.error('[DB] createFriendRequest error:', error.message);
+    logger.error('createFriendRequest error:', error.message);
     return false;
   }
   return true;
@@ -123,7 +115,7 @@ export async function updateFriendRequestStatus(
     .eq('to_user', toUser.toLowerCase());
 
   if (error) {
-    console.error('[DB] updateFriendRequestStatus error:', error.message);
+    logger.error('updateFriendRequestStatus error:', error.message);
     return false;
   }
   return true;
@@ -137,7 +129,7 @@ export async function deleteFriendRequest(fromUser: string, toUser: string): Pro
     .eq('to_user', toUser.toLowerCase());
 
   if (error) {
-    console.error('[DB] deleteFriendRequest error:', error.message);
+    logger.error('deleteFriendRequest error:', error.message);
     return false;
   }
   return true;

@@ -5,8 +5,13 @@
  */
 
 import type { GameResultRow } from '../../types/supabase';
+import { getUTCStartOfDay, getUTCStartOfMonth, getUTCStartOfWeek } from '../../utils/date';
 import { normalizeUsername } from '../../utils/format';
+import { createLogger } from '../../utils/logger';
 import { supabase } from '../supabase';
+import { executeQuery } from './utils';
+
+const logger = createLogger('DB:Games');
 
 // ============================================================================
 // GAME RESULTS / LEADERBOARD
@@ -39,7 +44,7 @@ export async function insertGameResult(
   const { error } = await supabase.from('game_results').insert(payload);
 
   if (error) {
-    console.error('[DB] insertGameResult error:', error.message);
+    logger.error('insertGameResult error:', error.message);
     return { success: false, error };
   }
   return { success: true };
@@ -54,62 +59,39 @@ export async function getLeaderboardScores(
 
   const now = new Date();
 
+  // ============================================================================
+
   // Apply period filters first to reduce dataset before ordering/limiting
   if (period === 'daily') {
-    const startOfDay = new Date(
-      Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(), 0, 0, 0, 0)
-    ).toISOString();
-    query = query.gte('played_at', startOfDay);
+    query = query.gte('played_at', getUTCStartOfDay(now));
   } else if (period === 'weekly') {
-    // Calculate start of week (Monday) using UTC to match game save timestamps
-    const currentDayUTC = now.getUTCDay(); // 0 = Sunday
-    const distanceToMonday = currentDayUTC === 0 ? 6 : currentDayUTC - 1;
-    const startOfWeek = new Date(
-      Date.UTC(
-        now.getUTCFullYear(),
-        now.getUTCMonth(),
-        now.getUTCDate() - distanceToMonday,
-        0,
-        0,
-        0,
-        0
-      )
-    ).toISOString();
-    query = query.gte('played_at', startOfWeek);
+    query = query.gte('played_at', getUTCStartOfWeek(now));
   } else if (period === 'monthly') {
-    // Use UTC for consistent monthly boundaries
-    const startOfMonth = new Date(
-      Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1, 0, 0, 0, 0)
-    ).toISOString();
-    query = query.gte('played_at', startOfMonth);
+    query = query.gte('played_at', getUTCStartOfMonth(now));
   }
 
   // Apply ordering and limit AFTER filtering to ensure correct results
-  query = query.order('score', { ascending: false }).limit(limit * 4);
+  // executeQuery expects a PromiseLike, query builder is thenable.
+  const data = await executeQuery<GameResultRow[]>(
+    query.order('score', { ascending: false }).limit(limit * 4),
+    'getLeaderboardScores'
+  );
 
-  const { data, error } = await query;
-
-  if (error) {
-    console.error('[DB] getLeaderboardScores error:', error.message);
-    return [];
-  }
   return data || [];
 }
 
 export async function getUserGameHistory(username: string, limit = 30): Promise<GameResultRow[]> {
   const normalizedUsername = normalizeUsername(username);
 
-  const { data, error } = await supabase
-    .from('game_results')
-    .select('*')
-    .eq('user_id', normalizedUsername)
-    .order('played_at', { ascending: false })
-    .limit(limit);
-
-  if (error) {
-    console.error('[DB] getUserGameHistory error:', error.message);
-    return [];
-  }
+  const data = await executeQuery<GameResultRow[]>(
+    supabase
+      .from('game_results')
+      .select('*')
+      .eq('user_id', normalizedUsername)
+      .order('played_at', { ascending: false })
+      .limit(limit),
+    'getUserGameHistory'
+  );
 
   return data || [];
 }
@@ -121,15 +103,16 @@ export async function getUserGameHistory(username: string, limit = 30): Promise<
 export async function getDistricts(): Promise<
   Array<{ id: string; name: string; team_name: string | null; score: number | null }>
 > {
-  const { data, error } = await supabase
-    .from('districts')
-    .select('id, name, team_name, score')
-    .order('score', { ascending: false });
+  const data = await executeQuery<
+    Array<{ id: string; name: string; team_name: string | null; score: number | null }>
+  >(
+    supabase
+      .from('districts')
+      .select('id, name, team_name, score')
+      .order('score', { ascending: false }),
+    'getDistricts'
+  );
 
-  if (error) {
-    console.error('[DB] getDistricts error:', error.message);
-    return [];
-  }
   return data || [];
 }
 
@@ -137,14 +120,12 @@ export async function updateDistrictScore(
   districtId: string,
   scoreToAdd: number
 ): Promise<boolean> {
-  const { data: district, error: fetchError } = await supabase
-    .from('districts')
-    .select('score')
-    .eq('id', districtId)
-    .single();
+  const district = await executeQuery<{ score: number }>(
+    supabase.from('districts').select('score').eq('id', districtId).single(),
+    'updateDistrictScore:fetch'
+  );
 
-  if (fetchError || !district) {
-    console.error('[DB] updateDistrictScore fetch error:', fetchError?.message);
+  if (!district) {
     return false;
   }
 
@@ -154,7 +135,7 @@ export async function updateDistrictScore(
     .eq('id', districtId);
 
   if (error) {
-    console.error('[DB] updateDistrictScore error:', error.message);
+    logger.error('updateDistrictScore error:', error.message);
     return false;
   }
   return true;
