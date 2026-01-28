@@ -6,46 +6,40 @@ import { checkAndProgressQuests, getDailyQuests } from '../quests';
 import { getShopItems } from '../shop';
 import { getUserByUsername, updateUser } from '../users';
 
-// Global Mocks
+// 1. Create a chainable builder mock
+const mockBuilder = {
+  select: vi.fn().mockReturnThis(),
+  insert: vi.fn().mockReturnThis(),
+  update: vi.fn().mockReturnThis(),
+  upsert: vi.fn().mockReturnThis(),
+  delete: vi.fn().mockReturnThis(),
+  eq: vi.fn().mockReturnThis(),
+  order: vi.fn().mockReturnThis(),
+  limit: vi.fn().mockReturnThis(),
+  gte: vi.fn().mockReturnThis(),
+  gt: vi.fn().mockReturnThis(),
+  lte: vi.fn().mockReturnThis(),
+  lt: vi.fn().mockReturnThis(),
+  in: vi.fn().mockReturnThis(),
+  single: vi.fn().mockReturnThis(), // .single() returns 'this' in chain, but usually ends it. We'll handle return values via .then()
+  then: vi.fn(resolve => resolve({ data: [], error: null })), // Default resolution
+};
+
+// 2. Mock the supabase module
 vi.mock('../../supabase', () => ({
   supabase: {
-    from: vi.fn(),
-    rpc: vi.fn(),
+    from: vi.fn(() => mockBuilder), // Always return our chainable builder
+    rpc: vi.fn().mockResolvedValue({ data: null, error: null }),
   },
 }));
 
 describe('Database Integration Suite', () => {
-  const mockBuilder = {
-    select: vi.fn(),
-    insert: vi.fn(),
-    update: vi.fn(),
-    upsert: vi.fn(),
-    delete: vi.fn(),
-    eq: vi.fn(),
-    order: vi.fn(),
-    limit: vi.fn(),
-    gte: vi.fn(),
-    gt: vi.fn(),
-    lte: vi.fn(),
-    lt: vi.fn(),
-    in: vi.fn(),
-    single: vi.fn(),
-    then: vi.fn(resolve => resolve({ data: [], error: null })),
-  };
-
   beforeEach(() => {
     vi.clearAllMocks();
-    // Setup builder methods to return self
-    Object.keys(mockBuilder).forEach(key => {
-      if (key !== 'then') {
-        (mockBuilder as any)[key].mockReturnValue(mockBuilder);
-      }
-    });
-
-    // Setup the mock client return values
-    // Since we mocked the module, 'supabase' object IS the mock object with vi.fn() methods
-    (supabase.from as any).mockReturnValue(mockBuilder);
-    (supabase.rpc as any).mockResolvedValue({ data: null, error: null } as any);
+    // Default: chainable methods return 'this' (the builder itself)
+    // We don't need to re-mockReturnThis() because we defined it in step 1.
+    // However, we DO need to reset 'then' implementation if tests override it.
+    mockBuilder.then.mockImplementation((resolve: any) => resolve({ data: [], error: null }));
   });
 
   afterEach(() => {
@@ -55,21 +49,10 @@ describe('Database Integration Suite', () => {
   describe('Users Service', () => {
     it('getUserByUsername should fetch user with normalized username', async () => {
       const mockUser = { id: '1', username: 'testuser' };
-      mockBuilder.then.mockImplementation(resolve => resolve({ data: mockUser, error: null }));
-      // Note: executeQuery wrapper might handle single().
-      // If getUserByUsername uses .single(), result is the user object, not { data }.
-      // But implementation awaits query.
-      // If query.single() was called, Supabase returns { data: T, error }.
-      // So mock resolving { data: mockUser } is correct.
-
-      // Implementation calls returns executeQuery(...)
-      // executeQuery awaits query.
-      // executeQuery implementation returns { data, error }.data ??
-      // Wait. Real executeQuery returns T | null.
-      // It does: `const { data, error } = await query; if (error) return null; return data;`
-
-      // So if we mock query to resolve `{ data: mockUser, error: null }`.
-      // executeQuery returns `mockUser`.
+      // Arrange: .then() simulates the await result of the query chain
+      mockBuilder.then.mockImplementationOnce((resolve: any) =>
+        resolve({ data: mockUser, error: null })
+      );
 
       const result = await getUserByUsername('@TestUser');
 
@@ -79,7 +62,7 @@ describe('Database Integration Suite', () => {
     });
 
     it('updateUser should return true on success', async () => {
-      mockBuilder.then.mockImplementation(resolve => resolve({ error: null }));
+      mockBuilder.then.mockImplementationOnce((resolve: any) => resolve({ error: null }));
       const result = await updateUser('TestUser', { real_name: 'New Name' });
       expect(result).toBe(true);
     });
@@ -87,7 +70,7 @@ describe('Database Integration Suite', () => {
 
   describe('Friends Service', () => {
     it('createFriendRequest should return true on success', async () => {
-      mockBuilder.then.mockImplementation(resolve => resolve({ error: null }));
+      mockBuilder.then.mockImplementationOnce((resolve: any) => resolve({ error: null }));
       const result = await createFriendRequest('Alice', 'Bob');
       expect(mockBuilder.insert).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -102,7 +85,9 @@ describe('Database Integration Suite', () => {
   describe('Shop Service', () => {
     it('getShopItems should fetch active items', async () => {
       const mockItems = [{ id: '1', name: 'Item', cost: 100 }];
-      mockBuilder.then.mockImplementation(resolve => resolve({ data: mockItems, error: null }));
+      mockBuilder.then.mockImplementationOnce((resolve: any) =>
+        resolve({ data: mockItems, error: null })
+      );
 
       const result = await getShopItems();
       expect(mockBuilder.eq).toHaveBeenCalledWith('is_active', true);
@@ -112,7 +97,7 @@ describe('Database Integration Suite', () => {
 
   describe('Games Service', () => {
     it('insertGameResult should success', async () => {
-      mockBuilder.then.mockImplementation(resolve => resolve({ error: null }));
+      mockBuilder.then.mockImplementationOnce((resolve: any) => resolve({ error: null }));
       const result = await insertGameResult({
         user_id: 'TestUser',
         score: 1000,
@@ -130,12 +115,18 @@ describe('Database Integration Suite', () => {
 
   describe('Quests Service', () => {
     it('getDailyQuests should fetch quests and progress', async () => {
-      const mockQuests = [{ id: 1, title: 'Quest 1' }];
-      const mockProgress = [{ quest_id: 1, progress: 10 }];
-
-      mockBuilder.then
-        .mockImplementationOnce(resolve => resolve({ data: mockQuests, error: null }))
-        .mockImplementationOnce(resolve => resolve({ data: mockProgress, error: null }));
+      mockBuilder.then.mockImplementation((resolve: any) => {
+        return resolve({
+          data: [
+            {
+              id: 1,
+              title: 'Quest 1',
+              progress: { progress: 10, is_claimed: false },
+            },
+          ],
+          error: null,
+        });
+      });
 
       const result = await getDailyQuests('User1');
       expect(result.length).toBe(1);
@@ -144,7 +135,6 @@ describe('Database Integration Suite', () => {
 
     it('checkAndProgressQuests should update progress', async () => {
       const mockState = {
-        // Partial<GameStateObject>
         score: 1500,
         correct: 5,
         correctStreak: 0,
@@ -158,13 +148,13 @@ describe('Database Integration Suite', () => {
         { id: 1, title: 'Quest 1', criteria_type: 'score_attack', criteria_value: '1000' },
       ];
 
-      // 1. getDailyQuests (2 queries)
-      mockBuilder.then
-        .mockImplementationOnce(resolve => resolve({ data: mockQuests, error: null }))
-        .mockImplementationOnce(resolve => resolve({ data: [], error: null }));
+      // checkAndProgressQuests calls:
+      // 1. getDailyQuests (read)
+      // 2. updateQuestProgress (upsert)
 
-      // 2. upsert progress
-      mockBuilder.then.mockImplementationOnce(resolve => resolve({ error: null }));
+      mockBuilder.then
+        .mockImplementationOnce((resolve: any) => resolve({ data: mockQuests, error: null })) // get
+        .mockImplementationOnce((resolve: any) => resolve({ error: null })); // upsert
 
       await checkAndProgressQuests('User1', mockState);
 
@@ -173,7 +163,7 @@ describe('Database Integration Suite', () => {
           username: 'user1',
           quest_id: 1,
           is_completed: true,
-          progress: 1000,
+          progress: 1000, // capped at criteria value
         }),
         expect.anything()
       );
@@ -183,7 +173,7 @@ describe('Database Integration Suite', () => {
   describe('Games Service - Extended', () => {
     it('getLeaderboardScores should fetch scores', async () => {
       const mockResponse = { data: [{ id: 1, score: 100 }], error: null };
-      mockBuilder.then.mockImplementation(resolve => resolve(mockResponse));
+      mockBuilder.then.mockImplementationOnce((resolve: any) => resolve(mockResponse));
 
       const scores = await getLeaderboardScores('all');
       expect(mockBuilder.order).toHaveBeenCalledWith('score', { ascending: false });
@@ -191,7 +181,7 @@ describe('Database Integration Suite', () => {
     });
 
     it('getUserGameHistory should fetch history with normalization', async () => {
-      mockBuilder.then.mockImplementation(resolve => resolve({ data: [], error: null }));
+      mockBuilder.then.mockImplementationOnce((resolve: any) => resolve({ data: [], error: null }));
       await getUserGameHistory('TestUser');
       expect(mockBuilder.eq).toHaveBeenCalledWith('user_id', 'testuser');
     });
