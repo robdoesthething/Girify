@@ -146,7 +146,7 @@ const FeedbackForm: React.FC<FeedbackFormProps> = ({ username, onSuccess, onClos
     dispatch({ type: 'SET_ERROR', payload: null });
 
     dispatch({ type: 'SET_SUBMITTING', payload: true });
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
     await (submitFeedback as any)(username, feedback || '');
     dispatch({ type: 'SET_SUBMITTING', payload: false });
     onSuccess();

@@ -1,4 +1,3 @@
-/* eslint-disable no-magic-numbers */
 // ==================== TIME CONSTANTS ====================
 export const TIME = {
   ONE_SECOND: 1000,

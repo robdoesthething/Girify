@@ -300,7 +300,7 @@ export const getTeamLeaderboard = async (
         return null;
       }
       const k = key.toLowerCase();
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
       return DISTRICTS.find((d: any) => {
         const dId = d.id?.toLowerCase();
         const dTeam = d.teamName?.toLowerCase();

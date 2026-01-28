@@ -17,7 +17,7 @@ export interface DashboardMetrics {
 }
 
 const CACHE_KEY = 'admin_metrics_cache';
-// eslint-disable-next-line no-magic-numbers
+
 const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
 
 /**
@@ -36,7 +36,7 @@ export const getDashboardMetrics = async (forceRefresh = false): Promise<Dashboa
   }
 
   const now = new Date();
-  // eslint-disable-next-line no-magic-numbers
+
   const yesterday = new Date(now.getTime() - 24 * 60 * 60 * 1000);
   const yesterdayTs = Timestamp.fromDate(yesterday);
 

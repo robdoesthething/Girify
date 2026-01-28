@@ -5,6 +5,7 @@ import TopBar from '../../../components/TopBar';
 import { API_TIMEOUT_MS } from '../../../config/appConstants';
 import { useTheme } from '../../../context/ThemeContext';
 import { DISTRICTS } from '../../../data/districts';
+import { UI } from '../../../utils/constants';
 import { formatUsername, usernamesMatch } from '../../../utils/format';
 import {
   getLeaderboard,
@@ -98,6 +99,198 @@ const LeaderboardScreen: React.FC<LeaderboardScreenProps> = ({ currentUser }) =>
     { id: 'daily', label: t('daily') },
   ];
 
+  const renderContent = () => {
+    if (loading) {
+      return (
+        <div className="flex flex-col items-center justify-center py-20 opacity-50 space-y-4">
+          <div className="w-8 h-8 border-4 border-sky-500 border-t-transparent rounded-full animate-spin" />
+          <span className="text-xs uppercase tracking-widest font-bold font-inter">
+            {t('loadingRankings')}
+          </span>
+        </div>
+      );
+    }
+
+    if (error) {
+      return (
+        <div className="flex flex-col items-center justify-center py-20 text-center p-6">
+          <span className="text-4xl mb-4">⚠️</span>
+          <p className="font-bold text-red-400 mb-2 font-inter">{error}</p>
+          <button
+            onClick={loadScores}
+            className="px-4 py-2 bg-slate-200 dark:bg-slate-800 rounded-lg hover:opacity-80 transition-colors text-sm font-bold font-inter"
+            type="button"
+          >
+            Try Again
+          </button>
+        </div>
+      );
+    }
+
+    if (viewMode === 'teams') {
+      if (teamScores.length === 0) {
+        return (
+          <div className="flex flex-col items-center justify-center py-20 opacity-40">
+            <span className="text-4xl mb-4">📭</span>
+            <p className="font-bold font-inter">{t('noRecords')}</p>
+          </div>
+        );
+      }
+
+      return (
+        <div className="space-y-2 pb-10">
+          {teamScores.map((team, index) => {
+            const district = DISTRICTS.find(d => d.teamName === team.teamName);
+            return (
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: index * UI.ANIMATION.DURATION_FAST }}
+                key={team.id}
+                className={`flex items-center justify-between p-4 rounded-2xl border transition-all
+                  ${themeClasses(theme, 'bg-slate-800 border-slate-700', 'bg-white border-slate-200 shadow-sm')}
+                `}
+              >
+                <div className="flex items-center gap-4">
+                  <div
+                    className={`w-10 h-10 flex items-center justify-center rounded-full font-black text-sm relative overflow-hidden
+                      ${index === 0 ? 'bg-yellow-400' : index === 1 ? 'bg-slate-300' : index === 2 ? 'bg-amber-600' : 'bg-slate-100 dark:bg-slate-700'}
+                    `}
+                  >
+                    {district?.logo ? (
+                      <img
+                        src={district.logo}
+                        alt={team.teamName}
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      index + 1
+                    )}
+                  </div>
+                  <div>
+                    <div className="font-bold text-sm flex items-center gap-2 font-inter">
+                      {team.teamName}
+                    </div>
+                    <div className="text-[10px] opacity-50 font-mono flex items-center gap-2">
+                      <span>
+                        {team.memberCount} {team.memberCount === 1 ? 'player' : 'players'}
+                      </span>
+                      <span>•</span>
+                      <span>avg {team.avgScore.toLocaleString()} pts</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="text-right">
+                  <div className="font-black text-lg text-emerald-500 font-inter">
+                    {team.score.toLocaleString()}
+                  </div>
+                  <div className="text-[9px] font-bold opacity-40 uppercase font-inter">
+                    Total Points
+                  </div>
+                </div>
+              </motion.div>
+            );
+          })}
+        </div>
+      );
+    }
+
+    // Individual View
+    if (scores.length === 0) {
+      return (
+        <div className="flex flex-col items-center justify-center py-20 opacity-40">
+          <span className="text-4xl mb-4">📭</span>
+          <p className="font-bold font-inter">{t('noRecords')}</p>
+        </div>
+      );
+    }
+
+    return (
+      <div className="space-y-2 pb-10">
+        {scores.map((s, index) => {
+          let dateStr = 'Unknown';
+          try {
+            const ts = s.timestamp;
+            if (ts && typeof ts === 'object' && 'seconds' in ts) {
+              dateStr = new Date(ts.seconds * 1000).toLocaleDateString(undefined, {
+                month: 'short',
+                day: 'numeric',
+              });
+            } else if (typeof ts === 'number' || typeof ts === 'string') {
+              dateStr = new Date(ts).toLocaleDateString(undefined, {
+                month: 'short',
+                day: 'numeric',
+              });
+            }
+          } catch {
+            dateStr = '--';
+          }
+
+          const isMe = currentUser && usernamesMatch(s.username, currentUser);
+
+          return (
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: index * UI.ANIMATION.DURATION_FAST }}
+              key={s.id || index}
+              onClick={() => {
+                if (usernamesMatch(s.username, currentUser)) {
+                  navigate('/profile');
+                } else {
+                  navigate(`/user/${encodeURIComponent(s.username)}`);
+                }
+              }}
+              role="button"
+              tabIndex={0}
+              onKeyDown={e => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  if (usernamesMatch(s.username, currentUser)) {
+                    navigate('/profile');
+                  } else {
+                    navigate(`/user/${encodeURIComponent(s.username)}`);
+                  }
+                }
+              }}
+              className={`flex items-center justify-between p-4 rounded-2xl border cursor-pointer transition-all hover:scale-[1.02]
+                  ${isMe ? 'border-sky-500 bg-sky-500/10 shadow-lg shadow-sky-500/10' : themeClasses(theme, 'bg-slate-800 border-slate-700 hover:border-slate-600', 'bg-white border-slate-200 hover:border-sky-200 shadow-sm')}
+                `}
+            >
+              <div className="flex items-center gap-4">
+                <div
+                  className={`w-8 h-8 flex items-center justify-center rounded-full font-black text-sm relative overflow-hidden
+                    ${index === 0 ? 'bg-yellow-400 text-yellow-900' : index === 1 ? 'bg-slate-300 text-slate-900' : index === 2 ? 'bg-amber-600 text-white' : 'bg-slate-100 dark:bg-slate-700 opacity-50'}
+                  `}
+                >
+                  {index + 1}
+                </div>
+                <div>
+                  <div className="font-bold text-sm flex items-center gap-2 font-inter">
+                    {formatUsername(s.username)}
+                    {isMe && (
+                      <span className="text-[10px] bg-sky-500 text-white px-1.5 rounded-full font-inter">
+                        YOU
+                      </span>
+                    )}
+                  </div>
+                  <div className="text-[10px] opacity-50 font-mono">{dateStr}</div>
+                </div>
+              </div>
+
+              <div className="text-right">
+                <div className="font-black text-lg text-sky-500 font-inter">
+                  {s.score.toLocaleString()}
+                </div>
+                <div className="text-[9px] font-bold opacity-40 uppercase font-inter">Points</div>
+              </div>
+            </motion.div>
+          );
+        })}
+      </div>
+    );
+  };
+
   return (
     <div
       className={`fixed inset-0 w-full h-full flex flex-col overflow-hidden transition-colors duration-500 ${themeClasses(theme, 'bg-slate-900 text-white', 'bg-slate-50 text-slate-900')}`}
@@ -176,182 +369,7 @@ const LeaderboardScreen: React.FC<LeaderboardScreenProps> = ({ currentUser }) =>
             </div>
           </div>
 
-          <div className="flex-1">
-            {loading ? (
-              <div className="flex flex-col items-center justify-center py-20 opacity-50 space-y-4">
-                <div className="w-8 h-8 border-4 border-sky-500 border-t-transparent rounded-full animate-spin" />
-                <span className="text-xs uppercase tracking-widest font-bold font-inter">
-                  {t('loadingRankings')}
-                </span>
-              </div>
-            ) : error ? (
-              <div className="flex flex-col items-center justify-center py-20 text-center p-6">
-                <span className="text-4xl mb-4">⚠️</span>
-                <p className="font-bold text-red-400 mb-2 font-inter">{error}</p>
-                <button
-                  onClick={loadScores}
-                  className="px-4 py-2 bg-slate-200 dark:bg-slate-800 rounded-lg hover:opacity-80 transition-colors text-sm font-bold font-inter"
-                  type="button"
-                >
-                  Try Again
-                </button>
-              </div>
-            ) : viewMode === 'teams' ? (
-              // Teams View
-              teamScores.length === 0 ? (
-                <div className="flex flex-col items-center justify-center py-20 opacity-40">
-                  <span className="text-4xl mb-4">📭</span>
-                  <p className="font-bold font-inter">{t('noRecords')}</p>
-                </div>
-              ) : (
-                <div className="space-y-2 pb-10">
-                  {teamScores.map((team, index) => {
-                    const district = DISTRICTS.find(d => d.teamName === team.teamName);
-                    return (
-                      <motion.div
-                        initial={{ opacity: 0, y: 10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: index * 0.05 }}
-                        key={team.id}
-                        className={`flex items-center justify-between p-4 rounded-2xl border transition-all
-                          ${themeClasses(theme, 'bg-slate-800 border-slate-700', 'bg-white border-slate-200 shadow-sm')}
-                        `}
-                      >
-                        <div className="flex items-center gap-4">
-                          <div
-                            className={`w-10 h-10 flex items-center justify-center rounded-full font-black text-sm relative overflow-hidden
-                              ${index === 0 ? 'bg-yellow-400' : index === 1 ? 'bg-slate-300' : index === 2 ? 'bg-amber-600' : 'bg-slate-100 dark:bg-slate-700'}
-                            `}
-                          >
-                            {district?.logo ? (
-                              <img
-                                src={district.logo}
-                                alt={team.teamName}
-                                className="w-full h-full object-cover"
-                              />
-                            ) : (
-                              index + 1
-                            )}
-                          </div>
-                          <div>
-                            <div className="font-bold text-sm flex items-center gap-2 font-inter">
-                              {team.teamName}
-                            </div>
-                            <div className="text-[10px] opacity-50 font-mono flex items-center gap-2">
-                              <span>
-                                {team.memberCount} {team.memberCount === 1 ? 'player' : 'players'}
-                              </span>
-                              <span>•</span>
-                              <span>avg {team.avgScore.toLocaleString()} pts</span>
-                            </div>
-                          </div>
-                        </div>
-
-                        <div className="text-right">
-                          <div className="font-black text-lg text-emerald-500 font-inter">
-                            {team.score.toLocaleString()}
-                          </div>
-                          <div className="text-[9px] font-bold opacity-40 uppercase font-inter">
-                            Total Points
-                          </div>
-                        </div>
-                      </motion.div>
-                    );
-                  })}
-                </div>
-              )
-            ) : // Individual View
-            scores.length === 0 ? (
-              <div className="flex flex-col items-center justify-center py-20 opacity-40">
-                <span className="text-4xl mb-4">📭</span>
-                <p className="font-bold font-inter">{t('noRecords')}</p>
-              </div>
-            ) : (
-              <div className="space-y-2 pb-10">
-                {scores.map((s, index) => {
-                  let dateStr = 'Unknown';
-                  try {
-                    const ts = s.timestamp;
-                    if (ts && typeof ts === 'object' && 'seconds' in ts) {
-                      dateStr = new Date(ts.seconds * 1000).toLocaleDateString(undefined, {
-                        month: 'short',
-                        day: 'numeric',
-                      });
-                    } else if (typeof ts === 'number' || typeof ts === 'string') {
-                      dateStr = new Date(ts).toLocaleDateString(undefined, {
-                        month: 'short',
-                        day: 'numeric',
-                      });
-                    }
-                  } catch {
-                    dateStr = '--';
-                  }
-
-                  const isMe = currentUser && usernamesMatch(s.username, currentUser);
-
-                  return (
-                    <motion.div
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: index * 0.05 }}
-                      key={s.id || index}
-                      onClick={() => {
-                        if (usernamesMatch(s.username, currentUser)) {
-                          navigate('/profile');
-                        } else {
-                          navigate(`/user/${encodeURIComponent(s.username)}`);
-                        }
-                      }}
-                      role="button"
-                      tabIndex={0}
-                      onKeyDown={e => {
-                        if (e.key === 'Enter' || e.key === ' ') {
-                          if (usernamesMatch(s.username, currentUser)) {
-                            navigate('/profile');
-                          } else {
-                            navigate(`/user/${encodeURIComponent(s.username)}`);
-                          }
-                        }
-                      }}
-                      className={`flex items-center justify-between p-4 rounded-2xl border cursor-pointer transition-all hover:scale-[1.02]
-                          ${isMe ? 'border-sky-500 bg-sky-500/10 shadow-lg shadow-sky-500/10' : themeClasses(theme, 'bg-slate-800 border-slate-700 hover:border-slate-600', 'bg-white border-slate-200 hover:border-sky-200 shadow-sm')}
-                        `}
-                    >
-                      <div className="flex items-center gap-4">
-                        <div
-                          className={`w-8 h-8 flex items-center justify-center rounded-full font-black text-sm relative overflow-hidden
-                            ${index === 0 ? 'bg-yellow-400 text-yellow-900' : index === 1 ? 'bg-slate-300 text-slate-900' : index === 2 ? 'bg-amber-600 text-white' : 'bg-slate-100 dark:bg-slate-700 opacity-50'}
-                          `}
-                        >
-                          {index + 1}
-                        </div>
-                        <div>
-                          <div className="font-bold text-sm flex items-center gap-2 font-inter">
-                            {formatUsername(s.username)}
-                            {isMe && (
-                              <span className="text-[10px] bg-sky-500 text-white px-1.5 rounded-full font-inter">
-                                YOU
-                              </span>
-                            )}
-                          </div>
-                          <div className="text-[10px] opacity-50 font-mono">{dateStr}</div>
-                        </div>
-                      </div>
-
-                      <div className="text-right">
-                        <div className="font-black text-lg text-sky-500 font-inter">
-                          {s.score.toLocaleString()}
-                        </div>
-                        <div className="text-[9px] font-bold opacity-40 uppercase font-inter">
-                          Points
-                        </div>
-                      </div>
-                    </motion.div>
-                  );
-                })}
-              </div>
-            )}
-          </div>
+          <div className="flex-1">{renderContent()}</div>
         </div>
       </div>
     </div>

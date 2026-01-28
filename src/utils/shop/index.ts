@@ -60,7 +60,7 @@ export const getShopItems = async (forceRefresh = false): Promise<GroupedShopIte
   }
 
   // Start with local cosmetics.json as the base source of truth
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
   const rawCosmetics = cosmetics as Record<string, any[]>;
   const localItems: ShopItem[] = [
     ...(rawCosmetics.avatarFrames || []).map(i => ({ ...i, type: 'frame' as const })),
@@ -245,7 +245,6 @@ export const deleteShopItem = async (id: string): Promise<OperationResult> => {
  * @returns Promise resolving to sync stats { updated, errors }
  */
 export const syncWithLocal = async (): Promise<{ updated: number; errors: number }> => {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const rawCosmetics = cosmetics as Record<string, any[]>;
   const localItems: ShopItem[] = [
     ...(rawCosmetics.avatarFrames || []).map(i => ({ ...i, type: 'frame' as const })),

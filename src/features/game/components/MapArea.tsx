@@ -16,7 +16,7 @@ import { logger } from '../../../utils/logger';
 import { themeClasses, themeValue } from '../../../utils/themeUtils';
 
 // Constants
-/* eslint-disable no-magic-numbers */
+
 const MAP_PADDING: [number, number] = [80, 80];
 const MAP_PADDING_MOBILE: [number, number] = [40, 40];
 const ANIMATION_DURATION = 2.0;
@@ -191,7 +191,6 @@ interface MapAreaProps {
   onAnimationComplete?: () => void;
 }
 
-// eslint-disable-next-line max-lines-per-function
 const MapArea: React.FC<MapAreaProps> = ({
   currentStreet,
   hintStreets = [],

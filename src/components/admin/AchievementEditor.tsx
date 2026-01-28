@@ -1,4 +1,3 @@
-/* eslint-disable max-lines-per-function */
 import { motion } from 'framer-motion';
 import React, { useEffect, useState } from 'react';
 import { Achievement } from '../../data/achievements';
@@ -85,7 +84,6 @@ const AchievementEditor: React.FC<AchievementEditorProps> = ({
               <select
                 id="achieve-cat"
                 value={editingItem.category || 'starter'}
-                // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 onChange={e => setEditingItem({ ...editingItem, category: e.target.value as any })}
                 className="w-full px-3 py-2 rounded-lg border dark:bg-slate-800 dark:border-slate-700 outline-none focus:ring-2 focus:ring-sky-500 transition-all"
               >
@@ -107,7 +105,6 @@ const AchievementEditor: React.FC<AchievementEditorProps> = ({
               <select
                 id="achieve-type"
                 value={editingItem.type || 'merit'}
-                // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 onChange={e => setEditingItem({ ...editingItem, type: e.target.value as any })}
                 className="w-full px-3 py-2 rounded-lg border dark:bg-slate-800 dark:border-slate-700 outline-none focus:ring-2 focus:ring-sky-500 transition-all"
               >

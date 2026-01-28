@@ -7,6 +7,11 @@
 export const GAME = {
   SESSION_TTL_SECONDS: 3600, // 1 hour
   LEADERBOARD_FETCH_MULTIPLIER: 4,
+  MAX_LIVES: 5,
+  BASE_SCORE: 100,
+  BONUS_SCORE: 50,
+  PENALTY_SCORE: 20,
+  STREAK_BONUS_THRESHOLD: 3,
 };
 
 export const DEBUG = {
@@ -28,6 +33,10 @@ export const UI = {
   },
   ANIMATION: {
     DURATION_FAST: 0.05,
+    DURATION_MEDIUM: 0.1,
+    DURATION_SLOW: 0.3,
+    DELAY_SHORT: 0.1,
+    DELAY_TRANSITION_MS: 1500,
   },
 };
 

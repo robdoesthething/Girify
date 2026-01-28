@@ -26,7 +26,6 @@ const FriendRequests: React.FC<FriendRequestsProps> = ({ username }) => {
       }
       setLoading(true);
       try {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const data = await (getIncomingRequests as any)(username);
         setRequests(data as FriendRequest[]);
       } catch (error) {
@@ -41,7 +40,6 @@ const FriendRequests: React.FC<FriendRequestsProps> = ({ username }) => {
 
   const handleAccept = async (reqId: string) => {
     try {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       await (acceptFriendRequest as any)(reqId);
       // Remove from list
       setRequests(prev => prev.filter(r => r.id !== reqId));

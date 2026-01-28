@@ -289,7 +289,7 @@ export const setEquippedCosmetics = async (
   try {
     // Cast to expected Map type. Supabase defines it as Record<string, string>
     // But usage might include non-string values?
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
     await updateUser(normalizeUsername(username), { equipped_cosmetics: equipped as any });
   } catch (e) {
     console.error('Error setting equipped cosmetics:', e);

@@ -315,7 +315,6 @@ export async function updateBadgeStats(username: string, gameResult: GameResult)
     }
 
     if (Object.keys(dbUpdates).length > 0) {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       await upsertBadgeStats(username, dbUpdates as any);
     }
   } catch (e) {
@@ -369,7 +368,7 @@ export async function trackPanDistance(username: string, distanceKm: number): Pr
   try {
     const current = await getBadgeStats(username);
     const newTotal = (current?.totalPanKm || 0) + distanceKm;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
     await upsertBadgeStats(username, { total_pan_km: newTotal } as any);
   } catch (e) {
     console.error('[BadgeStats] Error tracking pan distance:', e);

@@ -1,4 +1,3 @@
-/* eslint-disable max-lines-per-function */
 import { AnimatePresence, motion } from 'framer-motion';
 import React, { useState } from 'react';
 import { getUserProfile, updateUserAsAdmin } from '../../utils/social';
@@ -14,7 +13,7 @@ interface AdminGameMasterProps {
 
 const AdminGameMaster: React.FC<AdminGameMasterProps> = ({ onNotify, confirm }) => {
   const [searchTerm, setSearchTerm] = useState('');
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
   const [targetUser, setTargetUser] = useState<any | null>(null);
   const [loading, setLoading] = useState(false);
   const [newItemId, setNewItemId] = useState('');

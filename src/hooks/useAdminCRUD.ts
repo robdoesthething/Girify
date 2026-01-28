@@ -2,8 +2,11 @@ import { useCallback, useState } from 'react';
 
 interface UseAdminCRUDProps<T> {
   initialItems?: T[];
+
   createFn?: (data: any) => Promise<any>;
+
   updateFn?: (id: string, data: any) => Promise<any>;
+
   deleteFn?: (id: string) => Promise<any>;
   refreshFn?: () => void;
 
