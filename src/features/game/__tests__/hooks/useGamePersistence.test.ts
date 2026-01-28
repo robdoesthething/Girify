@@ -1,10 +1,8 @@
 import { act, renderHook } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import * as gameService from '../../../../services/gameService';
-import * as supabaseService from '../../../../services/supabase';
 import type { GameStateObject } from '../../../../types/game';
 import * as dailyChallengeUtils from '../../../../utils/game/dailyChallenge';
-import * as socialUtils from '../../../../utils/social';
 import { useGamePersistence } from '../../hooks/useGamePersistence';
 
 // Mock dependencies
@@ -13,6 +11,9 @@ vi.mock('react-router-dom', () => ({
 }));
 
 vi.mock('../../../../services/gameService');
+vi.mock('../../../../services/db/games', () => ({
+  insertGameResult: vi.fn(),
+}));
 vi.mock('../../../../services/supabase', () => ({
   supabase: {
     from: vi.fn(() => ({
@@ -29,6 +30,29 @@ vi.mock('../../../../utils/shop/giuros', () => ({
 vi.mock('../../../../utils/stats', () => ({
   calculateStreak: vi.fn(() => ({ streak: 5, maxStreak: 10 })),
 }));
+vi.mock('../../../../hooks/useNotification', () => ({
+  useNotification: () => ({
+    notify: vi.fn(),
+  }),
+}));
+
+vi.mock('../../../../services/db/quests', () => ({
+  checkAndProgressQuests: vi.fn(() => Promise.resolve([])),
+}));
+
+const { mockProcessReferrals, mockUpdateStreaks } = vi.hoisted(() => ({
+  mockProcessReferrals: vi.fn(),
+  mockUpdateStreaks: vi.fn(),
+}));
+
+// Mock new hooks
+vi.mock('../../hooks/useGameReferrals', () => ({
+  useGameReferrals: () => ({ processReferrals: mockProcessReferrals }),
+}));
+vi.mock('../../hooks/useGameStreaks', () => ({
+  useGameStreaks: () => ({ updateStreaks: mockUpdateStreaks }),
+}));
+
 vi.mock('../../../../hooks/useAsyncOperation', () => ({
   useAsyncOperation: () => ({
     execute: (fn: () => Promise<void>) => fn(),
@@ -38,6 +62,7 @@ vi.mock('../../../../hooks/useAsyncOperation', () => ({
 }));
 
 describe('useGamePersistence Integration Tests', () => {
+  // ... (keep mockGameState)
   const mockGameState: GameStateObject = {
     username: 'testuser',
     score: 7500,
@@ -109,8 +134,6 @@ describe('useGamePersistence Integration Tests', () => {
 
     vi.spyOn(dailyChallengeUtils, 'markTodayAsPlayed').mockReturnValue(undefined);
     vi.spyOn(dailyChallengeUtils, 'getTodaySeed').mockReturnValue(20260124);
-    vi.spyOn(socialUtils, 'updateUserGameStats').mockResolvedValue(undefined);
-    vi.spyOn(socialUtils, 'getReferrer').mockResolvedValue(null);
 
     const { result } = renderHook(() => useGamePersistence());
 
@@ -120,7 +143,9 @@ describe('useGamePersistence Integration Tests', () => {
 
     expect(gameService.endGame).toHaveBeenCalled();
     expect(dailyChallengeUtils.markTodayAsPlayed).toHaveBeenCalled();
-    expect(socialUtils.updateUserGameStats).toHaveBeenCalled();
+    // Sub-hooks should be called
+    expect(mockProcessReferrals).toHaveBeenCalledWith(mockGameState.username);
+    expect(mockUpdateStreaks).toHaveBeenCalled();
   });
 
   it('should fallback to Supabase when Redis fails', async () => {
@@ -130,15 +155,9 @@ describe('useGamePersistence Integration Tests', () => {
       error: 'Redis connection failed',
     });
 
-    const mockSupabaseInsert = vi.fn(() => ({ error: null }));
-    vi.spyOn(supabaseService.supabase, 'from').mockReturnValue({
-      insert: mockSupabaseInsert,
-    } as any);
-
-    vi.spyOn(dailyChallengeUtils, 'markTodayAsPlayed').mockReturnValue(undefined);
-    vi.spyOn(dailyChallengeUtils, 'getTodaySeed').mockReturnValue(20260124);
-    vi.spyOn(socialUtils, 'updateUserGameStats').mockResolvedValue(undefined);
-    vi.spyOn(socialUtils, 'getReferrer').mockResolvedValue(null);
+    const { insertGameResult } = await import('../../../../services/db/games');
+    // @ts-ignore
+    insertGameResult.mockResolvedValue({ success: true });
 
     const { result } = renderHook(() => useGamePersistence());
 
@@ -147,7 +166,7 @@ describe('useGamePersistence Integration Tests', () => {
     });
 
     expect(gameService.endGame).toHaveBeenCalled();
-    expect(mockSupabaseInsert).toHaveBeenCalledWith(
+    expect(insertGameResult).toHaveBeenCalledWith(
       expect.objectContaining({
         user_id: 'testuser',
         score: 7500,
@@ -156,28 +175,10 @@ describe('useGamePersistence Integration Tests', () => {
     );
   });
 
-  it('should calculate average time correctly', async () => {
-    vi.spyOn(gameService, 'endGame').mockResolvedValue({ success: true });
-    vi.spyOn(dailyChallengeUtils, 'markTodayAsPlayed').mockReturnValue(undefined);
-    vi.spyOn(dailyChallengeUtils, 'getTodaySeed').mockReturnValue(20260124);
-    vi.spyOn(socialUtils, 'updateUserGameStats').mockResolvedValue(undefined);
-    vi.spyOn(socialUtils, 'getReferrer').mockResolvedValue(null);
-
-    const { result } = renderHook(() => useGamePersistence());
-
-    await act(async () => {
-      await result.current.saveGameResults(mockGameState);
-    });
-
-    // Average time calculation tested implicitly through game saving
-  });
-
   it('should store game history in local storage', async () => {
     vi.spyOn(gameService, 'endGame').mockResolvedValue({ success: true });
     vi.spyOn(dailyChallengeUtils, 'markTodayAsPlayed').mockReturnValue(undefined);
     vi.spyOn(dailyChallengeUtils, 'getTodaySeed').mockReturnValue(20260124);
-    vi.spyOn(socialUtils, 'updateUserGameStats').mockResolvedValue(undefined);
-    vi.spyOn(socialUtils, 'getReferrer').mockResolvedValue(null);
 
     const { result } = renderHook(() => useGamePersistence());
 
@@ -191,14 +192,10 @@ describe('useGamePersistence Integration Tests', () => {
     );
   });
 
-  it('should award bonuses to referred users', async () => {
+  it('should process referrals', async () => {
     vi.spyOn(gameService, 'endGame').mockResolvedValue({ success: true });
     vi.spyOn(dailyChallengeUtils, 'markTodayAsPlayed').mockReturnValue(undefined);
     vi.spyOn(dailyChallengeUtils, 'getTodaySeed').mockReturnValue(20260124);
-    vi.spyOn(socialUtils, 'updateUserGameStats').mockResolvedValue(undefined);
-    vi.spyOn(socialUtils, 'getReferrer').mockResolvedValue('referrerUser');
-
-    const { awardReferralBonus } = await import('../../../../utils/shop/giuros');
 
     const { result } = renderHook(() => useGamePersistence());
 
@@ -206,7 +203,7 @@ describe('useGamePersistence Integration Tests', () => {
       await result.current.saveGameResults(mockGameState);
     });
 
-    expect(awardReferralBonus).toHaveBeenCalledWith('referrerUser');
+    expect(mockProcessReferrals).toHaveBeenCalledWith('testuser');
   });
 
   it('should handle missing username gracefully', async () => {
@@ -225,18 +222,14 @@ describe('useGamePersistence Integration Tests', () => {
       await result.current.saveGameResults(stateWithoutUsername);
     });
 
-    // Should not crash, should handle gracefully
     expect(gameService.endGame).not.toHaveBeenCalled();
+    expect(mockProcessReferrals).not.toHaveBeenCalled();
   });
 
-  it('should calculate streak correctly', async () => {
+  it('should update streaks', async () => {
     vi.spyOn(gameService, 'endGame').mockResolvedValue({ success: true });
     vi.spyOn(dailyChallengeUtils, 'markTodayAsPlayed').mockReturnValue(undefined);
     vi.spyOn(dailyChallengeUtils, 'getTodaySeed').mockReturnValue(20260124);
-    vi.spyOn(socialUtils, 'updateUserGameStats').mockResolvedValue(undefined);
-    vi.spyOn(socialUtils, 'getReferrer').mockResolvedValue(null);
-
-    const { calculateStreak } = await import('../../../../utils/stats');
 
     const { result } = renderHook(() => useGamePersistence());
 
@@ -244,6 +237,6 @@ describe('useGamePersistence Integration Tests', () => {
       await result.current.saveGameResults(mockGameState);
     });
 
-    expect(calculateStreak).toHaveBeenCalled();
+    expect(mockUpdateStreaks).toHaveBeenCalledWith(mockGameState.username, mockGameState.score);
   });
 });

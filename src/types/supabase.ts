@@ -64,3 +64,17 @@ export type GameResultRow = Tables['game_results']['Row'];
 
 // Admins
 export type AdminRow = Tables['admins']['Row'];
+
+// Quests (QuestRow already defined above)
+// export type QuestRow = Tables['quests']['Row'];
+
+// User Quests (Manual definition until codegen update)
+export interface UserQuestRow {
+  id: number;
+  username: string;
+  quest_id: number;
+  progress: number;
+  is_completed: boolean;
+  is_claimed: boolean;
+  updated_at: string | null;
+}

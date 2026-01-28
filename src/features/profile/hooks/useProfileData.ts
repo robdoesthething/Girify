@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import { GameHistory, UserProfile } from '../../../types/user';
+import { DATE } from '../../../utils/constants';
 import { normalizeUsername } from '../../../utils/format';
 import { getShopItems, ShopItem } from '../../../utils/shop';
 import { getEquippedCosmetics, getGiuros } from '../../../utils/shop/giuros';
@@ -69,10 +70,12 @@ export const useProfileData = (username: string): UseProfileDataResult => {
         } else {
           // Fallback to date number if timestamp missing
           const dStr = h.date?.toString() || '';
-          if (dStr.length === 8) {
-            const y = parseInt(dStr.slice(0, 4), 10);
-            const m = parseInt(dStr.slice(4, 6), 10) - 1;
-            const d = parseInt(dStr.slice(6, 8), 10);
+          if (dStr.length === DATE.PARSING.YYYYMMDD_LENGTH) {
+            const y = parseInt(dStr.slice(0, DATE.PARSING.YEAR_LEN), DATE.PARSING.BASE_10);
+            const mStart = DATE.PARSING.YEAR_LEN;
+            const mEnd = mStart + DATE.PARSING.MONTH_LEN;
+            const m = parseInt(dStr.slice(mStart, mEnd), DATE.PARSING.BASE_10) - 1;
+            const d = parseInt(dStr.slice(mEnd), DATE.PARSING.BASE_10);
             ts = new Date(y, m, d).getTime();
           }
         }

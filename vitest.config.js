@@ -34,6 +34,12 @@ export default defineConfig({
         '**/__tests__/**',
         'e2e/**',
       ],
+      thresholds: {
+        lines: 10,
+        functions: 10,
+        branches: 10,
+        statements: 10,
+      },
     },
   },
   resolve: {

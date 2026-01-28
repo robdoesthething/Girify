@@ -3,16 +3,17 @@ import { useNavigate } from 'react-router-dom';
 import { STORAGE_KEYS, TIME } from '../../../config/constants';
 import { shouldPromptFeedback } from '../../../config/gameConfig';
 import { useAsyncOperation } from '../../../hooks/useAsyncOperation';
+import { useNotification } from '../../../hooks/useNotification';
 import { insertGameResult } from '../../../services/db/games';
+import { checkAndProgressQuests } from '../../../services/db/quests';
 import { endGame } from '../../../services/gameService';
 import { GameStateObject, QuizResult } from '../../../types/game';
 import { GameHistory } from '../../../types/user';
 import { debugLog } from '../../../utils/debug';
 import { getTodaySeed, markTodayAsPlayed } from '../../../utils/game/dailyChallenge';
-import { awardChallengeBonus, awardReferralBonus } from '../../../utils/shop/giuros';
-import { getReferrer, updateUserGameStats } from '../../../utils/social';
-import { calculateStreak } from '../../../utils/stats';
 import { storage } from '../../../utils/storage';
+import { useGameReferrals } from './useGameReferrals';
+import { useGameStreaks } from './useGameStreaks';
 
 /**
  * Fallback function to save score directly to Supabase without Redis
@@ -57,6 +58,9 @@ const fallbackSaveScore = async (state: GameStateObject, avgTime: number): Promi
 export const useGamePersistence = () => {
   const navigate = useNavigate();
   const { execute } = useAsyncOperation();
+  const { notify } = useNotification();
+  const { processReferrals } = useGameReferrals();
+  const { updateStreaks } = useGameStreaks();
 
   const saveGameResults = useCallback(
     (state: GameStateObject) => {
@@ -118,26 +122,24 @@ export const useGamePersistence = () => {
               await fallbackSaveScore(state, Number(localRecord.avgTime));
             }
 
-            const historyForStreak = storage.get<GameHistory[]>(STORAGE_KEYS.HISTORY, []);
-            const streak = calculateStreak(
-              historyForStreak.map(h => ({ ...h, date: Number(h.date) }))
-            );
-            const totalScore = historyForStreak.reduce(
-              (acc: number, h: GameHistory) => acc + (h.score || 0),
-              0
-            );
+            // Update stats & streaks
+            await updateStreaks(state.username, state.score);
 
-            await updateUserGameStats(state.username, {
-              streak,
-              totalScore,
-              lastPlayDate: String(getTodaySeed()),
-            });
+            // Check referrals
+            await processReferrals(state.username);
 
-            await awardChallengeBonus(state.username, streak);
-
-            const referrer = await getReferrer(state.username);
-            if (referrer) {
-              await awardReferralBonus(referrer);
+            // Check Quests
+            try {
+              const completedQuests = await checkAndProgressQuests(state.username, state);
+              if (completedQuests.length > 0) {
+                completedQuests.forEach(title => {
+                  if (notify) {
+                    notify(`Quest Completed: ${title}`, 'success', 5000);
+                  }
+                });
+              }
+            } catch (err) {
+              console.error('Quest check failed', err);
             }
 
             // Check for feedback prompt
@@ -152,7 +154,7 @@ export const useGamePersistence = () => {
         { loadingKey: 'save-game', errorMessage: 'Failed to save game results' }
       );
     },
-    [navigate, execute]
+    [navigate, execute, notify, processReferrals, updateStreaks]
   );
 
   return { saveGameResults };

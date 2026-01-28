@@ -4,6 +4,7 @@ import { useGameContext } from '../../../context/GameContext';
 import { useTheme } from '../../../context/ThemeContext';
 import { displayUsername } from '../../../utils/format';
 import { themeClasses } from '../../../utils/themeUtils';
+import { QuestList } from '../../quests/components/QuestList';
 
 const PlayOverlay: FC = () => {
   const { theme, t } = useTheme();
@@ -40,6 +41,14 @@ const PlayOverlay: FC = () => {
             {handlers.hasPlayedToday() ? t('replay') || 'Replay' : t('play') || 'Play'}
           </span>
         </button>
+        <div className="mt-8 w-full max-w-sm">
+          <h3
+            className={`text-sm font-bold uppercase mb-2 ${theme === 'dark' ? 'text-slate-400' : 'text-slate-500'}`}
+          >
+            {t('todaysChallenge') || "Today's Challenge"}
+          </h3>
+          <QuestList username={state.username || ''} />
+        </div>
       </div>
     </div>
   );

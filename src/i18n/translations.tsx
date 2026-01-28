@@ -292,7 +292,16 @@ const translations: Translations = {
     members: 'Members',
     totalScore: 'Total Score',
     avgScore: 'Avg Score',
+
     team: 'Team',
+
+    // Quests
+    noActiveQuests: 'No active quests',
+    completed: 'Completed',
+    claimed: 'Claimed',
+    claim: 'Claim',
+    inProgress: 'Active',
+    quests: 'Quests',
   },
 
   es: {
@@ -530,8 +539,16 @@ const translations: Translations = {
     loadingTeamStats: 'Cargando estadísticas...',
     members: 'Miembros',
     totalScore: 'Puntuación Total',
-    avgScore: 'Puntuación Media',
+
     team: 'Equipo',
+
+    // Quests
+    noActiveQuests: 'No hay retos activos',
+    completed: 'Completado',
+    claimed: 'Reclamado',
+    claim: 'Reclamar',
+    inProgress: 'En Progreso',
+    quests: 'Retos',
   },
 
   ca: {
@@ -770,8 +787,16 @@ const translations: Translations = {
     loadingTeamStats: 'Carregant estadístiques...',
     members: 'Membres',
     totalScore: 'Puntuació Total',
-    avgScore: 'Puntuació Mitjana',
+
     team: 'Equip',
+
+    // Quests
+    noActiveQuests: 'No hi ha reptes actius',
+    completed: 'Completat',
+    claimed: 'Reclamat',
+    claim: 'Reclamar',
+    inProgress: 'En Progrés',
+    quests: 'Reptes',
   },
 };
 
