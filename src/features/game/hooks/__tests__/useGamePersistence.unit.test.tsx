@@ -39,6 +39,14 @@ vi.mock('../../../../hooks/useAsyncOperation', () => ({
   }),
 }));
 
+vi.mock('../../../../hooks/useNotification', () => ({
+  useNotification: () => ({
+    showSuccess: vi.fn(),
+    showError: vi.fn(),
+    showInfo: vi.fn(),
+  }),
+}));
+
 describe('useGamePersistence', () => {
   beforeEach(() => {
     vi.clearAllMocks();
