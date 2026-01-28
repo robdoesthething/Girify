@@ -6,29 +6,32 @@ import { checkAndProgressQuests, getDailyQuests } from '../quests';
 import { getShopItems } from '../shop';
 import { getUserByUsername, updateUser } from '../users';
 
-// 1. Create a chainable builder mock
-const mockBuilder = {
-  select: vi.fn().mockReturnThis(),
-  insert: vi.fn().mockReturnThis(),
-  update: vi.fn().mockReturnThis(),
-  upsert: vi.fn().mockReturnThis(),
-  delete: vi.fn().mockReturnThis(),
-  eq: vi.fn().mockReturnThis(),
-  order: vi.fn().mockReturnThis(),
-  limit: vi.fn().mockReturnThis(),
-  gte: vi.fn().mockReturnThis(),
-  gt: vi.fn().mockReturnThis(),
-  lte: vi.fn().mockReturnThis(),
-  lt: vi.fn().mockReturnThis(),
-  in: vi.fn().mockReturnThis(),
-  single: vi.fn().mockReturnThis(), // .single() returns 'this' in chain, but usually ends it. We'll handle return values via .then()
-  then: vi.fn(resolve => resolve({ data: [], error: null })), // Default resolution
-};
+// 1. Create a chainable builder using vi.hoisted so it's available in vi.mock
+const { mockBuilder } = vi.hoisted(() => {
+  const builder: any = {
+    select: vi.fn().mockReturnThis(),
+    insert: vi.fn().mockReturnThis(),
+    update: vi.fn().mockReturnThis(),
+    upsert: vi.fn().mockReturnThis(),
+    delete: vi.fn().mockReturnThis(),
+    eq: vi.fn().mockReturnThis(),
+    order: vi.fn().mockReturnThis(),
+    limit: vi.fn().mockReturnThis(),
+    gte: vi.fn().mockReturnThis(),
+    gt: vi.fn().mockReturnThis(),
+    lte: vi.fn().mockReturnThis(),
+    lt: vi.fn().mockReturnThis(),
+    in: vi.fn().mockReturnThis(),
+    single: vi.fn().mockReturnThis(),
+    then: vi.fn(resolve => resolve({ data: [], error: null })),
+  };
+  return { mockBuilder: builder };
+});
 
 // 2. Mock the supabase module
 vi.mock('../../supabase', () => ({
   supabase: {
-    from: vi.fn(() => mockBuilder), // Always return our chainable builder
+    from: vi.fn(() => mockBuilder),
     rpc: vi.fn().mockResolvedValue({ data: null, error: null }),
   },
 }));
@@ -36,10 +39,11 @@ vi.mock('../../supabase', () => ({
 describe('Database Integration Suite', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    // Default: chainable methods return 'this' (the builder itself)
-    // We don't need to re-mockReturnThis() because we defined it in step 1.
-    // However, we DO need to reset 'then' implementation if tests override it.
+    // Re-establish defaults in case tests overrode them
     mockBuilder.then.mockImplementation((resolve: any) => resolve({ data: [], error: null }));
+
+    // Explicitly ensure 'this' returns the builder for all methods
+    // (mockReturnThis() typically persists, but good to be safe)
   });
 
   afterEach(() => {
@@ -49,7 +53,6 @@ describe('Database Integration Suite', () => {
   describe('Users Service', () => {
     it('getUserByUsername should fetch user with normalized username', async () => {
       const mockUser = { id: '1', username: 'testuser' };
-      // Arrange: .then() simulates the await result of the query chain
       mockBuilder.then.mockImplementationOnce((resolve: any) =>
         resolve({ data: mockUser, error: null })
       );
@@ -115,22 +118,18 @@ describe('Database Integration Suite', () => {
 
   describe('Quests Service', () => {
     it('getDailyQuests should fetch quests and progress', async () => {
-      mockBuilder.then.mockImplementation((resolve: any) => {
-        return resolve({
-          data: [
-            {
-              id: 1,
-              title: 'Quest 1',
-              progress: { progress: 10, is_claimed: false },
-            },
-          ],
-          error: null,
-        });
-      });
+      // 1. Fetch active quests
+      const mockQuests = [{ id: 1, title: 'Quest 1' }];
+      // 2. Fetch user progress
+      const mockProgress = [{ quest_id: 1, progress: 10, is_claimed: false }];
+
+      mockBuilder.then
+        .mockImplementationOnce((resolve: any) => resolve({ data: mockQuests, error: null }))
+        .mockImplementationOnce((resolve: any) => resolve({ data: mockProgress, error: null }));
 
       const result = await getDailyQuests('User1');
       expect(result.length).toBe(1);
-      expect((result[0]?.progress as any)?.progress).toBe(10);
+      expect(result[0]?.progress?.progress).toBe(10);
     });
 
     it('checkAndProgressQuests should update progress', async () => {
@@ -149,12 +148,13 @@ describe('Database Integration Suite', () => {
       ];
 
       // checkAndProgressQuests calls:
-      // 1. getDailyQuests (read)
-      // 2. updateQuestProgress (upsert)
-
+      // 1. getDailyQuests (2 queries)
       mockBuilder.then
-        .mockImplementationOnce((resolve: any) => resolve({ data: mockQuests, error: null })) // get
-        .mockImplementationOnce((resolve: any) => resolve({ error: null })); // upsert
+        .mockImplementationOnce((resolve: any) => resolve({ data: mockQuests, error: null })) // get quests
+        .mockImplementationOnce((resolve: any) => resolve({ data: [], error: null })); // get progress (empty)
+
+      // 2. upsert progress
+      mockBuilder.then.mockImplementationOnce((resolve: any) => resolve({ error: null }));
 
       await checkAndProgressQuests('User1', mockState);
 
