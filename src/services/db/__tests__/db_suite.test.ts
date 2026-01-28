@@ -6,17 +6,13 @@ import { checkAndProgressQuests, getDailyQuests } from '../quests';
 import { getShopItems } from '../shop';
 import { getUserByUsername, updateUser } from '../users';
 
-vi.mock('@supabase/supabase-js', () => ({
-  createClient: vi.fn(() => ({
+// Global Mocks
+vi.mock('../../supabase', () => ({
+  supabase: {
     from: vi.fn(),
     rpc: vi.fn(),
-  })),
+  },
 }));
-
-// Global Mocks
-// Remove module mocks to ensure we use the real imported objects for spying
-// vi.mock('../../supabase', ...);
-// vi.mock('../utils', ...);
 
 describe('Database Integration Suite', () => {
   const mockBuilder = {
@@ -47,6 +43,7 @@ describe('Database Integration Suite', () => {
     });
 
     // Setup the mock client return values
+    // Since we mocked the module, 'supabase' object IS the mock object with vi.fn() methods
     (supabase.from as any).mockReturnValue(mockBuilder);
     (supabase.rpc as any).mockResolvedValue({ data: null, error: null } as any);
   });
