@@ -84,6 +84,8 @@ export async function getLeaderboardScores(
 export async function getUserGameHistory(username: string, limit = 30): Promise<GameResultRow[]> {
   const normalizedUsername = normalizeUsername(username);
 
+  logger.info(`Fetching game history for: ${normalizedUsername} (limit: ${limit})`);
+
   const data = await executeQuery<GameResultRow[]>(
     supabase
       .from('game_results')
@@ -93,6 +95,8 @@ export async function getUserGameHistory(username: string, limit = 30): Promise<
       .limit(limit),
     'getUserGameHistory'
   );
+
+  logger.info(`Retrieved ${data?.length || 0} game records for ${normalizedUsername}`);
 
   return data || [];
 }
