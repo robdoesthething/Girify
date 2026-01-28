@@ -6,6 +6,11 @@ import { NotificationProvider } from './components/NotificationSystem';
 import { LoadingProvider } from './context/LoadingContext';
 import { ThemeProvider } from './context/ThemeContext';
 
+// Load debug utilities in development
+if (import.meta.env.DEV) {
+  import('./utils/debug');
+}
+
 const App: React.FC = () => {
   return (
     <ThemeProvider>

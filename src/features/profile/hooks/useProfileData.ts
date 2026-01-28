@@ -40,11 +40,13 @@ export const useProfileData = (username: string): UseProfileDataResult => {
 
   const loadProfile = useCallback(async () => {
     if (!normalizedUsername) {
+      console.warn('[Profile] No username provided');
       return;
     }
 
     try {
       setLoading(true);
+      console.warn(`[Profile] Loading data for: ${normalizedUsername}`);
       const [count, bal, equipped, history, profile, shopItems] = await Promise.all([
         getFriendCount(normalizedUsername),
         getGiuros(normalizedUsername),
@@ -53,6 +55,7 @@ export const useProfileData = (username: string): UseProfileDataResult => {
         getUserProfile(normalizedUsername),
         getShopItems(),
       ]);
+      console.warn(`[Profile] Loaded history: ${history?.length || 0} games`);
 
       setFriendCount(count);
       setGiuros(bal);

@@ -11,6 +11,7 @@ import { GameStateObject, QuizResult } from '../../../types/game';
 import { GameHistory } from '../../../types/user';
 import { debugLog } from '../../../utils/debug';
 import { getTodaySeed, markTodayAsPlayed } from '../../../utils/game/dailyChallenge';
+import { publishActivity } from '../../../utils/social/publishActivity';
 import { storage } from '../../../utils/storage';
 import { useGameReferrals } from './useGameReferrals';
 import { useGameStreaks } from './useGameStreaks';
@@ -120,6 +121,17 @@ export const useGamePersistence = () => {
               );
               // No gameId = no Redis session, use fallback directly
               await fallbackSaveScore(state, Number(localRecord.avgTime));
+            }
+
+            // Publish activity to friends feed
+            try {
+              await publishActivity(state.username, 'daily_score', {
+                score: state.score,
+                time: Number(localRecord.avgTime),
+              });
+              debugLog(`[Activity] Published game completion for ${state.username}`);
+            } catch (err) {
+              console.error('[Activity] Failed to publish game activity:', err);
             }
 
             // Update stats & streaks

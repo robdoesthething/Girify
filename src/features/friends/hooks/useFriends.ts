@@ -179,9 +179,15 @@ export function useFriends(username: string) {
           dispatch({ type: 'SET_FEED', payload: [] });
           return;
         }
+        console.warn(`[Friends] Loading feed for ${username}`);
         const list = await getFriends(username);
+        console.warn(
+          `[Friends] Found ${list.length} friends:`,
+          list.map(f => f.username)
+        );
         const currentOffset = loadMore ? feedOffsetRef.current : 0;
         const activity = await getFriendFeed(list, 20, currentOffset);
+        console.warn(`[Friends] Loaded ${activity.length} feed items`);
 
         if (loadMore) {
           dispatch({ type: 'APPEND_FEED', payload: activity as unknown as FeedItem[] });

@@ -17,16 +17,20 @@ export async function getActivityFeed(
   offset = 0
 ): Promise<ActivityFeedRow[]> {
   if (usernames.length === 0) {
+    console.warn('[DB] getActivityFeed: No usernames provided');
     return [];
   }
+
+  const normalizedUsernames = usernames.map(u => u.toLowerCase());
+  console.warn(
+    `[DB] getActivityFeed: Querying for ${normalizedUsernames.length} users:`,
+    normalizedUsernames
+  );
 
   const { data, error } = await supabase
     .from('activity_feed')
     .select('*')
-    .in(
-      'username',
-      usernames.map(u => u.toLowerCase())
-    )
+    .in('username', normalizedUsernames)
     .order('created_at', { ascending: false })
     .range(offset, offset + limit - 1);
 
@@ -34,6 +38,8 @@ export async function getActivityFeed(
     console.error('[DB] getActivityFeed error:', error.message);
     return [];
   }
+
+  console.warn(`[DB] getActivityFeed: Retrieved ${data?.length || 0} activities`);
   return data || [];
 }
 

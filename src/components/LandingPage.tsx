@@ -139,7 +139,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onLogin, theme }) => {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: idx * 0.1 + 0.3 }}
-                className="glass-panel p-8 hover:bg-white/15 dark:hover:bg-white/5 transition-all duration-300 group cursor-pointer"
+                className="glass-panel p-8 transition-all duration-300 group"
               >
                 <div className="text-5xl mb-5 transform group-hover:scale-110 transition-transform duration-300">
                   {feature.emoji}
@@ -179,7 +179,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onLogin, theme }) => {
                     transition={{ delay: i * 0.05 }}
                     className="flex-shrink-0 snap-center"
                   >
-                    <div className="w-48 p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-lg flex flex-col items-center gap-4 group hover:scale-105 transition-transform duration-300">
+                    <div className="w-48 p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-lg flex flex-col items-center gap-4">
                       <div
                         className={`w-24 h-24 rounded-full bg-gradient-to-br ${district.color} p-1 shadow-inner relative overflow-hidden`}
                       >

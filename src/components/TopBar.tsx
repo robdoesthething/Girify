@@ -58,7 +58,7 @@ backdrop-blur-md border-b ${themeClasses(theme, 'border-slate-600', 'border-slat
         <div className="flex items-center gap-4 md:gap-4">
           <button
             onClick={() => setMenuOpen(!menuOpen)}
-            className={`p-2 rounded-full transition-colors shrink-0 ${themeClasses(theme, 'hover:bg-neutral-300', 'hover:bg-slate-100')} `}
+            className={`p-2.5 rounded-full transition-colors shrink-0 ${themeClasses(theme, 'hover:bg-neutral-300', 'hover:bg-slate-100')} `}
             type="button"
             aria-label="Open menu"
             aria-expanded={menuOpen}
@@ -108,7 +108,7 @@ backdrop-blur-md border-b ${themeClasses(theme, 'border-slate-600', 'border-slat
                 <h2 className="text-xl font-bold">{t('menu')}</h2>
                 <button
                   onClick={() => setMenuOpen(false)}
-                  className="p-1 hover:opacity-75"
+                  className="p-2.5 hover:opacity-75"
                   type="button"
                   aria-label="Close menu"
                 >
