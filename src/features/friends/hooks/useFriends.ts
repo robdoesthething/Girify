@@ -130,11 +130,19 @@ export function useFriends(username: string) {
 
   const loadFriends = useCallback(async () => {
     dispatch({ type: 'SET_LOADING', payload: true });
+    dispatch({ type: 'SET_ERROR', payload: null });
     try {
+      if (!username || username.trim() === '') {
+        console.warn('[Friends] Cannot load friends: username is empty');
+        dispatch({ type: 'SET_ERROR', payload: 'Please log in to view friends' });
+        dispatch({ type: 'SET_FRIENDS', payload: [] });
+        return;
+      }
       const list = (await getFriends(username)) as Friend[];
       dispatch({ type: 'SET_FRIENDS', payload: list });
     } catch (e) {
-      console.error(e);
+      console.error('[Friends] Error loading friends:', e);
+      dispatch({ type: 'SET_ERROR', payload: 'Failed to load friends. Please try again.' });
     } finally {
       dispatch({ type: 'SET_LOADING', payload: false });
     }
@@ -142,11 +150,19 @@ export function useFriends(username: string) {
 
   const loadRequests = useCallback(async () => {
     dispatch({ type: 'SET_LOADING', payload: true });
+    dispatch({ type: 'SET_ERROR', payload: null });
     try {
+      if (!username || username.trim() === '') {
+        console.warn('[Friends] Cannot load requests: username is empty');
+        dispatch({ type: 'SET_ERROR', payload: 'Please log in to view friend requests' });
+        dispatch({ type: 'SET_REQUESTS', payload: [] });
+        return;
+      }
       const list = await getIncomingRequests(username);
       dispatch({ type: 'SET_REQUESTS', payload: list });
     } catch (e) {
-      console.error(e);
+      console.error('[Friends] Error loading requests:', e);
+      dispatch({ type: 'SET_ERROR', payload: 'Failed to load friend requests. Please try again.' });
     } finally {
       dispatch({ type: 'SET_LOADING', payload: false });
     }
@@ -155,7 +171,14 @@ export function useFriends(username: string) {
   const loadFeed = useCallback(
     async (loadMore = false) => {
       dispatch({ type: 'SET_LOADING', payload: true });
+      dispatch({ type: 'SET_ERROR', payload: null });
       try {
+        if (!username || username.trim() === '') {
+          console.warn('[Friends] Cannot load feed: username is empty');
+          dispatch({ type: 'SET_ERROR', payload: 'Please log in to view activity feed' });
+          dispatch({ type: 'SET_FEED', payload: [] });
+          return;
+        }
         const list = await getFriends(username);
         const currentOffset = loadMore ? feedOffsetRef.current : 0;
         const activity = await getFriendFeed(list, 20, currentOffset);
@@ -166,7 +189,8 @@ export function useFriends(username: string) {
           dispatch({ type: 'SET_FEED', payload: activity as unknown as FeedItem[] });
         }
       } catch (e) {
-        console.error(e);
+        console.error('[Friends] Error loading feed:', e);
+        dispatch({ type: 'SET_ERROR', payload: 'Failed to load activity feed. Please try again.' });
       } finally {
         dispatch({ type: 'SET_LOADING', payload: false });
       }

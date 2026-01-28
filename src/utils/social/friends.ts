@@ -169,6 +169,7 @@ export const sendFriendRequest = async (
  */
 export const getIncomingRequests = async (username: string): Promise<FriendRequest[]> => {
   if (!username) {
+    console.warn('[Friends] getIncomingRequests called with empty username');
     return [];
   }
   const clean = sanitize(username);
@@ -256,6 +257,7 @@ export const declineFriendRequest = async (
  */
 export const getFriends = async (username: string): Promise<Friend[]> => {
   if (!username) {
+    console.warn('[Friends] getFriends called with empty username');
     return [];
   }
   const clean = sanitize(username);
