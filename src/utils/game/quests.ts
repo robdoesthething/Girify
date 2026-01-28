@@ -54,7 +54,7 @@ export const getQuests = async (): Promise<Quest[]> => {
       id: row.id.toString(),
       title: row.title,
       description: row.description || '',
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
       criteriaType: row.criteria_type as any,
       criteriaValue: row.criteria_value || '',
       rewardGiuros: row.reward_giuros ?? 0,

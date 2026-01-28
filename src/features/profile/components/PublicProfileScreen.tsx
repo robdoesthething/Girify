@@ -87,6 +87,7 @@ const PublicProfileScreen: React.FC<PublicProfileScreenProps> = ({ currentUser }
             />
 
             <div className="p-0">
+              {}
               {loading ? (
                 <div className="flex justify-center py-12">
                   <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-sky-500" />
@@ -101,9 +102,9 @@ const PublicProfileScreen: React.FC<PublicProfileScreenProps> = ({ currentUser }
                     <FriendActions
                       isBlocked={isBlocked}
                       friendStatus={friendStatus}
-                      requestSent={requestSent}
-                      sendingRequest={sendingRequest}
-                      blocking={blocking}
+                      isRequestSent={requestSent}
+                      isSendingRequest={sendingRequest}
+                      isBlocking={blocking}
                       onAddFriend={handleAddFriend}
                       onBlock={handleBlock}
                     />

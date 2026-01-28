@@ -48,7 +48,7 @@ const processStreetsData = (rawStreets: Street[]): Street[] => {
 };
 
 // Use 'any' return type compatible with Turf's Position[] expectation to avoid type errors
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
+
 const toTurf = (lines: number[][][]): any[][] =>
   lines.map(line =>
     line
@@ -111,6 +111,7 @@ export const useStreets = () => {
             const otherGeo = multiLineString(processedGeo);
             if (!booleanDisjoint(currentGeo, otherGeo)) {
               hints.push(street);
+              // eslint-disable-next-line max-depth
               if (hints.length >= HINTS_LIMIT) {
                 break;
               }

@@ -3,6 +3,7 @@ import LandingPage from '../../../components/LandingPage';
 import { useGameContext } from '../../../context/GameContext';
 import { useTheme } from '../../../context/ThemeContext';
 import { Street } from '../../../types/game';
+import { UI } from '../../../utils/constants';
 import { themeClasses } from '../../../utils/themeUtils';
 import RegisterPanel from '../../auth/components/RegisterPanel';
 import InstructionsOverlay from './InstructionsOverlay';
@@ -40,7 +41,7 @@ const GameScreen: FC = () => {
       handlers.processAnswer(state.selectedAnswer);
       setTimeout(() => {
         handlers.handleNext();
-      }, 1500);
+      }, UI.ANIMATION.DELAY_TRANSITION_MS);
     } else if (state.feedback === 'transitioning') {
       handlers.handleNext();
     }

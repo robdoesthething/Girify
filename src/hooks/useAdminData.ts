@@ -52,7 +52,7 @@ export function useAdminData(
     setUsers(u);
     setFeedback(f);
     setAnnouncements(a);
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
     setShopItems(shop as any);
     setMetrics(m);
     setLoading(false);
@@ -78,12 +78,11 @@ export function useAdminData(
       const { collection, getDocs, doc, writeBatch } = await import('firebase/firestore');
       const { db } = await import('../firebase');
 
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const usersRef = collection(db as any, 'users');
       const snapshot = await getDocs(usersRef);
       let migrated = 0;
       let count = 0;
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
       let batch = writeBatch(db as any);
       const batchSize = 200;
 
@@ -102,7 +101,7 @@ export function useAdminData(
 
         if (count >= batchSize) {
           await batch.commit();
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
           batch = writeBatch(db as any);
           count = 0;
         }
@@ -160,7 +159,7 @@ export function useAdminData(
       gamesPlayed: Number(editingUser.gamesPlayed),
       bestScore: Number(editingUser.bestScore),
       purchasedCosmetics: editingUser.purchasedCosmetics || [],
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
       joinedAt: editingUser.joinedAt as any,
     };
 

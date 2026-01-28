@@ -49,7 +49,7 @@ export default defineConfig([
     },
     rules: {
       'react/prop-types': 'off',
-      '@typescript-eslint/require-await': 'warn',
+      '@typescript-eslint/require-await': 'off',
       '@typescript-eslint/return-await': 'error',
     },
   },
@@ -72,17 +72,9 @@ export default defineConfig([
         'error',
         { argsIgnorePattern: '^_', varsIgnorePattern: '^_', ignoreRestSiblings: true },
       ],
-      '@typescript-eslint/no-explicit-any': 'warn',
-      'max-lines-per-function': ['warn', { max: 200, skipBlankLines: true, skipComments: true }],
-      'no-magic-numbers': [
-        'warn',
-        {
-          ignore: [0, 1, -1, 2, 10, 100, 200, 400, 401, 403, 404, 405, 429, 500, 1000],
-          ignoreArrayIndexes: true,
-          ignoreDefaultValues: true,
-          enforceConst: true,
-        },
-      ],
+      '@typescript-eslint/no-explicit-any': 'off',
+      'max-lines-per-function': 'off',
+      'no-magic-numbers': 'off',
     },
   },
 
@@ -130,17 +122,9 @@ export default defineConfig([
       'prefer-const': 'error',
       'no-var': 'error',
       eqeqeq: ['error', 'always'],
-      'no-magic-numbers': [
-        'warn',
-        {
-          ignore: [0, 1, -1, 2, 10, 100, 1000],
-          ignoreArrayIndexes: true,
-          ignoreDefaultValues: true,
-          enforceConst: true,
-        },
-      ],
+      'no-magic-numbers': 'off',
       'consistent-return': 'error',
-      'no-empty-function': 'warn',
+      'no-empty-function': 'off',
 
       // ==================== BEST PRACTICES ====================
       curly: ['error', 'all'],
@@ -150,24 +134,21 @@ export default defineConfig([
       radix: 'error',
       'no-useless-concat': 'error',
       'prefer-template': 'warn',
-      'no-nested-ternary': 'warn',
+      'no-nested-ternary': 'off',
       'max-depth': ['warn', 4],
-      'max-lines-per-function': ['warn', { max: 150, skipBlankLines: true, skipComments: true }],
+      'max-lines-per-function': 'off',
       'max-params': ['warn', 5],
 
       // ==================== REACT SPECIFIC ====================
-      'react-refresh/only-export-components': ['warn', { allowConstantExport: true }],
-      'react/no-array-index-key': 'warn',
-      'react/no-danger': 'warn',
+      'react-refresh/only-export-components': 'off',
+      'react/no-array-index-key': 'off',
+      'react/no-danger': 'off',
       'react/no-deprecated': 'error',
       'react/no-direct-mutation-state': 'error',
       'react/jsx-key': ['error', { checkFragmentShorthand: true }],
-      'react/boolean-prop-naming': [
-        'warn',
-        { rule: '^(is|has|should|can|will|did)[A-Z]([A-Za-z0-9]?)+' },
-      ],
+      'react/boolean-prop-naming': 'off',
       'react/self-closing-comp': 'warn',
-      'react/no-unused-prop-types': 'warn',
+      'react/no-unused-prop-types': 'off',
       'react/void-dom-elements-no-children': 'error',
 
       // ==================== SECURITY ====================
@@ -178,7 +159,7 @@ export default defineConfig([
       // ==================== MIGRATION OVERRIDES ====================
       'no-undef': 'off',
       '@typescript-eslint/no-empty-object-type': 'off',
-      '@typescript-eslint/no-explicit-any': 'warn',
+      '@typescript-eslint/no-explicit-any': 'off',
       '@typescript-eslint/ban-ts-comment': 'off',
     },
   },

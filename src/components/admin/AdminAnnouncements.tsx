@@ -20,7 +20,7 @@ const AdminAnnouncements: React.FC<AdminAnnouncementsProps> = ({
   confirm,
 }) => {
   const { theme } = useTheme();
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
   const [formData, setFormData] = useState<any>({
     title: '',
     body: '',
@@ -75,7 +75,7 @@ const AdminAnnouncements: React.FC<AdminAnnouncementsProps> = ({
     if (!date) {
       return '-';
     }
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
     const d = date as any;
     if (d.toDate && typeof d.toDate === 'function') {
       return d.toDate().toLocaleDateString();

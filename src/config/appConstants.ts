@@ -90,6 +90,9 @@ export const MAX_SCORE_PER_QUESTION = 1000;
 /** Score decay rate per second */
 export const SCORE_DECAY_PER_SECOND = 100;
 
+/** Autosave interval in ms */
+export const AUTOSAVE_INTERVAL_MS = 5000;
+
 // =============================================================================
 // RANDOM HANDLE GENERATION
 // =============================================================================

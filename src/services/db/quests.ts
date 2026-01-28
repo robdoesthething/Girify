@@ -50,6 +50,7 @@ export async function getDailyQuests(userId?: string): Promise<QuestWithProgress
     // We can't join directly easily with Supabase client unless we set up foreign keys in the query builder perfectly.
     // A simple second query is robust.
     const questIds = quests.map(q => q.id);
+
     const progressPromise = (supabase.from('user_quests' as any) as any)
       .select('*')
       .eq('username', cleanUserId)
@@ -124,7 +125,9 @@ export async function claimQuestReward(
 
     // 2. Transact (RPC would be better, but doing client-side for now)
     // Update is_claimed = true
+
     const { error: updateError } = await (supabase.from('user_quests' as any) as any)
+
       .update({ is_claimed: true } as any) // Type assertion due to manual type
       .eq('id', progress.id);
 
@@ -179,6 +182,7 @@ export async function updateQuestProgress(
     const cleanUserId = normalizeUsername(userId);
 
     // Upsert progress
+
     const { error } = await (supabase.from('user_quests' as any) as any).upsert(
       {
         username: cleanUserId,
@@ -203,6 +207,7 @@ export async function updateQuestProgress(
  */
 export async function checkAndProgressQuests(
   userId: string,
+
   gameState: { score: number; quizResults: any[]; quizStreets: any[] }
 ): Promise<string[]> {
   try {

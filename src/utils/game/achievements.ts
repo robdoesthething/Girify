@@ -12,7 +12,7 @@ import { logger } from '../logger';
 // Simple in-memory cache
 let achievementsCache: Achievement[] | null = null;
 let cacheTimestamp = 0;
-// eslint-disable-next-line no-magic-numbers
+
 const CACHE_DURATION = 60 * 60 * 1000; // 1 hour
 
 /**
@@ -37,14 +37,14 @@ export const getAllAchievements = async (forceRefresh = false): Promise<Achievem
         name: row.name,
         description: row.description || '',
         emoji: row.emoji || '',
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
         criteria: (row.criteria as any) || undefined,
         type: 'merit',
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
         rarity: (row.rarity as any) || 'common',
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
         category: (row.category as any) || 'general',
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
         unlockCondition: (row.unlock_condition as any) || undefined,
       });
     });
@@ -94,7 +94,6 @@ export const updateAchievement = async (
       dbUpdates.emoji = updates.emoji;
     }
     if (updates.criteria) {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       dbUpdates.criteria = updates.criteria as any;
     }
     if (updates.rarity) {
@@ -104,7 +103,6 @@ export const updateAchievement = async (
       dbUpdates.category = updates.category;
     }
     if (updates.unlockCondition) {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       dbUpdates.unlock_condition = updates.unlockCondition as any;
     }
 
@@ -138,7 +136,7 @@ export const createAchievement = async (
       name: itemData.name,
       description: itemData.description,
       emoji: itemData.emoji || null,
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
       criteria: (itemData.criteria as any) || null,
       rarity: itemData.rarity || null,
       category: itemData.category,

@@ -1,4 +1,3 @@
-/* eslint-disable no-magic-numbers */
 export interface Landmark {
   name: string;
   pos: [number, number];

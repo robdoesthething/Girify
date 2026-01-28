@@ -17,7 +17,6 @@ export interface GameSession {
  * Generates a simpler game ID.
  */
 function generateId(): string {
-  // eslint-disable-next-line no-magic-numbers
   return Math.random().toString(36).substring(2, 10);
 }
 

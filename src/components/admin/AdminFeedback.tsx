@@ -58,7 +58,7 @@ const AdminFeedback: React.FC<AdminFeedbackProps> = ({ feedback, onRefresh, noti
     if (!date) {
       return '-';
     }
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
     const d = date as any;
     if (typeof d.toDate === 'function') {
       return d.toDate().toLocaleDateString();

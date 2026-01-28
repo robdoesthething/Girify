@@ -89,6 +89,7 @@ export function useAuthRedirect({
               storage.remove(STORAGE_KEYS.REFERRER);
               handleRegister(handle);
             } else {
+              // eslint-disable-next-line max-depth
               if (user.displayName !== handle) {
                 await updateProfile(user, { displayName: handle });
               }

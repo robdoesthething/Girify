@@ -3,6 +3,7 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { useTheme } from '../../../context/ThemeContext';
 import { useToast } from '../../../hooks/useToast';
 import { claimQuestReward, getDailyQuests, QuestWithProgress } from '../../../services/db/quests';
+import { UI } from '../../../utils/constants';
 import { createLogger } from '../../../utils/logger';
 import { themeClasses } from '../../../utils/themeUtils';
 
@@ -130,7 +131,7 @@ export const QuestList: React.FC<QuestListProps> = ({ onRefresh, username }) => 
             key={quest.id}
             initial={{ opacity: 0, y: 5 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: index * 0.1 }}
+            transition={{ delay: index * UI.ANIMATION.DURATION_MEDIUM }}
             className={`p-3 rounded-xl border relative overflow-hidden ${themeClasses(
               theme,
               'bg-slate-800 border-slate-700',
