@@ -296,3 +296,102 @@ export async function checkAndProgressQuests(
     return [];
   }
 }
+
+/**
+ * Admin: Get all quests
+ */
+export async function getAllQuests(): Promise<QuestRow[]> {
+  try {
+    const { data, error } = await supabase
+      .from('quests')
+      .select('*')
+      .order('id', { ascending: true });
+
+    if (error) {
+      throw error;
+    }
+    return data || [];
+  } catch (error) {
+    logger.error('Error fetching all quests', error);
+    return [];
+  }
+}
+
+/**
+ * Admin: Create a new quest
+ */
+export async function createQuest(
+  quest: Omit<QuestRow, 'id' | 'created_at'>
+): Promise<QuestRow | null> {
+  try {
+    const { data, error } = await supabase.from('quests').insert(quest).select().single();
+
+    if (error) {
+      throw error;
+    }
+    return data;
+  } catch (error) {
+    logger.error('Error creating quest', error);
+    return null;
+  }
+}
+
+/**
+ * Admin: Update a quest
+ */
+export async function updateQuest(
+  id: number,
+  updates: Partial<QuestRow>
+): Promise<QuestRow | null> {
+  try {
+    const { data, error } = await supabase
+      .from('quests')
+      .update(updates)
+      .eq('id', id)
+      .select()
+      .single();
+
+    if (error) {
+      throw error;
+    }
+    return data;
+  } catch (error) {
+    logger.error('Error updating quest', error);
+    return null;
+  }
+}
+
+/**
+ * Admin: Delete a quest
+ */
+export async function deleteQuest(id: number): Promise<boolean> {
+  try {
+    const { error } = await supabase.from('quests').delete().eq('id', id);
+
+    if (error) {
+      throw error;
+    }
+    return true;
+  } catch (error) {
+    logger.error('Error deleting quest', error);
+    return false;
+  }
+}
+
+/**
+ * Get active quests (Alias for getDailyQuests without user progress, or explicit filter)
+ */
+export async function getActiveQuests(): Promise<QuestRow[]> {
+  return (await getDailyQuests()).map(q => {
+    const { progress, ...rest } = q;
+    return rest;
+  });
+}
+
+/**
+ * Get today's specific quest (Legacy/Helper)
+ */
+export async function getTodaysQuest(): Promise<QuestRow | null> {
+  const all = await getDailyQuests();
+  return all.length > 0 ? (all[0] as QuestRow) : null;
+}
