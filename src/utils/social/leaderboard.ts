@@ -115,6 +115,11 @@ export const getLeaderboard = async (
 
     if (error) {
       console.error('[Leaderboard] Supabase error:', error);
+      console.error('[Leaderboard] Error details:', {
+        message: error.message,
+        code: error.code,
+        details: error.details,
+      });
       debugLog(`[Leaderboard] DB Error: ${error.message}`);
       throw error;
     }
