@@ -69,9 +69,12 @@ export const useStreets = () => {
 
     const loadStreets = async () => {
       try {
-        // Dynamic import to split chunk
-        const module = await import('../../../data/streets.json');
-        const rawStreets = module.default as Street[];
+        // Fetch from static assets
+        const response = await fetch('/streets.json');
+        if (!response.ok) {
+          throw new Error(`Failed to fetch streets: ${response.statusText}`);
+        }
+        const rawStreets = (await response.json()) as Street[];
 
         if (mounted) {
           const processed = processStreetsData(rawStreets);

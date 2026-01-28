@@ -14,6 +14,11 @@ This document provides context and best practices for AI assistants (Claude) wor
 - [Deployment & News](#deployment--news)
 - [Gotchas & Pitfalls](#gotchas--pitfalls)
 - [Best Practices for Claude](#best-practices-for-claude)
+  - [Core Behavioral Guidelines](#core-behavioral-guidelines)
+  - [Think Before Coding](#1-think-before-coding)
+  - [Simplicity First](#2-simplicity-first)
+  - [Surgical Changes](#3-surgical-changes)
+  - [Goal-Driven Execution](#4-goal-driven-execution)
 
 ## Project Overview
 
@@ -572,6 +577,187 @@ Always test on mobile viewport in dev tools.
 
 ## Best Practices for Claude
 
+### Core Behavioral Guidelines
+
+These principles help reduce common AI coding mistakes. They bias toward caution over speed - use judgment for trivial tasks.
+
+#### 1. Think Before Coding
+
+**Don't assume. Don't hide confusion. Surface tradeoffs.**
+
+Before implementing:
+
+- **State assumptions explicitly** - If uncertain, ask first
+- **Present multiple interpretations** - If ambiguous, don't pick silently
+- **Suggest simpler approaches** - Push back when warranted
+- **Stop when confused** - Name what's unclear and ask
+
+**Examples:**
+
+✅ Good:
+
+```
+"I see two ways to implement this:
+1. Add a new field to the existing table (simpler, but denormalizes data)
+2. Create a join table (normalized, but adds complexity)
+
+Which approach fits your architecture better?"
+```
+
+❌ Bad:
+
+```
+"I'll create a new join table for this."
+(Silent assumption about architecture preference)
+```
+
+#### 2. Simplicity First
+
+**Minimum code that solves the problem. Nothing speculative.**
+
+Rules:
+
+- ❌ No features beyond what was asked
+- ❌ No abstractions for single-use code
+- ❌ No "flexibility" or "configurability" that wasn't requested
+- ❌ No error handling for impossible scenarios
+- ✅ If it takes 200 lines and could be 50, rewrite it
+
+**Ask yourself:** "Would a senior engineer say this is overcomplicated?" If yes, simplify.
+
+**Examples:**
+
+✅ Good (50 lines):
+
+```typescript
+// Direct implementation
+function saveGame(username: string, score: number) {
+  return supabase.from('game_results').insert({
+    user_id: normalizeUsername(username),
+    score,
+  });
+}
+```
+
+❌ Bad (200 lines):
+
+```typescript
+// Over-engineered with strategy pattern, factory, and config
+class GameSaveStrategy {
+  constructor(private config: GameSaveConfig) {}
+  // ... 150 more lines of abstraction
+}
+```
+
+#### 3. Surgical Changes
+
+**Touch only what you must. Clean up only your own mess.**
+
+When editing existing code:
+
+- ❌ Don't "improve" adjacent code, comments, or formatting
+- ❌ Don't refactor things that aren't broken
+- ✅ Match existing style, even if you'd do it differently
+- ✅ If you notice dead code, mention it - don't delete it
+
+When your changes create orphans:
+
+- ✅ Remove imports/variables/functions that YOUR changes made unused
+- ❌ Don't remove pre-existing dead code unless asked
+
+**The test:** Every changed line should trace directly to the user's request.
+
+**Examples:**
+
+✅ Good:
+
+```diff
+// User asked: "Add username validation"
++ function validateUsername(username: string): boolean {
++   return username.length >= 3 && username.length <= 20;
++ }
+
+  function createUser(username: string) {
++   if (!validateUsername(username)) {
++     throw new Error('Invalid username');
++   }
+    // existing code unchanged
+  }
+```
+
+❌ Bad:
+
+```diff
+// User asked: "Add username validation"
++ function validateUsername(username: string): boolean {
++   return username.length >= 3 && username.length <= 20;
++ }
+
+- function createUser(username: string) {
++ async function createUser(username: string): Promise<User> {
++   if (!validateUsername(username)) {
++     throw new Error('Invalid username');
++   }
+-   const user = { id: generateId(), name: username };
+-   users.push(user);
+-   return user;
++   // Refactored to use await (not requested!)
++   const user = await db.users.create({ username });
++   return user;
+  }
+```
+
+#### 4. Goal-Driven Execution
+
+**Define success criteria. Loop until verified.**
+
+Transform tasks into verifiable goals:
+
+- "Add validation" → "Write tests for invalid inputs, then make them pass"
+- "Fix the bug" → "Write a test that reproduces it, then make it pass"
+- "Refactor X" → "Ensure tests pass before and after"
+
+**For multi-step tasks, state a brief plan:**
+
+```
+1. Add getUserGameHistory test → verify: test fails as expected
+2. Update query to use game_results table → verify: test passes
+3. Run full test suite → verify: no regressions
+```
+
+Strong success criteria let you work independently. Weak criteria ("make it work") require constant clarification.
+
+**Examples:**
+
+✅ Good:
+
+```
+"I'll fix the profile activity bug with these verifiable steps:
+
+1. Add debug logging to identify username format mismatch
+   → Verify: Console shows exact username used in save vs query
+
+2. Apply normalizeUsername() to both save points
+   → Verify: Console shows consistent format
+
+3. Test that getUserGameHistory returns results
+   → Verify: Profile shows recent games
+
+4. Remove debug logging
+   → Verify: Clean console in production build
+
+Each step has a clear success check."
+```
+
+❌ Bad:
+
+```
+"I'll fix the profile activity bug."
+(No clear verification steps or success criteria)
+```
+
+---
+
 ### When Starting a Task
 
 1. **Ask clarifying questions** if requirements are unclear
@@ -713,4 +899,27 @@ This guide should help you work efficiently on Girify. Key principles:
 
 When in doubt, ask the user or check existing code for similar examples.
 
-**Last Updated**: January 23, 2026
+---
+
+## Summary: Guidelines in Action
+
+These guidelines are **working** if you see:
+
+✅ **Fewer unnecessary changes** in diffs
+✅ **Fewer rewrites** due to overcomplication
+✅ **Clarifying questions** before implementation (not after mistakes)
+✅ **Focused PRs** where every change traces to the user's request
+✅ **Self-verifying code** with clear success criteria
+
+**Remember:**
+
+1. **Think** → Ask questions, surface tradeoffs, state assumptions
+2. **Simplify** → Minimum code, no speculation, no premature abstraction
+3. **Surgical** → Touch only what's needed, match existing style
+4. **Verify** → Define success criteria, test each step
+
+When in doubt: **Ask** > Assume, **Simple** > Clever, **Focused** > Comprehensive
+
+---
+
+**Last Updated**: January 27, 2026

@@ -1,3 +1,4 @@
+import { GAME } from '../utils/constants';
 import { createLogger } from '../utils/logger';
 import { insertGameResult } from './db/games';
 import { redis } from './redis';
@@ -35,9 +36,8 @@ export async function startGame(userId: string): Promise<string> {
     round: 1,
   };
 
-  // Expires after 3600 seconds (1 hour)
-  // eslint-disable-next-line no-magic-numbers
-  await redis.setex(sessionKey, 3600, JSON.stringify(initialSession));
+  // Expires after 1 hour
+  await redis.setex(sessionKey, GAME.SESSION_TTL_SECONDS, JSON.stringify(initialSession));
 
   return gameId;
 }
@@ -61,8 +61,8 @@ export async function updateGameScore(gameId: string, newScore: number): Promise
     session.score = newScore;
     session.round += 1; // Increment round or logic as needed
 
-    // Update with same TTL (resetting it? or use KEEPTTL if supported. simple setex resets it which is fine)
-    await redis.setex(sessionKey, 3600, JSON.stringify(session));
+    // Update with same TTL
+    await redis.setex(sessionKey, GAME.SESSION_TTL_SECONDS, JSON.stringify(session));
   }
 }
 

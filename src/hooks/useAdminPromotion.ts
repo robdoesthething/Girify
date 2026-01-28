@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { HTTP } from '../utils/constants';
 
 interface UseAdminPromotionOptions {
   onSuccess?: (uid: string) => void;
@@ -45,11 +46,11 @@ export function useAdminPromotion(options: UseAdminPromotionOptions = {}): UseAd
       if (!response.ok || !data.success) {
         let errorMessage = data.error || 'Failed to promote to admin.';
 
-        if (response.status === 429) {
+        if (response.status === HTTP.STATUS.TOO_MANY_REQUESTS) {
           errorMessage = 'Too many attempts. Please try again later.';
-        } else if (response.status === 403) {
+        } else if (response.status === HTTP.STATUS.FORBIDDEN) {
           errorMessage = 'Access Denied.';
-        } else if (response.status === 401) {
+        } else if (response.status === HTTP.STATUS.UNAUTHORIZED) {
           errorMessage = 'Authentication failed. Please log in again.';
         }
 

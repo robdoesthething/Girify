@@ -5,6 +5,7 @@
  */
 
 import type { GameResultRow } from '../../types/supabase';
+import { GAME } from '../../utils/constants';
 import { getUTCStartOfDay, getUTCStartOfMonth, getUTCStartOfWeek } from '../../utils/date';
 import { normalizeUsername } from '../../utils/format';
 import { createLogger } from '../../utils/logger';
@@ -71,9 +72,9 @@ export async function getLeaderboardScores(
   }
 
   // Apply ordering and limit AFTER filtering to ensure correct results
-  // executeQuery expects a PromiseLike, query builder is thenable.
+
   const data = await executeQuery<GameResultRow[]>(
-    query.order('score', { ascending: false }).limit(limit * 4),
+    query.order('score', { ascending: false }).limit(limit * GAME.LEADERBOARD_FETCH_MULTIPLIER),
     'getLeaderboardScores'
   );
 

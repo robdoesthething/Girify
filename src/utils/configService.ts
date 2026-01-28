@@ -5,6 +5,7 @@
  */
 import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { db } from '../firebase';
+import { CACHE, TIME } from './constants';
 
 const CONFIG_DOC = 'settings';
 const CONFIG_COLLECTION = 'config';
@@ -24,7 +25,8 @@ export type PayoutConfig = typeof DEFAULT_PAYOUTS;
 // In-memory cache
 let cachedPayouts: PayoutConfig | null = null;
 let cacheTimestamp = 0;
-const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
+
+const CACHE_TTL = CACHE.TTL_MINUTES * TIME.SECONDS_PER_MINUTE * TIME.MS_PER_SECOND; // 5 minutes
 
 /**
  * Get payout configuration from Firestore with caching

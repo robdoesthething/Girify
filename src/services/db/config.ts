@@ -6,6 +6,8 @@
  * Allows dynamic configuration of payouts and game settings without code changes.
  */
 
+import { SupabaseClient } from '@supabase/supabase-js';
+import { CACHE, TIME } from '../../utils/constants';
 import { supabase } from '../supabase';
 
 // ============================================================================
@@ -61,7 +63,47 @@ let payoutCacheTimestamp = 0;
 let cachedGameConfig: GameConfig | null = null;
 let gameConfigCacheTimestamp = 0;
 
-const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
+// Define local types for tables not yet in generated types
+interface AppConfigRow {
+  id: string;
+  starting_giuros: number | null;
+  daily_login_bonus: number | null;
+  daily_challenge_bonus: number | null;
+  streak_week_bonus: number | null;
+  perfect_score_bonus: number | null;
+  referral_bonus: number | null;
+  updated_at?: string;
+}
+
+interface GameConfigRow {
+  id: string;
+  maintenance_mode: boolean;
+  score_multiplier: number | null;
+  giuros_multiplier: number | null;
+  daily_game_limit: number | null;
+  announcement_bar: string | null;
+  enabled_shop_categories: string[] | null;
+  updated_at?: string;
+}
+
+interface LocalDatabase {
+  public: {
+    Tables: {
+      app_config: {
+        Row: AppConfigRow;
+        Insert: Partial<AppConfigRow>;
+        Update: Partial<AppConfigRow>;
+      };
+      game_config: {
+        Row: GameConfigRow;
+        Insert: Partial<GameConfigRow>;
+        Update: Partial<GameConfigRow>;
+      };
+    };
+  };
+}
+
+const CACHE_TTL = CACHE.TTL_MINUTES * TIME.SECONDS_PER_MINUTE * TIME.MS_PER_SECOND; // 5 minutes
 
 // ============================================================================
 // PAYOUT CONFIG FUNCTIONS
@@ -80,7 +122,8 @@ export const getPayoutConfig = async (): Promise<PayoutConfig> => {
   }
 
   try {
-    const { data, error } = await (supabase as any)
+    const client = supabase as unknown as SupabaseClient<LocalDatabase>;
+    const { data, error } = await client
       .from('app_config')
       .select('*')
       .eq('id', 'default')
@@ -144,7 +187,8 @@ export const updatePayoutConfig = async (
       dbUpdates.referral_bonus = updates.REFERRAL_BONUS;
     }
 
-    const { error } = await (supabase as any)
+    const client = supabase as unknown as SupabaseClient<LocalDatabase>;
+    const { error } = await client
       .from('app_config')
       .update({ ...dbUpdates, updated_at: new Date().toISOString() })
       .eq('id', 'default');
@@ -227,7 +271,8 @@ export const getGameConfig = async (): Promise<GameConfig> => {
   }
 
   try {
-    const { data, error } = await (supabase as any)
+    const client = supabase as unknown as SupabaseClient<LocalDatabase>;
+    const { data, error } = await client
       .from('game_config')
       .select('*')
       .eq('id', 'default')
@@ -300,7 +345,8 @@ export const updateGameConfig = async (
       dbUpdates.enabled_shop_categories = updates.enabledShopCategories;
     }
 
-    const { error } = await (supabase as any)
+    const client = supabase as unknown as SupabaseClient<LocalDatabase>;
+    const { error } = await client
       .from('game_config')
       .update({ ...dbUpdates, updated_at: new Date().toISOString() })
       .eq('id', 'default');
