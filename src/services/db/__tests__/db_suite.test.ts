@@ -7,30 +7,9 @@ import { getShopItems } from '../shop';
 import { getUserByUsername, updateUser } from '../users';
 
 // Global Mocks
-vi.mock('../../supabase', () => ({
-  supabase: {
-    from: vi.fn(),
-    rpc: vi.fn(),
-  },
-}));
-
-vi.mock('../utils', () => ({
-  executeQuery: vi.fn(async query => {
-    // Unwraps the Supabase-like response { data, error }
-    // This mimics the real executeQuery behavior which returns 'data' on success
-    const result = await query;
-    // If result has data property, return it.
-    // If result IS the data (e.g. directly mocked to return array), return result.
-    // But our builder returns { data, error }.
-    if (result && 'data' in result) {
-      if (result.error) {
-        return null;
-      }
-      return result.data;
-    }
-    return result;
-  }),
-}));
+// Remove module mocks to ensure we use the real imported objects for spying
+// vi.mock('../../supabase', ...);
+// vi.mock('../utils', ...);
 
 describe('Database Integration Suite', () => {
   const mockBuilder = {
@@ -59,11 +38,14 @@ describe('Database Integration Suite', () => {
         (mockBuilder as any)[key].mockReturnValue(mockBuilder);
       }
     });
-    (supabase.from as any).mockReturnValue(mockBuilder);
+
+    // Spy on the real supabase client method
+    vi.spyOn(supabase, 'from').mockReturnValue(mockBuilder as any);
+    vi.spyOn(supabase, 'rpc').mockResolvedValue({ data: null, error: null } as any);
   });
 
   afterEach(() => {
-    vi.resetAllMocks();
+    vi.restoreAllMocks();
   });
 
   describe('Users Service', () => {
@@ -153,7 +135,7 @@ describe('Database Integration Suite', () => {
 
       const result = await getDailyQuests('User1');
       expect(result.length).toBe(1);
-      expect(result[0].progress?.progress).toBe(10);
+      expect((result[0]?.progress as any)?.progress).toBe(10);
     });
 
     it('checkAndProgressQuests should update progress', async () => {
