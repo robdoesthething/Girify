@@ -74,6 +74,9 @@ export const themePresets = {
 
   /** Subtle backgrounds */
   subtle: (theme: Theme) => themeClasses(theme, 'bg-slate-800/50', 'bg-slate-100'),
+
+  /** Interactive element hover scale */
+  hoverScale: 'transition-transform cursor-pointer hover:scale-[1.02] active:scale-[0.98]',
 };
 
 /**
