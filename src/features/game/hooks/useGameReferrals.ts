@@ -1,6 +1,6 @@
 import { useCallback } from 'react';
 import { awardReferralBonus } from '../../../utils/shop/giuros';
-import { getReferrer } from '../../../utils/social';
+import { getReferrer } from '../../../utils/social/referrals';
 
 export const useGameReferrals = () => {
   const processReferrals = useCallback(async (username: string) => {
