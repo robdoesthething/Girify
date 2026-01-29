@@ -1,11 +1,11 @@
 import { renderHook } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import * as giurosUtils from '../../../../utils/shop/giuros';
-import * as socialUtils from '../../../../utils/social';
+import * as socialUtils from '../../../../utils/social/referrals';
 import { useGameReferrals } from '../../hooks/useGameReferrals';
 
 // Mock dependencies
-vi.mock('../../../../utils/social', () => ({
+vi.mock('../../../../utils/social/referrals', () => ({
   getReferrer: vi.fn(),
   updateUserGameStats: vi.fn(),
 }));
