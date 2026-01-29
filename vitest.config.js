@@ -7,6 +7,9 @@ import { fileURLToPath } from 'node:url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
+// Check if Firebase credentials are available
+const hasFirebaseCredentials = !!process.env.VITE_FIREBASE_API_KEY;
+
 // More info at: https://storybook.js.org/docs/next/writing-tests/integrations/vitest-addon
 export default defineConfig({
   plugins: [react()],
@@ -45,6 +48,14 @@ export default defineConfig({
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),
+      // Mock Firebase in CI when credentials are not available
+      ...(hasFirebaseCredentials
+        ? {}
+        : {
+            '../firebase': path.resolve(__dirname, './src/__mocks__/firebase.ts'),
+            '../../firebase': path.resolve(__dirname, './src/__mocks__/firebase.ts'),
+            '../../../firebase': path.resolve(__dirname, './src/__mocks__/firebase.ts'),
+          }),
     },
   },
 });

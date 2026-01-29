@@ -24,7 +24,7 @@ describe('useGameReferrals', () => {
   });
 
   it('should do nothing if no referrer found', async () => {
-    vi.spyOn(socialUtils, 'getReferrer').mockResolvedValue(null);
+    vi.mocked(socialUtils.getReferrer).mockResolvedValue(null);
 
     const { result } = renderHook(() => useGameReferrals());
     await result.current.processReferrals('testuser');
@@ -34,8 +34,8 @@ describe('useGameReferrals', () => {
   });
 
   it('should award bonus if referrer found', async () => {
-    vi.spyOn(socialUtils, 'getReferrer').mockResolvedValue('referrer');
-    vi.spyOn(giurosUtils, 'awardReferralBonus').mockResolvedValue({
+    vi.mocked(socialUtils.getReferrer).mockResolvedValue('referrer');
+    vi.mocked(giurosUtils.awardReferralBonus).mockResolvedValue({
       success: true,
       newBalance: 100,
     });
@@ -48,7 +48,7 @@ describe('useGameReferrals', () => {
   });
 
   it('should handle errors gracefully', async () => {
-    vi.spyOn(socialUtils, 'getReferrer').mockRejectedValue(new Error('Network error'));
+    vi.mocked(socialUtils.getReferrer).mockRejectedValue(new Error('Network error'));
 
     const { result } = renderHook(() => useGameReferrals());
     // Should not throw
