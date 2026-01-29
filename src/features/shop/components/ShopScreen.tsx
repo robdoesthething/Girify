@@ -2,10 +2,10 @@ import { AnimatePresence } from 'framer-motion';
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import TopBar from '../../../components/TopBar';
+import { Button, Heading, Spinner, Tabs, Text } from '../../../components/ui';
 import { useTheme } from '../../../context/ThemeContext';
 import { useTabs } from '../../../hooks/useTabs';
 import { useToast } from '../../../hooks/useToast';
-import { getTabButtonClass } from '../../../utils/buttonClasses';
 import { ShopItem } from '../../../utils/shop';
 import { themeClasses } from '../../../utils/themeUtils';
 import { useEquip } from '../hooks/useEquip';
@@ -57,18 +57,14 @@ const ShopScreen: React.FC<ShopScreenProps> = ({ username }) => {
 
   const [flavorModal, setFlavorModal] = useState<ShopItem | null>(null);
 
-  const tabs: {
-    id: 'avatars' | 'frames' | 'titles' | 'special';
-    label: string;
-    items: ShopItem[];
-  }[] = [
-    { id: 'avatars', label: `👤 ${t('avatars') || 'Avatars'}`, items: shopItems.avatars || [] },
-    { id: 'frames', label: `🖼️ ${t('frames')}`, items: shopItems.avatarFrames || [] },
-    { id: 'titles', label: `🏷️ ${t('titles')}`, items: shopItems.titles || [] },
-    { id: 'special', label: `✨ ${t('special')}`, items: shopItems.special || [] },
+  const tabs = [
+    { id: 'avatars', label: t('avatars') || 'Avatars', icon: <span>👤</span> },
+    { id: 'frames', label: t('frames'), icon: <span>🖼️</span> },
+    { id: 'titles', label: t('titles'), icon: <span>🏷️</span> },
+    { id: 'special', label: t('special'), icon: <span>✨</span> },
   ];
 
-  const activeItems = (tabs.find(t_ => t_.id === activeTab)?.items || []).filter(i => !!i);
+  const activeItems = (shopItems[activeTab as keyof typeof shopItems] || []).filter(i => !!i);
 
   const isOwned = (itemId: string) =>
     purchased.includes(itemId) ||
@@ -97,30 +93,37 @@ const ShopScreen: React.FC<ShopScreenProps> = ({ username }) => {
       />
 
       <div className="flex-1 overflow-y-auto w-full px-4 py-6 pt-16">
-        <div className="max-w-2xl mx-auto">
+        <div className="max-w-6xl mx-auto">
           {/* Header */}
           <div className="flex items-center justify-between mb-8 relative">
-            <button
+            <Button
+              variant="ghost"
+              size="sm"
               onClick={() => navigate(-1)}
-              className="flex items-center gap-2 text-sm font-bold opacity-60 hover:opacity-100 transition-opacity z-10"
-              type="button"
+              leftIcon={
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M15 19l-7-7 7-7"
+                  />
+                </svg>
+              }
+              className="z-10"
             >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M15 19l-7-7 7-7"
-                />
-              </svg>
               {t('back')}
-            </button>
-            <h1 className="text-xl font-black absolute left-1/2 transform -translate-x-1/2 flex items-center gap-2 font-inter">
+            </Button>
+
+            <Heading
+              variant="h3"
+              className="absolute left-1/2 transform -translate-x-1/2 flex items-center gap-2 mb-0"
+            >
               <span>🛒</span> {t('shop')}
-            </h1>
+            </Heading>
 
             <div
-              className="bg-white/10 backdrop-blur-md px-4 py-2 rounded-2xl flex items-center gap-2 border border-white/10 shadow-lg"
+              className={`px-4 py-2 rounded-2xl flex items-center gap-2 border shadow-lg ${themeClasses(theme, 'bg-slate-800 border-slate-700', 'bg-white border-slate-200')}`}
               role="status"
               aria-label={`Balance: ${balance} Giuros`}
             >
@@ -149,39 +152,31 @@ const ShopScreen: React.FC<ShopScreenProps> = ({ username }) => {
           )}
 
           {/* Tabs */}
-          <div className="flex gap-2 mb-6 overflow-x-auto pb-2 scrollbar-hide">
-            {tabs.map(tab => (
-              <button
-                key={tab.id}
-                onClick={() => setTab(tab.id)}
-                className={`px-4 py-2 rounded-xl font-bold text-sm whitespace-nowrap transition-all font-inter ${getTabButtonClass(theme, activeTab === tab.id)}`}
-                type="button"
-              >
-                {tab.label}
-              </button>
-            ))}
+          <div className="mb-6 overflow-x-auto pb-2 scrollbar-hide">
+            <Tabs tabs={tabs} activeTab={activeTab} onChange={id => setTab(id as any)} />
           </div>
 
           {/* Content */}
           {loading ? (
             <div className="flex justify-center py-16">
-              <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-sky-500" />
+              <Spinner size="lg" />
             </div>
           ) : !username ? (
             <div className="flex flex-col items-center justify-center py-20 text-center">
               <div className="text-6xl mb-4">🔐</div>
-              <h2 className="text-2xl font-bold mb-2 font-inter">
+              <Heading variant="h3" className="mb-2">
                 {t('loginRequired') || 'Login Required'}
-              </h2>
-              <p className="text-slate-500 mb-6">
+              </Heading>
+              <Text className="mb-6 opacity-60">
                 {t('loginToShop') || 'Please log in to access the shop.'}
-              </p>
-              <button
+              </Text>
+              <Button
+                variant="primary"
                 onClick={() => navigate('/?auth=login')}
-                className="px-6 py-3 rounded-xl bg-sky-500 text-white font-bold font-inter hover:bg-sky-600 transition-colors shadow-lg shadow-sky-500/20"
+                className="shadow-lg shadow-sky-500/20"
               >
                 {t('login') || 'Log In'}
-              </button>
+              </Button>
             </div>
           ) : (
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 pb-20">
@@ -220,19 +215,17 @@ const ShopScreen: React.FC<ShopScreenProps> = ({ username }) => {
           <FlavorModal
             item={flavorModal}
             onClose={() => setFlavorModal(null)}
-            onPurchase={() => {
-              handlePurchase(flavorModal);
-              setFlavorModal(null); // Assuming close on buy, or keep open? Original was conditionally button.
-              // Wait, FlavorModal buttons call onPurchase/onEquip.
-              // FlavorModal props: onPurchase, onEquip.
-              // handlePurchase/Equip are async, but here we just trigger them.
+            onPurchase={item => {
+              handlePurchase(item);
+              // Do not setFlavorModal(null) here if you want to allow equip immediately after purchase in the same modal,
+              // but FlavorModal handles rendering purchase vs equip button based on isOwned.
+              // Usually we might want to keep it open or close it.
+              // Original logic wasn't explicit inside modal logic, but here we likely want to keep it open or let user close.
             }}
-            onEquip={() => handleEquip(flavorModal)}
+            onEquip={item => handleEquip(item)}
             isOwned={isOwned(flavorModal.id)}
             isEquipped={isEquipped(flavorModal.id)}
             balance={balance}
-            theme={theme}
-            t={t}
           />
         )}
       </AnimatePresence>

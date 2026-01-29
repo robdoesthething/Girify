@@ -5,8 +5,9 @@
  */
 
 import React, { memo } from 'react';
+import { Button, Card, Heading, Text } from '../../../components/ui';
 import { useTheme } from '../../../context/ThemeContext';
-import { getActionButtonClass, getItemCardClass } from '../../../utils/buttonClasses';
+import { getItemCardClass } from '../../../utils/buttonClasses';
 import type { ShopItem } from '../../../utils/shop';
 
 interface ShopItemCardProps {
@@ -37,8 +38,6 @@ const ShopItemCard: React.FC<ShopItemCardProps> = memo(
   }) => {
     const { theme, t } = useTheme();
 
-    // Utility functions handled by buttonClasses.ts usage below
-
     const renderItemIcon = () => {
       if (item.cssClass) {
         return <div className={`w-10 h-10 rounded-full ${item.cssClass}`} />;
@@ -59,9 +58,12 @@ const ShopItemCard: React.FC<ShopItemCardProps> = memo(
     const cost = item.cost || item.price || 0;
     const canAfford = balance >= cost;
 
+    // We reuse getItemCardClass for the specific border logic which is complex
+    const cardClasses = getItemCardClass(theme, isEquipped);
+
     return (
-      <div
-        className={`relative flex flex-col p-4 rounded-2xl border transition-all h-full ${getItemCardClass(theme, isEquipped)} bg-white/50 dark:bg-slate-800/50 backdrop-blur-sm`}
+      <Card
+        className={`relative flex flex-col !p-4 transition-all h-full ${cardClasses} bg-white/50 dark:bg-slate-800/50 backdrop-blur-sm`}
       >
         {/* Locked Overlay */}
         {isLocked && !isOwned && (
@@ -87,47 +89,51 @@ const ShopItemCard: React.FC<ShopItemCardProps> = memo(
             {renderItemIcon()}
           </div>
 
-          <h3 className="font-bold text-sm leading-tight font-inter mb-1.5 min-h-[1.25em]">
+          <Heading variant="h6" className="leading-tight mb-1.5 min-h-[1.25em]">
             {t(item.name || '') || item.name}
-          </h3>
-          <p className="text-xs opacity-60 font-inter leading-relaxed">
+          </Heading>
+
+          <Text variant="caption" className="opacity-60 leading-relaxed !mb-0">
             {activeTab === 'titles' && item.flavorText
               ? `"${item.flavorText}"`
               : t(item.description || '') || item.description}
-          </p>
+          </Text>
         </div>
 
         <div className="mt-auto pt-2 w-full">
           {isOwned ? (
             activeTab !== 'special' && (
-              <button
+              <Button
                 onClick={onEquip}
-                className={`w-full py-2 rounded-xl font-bold text-xs transition-all font-inter shadow-sm ${getActionButtonClass(theme, isEquipped)}`}
-                type="button"
+                variant={isEquipped ? 'ghost' : 'secondary'}
+                size="sm"
+                fullWidth
+                className={
+                  isEquipped ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400' : ''
+                }
               >
                 {isEquipped ? `✓ ${t('equipped')}` : t('equip')}
-              </button>
+              </Button>
             )
           ) : (
-            <button
+            <Button
               onClick={onPurchase}
               disabled={!canAfford || isLocked}
-              className={`w-full py-2 rounded-xl font-bold text-xs transition-all font-inter flex items-center justify-center gap-2
-              ${
-                isLocked
-                  ? 'bg-slate-200 dark:bg-slate-700 text-slate-400 cursor-not-allowed opacity-50'
-                  : canAfford
-                    ? 'bg-yellow-500 hover:bg-yellow-600 text-white shadow-lg shadow-yellow-500/20 transform active:scale-95'
-                    : 'bg-slate-200 dark:bg-slate-700 text-slate-400 cursor-not-allowed'
+              variant={canAfford && !isLocked ? 'primary' : 'secondary'}
+              size="sm"
+              fullWidth
+              className={`flex items-center justify-center gap-2 ${
+                !canAfford || isLocked
+                  ? '!bg-slate-200 dark:!bg-slate-700 !text-slate-400 opacity-50'
+                  : 'bg-yellow-500 hover:bg-yellow-600 text-white shadow-lg shadow-yellow-500/20'
               }`}
-              type="button"
             >
               <img src="/giuro.png" alt="" className="h-3 w-auto object-contain opacity-80" />
               {cost}
-            </button>
+            </Button>
           )}
         </div>
-      </div>
+      </Card>
     );
   }
 );
