@@ -47,7 +47,7 @@ const FeedbackModal: React.FC<FeedbackModalProps> = ({ username, onClose, isInli
 
   const wrapperClasses = isInline
     ? ''
-    : 'fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm';
+    : 'fixed inset-0 z-40 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm';
 
   return (
     <div className={wrapperClasses}>

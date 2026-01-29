@@ -50,7 +50,7 @@ const NotificationContainer: React.FC<NotificationContainerProps> = ({
   onDismiss,
 }) => {
   return (
-    <div className="fixed top-20 right-4 z-[9999] space-y-2 pointer-events-none">
+    <div className="fixed top-20 right-4 z-50 space-y-2 pointer-events-none">
       <AnimatePresence>
         {notifications.map(notification => (
           <motion.div

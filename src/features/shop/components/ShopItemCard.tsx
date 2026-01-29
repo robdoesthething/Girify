@@ -115,7 +115,7 @@ const ShopItemCard: React.FC<ShopItemCardProps> = memo(
               className={`w-full py-2 rounded-xl font-bold text-xs transition-all font-inter flex items-center justify-center gap-2
               ${
                 isLocked
-                  ? 'bg-slate-200 dark:bg-slate-700 text-slate-400 cursor-not-allowed opacity-0'
+                  ? 'bg-slate-200 dark:bg-slate-700 text-slate-400 cursor-not-allowed opacity-50'
                   : canAfford
                     ? 'bg-yellow-500 hover:bg-yellow-600 text-white shadow-lg shadow-yellow-500/20 transform active:scale-95'
                     : 'bg-slate-200 dark:bg-slate-700 text-slate-400 cursor-not-allowed'

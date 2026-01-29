@@ -42,7 +42,7 @@ const DebugOverlay: React.FC = () => {
     return (
       <button
         onClick={() => setIsOpen(true)}
-        className="fixed bottom-4 right-4 z-[9999] bg-red-600 text-white p-2 rounded-full shadow-lg text-xs font-mono opacity-50 hover:opacity-100"
+        className="fixed bottom-4 right-4 z-50 bg-red-600 text-white p-2 rounded-full shadow-lg text-xs font-mono opacity-50 hover:opacity-100"
       >
         BUG
       </button>
@@ -50,7 +50,7 @@ const DebugOverlay: React.FC = () => {
   }
 
   return (
-    <div className="fixed inset-0 z-[9999] bg-black/80 text-green-400 font-mono text-[10px] p-4 overflow-auto pointer-events-auto">
+    <div className="fixed inset-0 z-50 bg-black/80 text-green-400 font-mono text-[10px] p-4 overflow-auto pointer-events-auto">
       <div className="flex justify-between items-center mb-4">
         <h3 className="font-bold text-white text-sm">Auth/Leaderboard Debugger</h3>
         <button

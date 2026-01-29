@@ -131,7 +131,7 @@ const SettingsScreen: React.FC<SettingsScreenProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-[8000] flex items-center justify-center p-4 backdrop-blur-sm bg-black/50 overflow-hidden">
+    <div className="fixed inset-0 z-40 flex items-center justify-center p-4 backdrop-blur-sm bg-black/60 overflow-hidden">
       <motion.div
         initial={{ scale: 0.9, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}

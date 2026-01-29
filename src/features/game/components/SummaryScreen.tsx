@@ -130,7 +130,7 @@ const SummaryScreen: React.FC<SummaryScreenProps> = ({
 
   return (
     <div
-      className={`absolute inset-0 flex flex-col items-center justify-center p-6 text-center backdrop-blur-md transition-colors duration-500 pointer-events-auto overflow-y-auto font-inter z-[5000]
+      className={`absolute inset-0 flex flex-col items-center justify-center p-6 text-center backdrop-blur-md transition-colors duration-500 pointer-events-auto overflow-y-auto font-inter z-40
             ${themeClasses(theme, 'bg-slate-950/95 text-white', 'bg-slate-50/95 text-slate-800')}`}
     >
       {view === 'curiosity' && (
