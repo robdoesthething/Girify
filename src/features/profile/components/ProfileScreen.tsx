@@ -2,6 +2,7 @@ import { AnimatePresence, motion } from 'framer-motion';
 import React, { useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import TopBar from '../../../components/TopBar';
+import { Button, Card, Heading, Spinner, Text } from '../../../components/ui';
 import { useTheme } from '../../../context/ThemeContext';
 import { UserProfile } from '../../../types/user';
 import { updateUserProfile } from '../../../utils/social';
@@ -79,25 +80,33 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ username }) => {
 
       <div className="flex-1 w-full px-4 py-8 pt-20 overflow-x-hidden">
         <div className="max-w-2xl mx-auto w-full">
+          {/* Header Section */}
           <div className="flex items-center justify-between mb-8 relative">
-            <button
+            <Button
+              variant="ghost"
+              size="sm"
               onClick={() => navigate(-1)}
-              className="flex items-center gap-2 text-sm font-bold opacity-60 hover:opacity-100 transition-opacity z-10"
-              type="button"
+              leftIcon={
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M15 19l-7-7 7-7"
+                  />
+                </svg>
+              }
+              className="z-10"
             >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M15 19l-7-7 7-7"
-                />
-              </svg>
               {t('back')}
-            </button>
-            <h1 className="text-xl font-black absolute left-1/2 transform -translate-x-1/2 flex items-center gap-2 max-w-[60%] truncate justify-center font-inter">
+            </Button>
+
+            <Heading
+              variant="h3"
+              className="absolute left-1/2 transform -translate-x-1/2 flex items-center gap-2 max-w-[60%] truncate justify-center mb-0"
+            >
               {t('profile') || 'Profile'}
-            </h1>
+            </Heading>
 
             <button
               onClick={() => actions.toggleGiurosInfo()}
@@ -117,7 +126,11 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ username }) => {
             </button>
           </div>
 
-          {state.loading && <div className="py-10 text-center opacity-50">Loading profile...</div>}
+          {state.loading && (
+            <div className="py-20 flex justify-center">
+              <Spinner size="lg" />
+            </div>
+          )}
 
           {state.profileData && !state.loading && (
             <>
@@ -127,9 +140,9 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ username }) => {
                     initial={{ opacity: 0, height: 0, y: -20 }}
                     animate={{ opacity: 1, height: 'auto', y: 0 }}
                     exit={{ opacity: 0, height: 0, y: -20 }}
-                    className="relative mb-8 mx-2 filter drop-shadow-md overflow-hidden"
+                    className="relative mb-8 filter drop-shadow-md overflow-hidden"
                   >
-                    <div className="p-4 rounded-xl border-2 border-slate-900 bg-white dark:bg-slate-800 text-slate-900 dark:text-white relative z-10">
+                    <Card className="relative z-10 !p-4 border-2 !border-slate-900 dark:!border-slate-700">
                       <div className="flex items-start gap-4">
                         <img
                           src="/giuro.png"
@@ -137,20 +150,23 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ username }) => {
                           className="h-8 w-auto object-contain shrink-0 mt-0.5"
                         />
                         <div className="flex-1">
-                          <h3 className="font-black text-lg mb-1">{t('giurosExplainerTitle')}</h3>
-                          <p className="text-sm opacity-80 mb-3 leading-relaxed font-inter">
+                          <Heading variant="h4" className="mb-1">
+                            {t('giurosExplainerTitle')}
+                          </Heading>
+                          <Text variant="small" className="mb-3 opacity-90">
                             {t('giurosExplainerText')}
-                          </p>
-                          <button
+                          </Text>
+                          <Button
+                            variant="primary"
+                            size="sm"
                             onClick={() => navigate('/shop')}
-                            className="px-4 py-2 bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-lg text-xs font-black uppercase tracking-wider hover:scale-105 transition-transform"
-                            type="button"
+                            className="bg-slate-900 dark:bg-white text-white dark:text-slate-900"
                           >
                             {t('goToShop')}
-                          </button>
+                          </Button>
                         </div>
                       </div>
-                    </div>
+                    </Card>
                   </motion.div>
                 )}
               </AnimatePresence>

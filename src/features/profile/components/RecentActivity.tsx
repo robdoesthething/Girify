@@ -1,4 +1,5 @@
 import React, { useMemo } from 'react';
+import { Card, EmptyState, Heading, Text } from '../../../components/ui';
 import { useTheme } from '../../../context/ThemeContext';
 import { GameHistory } from '../../../types/user';
 import { getActivityClasses } from '../utils/profileHelpers';
@@ -36,32 +37,41 @@ const RecentActivity: React.FC<RecentActivityProps> = ({ history }) => {
 
   return (
     <div className="mb-20">
-      <h3 className="font-bold text-lg mb-4 text-sky-500 font-inter">{t('recentActivity')}</h3>
+      <Heading variant="h4" className="text-sky-500">
+        {t('recentActivity')}
+      </Heading>
+
       {history.length === 0 ? (
-        <div className="text-center py-10 opacity-40 text-sm font-inter">{t('noGamesYet')}</div>
+        <EmptyState
+          emoji="🎮"
+          title={t('noGamesYet') || 'No Games Yet'}
+          description="Play your first game to see your activity here!"
+          className="py-8"
+        />
       ) : (
-        <div className="space-y-4">
+        <div className="space-y-3">
           {sortedHistory.slice(0, HISTORY_LIMIT).map(game => {
             const isDaily = game.timestamp && dailyEarliest.get(game.date) === game.timestamp;
-
             const classes = getActivityClasses(!!isDaily, theme);
 
             return (
-              <div
+              <Card
                 key={`${game.date}-${game.timestamp}`}
-                className={`flex items-center justify-between p-4 rounded-2xl border transition-colors ${classes.container}`}
+                className={`flex items-center justify-between !p-4 transition-colors ${classes.container} border`}
               >
                 <div>
-                  <p className="font-bold text-sm font-inter">{t('dailyChallenge')}</p>
-                  <p className="text-[10px] text-slate-400 font-mono">
+                  <Text variant="small" className="font-bold !mb-0">
+                    {t('dailyChallenge')}
+                  </Text>
+                  <Text variant="caption" className="!mb-0 mt-0.5" muted>
                     {game.timestamp ? new Date(game.timestamp).toLocaleDateString() : 'Just now'}
-                  </p>
+                  </Text>
                 </div>
                 <div className="text-right">
                   <span className={`font-black text-lg ${classes.score}`}>{game.score}</span>
                   <span className="text-[10px] font-bold text-slate-400 ml-1 font-inter">PTS</span>
                 </div>
-              </div>
+              </Card>
             );
           })}
         </div>
