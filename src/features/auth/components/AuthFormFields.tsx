@@ -1,4 +1,5 @@
 import React from 'react';
+import { Button, Input, Text } from '../../../components/ui';
 import { themeClasses } from '../../../utils/themeUtils';
 import {
   FormAction as RegisterAction,
@@ -29,38 +30,39 @@ const AuthFormFields: React.FC<AuthFormFieldsProps> = ({
 }) => {
   const { firstName, lastName, email, password, district } = formState;
 
-  const inputClass = `w-full px-4 py-3 rounded-xl border font-medium outline-none focus:ring-2 focus:ring-sky-500 focus:border-sky-500 transition-all ${themeClasses(theme, 'bg-slate-800 border-slate-700 text-white placeholder-slate-500', 'bg-white border-slate-200 text-slate-900 placeholder-slate-400')}`;
-
   return (
     <form onSubmit={onSubmit} className="space-y-4">
       {isSignUp && (
         <>
           <div className="flex gap-4">
-            <input
-              type="text"
-              placeholder={t('firstName') || 'First Name'}
-              value={firstName}
-              onChange={e =>
-                dispatch({ type: 'SET_FIELD', field: 'firstName', value: e.target.value })
-              }
-              className={`w-1/2 ${inputClass.replace('w-full', '')}`}
-            />
-            <input
-              type="text"
-              placeholder={t('lastName') || 'Last Name'}
-              value={lastName}
-              onChange={e =>
-                dispatch({ type: 'SET_FIELD', field: 'lastName', value: e.target.value })
-              }
-              className={`w-1/2 ${inputClass.replace('w-full', '')}`}
-            />
+            <div className="w-1/2">
+              <Input
+                type="text"
+                placeholder={t('firstName') || 'First Name'}
+                value={firstName}
+                onChange={e =>
+                  dispatch({ type: 'SET_FIELD', field: 'firstName', value: e.target.value })
+                }
+              />
+            </div>
+            <div className="w-1/2">
+              <Input
+                type="text"
+                placeholder={t('lastName') || 'Last Name'}
+                value={lastName}
+                onChange={e =>
+                  dispatch({ type: 'SET_FIELD', field: 'lastName', value: e.target.value })
+                }
+              />
+            </div>
           </div>
           <div className="space-y-4">
-            <label
-              className={`text-xs font-bold uppercase tracking-wider ${themeClasses(theme, 'text-slate-400', 'text-slate-500')}`}
+            <Text
+              variant="caption"
+              className={`font-bold ${themeClasses(theme, 'text-slate-400', 'text-slate-500')}`}
             >
               {t('chooseYourDistrict') || 'Choose Your Allegiance'}
-            </label>
+            </Text>
             <DistrictSelector
               theme={theme}
               selectedDistrict={district}
@@ -71,29 +73,27 @@ const AuthFormFields: React.FC<AuthFormFieldsProps> = ({
           {district && <SelectedDistrictPreview districtId={district} t={t} />}
         </>
       )}
-      <input
+      <Input
         type="email"
         placeholder="Email address"
         value={email}
         onChange={e => dispatch({ type: 'SET_FIELD', field: 'email', value: e.target.value })}
-        className={inputClass}
       />
-      <input
+      <Input
         type="password"
         placeholder="Password"
         value={password}
         onChange={e => dispatch({ type: 'SET_FIELD', field: 'password', value: e.target.value })}
-        className={inputClass}
       />
-      <button
+      <Button
         type="submit"
         disabled={loading}
-        className={`w-full py-3 mt-2 rounded-xl font-bold text-sm transition-all shadow-lg active:scale-95 text-white
-          ${loading ? 'bg-slate-400 cursor-wait' : 'bg-sky-500 hover:bg-sky-600 shadow-sky-500/20'}
-        `}
+        variant="primary"
+        fullWidth
+        className={`mt-2 shadow-lg ${loading ? 'cursor-wait opacity-80' : 'hover:bg-sky-600 shadow-sky-500/20'}`}
       >
         {loading ? 'Please wait...' : isSignUp ? 'Create Account' : 'Sign In'}
-      </button>
+      </Button>
     </form>
   );
 };
