@@ -29,7 +29,7 @@ const AuthFormFields: React.FC<AuthFormFieldsProps> = ({
 }) => {
   const { firstName, lastName, email, password, district } = formState;
 
-  const inputClass = `w-full px-4 py-3 rounded-xl border font-medium outline-none focus:ring-2 focus:ring-sky-500 transition-all ${themeClasses(theme, 'bg-slate-800 border-slate-700 text-white placeholder-slate-600', 'bg-white border-slate-200 text-slate-900 placeholder-slate-400')}`;
+  const inputClass = `w-full px-4 py-3 rounded-xl border font-medium outline-none focus:ring-2 focus:ring-sky-500 focus:border-sky-500 transition-all ${themeClasses(theme, 'bg-slate-800 border-slate-700 text-white placeholder-slate-500', 'bg-white border-slate-200 text-slate-900 placeholder-slate-400')}`;
 
   return (
     <form onSubmit={onSubmit} className="space-y-4">
