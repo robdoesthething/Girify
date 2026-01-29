@@ -135,7 +135,7 @@ const AdminShop: React.FC<AdminShopProps> = ({ items, onRefresh, notify, confirm
                       src={item.image}
                       alt={item.name}
                       className="w-10 h-10 object-contain rounded-md"
-                      style={{ imageRendering: 'pixelated', mixBlendMode: 'multiply' }}
+                      style={{ imageRendering: 'pixelated' }}
                     />
                   ) : (
                     <span className="text-2xl">{item.emoji || '📦'}</span>

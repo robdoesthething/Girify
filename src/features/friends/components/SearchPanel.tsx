@@ -50,7 +50,7 @@ const SearchPanel: React.FC<SearchPanelProps> = ({
           value={query}
           onChange={e => setQuery(e.target.value)}
           placeholder="Search username..."
-          className={`flex-1 px-4 py-2 rounded-lg border text-sm ${themeClasses(theme, 'bg-white border-slate-300', 'bg-black border-slate-700')}`}
+          className={`flex-1 px-4 py-2 rounded-lg border text-sm ${themeClasses(theme, 'bg-white border-slate-300 text-slate-900 placeholder-slate-400', 'bg-slate-800 border-slate-700 text-white placeholder-slate-400')}`}
           aria-label="Search username"
         />
         <button
