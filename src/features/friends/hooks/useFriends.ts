@@ -50,6 +50,8 @@ interface FriendsState {
   error: string | null;
   feedOffset: number;
   hasMoreFeed: boolean;
+  acceptingRequest: string | null;
+  decliningRequest: string | null;
 }
 
 type FriendsAction =
@@ -62,7 +64,9 @@ type FriendsAction =
   | { type: 'SET_SEARCH_RESULTS'; payload: UserSearchResult[] }
   | { type: 'ADD_SUCCESSFUL_REQUEST'; payload: string }
   | { type: 'REMOVE_SUCCESSFUL_REQUEST'; payload: string }
-  | { type: 'SET_ERROR'; payload: string | null };
+  | { type: 'SET_ERROR'; payload: string | null }
+  | { type: 'SET_ACCEPTING_REQUEST'; payload: string | null }
+  | { type: 'SET_DECLINING_REQUEST'; payload: string | null };
 
 const initialState: FriendsState = {
   friends: [],
@@ -75,6 +79,8 @@ const initialState: FriendsState = {
   error: null,
   feedOffset: 0,
   hasMoreFeed: true,
+  acceptingRequest: null,
+  decliningRequest: null,
 };
 
 function friendsReducer(state: FriendsState, action: FriendsAction): FriendsState {
@@ -115,6 +121,10 @@ function friendsReducer(state: FriendsState, action: FriendsAction): FriendsStat
     }
     case 'SET_ERROR':
       return { ...state, error: action.payload };
+    case 'SET_ACCEPTING_REQUEST':
+      return { ...state, acceptingRequest: action.payload };
+    case 'SET_DECLINING_REQUEST':
+      return { ...state, decliningRequest: action.payload };
     default:
       return state;
   }
@@ -248,24 +258,34 @@ export function useFriends(username: string) {
 
   const acceptRequest = useCallback(
     async (requester: string) => {
-      const res = await acceptFriendRequest(username, requester);
-      if (res.success) {
-        loadRequests();
-        loadFriends();
-        loadFeed();
+      dispatch({ type: 'SET_ACCEPTING_REQUEST', payload: requester });
+      try {
+        const res = await acceptFriendRequest(username, requester);
+        if (res.success) {
+          loadRequests();
+          loadFriends();
+          loadFeed();
+        }
+        return res;
+      } finally {
+        dispatch({ type: 'SET_ACCEPTING_REQUEST', payload: null });
       }
-      return res;
     },
     [username, loadRequests, loadFriends, loadFeed]
   );
 
   const declineRequest = useCallback(
     async (requester: string) => {
-      const res = await declineFriendRequest(username, requester);
-      if (res.success) {
-        loadRequests();
+      dispatch({ type: 'SET_DECLINING_REQUEST', payload: requester });
+      try {
+        const res = await declineFriendRequest(username, requester);
+        if (res.success) {
+          loadRequests();
+        }
+        return res;
+      } finally {
+        dispatch({ type: 'SET_DECLINING_REQUEST', payload: null });
       }
-      return res;
     },
     [username, loadRequests]
   );

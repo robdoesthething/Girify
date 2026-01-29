@@ -27,6 +27,8 @@ const FriendsScreen: React.FC<FriendsScreenProps> = ({ onClose, username }) => {
     searchResults,
     searching,
     successfulRequests,
+    acceptingRequest,
+    decliningRequest,
     loadFriends,
     loadRequests,
     loadFeed,
@@ -151,7 +153,13 @@ const FriendsScreen: React.FC<FriendsScreenProps> = ({ onClose, username }) => {
         )}
 
         {!loading && isTabActive('requests') && (
-          <RequestsList requests={requests} onAccept={acceptRequest} onDecline={declineRequest} />
+          <RequestsList
+            requests={requests}
+            onAccept={acceptRequest}
+            onDecline={declineRequest}
+            acceptingRequest={acceptingRequest}
+            decliningRequest={decliningRequest}
+          />
         )}
       </div>
     </div>

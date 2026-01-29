@@ -1,8 +1,8 @@
 import { doc, serverTimestamp, setDoc } from 'firebase/firestore';
 import { getToken } from 'firebase/messaging';
 import { useState } from 'react';
-import { auth, db, messaging } from '../firebase';
-import { getPlatform, isIOS as checkIsIOS } from '../utils/platform';
+import { auth, db, getMessagingLazy } from '../firebase';
+import { isIOS as checkIsIOS, getPlatform } from '../utils/platform';
 
 interface UseNotificationsReturn {
   isSupported: boolean;
@@ -70,6 +70,8 @@ export const useNotifications = (): UseNotificationsReturn => {
       setPermission(result);
 
       if (result === 'granted') {
+        // Lazy-load messaging only when permission is granted
+        const messaging = await getMessagingLazy();
         const currentToken = await getToken(messaging, {});
 
         if (currentToken) {
