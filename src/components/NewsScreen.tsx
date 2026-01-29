@@ -55,7 +55,7 @@ const NewsScreen: React.FC<NewsScreenProps> = ({ onClose, username }) => {
 
   return (
     <div
-      className={`fixed inset-0 z-[8000] flex flex-col pt-16 pb-6 px-4 md:px-8 overflow-hidden pointer-events-auto backdrop-blur-md ${themeClasses(theme, 'bg-neutral-950 text-white', 'bg-slate-50 text-slate-900')}`}
+      className={`fixed inset-0 z-40 flex flex-col pt-16 pb-6 px-4 md:px-8 overflow-hidden pointer-events-auto backdrop-blur-md ${themeClasses(theme, 'bg-neutral-950 text-white', 'bg-slate-50 text-slate-900')}`}
     >
       {/* Header */}
       <div className="flex items-center justify-between max-w-2xl mx-auto w-full mb-8 shrink-0 relative">
