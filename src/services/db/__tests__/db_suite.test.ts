@@ -31,6 +31,7 @@ function createMockBuilder() {
     'limit',
     'gte',
     'single',
+    'in',
   ];
 
   methods.forEach(method => {
