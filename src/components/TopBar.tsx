@@ -80,7 +80,6 @@ backdrop-blur-md border-b ${themeClasses(theme, 'border-slate-600', 'border-slat
             aria-label="Go to home"
           >
             <Logo className="h-5 md:h-7 w-auto object-contain" />
-            <span className="hidden md:block ml-2 font-bold text-lg font-inter">Girify</span>
           </button>
         </div>
       </div>

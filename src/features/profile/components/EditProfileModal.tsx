@@ -106,7 +106,7 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({
                           src={img as string}
                           alt={avatar.name}
                           className="w-full h-full object-cover"
-                          style={{ imageRendering: 'pixelated', mixBlendMode: 'multiply' }}
+                          style={{ imageRendering: 'pixelated' }}
                         />
                       ) : (
                         <span className="text-2xl">{avatar.emoji}</span> // Fallback

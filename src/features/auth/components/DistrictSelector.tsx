@@ -42,7 +42,7 @@ const DistrictSelector: React.FC<DistrictSelectorProps> = ({
             src={d.logo}
             alt={d.teamName}
             className="w-8 h-8 object-contain"
-            style={{ imageRendering: 'pixelated', mixBlendMode: 'multiply' }}
+            style={{ imageRendering: 'pixelated' }}
           />
           <div className="flex-1 min-w-0">
             <p
