@@ -2,7 +2,7 @@
 import { initializeApp } from 'firebase/app';
 import { FacebookAuthProvider, getAuth, GoogleAuthProvider, OAuthProvider } from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
-import { getMessaging } from 'firebase/messaging';
+import type { Messaging } from 'firebase/messaging';
 import { getStorage } from 'firebase/storage';
 
 const firebaseConfig = {
@@ -24,7 +24,18 @@ import { browserLocalPersistence, setPersistence } from 'firebase/auth';
 setPersistence(auth, browserLocalPersistence).catch(e => console.error('Persistence error:', e));
 const db = getFirestore(app);
 const storage = getStorage(app);
-const messaging = getMessaging(app);
+
+// Lazy-loaded messaging - only initializes when first accessed
+// This saves ~100KB from initial bundle
+let _messaging: Messaging | null = null;
+export const getMessagingLazy = async (): Promise<Messaging> => {
+  if (_messaging) {
+    return _messaging;
+  }
+  const { getMessaging } = await import('firebase/messaging');
+  _messaging = getMessaging(app);
+  return _messaging;
+};
 
 // Providers
 const googleProvider = new GoogleAuthProvider();
@@ -33,4 +44,4 @@ googleProvider.addScope('email');
 const facebookProvider = new FacebookAuthProvider();
 const appleProvider = new OAuthProvider('apple.com');
 
-export { appleProvider, auth, db, facebookProvider, googleProvider, messaging, storage };
+export { appleProvider, auth, db, facebookProvider, googleProvider, storage };

@@ -108,6 +108,20 @@ export const sendFriendRequest = async (
   }
 
   try {
+    // Rate limit check (10 requests per hour)
+    // Note: RPC function added via migration, cast needed until types regenerated
+    const { data: rateLimitOk, error: rateLimitError } = await (supabase as any).rpc(
+      'check_friend_request_rate_limit',
+      { p_user_id: fromClean }
+    );
+
+    if (rateLimitError) {
+      console.error('[Friends] Rate limit check failed:', rateLimitError);
+      // Fail open - allow request if rate limit check fails
+    } else if (rateLimitOk === false) {
+      return { error: 'Too many friend requests. Please wait an hour before sending more.' };
+    }
+
     // Check if target user exists and handle migration
     const targetUser = await getUserByUsername(toClean);
     if (targetUser) {

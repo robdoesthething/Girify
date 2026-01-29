@@ -1,8 +1,11 @@
 /**
  * Utility to publish activity events to friend feed
  */
+import { auth } from '../../firebase';
 import { publishActivity as dbPublishActivity } from '../../services/database';
+import { getUserByUsername } from '../../services/db/users';
 import { ActivityFeedRow } from '../../types/supabase';
+import { normalizeUsername } from '../format';
 
 // Helper to map ActivityData to ActivityFeedRow columns
 const mapToRow = (
@@ -65,10 +68,29 @@ export const publishActivity = async (
     return;
   }
 
+  // Security: Verify user owns this username to prevent impersonation
+  const normalizedUsername = normalizeUsername(username);
+  const currentFirebaseUser = auth.currentUser;
+
+  if (!currentFirebaseUser) {
+    console.error('[Activity] Auth failed: no authenticated user');
+    return;
+  }
+
+  // Verify the current user owns this username
+  const userProfile = await getUserByUsername(normalizedUsername);
+  if (!userProfile || userProfile.uid !== currentFirebaseUser.uid) {
+    console.error('[Activity] Auth failed: user does not own username', {
+      requested: normalizedUsername,
+      currentUid: currentFirebaseUser.uid,
+    });
+    return;
+  }
+
   try {
-    const row = mapToRow(username, type, data);
+    const row = mapToRow(normalizedUsername, type, data);
     await dbPublishActivity(row);
-    // console.warn(`[Activity] Published ${type} for ${username}`);
+    // console.warn(`[Activity] Published ${type} for ${normalizedUsername}`);
   } catch (e) {
     console.error('[Activity] Error publishing activity:', e);
   }

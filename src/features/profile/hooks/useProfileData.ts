@@ -47,72 +47,88 @@ export const useProfileData = (username: string): UseProfileDataResult => {
     try {
       setLoading(true);
       console.warn(`[Profile] Loading data for: ${normalizedUsername}`);
-      const [count, bal, equipped, history, profile, shopItems] = await Promise.all([
-        getFriendCount(normalizedUsername),
+
+      // CRITICAL: Load only essential data immediately (300-400ms)
+      // User profile, balance, and equipped cosmetics are needed for initial render
+      const [profile, bal, equipped] = await Promise.all([
+        getUserProfile(normalizedUsername),
         getGiuros(normalizedUsername),
         getEquippedCosmetics(normalizedUsername),
-        getUserGameHistory(normalizedUsername),
-        getUserProfile(normalizedUsername),
-        getShopItems(),
       ]);
-      console.warn(`[Profile] Loaded history: ${history?.length || 0} games`);
 
-      setFriendCount(count);
       setGiuros(bal);
       setEquippedCosmetics(equipped || {});
-
-      // Map GameData to GameHistory
-      const mappedHistory: GameHistory[] = (history || []).map(h => {
-        let ts = 0;
-        if (h.timestamp && typeof (h.timestamp as any).toDate === 'function') {
-          ts = (h.timestamp as any).toDate().getTime();
-        } else if ((h.timestamp as any)?.seconds) {
-          ts = (h.timestamp as any).seconds * 1000;
-        } else if (typeof h.timestamp === 'number') {
-          ts = h.timestamp;
-        } else {
-          // Fallback to date number if timestamp missing
-          const dStr = h.date?.toString() || '';
-          if (dStr.length === DATE.PARSING.YYYYMMDD_LENGTH) {
-            const y = parseInt(dStr.slice(0, DATE.PARSING.YEAR_LEN), DATE.PARSING.BASE_10);
-            const mStart = DATE.PARSING.YEAR_LEN;
-            const mEnd = mStart + DATE.PARSING.MONTH_LEN;
-            const m = parseInt(dStr.slice(mStart, mEnd), DATE.PARSING.BASE_10) - 1;
-            const d = parseInt(dStr.slice(mEnd), DATE.PARSING.BASE_10);
-            ts = new Date(y, m, d).getTime();
-          }
-        }
-
-        return {
-          date: h.date?.toString() || new Date(ts).toISOString().slice(0, 10),
-          score: h.score,
-          avgTime: '0s',
-          timestamp: ts,
-          username: normalizedUsername,
-        };
-      });
-
-      setAllHistory(mappedHistory);
-      setShopAvatars(shopItems.avatars || []);
-      setShopFrames(shopItems.avatarFrames || []);
-      setShopTitles(shopItems.titles || []);
 
       if (profile) {
         const userProfile = profile as UserProfile;
         setProfileData(userProfile);
         setJoinedDate(parseJoinedDate(userProfile.joinedAt).toLocaleDateString());
       } else {
-        // Default joined date
         setJoinedDate(localStorage.getItem('girify_joined') || new Date().toLocaleDateString());
       }
+
+      // End loading here so user sees profile faster
+      setLoading(false);
+
+      // NON-CRITICAL: Load in background after profile is visible
+      console.warn(`[Profile] Loading background data...`);
+      Promise.all([
+        getFriendCount(normalizedUsername),
+        getUserGameHistory(normalizedUsername),
+        getShopItems(),
+      ])
+        .then(([count, history, shopItems]) => {
+          console.warn(`[Profile] Loaded history: ${history?.length || 0} games`);
+          setFriendCount(count);
+
+          // Map GameData to GameHistory
+          const mappedHistory: GameHistory[] = (history || []).map(h => {
+            let ts = 0;
+            if (h.timestamp && typeof (h.timestamp as any).toDate === 'function') {
+              ts = (h.timestamp as any).toDate().getTime();
+            } else if ((h.timestamp as any)?.seconds) {
+              ts = (h.timestamp as any).seconds * 1000;
+            } else if (typeof h.timestamp === 'number') {
+              ts = h.timestamp;
+            } else {
+              // Fallback to date number if timestamp missing
+              const dStr = h.date?.toString() || '';
+              if (dStr.length === DATE.PARSING.YYYYMMDD_LENGTH) {
+                const y = parseInt(dStr.slice(0, DATE.PARSING.YEAR_LEN), DATE.PARSING.BASE_10);
+                const mStart = DATE.PARSING.YEAR_LEN;
+                const mEnd = mStart + DATE.PARSING.MONTH_LEN;
+                const m = parseInt(dStr.slice(mStart, mEnd), DATE.PARSING.BASE_10) - 1;
+                const d = parseInt(dStr.slice(mEnd), DATE.PARSING.BASE_10);
+                ts = new Date(y, m, d).getTime();
+              }
+            }
+
+            return {
+              date: h.date?.toString() || new Date(ts).toISOString().slice(0, 10),
+              score: h.score,
+              avgTime: '0s',
+              timestamp: ts,
+              username: normalizedUsername,
+            };
+          });
+
+          setAllHistory(mappedHistory);
+          setShopAvatars(shopItems.avatars || []);
+          setShopFrames(shopItems.avatarFrames || []);
+          setShopTitles(shopItems.titles || []);
+        })
+        .catch(e => {
+          console.error('[Profile] Error loading background data:', e);
+        });
     } catch (e) {
       console.error('[Profile] Error loading profile:', e);
-    } finally {
       setLoading(false);
     }
   }, [normalizedUsername]);
 
+  // Initial data load on mount - this is an intentional async fetch, not cascading renders
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     loadProfile();
   }, [loadProfile]);
 
