@@ -12,7 +12,7 @@ const PlayOverlay: FC = () => {
 
   return (
     <div
-      className={`absolute inset-0 z-[500] flex flex-col items-center justify-center backdrop-blur-sm ${themeClasses(theme, 'bg-slate-950/70', 'bg-white/70')}`}
+      className={`absolute inset-0 top-12 z-10 flex flex-col items-center justify-center backdrop-blur-sm ${themeClasses(theme, 'bg-slate-950/70', 'bg-white/70')}`}
     >
       <div className="text-center animate-fade-in-up">
         <div className="mb-6 flex justify-center">

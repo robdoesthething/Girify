@@ -249,9 +249,17 @@ const SummaryScreen: React.FC<SummaryScreenProps> = ({
           <button
             onClick={onRestart}
             className="w-full py-4 rounded-xl font-bold text-lg uppercase tracking-wider transition-all
-               bg-slate-800 text-slate-300 hover:bg-slate-700 hover:text-white border border-slate-700 hover:border-slate-500 glass-button mb-6"
+               bg-slate-800 text-slate-300 hover:bg-slate-700 hover:text-white border border-slate-700 hover:border-slate-500 glass-button mb-3"
           >
             🔄 {t('playAgain') || 'Play Again'}
+          </button>
+
+          <button
+            onClick={() => navigate('/')}
+            className="w-full py-3 rounded-xl font-medium text-sm uppercase tracking-wider transition-all
+               bg-transparent text-slate-400 hover:text-white border border-slate-700/50 hover:border-slate-500 mb-6"
+          >
+            🏠 {t('backToMenu') || 'Back to Menu'}
           </button>
 
           <button
