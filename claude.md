@@ -6,10 +6,13 @@ This document provides context and best practices for AI assistants (Claude) wor
 
 - [Project Overview](#project-overview)
 - [Tech Stack & Architecture](#tech-stack--architecture)
+- [Code Review & Refactoring Standards](#code-review--refactoring-standards)
+- [TypeScript Conventions](#typescript-conventions)
 - [Key Conventions](#key-conventions)
 - [Important Files & Directories](#important-files--directories)
 - [Common Patterns](#common-patterns)
 - [Development Workflow](#development-workflow)
+- [Multi-File Refactoring Checklist](#multi-file-refactoring-checklist)
 - [Testing Strategy](#testing-strategy)
 - [Deployment & News](#deployment--news)
 - [Gotchas & Pitfalls](#gotchas--pitfalls)
@@ -83,6 +86,21 @@ src/
 ├── types/            # TypeScript definitions
 └── utils/            # Utility functions
 ```
+
+## Code Review & Refactoring Standards
+
+When performing code reviews or refactoring:
+
+1. Group findings by category (rendering, data-fetching, bundle size, type safety)
+2. Prioritize by impact: performance > correctness > maintainability > style
+3. Always run `tsc --noEmit` after multi-file refactors to catch type errors
+4. Run the test suite before and after changes to confirm no regressions
+
+## TypeScript Conventions
+
+- This is a TypeScript-first codebase. Always use TypeScript (.ts/.tsx) for new files.
+- Prefer strict typing — avoid `any`. Use `unknown` + type guards when types are uncertain.
+- After editing multiple files, run `tsc --noEmit` to verify type correctness.
 
 ## Key Conventions
 
@@ -390,6 +408,16 @@ const { data } = await supabase
    git diff
    git status
    ```
+
+## Multi-File Refactoring Checklist
+
+When making changes across 3+ files:
+
+1. Read all affected files first before editing any
+2. Make changes in dependency order (utils → components → pages)
+3. Run type checker after all edits
+4. Run tests if available
+5. Summarize all changed files at the end
 
 ## Testing Strategy
 

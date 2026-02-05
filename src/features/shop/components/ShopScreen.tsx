@@ -1,5 +1,5 @@
 import { AnimatePresence } from 'framer-motion';
-import React, { useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import TopBar from '../../../components/TopBar';
 import { Button, Heading, Spinner, Tabs, Text } from '../../../components/ui';
@@ -57,31 +57,52 @@ const ShopScreen: React.FC<ShopScreenProps> = ({ username }) => {
 
   const [flavorModal, setFlavorModal] = useState<ShopItem | null>(null);
 
-  const tabs = [
-    { id: 'avatars', label: t('avatars') || 'Avatars', icon: <span>👤</span> },
-    { id: 'frames', label: t('frames'), icon: <span>🖼️</span> },
-    { id: 'titles', label: t('titles'), icon: <span>🏷️</span> },
-    { id: 'special', label: t('special'), icon: <span>✨</span> },
-  ];
+  const tabs = useMemo(
+    () => [
+      { id: 'avatars', label: t('avatars') || 'Avatars', icon: <span>👤</span> },
+      { id: 'frames', label: t('frames'), icon: <span>🖼️</span> },
+      { id: 'titles', label: t('titles'), icon: <span>🏷️</span> },
+      { id: 'special', label: t('special'), icon: <span>✨</span> },
+    ],
+    [t]
+  );
 
-  const activeItems = (shopItems[activeTab as keyof typeof shopItems] || []).filter(i => !!i);
+  const activeItems = useMemo(
+    () => (shopItems[activeTab as keyof typeof shopItems] || []).filter(i => !!i),
+    [shopItems, activeTab]
+  );
 
-  const isOwned = (itemId: string) =>
-    purchased.includes(itemId) ||
-    (shopItems.avatars && shopItems.avatars.find(a => a.id === itemId)?.cost === 0);
+  const isOwned = useCallback(
+    (itemId: string) =>
+      purchased.includes(itemId) ||
+      (shopItems.avatars && shopItems.avatars.find(a => a.id === itemId)?.cost === 0),
+    [purchased, shopItems.avatars]
+  );
 
-  const isEquipped = (itemId: string) => {
-    if (activeTab === 'frames') {
-      return equipped.frameId === itemId;
-    }
-    if (activeTab === 'titles') {
-      return equipped.titleId === itemId;
-    }
-    if (activeTab === 'avatars') {
-      return equipped.avatarId === itemId;
-    }
-    return false;
-  };
+  const isEquipped = useCallback(
+    (itemId: string) => {
+      if (activeTab === 'frames') {
+        return equipped.frameId === itemId;
+      }
+      if (activeTab === 'titles') {
+        return equipped.titleId === itemId;
+      }
+      if (activeTab === 'avatars') {
+        return equipped.avatarId === itemId;
+      }
+      return false;
+    },
+    [activeTab, equipped]
+  );
+
+  const handleTitleClick = useCallback(
+    (item: ShopItem) => {
+      if (activeTab === 'titles') {
+        setFlavorModal(item);
+      }
+    },
+    [activeTab]
+  );
 
   return (
     <div
@@ -197,11 +218,7 @@ const ShopScreen: React.FC<ShopScreenProps> = ({ username }) => {
                     activeTab={activeTab}
                     onPurchase={() => handlePurchase(item)}
                     onEquip={() => handleEquip(item)}
-                    onTitleClick={() => {
-                      if (activeTab === 'titles') {
-                        setFlavorModal(item);
-                      }
-                    }}
+                    onTitleClick={() => handleTitleClick(item)}
                   />
                 );
               })}

@@ -9,6 +9,7 @@ export {
   createUser,
   getUserByUid,
   getUserByUsername,
+  getUserShopData,
   searchUsers,
   updateUser,
   upsertUser,

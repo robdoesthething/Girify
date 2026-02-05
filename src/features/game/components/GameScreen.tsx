@@ -1,4 +1,4 @@
-import { FC, useEffect, useState } from 'react';
+import React, { FC, useEffect, useState } from 'react';
 import LandingPage from '../../../components/LandingPage';
 import { useGameContext } from '../../../context/GameContext';
 import { useTheme } from '../../../context/ThemeContext';
@@ -188,4 +188,4 @@ const GameScreen: FC = () => {
   );
 };
 
-export default GameScreen;
+export default React.memo(GameScreen);

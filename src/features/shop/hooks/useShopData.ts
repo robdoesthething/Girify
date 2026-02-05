@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
+import { getUserPurchasedBadges, getUserShopData } from '../../../services/database';
 import { getShopItems, GroupedShopItems } from '../../../utils/shop';
-import { getEquippedCosmetics, getGiuros, getPurchasedCosmetics } from '../../../utils/shop/giuros';
-import { getUserProfile } from '../../../utils/social';
 
 export interface EquippedCosmetics {
   frameId?: string;
@@ -37,18 +36,28 @@ export function useShopData(username: string) {
     }
     setLoading(true);
     try {
-      const [bal, owned, eq, items, profile] = await Promise.all([
-        getGiuros(username),
-        getPurchasedCosmetics(username),
-        getEquippedCosmetics(username),
+      // Single user fetch + shop items + badges in parallel (was 5 queries, now 3)
+      const [userData, items, badges] = await Promise.all([
+        getUserShopData(username),
         getShopItems(),
-        getUserProfile(username),
+        getUserPurchasedBadges(username),
       ]);
-      setBalance(bal);
-      setPurchased(owned || []);
-      setEquipped((eq as EquippedCosmetics) || {});
+
+      // Derive all user-specific data from the single fetch
+      setBalance(userData?.giuros ?? 10);
+      const cosmetics = userData?.purchased_cosmetics || [];
+      setPurchased([...cosmetics, ...badges]);
+      setEquipped((userData?.equipped_cosmetics as EquippedCosmetics) || {});
       setShopItems(items);
-      setUserStats(profile as UserStats);
+      setUserStats(
+        userData
+          ? {
+              streak: userData.streak ?? undefined,
+              gamesPlayed: userData.games_played ?? undefined,
+              bestScore: userData.best_score ?? undefined,
+            }
+          : null
+      );
     } catch (e) {
       console.error('Error loading shop data:', e);
     } finally {

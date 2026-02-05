@@ -3,7 +3,6 @@ import { initializeApp } from 'firebase/app';
 import { FacebookAuthProvider, getAuth, GoogleAuthProvider, OAuthProvider } from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
 import type { Messaging } from 'firebase/messaging';
-import { getStorage } from 'firebase/storage';
 
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
@@ -23,7 +22,6 @@ const auth = getAuth(app);
 import { browserLocalPersistence, setPersistence } from 'firebase/auth';
 setPersistence(auth, browserLocalPersistence).catch(e => console.error('Persistence error:', e));
 const db = getFirestore(app);
-const storage = getStorage(app);
 
 // Lazy-loaded messaging - only initializes when first accessed
 // This saves ~100KB from initial bundle
@@ -44,4 +42,4 @@ googleProvider.addScope('email');
 const facebookProvider = new FacebookAuthProvider();
 const appleProvider = new OAuthProvider('apple.com');
 
-export { appleProvider, auth, db, facebookProvider, googleProvider, storage };
+export { appleProvider, auth, db, facebookProvider, googleProvider };

@@ -91,11 +91,11 @@ export const createQuest = async (quest: Omit<Quest, 'id' | 'createdAt'>): Promi
       is_active: quest.isActive,
     };
 
-    const id = await dbCreateQuest(row);
-    if (!id) {
+    const result = await dbCreateQuest(row);
+    if (!result) {
       throw new Error('Failed to create quest');
     }
-    return id;
+    return result.id.toString();
   } catch (error) {
     logger.error('Error creating quest', { error });
     throw error;

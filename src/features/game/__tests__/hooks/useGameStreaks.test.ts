@@ -28,8 +28,9 @@ describe('useGameStreaks', () => {
   });
 
   it('should update streaks correctly', async () => {
-    const mockStreakResult = { streak: 5, maxStreak: 10 };
-    vi.spyOn(statsUtils, 'calculateStreak').mockReturnValue(mockStreakResult);
+    const mockStreakValue = 5;
+    // calculateStreak returns a number (the streak count)
+    vi.spyOn(statsUtils, 'calculateStreak').mockReturnValue(mockStreakValue);
     vi.spyOn(socialUtils, 'updateUserGameStats').mockResolvedValue(undefined);
 
     const { result } = renderHook(() => useGameStreaks());
@@ -40,7 +41,7 @@ describe('useGameStreaks', () => {
       'testuser',
       expect.objectContaining({
         currentScore: 1000,
-        streak: { streak: mockStreakResult.streak, maxStreak: mockStreakResult.maxStreak },
+        streak: mockStreakValue,
       })
     );
   });

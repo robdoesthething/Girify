@@ -7,6 +7,7 @@
 import { lazy } from 'react';
 
 // Lazy loaded route components
+export const GamePage = lazy(() => import('./features/game/components/GamePage'));
 export const GameScreen = lazy(() => import('./features/game/components/GameScreen'));
 export const AboutScreen = lazy(() => import('./components/AboutScreen'));
 export const AdminPanel = lazy(() => import('./components/admin/AdminPanel'));

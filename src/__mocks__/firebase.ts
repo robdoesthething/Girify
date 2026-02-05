@@ -27,9 +27,6 @@ export const db = {
   doc: vi.fn(),
 };
 
-// Mock Storage
-export const storage = {};
-
 // Mock providers
 export const googleProvider = {};
 export const facebookProvider = {};

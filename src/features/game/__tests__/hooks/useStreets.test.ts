@@ -15,6 +15,9 @@ describe('useStreets', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     global.fetch = vi.fn();
+    // Clear localStorage cache so tests always hit fetch
+    localStorage.removeItem('girify_streets_cache');
+    localStorage.removeItem('girify_streets_version');
   });
 
   afterEach(() => {
@@ -49,10 +52,11 @@ describe('useStreets', () => {
 
     await waitFor(() => {
       expect(result.current.isLoading).toBe(false);
+      expect(result.current.validStreets.length).toBeGreaterThan(0);
     });
 
     expect(result.current.validStreets).toHaveLength(1);
-    expect(result.current.validStreets[0].name).toBe('Street 1');
+    expect(result.current.validStreets[0]?.name).toBe('Street 1');
   });
 
   it('should handle fetch errors', async () => {

@@ -63,45 +63,9 @@ let payoutCacheTimestamp = 0;
 let cachedGameConfig: GameConfig | null = null;
 let gameConfigCacheTimestamp = 0;
 
-// Define local types for tables not yet in generated types
-interface AppConfigRow {
-  id: string;
-  starting_giuros: number | null;
-  daily_login_bonus: number | null;
-  daily_challenge_bonus: number | null;
-  streak_week_bonus: number | null;
-  perfect_score_bonus: number | null;
-  referral_bonus: number | null;
-  updated_at?: string;
-}
+// Use 'any' for local table overrides since these tables are not in generated types
 
-interface GameConfigRow {
-  id: string;
-  maintenance_mode: boolean;
-  score_multiplier: number | null;
-  giuros_multiplier: number | null;
-  daily_game_limit: number | null;
-  announcement_bar: string | null;
-  enabled_shop_categories: string[] | null;
-  updated_at?: string;
-}
-
-interface LocalDatabase {
-  public: {
-    Tables: {
-      app_config: {
-        Row: AppConfigRow;
-        Insert: Partial<AppConfigRow>;
-        Update: Partial<AppConfigRow>;
-      };
-      game_config: {
-        Row: GameConfigRow;
-        Insert: Partial<GameConfigRow>;
-        Update: Partial<GameConfigRow>;
-      };
-    };
-  };
-}
+type AnySupabaseClient = SupabaseClient<any>;
 
 const CACHE_TTL = CACHE.TTL_MINUTES * TIME.SECONDS_PER_MINUTE * TIME.MS_PER_SECOND; // 5 minutes
 
@@ -122,7 +86,7 @@ export const getPayoutConfig = async (): Promise<PayoutConfig> => {
   }
 
   try {
-    const client = supabase as unknown as SupabaseClient<LocalDatabase>;
+    const client = supabase as AnySupabaseClient;
     const { data, error } = await client
       .from('app_config')
       .select('*')
@@ -187,7 +151,7 @@ export const updatePayoutConfig = async (
       dbUpdates.referral_bonus = updates.REFERRAL_BONUS;
     }
 
-    const client = supabase as unknown as SupabaseClient<LocalDatabase>;
+    const client = supabase as AnySupabaseClient;
     const { error } = await client
       .from('app_config')
       .update({ ...dbUpdates, updated_at: new Date().toISOString() })
@@ -271,7 +235,7 @@ export const getGameConfig = async (): Promise<GameConfig> => {
   }
 
   try {
-    const client = supabase as unknown as SupabaseClient<LocalDatabase>;
+    const client = supabase as AnySupabaseClient;
     const { data, error } = await client
       .from('game_config')
       .select('*')
@@ -345,7 +309,7 @@ export const updateGameConfig = async (
       dbUpdates.enabled_shop_categories = updates.enabledShopCategories;
     }
 
-    const client = supabase as unknown as SupabaseClient<LocalDatabase>;
+    const client = supabase as AnySupabaseClient;
     const { error } = await client
       .from('game_config')
       .update({ ...dbUpdates, updated_at: new Date().toISOString() })
