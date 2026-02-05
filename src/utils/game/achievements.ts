@@ -6,7 +6,6 @@ import {
   updateAchievement as dbUpdateAchievement,
 } from '../../services/database';
 import { AchievementRow } from '../../types/supabase';
-import { requireAdmin } from '../auth';
 import { logger } from '../logger';
 
 // Simple in-memory cache
@@ -81,6 +80,7 @@ export const updateAchievement = async (
 ): Promise<{ success: boolean; error?: string }> => {
   try {
     // Security: Verify admin before write
+    const { requireAdmin } = await import('../auth');
     await requireAdmin();
 
     const dbUpdates: Partial<AchievementRow> = {};
@@ -129,6 +129,7 @@ export const createAchievement = async (
 ): Promise<{ success: boolean; error?: string }> => {
   try {
     // Security: Verify admin before write
+    const { requireAdmin } = await import('../auth');
     await requireAdmin();
 
     const row: AchievementRow = {
@@ -169,6 +170,7 @@ export const deleteAchievement = async (
 ): Promise<{ success: boolean; error?: string }> => {
   try {
     // Security: Verify admin before write
+    const { requireAdmin } = await import('../auth');
     await requireAdmin();
 
     const success = await dbDeleteAchievement(id);

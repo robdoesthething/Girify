@@ -1,5 +1,5 @@
 import { onAuthStateChanged, signOut, User } from 'firebase/auth';
-import { Dispatch, useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { STORAGE_KEYS, TIME } from '../../../config/constants';
 import { auth } from '../../../firebase';
 import { useAsyncOperation } from '../../../hooks/useAsyncOperation';
@@ -8,7 +8,6 @@ import { UserMigrationService } from '../../../services/userMigration';
 import { FeedbackReward, GameHistory, UserProfile } from '../../../types/user';
 import { logger } from '../../../utils/logger';
 import { sanitizeInput } from '../../../utils/security';
-import { claimDailyLoginBonus } from '../../../utils/shop/giuros';
 import {
   checkUnseenFeedbackRewards,
   ensureUserProfile,
@@ -22,6 +21,7 @@ import { storage } from '../../../utils/storage';
 
 export interface UseAuthResult {
   user: User | null;
+  profile: UserProfile | null; // [NEW] Return profile
   emailVerified: boolean | null;
   isLoading: boolean;
   handleLogout: (navigate: (path: string) => void) => void;
@@ -30,18 +30,11 @@ export interface UseAuthResult {
 /**
  * Hook for Firebase authentication and user profile management
  */
-interface AppAction {
-  type: string;
-  payload?: string | number | boolean;
-}
 
-export const useAuth = (
-  dispatch: Dispatch<AppAction>,
-  currentGameState: string,
-  onAnnouncementsCheck?: () => void
-): UseAuthResult => {
+export const useAuth = (onAnnouncementsCheck?: () => void): UseAuthResult => {
   const [emailVerified, setEmailVerified] = useState<boolean | null>(true);
   const [user, setUser] = useState<User | null>(null);
+  const [profile, setProfile] = useState<UserProfile | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const { notify } = useNotification();
   const { execute } = useAsyncOperation(); // [NEW] Use async loader
@@ -100,23 +93,26 @@ export const useAuth = (
         // Ensure Firestore profile and sync data - Wrapped in execute for global loading
         await execute(
           async () => {
-            await syncUserProfile(usernameToUse, user, dispatch, onAnnouncementsCheck, notify);
+            const fetchedProfile = await syncUserProfile(
+              usernameToUse,
+              user,
+              onAnnouncementsCheck,
+              notify
+            );
+            if (fetchedProfile) {
+              setProfile(fetchedProfile);
+            }
           },
           { loadingKey: 'profile-sync', errorMessage: undefined } // Suppress annoying error on load if passive
         );
-
-        // Update React state with the correct username
-        dispatch({ type: 'SET_USERNAME', payload: usernameToUse });
-
-        if (currentGameState === 'register') {
-          dispatch({ type: 'SET_GAME_STATE', payload: 'intro' });
-        }
+      } else {
+        setProfile(null);
       }
       setIsLoading(false);
     });
 
     return () => unsubscribe();
-  }, [currentGameState, dispatch, onAnnouncementsCheck, notify, execute]);
+  }, [onAnnouncementsCheck, notify, execute]);
 
   /**
    * Handle user logout
@@ -128,7 +124,7 @@ export const useAuth = (
           await signOut(auth);
           storage.remove(STORAGE_KEYS.USERNAME);
           storage.remove('lastPlayedDate');
-          dispatch({ type: 'LOGOUT' });
+          setProfile(null);
           navigate('/');
         },
         {
@@ -138,10 +134,10 @@ export const useAuth = (
         }
       ).catch((err: Error) => logger.error('Sign out error', err));
     },
-    [dispatch, execute] // Removed notify dependency as it's handled by execute
+    [execute] // Removed notify dependency as it's handled by execute
   );
 
-  return { user, emailVerified, isLoading, handleLogout };
+  return { user, profile, emailVerified, isLoading, handleLogout };
 };
 
 /**
@@ -150,7 +146,6 @@ export const useAuth = (
 async function syncUserProfile(
   displayName: string,
   user: User,
-  dispatch: Dispatch<AppAction>,
   onAnnouncementsCheck: (() => void) | undefined,
   notify:
     | ((
@@ -159,7 +154,7 @@ async function syncUserProfile(
         duration?: number
       ) => void)
     | null
-) {
+): Promise<UserProfile | null> {
   try {
     // First, get existing profile to preserve district
     const existingProfile = await getUserProfile(displayName);
@@ -170,18 +165,11 @@ async function syncUserProfile(
     })) as unknown as UserProfile;
 
     if (profile) {
-      if (profile.realName) {
-        dispatch({ type: 'SET_REAL_NAME', payload: profile.realName });
-      }
-      if (profile.streak) {
-        dispatch({ type: 'SET_STREAK', payload: profile.streak });
-      }
-      dispatch({ type: 'SET_PROFILE_LOADED' });
-
       // Self-heal any broken migration links
       healMigration(displayName).catch((err: Error) => console.error(err));
 
       // Claim daily login bonus
+      const { claimDailyLoginBonus } = await import('../../../utils/shop/giuros');
       const bonusResult = await claimDailyLoginBonus(displayName);
       if (bonusResult.claimed) {
         logger.info(`[Giuros] Daily login bonus claimed: +${bonusResult.bonus}`);
@@ -210,7 +198,10 @@ async function syncUserProfile(
       await syncLocalHistory(displayName);
       await syncLocalCosmetics(displayName);
       await backfillJoinDate(displayName, profile);
+
+      return profile;
     }
+    return null;
   } catch (e) {
     console.error('[Auth] Profile sync error:', e);
     throw e; // Re-throw to let useAsyncOperation handle the error state if needed

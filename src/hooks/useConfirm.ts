@@ -29,15 +29,14 @@ export const useConfirm = (): ConfirmResult => {
     []
   );
 
-  const handleClose = useCallback(
-    (result: boolean) => {
-      if (confirmConfig?.resolve) {
-        confirmConfig.resolve(result);
+  const handleClose = useCallback((result: boolean) => {
+    setConfirmConfig(prev => {
+      if (prev?.resolve) {
+        prev.resolve(result);
       }
-      setConfirmConfig(null);
-    },
-    [confirmConfig]
-  );
+      return null;
+    });
+  }, []);
 
   return {
     confirm,

@@ -50,10 +50,41 @@ export async function upsertUser(user: UserInsert): Promise<UserRow | null> {
   );
 }
 
-export async function searchUsers(query: string, limit = 20): Promise<UserRow[]> {
+type UserShopData = Pick<
+  UserRow,
+  | 'username'
+  | 'giuros'
+  | 'purchased_cosmetics'
+  | 'equipped_cosmetics'
+  | 'streak'
+  | 'games_played'
+  | 'best_score'
+>;
+
+export async function getUserShopData(username: string): Promise<UserShopData | null> {
+  const cleanUsername = normalizeUsername(username);
+  return executeQuery<UserShopData>(
+    supabase
+      .from('users')
+      .select(
+        'username, giuros, purchased_cosmetics, equipped_cosmetics, streak, games_played, best_score'
+      )
+      .eq('username', cleanUsername)
+      .single(),
+    'getUserShopData'
+  );
+}
+
+type UserSearchData = Pick<UserRow, 'username' | 'best_score'>;
+
+export async function searchUsers(query: string, limit = 20): Promise<UserSearchData[]> {
   const searchTerm = query.toLowerCase().replace(/^@/, '');
-  const result = await executeQuery<UserRow[]>(
-    supabase.from('users').select('*').ilike('username', `${searchTerm}%`).limit(limit),
+  const result = await executeQuery<UserSearchData[]>(
+    supabase
+      .from('users')
+      .select('username, best_score')
+      .ilike('username', `${searchTerm}%`)
+      .limit(limit),
     'searchUsers'
   );
   return result || [];

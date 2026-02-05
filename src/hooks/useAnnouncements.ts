@@ -38,15 +38,15 @@ export const useAnnouncements = (username: string): UseAnnouncementsReturn => {
    * Dismiss and mark current announcement as read
    */
   const dismissAnnouncement = useCallback(async () => {
-    if (pendingAnnouncement && username) {
-      try {
-        await markAnnouncementAsRead(username, pendingAnnouncement.id);
-      } catch (err) {
-        console.warn('Failed to mark announcement read:', err);
+    setPendingAnnouncement(prev => {
+      if (prev && username) {
+        markAnnouncementAsRead(username, prev.id).catch(err =>
+          console.warn('Failed to mark announcement read:', err)
+        );
       }
-    }
-    setPendingAnnouncement(null);
-  }, [pendingAnnouncement, username]);
+      return null;
+    });
+  }, [username]);
 
   return { pendingAnnouncement, dismissAnnouncement, checkAnnouncements };
 };

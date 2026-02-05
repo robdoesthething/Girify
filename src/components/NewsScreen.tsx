@@ -104,6 +104,10 @@ const NewsScreen: React.FC<NewsScreenProps> = ({ onClose, username }) => {
               <img
                 src="/mejur_jouma.png"
                 alt="Mejur Jouma"
+                width={128}
+                height={128}
+                loading="lazy"
+                decoding="async"
                 className="w-32 h-32 object-contain hover:scale-110 transition-transform cursor-pointer"
                 title="Mejur Jouma delivering the news"
               />

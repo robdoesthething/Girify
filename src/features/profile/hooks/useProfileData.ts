@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { GameHistory, UserProfile } from '../../../types/user';
 import { DATE } from '../../../utils/constants';
 import { normalizeUsername } from '../../../utils/format';
-import { getShopItems, ShopItem } from '../../../utils/shop';
+import { getShopItems, GroupedShopItems, ShopItem } from '../../../utils/shop';
 import { getEquippedCosmetics, getGiuros } from '../../../utils/shop/giuros';
 import { getUserGameHistory, getUserProfile } from '../../../utils/social';
 import { getFriendCount } from '../../../utils/social/friends';
@@ -46,7 +46,7 @@ export const useProfileData = (username: string): UseProfileDataResult => {
 
     try {
       setLoading(true);
-      console.warn(`[Profile] Loading data for: ${normalizedUsername}`);
+      // console.warn(`[Profile] Loading data for: ${normalizedUsername}`);
 
       // CRITICAL: Load only essential data immediately (300-400ms)
       // User profile, balance, and equipped cosmetics are needed for initial render
@@ -56,30 +56,31 @@ export const useProfileData = (username: string): UseProfileDataResult => {
         getEquippedCosmetics(normalizedUsername),
       ]);
 
-      setGiuros(bal);
-      setEquippedCosmetics(equipped || {});
+      setGiuros(prev => (prev !== bal ? bal : prev));
+      setEquippedCosmetics(prev =>
+        JSON.stringify(prev) !== JSON.stringify(equipped || {}) ? equipped || {} : prev
+      );
 
       if (profile) {
-        const userProfile = profile as UserProfile;
-        setProfileData(userProfile);
-        setJoinedDate(parseJoinedDate(userProfile.joinedAt).toLocaleDateString());
+        setProfileData(profile as UserProfile);
+        const newDate = parseJoinedDate((profile as UserProfile).joinedAt).toLocaleDateString();
+        setJoinedDate(prev => (prev !== newDate ? newDate : prev));
       } else {
-        setJoinedDate(localStorage.getItem('girify_joined') || new Date().toLocaleDateString());
+        const localDate = localStorage.getItem('girify_joined') || new Date().toLocaleDateString();
+        setJoinedDate(prev => (prev !== localDate ? localDate : prev));
       }
 
       // End loading here so user sees profile faster
       setLoading(false);
 
       // NON-CRITICAL: Load in background after profile is visible
-      console.warn(`[Profile] Loading background data...`);
       Promise.all([
         getFriendCount(normalizedUsername),
         getUserGameHistory(normalizedUsername),
         getShopItems(),
       ])
-        .then(([count, history, shopItems]) => {
-          console.warn(`[Profile] Loaded history: ${history?.length || 0} games`);
-          setFriendCount(count);
+        .then(([count, history, shopItems]: [number, any[], GroupedShopItems]) => {
+          setFriendCount(prev => (prev !== count ? count : prev));
 
           // Map GameData to GameHistory
           const mappedHistory: GameHistory[] = (history || []).map(h => {
@@ -112,10 +113,26 @@ export const useProfileData = (username: string): UseProfileDataResult => {
             };
           });
 
-          setAllHistory(mappedHistory);
-          setShopAvatars(shopItems.avatars || []);
-          setShopFrames(shopItems.avatarFrames || []);
-          setShopTitles(shopItems.titles || []);
+          setAllHistory(prev => {
+            if (prev.length !== mappedHistory.length) {
+              return mappedHistory;
+            }
+            // Simple check: compare timestamps of first item
+            if (prev.length > 0 && prev[0]?.timestamp !== mappedHistory[0]?.timestamp) {
+              return mappedHistory;
+            }
+            return prev; // Assume same if length and first item same (optimization)
+          });
+
+          // Optimize Shop Items: Use strict equality from specific fields if they are arrays
+          // getShopItems returns cached object if valid, so strict equality works if unchanged
+          if (shopItems) {
+            setShopAvatars(prev => (prev === shopItems?.avatars ? prev : shopItems?.avatars || []));
+            setShopFrames(prev =>
+              prev === shopItems?.avatarFrames ? prev : shopItems?.avatarFrames || []
+            );
+            setShopTitles(prev => (prev === shopItems?.titles ? prev : shopItems?.titles || []));
+          }
         })
         .catch(e => {
           console.error('[Profile] Error loading background data:', e);

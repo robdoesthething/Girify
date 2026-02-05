@@ -2,29 +2,23 @@ import { AnimatePresence } from 'framer-motion';
 import React, { Suspense } from 'react';
 import { Route, Routes } from 'react-router-dom';
 import { STORAGE_KEYS } from './config/constants';
-import { GameProvider } from './context/GameContext';
 import { useAppInitialization } from './hooks/useAppInitialization';
-import { GameHistory } from './types/user';
-import { getTodaySeed, hasPlayedToday } from './utils/game/dailyChallenge';
 import { storage } from './utils/storage';
 import { themeClasses } from './utils/themeUtils';
 
-// Eagerly loaded components
-import AnnouncementModal from './components/AnnouncementModal';
-import DebugOverlay from './components/DebugOverlay';
-import TopBar from './components/TopBar';
+// Lazy loaded components for better code splitting
+const DebugOverlay = React.lazy(() => import('./components/DebugOverlay'));
+const TopBar = React.lazy(() => import('./components/TopBar'));
 
 // Lazy loaded routes
 import {
   AboutScreen,
-  AchievementModal,
   AdminPanel,
   AdminRoute,
   ConfirmDialog,
-  DistrictSelectionModal,
   FeedbackScreen,
   FriendsScreen,
-  GameScreen,
+  GamePage,
   LeaderboardScreen,
   NewsScreen,
   PageLoader,
@@ -41,18 +35,16 @@ import {
 const AppRoutes: React.FC = () => {
   const {
     theme,
-    t,
+    // t is used via themeClasses only
     location,
     navigate,
     isLoading,
-    confirm,
+    // confirm is available but not used in this component
     confirmConfig,
     handleConfirmClose,
-    state,
-    dispatch,
-    currentStreet,
-    handlers,
-    uiState,
+    user,
+    profile,
+    handleLogout,
   } = useAppInitialization();
 
   // Show loader while initializing
@@ -60,91 +52,29 @@ const AppRoutes: React.FC = () => {
     return <PageLoader />;
   }
 
-  const handleOpenPage = async (page: string | null) => {
-    // Check if user is in the middle of a game
-    if (state.gameState === 'playing' && state.currentQuestionIndex < state.quizStreets.length) {
-      const confirmed = await confirm(
-        t('exitGameWarning') || 'Exit game? Your current score will be saved.',
-        'Exit Game',
-        true
-      );
-      if (!confirmed) {
-        return;
-      }
-
-      // Save partial progress
-      try {
-        const history = storage.get<GameHistory[]>(STORAGE_KEYS.HISTORY, []);
-        const avgTime = state.quizResults.length
-          ? (
-              state.quizResults.reduce((acc, curr) => acc + (curr.time || 0), 0) /
-              state.quizResults.length
-            ).toFixed(1)
-          : 0;
-
-        history.push({
-          date: getTodaySeed().toString(),
-          score: state.score,
-          avgTime: avgTime.toString(),
-          timestamp: Date.now(),
-          username: state.username || 'guest',
-          incomplete: true,
-        });
-        storage.set(STORAGE_KEYS.HISTORY, history);
-      } catch (e) {
-        console.error('[Game] Error saving partial progress:', e);
-      }
-
-      dispatch({ type: 'SET_GAME_STATE', payload: 'summary' });
-    }
-
+  const handleOpenPage = (page: string | null) => {
+    // Note: Game progress saving is now handled by GamePage unmount/cleanup
     navigate(page ? `/${page}` : '/');
   };
+
+  const currentUsername = profile?.username || user?.displayName || undefined;
 
   return (
     <div
       className={`fixed inset-0 w-full h-full flex flex-col overflow-hidden transition-colors duration-500 bg-slate-50 ${themeClasses(theme, 'text-white', 'text-slate-900')}`}
     >
-      <TopBar
-        onOpenPage={handleOpenPage}
-        username={state.username || undefined}
-        onTriggerLogin={(mode = 'signin') => {
-          dispatch({ type: 'SET_REGISTER_MODE', payload: mode });
-          dispatch({ type: 'SET_GAME_STATE', payload: 'register' });
-          navigate('/');
-        }}
-        onLogout={handlers.handleLogout}
-      />
-
-      {/* Modals */}
-      <AnimatePresence>
-        {uiState.pendingAnnouncement && (
-          <AnnouncementModal
-            announcement={uiState.pendingAnnouncement}
-            onDismiss={handlers.dismissAnnouncement}
-          />
-        )}
-      </AnimatePresence>
-      <AnimatePresence>
-        {uiState.newlyUnlockedBadge && (
-          <Suspense fallback={null}>
-            <AchievementModal
-              achievement={uiState.newlyUnlockedBadge}
-              onDismiss={handlers.dismissAchievement}
-            />
-          </Suspense>
-        )}
-      </AnimatePresence>
-      <AnimatePresence>
-        {uiState.showDistrictModal && (
-          <Suspense fallback={null}>
-            <DistrictSelectionModal
-              username={state.username || ''}
-              onComplete={handlers.handleDistrictComplete}
-            />
-          </Suspense>
-        )}
-      </AnimatePresence>
+      <Suspense fallback={<div className="h-14" />}>
+        <TopBar
+          onOpenPage={handleOpenPage}
+          username={currentUsername}
+          onTriggerLogin={(mode = 'signin') => {
+            navigate('/', {
+              state: { mode: mode === 'signup' ? 'register' : 'register', submode: mode },
+            });
+          }}
+          onLogout={handleLogout}
+        />
+      </Suspense>
 
       {/* Routes */}
       <Suspense fallback={<PageLoader />}>
@@ -155,75 +85,56 @@ const AppRoutes: React.FC = () => {
             <Route
               path="/"
               element={
-                state.username && !uiState.emailVerified ? (
+                user && user.emailVerified === false ? (
                   <VerifyEmailScreen theme={theme as 'light' | 'dark'} />
                 ) : (
-                  <GameProvider
-                    value={{
-                      state,
-                      dispatch,
-                      currentStreet,
-                      handlers: {
-                        handleSelectAnswer: handlers.handleSelectAnswer,
-                        handleNext: handlers.handleNext,
-                        processAnswer: handlers.processAnswer,
-                        setupGame: handlers.setupGame,
-                        handleRegister: handlers.handleRegister,
-                        hasPlayedToday,
-                      },
-                    }}
-                  >
-                    <GameScreen />
-                  </GameProvider>
+                  <GamePage username={currentUsername} user={user} />
                 )
               }
             />
             <Route
               path="/leaderboard"
-              element={<LeaderboardScreen currentUser={state.username || undefined} />}
+              element={<LeaderboardScreen currentUser={currentUsername} />}
             />
             <Route
               path="/settings"
               element={
                 <SettingsScreen
                   onClose={() => handleOpenPage(null)}
-                  onLogout={handlers.handleLogout}
-                  autoAdvance={state.autoAdvance}
-                  setAutoAdvance={val => dispatch({ type: 'SET_AUTO_ADVANCE', payload: val })}
-                  username={state.username || undefined}
+                  onLogout={handleLogout}
+                  autoAdvance={false} // Auto-advance state moved to GamePage
+                  setAutoAdvance={() => {}} // No-op for global settings
+                  username={currentUsername}
                 />
               }
             />
             <Route path="/about" element={<AboutScreen onClose={() => handleOpenPage(null)} />} />
-            <Route path="/profile" element={<ProfileScreen username={state.username || ''} />} />
+            <Route path="/profile" element={<ProfileScreen username={currentUsername || ''} />} />
             <Route
               path="/user/:username"
-              element={<PublicProfileScreen currentUser={state.username || undefined} />}
+              element={<PublicProfileScreen currentUser={currentUsername} />}
             />
             <Route
               path="/friends"
               element={
                 <FriendsScreen
-                  username={state.username || ''}
+                  username={currentUsername || ''}
                   onClose={() => handleOpenPage(null)}
                 />
               }
             />
-            <Route path="/shop" element={<ShopScreen username={state.username || ''} />} />
+            <Route path="/shop" element={<ShopScreen username={currentUsername || ''} />} />
             <Route
               path="/news"
               element={
-                <NewsScreen
-                  username={state.username || undefined}
-                  onClose={() => handleOpenPage(null)}
-                />
+                <NewsScreen username={currentUsername} onClose={() => handleOpenPage(null)} />
               }
             />
             <Route
               path="/feedback"
               element={
                 <FeedbackScreen
-                  username={state.username || ''}
+                  username={currentUsername || ''}
                   onClose={() => {
                     storage.set(STORAGE_KEYS.LAST_FEEDBACK, Date.now().toString());
                     handleOpenPage(null);
@@ -257,7 +168,9 @@ const AppRoutes: React.FC = () => {
         />
       </Suspense>
 
-      <DebugOverlay />
+      <Suspense fallback={null}>
+        <DebugOverlay />
+      </Suspense>
     </div>
   );
 };

@@ -7,9 +7,9 @@
 
 /* eslint-disable no-console */
 
-import { publishActivity } from '../social/publishActivity';
 import { supabase } from '../../services/supabase';
 import { normalizeUsername } from '../format';
+import { publishActivity } from '../social/publishActivity';
 
 /**
  * Test publishing a daily score activity
@@ -58,7 +58,7 @@ export async function testPublishDailyScore(username: string, score: number = 10
     console.log('\nLatest activities:');
     data.forEach((activity, i) => {
       console.log(
-        `  ${i + 1}. ${activity.type} - Score: ${activity.score || 'N/A'} - ${new Date(activity.created_at).toLocaleString()}`
+        `  ${i + 1}. ${activity.type} - Score: ${activity.score || 'N/A'} - ${activity.created_at ? new Date(activity.created_at).toLocaleString() : 'N/A'}`
       );
     });
 

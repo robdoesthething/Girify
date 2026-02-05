@@ -9,7 +9,7 @@ import { useAuth } from '../useAuth';
 
 // Mock Firebase
 const mockUnsubscribe = vi.fn();
-const mockOnAuthStateChanged = vi.fn((auth, callback) => {
+const mockOnAuthStateChanged = vi.fn((_auth: any, _callback: any) => {
   return mockUnsubscribe;
 });
 
@@ -20,7 +20,7 @@ vi.mock('../../../../firebase', () => ({
 }));
 
 vi.mock('firebase/auth', () => ({
-  onAuthStateChanged: (auth: any, cb: any) => mockOnAuthStateChanged(auth, cb),
+  onAuthStateChanged: (_auth: any, _cb: any) => mockOnAuthStateChanged(_auth, _cb),
   signOut: vi.fn(),
   updateProfile: vi.fn(),
   User: {},
@@ -64,7 +64,6 @@ vi.mock('../../../../utils/security', () => ({
 }));
 
 describe('useAuth Hook', () => {
-  const mockDispatch = vi.fn();
   const mockExecute = vi.fn(fn => fn()); // Execute immediately
   const mockNotify = vi.fn();
 
@@ -80,7 +79,7 @@ describe('useAuth Hook', () => {
     });
 
     // Storage Mocks
-    vi.spyOn(storage, 'get').mockImplementation((key, defaultValue) => defaultValue ?? null);
+    vi.spyOn(storage, 'get').mockImplementation((_key, defaultValue) => defaultValue ?? null);
     vi.spyOn(storage, 'set').mockImplementation(() => {});
     vi.spyOn(storage, 'remove').mockImplementation(() => {});
   });
@@ -90,17 +89,20 @@ describe('useAuth Hook', () => {
   });
 
   it('should initialize with loading state', () => {
-    const { result } = renderHook(() => useAuth(mockDispatch, 'intro'));
+    const { result } = renderHook(() => useAuth());
     expect(result.current.isLoading).toBe(true);
   });
 
   it('should handle unauthenticated state', async () => {
-    const { result } = renderHook(() => useAuth(mockDispatch, 'intro'));
+    const { result } = renderHook(() => useAuth());
 
     // Simulate no user
     await act(async () => {
-      const callback = mockOnAuthStateChanged.mock.calls[0][1];
-      await callback(null);
+      const calls = mockOnAuthStateChanged.mock.calls;
+      if (calls.length > 0 && calls[0]) {
+        const callback = calls[0][1];
+        await callback(null);
+      }
     });
 
     expect(result.current.user).toBeNull();
@@ -125,28 +127,27 @@ describe('useAuth Hook', () => {
     (socialUtils.getUserProfile as any).mockResolvedValue(mockProfile);
     (socialUtils.ensureUserProfile as any).mockResolvedValue(mockProfile);
 
-    const { result } = renderHook(() => useAuth(mockDispatch, 'intro'));
+    const { result } = renderHook(() => useAuth());
 
     // Simulate login
     await act(async () => {
-      const callback = mockOnAuthStateChanged.mock.calls[0][1];
-      await callback(mockUser);
+      const calls = mockOnAuthStateChanged.mock.calls;
+      if (calls.length > 0 && calls[0]) {
+        const callback = calls[0][1];
+        await callback(mockUser);
+      }
     });
 
     expect(result.current.user).toBe(mockUser);
     expect(result.current.isLoading).toBe(false);
-    expect(mockDispatch).toHaveBeenCalledWith(
-      expect.objectContaining({
-        type: 'SET_USERNAME',
-        payload: expect.stringMatching(/@?testuser/),
-      })
-    );
     expect(socialUtils.ensureUserProfile).toHaveBeenCalled();
+    // Verify profile is set in state
+    expect(result.current.profile).toEqual(mockProfile);
   });
 
   it('should logout user', async () => {
     // Setup authenticated state first if needed, or just test handleLogout
-    const { result } = renderHook(() => useAuth(mockDispatch, 'intro'));
+    const { result } = renderHook(() => useAuth());
 
     const mockNavigate = vi.fn();
 
@@ -158,7 +159,11 @@ describe('useAuth Hook', () => {
     // Since mockExecute executes immediately:
     const { signOut } = await import('firebase/auth');
     expect(signOut).toHaveBeenCalled();
-    expect(mockDispatch).toHaveBeenCalledWith({ type: 'LOGOUT' });
     expect(mockNavigate).toHaveBeenCalledWith('/');
+    // Verify profile is cleared
+    // Note: Since handleLogout uses state setter, checking it here might depend on React batching/re-render.
+    // Ideally we'd check if setProfile(null) was called or if checking result.current.profile after update.
+    // For unit test of hook, renderHook result updates after act.
+    expect(result.current.profile).toBeNull();
   });
 });

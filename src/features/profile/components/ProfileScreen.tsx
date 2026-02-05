@@ -223,4 +223,4 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ username }) => {
   );
 };
 
-export default ProfileScreen;
+export default React.memo(ProfileScreen);

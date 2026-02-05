@@ -1,4 +1,12 @@
-import { createContext, FC, ReactNode, useCallback, useContext, useMemo, useState } from 'react';
+import React, {
+  createContext,
+  FC,
+  ReactNode,
+  useCallback,
+  useContext,
+  useMemo,
+  useState,
+} from 'react';
 
 interface LoadingState {
   [key: string]: boolean;
@@ -39,25 +47,23 @@ export const LoadingProvider: FC<{ children: ReactNode }> = ({ children }) => {
     });
   }, []);
 
-  const isLoading = useCallback((key: string) => !!loading[key], [loading]);
-
-  const isAnyLoading = useCallback(() => Object.values(loading).some(Boolean), [loading]);
+  const anyLoading = Object.values(loading).some(Boolean);
 
   const value = useMemo(
     () => ({
       loading,
       startLoading,
       stopLoading,
-      isLoading,
-      isAnyLoading,
+      isLoading: (key: string) => !!loading[key],
+      isAnyLoading: () => anyLoading,
     }),
-    [loading, startLoading, stopLoading, isLoading, isAnyLoading]
+    [loading, startLoading, stopLoading, anyLoading]
   );
 
   return (
     <LoadingContext.Provider value={value}>
       {children}
-      {isAnyLoading() && <GlobalLoadingIndicator />}
+      {anyLoading && <GlobalLoadingIndicator />}
     </LoadingContext.Provider>
   );
 };
@@ -71,10 +77,12 @@ export const useLoading = () => {
 };
 
 // Global loading indicator (top bar)
-const GlobalLoadingIndicator = () => (
+const GlobalLoadingIndicator = React.memo(() => (
   <div className="fixed top-0 left-0 right-0 h-1 bg-blue-500/20 z-50" role="progressbar">
     <div className="h-full bg-sky-500 animate-loading-bar shadow-[0_0_10px_#0ea5e9]" />
   </div>
-);
+));
+
+GlobalLoadingIndicator.displayName = 'GlobalLoadingIndicator';
 
 export default LoadingContext;

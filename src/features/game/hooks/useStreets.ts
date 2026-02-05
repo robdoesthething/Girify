@@ -2,11 +2,15 @@ import booleanDisjoint from '@turf/boolean-disjoint';
 import centroid from '@turf/centroid';
 import turfDistance from '@turf/distance';
 import { multiLineString, point } from '@turf/helpers';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { Street } from '../../../types/game';
 
 // --- Constants ---
 const HINTS_LIMIT = 3;
+const STREETS_CACHE_KEY = 'girify_streets_cache';
+const STREETS_VERSION_KEY = 'girify_streets_version';
+// Bump this when streets.json changes to invalidate cache
+const STREETS_VERSION = '1';
 
 // --- Helper Functions ---
 
@@ -24,27 +28,22 @@ const isValidType = (name: string): boolean => {
 };
 
 const processStreetsData = (rawStreets: Street[]): Street[] => {
-  const streets = rawStreets;
-  const rawValidStreets = streets.filter(
+  const rawValidStreets = rawStreets.filter(
     s => isValidType(s.name) && s.geometry && s.geometry.length > 0
   );
 
   // Deduplicate by name, keeping the one with most geometry points
-  const uniqueStreetsMap = new Map<string, Street>();
+  // Pre-compute flat lengths to avoid redundant .flat() calls
+  const uniqueStreetsMap = new Map<string, { street: Street; geomLength: number }>();
   rawValidStreets.forEach(s => {
-    if (!uniqueStreetsMap.has(s.name)) {
-      uniqueStreetsMap.set(s.name, s);
-    } else {
-      const existing = uniqueStreetsMap.get(s.name)!;
-      const currentLength = s.geometry.flat().length;
-      const existingLength = existing.geometry.flat().length;
-      if (currentLength > existingLength) {
-        uniqueStreetsMap.set(s.name, s);
-      }
+    const geomLength = s.geometry.flat().length;
+    const existing = uniqueStreetsMap.get(s.name);
+    if (!existing || geomLength > existing.geomLength) {
+      uniqueStreetsMap.set(s.name, { street: s, geomLength });
     }
   });
 
-  return Array.from(uniqueStreetsMap.values());
+  return Array.from(uniqueStreetsMap.values()).map(v => v.street);
 };
 
 // Use 'any' return type compatible with Turf's Position[] expectation to avoid type errors
@@ -63,12 +62,29 @@ const toTurf = (lines: number[][][]): any[][] =>
 export const useStreets = () => {
   const [validStreets, setValidStreets] = useState<Street[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const hintCache = useRef<Map<string | number, Street[]>>(new Map());
 
   useEffect(() => {
     let mounted = true;
 
     const loadStreets = async () => {
       try {
+        // Try localStorage cache first
+        const cachedVersion = localStorage.getItem(STREETS_VERSION_KEY);
+        if (cachedVersion === STREETS_VERSION) {
+          const cached = localStorage.getItem(STREETS_CACHE_KEY);
+          if (cached) {
+            // Unblock main thread to allow "Loading..." state to render
+            await new Promise(resolve => setTimeout(resolve, 0));
+            const processed = JSON.parse(cached) as Street[];
+            if (mounted && processed.length > 0) {
+              setValidStreets(processed);
+              setIsLoading(false);
+              return;
+            }
+          }
+        }
+
         // Fetch from static assets
         const response = await fetch('/streets.json');
         if (!response.ok) {
@@ -77,9 +93,23 @@ export const useStreets = () => {
         const rawStreets = (await response.json()) as Street[];
 
         if (mounted) {
+          // Process data (Computationally expensive)
+          // Ensure this runs after a tick
+          await new Promise(resolve => setTimeout(resolve, 0));
+
           const processed = processStreetsData(rawStreets);
           setValidStreets(processed);
           setIsLoading(false);
+
+          // Cache processed data - Defer to avoid blocking commit
+          setTimeout(() => {
+            try {
+              localStorage.setItem(STREETS_CACHE_KEY, JSON.stringify(processed));
+              localStorage.setItem(STREETS_VERSION_KEY, STREETS_VERSION);
+            } catch {
+              // localStorage full or unavailable — ignore
+            }
+          }, 100);
         }
       } catch (error) {
         console.error('Failed to load streets data:', error);
@@ -95,6 +125,11 @@ export const useStreets = () => {
       mounted = false;
     };
   }, []);
+
+  // Clear hint cache when streets change
+  useEffect(() => {
+    hintCache.current.clear();
+  }, [validStreets]);
 
   const getIntersectionHints = useCallback(
     (currentGeo: any, targetId: string | number, streets: Street[]): Street[] => {
@@ -170,6 +205,12 @@ export const useStreets = () => {
         return [];
       }
 
+      // Check cache
+      const cached = hintCache.current.get(targetStreet.id);
+      if (cached) {
+        return cached;
+      }
+
       try {
         const currentGeo = multiLineString(toTurf(targetStreet.geometry));
 
@@ -180,6 +221,8 @@ export const useStreets = () => {
           hints = [...hints, ...distanceHints];
         }
 
+        // Cache result
+        hintCache.current.set(targetStreet.id, hints);
         return hints;
       } catch (e) {
         console.error('Turf error in getHintStreets:', e);

@@ -75,7 +75,7 @@ async function checkGameResults(username: string): Promise<DiagnosticResult> {
   return {
     check: 'Game Results',
     status: 'pass',
-    message: `Found ${count} game results. Latest: Score ${data[0].score} at ${data[0].played_at}`,
+    message: `Found ${count} game results. Latest: Score ${data[0]?.score} at ${data[0]?.played_at}`,
     data,
   };
 }
@@ -112,7 +112,7 @@ async function checkActivityFeed(username: string): Promise<DiagnosticResult> {
   return {
     check: 'Activity Feed',
     status: 'pass',
-    message: `Found ${count} activity entries. Latest: ${data[0].type} at ${data[0].created_at}`,
+    message: `Found ${count} activity entries. Latest: ${data[0]?.type} at ${data[0]?.created_at}`,
     data,
   };
 }
@@ -206,7 +206,7 @@ async function checkFriendsFeed(username: string): Promise<DiagnosticResult> {
   return {
     check: 'Friends Feed',
     status: 'pass',
-    message: `Found ${count} friend activities. Latest: ${data[0].username} - ${data[0].type}`,
+    message: `Found ${count} friend activities. Latest: ${data[0]?.username} - ${data[0]?.type}`,
     data,
   };
 }
@@ -220,7 +220,7 @@ async function checkRLSPolicies(): Promise<DiagnosticResult> {
   const results: string[] = [];
 
   for (const table of tables) {
-    const { error } = await supabase.from(table).select('*').limit(1);
+    const { error } = await (supabase as any).from(table).select('*').limit(1);
 
     if (error) {
       results.push(`❌ ${table}: ${error.message}`);
