@@ -41,7 +41,7 @@ const SearchPanel: React.FC<SearchPanelProps> = ({
 
   return (
     <div
-      className={`mb-8 p-4 rounded-xl border ${themeClasses(theme, 'bg-slate-100 border-slate-200', 'bg-slate-900 border-slate-800')}`}
+      className={`mb-8 p-4 rounded-xl border ${themeClasses(theme, 'bg-slate-900 border-slate-800', 'bg-slate-100 border-slate-200')}`}
     >
       <h3 className="font-bold mb-3">Add Friend</h3>
       <form onSubmit={handleSubmit} className="flex gap-2">
@@ -50,7 +50,7 @@ const SearchPanel: React.FC<SearchPanelProps> = ({
           value={query}
           onChange={e => setQuery(e.target.value)}
           placeholder="Search username..."
-          className={`flex-1 px-4 py-2 rounded-lg border text-sm ${themeClasses(theme, 'bg-white border-slate-300 text-slate-900 placeholder-slate-400', 'bg-slate-800 border-slate-700 text-white placeholder-slate-400')}`}
+          className={`flex-1 px-4 py-2 rounded-lg border text-sm ${themeClasses(theme, 'bg-slate-800 border-slate-700 text-white placeholder-slate-400', 'bg-white border-slate-300 text-slate-900 placeholder-slate-400')}`}
           aria-label="Search username"
         />
         <button
@@ -67,7 +67,7 @@ const SearchPanel: React.FC<SearchPanelProps> = ({
           {searchResults.map(u => (
             <div
               key={u.username}
-              className={`flex justify-between items-center p-2 rounded ${themeClasses(theme, 'bg-white', 'bg-slate-800')}`}
+              className={`flex justify-between items-center p-2 rounded ${themeClasses(theme, 'bg-slate-800', 'bg-white')}`}
             >
               <span className="font-bold">{u.username.toLowerCase()}</span>
               <button
@@ -79,8 +79,8 @@ const SearchPanel: React.FC<SearchPanelProps> = ({
                         ? 'bg-emerald-500 text-white cursor-default'
                         : themeClasses(
                             theme,
-                            'bg-slate-200 hover:bg-sky-500 hover:text-white',
-                            'bg-slate-700 hover:bg-sky-500 hover:text-white'
+                            'bg-slate-700 hover:bg-sky-500 hover:text-white',
+                            'bg-slate-200 hover:bg-sky-500 hover:text-white'
                           )
                     }
                   `}

@@ -13,12 +13,14 @@ import PendingGoogleUserView from './PendingGoogleUserView';
 interface RegisterPanelProps {
   theme?: 'dark' | 'light';
   onRegister?: (handle: string) => void;
+  onClose?: () => void;
   initialMode?: 'signin' | 'signup';
 }
 
 const RegisterPanel: React.FC<RegisterPanelProps> = ({
   theme: themeProp,
   onRegister,
+  onClose,
   initialMode = 'signin',
 }) => {
   const { theme: contextTheme, t } = useTheme();
@@ -61,8 +63,26 @@ const RegisterPanel: React.FC<RegisterPanelProps> = ({
       <motion.div
         initial={{ scale: 0.9, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
-        className="w-full max-w-sm my-auto"
+        className="w-full max-w-sm my-auto relative"
       >
+        {/* Close button */}
+        {onClose && (
+          <button
+            onClick={onClose}
+            className={`absolute -top-2 -right-2 z-10 p-2 rounded-full transition-colors ${themeClasses(theme, 'bg-slate-700 hover:bg-slate-600 text-white', 'bg-slate-200 hover:bg-slate-300 text-slate-700')}`}
+            aria-label={t('close') || 'Close'}
+            type="button"
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M6 18L18 6M6 6l12 12"
+              />
+            </svg>
+          </button>
+        )}
         <Card
           className={`p-8 shadow-2xl border ${themeClasses(theme, '!bg-slate-900/90 !border-slate-700', '!bg-white/90 !border-slate-200')}`}
         >

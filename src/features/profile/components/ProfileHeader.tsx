@@ -63,7 +63,6 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
               src={cosmeticAvatar.image as string}
               alt="Avatar"
               className="w-full h-full object-cover"
-              style={{ imageRendering: 'pixelated' }}
             />
           ) : (
             legacyAvatar

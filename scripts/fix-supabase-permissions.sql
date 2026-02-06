@@ -235,3 +235,39 @@ ORDER BY tablename, policyname;
 -- ALTER TABLE game_results ENABLE ROW LEVEL SECURITY;
 --
 -- ============================================================================
+-- ⚠️ SUPERSEDED: Run harden-rls-policies.sql AFTER this script.
+-- That script drops the overly-permissive policies created here.
+-- ============================================================================
+--
+-- SECURITY ADVISORY (2026-02-06)
+-- ============================================================================
+--
+-- KNOWN LIMITATION: Firebase Auth + Supabase Anon Key
+--
+-- This app uses Firebase for authentication but Supabase for the database.
+-- The Supabase client uses the anon key, so auth.uid() in RLS policies
+-- returns the Supabase anon role — NOT the Firebase UID.
+--
+-- This means traditional RLS ownership checks (e.g. user_id = auth.uid())
+-- CANNOT work. All WITH CHECK (true) policies are intentionally permissive
+-- because ownership validation happens in application code instead.
+--
+-- AFFECTED TABLES (WITH CHECK (true)):
+--   - game_results INSERT: app validates via assertCurrentUser()
+--   - users UPDATE: app validates via profile update flow
+--   - friendships ALL: app validates friendship ownership
+--   - announcements ALL: app validates via requireAdmin()
+--   - activity_feed INSERT: app validates via authenticated user context
+--
+-- TO PROPERLY FIX THIS, choose one of:
+--   1. Custom JWT mapping: Firebase → Supabase custom token with Firebase UID
+--      as a custom claim, then use auth.jwt()->>'firebase_uid' in RLS
+--   2. Server-side API endpoints: Move all mutations to Vercel API routes
+--      that verify Firebase tokens before writing to Supabase
+--   3. Supabase Edge Functions: Proxy mutations through Edge Functions that
+--      validate Firebase tokens
+--
+-- Until one of these is implemented, application-layer ownership checks
+-- (assertCurrentUser, requireAdmin) serve as the primary access control.
+--
+-- ============================================================================

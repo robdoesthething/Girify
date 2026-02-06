@@ -42,6 +42,9 @@ export async function insertGameResult(
     user_id: data.user_id ? normalizeUsername(data.user_id) : null,
   };
 
+  // Ownership is enforced by RLS: the custom JWT's `sub` claim (Firebase UID)
+  // is matched against the user's username via the users table.
+
   const { error } = await supabase.from('game_results').insert(payload);
 
   if (error) {

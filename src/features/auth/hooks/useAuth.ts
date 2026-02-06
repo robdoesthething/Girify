@@ -5,6 +5,7 @@ import { auth } from '../../../firebase';
 import { useAsyncOperation } from '../../../hooks/useAsyncOperation';
 import { useNotification } from '../../../hooks/useNotification';
 import { UserMigrationService } from '../../../services/userMigration';
+import { setSupabaseAccessToken } from '../../../services/supabase';
 import { FeedbackReward, GameHistory, UserProfile } from '../../../types/user';
 import { logger } from '../../../utils/logger';
 import { sanitizeInput } from '../../../utils/security';
@@ -18,6 +19,33 @@ import {
   updateUserProfile,
 } from '../../../utils/social';
 import { storage } from '../../../utils/storage';
+
+/**
+ * Mint a Supabase-compatible JWT from the Firebase user's ID token.
+ * On success, injects it into the Supabase client so RLS ownership checks work.
+ * On failure, logs a warning and continues (graceful degradation — anon key still works for reads).
+ */
+async function mintSupabaseToken(firebaseUser: User): Promise<void> {
+  try {
+    const idToken = await firebaseUser.getIdToken();
+    const res = await fetch('/api/auth/token', {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${idToken}` },
+    });
+
+    if (!res.ok) {
+      console.warn('[Auth] Failed to mint Supabase token:', res.status);
+      return;
+    }
+
+    const json = await res.json();
+    if (json.success && json.data?.token) {
+      setSupabaseAccessToken(json.data.token);
+    }
+  } catch (e) {
+    console.warn('[Auth] Supabase token minting failed, using anon key:', e);
+  }
+}
 
 export interface UseAuthResult {
   user: User | null;
@@ -43,7 +71,7 @@ export const useAuth = (onAnnouncementsCheck?: () => void): UseAuthResult => {
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const ref = params.get('ref');
-    if (ref && !storage.get(STORAGE_KEYS.REFERRER, '')) {
+    if (ref && /^[a-zA-Z0-9_]{2,20}$/.test(ref) && !storage.get(STORAGE_KEYS.REFERRER, '')) {
       storage.set(STORAGE_KEYS.REFERRER, ref);
     }
   }, []);
@@ -75,6 +103,9 @@ export const useAuth = (onAnnouncementsCheck?: () => void): UseAuthResult => {
           console.warn('[Auth] Failed to reload user:', e);
           setEmailVerified(user.emailVerified);
         }
+
+        // Mint Supabase JWT so RLS ownership checks work
+        await mintSupabaseToken(user);
 
         // CRITICAL: Check for existing username FIRST (set by handleRegister callback during login)
         // Re-check storage in case it was updated by redirect handler
@@ -121,6 +152,7 @@ export const useAuth = (onAnnouncementsCheck?: () => void): UseAuthResult => {
     (navigate: (path: string) => void) => {
       execute(
         async () => {
+          setSupabaseAccessToken(null);
           await signOut(auth);
           storage.remove(STORAGE_KEYS.USERNAME);
           storage.remove('lastPlayedDate');

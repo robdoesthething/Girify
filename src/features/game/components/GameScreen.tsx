@@ -162,6 +162,7 @@ const GameScreen: FC = () => {
         <RegisterPanel
           theme={theme}
           onRegister={handlers.handleRegister}
+          onClose={() => dispatch({ type: 'SET_GAME_STATE', payload: 'intro' })}
           initialMode={state.registerMode}
         />
       )}

@@ -52,6 +52,7 @@ export function useShopState(username: string): UseShopStateReturn {
   const [equipped, setEquipped] = useState<EquippedCosmetics>({});
   const [shopItems, setShopItems] = useState<GroupedShopItems>({
     avatarFrames: [],
+    frames: [],
     titles: [],
     special: [],
     avatars: [],

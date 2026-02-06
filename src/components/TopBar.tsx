@@ -1,5 +1,6 @@
 import { AnimatePresence, motion } from 'framer-motion';
 import React, { useState } from 'react';
+import { useLocation } from 'react-router-dom';
 import { useTheme } from '../context/ThemeContext';
 import { themeClasses } from '../utils/themeUtils';
 import Logo from './Logo';
@@ -14,8 +15,12 @@ interface TopBarProps {
 const TopBar: React.FC<TopBarProps> = React.memo(
   ({ onOpenPage, username, onTriggerLogin, onLogout }) => {
     const { theme, t } = useTheme();
+    const location = useLocation();
     const [menuOpen, setMenuOpen] = useState(false);
     const [showLoginModal, setShowLoginModal] = useState(false);
+
+    const isActivePage = (page: string | null) =>
+      page === null ? location.pathname === '/' : location.pathname === `/${page}`;
 
     const handleMenuClick = (page: string | null) => {
       const RESTRICTED_PAGES = ['profile', 'friends', 'leaderboard', 'shop', 'admin'];
@@ -124,69 +129,26 @@ backdrop-blur-md border-b ${themeClasses(theme, 'border-slate-600', 'border-slat
                 </div>
 
                 <nav className="flex-1 flex flex-col gap-2 overflow-y-auto px-6 pb-20">
-                  <button
-                    onClick={() => handleMenuClick(null)}
-                    className="text-left py-2 px-3 rounded-lg hover:bg-slate-500/10 font-medium text-sky-500 bg-sky-500/10 flex items-center gap-4 shrink-0"
-                    type="button"
-                  >
-                    <span className="text-xl">🏠</span> {t('home')}
-                  </button>
-                  <button
-                    onClick={() => handleMenuClick('profile')}
-                    className="text-left py-2 px-3 rounded-lg hover:bg-slate-500/10 font-medium flex items-center gap-4 shrink-0"
-                    type="button"
-                  >
-                    <span className="text-xl">👤</span> {t('myProfile')}
-                  </button>
-                  <button
-                    onClick={() => handleMenuClick('friends')}
-                    className="text-left py-2 px-3 rounded-lg hover:bg-slate-500/10 font-medium flex items-center gap-4 shrink-0"
-                    type="button"
-                  >
-                    <span className="text-xl">👥</span> {t('friends')}
-                  </button>
-                  <button
-                    onClick={() => handleMenuClick('leaderboard')}
-                    className="text-left py-2 px-3 rounded-lg hover:bg-slate-500/10 font-medium flex items-center gap-4 shrink-0"
-                    type="button"
-                  >
-                    <span className="text-xl">🏆</span> {t('leaderboard')}
-                  </button>
-                  <button
-                    onClick={() => handleMenuClick('shop')}
-                    className="text-left py-2 px-3 rounded-lg hover:bg-slate-500/10 font-medium flex items-center gap-4 shrink-0"
-                    type="button"
-                  >
-                    <span className="text-xl">🛒</span> {t('shop')}
-                  </button>
-                  <button
-                    onClick={() => handleMenuClick('about')}
-                    className="text-left py-2 px-3 rounded-lg hover:bg-slate-500/10 font-medium flex items-center gap-4 shrink-0"
-                    type="button"
-                  >
-                    <span className="text-xl">ℹ️</span> {t('about')}
-                  </button>
-                  <button
-                    onClick={() => handleMenuClick('news')}
-                    className="text-left py-2 px-3 rounded-lg hover:bg-slate-500/10 font-medium flex items-center gap-4 shrink-0"
-                    type="button"
-                  >
-                    <span className="text-xl">📰</span> {t('news') || 'News'}
-                  </button>
-                  <button
-                    onClick={() => handleMenuClick('feedback')}
-                    className="text-left py-2 px-3 rounded-lg hover:bg-slate-500/10 font-medium flex items-center gap-4 shrink-0"
-                    type="button"
-                  >
-                    <span className="text-xl">📝</span> {t('feedback') || 'Feedback'}
-                  </button>
-                  <button
-                    onClick={() => handleMenuClick('settings')}
-                    className="text-left py-2 px-3 rounded-lg hover:bg-slate-500/10 font-medium flex items-center gap-4 shrink-0"
-                    type="button"
-                  >
-                    <span className="text-xl">⚙️</span> {t('settings')}
-                  </button>
+                  {[
+                    { page: null, emoji: '🏠', label: t('home') },
+                    { page: 'profile', emoji: '👤', label: t('myProfile') },
+                    { page: 'friends', emoji: '👥', label: t('friends') },
+                    { page: 'leaderboard', emoji: '🏆', label: t('leaderboard') },
+                    { page: 'shop', emoji: '🛒', label: t('shop') },
+                    { page: 'about', emoji: 'ℹ️', label: t('about') },
+                    { page: 'news', emoji: '📰', label: t('news') || 'News' },
+                    { page: 'feedback', emoji: '📝', label: t('feedback') || 'Feedback' },
+                    { page: 'settings', emoji: '⚙️', label: t('settings') },
+                  ].map(item => (
+                    <button
+                      key={item.page ?? 'home'}
+                      onClick={() => handleMenuClick(item.page)}
+                      className={`text-left py-2 px-3 rounded-lg hover:bg-slate-500/10 font-medium flex items-center gap-4 shrink-0 ${isActivePage(item.page) ? 'text-sky-500 bg-sky-500/10' : ''}`}
+                      type="button"
+                    >
+                      <span className="text-xl">{item.emoji}</span> {item.label}
+                    </button>
+                  ))}
 
                   <div className="h-px bg-slate-200 dark:bg-slate-700 my-2 shrink-0" />
 

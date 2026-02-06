@@ -21,6 +21,7 @@ export function useShopData(username: string) {
   const [equipped, setEquipped] = useState<EquippedCosmetics>({});
   const [shopItems, setShopItems] = useState<GroupedShopItems>({
     avatarFrames: [],
+    frames: [],
     titles: [],
     special: [],
     avatars: [],

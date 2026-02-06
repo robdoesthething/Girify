@@ -1,6 +1,7 @@
 import { motion } from 'framer-motion';
 import React from 'react';
 import { useTheme } from '../context/ThemeContext';
+import { sanitizeHtml } from '../utils/security';
 import { themeClasses } from '../utils/themeUtils';
 
 interface Announcement {
@@ -75,7 +76,7 @@ const AnnouncementModal: React.FC<AnnouncementModalProps> = ({ announcement, onD
         {/* Body */}
         <div
           className="mb-6 opacity-80 leading-relaxed text-sm max-h-60 overflow-y-auto font-inter"
-          dangerouslySetInnerHTML={{ __html: announcement.body.replace(/\n/g, '<br />') }}
+          dangerouslySetInnerHTML={{ __html: sanitizeHtml(announcement.body) }}
         />
 
         {/* Action */}
