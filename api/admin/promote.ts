@@ -9,6 +9,7 @@
  * 4. Supabase admin table update
  */
 
+import { timingSafeEqual } from 'crypto';
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { extractBearerToken, verifyFirebaseToken } from '../_lib/auth';
 import { RATE_LIMIT_DEFAULTS, USERNAME_CONSTRAINTS } from '../_lib/constants';
@@ -106,10 +107,13 @@ export default async function handler(req: VercelRequest, res: VercelResponse): 
       return;
     }
 
-    if (adminKey !== serverAdminKey) {
-      console.warn(
-        `[API] Invalid admin key attempt by user ${user.uid} (${user.email}) from ${clientIp}`
-      );
+    const keyBuffer = Buffer.from(adminKey);
+    const serverKeyBuffer = Buffer.from(serverAdminKey);
+    const keysMatch =
+      keyBuffer.length === serverKeyBuffer.length && timingSafeEqual(keyBuffer, serverKeyBuffer);
+
+    if (!keysMatch) {
+      console.warn(`[API] Invalid admin key attempt by user ${user.uid} from ${clientIp}`);
       ErrorResponses.FORBIDDEN(res, 'Invalid admin key');
       return;
     }
@@ -122,7 +126,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse): 
     }
 
     // 6. Success - log and return
-    console.log(`[API] ✅ Successfully promoted user ${user.uid} (${user.email}) to admin`);
+    console.log(`[API] Successfully promoted user ${user.uid} to admin`);
 
     sendSuccess(res, { uid: user.uid });
   } catch (error) {

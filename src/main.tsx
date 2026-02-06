@@ -54,7 +54,10 @@ if (rootElement) {
   } catch (e: unknown) {
     logger.error('[main.tsx] Failed to render:', e);
     const errorMessage = e instanceof Error ? e.message : String(e);
-    rootElement.innerHTML = `<div style="padding: 20px; color: red;">Error: ${errorMessage}</div>`;
+    const errorDiv = document.createElement('div');
+    errorDiv.style.cssText = 'padding: 20px; color: red;';
+    errorDiv.textContent = `Error: ${errorMessage}`;
+    rootElement.replaceChildren(errorDiv);
   }
 } else {
   logger.error('[main.tsx] Root element not found');

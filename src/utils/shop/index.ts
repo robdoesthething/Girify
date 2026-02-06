@@ -29,6 +29,7 @@ export interface ShopItem {
 
 export interface GroupedShopItems {
   avatarFrames: ShopItem[];
+  frames: ShopItem[]; // Alias for avatarFrames - used by ShopScreen tabs
   titles: ShopItem[];
   special: ShopItem[];
   avatars: ShopItem[];
@@ -122,8 +123,10 @@ export const getShopItems = async (forceRefresh = false): Promise<GroupedShopIte
   const allItems = Array.from(itemMap.values());
 
   // Group items
+  const frameItems = allItems.filter(i => i.type === 'frame');
   const grouped: GroupedShopItems = {
-    avatarFrames: allItems.filter(i => i.type === 'frame'),
+    avatarFrames: frameItems,
+    frames: frameItems, // Alias for ShopScreen tabs compatibility
     titles: allItems.filter(i => i.type === 'title'),
     special: allItems.filter(i => i.type === 'special'),
     avatars: allItems.filter(

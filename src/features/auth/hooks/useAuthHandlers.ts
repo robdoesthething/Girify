@@ -110,7 +110,8 @@ export function createAuthHandlers(config: AuthHandlersConfig, state: AuthHandle
       await handlePostLogin(handle, true);
     } catch (err) {
       const error = err instanceof Error ? err : new Error(String(err));
-      dispatch({ type: 'SET_ERROR', payload: `Login processing failed: ${error.message}` });
+      console.error('[Auth] Login processing failed:', error.message);
+      dispatch({ type: 'SET_ERROR', payload: 'Login processing failed. Please try again.' });
       dispatch({ type: 'SET_LOADING', payload: false });
     }
   };

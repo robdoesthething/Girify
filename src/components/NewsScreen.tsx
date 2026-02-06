@@ -1,6 +1,7 @@
 import { motion } from 'framer-motion';
 import React, { useEffect, useState } from 'react';
 import { useTheme } from '../context/ThemeContext';
+import { sanitizeHtml } from '../utils/security';
 import { Announcement, getActiveAnnouncements, markAnnouncementAsRead } from '../utils/social/news';
 import { themeClasses } from '../utils/themeUtils';
 
@@ -130,7 +131,7 @@ const NewsScreen: React.FC<NewsScreenProps> = ({ onClose, username }) => {
                 </div>
                 <div
                   className="prose prose-sm dark:prose-invert max-w-none opacity-80 leading-relaxed font-inter"
-                  dangerouslySetInnerHTML={{ __html: announcement.body.replace(/\n/g, '<br />') }}
+                  dangerouslySetInnerHTML={{ __html: sanitizeHtml(announcement.body) }}
                 />
               </motion.article>
             ))}

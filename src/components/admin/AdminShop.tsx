@@ -61,12 +61,20 @@ const AdminShop: React.FC<AdminShopProps> = ({ items, onRefresh, notify, confirm
 
   const getTypeStyle = (type: string) => {
     if (type === 'avatar') {
-      return 'bg-purple-100 text-purple-600';
+      return themeClasses(
+        theme,
+        'bg-purple-900/30 text-purple-400',
+        'bg-purple-100 text-purple-600'
+      );
     }
     if (type === 'frame') {
-      return 'bg-orange-100 text-orange-600';
+      return themeClasses(
+        theme,
+        'bg-orange-900/30 text-orange-400',
+        'bg-orange-100 text-orange-600'
+      );
     }
-    return 'bg-slate-100 text-slate-600';
+    return themeClasses(theme, 'bg-slate-700 text-slate-300', 'bg-slate-100 text-slate-600');
   };
 
   return (

@@ -30,12 +30,12 @@ export const getTabButtonClass = (
  */
 export const getItemCardClass = (theme: 'light' | 'dark', isActive: boolean): string => {
   if (isActive) {
-    return 'border-4 border-sky-500 bg-sky-500/10 shadow-sky-500/20 shadow-xl';
+    return 'border-2 border-sky-500 bg-sky-500/10 shadow-sky-500/20 shadow-xl';
   }
   return themeClasses(
     theme,
-    'border-4 border-slate-700 bg-slate-800',
-    'border-4 border-slate-200 bg-white/50 backdrop-blur-sm shadow-lg'
+    'border-2 border-slate-700 bg-slate-800',
+    'border-2 border-slate-200 bg-white/50 backdrop-blur-sm shadow-lg'
   );
 };
 

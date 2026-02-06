@@ -1,8 +1,7 @@
 import { motion } from 'framer-motion';
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import TopBar from '../../../components/TopBar';
-import { API_TIMEOUT_MS } from '../../../config/appConstants';
 import { useTheme } from '../../../context/ThemeContext';
 import { DISTRICTS } from '../../../data/districts';
 import { UI } from '../../../utils/constants';
@@ -13,6 +12,8 @@ import {
   TeamScoreEntry,
 } from '../../../utils/social/leaderboard';
 import { themeClasses } from '../../../utils/themeUtils';
+
+const LEADERBOARD_TIMEOUT_MS = 10000;
 
 interface ScoreEntry {
   id?: string;
@@ -34,8 +35,20 @@ const LeaderboardScreen: React.FC<LeaderboardScreenProps> = ({ currentUser }) =>
   const [period, setPeriod] = useState<'all' | 'monthly' | 'weekly' | 'daily'>('all');
   const [viewMode, setViewMode] = useState<'individual' | 'teams'>('individual');
   const [error, setError] = useState<string | null>(null);
+  const cacheRef = useRef<Map<string, { scores: ScoreEntry[]; teamScores: TeamScoreEntry[] }>>(
+    new Map()
+  );
 
   const loadScores = useCallback(async () => {
+    const cacheKey = `${viewMode}-${period}`;
+    const cached = cacheRef.current.get(cacheKey);
+    if (cached) {
+      setScores(cached.scores);
+      setTeamScores(cached.teamScores);
+      setLoading(false);
+      return;
+    }
+
     setLoading(true);
     setError(null);
     setScores([]);
@@ -45,22 +58,27 @@ const LeaderboardScreen: React.FC<LeaderboardScreenProps> = ({ currentUser }) =>
       const timeoutPromise = new Promise((_, reject) =>
         setTimeout(
           () => reject(new Error('Timeout: Server response took too long')),
-          API_TIMEOUT_MS
+          LEADERBOARD_TIMEOUT_MS
         )
       );
 
       if (viewMode === 'teams') {
         const dataPromise = getTeamLeaderboard(period);
         const data = (await Promise.race([dataPromise, timeoutPromise])) as TeamScoreEntry[];
-        setTeamScores(data || []);
+        const result = data || [];
+        setTeamScores(result);
+        cacheRef.current.set(cacheKey, { scores: [], teamScores: result });
       } else {
         const dataPromise = getLeaderboard(period);
         const data = (await Promise.race([dataPromise, timeoutPromise])) as ScoreEntry[] | null;
 
         if (data === null) {
           setScores([]);
+          cacheRef.current.set(cacheKey, { scores: [], teamScores: [] });
         } else {
-          setScores(data.filter(s => s.username && s.username !== 'UNKNOWN'));
+          const filtered = data.filter(s => s.username && s.username !== 'UNKNOWN');
+          setScores(filtered);
+          cacheRef.current.set(cacheKey, { scores: filtered, teamScores: [] });
         }
       }
     } catch (err: unknown) {

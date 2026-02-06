@@ -84,7 +84,6 @@ const ShopItemCard: React.FC<ShopItemCardProps> = memo(
               }
             }}
             className={`w-16 h-16 mb-3 flex items-center justify-center text-3xl relative overflow-hidden shrink-0 rounded-2xl bg-transparent ${activeTab === 'titles' ? 'cursor-pointer hover:scale-105 transition-transform' : ''}`}
-            style={{ imageRendering: 'pixelated' }}
           >
             {renderItemIcon()}
           </div>

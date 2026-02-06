@@ -6,6 +6,7 @@ import {
   updateUser,
 } from '../../services/database';
 import { getPayoutConfig } from '../../services/db/config';
+import { assertCurrentUser } from '../auth';
 import { normalizeUsername } from '../format';
 import { publishCosmeticPurchase } from '../social/publishActivity';
 
@@ -105,6 +106,8 @@ export const spendGiuros = async (
   const normalizedUsername = normalizeUsername(username);
 
   try {
+    await assertCurrentUser(normalizedUsername);
+
     const user = await getUserByUsername(normalizedUsername);
     if (!user) {
       return { success: false, error: 'User not found' };

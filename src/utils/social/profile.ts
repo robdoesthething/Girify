@@ -87,9 +87,7 @@ export const ensureUserProfile = async (
   if (additionalData.email && !existingUser) {
     const foundByEmail = await getUserByEmail(additionalData.email);
     if (foundByEmail) {
-      console.warn(
-        `[Auth] Found existing user by email ${additionalData.email}: ${foundByEmail.username}`
-      );
+      console.warn(`[Auth] Found existing user by email lookup: ${foundByEmail.username}`);
       userDbRecord = await getUserByUsername(foundByEmail.username);
     }
   }

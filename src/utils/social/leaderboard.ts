@@ -12,7 +12,7 @@ const formatLeaderboardUsername = (userId: string | null | undefined): string =>
   return userId.startsWith('@') ? userId : `@${userId}`;
 };
 
-const FETCH_BUFFER_MULTIPLIER = 4;
+const FETCH_BUFFER_MULTIPLIER = 2;
 const DAYS_IN_WEEK_MINUS_ONE = 6;
 
 export type LeaderboardPeriod = 'all' | 'daily' | 'weekly' | 'monthly';
@@ -64,7 +64,9 @@ export const getLeaderboard = async (
   try {
     // 1. Fetch from Supabase
     // Start building the query
-    let queryBuilder = supabase.from('game_results').select('*');
+    let queryBuilder = supabase
+      .from('game_results')
+      .select('id, user_id, score, time_taken, played_at');
 
     // Apply period filters (timestamp based usage of played_at)
     const now = new Date();
@@ -274,6 +276,7 @@ export const getTeamLeaderboard = async (
     const { data: usersData, error: usersError } = await supabase
       .from('users')
       .select('username, team, district')
+      .not('team', 'is', null)
       .returns<UserTeamData[]>();
 
     if (usersError) {
@@ -294,7 +297,7 @@ export const getTeamLeaderboard = async (
     });
 
     // Fetch individual scores for the period from SUPABASE (via getLeaderboard)
-    const TEAM_LEADERBOARD_LIMIT = 10000;
+    const TEAM_LEADERBOARD_LIMIT = 2000;
     const individualScores = await getLeaderboard(period, TEAM_LEADERBOARD_LIMIT);
 
     // Aggregate by team

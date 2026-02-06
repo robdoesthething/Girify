@@ -79,6 +79,9 @@ type UserSearchData = Pick<UserRow, 'username' | 'best_score'>;
 
 export async function searchUsers(query: string, limit = 20): Promise<UserSearchData[]> {
   const searchTerm = query.toLowerCase().replace(/^@/, '');
+  if (searchTerm.length < 2) {
+    return [];
+  }
   const result = await executeQuery<UserSearchData[]>(
     supabase
       .from('users')

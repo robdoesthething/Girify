@@ -36,6 +36,8 @@ const GamePageContent = ({ username }: GamePageProps) => {
     if (location.state?.mode === 'register' && state.gameState !== 'register') {
       dispatch({ type: 'SET_REGISTER_MODE', payload: 'signup' });
       dispatch({ type: 'SET_GAME_STATE', payload: 'register' });
+      // Clear the location state to prevent re-triggering after panel close
+      window.history.replaceState({}, document.title);
     }
   }, [location.state, dispatch, state.gameState]);
 

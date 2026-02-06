@@ -63,6 +63,15 @@ describe('Database Integration Suite', () => {
     vi.doMock('../../supabase', () => ({
       supabase: supabaseMock,
     }));
+
+    // Mock auth utilities so ownership checks pass in tests
+    vi.doMock('../../../utils/auth', () => ({
+      assertCurrentUser: vi.fn().mockResolvedValue(undefined),
+      getCurrentUsername: vi.fn().mockResolvedValue('testuser'),
+      requireAuth: vi.fn().mockResolvedValue('test-uid'),
+      requireAdmin: vi.fn().mockResolvedValue(undefined),
+      isCurrentUserAdmin: vi.fn().mockResolvedValue(false),
+    }));
   });
 
   describe('Users Service', () => {

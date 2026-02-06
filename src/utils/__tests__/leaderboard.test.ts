@@ -90,7 +90,9 @@ describe('Leaderboard Service', () => {
       const result = await getLeaderboard('all');
 
       expect(mockSupabase.from).toHaveBeenCalledWith('game_results');
-      expect(mockQueryBuilder.select).toHaveBeenCalledWith('*');
+      expect(mockQueryBuilder.select).toHaveBeenCalledWith(
+        'id, user_id, score, time_taken, played_at'
+      );
 
       // Deduplication logic: Both scores are same day, should take best (1800)
       expect(result).toHaveLength(1);
