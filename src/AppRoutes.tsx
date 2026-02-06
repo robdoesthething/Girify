@@ -76,82 +76,91 @@ const AppRoutes: React.FC = () => {
         />
       </Suspense>
 
-      {/* Routes */}
-      <Suspense fallback={<PageLoader />}>
-        <AnimatePresence mode="wait">
-          <Routes location={location} key={location.pathname}>
-            <Route path="/privacy" element={<PrivacyPolicy />} />
-            <Route path="/terms" element={<TermsOfService />} />
-            <Route
-              path="/"
-              element={
-                user && user.emailVerified === false ? (
-                  <VerifyEmailScreen theme={theme as 'light' | 'dark'} />
-                ) : (
-                  <GamePage username={currentUsername} user={user} />
-                )
-              }
-            />
-            <Route
-              path="/leaderboard"
-              element={<LeaderboardScreen currentUser={currentUsername} />}
-            />
-            <Route
-              path="/settings"
-              element={
-                <SettingsScreen
-                  onClose={() => handleOpenPage(null)}
-                  onLogout={handleLogout}
-                  autoAdvance={false} // Auto-advance state moved to GamePage
-                  setAutoAdvance={() => {}} // No-op for global settings
-                  username={currentUsername}
-                />
-              }
-            />
-            <Route path="/about" element={<AboutScreen onClose={() => handleOpenPage(null)} />} />
-            <Route path="/profile" element={<ProfileScreen username={currentUsername || ''} />} />
-            <Route
-              path="/user/:username"
-              element={<PublicProfileScreen currentUser={currentUsername} />}
-            />
-            <Route
-              path="/friends"
-              element={
-                <FriendsScreen
-                  username={currentUsername || ''}
-                  onClose={() => handleOpenPage(null)}
-                />
-              }
-            />
-            <Route path="/shop" element={<ShopScreen username={currentUsername || ''} />} />
-            <Route
-              path="/news"
-              element={
-                <NewsScreen username={currentUsername} onClose={() => handleOpenPage(null)} />
-              }
-            />
-            <Route
-              path="/feedback"
-              element={
-                <FeedbackScreen
-                  username={currentUsername || ''}
-                  onClose={() => {
-                    storage.set(STORAGE_KEYS.LAST_FEEDBACK, Date.now().toString());
-                    handleOpenPage(null);
-                  }}
-                />
-              }
-            />
-            <Route element={<AdminRoute />}>
-              <Route path="/admin" element={<AdminPanel />} />
-              <Route path="/fetch-streets" element={<StreetsFetcher />} />
-            </Route>
-          </Routes>
-        </AnimatePresence>
-      </Suspense>
+      {/* Scrollable Content Area */}
+      <div className="flex-1 w-full h-full overflow-y-auto overflow-x-hidden relative scroll-smooth no-scrollbar">
+        <Suspense fallback={<PageLoader />}>
+          <AnimatePresence mode="wait">
+            <Routes location={location} key={location.pathname}>
+              <Route path="/privacy" element={<PrivacyPolicy />} />
+              <Route path="/terms" element={<TermsOfService />} />
+              <Route
+                path="/"
+                element={
+                  user && user.emailVerified === false ? (
+                    <VerifyEmailScreen theme={theme as 'light' | 'dark'} />
+                  ) : (
+                    <GamePage username={currentUsername} user={user} />
+                  )
+                }
+              />
+              <Route
+                path="/leaderboard"
+                element={<LeaderboardScreen currentUser={currentUsername} />}
+              />
+              <Route
+                path="/settings"
+                element={
+                  <SettingsScreen
+                    onClose={() => handleOpenPage(null)}
+                    onLogout={handleLogout}
+                    autoAdvance={false} // Auto-advance state moved to GamePage
+                    setAutoAdvance={() => {}} // No-op for global settings
+                    username={currentUsername}
+                  />
+                }
+              />
+              <Route
+                path="/friends"
+                element={
+                  <FriendsScreen
+                    username={currentUsername || ''}
+                    onClose={() => handleOpenPage(null)}
+                  />
+                }
+              />
+              <Route path="/shop" element={<ShopScreen username={currentUsername || ''} />} />
+              <Route path="/about" element={<AboutScreen onClose={() => handleOpenPage(null)} />} />
+              <Route
+                path="/news"
+                element={
+                  <NewsScreen username={currentUsername} onClose={() => handleOpenPage(null)} />
+                }
+              />
+              <Route
+                path="/feedback"
+                element={
+                  <FeedbackScreen
+                    username={currentUsername || ''}
+                    onClose={() => {
+                      storage.set(STORAGE_KEYS.LAST_FEEDBACK, Date.now().toString());
+                      handleOpenPage(null);
+                    }}
+                  />
+                }
+              />
+              <Route path="/profile" element={<ProfileScreen username={currentUsername || ''} />} />
+              <Route
+                path="/u/:handle"
+                element={<PublicProfileScreen currentUser={currentUsername} />}
+              />
 
-      {/* Footer */}
-      <div className="absolute bottom-1 left-0 right-0 text-center pointer-events-none opacity-40 mix-blend-difference pb-4">
+              <Route element={<AdminRoute />}>
+                <Route path="/admin" element={<AdminPanel />} />
+                {import.meta.env.DEV && (
+                  <Route path="/fetch-streets" element={<StreetsFetcher />} />
+                )}
+              </Route>
+            </Routes>
+          </AnimatePresence>
+        </Suspense>
+
+        {/* Footer - positioned at bottom of scrollable area content or fixed?
+            Original was absolute bottom-1. If we want it to scroll with content, put it here.
+            If we want it fixed, keep it outside. But fixed might cover content.
+            Let's keep it outside as per original design, but pointer-events-none makes it click-through. */}
+      </div>
+
+      <div className="absolute bottom-1 left-0 right-0 text-center pointer-events-none opacity-40 mix-blend-difference pb-4 z-10">
         <p className="text-[10px] font-medium text-slate-500 dark:text-slate-400 font-inter">
           © 2025 Girify. All rights reserved.
         </p>
