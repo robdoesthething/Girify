@@ -2,7 +2,7 @@
  * Test fixtures for Admin API tests
  */
 
-export const MOCK_ADMIN_KEY = 'GIRIFY_ADMIN_ACCESS_2026_SECURE';
+export const MOCK_ADMIN_KEY = 'test-mock-admin-key-not-real';
 export const MOCK_USERNAME = 'testuser';
 export const MOCK_UID = 'test-uid';
 export const MOCK_EMAIL = 'test@example.com';

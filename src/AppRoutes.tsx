@@ -1,9 +1,7 @@
 import { AnimatePresence } from 'framer-motion';
 import React, { Suspense } from 'react';
 import { Route, Routes } from 'react-router-dom';
-import { STORAGE_KEYS } from './config/constants';
 import { useAppInitialization } from './hooks/useAppInitialization';
-import { storage } from './utils/storage';
 import { themeClasses } from './utils/themeUtils';
 
 // Lazy loaded components for better code splitting
@@ -99,44 +97,15 @@ const AppRoutes: React.FC = () => {
               />
               <Route
                 path="/settings"
-                element={
-                  <SettingsScreen
-                    onClose={() => handleOpenPage(null)}
-                    onLogout={handleLogout}
-                    autoAdvance={false} // Auto-advance state moved to GamePage
-                    setAutoAdvance={() => {}} // No-op for global settings
-                    username={currentUsername}
-                  />
-                }
+                element={<SettingsScreen onLogout={handleLogout} username={currentUsername} />}
               />
-              <Route
-                path="/friends"
-                element={
-                  <FriendsScreen
-                    username={currentUsername || ''}
-                    onClose={() => handleOpenPage(null)}
-                  />
-                }
-              />
+              <Route path="/friends" element={<FriendsScreen username={currentUsername || ''} />} />
               <Route path="/shop" element={<ShopScreen username={currentUsername || ''} />} />
-              <Route path="/about" element={<AboutScreen onClose={() => handleOpenPage(null)} />} />
-              <Route
-                path="/news"
-                element={
-                  <NewsScreen username={currentUsername} onClose={() => handleOpenPage(null)} />
-                }
-              />
+              <Route path="/about" element={<AboutScreen />} />
+              <Route path="/news" element={<NewsScreen username={currentUsername} />} />
               <Route
                 path="/feedback"
-                element={
-                  <FeedbackScreen
-                    username={currentUsername || ''}
-                    onClose={() => {
-                      storage.set(STORAGE_KEYS.LAST_FEEDBACK, Date.now().toString());
-                      handleOpenPage(null);
-                    }}
-                  />
-                }
+                element={<FeedbackScreen username={currentUsername || ''} />}
               />
               <Route path="/profile" element={<ProfileScreen username={currentUsername || ''} />} />
               <Route
@@ -177,9 +146,11 @@ const AppRoutes: React.FC = () => {
         />
       </Suspense>
 
-      <Suspense fallback={null}>
-        <DebugOverlay />
-      </Suspense>
+      {import.meta.env.DEV && (
+        <Suspense fallback={null}>
+          <DebugOverlay />
+        </Suspense>
+      )}
     </div>
   );
 };

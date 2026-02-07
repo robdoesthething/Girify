@@ -1,17 +1,19 @@
 import { motion } from 'framer-motion';
 import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useTheme } from '../context/ThemeContext';
-import { sanitizeHtml } from '../utils/security';
 import { Announcement, getActiveAnnouncements, markAnnouncementAsRead } from '../utils/social/news';
 import { themeClasses } from '../utils/themeUtils';
+import TopBar from './TopBar';
+import { PageHeader } from './ui';
 
 interface NewsScreenProps {
-  onClose: () => void;
   username?: string;
 }
 
-const NewsScreen: React.FC<NewsScreenProps> = ({ onClose, username }) => {
+const NewsScreen: React.FC<NewsScreenProps> = ({ username }) => {
   const { theme, t } = useTheme();
+  const navigate = useNavigate();
   const [announcements, setAnnouncements] = useState<Announcement[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -20,14 +22,12 @@ const NewsScreen: React.FC<NewsScreenProps> = ({ onClose, username }) => {
       setLoading(true);
       const news = await getActiveAnnouncements();
       setAnnouncements(news);
-
-      // Mark all as read when viewing
-      if (username) {
-        for (const a of news) {
-          await markAnnouncementAsRead(username, a.id);
-        }
-      }
       setLoading(false);
+
+      // Mark all as read in background (non-blocking)
+      if (username) {
+        Promise.all(news.map(a => markAnnouncementAsRead(username, a.id)));
+      }
     };
 
     fetchAnnouncements();
@@ -56,87 +56,69 @@ const NewsScreen: React.FC<NewsScreenProps> = ({ onClose, username }) => {
 
   return (
     <div
-      className={`fixed inset-0 z-40 flex flex-col pt-16 pb-6 px-4 md:px-8 overflow-hidden pointer-events-auto backdrop-blur-md ${themeClasses(theme, 'bg-neutral-950 text-white', 'bg-slate-50 text-slate-900')}`}
+      className={`fixed inset-0 w-full h-full flex flex-col overflow-hidden transition-colors duration-500 ${themeClasses(theme, 'bg-slate-900 text-white', 'bg-slate-50 text-slate-900')}`}
     >
-      {/* Header */}
-      <div className="flex items-center justify-between max-w-2xl mx-auto w-full mb-8 shrink-0 relative">
-        <button
-          onClick={onClose}
-          className="flex items-center gap-2 text-sm font-bold opacity-60 hover:opacity-100 transition-opacity z-10 font-inter"
-          type="button"
-        >
-          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M15 19l-7-7 7-7"
-            />
-          </svg>
-          {t('back') || 'Back'}
-        </button>
+      <TopBar
+        onOpenPage={page => navigate(page ? `/${page}` : '/')}
+        onTriggerLogin={mode => navigate(`/?auth=${mode}`)}
+      />
 
-        <h2 className="text-xl font-black tracking-tight absolute left-1/2 transform -translate-x-1/2 font-inter">
-          {t('news') || 'News'}
-        </h2>
+      <div className="flex-1 w-full px-4 py-8 pt-20 overflow-x-hidden overflow-y-auto">
+        <div className="max-w-2xl mx-auto w-full">
+          <PageHeader title={t('news') || 'News'} />
 
-        {/* Empty div for flex spacing */}
-        <div className="w-16" />
-      </div>
-
-      <div className="flex-1 overflow-y-auto max-w-2xl mx-auto w-full pb-8">
-        {loading ? (
-          <div className="flex items-center justify-center py-20">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-sky-500" />
-          </div>
-        ) : announcements.length === 0 ? (
-          <div className="text-center py-20">
-            <div className="text-6xl mb-4">📰</div>
-            <h2 className="text-xl font-bold mb-2 font-inter">
-              {t('noNews') || 'No announcements yet'}
-            </h2>
-            <p className="opacity-60 font-inter">
-              {t('checkBackLater') || 'Check back later for updates!'}
-            </p>
-          </div>
-        ) : (
-          <div className="space-y-6 text-center">
-            <div className="flex flex-col items-center mb-6">
-              <img
-                src="/mejur_jouma.png"
-                alt="Mejur Jouma"
-                width={128}
-                height={128}
-                loading="lazy"
-                decoding="async"
-                className="w-32 h-32 object-contain hover:scale-110 transition-transform cursor-pointer"
-                title="Mejur Jouma delivering the news"
-              />
-              <p className="text-center text-sm opacity-50 uppercase tracking-widest font-bold mt-2 font-inter">
-                {t('latestUpdates') || 'Latest updates and announcements'}
+          {loading ? (
+            <div className="flex items-center justify-center py-20">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-sky-500" />
+            </div>
+          ) : announcements.length === 0 ? (
+            <div className="text-center py-20">
+              <div className="text-6xl mb-4">📰</div>
+              <h2 className="text-xl font-bold mb-2 font-inter">
+                {t('noNews') || 'No announcements yet'}
+              </h2>
+              <p className="opacity-60 font-inter">
+                {t('checkBackLater') || 'Check back later for updates!'}
               </p>
             </div>
-            {announcements.map(announcement => (
-              <motion.article
-                key={announcement.id}
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                className={`p-6 rounded-2xl border ${themeClasses(theme, 'bg-slate-900 border-slate-800', 'bg-white border-slate-200')} shadow-sm`}
-              >
-                <div className="flex items-start justify-between mb-3">
-                  <h2 className="text-xl font-bold font-inter">{announcement.title}</h2>
-                  <span className="text-xs opacity-50 whitespace-nowrap ml-4 font-bold uppercase tracking-wider font-inter">
-                    {formatDate(announcement.publishDate)}
-                  </span>
-                </div>
-                <div
-                  className="prose prose-sm dark:prose-invert max-w-none opacity-80 leading-relaxed font-inter"
-                  dangerouslySetInnerHTML={{ __html: sanitizeHtml(announcement.body) }}
+          ) : (
+            <div className="space-y-6 text-center">
+              <div className="flex flex-col items-center mb-6">
+                <img
+                  src="/mejur_jouma.png"
+                  alt="Mejur Jouma"
+                  width={128}
+                  height={128}
+                  loading="lazy"
+                  decoding="async"
+                  className="w-32 h-32 object-contain hover:scale-110 transition-transform cursor-pointer"
+                  title="Mejur Jouma delivering the news"
                 />
-              </motion.article>
-            ))}
-          </div>
-        )}
+                <p className="text-center text-sm opacity-50 uppercase tracking-widest font-bold mt-2 font-inter">
+                  {t('latestUpdates') || 'Latest updates and announcements'}
+                </p>
+              </div>
+              {announcements.map(announcement => (
+                <motion.article
+                  key={announcement.id}
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className={`p-6 rounded-2xl border ${themeClasses(theme, 'bg-slate-900 border-slate-800', 'bg-white border-slate-200')} shadow-sm`}
+                >
+                  <div className="flex items-start justify-between mb-3">
+                    <h2 className="text-xl font-bold font-inter">{announcement.title}</h2>
+                    <span className="text-xs opacity-50 whitespace-nowrap ml-4 font-bold uppercase tracking-wider font-inter">
+                      {formatDate(announcement.publishDate)}
+                    </span>
+                  </div>
+                  <p className="prose prose-sm dark:prose-invert max-w-none opacity-80 leading-relaxed font-inter whitespace-pre-line">
+                    {announcement.body}
+                  </p>
+                </motion.article>
+              ))}
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

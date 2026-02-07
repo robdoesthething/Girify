@@ -2,6 +2,7 @@ import { motion } from 'framer-motion';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import TopBar from '../../../components/TopBar';
+import { PageHeader } from '../../../components/ui';
 import { useTheme } from '../../../context/ThemeContext';
 import { DISTRICTS } from '../../../data/districts';
 import { UI } from '../../../utils/constants';
@@ -320,27 +321,7 @@ const LeaderboardScreen: React.FC<LeaderboardScreenProps> = ({ currentUser }) =>
 
       <div className="flex-1 w-full px-4 py-8 pt-20 overflow-x-hidden overflow-y-auto">
         <div className="max-w-2xl mx-auto w-full">
-          <div className="flex items-center justify-between mb-8 relative">
-            <button
-              onClick={() => navigate(-1)}
-              className="flex items-center gap-2 text-sm font-bold opacity-60 hover:opacity-100 transition-opacity z-10"
-              type="button"
-            >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M15 19l-7-7 7-7"
-                />
-              </svg>
-              {t('back')}
-            </button>
-            <h1 className="text-xl font-black absolute left-1/2 transform -translate-x-1/2 flex items-center gap-2 font-inter">
-              <span className="text-2xl">🏆</span> {t('leaderboard')}
-            </h1>
-            <div className="w-10" />
-          </div>
+          <PageHeader title={`🏆 ${t('leaderboard')}`} />
 
           {/* Individual/Teams Toggle */}
           <div className="flex justify-center mb-4">

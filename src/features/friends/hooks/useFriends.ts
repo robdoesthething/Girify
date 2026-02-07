@@ -133,10 +133,15 @@ function friendsReducer(state: FriendsState, action: FriendsAction): FriendsStat
 export function useFriends(username: string) {
   const [state, dispatch] = useReducer(friendsReducer, initialState);
   const feedOffsetRef = useRef(0);
+  const friendsRef = useRef<Friend[]>([]);
 
   useEffect(() => {
     feedOffsetRef.current = state.feedOffset;
   }, [state.feedOffset]);
+
+  useEffect(() => {
+    friendsRef.current = state.friends;
+  }, [state.friends]);
 
   const loadFriends = useCallback(async () => {
     dispatch({ type: 'SET_LOADING', payload: true });
@@ -190,7 +195,11 @@ export function useFriends(username: string) {
           return;
         }
         console.warn(`[Friends] Loading feed for ${username}`);
-        const list = await getFriends(username);
+        // Reuse already-loaded friends list to avoid redundant fetch
+        const list =
+          friendsRef.current.length > 0
+            ? friendsRef.current
+            : ((await getFriends(username)) as Friend[]);
         console.warn(
           `[Friends] Found ${list.length} friends:`,
           list.map(f => f.username)

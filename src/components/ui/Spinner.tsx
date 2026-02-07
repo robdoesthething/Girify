@@ -13,15 +13,18 @@ const Spinner: React.FC<SpinnerProps> = ({ size = 'md', className = '' }) => {
   };
 
   return (
-    <div
-      className={`
-        animate-spin rounded-full
-        border-current border-t-transparent
-        text-sky-500
-        ${sizeClasses[size]}
-        ${className}
-      `}
-    />
+    <div role="status" aria-label="Loading">
+      <div
+        className={`
+          animate-spin rounded-full
+          border-current border-t-transparent
+          text-sky-500
+          ${sizeClasses[size]}
+          ${className}
+        `}
+      />
+      <span className="sr-only">Loading...</span>
+    </div>
   );
 };
 

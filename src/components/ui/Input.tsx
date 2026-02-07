@@ -1,4 +1,4 @@
-import React, { forwardRef } from 'react';
+import React, { forwardRef, useId } from 'react';
 import { useTheme } from '../../context/ThemeContext';
 import { themeClasses } from '../../utils/themeUtils';
 
@@ -12,10 +12,13 @@ interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
 
 const Input = forwardRef<HTMLInputElement, InputProps>(
   (
-    { label, error, fullWidth = true, leftIcon, rightIcon, className = '', disabled, ...props },
+    { label, error, fullWidth = true, leftIcon, rightIcon, className = '', disabled, id, ...props },
     ref
   ) => {
     const { theme } = useTheme();
+    const autoId = useId();
+    const inputId = id || autoId;
+    const errorId = error ? `${inputId}-error` : undefined;
 
     const baseInputRequest = `
       w-full px-4 py-3 rounded-xl border text-base transition-all duration-200 outline-none
@@ -38,7 +41,11 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
 
     return (
       <div className={`${fullWidth ? 'w-full' : ''} ${className}`}>
-        {label && <label className="block text-sm font-bold mb-2 ml-1 opacity-80">{label}</label>}
+        {label && (
+          <label htmlFor={inputId} className="block text-sm font-bold mb-2 ml-1 opacity-80">
+            {label}
+          </label>
+        )}
 
         <div className="relative">
           {leftIcon && (
@@ -49,7 +56,10 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
 
           <input
             ref={ref}
+            id={inputId}
             disabled={disabled}
+            aria-invalid={error ? true : undefined}
+            aria-describedby={errorId}
             className={`${baseInputRequest} ${themeStyles} ${errorStyles}`}
             {...props}
           />
@@ -62,7 +72,13 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
         </div>
 
         {error && (
-          <p className="mt-1 ml-1 text-xs font-bold text-red-500 animate-fadeIn">{error}</p>
+          <p
+            id={errorId}
+            role="alert"
+            className="mt-1 ml-1 text-xs font-bold text-red-500 animate-fadeIn"
+          >
+            {error}
+          </p>
         )}
       </div>
     );

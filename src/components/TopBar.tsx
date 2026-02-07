@@ -1,9 +1,17 @@
 import { AnimatePresence, motion } from 'framer-motion';
-import React, { useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import { useTheme } from '../context/ThemeContext';
 import { themeClasses } from '../utils/themeUtils';
 import Logo from './Logo';
+
+// Prefetch map for lazy-loaded route chunks
+const prefetchRouteChunk: Record<string, () => void> = {
+  leaderboard: () => import('../features/leaderboard/components/LeaderboardScreen'),
+  shop: () => import('../features/shop/components/ShopScreen'),
+  profile: () => import('../features/profile/components/ProfileScreen'),
+  friends: () => import('../features/friends/components/FriendsScreen'),
+};
 
 interface TopBarProps {
   onOpenPage: (page: string | null) => void;
@@ -18,6 +26,12 @@ const TopBar: React.FC<TopBarProps> = React.memo(
     const location = useLocation();
     const [menuOpen, setMenuOpen] = useState(false);
     const [showLoginModal, setShowLoginModal] = useState(false);
+
+    const handlePrefetch = useCallback((page: string | null) => {
+      if (page && prefetchRouteChunk[page]) {
+        prefetchRouteChunk[page]();
+      }
+    }, []);
 
     const isActivePage = (page: string | null) =>
       page === null ? location.pathname === '/' : location.pathname === `/${page}`;
@@ -143,6 +157,8 @@ backdrop-blur-md border-b ${themeClasses(theme, 'border-slate-600', 'border-slat
                     <button
                       key={item.page ?? 'home'}
                       onClick={() => handleMenuClick(item.page)}
+                      onMouseEnter={() => handlePrefetch(item.page)}
+                      onTouchStart={() => handlePrefetch(item.page)}
                       className={`text-left py-2 px-3 rounded-lg hover:bg-slate-500/10 font-medium flex items-center gap-4 shrink-0 ${isActivePage(item.page) ? 'text-sky-500 bg-sky-500/10' : ''}`}
                       type="button"
                     >

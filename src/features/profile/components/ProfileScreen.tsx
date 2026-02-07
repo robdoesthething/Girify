@@ -2,7 +2,7 @@ import { AnimatePresence, motion } from 'framer-motion';
 import React, { useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import TopBar from '../../../components/TopBar';
-import { Button, Card, Heading, Spinner, Text } from '../../../components/ui';
+import { Button, Card, Heading, PageHeader, Spinner, Text } from '../../../components/ui';
 import { useTheme } from '../../../context/ThemeContext';
 import { UserProfile } from '../../../types/user';
 import { updateUserProfile } from '../../../utils/social';
@@ -80,51 +80,27 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ username }) => {
 
       <div className="flex-1 w-full px-4 py-8 pt-20 overflow-x-hidden">
         <div className="max-w-2xl mx-auto w-full">
-          {/* Header Section */}
-          <div className="flex items-center justify-between mb-8 relative">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => navigate(-1)}
-              leftIcon={
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M15 19l-7-7 7-7"
-                  />
-                </svg>
-              }
-              className="z-10"
-            >
-              {t('back')}
-            </Button>
-
-            <Heading
-              variant="h3"
-              className="absolute left-1/2 transform -translate-x-1/2 flex items-center gap-2 max-w-[60%] truncate justify-center mb-0"
-            >
-              {t('profile') || 'Profile'}
-            </Heading>
-
-            <button
-              onClick={() => actions.toggleGiurosInfo()}
-              className="flex items-center gap-2 hover:scale-105 transition-transform"
-              type="button"
-              aria-label={`${state.giuros} Giuros`}
-            >
-              <img
-                src="/giuro.png"
-                alt=""
-                aria-hidden="true"
-                className="h-6 w-auto object-contain"
-              />
-              <span className="font-black text-lg text-yellow-600 dark:text-yellow-400">
-                {state.giuros}
-              </span>
-            </button>
-          </div>
+          <PageHeader
+            title={t('profile') || 'Profile'}
+            rightElement={
+              <button
+                onClick={() => actions.toggleGiurosInfo()}
+                className="flex items-center gap-2 hover:scale-105 transition-transform"
+                type="button"
+                aria-label={`${state.giuros} Giuros`}
+              >
+                <img
+                  src="/giuro.png"
+                  alt=""
+                  aria-hidden="true"
+                  className="h-6 w-auto object-contain"
+                />
+                <span className="font-black text-lg text-yellow-600 dark:text-yellow-400">
+                  {state.giuros}
+                </span>
+              </button>
+            }
+          />
 
           {state.loading && (
             <div className="py-20 flex justify-center">

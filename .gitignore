@@ -33,6 +33,7 @@ storybook-static
 .env.development
 service-account.json
 .env.production
+.env.backup
 
 # Temporary documentation and reports
 *_report*.txt

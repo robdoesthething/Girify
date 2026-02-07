@@ -57,9 +57,7 @@ const Options: React.FC<OptionsProps> = ({
           return (
             <button
               key={opt.id}
-              onClick={e => {
-                const target = e.currentTarget as HTMLButtonElement;
-                target.blur();
+              onClick={() => {
                 onSelect(opt);
               }}
               disabled={disabled || feedback === 'transitioning'}
@@ -70,7 +68,7 @@ const Options: React.FC<OptionsProps> = ({
                 text-center sm:text-left
                 transition-all duration-200
                 relative overflow-hidden group
-                focus:outline-none focus:ring-0
+                focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500 focus-visible:ring-offset-2
                 ${btnClass}
               `}
               type="button"
