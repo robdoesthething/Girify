@@ -2,7 +2,7 @@ import { AnimatePresence } from 'framer-motion';
 import React, { useCallback, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import TopBar from '../../../components/TopBar';
-import { Button, Heading, Spinner, Tabs, Text } from '../../../components/ui';
+import { Button, Heading, PageHeader, Spinner, Tabs, Text } from '../../../components/ui';
 import { useTheme } from '../../../context/ThemeContext';
 import { useTabs } from '../../../hooks/useTabs';
 import { useToast } from '../../../hooks/useToast';
@@ -115,53 +115,29 @@ const ShopScreen: React.FC<ShopScreenProps> = ({ username }) => {
 
       <div className="flex-1 overflow-y-auto w-full px-4 py-6 pt-16">
         <div className="max-w-6xl mx-auto">
-          {/* Header */}
-          <div className="flex items-center justify-between mb-8 relative">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => navigate(-1)}
-              leftIcon={
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M15 19l-7-7 7-7"
-                  />
-                </svg>
-              }
-              className="z-10"
-            >
-              {t('back')}
-            </Button>
-
-            <Heading
-              variant="h3"
-              className="absolute left-1/2 transform -translate-x-1/2 flex items-center gap-2 mb-0"
-            >
-              <span>🛒</span> {t('shop')}
-            </Heading>
-
-            <div
-              className={`px-4 py-2 rounded-2xl flex items-center gap-2 border shadow-lg ${themeClasses(theme, 'bg-slate-800 border-slate-700', 'bg-white border-slate-200')}`}
-              role="status"
-              aria-label={`Balance: ${balance} Giuros`}
-            >
-              <img
-                src="/giuro.png"
-                alt=""
-                aria-hidden="true"
-                className="h-6 w-auto object-contain"
-              />
-              <div className="flex flex-col items-end leading-none">
-                <span className="text-lg font-black text-yellow-500">{balance}</span>
-                <span className="text-[10px] uppercase font-bold opacity-60 font-inter">
-                  Giuros
-                </span>
+          <PageHeader
+            title={`🛒 ${t('shop')}`}
+            rightElement={
+              <div
+                className={`px-4 py-2 rounded-2xl flex items-center gap-2 border shadow-lg ${themeClasses(theme, 'bg-slate-800 border-slate-700', 'bg-white border-slate-200')}`}
+                role="status"
+                aria-label={`Balance: ${balance} Giuros`}
+              >
+                <img
+                  src="/giuro.png"
+                  alt=""
+                  aria-hidden="true"
+                  className="h-6 w-auto object-contain"
+                />
+                <div className="flex flex-col items-end leading-none">
+                  <span className="text-lg font-black text-yellow-500">{balance}</span>
+                  <span className="text-[10px] uppercase font-bold opacity-60 font-inter">
+                    Giuros
+                  </span>
+                </div>
               </div>
-            </div>
-          </div>
+            }
+          />
 
           {/* Toast */}
           {toast && (

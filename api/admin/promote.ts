@@ -83,10 +83,10 @@ export default async function handler(req: VercelRequest, res: VercelResponse): 
 
     const { adminKey, username } = req.body as AdminPromoteRequest;
 
-    // 3. Check rate limiting
-    const clientIp = req.headers['x-forwarded-for'] || req.socket.remoteAddress || 'unknown';
+    // 3. Check rate limiting (x-real-ip is set by Vercel edge, not spoofable by clients)
+    const clientIp = req.headers['x-real-ip'] || req.socket.remoteAddress || 'unknown';
     const rateLimitKey = `admin-promote:${user.uid}:${clientIp}`;
-    const rateLimit = checkRateLimit(rateLimitKey, RATE_LIMIT_CONFIG);
+    const rateLimit = await checkRateLimit(rateLimitKey, RATE_LIMIT_CONFIG);
 
     // Add rate limit headers
     res.setHeader('X-RateLimit-Limit', RATE_LIMIT_CONFIG.maxAttempts.toString());

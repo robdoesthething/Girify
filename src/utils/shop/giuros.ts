@@ -1,11 +1,7 @@
 import { calculateStreakBonus } from '../../config/gameConfig';
-import {
-  addPurchasedBadge,
-  getUserByUsername,
-  getUserPurchasedBadges,
-  updateUser,
-} from '../../services/database';
+import { getUserByUsername, getUserPurchasedBadges, updateUser } from '../../services/database';
 import { getPayoutConfig } from '../../services/db/config';
+import { supabase } from '../../services/supabase';
 import { assertCurrentUser } from '../auth';
 import { normalizeUsername } from '../format';
 import { publishCosmeticPurchase } from '../social/publishActivity';
@@ -108,52 +104,25 @@ export const spendGiuros = async (
   try {
     await assertCurrentUser(normalizedUsername);
 
-    const user = await getUserByUsername(normalizedUsername);
-    if (!user) {
-      return { success: false, error: 'User not found' };
+    // Use atomic RPC to prevent TOCTOU race conditions
+    const { data, error } = await (supabase as any).rpc('spend_giuros', {
+      p_username: normalizedUsername,
+      p_cost: cost,
+      p_item_id: itemId,
+    });
+
+    if (error) {
+      console.error('[Giuros] RPC error:', error);
+      return { success: false, error: error.message };
     }
 
-    const currentBalance = user.giuros ?? 0;
+    const result = data as { success: boolean; error?: string; new_balance?: number };
 
-    if (currentBalance < cost) {
-      return { success: false, error: 'Insufficient giuros' };
+    if (!result.success) {
+      return { success: false, error: result.error };
     }
 
-    // Check ownership
-    // Badges are in a separate table, other cosmetics in purchased_cosmetics array
-    if (itemId.startsWith('badge_')) {
-      // Check purchased_badges table
-      const purchasedBadges = await getUserPurchasedBadges(normalizedUsername);
-      if (purchasedBadges.includes(itemId)) {
-        return { success: false, error: 'Already owned' };
-      }
-    } else {
-      const purchasedCosmetics: string[] = user.purchased_cosmetics || [];
-      if (purchasedCosmetics.includes(itemId) && !itemId.startsWith('handle_change')) {
-        return { success: false, error: 'Already owned' };
-      }
-    }
-
-    const newBalance = currentBalance - cost;
-
-    // Transaction needed ideally
-    // Update balance
-    const success = await updateUser(normalizedUsername, { giuros: newBalance });
-    if (!success) {
-      return { success: false, error: 'Failed to update balance' };
-    }
-
-    // Add item
-    if (itemId.startsWith('badge_')) {
-      await addPurchasedBadge(normalizedUsername, itemId);
-    } else {
-      const purchasedCosmetics: string[] = user.purchased_cosmetics || [];
-      // Re-read or just append? Appending is risky if concurrent.
-      // Ideally we use array_append in Supabase but updateUser takes the whole array.
-      // For now, re-use list from variable.
-      const newPurchases = [...purchasedCosmetics, itemId];
-      await updateUser(normalizedUsername, { purchased_cosmetics: newPurchases });
-    }
+    const newBalance = result.new_balance ?? 0;
 
     // eslint-disable-next-line no-console
     console.log(

@@ -1,14 +1,16 @@
-import { motion } from 'framer-motion';
-import React, { useEffect, useReducer } from 'react';
+import React, { useEffect, useReducer, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { TOAST_SHORT_MS } from '../config/appConstants';
 import { useTheme } from '../context/ThemeContext';
 import { useAdminPromotion } from '../hooks/useAdminPromotion';
 import { useConfirm as useCommonConfirm } from '../hooks/useConfirm';
 import { useToast } from '../hooks/useToast';
-import { SettingsAction, SettingsState } from '../types/settings'; // Types extracted
+import { SettingsAction, SettingsState } from '../types/settings';
 import { getUserProfile } from '../utils/social';
 import { themeClasses } from '../utils/themeUtils';
 import { ConfirmDialog } from './ConfirmDialog';
+import TopBar from './TopBar';
+import { PageHeader } from './ui';
 
 // Import Sections
 import AccountSettings from './settings/AccountSettings';
@@ -18,10 +20,7 @@ import LanguageSettings from './settings/LanguageSettings';
 import NotificationSettings from './settings/NotificationSettings';
 
 interface SettingsScreenProps {
-  onClose: () => void;
   onLogout: () => void;
-  autoAdvance: boolean;
-  setAutoAdvance: (val: boolean) => void;
   username?: string;
 }
 
@@ -48,19 +47,12 @@ function settingsReducer(state: SettingsState, action: SettingsAction): Settings
   }
 }
 
-const SettingsScreen: React.FC<SettingsScreenProps> = ({
-  onClose,
-  onLogout,
-  autoAdvance,
-  setAutoAdvance,
-  username,
-}) => {
+const SettingsScreen: React.FC<SettingsScreenProps> = ({ onLogout, username }) => {
   const { theme, t } = useTheme();
+  const navigate = useNavigate();
   const { toast, success: showSuccess, error: showError } = useToast();
-  // Renamed hook usage to avoid naming collision if any, or just use useConfirm but imported as useCommonConfirm to clarify
-  // Actually checking original import: import { useConfirm } from '../hooks/useConfirm';
-  // I'll stick to useConfirm.
   const { confirm, confirmConfig, handleClose } = useCommonConfirm();
+  const [autoAdvance, setAutoAdvance] = useState(false);
 
   const [settingsState, dispatch] = useReducer(settingsReducer, {
     isAdmin: false,
@@ -110,7 +102,7 @@ const SettingsScreen: React.FC<SettingsScreenProps> = ({
       : null;
 
     if (!input) {
-      return; // User cancelled
+      return;
     }
 
     if (!username) {
@@ -131,71 +123,55 @@ const SettingsScreen: React.FC<SettingsScreenProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-40 flex items-center justify-center p-4 backdrop-blur-sm bg-black/60 overflow-hidden">
-      <motion.div
-        initial={{ scale: 0.9, opacity: 0 }}
-        animate={{ scale: 1, opacity: 1 }}
-        exit={{ scale: 0.9, opacity: 0 }}
-        className={`w-full max-w-md max-h-[80vh] flex flex-col rounded-3xl shadow-2xl overflow-hidden ${themeClasses(theme, 'bg-slate-900 text-white', 'bg-white text-slate-900')}`}
-      >
-        <div
-          className={`p-6 border-b shrink-0 flex justify-between items-center ${themeClasses(theme, 'border-slate-800', 'border-slate-100')}`}
-        >
-          <h2 className="text-2xl font-black tracking-tight font-inter">{t('settings')}</h2>
-          <button
-            onClick={onClose}
-            className={`p-2 rounded-full transition-colors ${themeClasses(theme, 'hover:bg-slate-800', 'hover:bg-slate-100')}`}
-            type="button"
-            aria-label={t('close') || 'Close'}
-          >
-            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M6 18L18 6M6 6l12 12"
-              />
-            </svg>
-          </button>
+    <div
+      className={`fixed inset-0 w-full h-full flex flex-col overflow-hidden transition-colors duration-500 ${themeClasses(theme, 'bg-slate-900 text-white', 'bg-slate-50 text-slate-900')}`}
+    >
+      <TopBar
+        onOpenPage={page => navigate(page ? `/${page}` : '/')}
+        onTriggerLogin={mode => navigate(`/?auth=${mode}`)}
+      />
+
+      <div className="flex-1 w-full px-4 py-8 pt-20 overflow-x-hidden overflow-y-auto">
+        <div className="max-w-2xl mx-auto w-full">
+          <PageHeader title={t('settings')} />
+
+          <div className="space-y-6">
+            {toast && (
+              <div
+                className={`mb-4 p-3 rounded-xl text-center font-bold text-sm font-inter ${
+                  toast.type === 'success'
+                    ? 'bg-emerald-500/20 text-emerald-600 dark:text-emerald-400'
+                    : toast.type === 'error'
+                      ? 'bg-red-500/20 text-red-600 dark:text-red-400'
+                      : toast.type === 'warning'
+                        ? 'bg-amber-500/20 text-amber-600 dark:text-amber-400'
+                        : 'bg-sky-500/20 text-sky-600 dark:text-sky-400'
+                }`}
+              >
+                {toast.text}
+              </div>
+            )}
+
+            <LanguageSettings />
+
+            <AppearanceSettings username={username} />
+
+            <GameplaySettings autoAdvance={autoAdvance} setAutoAdvance={setAutoAdvance} />
+
+            <NotificationSettings
+              settings={profileSettings.notificationSettings}
+              username={username}
+              dispatch={dispatch}
+            />
+
+            <AccountSettings
+              onLogout={onLogout}
+              isAdmin={isAdmin}
+              onAdminAccess={handleVersionClick}
+            />
+          </div>
         </div>
-
-        <div className="flex-1 overflow-y-auto p-6 space-y-6 scrollbar-hide">
-          {/* Main Toast UI */}
-          {toast && (
-            <div
-              className={`mb-4 p-3 rounded-xl text-center font-bold text-sm font-inter ${
-                toast.type === 'success'
-                  ? 'bg-emerald-500/20 text-emerald-600 dark:text-emerald-400'
-                  : toast.type === 'error'
-                    ? 'bg-red-500/20 text-red-600 dark:text-red-400'
-                    : toast.type === 'warning'
-                      ? 'bg-amber-500/20 text-amber-600 dark:text-amber-400'
-                      : 'bg-sky-500/20 text-sky-600 dark:text-sky-400'
-              }`}
-            >
-              {toast.text}
-            </div>
-          )}
-
-          <LanguageSettings />
-
-          <AppearanceSettings username={username} />
-
-          <GameplaySettings autoAdvance={autoAdvance} setAutoAdvance={setAutoAdvance} />
-
-          <NotificationSettings
-            settings={profileSettings.notificationSettings}
-            username={username}
-            dispatch={dispatch}
-          />
-
-          <AccountSettings
-            onLogout={onLogout}
-            isAdmin={isAdmin}
-            onAdminAccess={handleVersionClick}
-          />
-        </div>
-      </motion.div>
+      </div>
 
       <ConfirmDialog
         isOpen={!!confirmConfig}

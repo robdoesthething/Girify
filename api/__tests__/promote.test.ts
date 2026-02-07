@@ -220,7 +220,7 @@ describe('Admin Promotion API', () => {
 
       vi.mocked(verifyFirebaseToken).mockResolvedValue(MOCK_USER_RECORD);
 
-      vi.mocked(checkRateLimit).mockReturnValue({
+      vi.mocked(checkRateLimit).mockResolvedValue({
         allowed: true,
         remaining: 4,
         resetAt: Date.now() + 900000,
@@ -242,7 +242,7 @@ describe('Admin Promotion API', () => {
 
       vi.mocked(verifyFirebaseToken).mockResolvedValue(MOCK_USER_RECORD);
 
-      vi.mocked(checkRateLimit).mockReturnValue({
+      vi.mocked(checkRateLimit).mockResolvedValue({
         allowed: false,
         remaining: 0,
         resetAt: Date.now() + 900000,
@@ -264,7 +264,7 @@ describe('Admin Promotion API', () => {
       vi.mocked(verifyFirebaseToken).mockResolvedValue(MOCK_USER_RECORD);
 
       const resetAt = Date.now() + 900000;
-      vi.mocked(checkRateLimit).mockReturnValue({
+      vi.mocked(checkRateLimit).mockResolvedValue({
         allowed: true,
         remaining: 3,
         resetAt,
@@ -292,7 +292,7 @@ describe('Admin Promotion API', () => {
 
       vi.mocked(verifyFirebaseToken).mockResolvedValue(MOCK_USER_RECORD);
 
-      vi.mocked(checkRateLimit).mockReturnValue({
+      vi.mocked(checkRateLimit).mockResolvedValue({
         allowed: true,
         remaining: 4,
         resetAt: Date.now() + 900000,
@@ -315,7 +315,7 @@ describe('Admin Promotion API', () => {
 
       vi.mocked(verifyFirebaseToken).mockResolvedValue(MOCK_USER_RECORD);
 
-      vi.mocked(checkRateLimit).mockReturnValue({
+      vi.mocked(checkRateLimit).mockResolvedValue({
         allowed: true,
         remaining: 4,
         resetAt: Date.now() + 900000,
@@ -338,7 +338,7 @@ describe('Admin Promotion API', () => {
 
       vi.mocked(verifyFirebaseToken).mockResolvedValue(MOCK_USER_RECORD);
 
-      vi.mocked(checkRateLimit).mockReturnValue({
+      vi.mocked(checkRateLimit).mockResolvedValue({
         allowed: true,
         remaining: 4,
         resetAt: Date.now() + 900000,
@@ -362,7 +362,7 @@ describe('Admin Promotion API', () => {
 
       vi.mocked(verifyFirebaseToken).mockResolvedValue(MOCK_USER_RECORD);
 
-      vi.mocked(checkRateLimit).mockReturnValue({
+      vi.mocked(checkRateLimit).mockResolvedValue({
         allowed: true,
         remaining: 4,
         resetAt: Date.now() + 900000,

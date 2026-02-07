@@ -3,12 +3,9 @@ import { useNavigate } from 'react-router-dom';
 import { useTheme } from '../context/ThemeContext';
 import { themeClasses } from '../utils/themeUtils';
 import TopBar from './TopBar';
+import { PageHeader } from './ui';
 
-interface AboutScreenProps {
-  onClose?: () => void;
-}
-
-const AboutScreen: React.FC<AboutScreenProps> = ({ onClose: _onClose }) => {
+const AboutScreen: React.FC = () => {
   const { theme, t } = useTheme();
   const navigate = useNavigate();
 
@@ -25,27 +22,7 @@ const AboutScreen: React.FC<AboutScreenProps> = ({ onClose: _onClose }) => {
 
       <div className="flex-1 overflow-y-auto w-full px-4 py-6 pt-16">
         <div className="max-w-2xl mx-auto">
-          <div className="flex items-center justify-between mb-8 relative">
-            <button
-              onClick={() => navigate(-1)}
-              className="flex items-center gap-2 text-sm font-bold opacity-60 hover:opacity-100 transition-opacity z-10"
-              type="button"
-            >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M15 19l-7-7 7-7"
-                />
-              </svg>
-              {t('back')}
-            </button>
-
-            <h2 className="text-xl font-black tracking-tight absolute left-1/2 transform -translate-x-1/2">
-              {t('aboutGirify')}
-            </h2>
-          </div>
+          <PageHeader title={t('aboutGirify')} />
 
           <div className="space-y-6 text-sm leading-relaxed opacity-90 px-2 pb-24">
             <p className="text-base font-medium">{t('aboutDescription')}</p>

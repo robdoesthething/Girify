@@ -21,6 +21,7 @@ const Tabs: React.FC<TabsProps> = ({ tabs, activeTab, onChange, fullWidth = fals
 
   return (
     <div
+      role="tablist"
       className={`
       flex p-1 rounded-xl mb-6 space-x-1
       ${themeClasses(theme, 'bg-slate-800', 'bg-slate-100')}
@@ -33,6 +34,10 @@ const Tabs: React.FC<TabsProps> = ({ tabs, activeTab, onChange, fullWidth = fals
         return (
           <button
             key={tab.id}
+            role="tab"
+            aria-selected={isActive}
+            aria-controls={`tabpanel-${tab.id}`}
+            id={`tab-${tab.id}`}
             onClick={() => onChange(tab.id)}
             className={`
               relative flex items-center justify-center gap-2 px-4 py-2 rounded-lg text-sm font-bold transition-all

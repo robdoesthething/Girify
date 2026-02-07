@@ -85,10 +85,10 @@ export default async function handler(req: VercelRequest, res: VercelResponse): 
       return;
     }
 
-    // 2. Rate limit
-    const clientIp = req.headers['x-forwarded-for'] || req.socket.remoteAddress || 'unknown';
+    // 2. Rate limit (x-real-ip is set by Vercel edge, not spoofable by clients)
+    const clientIp = req.headers['x-real-ip'] || req.socket.remoteAddress || 'unknown';
     const rateLimitKey = `auth-token:${user.uid}:${clientIp}`;
-    const rateLimit = checkRateLimit(rateLimitKey, RATE_LIMIT_CONFIG);
+    const rateLimit = await checkRateLimit(rateLimitKey, RATE_LIMIT_CONFIG);
 
     res.setHeader('X-RateLimit-Limit', RATE_LIMIT_CONFIG.maxAttempts.toString());
     res.setHeader('X-RateLimit-Remaining', rateLimit.remaining.toString());
