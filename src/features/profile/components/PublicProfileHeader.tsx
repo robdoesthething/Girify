@@ -61,14 +61,7 @@ const PublicProfileHeader: React.FC<PublicProfileHeaderProps> = ({
       {profile?.realName && <p className="text-sm font-bold opacity-50 mt-1">{profile.realName}</p>}
       {profile?.joinedAt && (
         <p className="text-xs font-bold uppercase tracking-widest opacity-40 mt-2">
-          {t('playerSince')}{' '}
-          {profile.joinedAt instanceof Date
-            ? profile.joinedAt.toLocaleDateString()
-            : (profile.joinedAt as { toDate: () => Date }).toDate
-              ? (profile.joinedAt as { toDate: () => Date }).toDate().toLocaleDateString()
-              : new Date(
-                  (profile.joinedAt as { seconds: number }).seconds * 1000
-                ).toLocaleDateString()}
+          {t('playerSince')} {new Date(profile.joinedAt).toLocaleDateString()}
         </p>
       )}
 

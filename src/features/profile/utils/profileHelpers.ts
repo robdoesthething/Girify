@@ -1,16 +1,15 @@
-import { Timestamp } from 'firebase/firestore';
 import { UserProfile } from '../../../types/user';
 import { ShopItem } from '../../../utils/shop';
 
 /**
- * Parse joined date from various formats (Timestamp, object with seconds, or string)
+ * Parse joined date from various formats (object with seconds, Date, or string)
  */
 export const parseJoinedDate = (joinedAt: any): Date => {
   if (!joinedAt) {
     return new Date();
   }
-  if (joinedAt instanceof Timestamp) {
-    return joinedAt.toDate();
+  if (joinedAt instanceof Date) {
+    return joinedAt;
   }
   if (typeof joinedAt === 'object' && 'seconds' in joinedAt) {
     return new Date(joinedAt.seconds * 1000);

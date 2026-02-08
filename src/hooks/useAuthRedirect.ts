@@ -1,22 +1,21 @@
 /**
  * useAuthRedirect Hook
  *
- * Handles Google auth redirect flow and district selection modal state.
+ * Handles Google OAuth redirect flow and district selection modal state.
+ * With Supabase Auth, the redirect callback is handled automatically
+ * by onAuthStateChange. This hook checks for district selection needs.
  */
 
-import { getRedirectResult, updateProfile } from 'firebase/auth';
 import { useEffect, useRef, useState } from 'react';
-import {
-  DISTRICT_CHECK_DELAY_MS,
-  getRandomAvatarId,
-  getRandomHandleSuffix,
-} from '../config/appConstants';
+import { DISTRICT_CHECK_DELAY_MS } from '../config/appConstants';
 import { STORAGE_KEYS } from '../config/constants';
-import { auth } from '../firebase';
+import { supabase } from '../services/supabase';
 import { debugLog } from '../utils/debug';
 import { normalizeUsername } from '../utils/format';
-import { ensureUserProfile, getUserByEmail, getUserByUid, getUserProfile } from '../utils/social';
+import { getUserByEmail, getUserByUid, getUserProfile } from '../utils/social';
 import { storage } from '../utils/storage';
+import { getRandomAvatarId, getRandomHandleSuffix } from '../config/appConstants';
+import { ensureUserProfile } from '../utils/social';
 
 interface UseAuthRedirectOptions {
   username: string | null;
@@ -41,7 +40,7 @@ export function useAuthRedirect({
   const districtFlowActive = useRef(false);
   const checkedDistrictForUsername = useRef<string | null>(null);
 
-  // Handle Google redirect result for Mobile Safari
+  // Handle OAuth redirect result
   useEffect(() => {
     if (hasProcessedRedirect) {
       return;
@@ -49,24 +48,36 @@ export function useAuthRedirect({
 
     const handleRedirectResult = async () => {
       debugLog('Running handleRedirectResult...');
+
+      // Check if we're returning from an OAuth redirect
+      // Supabase stores the auth result in the URL hash after redirect
+      const hashParams = new URLSearchParams(window.location.hash.substring(1));
+      const accessToken = hashParams.get('access_token');
+      if (!accessToken) {
+        return;
+      }
+
       try {
         setIsProcessingRedirect(true);
-        const result = await getRedirectResult(auth);
+        sessionStorage.setItem('girify_processing_redirect', 'true');
 
-        if (result?.user) {
-          sessionStorage.setItem('girify_processing_redirect', 'true');
-        }
+        const {
+          data: { user },
+        } = await supabase.auth.getUser();
 
-        if (result?.user) {
+        if (user) {
           setHasProcessedRedirect(true);
           sessionStorage.removeItem('girify_redirect_pending');
 
-          const user = result.user;
-          let handle = user.displayName || '';
+          let handle = user.user_metadata?.full_name || user.user_metadata?.name || '';
           let avatarId = getRandomAvatarId();
-          const fullName = user.displayName || user.email?.split('@')[0] || 'User';
+          const fullName =
+            user.user_metadata?.full_name ||
+            user.user_metadata?.name ||
+            user.email?.split('@')[0] ||
+            'User';
 
-          let existingProfile = (await getUserByUid(user.uid)) as any;
+          let existingProfile = (await getUserByUid(user.id)) as any;
 
           if (!existingProfile) {
             existingProfile = (await getUserByEmail(user.email || '')) as any;
@@ -80,7 +91,7 @@ export function useAuthRedirect({
             avatarId = existingProfile.avatarId || avatarId;
 
             if (existingProfile.district) {
-              await ensureUserProfile(handle, user.uid, {
+              await ensureUserProfile(handle, user.id, {
                 realName: fullName,
                 avatarId,
                 email: user.email || undefined,
@@ -89,10 +100,7 @@ export function useAuthRedirect({
               storage.remove(STORAGE_KEYS.REFERRER);
               handleRegister(handle);
             } else {
-              // eslint-disable-next-line max-depth
-              if (user.displayName !== handle) {
-                await updateProfile(user, { displayName: handle });
-              }
+              await supabase.auth.updateUser({ data: { display_name: handle } });
               storage.set(STORAGE_KEYS.USERNAME, handle);
               districtFlowActive.current = true;
               setShowDistrictModal(true);
@@ -101,17 +109,10 @@ export function useAuthRedirect({
             const namePart = (fullName.split(' ')[0] || 'User').replace(/[^a-zA-Z0-9]/g, '');
             handle = `@${namePart}${getRandomHandleSuffix()}`;
 
-            if (user.displayName !== handle) {
-              await updateProfile(user, { displayName: handle });
-            }
+            await supabase.auth.updateUser({ data: { display_name: handle } });
             storage.set(STORAGE_KEYS.USERNAME, handle);
             districtFlowActive.current = true;
             setShowDistrictModal(true);
-          }
-        } else {
-          const pendingRedirect = sessionStorage.getItem('girify_redirect_pending');
-          if (pendingRedirect) {
-            sessionStorage.removeItem('girify_redirect_pending');
           }
         }
       } catch (err) {

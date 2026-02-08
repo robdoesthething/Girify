@@ -1,18 +1,18 @@
-import { updateProfile, User } from 'firebase/auth';
 import { USER } from '../config/constants';
+import { supabase } from './supabase';
 import { migrateUser } from '../utils/social';
 
 export class UserMigrationService {
   /**
    * Check and perform migration if necessary
    */
-  static async migrateToNewFormat(user: User, currentHandle: string): Promise<string> {
+  static async migrateToNewFormat(currentHandle: string): Promise<string> {
     if (!this.needsMigration(currentHandle)) {
       return currentHandle;
     }
 
     const newHandle = this.generateNewHandle(currentHandle);
-    await this.performMigration(user, currentHandle, newHandle);
+    await this.performMigration(currentHandle, newHandle);
     return newHandle;
   }
 
@@ -45,13 +45,9 @@ export class UserMigrationService {
     return `@${coreName}${randomId}`;
   }
 
-  static async performMigration(
-    user: User,
-    currentHandle: string,
-    newHandle: string
-  ): Promise<void> {
+  static async performMigration(currentHandle: string, newHandle: string): Promise<void> {
     console.warn(`[Migration] Update handle: ${currentHandle} -> ${newHandle}`);
-    await updateProfile(user, { displayName: newHandle });
+    await supabase.auth.updateUser({ data: { display_name: newHandle } });
     await migrateUser(currentHandle, newHandle);
     console.warn('[Migration] Success! New handle:', newHandle);
   }

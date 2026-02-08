@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { auth } from '../firebase';
+import { supabase } from '../services/supabase';
 import { storage } from '../utils/storage';
 
 const DebugOverlay: React.FC = () => {
@@ -8,11 +8,14 @@ const DebugOverlay: React.FC = () => {
   const [logs, setLogs] = useState<string[]>([]);
 
   useEffect(() => {
-    const updateInfo = () => {
+    const updateInfo = async () => {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
       setInfo({
-        uid: auth.currentUser?.uid || 'null',
-        email: auth.currentUser?.email || 'null',
-        displayName: auth.currentUser?.displayName || 'null',
+        uid: user?.id || 'null',
+        email: user?.email || 'null',
+        displayName: user?.user_metadata?.display_name || user?.user_metadata?.full_name || 'null',
         storageUser: storage.get('girify_username', 'null'),
         redirectPending: sessionStorage.getItem('girify_redirect_pending') || 'null',
         processing: sessionStorage.getItem('girify_processing_redirect') || 'null',

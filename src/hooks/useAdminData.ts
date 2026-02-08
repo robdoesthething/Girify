@@ -59,7 +59,10 @@ export function useAdminData(
   }, []);
 
   useEffect(() => {
-    fetchData();
+    const loadData = async () => {
+      await fetchData();
+    };
+    loadData();
   }, [fetchData]);
 
   const handleMigration = async () => {
@@ -75,43 +78,9 @@ export function useAdminData(
 
     setMigrationStatus('Starting migration...');
     try {
-      const { collection, getDocs, doc, writeBatch } = await import('firebase/firestore');
-      const { db } = await import('../firebase');
-
-      const usersRef = collection(db as any, 'users');
-      const snapshot = await getDocs(usersRef);
-      let migrated = 0;
-      let count = 0;
-
-      let batch = writeBatch(db as any);
-      const batchSize = 200;
-
-      for (const userDoc of snapshot.docs) {
-        const oldId = userDoc.id;
-        const newId = oldId.toLowerCase();
-
-        if (oldId !== newId) {
-          const oldData = userDoc.data();
-          const targetRef = doc(db, 'users', newId);
-          batch.set(targetRef, { ...oldData, username: newId, originalId: oldId }, { merge: true });
-          batch.delete(userDoc.ref);
-          migrated++;
-          count++;
-        }
-
-        if (count >= batchSize) {
-          await batch.commit();
-
-          batch = writeBatch(db as any);
-          count = 0;
-        }
-      }
-
-      if (count > 0) {
-        await batch.commit();
-      }
-
-      setMigrationStatus(`Migration complete. Migrated ${migrated} users.`);
+      // Migration now handled via Supabase. This is a legacy admin action.
+      // Lowercase username migration is no longer needed (Supabase data is already normalized).
+      setMigrationStatus('Migration is no longer needed — all data is in Supabase.');
       fetchData();
     } catch (e: unknown) {
       logger.error(e);

@@ -736,6 +736,7 @@ export type Database = {
           team: string | null;
           theme: string | null;
           total_score: number | null;
+          supabase_uid: string | null;
           uid: string | null;
           updated_at: string | null;
           username: string;
@@ -768,6 +769,7 @@ export type Database = {
           team?: string | null;
           theme?: string | null;
           total_score?: number | null;
+          supabase_uid?: string | null;
           uid?: string | null;
           updated_at?: string | null;
           username: string;
@@ -800,6 +802,7 @@ export type Database = {
           team?: string | null;
           theme?: string | null;
           total_score?: number | null;
+          supabase_uid?: string | null;
           uid?: string | null;
           updated_at?: string | null;
           username?: string;

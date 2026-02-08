@@ -12,16 +12,6 @@ vi.mock('../../context/ThemeContext', () => ({
   }),
 }));
 
-vi.mock('../../firebase', () => ({
-  auth: { currentUser: { uid: 'testuser' } },
-  db: {},
-  messaging: {},
-}));
-
-vi.mock('../../hooks/useNotifications', () => ({
-  useNotifications: vi.fn(),
-}));
-
 // Mock Supabase client
 vi.mock('../../services/supabase', () => ({
   supabase: {

@@ -1,7 +1,6 @@
-import { onAuthStateChanged } from 'firebase/auth';
 import React, { useEffect, useState } from 'react';
 import { Navigate, Outlet } from 'react-router-dom';
-import { auth } from '../../firebase';
+import { supabase } from '../../services/supabase';
 import { isCurrentUserAdmin } from '../../utils/auth';
 
 const AdminRoute: React.FC = () => {
@@ -9,17 +8,28 @@ const AdminRoute: React.FC = () => {
 
   useEffect(() => {
     // Listen for auth changes
-    const unsubscribe = onAuthStateChanged(auth, async user => {
-      if (!user) {
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange(async (_event, session) => {
+      if (!session?.user) {
         setIsAdmin(false);
       } else {
-        // Check admin status against Supabase (handled by isCurrentUserAdmin)
         const admin = await isCurrentUserAdmin();
         setIsAdmin(admin);
       }
     });
 
-    return () => unsubscribe();
+    // Check initial state
+    supabase.auth.getUser().then(async ({ data: { user } }) => {
+      if (!user) {
+        setIsAdmin(false);
+      } else {
+        const admin = await isCurrentUserAdmin();
+        setIsAdmin(admin);
+      }
+    });
+
+    return () => subscription.unsubscribe();
   }, []);
 
   if (isAdmin === null) {

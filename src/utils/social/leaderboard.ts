@@ -1,4 +1,3 @@
-import { Timestamp } from 'firebase/firestore';
 import { SOCIAL } from '../../config/constants';
 import { DISTRICTS } from '../../data/districts';
 import { supabase } from '../../services/supabase';
@@ -23,7 +22,7 @@ export interface ScoreEntry {
   score: number;
   time: number;
   date?: number;
-  timestamp?: Timestamp | { seconds: number };
+  timestamp?: { seconds: number };
   platform?: string;
   isBonus?: boolean;
   correctAnswers?: number | null;

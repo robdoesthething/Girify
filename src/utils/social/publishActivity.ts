@@ -1,9 +1,9 @@
 /**
  * Utility to publish activity events to friend feed
  */
-import { auth } from '../../firebase';
 import { publishActivity as dbPublishActivity } from '../../services/database';
 import { getUserByUsername } from '../../services/db/users';
+import { supabase } from '../../services/supabase';
 import { ActivityFeedRow } from '../../types/supabase';
 import { normalizeUsername } from '../format';
 
@@ -70,27 +70,31 @@ export const publishActivity = async (
 
   // Security: Verify user owns this username to prevent impersonation
   const normalizedUsername = normalizeUsername(username);
-  const currentFirebaseUser = auth.currentUser;
+  const {
+    data: { user: currentUser },
+  } = await supabase.auth.getUser();
 
-  if (!currentFirebaseUser) {
+  if (!currentUser) {
     console.error('[Activity] Auth failed: no authenticated user');
     return;
   }
 
   // Verify the current user owns this username
   const userProfile = await getUserByUsername(normalizedUsername);
-  if (!userProfile || userProfile.uid !== currentFirebaseUser.uid) {
-    console.error('[Activity] Auth failed: user does not own username', {
-      requested: normalizedUsername,
-      currentUid: currentFirebaseUser.uid,
-    });
-    return;
+  if (!userProfile || (userProfile.supabase_uid && userProfile.supabase_uid !== currentUser.id)) {
+    // Fallback: check by uid for users who haven't migrated supabase_uid yet
+    if (!userProfile || userProfile.uid !== currentUser.id) {
+      console.error('[Activity] Auth failed: user does not own username', {
+        requested: normalizedUsername,
+        currentUid: currentUser.id,
+      });
+      return;
+    }
   }
 
   try {
     const row = mapToRow(normalizedUsername, type, data);
     await dbPublishActivity(row);
-    // console.warn(`[Activity] Published ${type} for ${normalizedUsername}`);
   } catch (e) {
     console.error('[Activity] Error publishing activity:', e);
   }

@@ -1,4 +1,3 @@
-import { auth } from '../firebase';
 import { supabase } from '../services/supabase';
 import { normalizeUsername } from './format';
 import { logger } from './logger';
@@ -9,17 +8,15 @@ import { logger } from './logger';
  */
 export const isCurrentUserAdmin = async (): Promise<boolean> => {
   try {
-    const user = auth.currentUser;
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
     if (!user) {
       return false;
     }
 
-    // Check admins table
-    const { data, error } = await supabase
-      .from('admins')
-      .select('uid')
-      .eq('uid', user.uid)
-      .single();
+    // Check admins table by uid (supabase auth uid)
+    const { data, error } = await supabase.from('admins').select('uid').eq('uid', user.id).single();
 
     if (error || !data) {
       return false;
@@ -47,11 +44,13 @@ export const requireAdmin = async (): Promise<void> => {
  * @throws Error if not authenticated
  */
 export const requireAuth = async (): Promise<string> => {
-  const user = auth.currentUser;
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) {
     throw new Error('Not authenticated');
   }
-  return user.uid;
+  return user.id;
 };
 
 /**
@@ -59,7 +58,9 @@ export const requireAuth = async (): Promise<string> => {
  * @returns The normalized username or null if not authenticated/found
  */
 export const getCurrentUsername = async (): Promise<string | null> => {
-  const user = auth.currentUser;
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) {
     return null;
   }
@@ -67,10 +68,22 @@ export const getCurrentUsername = async (): Promise<string | null> => {
   const { data, error } = await supabase
     .from('users')
     .select('username')
-    .eq('uid', user.uid)
+    .eq('supabase_uid', user.id)
     .single();
 
   if (error || !data) {
+    // Fallback: try by email for users who haven't linked supabase_uid yet
+    if (user.email) {
+      const { data: emailData, error: emailError } = await supabase
+        .from('users')
+        .select('username')
+        .eq('email', user.email)
+        .single();
+
+      if (!emailError && emailData) {
+        return emailData.username;
+      }
+    }
     return null;
   }
   return data.username;

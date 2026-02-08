@@ -1,7 +1,7 @@
 import { motion } from 'framer-motion';
 import React, { useState } from 'react';
 import { useTheme } from '../context/ThemeContext';
-import { auth } from '../firebase';
+import { supabase } from '../services/supabase';
 import DistrictSelector from '../features/auth/components/DistrictSelector';
 import SelectedDistrictPreview from '../features/auth/components/SelectedDistrictPreview';
 import { ensureUserProfile } from '../utils/social';
@@ -31,12 +31,14 @@ const DistrictSelectionModal: React.FC<DistrictSelectionModalProps> = ({
       setLoading(true);
       setError('');
 
-      const currentUser = auth.currentUser;
+      const {
+        data: { user: currentUser },
+      } = await supabase.auth.getUser();
       if (!currentUser) {
         throw new Error('No authenticated user found');
       }
 
-      await ensureUserProfile(username, currentUser.uid, {
+      await ensureUserProfile(username, currentUser.id, {
         district,
         email: currentUser.email || undefined,
       });

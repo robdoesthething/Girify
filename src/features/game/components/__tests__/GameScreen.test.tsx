@@ -26,13 +26,6 @@ vi.mock('../../../../context/GameContext', () => ({
   useGameContext: () => mockUseGameContext(),
 }));
 
-// Mock Firebase
-vi.mock('../../../../firebase', () => ({
-  auth: {},
-  db: {},
-  storage: {},
-}));
-
 // Mock child components to avoid deep rendering issues
 vi.mock('../MapArea', () => ({
   default: () => <div data-testid="map-area">Map Area</div>,

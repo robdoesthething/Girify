@@ -1,12 +1,4 @@
-import {
-  collection,
-  getCountFromServer,
-  getDocs,
-  query,
-  Timestamp,
-  where,
-} from 'firebase/firestore';
-import { db } from '../../firebase';
+import { supabase } from '../../services/supabase';
 
 export interface DashboardMetrics {
   totalUsers: number;
@@ -35,55 +27,55 @@ export const getDashboardMetrics = async (forceRefresh = false): Promise<Dashboa
     }
   }
 
-  const now = new Date();
-
-  const yesterday = new Date(now.getTime() - 24 * 60 * 60 * 1000);
-  const yesterdayTs = Timestamp.fromDate(yesterday);
+  const yesterday = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
 
   try {
     // 1. Total Users
-    const usersRef = collection(db, 'users');
-    const totalUsersSnap = await getCountFromServer(usersRef);
-    const totalUsers = totalUsersSnap.data().count;
+    const { count: totalUsers, error: totalUsersError } = await supabase
+      .from('users')
+      .select('*', { count: 'exact', head: true });
 
-    // 2. New Users (24h) - Requires 'joinedAt' index usually, or client-side filter if small
-    // We'll trust getDocs for now as user base is likely <10k. If larger, we need count aggregation.
-    // Optimization: Use count query with where
-    const newUsersQuery = query(usersRef, where('joinedAt', '>=', yesterdayTs));
-    const newUsersSnap = await getCountFromServer(newUsersQuery);
-    const newUsers24h = newUsersSnap.data().count;
+    if (totalUsersError) {
+      throw totalUsersError;
+    }
+
+    // 2. New Users (24h)
+    const { count: newUsers24h, error: newUsersError } = await supabase
+      .from('users')
+      .select('*', { count: 'exact', head: true })
+      .gte('joined_at', yesterday);
+
+    if (newUsersError) {
+      throw newUsersError;
+    }
 
     // 3. Games Played (24h)
-    const scoresRef = collection(db, 'scores');
-    const recentGamesQuery = query(scoresRef, where('timestamp', '>=', yesterdayTs));
-    // We need docs to count unique users for DAU (Active Users)
-    const recentGamesSnap = await getDocs(recentGamesQuery);
-    const gamesPlayed24h = recentGamesSnap.size;
+    const { data: recentGames, error: gamesError } = await supabase
+      .from('game_results')
+      .select('user_id')
+      .gte('played_at', yesterday);
 
-    // 4. Active Users (24h)
+    if (gamesError) {
+      throw gamesError;
+    }
+
+    const gamesPlayed24h = recentGames?.length || 0;
+
+    // 4. Active Users (24h) - count distinct usernames
     const uniquePlayers = new Set<string>();
-    recentGamesSnap.forEach(doc => {
-      const data = doc.data();
-      if (data.username) {
-        uniquePlayers.add(data.username);
+    recentGames?.forEach(game => {
+      if (game.user_id) {
+        uniquePlayers.add(game.user_id);
       }
     });
     const activeUsers24h = uniquePlayers.size;
 
-    // 5. Total Giuros (requires scanning users if not aggregated)
-    // This is expensive if we download all users. Let's do it only if forcing refresh or separate it.
-    // For now, let's fetch limited batch or skip if too heavy.
-    // Actually, AdminPanel already fetches getAllUsers(100)? No, it fetches all?
-    // Let's assume we can fetch all for now or estimate.
-    // Optimization: Create a cloud function for this. For client-side admin, we skip precise total sum to save reads
-    // unless strictly requested. We'll set it to 0 or estimate from the cached user list if passed.
-    // Let's perform a lightweight aggregation query if possible (not possible in client SDK without reads).
-    // We will just sum the metrics from the recently active gamers as a proxy, or return 0.
-    const totalGiuros = 0; // Placeholder to avoid 1000s of reads
+    // 5. Total Giuros - placeholder (expensive to scan all users)
+    const totalGiuros = 0;
 
     const metrics: DashboardMetrics = {
-      totalUsers,
-      newUsers24h,
+      totalUsers: totalUsers || 0,
+      newUsers24h: newUsers24h || 0,
       gamesPlayed24h,
       activeUsers24h,
       totalGiuros,

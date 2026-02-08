@@ -1,10 +1,14 @@
 import React from 'react';
 import { useTheme } from '../../context/ThemeContext';
-import { useNotifications } from '../../hooks/useNotifications';
 import { useToast } from '../../hooks/useToast';
 import { SettingsAction } from '../../types/settings';
 import { updateUserProfile } from '../../utils/social';
 import { themeClasses } from '../../utils/themeUtils';
+
+// Check if iOS (notifications not reliable on iOS PWA)
+const checkIsIOS = () =>
+  /iPad|iPhone|iPod/.test(navigator.userAgent) ||
+  (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
 
 interface NotificationSettingsProps {
   settings: {
@@ -24,11 +28,8 @@ const NotificationSettings: React.FC<NotificationSettingsProps> = ({
   const { theme } = useTheme();
   const { toast, success: showSuccess, warning: showWarning, info: showInfo } = useToast();
 
-  const { isSupported, isIOS, requestPermission } = useNotifications() as {
-    isSupported: boolean;
-    isIOS: boolean;
-    requestPermission: () => Promise<boolean>;
-  };
+  const isIOS = checkIsIOS();
+  const isSupported = 'Notification' in window && !isIOS;
 
   const handleToggleDaily = async () => {
     const isEnabled = settings.dailyReminder ?? true;
@@ -39,9 +40,8 @@ const NotificationSettings: React.FC<NotificationSettingsProps> = ({
     }
 
     if (!isEnabled) {
-      // Trying to enable
-      const granted = await requestPermission();
-      if (!granted) {
+      const result = await Notification.requestPermission();
+      if (result !== 'granted') {
         showWarning('Permission blocked. Please enable in browser settings.');
         return;
       } else {
