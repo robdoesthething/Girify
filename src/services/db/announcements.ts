@@ -5,6 +5,7 @@
  */
 
 import type { AnnouncementRow } from '../../types/supabase';
+import { normalizeUsername } from '../../utils/format';
 import { supabase } from '../supabase';
 
 export async function getActiveAnnouncements(): Promise<AnnouncementRow[]> {
@@ -80,10 +81,11 @@ export async function deleteAnnouncement(id: number): Promise<boolean> {
 }
 
 export async function getReadAnnouncementIds(username: string): Promise<number[]> {
+  const normalized = normalizeUsername(username);
   const { data, error } = await supabase
     .from('user_read_announcements')
     .select('announcement_id')
-    .eq('username', username.toLowerCase());
+    .eq('username', normalized);
 
   if (error) {
     console.error('[DB] getReadAnnouncementIds error:', error.message);
@@ -96,8 +98,9 @@ export async function markAnnouncementAsRead(
   username: string,
   announcementId: number
 ): Promise<boolean> {
+  const normalized = normalizeUsername(username);
   const { error } = await supabase.from('user_read_announcements').insert({
-    username: username.toLowerCase(),
+    username: normalized,
     announcement_id: announcementId,
   });
 
