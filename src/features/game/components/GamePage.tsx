@@ -1,5 +1,5 @@
 import { AnimatePresence } from 'framer-motion';
-import { Suspense, useCallback, useEffect, useMemo, useState } from 'react';
+import { Suspense, useEffect, useMemo } from 'react';
 import { useLocation } from 'react-router-dom';
 import AchievementModal from '../../../components/AchievementModal';
 import AnnouncementModal from '../../../components/AnnouncementModal';
@@ -7,6 +7,7 @@ import DistrictSelectionModal from '../../../components/DistrictSelectionModal';
 import { GameProvider } from '../../../context/GameContext';
 import { useAchievements } from '../../../hooks/useAchievements';
 import { useAnnouncements } from '../../../hooks/useAnnouncements';
+import { useAuthRedirect } from '../../../hooks/useAuthRedirect';
 import { hasPlayedToday } from '../../../utils/game/dailyChallenge';
 import useGameState from '../hooks/useGameState';
 import useStreets from '../hooks/useStreets';
@@ -52,7 +53,11 @@ const GamePageContent = ({ username }: GamePageProps) => {
   const announcements = useAnnouncements(state.username || '');
   const achievements = useAchievements(state.username || '', state.gameState, location.pathname);
 
-  const [showDistrictModal, setShowDistrictModal] = useState(false);
+  // District check — prompts logged-in users without a team to pick one
+  const { showDistrictModal, handleDistrictComplete } = useAuthRedirect({
+    username: state.username,
+    handleRegister,
+  });
 
   // Check announcements on home screen
   useEffect(() => {
@@ -61,10 +66,6 @@ const GamePageContent = ({ username }: GamePageProps) => {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [state.username]);
-
-  const handleDistrictComplete = useCallback(async () => {
-    setShowDistrictModal(false);
-  }, []);
 
   const providerValue = useMemo(
     () => ({

@@ -62,6 +62,7 @@ describe('SummaryScreen Integration', () => {
       theme: 'light' as const,
       streak: 5,
       onRestart: vi.fn(),
+      onBackToMenu: vi.fn(),
       quizResults: Array(5).fill({ time: 5, status: 'correct', points: 1000 }),
       quizStreets: Array(5).fill({ id: 's1', name: 'Test Street' }),
       t: (key: string) => key,

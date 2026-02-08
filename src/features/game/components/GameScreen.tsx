@@ -177,6 +177,7 @@ const GameScreen: FC = () => {
             realName={state.realName ?? undefined} // Pass real name
             streak={state.streak} // Pass streak
             onRestart={() => handlers.setupGame()}
+            onBackToMenu={() => dispatch({ type: 'SET_GAME_STATE', payload: 'intro' })}
             quizResults={state.quizResults}
             quizStreets={state.quizStreets}
             t={t}

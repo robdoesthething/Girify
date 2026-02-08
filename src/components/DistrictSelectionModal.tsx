@@ -1,9 +1,9 @@
 import { motion } from 'framer-motion';
-import PropTypes from 'prop-types';
 import React, { useState } from 'react';
 import { useTheme } from '../context/ThemeContext';
-import { DISTRICTS } from '../data/districts';
 import { auth } from '../firebase';
+import DistrictSelector from '../features/auth/components/DistrictSelector';
+import SelectedDistrictPreview from '../features/auth/components/SelectedDistrictPreview';
 import { ensureUserProfile } from '../utils/social';
 import { themeClasses } from '../utils/themeUtils';
 
@@ -31,14 +31,11 @@ const DistrictSelectionModal: React.FC<DistrictSelectionModalProps> = ({
       setLoading(true);
       setError('');
 
-      // Get current auth user
       const currentUser = auth.currentUser;
       if (!currentUser) {
         throw new Error('No authenticated user found');
       }
 
-      // Update user profile with selected district and email
-      // ensureUserProfile handles the team name logic automatically
       await ensureUserProfile(username, currentUser.uid, {
         district,
         email: currentUser.email || undefined,
@@ -58,7 +55,7 @@ const DistrictSelectionModal: React.FC<DistrictSelectionModalProps> = ({
       <motion.div
         initial={{ scale: 0.9, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
-        className={`w-full max-w-sm p-8 rounded-3xl shadow-2xl border ${themeClasses(theme, 'bg-slate-900 border-slate-700 text-white', 'bg-white border-slate-200 text-slate-900')}`}
+        className={`w-full max-w-md p-8 rounded-3xl shadow-2xl border ${themeClasses(theme, 'bg-slate-900 border-slate-700 text-white', 'bg-white border-slate-200 text-slate-900')}`}
       >
         <div className="text-center mb-6">
           <span className="text-4xl mb-2 block">🏆</span>
@@ -72,50 +69,15 @@ const DistrictSelectionModal: React.FC<DistrictSelectionModalProps> = ({
         </div>
 
         <div className="space-y-4">
-          <select
-            value={district}
-            onChange={e => setDistrict(e.target.value)}
-            aria-label={t('chooseATeam') || 'Choose a team'}
-            className={`w-full px-4 py-3 rounded-xl border font-medium outline-none focus:ring-2 focus:ring-sky-500 transition-all appearance-none cursor-pointer ${themeClasses(theme, 'bg-slate-800 border-slate-700 text-white placeholder-slate-600', 'bg-white border-slate-200 text-slate-900 placeholder-slate-400')}`}
-          >
-            <option value="" disabled>
-              {t('chooseATeam') || '🏆 Choose a team...'}
-            </option>
-            {DISTRICTS.map(d => (
-              <option key={d.id} value={d.id}>
-                {d.teamName}
-              </option>
-            ))}
-          </select>
+          <DistrictSelector
+            theme={theme as 'light' | 'dark'}
+            selectedDistrict={district}
+            onSelect={setDistrict}
+            showTeamName
+            maxHeight="max-h-56"
+          />
 
-          {district && (
-            <div className="p-4 rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 flex items-center gap-4 animate-fadeIn">
-              {(() => {
-                const d = DISTRICTS.find(dist => dist.id === district);
-                return d ? (
-                  <>
-                    <div
-                      className={`w-16 h-16 rounded-full bg-gradient-to-br ${d.color} p-0.5 shadow-lg flex-shrink-0`}
-                    >
-                      <div className="w-full h-full rounded-full bg-slate-900 flex items-center justify-center overflow-hidden border-2 border-white/20">
-                        <img src={d.logo} alt={d.teamName} className="w-full h-full object-cover" />
-                      </div>
-                    </div>
-                    <div>
-                      <p className="text-[10px] font-bold opacity-50 uppercase tracking-widest">
-                        {t('youAreJoining') || 'You are joining'}
-                      </p>
-                      <h3
-                        className={`text-lg font-black bg-gradient-to-r ${d.color} bg-clip-text text-transparent leading-tight`}
-                      >
-                        {d.teamName}
-                      </h3>
-                    </div>
-                  </>
-                ) : null;
-              })()}
-            </div>
-          )}
+          {district && <SelectedDistrictPreview districtId={district} t={t} />}
 
           {error && (
             <div className="p-3 text-xs text-rose-500 bg-rose-50 dark:bg-rose-900/20 rounded-lg text-center font-bold">
@@ -140,11 +102,6 @@ const DistrictSelectionModal: React.FC<DistrictSelectionModalProps> = ({
       </motion.div>
     </div>
   );
-};
-
-DistrictSelectionModal.propTypes = {
-  username: PropTypes.string.isRequired,
-  onComplete: PropTypes.func.isRequired,
 };
 
 export default DistrictSelectionModal;

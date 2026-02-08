@@ -30,12 +30,12 @@ const AboutScreen: React.FC = () => {
             <h3 className="font-bold text-lg mt-8 text-sky-500">Tech Stack</h3>
             <div className="grid grid-cols-2 gap-4">
               <div className="p-3 bg-slate-100 dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700">
-                <div className="font-bold mb-1">React 18</div>
-                <div className="text-xs opacity-60">Vite, Hooks, Context</div>
+                <div className="font-bold mb-1">React 19</div>
+                <div className="text-xs opacity-60">Vite 7, Hooks, Context</div>
               </div>
               <div className="p-3 bg-slate-100 dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700">
-                <div className="font-bold mb-1">Firebase</div>
-                <div className="text-xs opacity-60">Auth, Firestore, Hosting</div>
+                <div className="font-bold mb-1">Supabase</div>
+                <div className="text-xs opacity-60">PostgreSQL, Auth, Realtime</div>
               </div>
               <div className="p-3 bg-slate-100 dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700">
                 <div className="font-bold mb-1">TailwindCSS</div>
