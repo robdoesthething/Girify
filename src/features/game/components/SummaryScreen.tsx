@@ -27,6 +27,7 @@ interface SummaryScreenProps {
   realName?: string;
   streak?: number;
   onRestart: () => void;
+  onBackToMenu: () => void;
   quizResults: QuizResult[];
   quizStreets: Street[];
   t: (key: string) => string;
@@ -39,6 +40,7 @@ const SummaryScreen: React.FC<SummaryScreenProps> = ({
   username,
   streak,
   onRestart,
+  onBackToMenu,
   quizStreets,
   t,
 }) => {
@@ -255,9 +257,9 @@ const SummaryScreen: React.FC<SummaryScreenProps> = ({
           </button>
 
           <button
-            onClick={() => navigate('/')}
-            className="w-full py-3 rounded-xl font-medium text-sm uppercase tracking-wider transition-all
-               bg-transparent text-slate-400 hover:text-white border border-slate-700/50 hover:border-slate-500 mb-6"
+            onClick={onBackToMenu}
+            className="w-full py-4 rounded-xl font-bold text-sm uppercase tracking-wider transition-all
+               bg-slate-800/60 text-slate-300 hover:bg-slate-700 hover:text-white border border-slate-700 hover:border-slate-500 mb-6"
           >
             🏠 {t('backToMenu') || 'Back to Menu'}
           </button>
