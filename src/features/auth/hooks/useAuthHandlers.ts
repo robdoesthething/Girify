@@ -1,20 +1,12 @@
 /**
  * useAuthHandlers Hook
  *
- * Handles all authentication logic for Google and Email auth flows.
+ * Handles all authentication logic for Google and Email auth flows via Supabase Auth.
  */
 
-import {
-  createUserWithEmailAndPassword,
-  sendEmailVerification,
-  signInWithEmailAndPassword,
-  signInWithPopup,
-  updateProfile,
-  type User,
-} from 'firebase/auth';
 import { STORAGE_KEYS } from '../../../config/constants';
-import { auth, googleProvider } from '../../../firebase';
-import { ensureUserProfile, getUserByEmail, recordReferral } from '../../../utils/social';
+import { supabase } from '../../../services/supabase';
+import { ensureUserProfile, getUserByEmail, getUserByUid } from '../../../utils/social';
 import { storage } from '../../../utils/storage';
 
 import {
@@ -24,6 +16,8 @@ import {
   validateUsername,
 } from '../utils/authUtils';
 import type { FormAction, PendingGoogleUser } from './useRegisterForm';
+
+import type { User } from '@supabase/supabase-js';
 
 export interface AuthHandlersConfig {
   dispatch: React.Dispatch<FormAction>;
@@ -49,6 +43,7 @@ export function createAuthHandlers(config: AuthHandlersConfig, state: AuthHandle
     console.warn('[AuthDebug] handlePostLogin called for:', handle, 'Existing:', isExisting);
     const referrer = storage.get('girify_referrer', '');
     if (referrer && referrer !== handle && !isExisting) {
+      const { recordReferral } = await import('../../../utils/social');
       await recordReferral(referrer, handle);
       storage.remove('girify_referrer');
     }
@@ -64,12 +59,15 @@ export function createAuthHandlers(config: AuthHandlersConfig, state: AuthHandle
 
   const processGoogleUser = async (user: User) => {
     try {
-      let handle = user.displayName || '';
+      let handle = user.user_metadata?.full_name || user.user_metadata?.name || '';
       let avatarId = getRandomAvatarId();
-      const fullName = user.displayName || user.email?.split('@')[0] || 'User';
+      const fullName =
+        user.user_metadata?.full_name ||
+        user.user_metadata?.name ||
+        user.email?.split('@')[0] ||
+        'User';
 
-      const { getUserByUid } = await import('../../../utils/social');
-      let existingProfile = (await getUserByUid(user.uid)) as any;
+      let existingProfile = (await getUserByUid(user.id)) as any;
 
       if (!existingProfile) {
         existingProfile = (await getUserByEmail(user.email || '')) as any;
@@ -86,9 +84,8 @@ export function createAuthHandlers(config: AuthHandlersConfig, state: AuthHandle
         if (!handle.startsWith('@')) {
           handle = `@${handle}`;
         }
-        if (user.displayName !== handle) {
-          await updateProfile(user, { displayName: handle });
-        }
+        // Update user metadata with handle
+        await supabase.auth.updateUser({ data: { display_name: handle } });
       }
 
       if (!existingProfile?.district) {
@@ -100,7 +97,7 @@ export function createAuthHandlers(config: AuthHandlersConfig, state: AuthHandle
         return;
       }
 
-      await ensureUserProfile(handle, user.uid, {
+      await ensureUserProfile(handle, user.id, {
         realName: fullName,
         avatarId,
         email: user.email || undefined,
@@ -121,13 +118,25 @@ export function createAuthHandlers(config: AuthHandlersConfig, state: AuthHandle
       dispatch({ type: 'SET_LOADING', payload: true });
       dispatch({ type: 'RESET_ERROR' });
 
-      const result = await signInWithPopup(auth, googleProvider);
-      await processGoogleUser(result.user);
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: window.location.origin,
+        },
+      });
+
+      if (error) {
+        throw error;
+      }
+
+      // The page will redirect to Google, then back to the app.
+      // onAuthStateChange in useAuth will pick up the session.
+      // processGoogleUser will be called via useAuthRedirect.
     } catch (err: unknown) {
-      const firebaseError = err as { code?: string; message?: string };
+      const error = err as { code?: string; message?: string };
       dispatch({
         type: 'SET_ERROR',
-        payload: getAuthErrorMessage(firebaseError.code || 'auth/error', firebaseError.message),
+        payload: getAuthErrorMessage(error.code || 'auth/error', error.message),
       });
       dispatch({ type: 'SET_LOADING', payload: false });
     }
@@ -140,7 +149,7 @@ export function createAuthHandlers(config: AuthHandlersConfig, state: AuthHandle
 
     dispatch({ type: 'SET_LOADING', payload: true });
     try {
-      await ensureUserProfile(pendingGoogleUser.handle, pendingGoogleUser.user.uid, {
+      await ensureUserProfile(pendingGoogleUser.handle, pendingGoogleUser.user.id, {
         realName: pendingGoogleUser.fullName,
         avatarId: pendingGoogleUser.avatarId,
         email: pendingGoogleUser.email || undefined,
@@ -187,24 +196,36 @@ export function createAuthHandlers(config: AuthHandlersConfig, state: AuthHandle
         const avatarId = getRandomAvatarId();
         const realName = `${firstName} ${lastName}`.trim();
 
-        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-        await updateProfile(userCredential.user, { displayName: handle });
-        await sendEmailVerification(userCredential.user);
-
-        await ensureUserProfile(handle, userCredential.user.uid, {
-          realName,
-          avatarId,
+        const { data, error: signUpError } = await supabase.auth.signUp({
           email,
-          district,
+          password,
+          options: {
+            data: { display_name: handle, full_name: realName },
+          },
         });
 
-        const referrer = storage.get('girify_referrer', '');
-        if (referrer && referrer !== handle) {
-          await recordReferral(referrer, handle);
-          storage.remove('girify_referrer');
+        if (signUpError) {
+          throw signUpError;
         }
 
-        await auth.signOut();
+        if (data.user) {
+          await ensureUserProfile(handle, data.user.id, {
+            realName,
+            avatarId,
+            email,
+            district,
+          });
+
+          const referrer = storage.get('girify_referrer', '');
+          if (referrer && referrer !== handle) {
+            const { recordReferral } = await import('../../../utils/social');
+            await recordReferral(referrer, handle);
+            storage.remove('girify_referrer');
+          }
+        }
+
+        // Supabase sends verification email automatically if configured
+        await supabase.auth.signOut();
         dispatch({
           type: 'SET_ERROR',
           payload: t('verificationSent') || 'Verification email sent! Please check your inbox.',
@@ -215,20 +236,28 @@ export function createAuthHandlers(config: AuthHandlersConfig, state: AuthHandle
       }
 
       // Sign in flow
-      const userCredential = await signInWithEmailAndPassword(auth, email, password);
+      const { data, error: signInError } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
 
-      if (!userCredential.user.emailVerified) {
+      if (signInError) {
+        throw signInError;
+      }
+
+      const user = data.user;
+      if (user && !user.email_confirmed_at) {
         dispatch({
           type: 'SET_ERROR',
           payload:
             'Please verify your email address before signing in. Check your inbox for the verification link.',
         });
-        await auth.signOut();
+        await supabase.auth.signOut();
         dispatch({ type: 'SET_LOADING', payload: false });
         return;
       }
 
-      const displayName = userCredential.user.displayName || '';
+      const displayName = user?.user_metadata?.display_name || user?.user_metadata?.full_name || '';
       const storedUsername = storage.get(STORAGE_KEYS.USERNAME, '');
 
       if (!storedUsername && displayName) {
@@ -255,5 +284,6 @@ export function createAuthHandlers(config: AuthHandlersConfig, state: AuthHandle
     handleGoogleLogin,
     handleEmailAuth,
     completeGoogleSignup,
+    processGoogleUser,
   };
 }

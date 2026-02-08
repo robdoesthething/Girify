@@ -1,53 +1,10 @@
 /**
- * Firebase Admin authentication utilities
+ * Supabase JWT authentication utilities for server-side verification
  */
 
-import * as admin from 'firebase-admin';
+import { createHmac } from 'crypto';
 import { BEARER_PREFIX, BEARER_PREFIX_LENGTH } from './constants';
 import type { FirebaseUser } from './types';
-
-// Initialize Firebase Admin SDK
-let app: admin.app.App;
-
-function getFirebaseAdmin(): admin.app.App {
-  if (app) {
-    return app;
-  }
-
-  // Check if already initialized
-  if (admin.apps.length > 0) {
-    app = admin.apps[0]!;
-    return app;
-  }
-
-  // Initialize with service account from env var
-  const serviceAccountKey = process.env.FIREBASE_SERVICE_ACCOUNT_KEY;
-  if (!serviceAccountKey) {
-    throw new Error('[Auth] FIREBASE_SERVICE_ACCOUNT_KEY environment variable not set');
-  }
-
-  try {
-    // Decode base64-encoded service account JSON
-    const serviceAccount = JSON.parse(Buffer.from(serviceAccountKey, 'base64').toString('utf-8'));
-
-    app = admin.initializeApp({
-      credential: admin.credential.cert(serviceAccount),
-    });
-
-    console.log('[Auth] Firebase Admin initialized successfully');
-    return app;
-  } catch (error) {
-    console.error('[Auth] Error initializing Firebase Admin:', error);
-    throw new Error('[Auth] Failed to initialize Firebase Admin SDK');
-  }
-}
-
-/**
- * Verify Firebase ID token and return user info
- * @param idToken Firebase ID token from client
- * @returns Verified user information
- * @throws Error if token is invalid
- */
 
 export interface AuthExtractionResult {
   token?: string;
@@ -73,44 +30,71 @@ export function extractBearerToken(authHeader?: string): AuthExtractionResult {
 }
 
 /**
- * Verify Firebase ID token and return user info
- * @param idToken Firebase ID token from client
- * @returns Verified user information
- * @throws Error if token is invalid
+ * Base64url-decode a string
  */
-export async function verifyFirebaseToken(idToken: string): Promise<FirebaseUser> {
+function base64urlDecode(str: string): string {
+  const padded = str + '='.repeat((4 - (str.length % 4)) % 4);
+  return Buffer.from(padded.replace(/-/g, '+').replace(/_/g, '/'), 'base64').toString('utf-8');
+}
+
+/**
+ * Verify a Supabase JWT using the SUPABASE_JWT_SECRET.
+ * Returns the decoded user info (uid from `sub` claim, email).
+ *
+ * This replaces Firebase Admin SDK verification — no external dependency needed.
+ */
+export async function verifySupabaseToken(token: string): Promise<FirebaseUser> {
+  const jwtSecret = process.env.SUPABASE_JWT_SECRET;
+  if (!jwtSecret) {
+    throw new Error('[Auth] SUPABASE_JWT_SECRET environment variable not set');
+  }
+
   try {
-    const app = getFirebaseAdmin();
-    const decodedToken = await app.auth().verifyIdToken(idToken);
+    const parts = token.split('.');
+    if (parts.length !== 3) {
+      throw new Error('Invalid JWT format');
+    }
+
+    const [headerB64, payloadB64, signatureB64] = parts;
+
+    // Verify signature (HS256)
+    const expectedSignature = createHmac('sha256', jwtSecret)
+      .update(`${headerB64}.${payloadB64}`)
+      .digest('base64')
+      .replace(/=/g, '')
+      .replace(/\+/g, '-')
+      .replace(/\//g, '_');
+
+    if (expectedSignature !== signatureB64) {
+      throw new Error('Invalid JWT signature');
+    }
+
+    // Decode payload
+    const payload = JSON.parse(base64urlDecode(payloadB64));
+
+    // Check expiration
+    const now = Math.floor(Date.now() / 1000);
+    if (payload.exp && payload.exp < now) {
+      throw new Error('Token expired');
+    }
+
+    // Check role
+    if (payload.role !== 'authenticated') {
+      throw new Error('Invalid token role');
+    }
 
     return {
-      uid: decodedToken.uid,
-      email: decodedToken.email,
-      displayName: decodedToken.name,
+      uid: payload.sub,
+      email: payload.email,
+      displayName: payload.user_metadata?.full_name || payload.user_metadata?.name,
     };
   } catch (error) {
-    console.error('[Auth] Error verifying Firebase token:', error);
+    console.error('[Auth] Error verifying Supabase token:', error);
     throw new Error('Invalid or expired authentication token');
   }
 }
 
 /**
- * Get Firebase user by UID
- * @param uid User ID
- * @returns User information
+ * @deprecated Use verifySupabaseToken instead. Kept as alias for backwards compatibility.
  */
-export async function getFirebaseUser(uid: string): Promise<FirebaseUser | null> {
-  try {
-    const app = getFirebaseAdmin();
-    const userRecord = await app.auth().getUser(uid);
-
-    return {
-      uid: userRecord.uid,
-      email: userRecord.email,
-      displayName: userRecord.displayName,
-    };
-  } catch (error) {
-    console.error('[Auth] Error fetching Firebase user:', error);
-    return null;
-  }
-}
+export const verifyFirebaseToken = verifySupabaseToken;

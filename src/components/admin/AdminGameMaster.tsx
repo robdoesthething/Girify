@@ -2,8 +2,7 @@ import { AnimatePresence, motion } from 'framer-motion';
 import React, { useState } from 'react';
 import { getUserProfile, updateUserAsAdmin } from '../../utils/social';
 
-import { doc, setDoc } from 'firebase/firestore';
-import { db } from '../../firebase';
+import { supabase } from '../../services/supabase';
 import FormInput from '../FormInput';
 
 interface AdminGameMasterProps {
@@ -29,28 +28,30 @@ const AdminGameMaster: React.FC<AdminGameMasterProps> = ({ onNotify, confirm }) 
       return;
     }
     try {
-      await setDoc(doc(db, 'users', 'mayor_jaume'), {
-        username: '@MayorJaume',
-        realName: 'Mayor Jaume',
-        email: 'mayor@girify.com',
-        role: 'user',
-        verified: true,
-        isSystem: true,
-        createdAt: new Date(),
-        lastLogin: new Date(),
-        banned: false,
-        giuros: 9000000,
-        totalScore: 1000000,
-        gamesPlayed: 1000,
-        streak: 999,
-        bestScore: 25000,
-        purchasedCosmetics: ['title_mayor', 'frame_gold', 'avatar_mayor'],
-        equippedCosmetics: {
-          titleId: 'title_mayor',
-          frameId: 'frame_gold',
-          avatarId: 'avatar_mayor',
+      await supabase.from('users').upsert(
+        {
+          username: '@MayorJaume',
+          real_name: 'Mayor Jaume',
+          email: 'mayor@girify.com',
+          role: 'user',
+          verified: true,
+          joined_at: new Date().toISOString(),
+          last_login: new Date().toISOString(),
+          banned: false,
+          giuros: 9000000,
+          total_score: 1000000,
+          games_played: 1000,
+          streak: 999,
+          best_score: 25000,
+          purchased_cosmetics: ['title_mayor', 'frame_gold', 'avatar_mayor'],
+          equipped_cosmetics: {
+            titleId: 'title_mayor',
+            frameId: 'frame_gold',
+            avatarId: 'avatar_mayor',
+          },
         },
-      });
+        { onConflict: 'username' }
+      );
       onNotify('Mayor Jaume seeded successfully!', 'success');
     } catch (e) {
       console.error(e);
@@ -65,8 +66,6 @@ const AdminGameMaster: React.FC<AdminGameMasterProps> = ({ onNotify, confirm }) 
     setLoading(true);
     setTargetUser(null);
     try {
-      // Basic search by exact username for now - in future we could use search index
-      // But actually, getUserProfile takes a username.
       const user = await getUserProfile(searchTerm);
       if (user) {
         setTargetUser(user);

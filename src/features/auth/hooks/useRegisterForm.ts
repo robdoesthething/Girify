@@ -4,7 +4,7 @@
  * Manages form state for the RegisterPanel component.
  */
 
-import type { User } from 'firebase/auth';
+import type { User } from '@supabase/supabase-js';
 import { useEffect, useReducer } from 'react';
 
 // Types

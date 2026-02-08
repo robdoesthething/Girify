@@ -199,7 +199,7 @@ describe('Admin Promotion API', () => {
   });
 
   describe('Authentication', () => {
-    it('should reject invalid Firebase token', async () => {
+    it('should reject invalid auth token', async () => {
       const req = createMockReq();
       const res = createMockRes();
 
@@ -214,7 +214,7 @@ describe('Admin Promotion API', () => {
       });
     });
 
-    it('should accept valid Firebase token', async () => {
+    it('should accept valid auth token', async () => {
       const req = createMockReq();
       const res = createMockRes();
 

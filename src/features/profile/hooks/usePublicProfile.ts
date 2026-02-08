@@ -1,4 +1,3 @@
-import { Timestamp } from 'firebase/firestore';
 import { useEffect, useState } from 'react';
 import { getEquippedCosmetics } from '../../../utils/shop/giuros';
 import { getUserGameHistory, getUserProfile, UserProfile } from '../../../utils/social';
@@ -61,7 +60,7 @@ export const usePublicProfile = (
             streak: 0,
             totalScore: 0,
             lastPlayDate: '',
-            joinedAt: Timestamp.now(),
+            joinedAt: new Date().toISOString(),
             gamesPlayed: 0,
             bestScore: 0,
             friendCount: 0,
@@ -94,7 +93,7 @@ export const usePublicProfile = (
           streak: 0,
           totalScore: 0,
           lastPlayDate: '',
-          joinedAt: Timestamp.now(),
+          joinedAt: new Date().toISOString(),
           gamesPlayed: 0,
           bestScore: 0,
           friendCount: 0,

@@ -1,7 +1,6 @@
 /**
  * News/Announcements Utility Functions
  */
-import { Timestamp } from 'firebase/firestore'; // Keep for compatibility if needed, but try to move away
 import {
   createAnnouncement as dbCreateAnnouncement,
   deleteAnnouncement as dbDeleteAnnouncement,
@@ -20,12 +19,12 @@ export interface Announcement {
   id: string;
   title: string;
   body: string;
-  publishDate: Timestamp | Date | { seconds: number; toDate?: () => Date };
-  expiryDate?: Timestamp | Date | { seconds: number; toDate?: () => Date } | null;
+  publishDate: Date | { seconds: number; toDate?: () => Date };
+  expiryDate?: Date | { seconds: number; toDate?: () => Date } | null;
   isActive?: boolean;
   priority?: AnnouncementPriority;
   targetAudience?: TargetAudience;
-  createdAt?: Timestamp;
+  createdAt?: { seconds: number; toDate?: () => Date };
 }
 
 interface AnnouncementInput {
@@ -67,7 +66,7 @@ const mapRowToAnnouncement = (row: AnnouncementRow): Announcement => {
     createdAt: {
       seconds: new Date(row.created_at || 0).getTime() / 1000,
       toDate: () => new Date(row.created_at || 0),
-    } as Timestamp,
+    },
   };
 };
 

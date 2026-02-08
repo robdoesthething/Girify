@@ -1,7 +1,6 @@
-import { sendEmailVerification } from 'firebase/auth';
 import React from 'react';
 import { useTheme } from '../../../context/ThemeContext';
-import { auth } from '../../../firebase';
+import { supabase } from '../../../services/supabase';
 import { themeClasses } from '../../../utils/themeUtils';
 
 interface VerifyEmailScreenProps {
@@ -11,10 +10,17 @@ interface VerifyEmailScreenProps {
 const VerifyEmailScreen: React.FC<VerifyEmailScreenProps> = ({ theme }) => {
   const { t } = useTheme();
   const [sent, setSent] = React.useState(false);
+  const [email, setEmail] = React.useState<string | null>(null);
+
+  React.useEffect(() => {
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      setEmail(user?.email || null);
+    });
+  }, []);
 
   const handleResend = async () => {
-    if (auth.currentUser) {
-      await sendEmailVerification(auth.currentUser);
+    if (email) {
+      await supabase.auth.resend({ type: 'signup', email });
       setSent(true);
     }
   };
@@ -32,7 +38,7 @@ const VerifyEmailScreen: React.FC<VerifyEmailScreenProps> = ({ theme }) => {
         </p>
 
         <div className="bg-slate-100 dark:bg-slate-900/50 p-4 rounded-xl mb-8 font-mono text-sm opacity-70">
-          {auth.currentUser?.email}
+          {email || '...'}
         </div>
 
         <div className="space-y-4">
@@ -54,7 +60,7 @@ const VerifyEmailScreen: React.FC<VerifyEmailScreenProps> = ({ theme }) => {
           </button>
 
           <button
-            onClick={() => auth.signOut()}
+            onClick={() => supabase.auth.signOut()}
             className="text-sm opacity-50 hover:opacity-100 underline mt-4"
             type="button"
           >

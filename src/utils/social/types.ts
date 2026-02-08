@@ -4,8 +4,6 @@
  * Shared types used across all social utility modules.
  */
 
-import { Timestamp } from 'firebase/firestore';
-
 export interface NotificationSettings {
   dailyReminder: boolean;
   friendActivity: boolean;
@@ -19,9 +17,9 @@ export interface UserProfile {
   email?: string | null;
   realName?: string;
   avatarId?: number;
-  joinedAt?: Timestamp | string;
-  createdAt?: Timestamp | string;
-  updatedAt?: Timestamp | string;
+  joinedAt?: string;
+  createdAt?: string;
+  updatedAt?: string;
   friendCount?: number;
   banned?: boolean;
   gamesPlayed?: number;
@@ -53,16 +51,16 @@ export interface FeedbackItem {
   text: string;
   status: 'pending' | 'approved' | 'rejected';
   reward?: number | null;
-  createdAt?: Timestamp | string;
-  approvedAt?: Timestamp | string;
-  rejectedAt?: Timestamp | string;
+  createdAt?: string;
+  approvedAt?: string;
+  rejectedAt?: string;
   notified?: boolean;
 }
 
 export interface GameData {
   score: number;
   date?: number | string;
-  timestamp?: Timestamp | { seconds: number } | number;
+  timestamp?: { seconds: number } | number;
   time?: number;
   [key: string]: unknown;
 }

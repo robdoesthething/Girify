@@ -55,7 +55,8 @@ const AppRoutes: React.FC = () => {
     navigate(page ? `/${page}` : '/');
   };
 
-  const currentUsername = profile?.username || user?.displayName || undefined;
+  const currentUsername =
+    profile?.username || user?.user_metadata?.full_name || user?.user_metadata?.name || undefined;
 
   return (
     <div
@@ -84,7 +85,7 @@ const AppRoutes: React.FC = () => {
               <Route
                 path="/"
                 element={
-                  user && user.emailVerified === false ? (
+                  user && user.email_confirmed_at === null ? (
                     <VerifyEmailScreen theme={theme as 'light' | 'dark'} />
                   ) : (
                     <GamePage username={currentUsername} user={user} />

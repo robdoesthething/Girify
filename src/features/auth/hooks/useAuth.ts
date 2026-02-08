@@ -1,11 +1,9 @@
-import { onAuthStateChanged, signOut, User } from 'firebase/auth';
 import { useCallback, useEffect, useState } from 'react';
 import { STORAGE_KEYS, TIME } from '../../../config/constants';
-import { auth } from '../../../firebase';
 import { useAsyncOperation } from '../../../hooks/useAsyncOperation';
 import { useNotification } from '../../../hooks/useNotification';
 import { UserMigrationService } from '../../../services/userMigration';
-import { setSupabaseAccessToken } from '../../../services/supabase';
+import { supabase } from '../../../services/supabase';
 import { FeedbackReward, GameHistory, UserProfile } from '../../../types/user';
 import { logger } from '../../../utils/logger';
 import { sanitizeInput } from '../../../utils/security';
@@ -20,52 +18,52 @@ import {
 } from '../../../utils/social';
 import { storage } from '../../../utils/storage';
 
+import type { Session, User } from '@supabase/supabase-js';
+
 /**
- * Mint a Supabase-compatible JWT from the Firebase user's ID token.
- * On success, injects it into the Supabase client so RLS ownership checks work.
- * On failure, logs a warning and continues (graceful degradation — anon key still works for reads).
+ * Link existing user row to Supabase Auth by setting supabase_uid.
+ * Matches by email on first login after migration.
  */
-async function mintSupabaseToken(firebaseUser: User): Promise<void> {
+async function linkSupabaseUid(user: User): Promise<void> {
+  if (!user.email) {
+    return;
+  }
+
   try {
-    const idToken = await firebaseUser.getIdToken();
-    const res = await fetch('/api/auth/token', {
-      method: 'POST',
-      headers: { Authorization: `Bearer ${idToken}` },
-    });
+    // Check if already linked
+    const { data: existing } = await supabase
+      .from('users')
+      .select('supabase_uid')
+      .eq('email', user.email)
+      .single();
 
-    if (!res.ok) {
-      console.warn('[Auth] Failed to mint Supabase token:', res.status);
-      return;
-    }
-
-    const json = await res.json();
-    if (json.success && json.data?.token) {
-      setSupabaseAccessToken(json.data.token);
+    if (existing && !existing.supabase_uid) {
+      await supabase.from('users').update({ supabase_uid: user.id }).eq('email', user.email);
+      logger.info('[Auth] Linked supabase_uid for', user.email);
     }
   } catch (e) {
-    console.warn('[Auth] Supabase token minting failed, using anon key:', e);
+    console.warn('[Auth] Failed to link supabase_uid:', e);
   }
 }
 
 export interface UseAuthResult {
   user: User | null;
-  profile: UserProfile | null; // [NEW] Return profile
+  profile: UserProfile | null;
   emailVerified: boolean | null;
   isLoading: boolean;
   handleLogout: (navigate: (path: string) => void) => void;
 }
 
 /**
- * Hook for Firebase authentication and user profile management
+ * Hook for Supabase authentication and user profile management
  */
-
 export const useAuth = (onAnnouncementsCheck?: () => void): UseAuthResult => {
   const [emailVerified, setEmailVerified] = useState<boolean | null>(true);
   const [user, setUser] = useState<User | null>(null);
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const { notify } = useNotification();
-  const { execute } = useAsyncOperation(); // [NEW] Use async loader
+  const { execute } = useAsyncOperation();
 
   // Parse referral code from URL on load
   useEffect(() => {
@@ -76,74 +74,83 @@ export const useAuth = (onAnnouncementsCheck?: () => void): UseAuthResult => {
     }
   }, []);
 
-  // Firebase Auth Listener
+  // Supabase Auth Listener
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (user: User | null) => {
-      // Logic for initial load isn't easily wrapped in atomic async op because it's an event listener,
-      // but we can wrap the syncUserProfile part.
-      setUser(user);
-
-      // Skip user profile setup if redirect is being processed (AppRoutes handles this case)
-      // This prevents race conditions where useAuth creates a profile with random district
-      // before the redirect handler can show the district selection modal
-      const isRedirectProcessing = sessionStorage.getItem('girify_processing_redirect');
-      if (isRedirectProcessing) {
-        console.warn('[useAuth] Skipping profile sync - redirect is being processed');
-        setIsLoading(false);
-        return;
-      }
-
-      if (user) {
-        // Refresh user data to get latest emailVerified status
-        try {
-          await user.reload();
-          const freshUser = auth.currentUser;
-          setEmailVerified(freshUser?.emailVerified ?? false);
-        } catch (e) {
-          console.warn('[Auth] Failed to reload user:', e);
-          setEmailVerified(user.emailVerified);
-        }
-
-        // Mint Supabase JWT so RLS ownership checks work
-        await mintSupabaseToken(user);
-
-        // CRITICAL: Check for existing username FIRST (set by handleRegister callback during login)
-        // Re-check storage in case it was updated by redirect handler
-        const existingUsername = storage.get(STORAGE_KEYS.USERNAME, '');
-
-        let displayName = sanitizeInput(
-          user.displayName || user.email?.split('@')[0] || 'User'
-        ).toLowerCase();
-
-        // Handle format migration
-        displayName = await UserMigrationService.migrateToNewFormat(user, displayName);
-
-        // Use stored username if available (from handleRegister), otherwise use derived displayName
-        const usernameToUse = existingUsername || displayName;
-
-        // Ensure Firestore profile and sync data - Wrapped in execute for global loading
-        await execute(
-          async () => {
-            const fetchedProfile = await syncUserProfile(
-              usernameToUse,
-              user,
-              onAnnouncementsCheck,
-              notify
-            );
-            if (fetchedProfile) {
-              setProfile(fetchedProfile);
-            }
-          },
-          { loadingKey: 'profile-sync', errorMessage: undefined } // Suppress annoying error on load if passive
-        );
+    // Get initial session
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session?.user) {
+        handleAuthUser(session.user);
       } else {
-        setProfile(null);
+        setIsLoading(false);
       }
-      setIsLoading(false);
     });
 
-    return () => unsubscribe();
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange(async (_event, session: Session | null) => {
+      if (session?.user) {
+        handleAuthUser(session.user);
+      } else {
+        setUser(null);
+        setProfile(null);
+        setIsLoading(false);
+      }
+    });
+
+    return () => subscription.unsubscribe();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [onAnnouncementsCheck, notify, execute]);
+
+  const handleAuthUser = async (authUser: User) => {
+    setUser(authUser);
+
+    // Skip user profile setup if redirect is being processed
+    const isRedirectProcessing = sessionStorage.getItem('girify_processing_redirect');
+    if (isRedirectProcessing) {
+      console.warn('[useAuth] Skipping profile sync - redirect is being processed');
+      setIsLoading(false);
+      return;
+    }
+
+    // Email verification check
+    setEmailVerified(authUser.email_confirmed_at !== null);
+
+    // Link supabase_uid on first login after migration
+    await linkSupabaseUid(authUser);
+
+    // Determine username
+    const existingUsername = storage.get(STORAGE_KEYS.USERNAME, '');
+
+    let displayName = sanitizeInput(
+      authUser.user_metadata?.full_name ||
+        authUser.user_metadata?.name ||
+        authUser.email?.split('@')[0] ||
+        'User'
+    ).toLowerCase();
+
+    // Handle format migration
+    displayName = await UserMigrationService.migrateToNewFormat(displayName);
+
+    const usernameToUse = existingUsername || displayName;
+
+    // Sync user profile
+    await execute(
+      async () => {
+        const fetchedProfile = await syncUserProfile(
+          usernameToUse,
+          authUser,
+          onAnnouncementsCheck,
+          notify
+        );
+        if (fetchedProfile) {
+          setProfile(fetchedProfile);
+        }
+      },
+      { loadingKey: 'profile-sync', errorMessage: undefined }
+    );
+
+    setIsLoading(false);
+  };
 
   /**
    * Handle user logout
@@ -152,8 +159,7 @@ export const useAuth = (onAnnouncementsCheck?: () => void): UseAuthResult => {
     (navigate: (path: string) => void) => {
       execute(
         async () => {
-          setSupabaseAccessToken(null);
-          await signOut(auth);
+          await supabase.auth.signOut();
           storage.remove(STORAGE_KEYS.USERNAME);
           storage.remove('lastPlayedDate');
           setProfile(null);
@@ -166,14 +172,14 @@ export const useAuth = (onAnnouncementsCheck?: () => void): UseAuthResult => {
         }
       ).catch((err: Error) => logger.error('Sign out error', err));
     },
-    [execute] // Removed notify dependency as it's handled by execute
+    [execute]
   );
 
   return { user, profile, emailVerified, isLoading, handleLogout };
 };
 
 /**
- * Sync user profile data with Firestore
+ * Sync user profile data with Supabase
  */
 async function syncUserProfile(
   displayName: string,
@@ -190,9 +196,9 @@ async function syncUserProfile(
   try {
     // First, get existing profile to preserve district
     const existingProfile = await getUserProfile(displayName);
-    const profile = (await ensureUserProfile(displayName, user.uid, {
+    const profile = (await ensureUserProfile(displayName, user.id, {
       email: user.email || undefined,
-      // Preserve existing district if user already has one so we don't overwrite with random
+      // Preserve existing district if user already has one
       district: existingProfile?.district,
     })) as unknown as UserProfile;
 
@@ -236,12 +242,12 @@ async function syncUserProfile(
     return null;
   } catch (e) {
     console.error('[Auth] Profile sync error:', e);
-    throw e; // Re-throw to let useAsyncOperation handle the error state if needed
+    throw e;
   }
 }
 
 /**
- * One-time sync of local game history to Firestore
+ * One-time sync of local game history
  */
 async function syncLocalHistory(displayName: string) {
   if (storage.get(STORAGE_KEYS.HISTORY_SYNCED, false)) {
@@ -256,8 +262,6 @@ async function syncLocalHistory(displayName: string) {
         logger.info(
           `[Migration] Legacy history sync skipped - games now saved directly to game_results table`
         );
-        // Legacy migration code removed - games are now saved directly to game_results table
-        // when users play new games. Local history is preserved for reference.
       }
     }
     storage.set(STORAGE_KEYS.HISTORY_SYNCED, 'true');
@@ -267,7 +271,7 @@ async function syncLocalHistory(displayName: string) {
 }
 
 /**
- * One-time sync of local cosmetics/currency to Firestore
+ * One-time sync of local cosmetics/currency
  */
 async function syncLocalCosmetics(displayName: string) {
   if (storage.get(STORAGE_KEYS.COSMETICS_SYNCED, false)) {
@@ -282,9 +286,9 @@ async function syncLocalCosmetics(displayName: string) {
     if (
       (purchased && purchased.length > 0) ||
       (equipped && Object.keys(equipped).length > 0) ||
-      (giuros !== undefined && giuros > 10) // giuros is number from storage.get if stored as number/JSON
+      (giuros !== undefined && giuros > 10)
     ) {
-      logger.info('[Migration] Syncing cosmetics and giuros to Firestore...');
+      logger.info('[Migration] Syncing cosmetics and giuros...');
       await updateUserProfile(displayName, {
         purchasedCosmetics: purchased,
         equippedCosmetics: equipped,
@@ -319,11 +323,10 @@ async function backfillJoinDate(displayName: string, profile: UserProfile | null
 
   let profileDate: Date | null = null;
   if (profile && profile.joinedAt) {
-    // Handle both Firebase Timestamp and Date objects
     if (profile.joinedAt instanceof Date) {
       profileDate = profile.joinedAt;
-    } else if (typeof profile.joinedAt === 'object' && 'toDate' in profile.joinedAt) {
-      profileDate = profile.joinedAt.toDate();
+    } else if (typeof profile.joinedAt === 'string') {
+      profileDate = new Date(profile.joinedAt);
     } else if (typeof profile.joinedAt === 'object' && 'seconds' in profile.joinedAt) {
       profileDate = new Date((profile.joinedAt as { seconds: number }).seconds * 1000);
     }
@@ -331,8 +334,6 @@ async function backfillJoinDate(displayName: string, profile: UserProfile | null
 
   if (earliestDate && (!profileDate || earliestDate < profileDate)) {
     logger.info('[Migration] Backfilling registry date from history:', earliestDate);
-    // Cast to any to bypass strict Timestamp check for now, or convert if possible.
-    // Ideally we import Timestamp from firebase/firestore but user helper handles conversion usually.
     await updateUserProfile(displayName, { joinedAt: earliestDate } as any);
     storage.set(STORAGE_KEYS.JOINED, earliestDate!.toLocaleDateString());
   }

@@ -26,25 +26,8 @@ vi.mock('../../services/supabase', () => ({
   supabase: mockSupabase,
 }));
 
-// Mock Firestore (still imported by leaderboard.ts, even if unused in simple getLeaderboard)
-vi.mock('firebase/firestore', () => ({
-  collection: vi.fn(),
-  getDocs: vi.fn(),
-  doc: vi.fn(),
-  getDoc: vi.fn(),
-  query: vi.fn(),
-  where: vi.fn(),
-  orderBy: vi.fn(),
-  limit: vi.fn(),
-  Timestamp: { now: () => ({ seconds: 12345 }) },
-}));
-
 vi.mock('../social', () => ({
   updateUserGameStats: vi.fn(),
-}));
-
-vi.mock('../../firebase', () => ({
-  db: {},
 }));
 
 vi.mock('../dailyChallenge', () => ({

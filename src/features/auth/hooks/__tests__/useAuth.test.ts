@@ -1,46 +1,36 @@
 import { act, renderHook } from '@testing-library/react';
-import { User } from 'firebase/auth';
+import type { User } from '@supabase/supabase-js';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import * as useAsyncOperationModule from '../../../../hooks/useAsyncOperation';
 import * as useNotificationModule from '../../../../hooks/useNotification';
 import * as socialUtils from '../../../../utils/social';
 import { storage } from '../../../../utils/storage';
 
+// Capture the onAuthStateChange callback so we can trigger it in tests
+let authChangeCallback: (event: string, session: any) => void;
+
 // Mock Supabase before importing useAuth (which imports supabase)
 vi.mock('../../../../services/supabase', () => ({
   supabase: {
     auth: {
       getSession: vi.fn().mockResolvedValue({ data: { session: null } }),
-      onAuthStateChange: vi.fn(() => ({ data: { subscription: { unsubscribe: vi.fn() } } })),
+      onAuthStateChange: vi.fn((cb: any) => {
+        authChangeCallback = cb;
+        return { data: { subscription: { unsubscribe: vi.fn() } } };
+      }),
+      signOut: vi.fn().mockResolvedValue({ error: null }),
+      updateUser: vi.fn().mockResolvedValue({ data: { user: null }, error: null }),
     },
     from: vi.fn(() => ({
       select: vi.fn().mockReturnThis(),
       eq: vi.fn().mockReturnThis(),
+      update: vi.fn().mockReturnThis(),
       single: vi.fn().mockResolvedValue({ data: null, error: null }),
     })),
   },
 }));
 
 import { useAuth } from '../useAuth';
-
-// Mock Firebase
-const mockUnsubscribe = vi.fn();
-const mockOnAuthStateChanged = vi.fn((_auth: any, _callback: any) => {
-  return mockUnsubscribe;
-});
-
-vi.mock('../../../../firebase', () => ({
-  auth: {
-    currentUser: null,
-  },
-}));
-
-vi.mock('firebase/auth', () => ({
-  onAuthStateChanged: (_auth: any, _cb: any) => mockOnAuthStateChanged(_auth, _cb),
-  signOut: vi.fn().mockResolvedValue(undefined),
-  updateProfile: vi.fn().mockResolvedValue(undefined),
-  User: {},
-}));
 
 // Mock Hooks
 vi.mock('../../../../hooks/useAsyncOperation', () => ({
@@ -112,12 +102,10 @@ describe('useAuth Hook', () => {
   it('should handle unauthenticated state', async () => {
     const { result } = renderHook(() => useAuth());
 
-    // Simulate no user
+    // Simulate no user via onAuthStateChange
     await act(async () => {
-      const calls = mockOnAuthStateChanged.mock.calls;
-      if (calls.length > 0 && calls[0]) {
-        const callback = calls[0][1];
-        await callback(null);
+      if (authChangeCallback) {
+        authChangeCallback('SIGNED_OUT', null);
       }
     });
 
@@ -127,11 +115,16 @@ describe('useAuth Hook', () => {
 
   it('should handle authenticated user and sync profile', async () => {
     const mockUser = {
-      uid: 'test-uid',
+      id: 'test-supabase-uid',
       email: 'test@example.com',
-      displayName: 'Test User',
-      emailVerified: true,
-      reload: vi.fn(),
+      email_confirmed_at: '2024-01-01T00:00:00Z',
+      user_metadata: {
+        full_name: 'Test User',
+        name: 'Test User',
+      },
+      app_metadata: {},
+      aud: 'authenticated',
+      created_at: '2024-01-01T00:00:00Z',
     } as unknown as User;
 
     const mockProfile = {
@@ -145,13 +138,13 @@ describe('useAuth Hook', () => {
 
     const { result } = renderHook(() => useAuth());
 
-    // Simulate login
+    // Simulate login via onAuthStateChange
     await act(async () => {
-      const calls = mockOnAuthStateChanged.mock.calls;
-      if (calls.length > 0 && calls[0]) {
-        const callback = calls[0][1];
-        await callback(mockUser);
+      if (authChangeCallback) {
+        authChangeCallback('SIGNED_IN', { user: mockUser });
       }
+      // Allow async handleAuthUser to complete (linkSupabaseUid, migration, syncUserProfile)
+      await new Promise(resolve => setTimeout(resolve, 50));
     });
 
     expect(result.current.user).toBe(mockUser);

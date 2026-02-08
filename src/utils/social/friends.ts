@@ -1,4 +1,3 @@
-import { Timestamp } from 'firebase/firestore'; // Keep for type compatibility if needed, or remove if unused. Types often used in UI.
 import { SOCIAL } from '../../config/constants';
 import {
   addFriendship,
@@ -28,13 +27,13 @@ export interface UserSearchResult {
 export interface FriendRequest {
   id: string;
   from: string;
-  timestamp: Timestamp | string;
+  timestamp: string;
   status: string;
 }
 
 export interface Friend {
   username: string;
-  since?: Timestamp | string;
+  since?: string;
   badges?: string[];
   todayGames?: number;
   avatarId?: number;
@@ -51,7 +50,7 @@ export interface FeedActivity {
   username: string;
   score?: number;
   time?: number;
-  timestamp?: Timestamp | { seconds: number } | string;
+  timestamp?: { seconds: number } | string;
   oldUsername?: string;
   avatarId?: number;
   itemName?: string;

@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { supabase } from '../services/supabase';
 import { HTTP } from '../utils/constants';
 
 interface UseAdminPromotionOptions {
@@ -18,22 +19,20 @@ export function useAdminPromotion(options: UseAdminPromotionOptions = {}): UseAd
     setIsLoading(true);
 
     try {
-      // Dynamic import to avoid loading Firebase if not needed immediately
-      const { auth } = await import('../firebase');
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
 
-      if (!auth.currentUser) {
+      if (!session) {
         throw new Error('Not authenticated. Please log in again.');
       }
 
-      // Get Firebase ID token
-      const idToken = await auth.currentUser.getIdToken();
-
-      // Call API endpoint
+      // Call API endpoint with Supabase JWT
       const response = await fetch('/api/admin/promote', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${idToken}`,
+          Authorization: `Bearer ${session.access_token}`,
         },
         body: JSON.stringify({
           adminKey,
@@ -59,7 +58,7 @@ export function useAdminPromotion(options: UseAdminPromotionOptions = {}): UseAd
 
       // Success
       if (options.onSuccess) {
-        options.onSuccess(auth.currentUser.uid);
+        options.onSuccess(session.user.id);
       }
     } catch (e: unknown) {
       console.error('[useAdminPromotion] Error promoting to admin:', e);

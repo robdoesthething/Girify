@@ -1,5 +1,3 @@
-import { Timestamp } from 'firebase/firestore';
-
 export interface UserProfile {
   username: string;
   uid: string;
@@ -8,7 +6,7 @@ export interface UserProfile {
   streak: number;
   totalScore: number;
   lastPlayDate: string;
-  joinedAt: Date | Timestamp;
+  joinedAt: Date | string;
   purchasedCosmetics?: string[];
   equippedCosmetics?: Record<string, string>;
   giuros?: number;
