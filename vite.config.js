@@ -69,7 +69,6 @@ export default defineConfig(({ mode }) => ({
         manualChunks: {
           // Vendor chunks for better caching
           'vendor-react': ['react', 'react-dom', 'react-router-dom'],
-          'vendor-firebase': ['firebase/app', 'firebase/auth', 'firebase/firestore'],
           'vendor-map': ['leaflet', 'react-leaflet'],
           'vendor-turf': [
             '@turf/helpers',
