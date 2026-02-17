@@ -39,10 +39,14 @@ jobs:
 
       - name: Run tests
         run: npm test -- --run
+        env:
+          NODE_OPTIONS: '--max-old-space-size=4096'
 
       - name: Generate coverage report
         run: npm run test:coverage -- --run
         continue-on-error: true
+        env:
+          NODE_OPTIONS: '--max-old-space-size=4096'
 
       - name: Upload coverage reports
         uses: codecov/codecov-action@v4
