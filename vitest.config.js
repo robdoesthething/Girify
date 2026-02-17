@@ -19,8 +19,13 @@ export default defineConfig({
     setupFiles: './src/test/setup.ts',
     css: true,
     pool: 'forks',
-    isolate: false,
+    isolate: true,
     maxWorkers: 1,
+    poolOptions: {
+      forks: {
+        execArgv: ['--max-old-space-size=4096'],
+      },
+    },
     include: [
       'src/**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}',
       'api/**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}',
