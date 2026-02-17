@@ -6,6 +6,7 @@
 
 import { motion } from 'framer-motion';
 import React from 'react';
+import { Button, Card, Heading, Text } from '../../../components/ui';
 import { themeClasses } from '../../../utils/themeUtils';
 import type { FormAction, PendingGoogleUser } from '../hooks/useRegisterForm';
 import DistrictSelector from './DistrictSelector';
@@ -17,6 +18,8 @@ interface PendingGoogleUserViewProps {
   loading: boolean;
   dispatch: React.Dispatch<FormAction>;
   onComplete: () => Promise<void>;
+  onCancel?: () => void;
+  t: (key: string) => string;
 }
 
 const PendingGoogleUserView: React.FC<PendingGoogleUserViewProps> = ({
@@ -26,41 +29,49 @@ const PendingGoogleUserView: React.FC<PendingGoogleUserViewProps> = ({
   loading,
   dispatch,
   onComplete,
+  onCancel,
+  t,
 }) => {
   return (
     <div className="absolute inset-0 z-40 flex items-center justify-center p-6 backdrop-blur-xl pointer-events-auto overflow-hidden overflow-y-auto">
-      <motion.div
-        initial={{ scale: 0.9, opacity: 0 }}
-        animate={{ scale: 1, opacity: 1 }}
-        className={`w-full max-w-sm p-8 rounded-3xl shadow-2xl border my-auto ${themeClasses(theme, 'bg-slate-900/90 border-slate-700 text-white', 'bg-white/90 border-slate-200 text-slate-900')}`}
-      >
-        <h2 className="text-2xl font-black mb-2 tracking-tight text-center">One Last Step!</h2>
-        <p
-          className={`text-sm text-center mb-6 font-medium ${themeClasses(theme, 'text-slate-400', 'text-slate-500')}`}
+      <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }}>
+        <Card
+          className={`w-full max-w-sm p-8 shadow-2xl border my-auto ${themeClasses(theme, '!bg-slate-900/90 !border-slate-700', '!bg-white/90 !border-slate-200')}`}
         >
-          Welcome, <span className="font-bold text-sky-500">{pendingGoogleUser.handle}</span>!
-          <br />
-          Please choose your district to complete your registration.
-        </p>
+          <Heading variant="h2" align="center" className="mb-2 tracking-tight">
+            {t('oneLastStep')}
+          </Heading>
+          <Text variant="caption" align="center" className="mb-6 font-medium" muted>
+            {t('welcomeBack')},{' '}
+            <span className="font-bold text-sky-500">{pendingGoogleUser.handle}</span>!
+            <br />
+            {t('chooseDistrictToComplete')}
+          </Text>
 
-        <div className="space-y-4 mb-6">
-          <DistrictSelector
-            theme={theme}
-            selectedDistrict={district}
-            onSelect={value => dispatch({ type: 'SET_FIELD', field: 'district', value })}
-            maxHeight="max-h-60"
-          />
-        </div>
+          <div className="space-y-4 mb-6">
+            <DistrictSelector
+              theme={theme}
+              selectedDistrict={district}
+              onSelect={value => dispatch({ type: 'SET_FIELD', field: 'district', value })}
+              maxHeight="max-h-60"
+            />
+          </div>
 
-        <button
-          onClick={onComplete}
-          disabled={!district || loading}
-          className={`w-full py-3 rounded-xl font-bold text-sm transition-all shadow-lg active:scale-95 text-white
-              ${!district || loading ? 'bg-slate-400 cursor-not-allowed' : 'bg-sky-500 hover:bg-sky-600 shadow-sky-500/20'}
-          `}
-        >
-          {loading ? 'Finalizing...' : 'Complete Registration'}
-        </button>
+          <Button
+            onClick={onComplete}
+            disabled={!district || loading}
+            fullWidth
+            className={`shadow-lg ${!district || loading ? 'cursor-not-allowed' : 'hover:bg-sky-600 shadow-sky-500/20'}`}
+          >
+            {loading ? t('finalizing') : t('completeRegistration')}
+          </Button>
+
+          {onCancel && (
+            <Button variant="ghost" onClick={onCancel} fullWidth className="mt-3">
+              {t('cancel')}
+            </Button>
+          )}
+        </Card>
       </motion.div>
     </div>
   );

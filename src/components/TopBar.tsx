@@ -1,6 +1,7 @@
 import { AnimatePresence, motion } from 'framer-motion';
 import React, { useCallback, useState } from 'react';
 import { useLocation } from 'react-router-dom';
+import { version } from '../../package.json';
 import { useTheme } from '../context/ThemeContext';
 import { themeClasses } from '../utils/themeUtils';
 import Logo from './Logo';
@@ -166,23 +167,25 @@ backdrop-blur-md border-b ${themeClasses(theme, 'border-slate-600', 'border-slat
                     </button>
                   ))}
 
-                  <div className="h-px bg-slate-200 dark:bg-slate-700 my-2 shrink-0" />
+                  <div
+                    className={`h-px my-2 shrink-0 ${themeClasses(theme, 'bg-slate-700', 'bg-slate-200')}`}
+                  />
 
                   {!username ? (
                     <>
                       <button
                         onClick={() => handleMenuClick('login')}
-                        className="text-left py-2 px-3 rounded-lg hover:bg-emerald-500/10 font-bold text-emerald-600 dark:text-emerald-400 flex items-center gap-4 shrink-0"
+                        className={`text-left py-2 px-3 rounded-lg hover:bg-emerald-500/10 font-bold flex items-center gap-4 shrink-0 ${themeClasses(theme, 'text-emerald-400', 'text-emerald-600')}`}
                         type="button"
                       >
-                        <span className="text-xl">🔑</span> Sign In
+                        <span className="text-xl">🔑</span> {t('signIn')}
                       </button>
                       <button
                         onClick={() => handleMenuClick('signup')}
                         className="text-left py-2 px-3 rounded-lg hover:bg-sky-500/10 font-bold text-sky-500 flex items-center gap-4 shrink-0"
                         type="button"
                       >
-                        <span className="text-xl">✨</span> Sign Up
+                        <span className="text-xl">✨</span> {t('signUp')}
                       </button>
                     </>
                   ) : (
@@ -191,13 +194,13 @@ backdrop-blur-md border-b ${themeClasses(theme, 'border-slate-600', 'border-slat
                       className="text-left py-2 px-3 rounded-lg hover:bg-red-500/10 font-bold text-red-500 flex items-center gap-4 shrink-0"
                       type="button"
                     >
-                      <span className="text-xl">🚪</span> Log Out
+                      <span className="text-xl">🚪</span> {t('logout')}
                     </button>
                   )}
                 </nav>
 
                 <div className="mb-6 mx-6 p-2 text-xs text-slate-500 text-center shrink-0">
-                  v1.0.1 Girify
+                  v{version} Girify
                 </div>
               </motion.div>
             </>
@@ -238,21 +241,21 @@ backdrop-blur-md border-b ${themeClasses(theme, 'border-slate-600', 'border-slat
                     className="w-full py-3 bg-sky-500 hover:bg-sky-600 text-white rounded-xl font-bold shadow-lg shadow-sky-500/20 active:scale-95 transition-all"
                     type="button"
                   >
-                    Sign Up
+                    {t('signUp')}
                   </button>
                   <button
                     onClick={() => {
                       setShowLoginModal(false);
                       onTriggerLogin('signin');
                     }}
-                    className="w-full py-3 bg-white border-2 border-slate-200 hover:bg-slate-50 dark:bg-slate-800 dark:border-slate-700 text-slate-900 dark:text-white rounded-xl font-bold transition-all"
+                    className={`w-full py-3 rounded-xl font-bold transition-all ${themeClasses(theme, 'bg-slate-800 border-2 border-slate-700 text-white', 'bg-white border-2 border-slate-200 hover:bg-slate-50 text-slate-900')}`}
                     type="button"
                   >
-                    Sign In
+                    {t('signIn')}
                   </button>
                   <button
                     onClick={() => setShowLoginModal(false)}
-                    className="w-full py-3 text-slate-500 hover:text-slate-800 dark:hover:text-white font-medium transition-colors"
+                    className={`w-full py-3 font-medium transition-colors ${themeClasses(theme, 'text-slate-500 hover:text-white', 'text-slate-500 hover:text-slate-800')}`}
                     type="button"
                   >
                     {t('cancel') || 'Cancel'}

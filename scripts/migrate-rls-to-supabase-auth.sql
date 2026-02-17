@@ -16,11 +16,19 @@
 DROP POLICY IF EXISTS "Users can update own profile" ON users;
 DROP POLICY IF EXISTS "users_link_supabase_uid" ON users;
 
--- Users can only update their own profile (matched by supabase_uid)
+-- Users can update their own profile if:
+-- 1. supabase_uid matches (already linked), OR
+-- 2. email matches and supabase_uid is NULL (first-login linking)
 CREATE POLICY "Users can update own profile" ON users
 FOR UPDATE TO authenticated
-USING (supabase_uid = auth.uid())
-WITH CHECK (supabase_uid = auth.uid());
+USING (
+    supabase_uid = auth.uid()
+    OR (supabase_uid IS NULL AND email = (SELECT email FROM auth.users WHERE id = auth.uid()))
+)
+WITH CHECK (
+    supabase_uid = auth.uid()
+    OR (supabase_uid IS NULL AND email = (SELECT email FROM auth.users WHERE id = auth.uid()))
+);
 
 -- Users can insert their own profile (first login)
 DROP POLICY IF EXISTS "Users can insert own profile" ON users;
@@ -56,6 +64,7 @@ WITH CHECK (true);
 -- ============================================================================
 
 DROP POLICY IF EXISTS "Admins can read own record" ON admins;
+DROP POLICY IF EXISTS "Authenticated can read admins" ON admins;
 
 -- Allow authenticated users to check if they are admin
 -- The admins table needs to be updated to store supabase_uid instead of firebase uid

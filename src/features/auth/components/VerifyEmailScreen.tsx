@@ -37,7 +37,9 @@ const VerifyEmailScreen: React.FC<VerifyEmailScreenProps> = ({ theme }) => {
             "We've sent a verification link to your email address. Please click it to unlock the full game!"}
         </p>
 
-        <div className="bg-slate-100 dark:bg-slate-900/50 p-4 rounded-xl mb-8 font-mono text-sm opacity-70">
+        <div
+          className={`p-4 rounded-xl mb-8 font-mono text-sm opacity-70 ${themeClasses(theme, 'bg-slate-900/50', 'bg-slate-100')}`}
+        >
           {email || '...'}
         </div>
 
@@ -56,7 +58,7 @@ const VerifyEmailScreen: React.FC<VerifyEmailScreenProps> = ({ theme }) => {
             className="w-full py-3 bg-sky-500/10 text-sky-500 hover:bg-sky-500 hover:text-white rounded-xl font-bold transition-all"
             type="button"
           >
-            {sent ? 'Sent!' : t('resendEmail') || 'Resend Email'}
+            {sent ? t('sent') : t('resendEmail') || 'Resend Email'}
           </button>
 
           <button

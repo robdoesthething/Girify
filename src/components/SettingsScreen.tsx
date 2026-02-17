@@ -140,12 +140,12 @@ const SettingsScreen: React.FC<SettingsScreenProps> = ({ onLogout, username }) =
               <div
                 className={`mb-4 p-3 rounded-xl text-center font-bold text-sm font-inter ${
                   toast.type === 'success'
-                    ? 'bg-emerald-500/20 text-emerald-600 dark:text-emerald-400'
+                    ? `bg-emerald-500/20 ${themeClasses(theme, 'text-emerald-400', 'text-emerald-600')}`
                     : toast.type === 'error'
-                      ? 'bg-red-500/20 text-red-600 dark:text-red-400'
+                      ? `bg-red-500/20 ${themeClasses(theme, 'text-red-400', 'text-red-600')}`
                       : toast.type === 'warning'
-                        ? 'bg-amber-500/20 text-amber-600 dark:text-amber-400'
-                        : 'bg-sky-500/20 text-sky-600 dark:text-sky-400'
+                        ? `bg-amber-500/20 ${themeClasses(theme, 'text-amber-400', 'text-amber-600')}`
+                        : `bg-sky-500/20 ${themeClasses(theme, 'text-sky-400', 'text-sky-600')}`
                 }`}
               >
                 {toast.text}

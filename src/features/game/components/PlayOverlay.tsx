@@ -43,7 +43,7 @@ const PlayOverlay: FC = () => {
         </button>
         <div className="mt-8 w-full max-w-sm">
           <h3
-            className={`text-sm font-bold uppercase mb-2 ${theme === 'dark' ? 'text-slate-400' : 'text-slate-500'}`}
+            className={`text-sm font-bold uppercase mb-2 ${themeClasses(theme, 'text-slate-400', 'text-slate-500')}`}
           >
             {t('todaysChallenge') || "Today's Challenge"}
           </h3>

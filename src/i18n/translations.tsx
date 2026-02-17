@@ -57,6 +57,18 @@ const translations: Translations = {
     alreadyHaveAccount: 'Already have an account? Sign In',
     noAccount: "Don't have an account? Sign Up",
     pleaseWait: 'Please wait...',
+    createAccountToTrack: 'Create an account to track stats',
+    signInToContinue: 'Sign in to continue',
+    orWithEmail: 'Or with email',
+    oneLastStep: 'One Last Step!',
+    chooseDistrictToComplete: 'Please choose your district to complete your registration.',
+    completeRegistration: 'Complete Registration',
+    finalizing: 'Finalizing...',
+    firstName: 'First Name',
+    lastName: 'Last Name',
+    fillAllFields: 'Please enter all fields including district',
+    sent: 'Sent!',
+    passwordMinLength: 'Minimum 6 characters',
     verificationSent: 'Verification email sent! Please check your inbox.',
     verifyEmail: 'Please verify your email before signing in.',
 
@@ -90,7 +102,7 @@ const translations: Translations = {
     aboutCredits: 'Credits',
     aboutFooter:
       'Designed and built with ❤️ for Barcelona. Map data provided by OpenStreetMap contributors.',
-    rightsReserved: '© 2025 Girify. All rights reserved.',
+    rightsReserved: '© 2026 Girify. All rights reserved.',
     aboutPoint1: 'A street is highlighted in blue on the map.',
     aboutPoint2: 'You have 4 options to choose from.',
     aboutPoint3: 'The faster you answer, the more points you get!',
@@ -302,6 +314,14 @@ const translations: Translations = {
     claim: 'Claim',
     inProgress: 'Active',
     quests: 'Quests',
+
+    // Post-game summary
+    greetingExcellent: '🏆 Unstoppable! The streets know your name!',
+    greetingGood: '🔥 Great job! You really know this city!',
+    greetingFair: '👍 Not bad! Keep exploring!',
+    greetingDefault: '🗺️ Keep wandering! Every street has a story.',
+    copied: 'Copied!',
+    backToMenu: 'Back to Menu',
   },
 
   es: {
@@ -325,6 +345,18 @@ const translations: Translations = {
     alreadyHaveAccount: '¿Ya tienes cuenta? Iniciar sesión',
     noAccount: '¿No tienes cuenta? Regístrate',
     pleaseWait: 'Por favor espera...',
+    createAccountToTrack: 'Crea una cuenta para guardar tus estadísticas',
+    signInToContinue: 'Inicia sesión para continuar',
+    orWithEmail: 'O con email',
+    oneLastStep: '¡Un último paso!',
+    chooseDistrictToComplete: 'Por favor elige tu distrito para completar el registro.',
+    completeRegistration: 'Completar Registro',
+    finalizing: 'Finalizando...',
+    firstName: 'Nombre',
+    lastName: 'Apellido',
+    fillAllFields: 'Por favor completa todos los campos incluyendo distrito',
+    sent: '¡Enviado!',
+    passwordMinLength: 'Mínimo 6 caracteres',
     verificationSent: '¡Email de verificación enviado! Revisa tu bandeja de entrada.',
     verifyEmail: 'Por favor verifica tu email antes de iniciar sesión.',
 
@@ -358,7 +390,7 @@ const translations: Translations = {
     aboutCredits: 'Créditos',
     aboutFooter:
       'Diseñado y construido con ❤️ para Barcelona. Datos del mapa proporcionados por OpenStreetMap.',
-    rightsReserved: '© 2025 Girify. Todos los derechos reservados.',
+    rightsReserved: '© 2026 Girify. Todos los derechos reservados.',
     aboutPoint1: 'Una calle se resalta en azul en el mapa.',
     aboutPoint2: 'Tienes 4 opciones para elegir.',
     aboutPoint3: '¡Cuanto más rápido respondas, más puntos obtienes!',
@@ -549,6 +581,14 @@ const translations: Translations = {
     claim: 'Reclamar',
     inProgress: 'En Progreso',
     quests: 'Retos',
+
+    // Post-game summary
+    greetingExcellent: '🏆 ¡Imparable! ¡Las calles conocen tu nombre!',
+    greetingGood: '🔥 ¡Buen trabajo! ¡Conoces bien esta ciudad!',
+    greetingFair: '👍 ¡Nada mal! ¡Sigue explorando!',
+    greetingDefault: '🗺️ ¡Sigue paseando! Cada calle tiene su historia.',
+    copied: '¡Copiado!',
+    backToMenu: 'Volver al menú',
   },
 
   ca: {
@@ -572,6 +612,18 @@ const translations: Translations = {
     alreadyHaveAccount: 'Ja tens compte? Inicia sessió',
     noAccount: "No tens compte? Registra't",
     pleaseWait: 'Si us plau espera...',
+    createAccountToTrack: 'Crea un compte per guardar les teves estadístiques',
+    signInToContinue: 'Inicia sessió per continuar',
+    orWithEmail: 'O amb email',
+    oneLastStep: 'Un últim pas!',
+    chooseDistrictToComplete: 'Si us plau tria el teu districte per completar el registre.',
+    completeRegistration: 'Completar Registre',
+    finalizing: 'Finalitzant...',
+    firstName: 'Nom',
+    lastName: 'Cognom',
+    fillAllFields: 'Si us plau completa tots els camps incloent districte',
+    sent: 'Enviat!',
+    passwordMinLength: 'Mínim 6 caràcters',
     verificationSent: "Email de verificació enviat! Revisa la safata d'entrada.",
     verifyEmail: "Si us plau verifica el teu email abans d'iniciar sessió.",
 
@@ -700,7 +752,7 @@ const translations: Translations = {
     aboutCredits: 'Crèdits',
     aboutFooter:
       'Dissenyat i construït amb ❤️ per a Barcelona. Dades del mapa proporcionades per OpenStreetMap.',
-    rightsReserved: '© 2025 Girify. Tots els drets reservats.',
+    rightsReserved: '© 2026 Girify. Tots els drets reservats.',
     aboutPoint1: 'Un carrer es ressaltarà en blau al mapa.',
     aboutPoint2: 'Tens 4 opcions per triar.',
     aboutPoint3: 'Com més ràpid responguis, més punts obtindràs!',
@@ -797,6 +849,14 @@ const translations: Translations = {
     claim: 'Reclamar',
     inProgress: 'En Progrés',
     quests: 'Reptes',
+
+    // Post-game summary
+    greetingExcellent: '🏆 Imparable! Els carrers coneixen el teu nom!',
+    greetingGood: '🔥 Molt bé! Coneixes bé aquesta ciutat!',
+    greetingFair: '👍 No està malament! Segueix explorant!',
+    greetingDefault: '🗺️ Segueix passejant! Cada carrer té la seva història.',
+    copied: 'Copiat!',
+    backToMenu: 'Tornar al menú',
   },
 };
 

@@ -79,15 +79,15 @@ const SummaryScreen: React.FC<SummaryScreenProps> = ({
     const ratio = score / maxPossibleScore;
 
     if (ratio >= UI.PERFORMANCE_THRESHOLDS.EXCELLENT) {
-      return '🏆 Unstoppable! The streets know your name!';
+      return t('greetingExcellent') || '🏆 Unstoppable! The streets know your name!';
     }
     if (ratio >= UI.PERFORMANCE_THRESHOLDS.GOOD) {
-      return '🔥 Great job! You really know this city!';
+      return t('greetingGood') || '🔥 Great job! You really know this city!';
     }
     if (ratio >= UI.PERFORMANCE_THRESHOLDS.FAIR) {
-      return '👍 Not bad! Keep exploring!';
+      return t('greetingFair') || '👍 Not bad! Keep exploring!';
     }
-    return '🗺️ Keep wandering! Every street has a story.';
+    return t('greetingDefault') || '🗺️ Keep wandering! Every street has a story.';
   };
 
   useEffect(() => {
@@ -122,11 +122,11 @@ const SummaryScreen: React.FC<SummaryScreenProps> = ({
         });
       } else {
         await navigator.clipboard.writeText(shareUrl);
-        setShareStatus('Copied!');
+        setShareStatus(t('copied') || 'Copied!');
         setTimeout(() => setShareStatus(null), TIME.SUMMARY_ANIMATION_DELAY);
       }
-    } catch (e) {
-      console.error('Share failed:', e);
+    } catch {
+      // Share failed silently
     }
   };
 
@@ -181,7 +181,7 @@ const SummaryScreen: React.FC<SummaryScreenProps> = ({
           <div className="flex gap-4 w-full">
             <button
               onClick={handleShare}
-              className="flex-1 py-4 bg-slate-200 dark:bg-white/5 hover:bg-slate-300 dark:hover:bg-white/10 border border-slate-300 dark:border-white/10 text-slate-800 dark:text-white rounded-2xl font-bold text-sm transition-all"
+              className={`flex-1 py-4 rounded-2xl font-bold text-sm transition-all ${themeClasses(theme, 'bg-white/5 hover:bg-white/10 border border-white/10 text-white', 'bg-slate-200 hover:bg-slate-300 border border-slate-300 text-slate-800')}`}
             >
               {shareStatus || `🎁 ${t('share') || 'Share & Earn'}`}
             </button>
@@ -213,7 +213,7 @@ const SummaryScreen: React.FC<SummaryScreenProps> = ({
           <div className="grid grid-cols-2 gap-4 w-full mb-8">
             <div className="glass-panel p-4 flex flex-col items-center justify-center col-span-1 asp-square">
               <span className="text-xs opacity-70 uppercase tracking-wider font-bold mb-1">
-                Score
+                {t('yourScore') || 'Score'}
               </span>
               <div className="flex flex-col items-center">
                 <span className="text-4xl md:text-5xl font-black text-emerald-400 leading-none">
