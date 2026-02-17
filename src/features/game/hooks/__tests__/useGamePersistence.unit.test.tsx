@@ -25,9 +25,15 @@ vi.mock('../../../services/supabase', () => ({
     from: vi.fn(() => ({
       insert: vi.fn().mockReturnThis(),
       select: vi.fn().mockReturnThis(),
+      update: vi.fn().mockReturnThis(),
+      eq: vi.fn().mockReturnThis(),
       single: vi.fn().mockResolvedValue({ data: {}, error: null }),
     })),
   },
+}));
+
+vi.mock('../../../services/db/games', () => ({
+  insertGameResult: vi.fn().mockResolvedValue({ success: true }),
 }));
 
 // Correct path: ../../../../hooks/useAsyncOperation because we are in src/features/game/hooks/__tests__

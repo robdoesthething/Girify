@@ -14,6 +14,18 @@ vi.mock('../../../../utils/social', () => ({
   updateUserGameStats: vi.fn(),
 }));
 
+vi.mock('../../../../services/supabase', () => ({
+  supabase: {
+    from: vi.fn(() => ({
+      select: vi.fn().mockReturnThis(),
+      insert: vi.fn().mockReturnThis(),
+      update: vi.fn().mockReturnThis(),
+      eq: vi.fn().mockReturnThis(),
+      single: vi.fn().mockResolvedValue({ data: null, error: null }),
+    })),
+  },
+}));
+
 vi.mock('../../../../services/gameService', () => ({
   endGame: vi.fn(),
 }));
