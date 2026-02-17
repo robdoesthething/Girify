@@ -21,10 +21,8 @@ export default defineConfig({
     pool: 'forks',
     isolate: true,
     maxWorkers: 1,
-    poolOptions: {
-      forks: {
-        execArgv: ['--max-old-space-size=4096'],
-      },
+    forks: {
+      execArgv: ['--max-old-space-size=4096'],
     },
     include: [
       'src/**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}',
