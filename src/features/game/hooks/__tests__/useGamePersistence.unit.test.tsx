@@ -7,20 +7,20 @@ import { useGamePersistence } from '../useGamePersistence';
 const mockSaveUserGameResult = vi.fn();
 const mockUpdateUserGameStats = vi.fn();
 
-vi.mock('../../../utils/social', () => ({
+vi.mock('../../../../utils/social', () => ({
   saveUserGameResult: (...args: any[]) => mockSaveUserGameResult(...args),
   updateUserGameStats: (...args: any[]) => mockUpdateUserGameStats(...args),
   getReferrer: vi.fn(),
 }));
 
-vi.mock('../../../utils/storage', () => ({
+vi.mock('../../../../utils/storage', () => ({
   storage: {
     get: vi.fn(),
     set: vi.fn(),
   },
 }));
 
-vi.mock('../../../services/supabase', () => ({
+vi.mock('../../../../services/supabase', () => ({
   supabase: {
     from: vi.fn(() => ({
       insert: vi.fn().mockReturnThis(),
@@ -32,8 +32,16 @@ vi.mock('../../../services/supabase', () => ({
   },
 }));
 
-vi.mock('../../../services/db/games', () => ({
+vi.mock('../../../../services/db/games', () => ({
   insertGameResult: vi.fn().mockResolvedValue({ success: true }),
+}));
+
+vi.mock('../../../../services/db/quests', () => ({
+  checkAndProgressQuests: vi.fn().mockResolvedValue([]),
+}));
+
+vi.mock('../../../../services/gameService', () => ({
+  endGame: vi.fn().mockResolvedValue({ success: true, gameId: 'test-game-id' }),
 }));
 
 // Correct path: ../../../../hooks/useAsyncOperation because we are in src/features/game/hooks/__tests__
