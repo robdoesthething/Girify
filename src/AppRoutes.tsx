@@ -1,12 +1,12 @@
 import { AnimatePresence } from 'framer-motion';
 import React, { Suspense } from 'react';
 import { Route, Routes } from 'react-router-dom';
+import TopBar from './components/TopBar';
 import { useAppInitialization } from './hooks/useAppInitialization';
 import { themeClasses } from './utils/themeUtils';
 
 // Lazy loaded components for better code splitting
 const DebugOverlay = React.lazy(() => import('./components/DebugOverlay'));
-const TopBar = React.lazy(() => import('./components/TopBar'));
 
 // Lazy loaded routes
 import {
@@ -62,18 +62,16 @@ const AppRoutes: React.FC = () => {
     <div
       className={`fixed inset-0 w-full h-full flex flex-col overflow-hidden transition-colors duration-500 bg-slate-50 ${themeClasses(theme, 'text-white', 'text-slate-900')}`}
     >
-      <Suspense fallback={<div className="h-14" />}>
-        <TopBar
-          onOpenPage={handleOpenPage}
-          username={currentUsername}
-          onTriggerLogin={(mode = 'signin') => {
-            navigate('/', {
-              state: { mode: mode === 'signup' ? 'register' : 'register', submode: mode },
-            });
-          }}
-          onLogout={handleLogout}
-        />
-      </Suspense>
+      <TopBar
+        onOpenPage={handleOpenPage}
+        username={currentUsername}
+        onTriggerLogin={(mode = 'signin') => {
+          navigate('/', {
+            state: { mode: 'register', submode: mode },
+          });
+        }}
+        onLogout={handleLogout}
+      />
 
       {/* Scrollable Content Area */}
       <div className="flex-1 w-full h-full overflow-y-auto overflow-x-hidden relative scroll-smooth no-scrollbar">
@@ -131,8 +129,10 @@ const AppRoutes: React.FC = () => {
       </div>
 
       <div className="absolute bottom-1 left-0 right-0 text-center pointer-events-none opacity-40 mix-blend-difference pb-4 z-10">
-        <p className="text-[10px] font-medium text-slate-500 dark:text-slate-400 font-inter">
-          © 2025 Girify. All rights reserved.
+        <p
+          className={`text-[10px] font-medium font-inter ${themeClasses(theme, 'text-slate-400', 'text-slate-500')}`}
+        >
+          © {new Date().getFullYear()} Girify. All rights reserved.
         </p>
       </div>
 

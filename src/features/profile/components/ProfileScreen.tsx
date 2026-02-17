@@ -95,7 +95,9 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ username }) => {
                   aria-hidden="true"
                   className="h-6 w-auto object-contain"
                 />
-                <span className="font-black text-lg text-yellow-600 dark:text-yellow-400">
+                <span
+                  className={`font-black text-lg ${themeClasses(theme, 'text-yellow-400', 'text-yellow-600')}`}
+                >
                   {state.giuros}
                 </span>
               </button>
@@ -118,7 +120,9 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ username }) => {
                     exit={{ opacity: 0, height: 0, y: -20 }}
                     className="relative mb-8 filter drop-shadow-md overflow-hidden"
                   >
-                    <Card className="relative z-10 !p-4 border-2 !border-slate-900 dark:!border-slate-700">
+                    <Card
+                      className={`relative z-10 !p-4 border-2 ${themeClasses(theme, '!border-slate-700', '!border-slate-900')}`}
+                    >
                       <div className="flex items-start gap-4">
                         <img
                           src="/giuro.png"
@@ -136,7 +140,11 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ username }) => {
                             variant="primary"
                             size="sm"
                             onClick={() => navigate('/shop')}
-                            className="bg-slate-900 dark:bg-white text-white dark:text-slate-900"
+                            className={themeClasses(
+                              theme,
+                              'bg-white text-slate-900',
+                              'bg-slate-900 text-white'
+                            )}
                           >
                             {t('goToShop')}
                           </Button>

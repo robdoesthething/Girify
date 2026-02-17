@@ -6,12 +6,22 @@ interface GoogleAuthSectionProps {
   theme: 'light' | 'dark';
   loading: boolean;
   onGoogleLogin: () => void;
+  t: (key: string) => string;
 }
 
-const GoogleAuthSection: React.FC<GoogleAuthSectionProps> = ({ theme, loading, onGoogleLogin }) => {
+const GoogleAuthSection: React.FC<GoogleAuthSectionProps> = ({
+  theme,
+  loading,
+  onGoogleLogin,
+  t,
+}) => {
   return (
     <>
-      <GoogleLoginButton onClick={onGoogleLogin} disabled={loading} />
+      <GoogleLoginButton
+        onClick={onGoogleLogin}
+        disabled={loading}
+        label={t('continueWithGoogle')}
+      />
 
       <div className="relative mb-6">
         <div className="absolute inset-0 flex items-center">
@@ -23,7 +33,7 @@ const GoogleAuthSection: React.FC<GoogleAuthSectionProps> = ({ theme, loading, o
           <span
             className={`px-2 ${themeClasses(theme, 'bg-slate-900 text-slate-500', 'bg-white text-slate-400')}`}
           >
-            Or with email
+            {t('orWithEmail')}
           </span>
         </div>
       </div>

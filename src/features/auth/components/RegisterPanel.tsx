@@ -54,6 +54,8 @@ const RegisterPanel: React.FC<RegisterPanelProps> = ({
         loading={loading}
         dispatch={dispatch}
         onComplete={completeGoogleSignup}
+        onCancel={() => dispatch({ type: 'SET_PENDING_GOOGLE_USER', payload: null })}
+        t={t}
       />
     );
   }
@@ -87,21 +89,24 @@ const RegisterPanel: React.FC<RegisterPanelProps> = ({
           className={`p-8 shadow-2xl border ${themeClasses(theme, '!bg-slate-900/90 !border-slate-700', '!bg-white/90 !border-slate-200')}`}
         >
           <Heading variant="h2" align="center" className="mb-2 tracking-tight">
-            {isSignUp ? 'Join Girify' : 'Welcome Back'}
+            {isSignUp ? t('joinGirify') : t('welcomeBack')}
           </Heading>
 
           <Text variant="caption" align="center" className="mb-6 font-bold" muted>
-            {isSignUp ? 'Create an account to track stats' : 'Sign in to continue'}
+            {isSignUp ? t('createAccountToTrack') : t('signInToContinue')}
           </Text>
 
           <GoogleAuthSection
             theme={theme as 'light' | 'dark'}
             loading={loading}
             onGoogleLogin={handleGoogleLogin}
+            t={t}
           />
 
           {error && (
-            <div className="p-3 mb-4 text-xs text-rose-500 bg-rose-50 dark:bg-rose-900/20 rounded-lg text-center font-medium">
+            <div
+              className={`p-3 mb-4 text-xs text-rose-500 rounded-lg text-center font-medium ${themeClasses(theme, 'bg-rose-900/20', 'bg-rose-50')}`}
+            >
               {error}
             </div>
           )}
@@ -123,7 +128,7 @@ const RegisterPanel: React.FC<RegisterPanelProps> = ({
               onClick={() => dispatch({ type: 'SET_MODE', payload: !isSignUp })}
               className={`text-xs hover:underline ${themeClasses(theme, 'text-slate-400 hover:text-white', 'text-slate-500 hover:text-slate-900')}`}
             >
-              {isSignUp ? 'Already have an account? Sign In' : "Don't have an account? Sign Up"}
+              {isSignUp ? t('alreadyHaveAccount') : t('noAccount')}
             </Button>
           </div>
         </Card>

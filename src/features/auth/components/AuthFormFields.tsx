@@ -38,7 +38,7 @@ const AuthFormFields: React.FC<AuthFormFieldsProps> = ({
             <div className="w-1/2">
               <Input
                 type="text"
-                placeholder={t('firstName') || 'First Name'}
+                placeholder={t('firstName')}
                 value={firstName}
                 onChange={e =>
                   dispatch({ type: 'SET_FIELD', field: 'firstName', value: e.target.value })
@@ -48,7 +48,7 @@ const AuthFormFields: React.FC<AuthFormFieldsProps> = ({
             <div className="w-1/2">
               <Input
                 type="text"
-                placeholder={t('lastName') || 'Last Name'}
+                placeholder={t('lastName')}
                 value={lastName}
                 onChange={e =>
                   dispatch({ type: 'SET_FIELD', field: 'lastName', value: e.target.value })
@@ -75,16 +75,25 @@ const AuthFormFields: React.FC<AuthFormFieldsProps> = ({
       )}
       <Input
         type="email"
-        placeholder="Email address"
+        placeholder={t('email')}
         value={email}
         onChange={e => dispatch({ type: 'SET_FIELD', field: 'email', value: e.target.value })}
       />
-      <Input
-        type="password"
-        placeholder="Password"
-        value={password}
-        onChange={e => dispatch({ type: 'SET_FIELD', field: 'password', value: e.target.value })}
-      />
+      <div>
+        <Input
+          type="password"
+          placeholder={t('password')}
+          value={password}
+          onChange={e => dispatch({ type: 'SET_FIELD', field: 'password', value: e.target.value })}
+        />
+        {isSignUp && (
+          <p
+            className={`text-[10px] mt-1 ml-1 font-medium ${themeClasses(theme, 'text-slate-500', 'text-slate-400')}`}
+          >
+            {t('passwordMinLength')}
+          </p>
+        )}
+      </div>
       <Button
         type="submit"
         disabled={loading}
@@ -92,7 +101,7 @@ const AuthFormFields: React.FC<AuthFormFieldsProps> = ({
         fullWidth
         className={`mt-2 shadow-lg ${loading ? 'cursor-wait opacity-80' : 'hover:bg-sky-600 shadow-sky-500/20'}`}
       >
-        {loading ? 'Please wait...' : isSignUp ? 'Create Account' : 'Sign In'}
+        {loading ? t('pleaseWait') : isSignUp ? t('createAccount') : t('signIn')}
       </Button>
     </form>
   );
