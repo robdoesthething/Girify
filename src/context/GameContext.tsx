@@ -3,7 +3,7 @@ import { GameStateObject, Street } from '../types/game';
 
 export interface GameAction {
   type: string;
-  payload?: any;
+  payload?: string | number | boolean | Street | Street[] | Record<string, unknown> | null;
 }
 
 export interface GameHandlers {

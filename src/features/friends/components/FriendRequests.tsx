@@ -1,14 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { useTheme } from '../../../context/ThemeContext';
-import { acceptFriendRequest, getIncomingRequests } from '../../../utils/social/friends';
+import {
+  acceptFriendRequest,
+  FriendRequest,
+  getIncomingRequests,
+} from '../../../utils/social/friends';
 import { themeClasses } from '../../../utils/themeUtils';
-
-interface FriendRequest {
-  id: string;
-  from: string;
-  status: string;
-  timestamp: { seconds: number; nanoseconds: number };
-}
 
 interface FriendRequestsProps {
   username: string;
@@ -26,8 +23,8 @@ const FriendRequests: React.FC<FriendRequestsProps> = ({ username }) => {
       }
       setLoading(true);
       try {
-        const data = await (getIncomingRequests as any)(username);
-        setRequests(data as FriendRequest[]);
+        const data = await getIncomingRequests(username);
+        setRequests(data);
       } catch (error) {
         console.error('Error loading friend requests:', error);
       } finally {
@@ -38,11 +35,10 @@ const FriendRequests: React.FC<FriendRequestsProps> = ({ username }) => {
     loadRequests();
   }, [username]);
 
-  const handleAccept = async (reqId: string) => {
+  const handleAccept = async (fromUser: string) => {
     try {
-      await (acceptFriendRequest as any)(reqId);
-      // Remove from list
-      setRequests(prev => prev.filter(r => r.id !== reqId));
+      await acceptFriendRequest(username, fromUser);
+      setRequests(prev => prev.filter(r => r.from !== fromUser));
     } catch (error) {
       console.error('Error accepting request:', error);
     }
@@ -79,7 +75,7 @@ const FriendRequests: React.FC<FriendRequestsProps> = ({ username }) => {
               <span className="font-bold text-sm font-inter">{req.from}</span>
             </div>
             <button
-              onClick={() => handleAccept(req.id)}
+              onClick={() => handleAccept(req.from)}
               className="bg-emerald-500 hover:bg-emerald-600 text-white text-xs font-bold py-1.5 px-3 rounded-lg transition-colors font-inter"
               type="button"
             >

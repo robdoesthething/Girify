@@ -77,9 +77,4 @@ export { getApprovedFeedbackRewards, markFeedbackNotified, submitFeedback } from
 export { createReferral, getActivityFeed, getReferralCount, publishActivity } from './activity';
 
 // Games
-export {
-  getDistricts,
-  getLeaderboardScores,
-  getUserGameHistory,
-  updateDistrictScore,
-} from './games';
+export { getDistricts, getUserGameHistory, updateDistrictScore } from './games';

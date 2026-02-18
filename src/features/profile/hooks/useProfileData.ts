@@ -1,10 +1,11 @@
 import { useCallback, useEffect, useState } from 'react';
+import { getUserGameHistory } from '../../../services/db/games';
+import { GameResultRow } from '../../../types/supabase';
 import { GameHistory, UserProfile } from '../../../types/user';
-import { DATE } from '../../../utils/constants';
 import { normalizeUsername } from '../../../utils/format';
 import { getShopItems, GroupedShopItems, ShopItem } from '../../../utils/shop';
 import { getEquippedCosmetics, getGiuros } from '../../../utils/shop/giuros';
-import { getUserGameHistory, getUserProfile } from '../../../utils/social';
+import { getUserProfile } from '../../../utils/social';
 import { getFriendCount } from '../../../utils/social/friends';
 import { parseJoinedDate } from '../utils/profileHelpers';
 
@@ -46,8 +47,6 @@ export const useProfileData = (username: string): UseProfileDataResult => {
 
     try {
       setLoading(true);
-      // console.warn(`[Profile] Loading data for: ${normalizedUsername}`);
-
       // CRITICAL: Load only essential data immediately (300-400ms)
       // User profile, balance, and equipped cosmetics are needed for initial render
       const [profile, bal, equipped] = await Promise.all([
@@ -79,33 +78,15 @@ export const useProfileData = (username: string): UseProfileDataResult => {
         getUserGameHistory(normalizedUsername),
         getShopItems(),
       ])
-        .then(([count, history, shopItems]: [number, any[], GroupedShopItems]) => {
+        .then(([count, history, shopItems]: [number, GameResultRow[], GroupedShopItems]) => {
           setFriendCount(prev => (prev !== count ? count : prev));
 
-          // Map GameData to GameHistory
+          // Map GameResultRow to GameHistory
           const mappedHistory: GameHistory[] = (history || []).map(h => {
-            let ts = 0;
-            if (h.timestamp && typeof (h.timestamp as any).toDate === 'function') {
-              ts = (h.timestamp as any).toDate().getTime();
-            } else if ((h.timestamp as any)?.seconds) {
-              ts = (h.timestamp as any).seconds * 1000;
-            } else if (typeof h.timestamp === 'number') {
-              ts = h.timestamp;
-            } else {
-              // Fallback to date number if timestamp missing
-              const dStr = h.date?.toString() || '';
-              if (dStr.length === DATE.PARSING.YYYYMMDD_LENGTH) {
-                const y = parseInt(dStr.slice(0, DATE.PARSING.YEAR_LEN), DATE.PARSING.BASE_10);
-                const mStart = DATE.PARSING.YEAR_LEN;
-                const mEnd = mStart + DATE.PARSING.MONTH_LEN;
-                const m = parseInt(dStr.slice(mStart, mEnd), DATE.PARSING.BASE_10) - 1;
-                const d = parseInt(dStr.slice(mEnd), DATE.PARSING.BASE_10);
-                ts = new Date(y, m, d).getTime();
-              }
-            }
+            const ts = h.played_at ? new Date(h.played_at).getTime() : 0;
 
             return {
-              date: h.date?.toString() || new Date(ts).toISOString().slice(0, 10),
+              date: h.played_at ? h.played_at.split('T')[0] || '' : '',
               score: h.score,
               avgTime: '0s',
               timestamp: ts,

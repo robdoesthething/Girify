@@ -8,11 +8,13 @@ interface AdminConfigProps {
 
 const AdminConfig: React.FC<AdminConfigProps> = ({ onNotify }) => {
   const [config, setConfig] = useState<GameConfig | null>(null);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 
-  const fetchConfig = useCallback(async () => {
-    setLoading(true);
+  const fetchConfig = useCallback(async (isInitial = false) => {
+    if (!isInitial) {
+      setLoading(true);
+    }
     const data = await getGameConfig();
     setConfig(data);
     setLoading(false);
@@ -20,7 +22,7 @@ const AdminConfig: React.FC<AdminConfigProps> = ({ onNotify }) => {
 
   useEffect(() => {
     // eslint-disable-next-line
-    fetchConfig();
+    fetchConfig(true);
   }, [fetchConfig]);
 
   const handleSave = async () => {
@@ -46,7 +48,7 @@ const AdminConfig: React.FC<AdminConfigProps> = ({ onNotify }) => {
     return (
       <div className="py-12 text-center text-red-500">
         Failed to load config.{' '}
-        <button onClick={fetchConfig} className="underline">
+        <button onClick={() => fetchConfig(false)} className="underline">
           Retry
         </button>
       </div>

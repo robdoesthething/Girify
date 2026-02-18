@@ -176,6 +176,9 @@ const createEmojiIcon = (emoji: string) => {
   });
 };
 
+// Pre-compute landmark icons since LANDMARKS is static
+const LANDMARK_ICONS = new Map(LANDMARKS.map(l => [l.icon, createEmojiIcon(l.icon)]));
+
 interface MapAreaProps {
   currentStreet: {
     id: string;
@@ -298,7 +301,7 @@ const MapArea: React.FC<MapAreaProps> = ({
 
           {currentZoom >= MIN_ZOOM &&
             LANDMARKS.map((l, idx) => (
-              <Marker key={idx} position={l.pos} icon={createEmojiIcon(l.icon)}>
+              <Marker key={idx} position={l.pos} icon={LANDMARK_ICONS.get(l.icon)!}>
                 {currentZoom >= MAX_ZOOM_ANIMATION && (
                   <Tooltip
                     permanent

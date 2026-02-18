@@ -15,7 +15,6 @@ import GameScreen from './GameScreen';
 
 export interface GamePageProps {
   username?: string;
-  user?: any; // Firebase user
 }
 
 const GamePageContent = ({ username }: GamePageProps) => {
@@ -138,8 +137,4 @@ const GamePageContent = ({ username }: GamePageProps) => {
   );
 };
 
-const GamePage = (props: GamePageProps) => {
-  return <GamePageContent {...props} />;
-};
-
-export default GamePage;
+export default GamePageContent;

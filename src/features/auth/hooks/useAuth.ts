@@ -115,9 +115,6 @@ export const useAuth = (onAnnouncementsCheck?: () => void): UseAuthResult => {
     // Email verification check
     setEmailVerified(authUser.email_confirmed_at !== null);
 
-    // Link supabase_uid on first login after migration
-    await linkSupabaseUid(authUser);
-
     // Determine username
     const existingUsername = storage.get(STORAGE_KEYS.USERNAME, '');
 
@@ -145,6 +142,9 @@ export const useAuth = (onAnnouncementsCheck?: () => void): UseAuthResult => {
         if (fetchedProfile) {
           setProfile(fetchedProfile);
         }
+
+        // Link supabase_uid for migrated users (after profile exists in DB)
+        await linkSupabaseUid(authUser);
       },
       { loadingKey: 'profile-sync', errorMessage: undefined }
     );

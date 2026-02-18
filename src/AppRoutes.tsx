@@ -86,7 +86,7 @@ const AppRoutes: React.FC = () => {
                   user && user.email_confirmed_at === null ? (
                     <VerifyEmailScreen theme={theme as 'light' | 'dark'} />
                   ) : (
-                    <GamePage username={currentUsername} user={user} />
+                    <GamePage username={currentUsername} />
                   )
                 }
               />

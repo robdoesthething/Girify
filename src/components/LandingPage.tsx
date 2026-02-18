@@ -14,10 +14,8 @@ const NEWS_HEADLINES = [
 ];
 
 interface LandingPageProps {
-  onStart: () => void;
   onLogin: () => void;
   theme: 'light' | 'dark';
-  hasPlayedToday: boolean;
 }
 
 const LandingPage: React.FC<LandingPageProps> = ({ onLogin, theme }) => {

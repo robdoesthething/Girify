@@ -48,7 +48,6 @@ export {
   getUserGameHistory,
   updateDistrictScore,
   updateUserGameStats,
-  updateUserStats,
 } from './stats';
 
 // Referral functions

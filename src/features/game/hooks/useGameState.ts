@@ -1,4 +1,4 @@
-import { Dispatch, useCallback, useEffect, useMemo, useReducer } from 'react';
+import { Dispatch, useCallback, useEffect, useMemo, useReducer, useRef } from 'react';
 import { GAME_LOGIC, STORAGE_KEYS, TIME } from '../../../config/constants';
 import { calculateScore } from '../../../config/gameConfig';
 import quizPlan from '../../../data/quizPlan.json';
@@ -76,18 +76,6 @@ export const useGameState = (
     dispatch({ type: 'SET_HINT_STREETS', payload: hints });
   }, [currentStreet, getHintStreets]);
 
-  // Auto-advance effect
-  useEffect(() => {
-    let timeoutId: ReturnType<typeof setTimeout>;
-    if (state.feedback === 'transitioning' && state.autoAdvance) {
-      timeoutId = setTimeout(() => {
-        handleNext();
-      }, TIME.AUTO_ADVANCE_DELAY);
-    }
-    return () => clearTimeout(timeoutId);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [state.autoAdvance, state.feedback]);
-
   // ...
 
   // ...
@@ -129,7 +117,7 @@ export const useGameState = (
       // Let Redis finish in background
       void redisPromise;
     },
-    [state.username, validStreets]
+    [state.username, validStreets, dispatch]
   );
 
   /**
@@ -164,7 +152,7 @@ export const useGameState = (
         payload: { result, points, selectedStreet },
       });
     },
-    [currentStreet, state.feedback, state.questionStartTime, state.hintsRevealedCount]
+    [currentStreet, state.feedback, state.questionStartTime, state.hintsRevealedCount, dispatch]
   );
 
   /**
@@ -175,7 +163,7 @@ export const useGameState = (
       dispatch({ type: 'SELECT_ANSWER', payload: selectedStreet });
       processAnswer(selectedStreet);
     },
-    [processAnswer]
+    [processAnswer, dispatch]
   );
 
   /**
@@ -232,28 +220,39 @@ export const useGameState = (
         payload: { options: nextOptions },
       });
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [
-    state.feedback,
-    state.currentQuestionIndex,
-    state.quizStreets,
-    state.gameState,
-    state.plannedQuestions,
-    validStreets,
-    generateOptionsList,
-  ]);
+  }, [state, validStreets, saveGameResults, dispatch]);
+
+  // Keep a stable ref to handleNext for the auto-advance timer
+  const handleNextRef = useRef(handleNext);
+  useEffect(() => {
+    handleNextRef.current = handleNext;
+  });
+
+  // Auto-advance effect
+  useEffect(() => {
+    let timeoutId: ReturnType<typeof setTimeout>;
+    if (state.feedback === 'transitioning' && state.autoAdvance) {
+      timeoutId = setTimeout(() => {
+        handleNextRef.current();
+      }, TIME.AUTO_ADVANCE_DELAY);
+    }
+    return () => clearTimeout(timeoutId);
+  }, [state.autoAdvance, state.feedback]);
 
   /**
    * Handle user registration
    */
-  const handleRegister = useCallback((name: string) => {
-    // Only set storage - useAuth listener will dispatch if needed
-    const currentUsername = storage.get(STORAGE_KEYS.USERNAME, '');
-    if (currentUsername !== name) {
-      storage.set(STORAGE_KEYS.USERNAME, name);
-    }
-    dispatch({ type: 'SET_GAME_STATE', payload: 'intro' });
-  }, []);
+  const handleRegister = useCallback(
+    (name: string) => {
+      // Only set storage - useAuth listener will dispatch if needed
+      const currentUsername = storage.get(STORAGE_KEYS.USERNAME, '');
+      if (currentUsername !== name) {
+        storage.set(STORAGE_KEYS.USERNAME, name);
+      }
+      dispatch({ type: 'SET_GAME_STATE', payload: 'intro' });
+    },
+    [dispatch]
+  );
 
   return {
     state,

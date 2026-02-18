@@ -1,5 +1,6 @@
 import React from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
+import { useTopBarNav } from '../../../hooks/useTopBarNav';
 import TopBar from '../../../components/TopBar';
 import { useTheme } from '../../../context/ThemeContext';
 import { getUnlockedAchievements } from '../../../data/achievements';
@@ -20,6 +21,7 @@ const PublicProfileScreen: React.FC<PublicProfileScreenProps> = ({ currentUser }
   const { username: encodedUsername } = useParams<{ username: string }>();
   const username = decodeURIComponent(encodedUsername || '');
   const navigate = useNavigate();
+  const topBarNav = useTopBarNav();
 
   const {
     profile,
@@ -49,10 +51,7 @@ const PublicProfileScreen: React.FC<PublicProfileScreenProps> = ({ currentUser }
     <div
       className={`fixed inset-0 w-full h-full flex flex-col overflow-hidden transition-colors duration-500 ${themeClasses(theme, 'bg-slate-900 text-white', 'bg-slate-50 text-slate-900')}`}
     >
-      <TopBar
-        onOpenPage={page => navigate(page ? `/${page}` : '/')}
-        onTriggerLogin={mode => navigate(`/?auth=${mode}`)}
-      />
+      <TopBar onOpenPage={topBarNav.onOpenPage} onTriggerLogin={topBarNav.onTriggerLogin} />
 
       <div className="flex-1 overflow-y-auto w-full px-4 py-8 pt-16">
         <div className="max-w-2xl mx-auto">

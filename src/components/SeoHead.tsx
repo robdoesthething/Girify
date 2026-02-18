@@ -1,5 +1,5 @@
 import { Helmet } from 'react-helmet-async';
-import { useTranslation } from 'react-i18next';
+import { useTheme } from '../context/ThemeContext';
 
 interface SeoHeadProps {
   title?: string;
@@ -9,7 +9,7 @@ interface SeoHeadProps {
 }
 
 const SeoHead: React.FC<SeoHeadProps> = ({ title, description, image, path = '' }) => {
-  const { t } = useTranslation();
+  const { t } = useTheme();
 
   const siteUrl = 'https://girify.com';
   const fullUrl = `${siteUrl}${path}`;
