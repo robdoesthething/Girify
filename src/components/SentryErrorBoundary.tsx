@@ -1,5 +1,5 @@
-import * as Sentry from '@sentry/react';
 import React, { Component, ReactNode } from 'react';
+import { captureException } from '../utils/sentry';
 
 interface Props {
   children: ReactNode;
@@ -11,8 +11,8 @@ interface State {
 }
 
 /**
- * Sentry Error Boundary
- * Catches errors in the component tree and logs them to Sentry.
+ * Error Boundary that lazily reports to Sentry.
+ * Does not import @sentry/react synchronously.
  */
 export class SentryErrorBoundary extends Component<Props, State> {
   constructor(props: Props) {
@@ -25,9 +25,7 @@ export class SentryErrorBoundary extends Component<Props, State> {
   }
 
   componentDidCatch(error: Error, errorInfo: React.ErrorInfo): void {
-    Sentry.captureException(error, {
-      extra: { componentStack: errorInfo.componentStack },
-    });
+    captureException(error, { componentStack: errorInfo.componentStack });
     console.error('Uncaught error:', error, errorInfo);
   }
 
