@@ -39,7 +39,7 @@ export default defineConfig(({ mode }) => ({
         ],
       },
       workbox: {
-        globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2}'],
+        globPatterns: ['**/*.{js,css,html,ico,woff2}'],
         maximumFileSizeToCacheInBytes: 5 * 1024 * 1024, // 5 MB limit
         runtimeCaching: [
           {
@@ -49,6 +49,17 @@ export default defineConfig(({ mode }) => ({
               cacheName: 'map-tiles',
               expiration: {
                 maxEntries: 500,
+                maxAgeSeconds: 60 * 60 * 24 * 30, // 30 days
+              },
+            },
+          },
+          {
+            urlPattern: /\.(?:png|jpg|jpeg|svg|gif|webp)$/i,
+            handler: 'CacheFirst',
+            options: {
+              cacheName: 'app-images',
+              expiration: {
+                maxEntries: 200,
                 maxAgeSeconds: 60 * 60 * 24 * 30, // 30 days
               },
             },
