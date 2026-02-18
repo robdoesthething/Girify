@@ -104,6 +104,7 @@ export const ensureUserProfile = async (
     const newUser = await createUser({
       username,
       uid: uid,
+      supabase_uid: uid,
       email: additionalData.email ? additionalData.email.toLowerCase().trim() : null,
       real_name: additionalData.realName || null,
       avatar_id: additionalData.avatarId || Math.floor(Math.random() * DEFAULT_AVATAR_COUNT) + 1,
@@ -145,6 +146,9 @@ export const ensureUserProfile = async (
 
   if (uid && userDbRecord.uid !== uid) {
     updates.uid = uid;
+  }
+  if (uid && !userDbRecord.supabase_uid) {
+    updates.supabase_uid = uid;
   }
   if (additionalData.email && !userDbRecord.email) {
     updates.email = additionalData.email.toLowerCase().trim();

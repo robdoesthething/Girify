@@ -13,7 +13,6 @@ import {
 } from '../../services/database';
 import { normalizeUsername } from '../format';
 
-import { ensureUserProfile } from './profile';
 import type { GameData, GameStatsUpdate } from './types';
 
 /**
@@ -59,36 +58,6 @@ export const updateUserGameStats = async (
     }
   } catch (e) {
     console.error('Error updating game stats:', e);
-  }
-};
-
-/**
- * Update user statistics after completing a game (Simple version)
- * @param username - The username to update
- * @param score - The score achieved
- * @returns Promise resolving when update is complete
- */
-export const updateUserStats = async (username: string, score: number): Promise<void> => {
-  if (!username) {
-    return;
-  }
-
-  const existingUser = await getUserByUsername(username);
-
-  if (existingUser) {
-    const newGamesPlayed = (existingUser.games_played ?? 0) + 1;
-    const newBestScore = Math.max(existingUser.best_score ?? 0, score);
-
-    await updateUser(username, {
-      games_played: newGamesPlayed,
-      best_score: newBestScore,
-    });
-  } else {
-    await ensureUserProfile(username);
-    await updateUser(username, {
-      games_played: 1,
-      best_score: score,
-    });
   }
 };
 

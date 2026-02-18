@@ -1,14 +1,8 @@
 import { motion } from 'framer-motion';
 import React from 'react';
 import { useTheme } from '../context/ThemeContext';
+import { Announcement } from '../utils/social/news';
 import { themeClasses } from '../utils/themeUtils';
-
-interface Announcement {
-  id: string;
-  title: string;
-  body: string;
-  publishDate: Date | { seconds: number; toDate?: () => Date };
-}
 
 interface AnnouncementModalProps {
   announcement: Announcement | null;
@@ -22,19 +16,12 @@ const AnnouncementModal: React.FC<AnnouncementModalProps> = ({ announcement, onD
     return null;
   }
 
-  const formatDate = (timestamp: Date | { seconds: number; toDate?: () => Date }) => {
+  const formatDate = (timestamp: Date | string) => {
     if (!timestamp) {
       return '';
     }
 
-    let date: Date;
-    if (timestamp instanceof Date) {
-      date = timestamp;
-    } else if (timestamp.toDate) {
-      date = timestamp.toDate();
-    } else {
-      date = new Date((timestamp as { seconds: number }).seconds * 1000);
-    }
+    const date = timestamp instanceof Date ? timestamp : new Date(timestamp);
 
     return date.toLocaleDateString(undefined, {
       year: 'numeric',

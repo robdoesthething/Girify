@@ -52,9 +52,9 @@ const DistrictSelector: React.FC<DistrictSelectorProps> = ({
             </p>
             {showTeamName && (
               <p
-                className={`text-xs font-bold truncate ${themeClasses(theme, 'text-white', 'text-slate-800')}`}
+                className={`text-sm font-black uppercase truncate ${themeClasses(theme, 'text-white', 'text-slate-900')}`}
               >
-                {d.teamName.replace(d.name, '').trim() || d.teamName}
+                {d.animalName}
               </p>
             )}
           </div>

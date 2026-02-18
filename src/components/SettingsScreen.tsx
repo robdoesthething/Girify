@@ -1,5 +1,5 @@
 import React, { useEffect, useReducer, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useTopBarNav } from '../hooks/useTopBarNav';
 import { TOAST_SHORT_MS } from '../config/appConstants';
 import { useTheme } from '../context/ThemeContext';
 import { useAdminPromotion } from '../hooks/useAdminPromotion';
@@ -49,7 +49,7 @@ function settingsReducer(state: SettingsState, action: SettingsAction): Settings
 
 const SettingsScreen: React.FC<SettingsScreenProps> = ({ onLogout, username }) => {
   const { theme, t } = useTheme();
-  const navigate = useNavigate();
+  const topBarNav = useTopBarNav();
   const { toast, success: showSuccess, error: showError } = useToast();
   const { confirm, confirmConfig, handleClose } = useCommonConfirm();
   const [autoAdvance, setAutoAdvance] = useState(false);
@@ -126,10 +126,7 @@ const SettingsScreen: React.FC<SettingsScreenProps> = ({ onLogout, username }) =
     <div
       className={`fixed inset-0 w-full h-full flex flex-col overflow-hidden transition-colors duration-500 ${themeClasses(theme, 'bg-slate-900 text-white', 'bg-slate-50 text-slate-900')}`}
     >
-      <TopBar
-        onOpenPage={page => navigate(page ? `/${page}` : '/')}
-        onTriggerLogin={mode => navigate(`/?auth=${mode}`)}
-      />
+      <TopBar onOpenPage={topBarNav.onOpenPage} onTriggerLogin={topBarNav.onTriggerLogin} />
 
       <div className="flex-1 w-full px-4 py-8 pt-20 overflow-x-hidden overflow-y-auto">
         <div className="max-w-2xl mx-auto w-full">

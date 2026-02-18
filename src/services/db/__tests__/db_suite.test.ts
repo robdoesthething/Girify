@@ -190,16 +190,6 @@ describe('Database Integration Suite', () => {
   });
 
   describe('Games Service - Extended', () => {
-    it('getLeaderboardScores should fetch scores', async () => {
-      const mockResponse = { data: [{ id: 1, score: 100 }], error: null };
-      mockBuilder.then.mockImplementationOnce((resolve: any) => resolve(mockResponse));
-
-      const { getLeaderboardScores } = await import('../games');
-      const scores = await getLeaderboardScores('all');
-
-      expect(scores).toHaveLength(1);
-    });
-
     it('getUserGameHistory should fetch history with normalization', async () => {
       mockBuilder.then.mockImplementationOnce((resolve: any) => resolve({ data: [], error: null }));
 

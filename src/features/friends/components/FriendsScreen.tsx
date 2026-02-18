@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useTopBarNav } from '../../../hooks/useTopBarNav';
 import TopBar from '../../../components/TopBar';
 import { PageHeader } from '../../../components/ui';
 import { useTheme } from '../../../context/ThemeContext';
@@ -18,7 +18,7 @@ interface FriendsScreenProps {
 
 const FriendsScreen: React.FC<FriendsScreenProps> = ({ username }) => {
   const { theme, t } = useTheme();
-  const navigate = useNavigate();
+  const topBarNav = useTopBarNav();
 
   // Custom hooks
   const { activeTab, setTab, isTabActive } = useTabs<'feed' | 'friends' | 'requests'>('feed');
@@ -79,10 +79,7 @@ const FriendsScreen: React.FC<FriendsScreenProps> = ({ username }) => {
     <div
       className={`fixed inset-0 w-full h-full flex flex-col overflow-hidden transition-colors duration-500 ${themeClasses(theme, 'bg-slate-900 text-white', 'bg-slate-50 text-slate-900')}`}
     >
-      <TopBar
-        onOpenPage={page => navigate(page ? `/${page}` : '/')}
-        onTriggerLogin={mode => navigate(`/?auth=${mode}`)}
-      />
+      <TopBar onOpenPage={topBarNav.onOpenPage} onTriggerLogin={topBarNav.onTriggerLogin} />
 
       <div className="flex-1 w-full px-4 py-8 pt-20 overflow-x-hidden overflow-y-auto">
         <div className="max-w-2xl mx-auto w-full">

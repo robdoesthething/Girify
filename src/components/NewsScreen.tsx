@@ -1,6 +1,6 @@
 import { motion } from 'framer-motion';
 import React, { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useTopBarNav } from '../hooks/useTopBarNav';
 import { useTheme } from '../context/ThemeContext';
 import { Announcement, getActiveAnnouncements, markAnnouncementAsRead } from '../utils/social/news';
 import { themeClasses } from '../utils/themeUtils';
@@ -13,7 +13,7 @@ interface NewsScreenProps {
 
 const NewsScreen: React.FC<NewsScreenProps> = ({ username }) => {
   const { theme, t } = useTheme();
-  const navigate = useNavigate();
+  const topBarNav = useTopBarNav();
   const [announcements, setAnnouncements] = useState<Announcement[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -33,19 +33,12 @@ const NewsScreen: React.FC<NewsScreenProps> = ({ username }) => {
     fetchAnnouncements();
   }, [username]);
 
-  const formatDate = (timestamp: Date | { seconds: number; toDate?: () => Date }) => {
+  const formatDate = (timestamp: Date | string) => {
     if (!timestamp) {
       return '';
     }
 
-    let date: Date;
-    if (timestamp instanceof Date) {
-      date = timestamp;
-    } else if (timestamp.toDate) {
-      date = timestamp.toDate();
-    } else {
-      date = new Date((timestamp as { seconds: number }).seconds * 1000);
-    }
+    const date = timestamp instanceof Date ? timestamp : new Date(timestamp);
 
     return date.toLocaleDateString(undefined, {
       year: 'numeric',
@@ -58,10 +51,7 @@ const NewsScreen: React.FC<NewsScreenProps> = ({ username }) => {
     <div
       className={`fixed inset-0 w-full h-full flex flex-col overflow-hidden transition-colors duration-500 ${themeClasses(theme, 'bg-slate-900 text-white', 'bg-slate-50 text-slate-900')}`}
     >
-      <TopBar
-        onOpenPage={page => navigate(page ? `/${page}` : '/')}
-        onTriggerLogin={mode => navigate(`/?auth=${mode}`)}
-      />
+      <TopBar onOpenPage={topBarNav.onOpenPage} onTriggerLogin={topBarNav.onTriggerLogin} />
 
       <div className="flex-1 w-full px-4 py-8 pt-20 overflow-x-hidden overflow-y-auto">
         <div className="max-w-2xl mx-auto w-full">

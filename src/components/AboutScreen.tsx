@@ -1,5 +1,5 @@
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useTopBarNav } from '../hooks/useTopBarNav';
 import { useTheme } from '../context/ThemeContext';
 import { themeClasses } from '../utils/themeUtils';
 import TopBar from './TopBar';
@@ -7,7 +7,7 @@ import { PageHeader } from './ui';
 
 const AboutScreen: React.FC = () => {
   const { theme, t } = useTheme();
-  const navigate = useNavigate();
+  const topBarNav = useTopBarNav();
 
   return (
     <div
@@ -15,10 +15,7 @@ const AboutScreen: React.FC = () => {
            ${themeClasses(theme, 'bg-slate-900 text-white', 'bg-slate-50 text-slate-900')}
       `}
     >
-      <TopBar
-        onOpenPage={page => navigate(page ? `/${page}` : '/')}
-        onTriggerLogin={mode => navigate(`/?auth=${mode}`)}
-      />
+      <TopBar onOpenPage={topBarNav.onOpenPage} onTriggerLogin={topBarNav.onTriggerLogin} />
 
       <div className="flex-1 overflow-y-auto w-full px-4 py-6 pt-16">
         <div className="max-w-2xl mx-auto">

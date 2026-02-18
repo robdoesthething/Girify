@@ -2,6 +2,7 @@ import booleanDisjoint from '@turf/boolean-disjoint';
 import centroid from '@turf/centroid';
 import turfDistance from '@turf/distance';
 import { multiLineString, point } from '@turf/helpers';
+import type { Feature, MultiLineString, Position } from 'geojson';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Street } from '../../../types/game';
 
@@ -46,13 +47,11 @@ const processStreetsData = (rawStreets: Street[]): Street[] => {
   return Array.from(uniqueStreetsMap.values()).map(v => v.street);
 };
 
-// Use 'any' return type compatible with Turf's Position[] expectation to avoid type errors
-
-const toTurf = (lines: number[][][]): any[][] =>
+const toTurf = (lines: number[][][]): Position[][] =>
   lines.map(line =>
     line
       .filter(p => p && typeof p[0] === 'number' && typeof p[1] === 'number')
-      .map(p => [p[1], p[0]])
+      .map(p => [p[1], p[0]] as Position)
   );
 
 /**
@@ -132,7 +131,11 @@ export const useStreets = () => {
   }, [validStreets]);
 
   const getIntersectionHints = useCallback(
-    (currentGeo: any, targetId: string | number, streets: Street[]): Street[] => {
+    (
+      currentGeo: Feature<MultiLineString>,
+      targetId: string | number,
+      streets: Street[]
+    ): Street[] => {
       const hints: Street[] = [];
 
       for (const street of streets) {
@@ -161,7 +164,7 @@ export const useStreets = () => {
 
   const getDistanceHints = useCallback(
     (
-      currentGeo: any,
+      currentGeo: Feature<MultiLineString>,
       targetId: string | number,
       streets: Street[],
       existingHints: Street[]

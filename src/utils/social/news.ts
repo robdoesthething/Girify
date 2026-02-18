@@ -19,12 +19,12 @@ export interface Announcement {
   id: string;
   title: string;
   body: string;
-  publishDate: Date | { seconds: number; toDate?: () => Date };
-  expiryDate?: Date | { seconds: number; toDate?: () => Date } | null;
+  publishDate: Date | string;
+  expiryDate?: Date | string | null;
   isActive?: boolean;
   priority?: AnnouncementPriority;
   targetAudience?: TargetAudience;
-  createdAt?: { seconds: number; toDate?: () => Date };
+  createdAt?: Date | string;
 }
 
 interface AnnouncementInput {
@@ -49,24 +49,12 @@ const mapRowToAnnouncement = (row: AnnouncementRow): Announcement => {
     id: row.id.toString(),
     title: row.title,
     body: row.body,
-    // Mock Timestamp-like object for compatibility
-    publishDate: {
-      seconds: new Date(row.publish_date || 0).getTime() / 1000,
-      toDate: () => new Date(row.publish_date || 0),
-    },
-    expiryDate: row.expiry_date
-      ? {
-          seconds: new Date(row.expiry_date).getTime() / 1000,
-          toDate: () => new Date(row.expiry_date!),
-        }
-      : null,
+    publishDate: row.publish_date || '',
+    expiryDate: row.expiry_date || null,
     isActive: row.is_active || false,
     priority: (row.priority as AnnouncementPriority) || undefined,
     targetAudience: (row.target_audience as TargetAudience) || undefined,
-    createdAt: {
-      seconds: new Date(row.created_at || 0).getTime() / 1000,
-      toDate: () => new Date(row.created_at || 0),
-    },
+    createdAt: row.created_at || undefined,
   };
 };
 

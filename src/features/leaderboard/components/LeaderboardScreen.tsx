@@ -1,6 +1,7 @@
 import { motion } from 'framer-motion';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTopBarNav } from '../../../hooks/useTopBarNav';
 import TopBar from '../../../components/TopBar';
 import { PageHeader } from '../../../components/ui';
 import { useTheme } from '../../../context/ThemeContext';
@@ -10,18 +11,12 @@ import { formatUsername, usernamesMatch } from '../../../utils/format';
 import {
   getLeaderboard,
   getTeamLeaderboard,
+  ScoreEntry,
   TeamScoreEntry,
 } from '../../../utils/social/leaderboard';
 import { themeClasses } from '../../../utils/themeUtils';
 
 const LEADERBOARD_TIMEOUT_MS = 10000;
-
-interface ScoreEntry {
-  id?: string;
-  username: string;
-  score: number;
-  timestamp?: { seconds: number } | number | string;
-}
 
 interface LeaderboardScreenProps {
   currentUser?: string;
@@ -30,6 +25,7 @@ interface LeaderboardScreenProps {
 const LeaderboardScreen: React.FC<LeaderboardScreenProps> = ({ currentUser }) => {
   const { theme, t } = useTheme();
   const navigate = useNavigate();
+  const topBarNav = useTopBarNav();
   const [scores, setScores] = useState<ScoreEntry[]>([]);
   const [teamScores, setTeamScores] = useState<TeamScoreEntry[]>([]);
   const [loading, setLoading] = useState(true);
@@ -314,10 +310,7 @@ const LeaderboardScreen: React.FC<LeaderboardScreenProps> = ({ currentUser }) =>
     <div
       className={`fixed inset-0 w-full h-full flex flex-col overflow-hidden transition-colors duration-500 ${themeClasses(theme, 'bg-slate-900 text-white', 'bg-slate-50 text-slate-900')}`}
     >
-      <TopBar
-        onOpenPage={page => navigate(page ? `/${page}` : '/')}
-        onTriggerLogin={mode => navigate(`/?auth=${mode}`)}
-      />
+      <TopBar onOpenPage={topBarNav.onOpenPage} onTriggerLogin={topBarNav.onTriggerLogin} />
 
       <div className="flex-1 w-full px-4 py-8 pt-20 overflow-x-hidden overflow-y-auto">
         <div className="max-w-2xl mx-auto w-full">

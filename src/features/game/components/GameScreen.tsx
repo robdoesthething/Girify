@@ -141,15 +141,6 @@ const GameScreen: FC = () => {
       {state.gameState === 'intro' && !state.username && (
         <LandingPage
           theme={theme}
-          hasPlayedToday={handlers.hasPlayedToday()}
-          onStart={() => {
-            const seen = localStorage.getItem('girify_instructions_seen');
-            if (seen === 'true') {
-              dispatch({ type: 'SET_GAME_STATE', payload: 'register' });
-            } else {
-              dispatch({ type: 'SET_GAME_STATE', payload: 'instructions' });
-            }
-          }}
           onLogin={() => {
             dispatch({ type: 'SET_GAME_STATE', payload: 'register' });
           }}

@@ -1,10 +1,10 @@
 import { AnimatePresence, motion } from 'framer-motion';
 import React, { useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTopBarNav } from '../../../hooks/useTopBarNav';
 import TopBar from '../../../components/TopBar';
 import { Button, Card, Heading, PageHeader, Spinner, Text } from '../../../components/ui';
 import { useTheme } from '../../../context/ThemeContext';
-import { UserProfile } from '../../../types/user';
 import { updateUserProfile } from '../../../utils/social';
 import { themeClasses } from '../../../utils/themeUtils';
 import { useProfileData } from '../hooks/useProfileData';
@@ -24,18 +24,45 @@ interface ProfileScreenProps {
 const ProfileScreen: React.FC<ProfileScreenProps> = ({ username }) => {
   const { theme, t } = useTheme();
   const navigate = useNavigate();
+  const topBarNav = useTopBarNav();
 
   // Custom hooks
   const profileData = useProfileData(username);
   const { state, actions } = useProfileState();
   const stats = useProfileStats(state.allHistory, state.profileData);
 
-  // Sync fetched data to state
+  // Sync fetched data to state — depend on individual fields, not the whole result object
+  const {
+    loading: pdLoading,
+    profileData: pdProfile,
+    allHistory: pdHistory,
+    friendCount: pdFriendCount,
+    giuros: pdGiuros,
+    equippedCosmetics: pdCosmetics,
+    joinedDate: pdJoinedDate,
+    shopAvatars: pdShopAvatars,
+    shopFrames: pdShopFrames,
+    shopTitles: pdShopTitles,
+  } = profileData;
+
   useEffect(() => {
-    if (!profileData.loading && profileData.profileData) {
+    if (!pdLoading && pdProfile) {
       actions.loadProfileData(profileData);
     }
-  }, [profileData, actions]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [
+    pdLoading,
+    pdProfile,
+    pdHistory,
+    pdFriendCount,
+    pdGiuros,
+    pdCosmetics,
+    pdJoinedDate,
+    pdShopAvatars,
+    pdShopFrames,
+    pdShopTitles,
+    actions,
+  ]);
 
   // Calculate owned cosmetics
   const ownedAvatars = useMemo(
@@ -49,7 +76,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ username }) => {
   );
 
   const handleSaveProfile = async (newName: string, newAvatarId: string, newFrameId: string) => {
-    const updates: Partial<UserProfile> = {
+    const updates = {
       realName: newName,
       equippedCosmetics: {
         ...state.equippedCosmetics,
@@ -58,7 +85,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ username }) => {
       },
     };
 
-    await updateUserProfile(username, updates as any);
+    await updateUserProfile(username, updates);
 
     // Update local state
     actions.updateProfile(updates);
@@ -73,10 +100,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ username }) => {
     <div
       className={`fixed inset-0 w-full h-full flex flex-col overflow-hidden transition-colors duration-500 ${themeClasses(theme, 'bg-slate-900 text-white', 'bg-slate-50 text-slate-900')}`}
     >
-      <TopBar
-        onOpenPage={page => navigate(page ? `/${page}` : '/')}
-        onTriggerLogin={mode => navigate(`/?auth=${mode}`)}
-      />
+      <TopBar onOpenPage={topBarNav.onOpenPage} onTriggerLogin={topBarNav.onTriggerLogin} />
 
       <div className="flex-1 w-full px-4 py-8 pt-20 overflow-x-hidden">
         <div className="max-w-2xl mx-auto w-full">

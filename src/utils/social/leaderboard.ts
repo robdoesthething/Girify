@@ -271,12 +271,19 @@ export const getTeamLeaderboard = async (
       district: string | null;
     }
 
-    // Fetch user profiles to get team assignments from SUPABASE
-    const { data: usersData, error: usersError } = await supabase
-      .from('users')
-      .select('username, team, district')
-      .not('team', 'is', null)
-      .returns<UserTeamData[]>();
+    // Fetch user profiles and individual scores in parallel
+    const TEAM_LEADERBOARD_LIMIT = 2000;
+
+    const [usersResult, individualScores] = await Promise.all([
+      supabase
+        .from('users')
+        .select('username, team, district')
+        .not('team', 'is', null)
+        .returns<UserTeamData[]>(),
+      getLeaderboard(period, TEAM_LEADERBOARD_LIMIT),
+    ]);
+
+    const { data: usersData, error: usersError } = usersResult;
 
     if (usersError) {
       console.error('Error fetching users for team leaderboard:', usersError);
@@ -294,10 +301,6 @@ export const getTeamLeaderboard = async (
         };
       }
     });
-
-    // Fetch individual scores for the period from SUPABASE (via getLeaderboard)
-    const TEAM_LEADERBOARD_LIMIT = 2000;
-    const individualScores = await getLeaderboard(period, TEAM_LEADERBOARD_LIMIT);
 
     // Aggregate by team
     const teamScores: Record<string, { score: number; members: Set<string>; id: string }> = {};

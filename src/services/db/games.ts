@@ -5,8 +5,6 @@
  */
 
 import type { GameResultRow } from '../../types/supabase';
-import { GAME } from '../../utils/constants';
-import { getUTCStartOfDay, getUTCStartOfMonth, getUTCStartOfWeek } from '../../utils/date';
 import { normalizeUsername } from '../../utils/format';
 import { createLogger } from '../../utils/logger';
 import { supabase } from '../supabase';
@@ -54,36 +52,6 @@ export async function insertGameResult(
   return { success: true };
 }
 
-export async function getLeaderboardScores(
-  period: 'all' | 'daily' | 'weekly' | 'monthly',
-  limit = 100
-): Promise<GameResultRow[]> {
-  // Start with base query - apply filters first, then order and limit
-  let query = supabase.from('game_results').select('*');
-
-  const now = new Date();
-
-  // ============================================================================
-
-  // Apply period filters first to reduce dataset before ordering/limiting
-  if (period === 'daily') {
-    query = query.gte('played_at', getUTCStartOfDay(now));
-  } else if (period === 'weekly') {
-    query = query.gte('played_at', getUTCStartOfWeek(now));
-  } else if (period === 'monthly') {
-    query = query.gte('played_at', getUTCStartOfMonth(now));
-  }
-
-  // Apply ordering and limit AFTER filtering to ensure correct results
-
-  const data = await executeQuery<GameResultRow[]>(
-    query.order('score', { ascending: false }).limit(limit * GAME.LEADERBOARD_FETCH_MULTIPLIER),
-    'getLeaderboardScores'
-  );
-
-  return data || [];
-}
-
 export async function getUserGameHistory(username: string, limit = 30): Promise<GameResultRow[]> {
   const normalizedUsername = normalizeUsername(username);
 
@@ -128,23 +96,34 @@ export async function updateDistrictScore(
   districtId: string,
   scoreToAdd: number
 ): Promise<boolean> {
-  const district = await executeQuery<{ score: number }>(
-    supabase.from('districts').select('score').eq('id', districtId).single(),
-    'updateDistrictScore:fetch'
-  );
-
-  if (!district) {
-    return false;
-  }
-
-  const { error } = await supabase
-    .from('districts')
-    .update({ score: (district.score ?? 0) + scoreToAdd })
-    .eq('id', districtId);
+  // Atomic increment via RPC to avoid TOCTOU race condition
+  const { error } = await (supabase as any).rpc('increment_district_score', {
+    district_id: districtId,
+    score_to_add: scoreToAdd,
+  });
 
   if (error) {
-    logger.error('updateDistrictScore error:', error.message);
-    return false;
+    logger.error('updateDistrictScore RPC error:', error.message);
+
+    // Fallback: read-modify-write (non-atomic, for pre-migration DBs)
+    const district = await executeQuery<{ score: number }>(
+      supabase.from('districts').select('score').eq('id', districtId).single(),
+      'updateDistrictScore:fetch'
+    );
+
+    if (!district) {
+      return false;
+    }
+
+    const { error: updateError } = await supabase
+      .from('districts')
+      .update({ score: (district.score ?? 0) + scoreToAdd })
+      .eq('id', districtId);
+
+    if (updateError) {
+      logger.error('updateDistrictScore fallback error:', updateError.message);
+      return false;
+    }
   }
   return true;
 }

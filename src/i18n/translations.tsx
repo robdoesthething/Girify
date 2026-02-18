@@ -298,6 +298,9 @@ const translations: Translations = {
     joining: 'Joining...',
     confirmJoinTeam: 'Confirm & Join Team',
     districtUpdateError: 'Failed to update district. Please try again.',
+    joinATeam: 'Join a Team!',
+    teamRequiredDetails:
+      'Pick your Barcelona district and compete with your team in the global leaderboard!',
     districtTeams: 'District Teams',
     refreshData: 'Refresh Data',
     loadingTeamStats: 'Loading team statistics...',
@@ -566,6 +569,9 @@ const translations: Translations = {
     joining: 'Uniéndose...',
     confirmJoinTeam: 'Confirmar y Unirse',
     districtUpdateError: 'Error al actualizar distrito. Inténtalo de nuevo.',
+    joinATeam: '¡Únete a un Equipo!',
+    teamRequiredDetails:
+      '¡Elige tu distrito de Barcelona y compite con tu equipo en la clasificación mundial!',
     districtTeams: 'Equipos de Distrito',
     refreshData: 'Actualizar Datos',
     loadingTeamStats: 'Cargando estadísticas...',
@@ -834,6 +840,9 @@ const translations: Translations = {
     joining: 'Unint-se...',
     confirmJoinTeam: 'Confirmar i Unir-se',
     districtUpdateError: 'Error en actualitzar districte. Torna-ho a provar.',
+    joinATeam: 'Uneix-te a un Equip!',
+    teamRequiredDetails:
+      'Tria el teu districte de Barcelona i competeix amb el teu equip a la classificació mundial!',
     districtTeams: 'Equips de Districte',
     refreshData: 'Actualitzar Dades',
     loadingTeamStats: 'Carregant estadístiques...',
