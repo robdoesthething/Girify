@@ -20,6 +20,15 @@ DECLARE
   v_is_badge BOOLEAN;
   v_already_owned BOOLEAN := FALSE;
 BEGIN
+  -- Verify caller owns this account (prevents spending other users' giuros)
+  IF NOT EXISTS (
+    SELECT 1 FROM users
+    WHERE username = p_username
+      AND supabase_uid = auth.uid()
+  ) THEN
+    RETURN jsonb_build_object('success', false, 'error', 'Unauthorized');
+  END IF;
+
   v_is_badge := p_item_id LIKE 'badge_%';
 
   -- Lock the user row for update (prevents concurrent modifications)
