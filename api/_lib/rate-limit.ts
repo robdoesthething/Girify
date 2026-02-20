@@ -12,8 +12,8 @@ function getRedis(): Redis | null {
     return redis;
   }
 
-  const url = process.env.VITE_UPSTASH_REDIS_REST_URL;
-  const token = process.env.VITE_UPSTASH_REDIS_REST_TOKEN;
+  const url = process.env.UPSTASH_REDIS_REST_URL;
+  const token = process.env.UPSTASH_REDIS_REST_TOKEN;
 
   if (!url || !token) {
     console.warn('[RateLimit] Upstash Redis credentials missing, rate limiting disabled');

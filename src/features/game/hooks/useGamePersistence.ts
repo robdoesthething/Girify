@@ -98,7 +98,8 @@ export const useGamePersistence = () => {
                   state.score,
                   Number(localRecord.avgTime),
                   state.correct,
-                  state.quizStreets.length
+                  state.quizStreets.length,
+                  state.username
                 );
 
                 if (!result.success) {
