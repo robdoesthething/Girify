@@ -33,3 +33,7 @@ BEGIN
   RETURN jsonb_build_object('success', true, 'new_balance', v_new_balance);
 END;
 $$;
+
+-- Restrict execution to authenticated Supabase users only
+REVOKE ALL ON FUNCTION add_giuros(TEXT, INTEGER, TEXT) FROM PUBLIC;
+GRANT EXECUTE ON FUNCTION add_giuros(TEXT, INTEGER, TEXT) TO authenticated;
