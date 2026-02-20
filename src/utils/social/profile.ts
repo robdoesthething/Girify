@@ -375,6 +375,10 @@ export const deleteUserAndData = async (
     return { success: false, error: 'No username provided' };
   }
 
+  // Guard: caller must be an admin (mirrors updateUserAsAdmin pattern)
+  const { requireAdmin } = await import('../auth');
+  await requireAdmin();
+
   try {
     const { error } = await supabase
       .from('users')

@@ -128,6 +128,10 @@ export const getPayoutConfig = async (): Promise<PayoutConfig> => {
 export const updatePayoutConfig = async (
   updates: Partial<PayoutConfig>
 ): Promise<{ success: boolean; error?: string }> => {
+  // Guard: caller must be an admin
+  const { requireAdmin } = await import('../../utils/auth');
+  await requireAdmin();
+
   try {
     // Map PayoutConfig keys to database column names
     const dbUpdates: Record<string, number> = {};
@@ -283,6 +287,10 @@ export const getGameConfig = async (): Promise<GameConfig> => {
 export const updateGameConfig = async (
   updates: Partial<GameConfig>
 ): Promise<{ success: boolean; error?: string }> => {
+  // Guard: caller must be an admin
+  const { requireAdmin } = await import('../../utils/auth');
+  await requireAdmin();
+
   try {
     // Validation: Check values before write
     validateGameConfig(updates);
