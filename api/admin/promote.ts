@@ -9,7 +9,7 @@
  * 4. Supabase admin table update
  */
 
-import { timingSafeEqual } from 'crypto';
+import { createHmac, timingSafeEqual } from 'crypto';
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { extractBearerToken, verifyFirebaseToken } from '../_lib/auth';
 import { RATE_LIMIT_DEFAULTS, USERNAME_CONSTRAINTS } from '../_lib/constants';
@@ -107,10 +107,10 @@ export default async function handler(req: VercelRequest, res: VercelResponse): 
       return;
     }
 
-    const keyBuffer = Buffer.from(adminKey);
-    const serverKeyBuffer = Buffer.from(serverAdminKey);
-    const keysMatch =
-      keyBuffer.length === serverKeyBuffer.length && timingSafeEqual(keyBuffer, serverKeyBuffer);
+    // Use HMAC-SHA256 digests (fixed 32-byte output) so comparison is
+    // constant-time and length-agnostic — no key-length oracle.
+    const hmac = (k: string) => createHmac('sha256', 'girify-admin-key-compare').update(k).digest();
+    const keysMatch = timingSafeEqual(hmac(adminKey), hmac(serverAdminKey));
 
     if (!keysMatch) {
       console.warn(`[API] Invalid admin key attempt by user ${user.uid} from ${clientIp}`);
