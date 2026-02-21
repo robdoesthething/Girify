@@ -51,24 +51,30 @@ export const addGiuros = async (
   const normalizedUsername = normalizeUsername(username);
 
   try {
-    const user = await getUserByUsername(normalizedUsername);
-    if (!user) {
+    const { data, error } = await (supabase as any).rpc('add_giuros', {
+      p_username: normalizedUsername,
+      p_amount: amount,
+      p_reason: reason,
+    });
+
+    if (error) {
+      console.error('[Giuros] add_giuros RPC error:', error);
       return { success: false, newBalance: 0 };
     }
 
-    const currentBalance = user.giuros ?? 0;
-    const newBalance = currentBalance + amount;
+    const result = data as { success: boolean; error?: string; new_balance?: number };
 
-    const success = await updateUser(normalizedUsername, { giuros: newBalance });
-
-    if (success) {
-      // eslint-disable-next-line no-console
-      console.log(
-        `[Giuros] +${amount} for ${normalizedUsername} (${reason}). New balance: ${newBalance}`
-      );
-      return { success: true, newBalance };
+    if (!result.success) {
+      console.error('[Giuros] add_giuros failed:', result.error);
+      return { success: false, newBalance: 0 };
     }
-    return { success: false, newBalance: 0 };
+
+    const newBalance = result.new_balance ?? 0;
+    // eslint-disable-next-line no-console
+    console.log(
+      `[Giuros] +${amount} for ${normalizedUsername} (${reason}). New balance: ${newBalance}`
+    );
+    return { success: true, newBalance };
   } catch (e) {
     console.error('Error adding giuros:', e);
     return { success: false, newBalance: 0 };

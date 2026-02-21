@@ -55,7 +55,7 @@ export async function verifySupabaseToken(token: string): Promise<FirebaseUser> 
       throw new Error('Invalid JWT format');
     }
 
-    const [headerB64, payloadB64, signatureB64] = parts;
+    const [headerB64, payloadB64, signatureB64] = parts as [string, string, string];
 
     // Verify signature (HS256)
     const expectedSignature = createHmac('sha256', jwtSecret)
