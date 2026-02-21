@@ -32,8 +32,9 @@ const DistrictSelectionModal: React.FC<DistrictSelectionModalProps> = ({
       setError('');
 
       const {
-        data: { user: currentUser },
-      } = await supabase.auth.getUser();
+        data: { session },
+      } = await supabase.auth.getSession();
+      const currentUser = session?.user;
       if (!currentUser) {
         throw new Error('No authenticated user found');
       }

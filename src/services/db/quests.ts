@@ -136,27 +136,19 @@ export async function claimQuestReward(
       return { success: false, error: 'Failed to claim reward' };
     }
 
-    // 3. Add Giuros
+    // 3. Add Giuros — atomic via RPC to avoid TOCTOU race
     if (quest.reward_giuros && quest.reward_giuros > 0) {
-      // Fetch current user to get current giuros? Or just increment using RPC?
-      // We don't have a simple "increment" RPC without custom SQL functioning.
-      // Let's read-modify-write for now (optimistic locking not critical for small game currency yet).
-      const { data: userData, error: userError } = await supabase
-        .from('users')
-        .select('giuros')
-        .eq('username', cleanUserId)
-        .single();
+      const { data: rpcData, error: rpcError } = await (supabase as any).rpc('add_giuros', {
+        p_username: cleanUserId,
+        p_amount: quest.reward_giuros,
+        p_reason: `quest_reward:${questId}`,
+      });
 
-      if (userError || !userData) {
-        // Warning: Claimed but logic failed to add currency.
-        // Should rollback claim?
-        // Retrying won't help if user issue.
-        logger.error('Failed to add giuros', userError);
+      if (rpcError || !(rpcData as any)?.success) {
+        logger.error('Failed to add giuros via RPC', rpcError || (rpcData as any)?.error);
+        // Quest is claimed; currency failed — don't fail the whole claim.
         return { success: true, reward: 0, error: 'Claimed, but failed to add currency' };
       }
-
-      const newBalance = (userData.giuros || 0) + quest.reward_giuros;
-      await supabase.from('users').update({ giuros: newBalance }).eq('username', cleanUserId);
 
       return { success: true, reward: quest.reward_giuros };
     }
