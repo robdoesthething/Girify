@@ -109,3 +109,26 @@ export async function isUserAdmin(uid: string): Promise<boolean> {
     return false;
   }
 }
+
+/**
+ * Insert a feedback record
+ * @param username Normalized username (no @ prefix)
+ * @param text Feedback text
+ */
+export async function insertFeedbackRecord(
+  username: string,
+  text: string
+): Promise<{ success: boolean; error?: string }> {
+  try {
+    const supabase = getSupabaseAdmin();
+    const { error } = await supabase.from('feedback').insert({ username, text });
+    if (error) {
+      console.error('[Supabase] feedback insert error:', error.message);
+      return { success: false, error: error.message };
+    }
+    return { success: true };
+  } catch (error) {
+    console.error('[Supabase] unexpected error inserting feedback:', error);
+    return { success: false, error: 'Unexpected error' };
+  }
+}
