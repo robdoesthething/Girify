@@ -24,7 +24,7 @@ const FeedbackScreen: React.FC<FeedbackScreenProps> = ({ username }) => {
   const [submitted, setSubmitted] = useState(false);
   const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const turnstileRef = useRef<TurnstileInstance>(null);
+  const turnstileRef = useRef<TurnstileInstance | undefined>(undefined);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -107,11 +107,11 @@ const FeedbackScreen: React.FC<FeedbackScreenProps> = ({ username }) => {
                     <div className="flex justify-center mb-4">
                       <Turnstile
                         ref={turnstileRef}
-                        siteKey={import.meta.env.VITE_TURNSTILE_SITE_KEY}
+                        siteKey={import.meta.env.VITE_TURNSTILE_SITE_KEY ?? ''}
                         onSuccess={setTurnstileToken}
                         onError={() => setTurnstileToken(null)}
                         onExpire={() => setTurnstileToken(null)}
-                        options={{ theme: theme === 'light' ? 'light' : 'dark' }}
+                        options={{ theme }}
                       />
                     </div>
 

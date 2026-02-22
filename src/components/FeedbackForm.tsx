@@ -42,7 +42,7 @@ const FeedbackForm: React.FC<FeedbackFormProps> = ({ username, onSuccess, onClos
     error: null,
   });
   const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
-  const turnstileRef = useRef<TurnstileInstance>(null);
+  const turnstileRef = useRef<TurnstileInstance | undefined>(undefined);
 
   const { feedback, isSubmitting, error } = formState;
 
@@ -108,14 +108,14 @@ const FeedbackForm: React.FC<FeedbackFormProps> = ({ username, onSuccess, onClos
         <div className="flex justify-center mb-4">
           <Turnstile
             ref={turnstileRef}
-            siteKey={import.meta.env.VITE_TURNSTILE_SITE_KEY}
+            siteKey={import.meta.env.VITE_TURNSTILE_SITE_KEY ?? ''}
             onSuccess={setTurnstileToken}
             onError={() => {
               setTurnstileToken(null);
               turnstileRef.current?.reset();
             }}
             onExpire={() => setTurnstileToken(null)}
-            options={{ theme: theme === 'light' ? 'light' : 'dark', size: 'compact' }}
+            options={{ theme, size: 'compact' }}
           />
         </div>
 
