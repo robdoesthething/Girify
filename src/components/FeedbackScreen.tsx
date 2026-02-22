@@ -1,6 +1,7 @@
 import { Turnstile } from '@marsidev/react-turnstile';
+import type { TurnstileInstance } from '@marsidev/react-turnstile';
 import { AnimatePresence, motion } from 'framer-motion';
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTopBarNav } from '../hooks/useTopBarNav';
 import { STORAGE_KEYS } from '../config/constants';
@@ -23,6 +24,7 @@ const FeedbackScreen: React.FC<FeedbackScreenProps> = ({ username }) => {
   const [submitted, setSubmitted] = useState(false);
   const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const turnstileRef = useRef<TurnstileInstance>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -50,6 +52,7 @@ const FeedbackScreen: React.FC<FeedbackScreenProps> = ({ username }) => {
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Something went wrong. Please try again.');
       setTurnstileToken(null);
+      turnstileRef.current?.reset();
     } finally {
       setIsSubmitting(false);
     }
@@ -103,11 +106,12 @@ const FeedbackScreen: React.FC<FeedbackScreenProps> = ({ username }) => {
 
                     <div className="flex justify-center mb-4">
                       <Turnstile
+                        ref={turnstileRef}
                         siteKey={import.meta.env.VITE_TURNSTILE_SITE_KEY}
                         onSuccess={setTurnstileToken}
                         onError={() => setTurnstileToken(null)}
                         onExpire={() => setTurnstileToken(null)}
-                        options={{ theme: theme === 'dark' ? 'dark' : 'light' }}
+                        options={{ theme: theme === 'light' ? 'light' : 'dark' }}
                       />
                     </div>
 
