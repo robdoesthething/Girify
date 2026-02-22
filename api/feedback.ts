@@ -9,6 +9,7 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { handleCors } from './_lib/cors';
 import { handleError } from './_lib/errorHandler';
+import { checkRateLimit } from './_lib/rate-limit';
 import { ErrorResponses, sendSuccess } from './_lib/response';
 import { insertFeedbackRecord } from './_lib/supabase';
 import { validateRequestBody, ValidationSchema } from './_lib/validation';
@@ -20,6 +21,11 @@ const FEEDBACK_SCHEMA: ValidationSchema = {
 };
 
 const TURNSTILE_VERIFY_URL = 'https://challenges.cloudflare.com/turnstile/v0/siteverify';
+
+const FEEDBACK_RATE_LIMIT = {
+  maxAttempts: 5,
+  windowMs: 10 * 60 * 1000, // 10 minutes
+};
 
 export default async function handler(req: VercelRequest, res: VercelResponse): Promise<void> {
   if (handleCors(res, req.headers.origin, req.method || 'GET')) return;
@@ -42,15 +48,35 @@ export default async function handler(req: VercelRequest, res: VercelResponse): 
       turnstileToken: string;
     };
 
+    const clientIp = String(req.headers['x-real-ip'] || req.socket.remoteAddress || 'unknown');
+    const rateLimitKey = `feedback:${clientIp}`;
+    const rateLimit = await checkRateLimit(rateLimitKey, FEEDBACK_RATE_LIMIT);
+
+    res.setHeader('X-RateLimit-Limit', FEEDBACK_RATE_LIMIT.maxAttempts.toString());
+    res.setHeader('X-RateLimit-Remaining', rateLimit.remaining.toString());
+    res.setHeader('X-RateLimit-Reset', new Date(rateLimit.resetAt).toISOString());
+
+    if (!rateLimit.allowed) {
+      console.warn(`[API] Feedback rate limit exceeded from ${clientIp}`);
+      ErrorResponses.RATE_LIMIT_EXCEEDED(res);
+      return;
+    }
+
+    const secretKey = process.env.TURNSTILE_SECRET_KEY;
+    if (!secretKey) {
+      console.error('[API] TURNSTILE_SECRET_KEY is not configured');
+      ErrorResponses.SERVER_ERROR(res, 'Server configuration error');
+      return;
+    }
+
     // Verify Turnstile token with Cloudflare
-    const ip = req.headers['x-real-ip'] || req.socket.remoteAddress || '';
     const verifyRes = await fetch(TURNSTILE_VERIFY_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
       body: new URLSearchParams({
-        secret: process.env.TURNSTILE_SECRET_KEY || '',
+        secret: secretKey,
         response: turnstileToken,
-        remoteip: String(ip),
+        remoteip: clientIp,
       }),
     });
     const verifyData = (await verifyRes.json()) as { success: boolean };

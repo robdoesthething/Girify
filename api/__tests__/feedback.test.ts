@@ -10,11 +10,16 @@ vi.mock('../_lib/supabase', () => ({
   insertFeedbackRecord: vi.fn(),
 }));
 
+vi.mock('../_lib/rate-limit', () => ({
+  checkRateLimit: vi.fn(),
+}));
+
 // Mock fetch for Turnstile verification
 const mockFetch = vi.fn();
 global.fetch = mockFetch;
 
 import { insertFeedbackRecord } from '../_lib/supabase';
+import { checkRateLimit } from '../_lib/rate-limit';
 import handler from '../feedback';
 
 function createMockReq(overrides: Partial<VercelRequest> = {}): VercelRequest {
@@ -48,6 +53,11 @@ describe('POST /api/feedback', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     process.env.TURNSTILE_SECRET_KEY = 'test-secret';
+    vi.mocked(checkRateLimit).mockResolvedValue({
+      allowed: true,
+      remaining: 4,
+      resetAt: Date.now() + 600000,
+    });
   });
 
   afterEach(() => {
@@ -106,5 +116,27 @@ describe('POST /api/feedback', () => {
     const res = createMockRes();
     await handler(req, res);
     expect(res.status).toHaveBeenCalledWith(500);
+  });
+
+  it('returns 429 when rate limit is exceeded', async () => {
+    vi.mocked(checkRateLimit).mockResolvedValueOnce({
+      allowed: false,
+      remaining: 0,
+      resetAt: Date.now() + 600000,
+    });
+    const req = createMockReq();
+    const res = createMockRes();
+    await handler(req, res);
+    expect(res.status).toHaveBeenCalledWith(429);
+    expect(mockFetch).not.toHaveBeenCalled();
+  });
+
+  it('returns 500 when TURNSTILE_SECRET_KEY is not set', async () => {
+    delete process.env.TURNSTILE_SECRET_KEY;
+    const req = createMockReq();
+    const res = createMockRes();
+    await handler(req, res);
+    expect(res.status).toHaveBeenCalledWith(500);
+    expect(mockFetch).not.toHaveBeenCalled();
   });
 });
