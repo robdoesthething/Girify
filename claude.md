@@ -100,7 +100,8 @@ When performing code reviews or refactoring:
 
 - This is a TypeScript-first codebase. Always use TypeScript (.ts/.tsx) for new files.
 - Prefer strict typing — avoid `any`. Use `unknown` + type guards when types are uncertain.
-- After editing multiple files, run `tsc --noEmit` to verify type correctness.
+- **Run `npm run type-check` after every TypeScript edit** — not just after multi-file refactors. Fix all errors before moving on.
+- Do not batch more than 5–6 file edits without an intermediate type check. Type errors compound across files and become harder to isolate.
 
 ## Key Conventions
 
@@ -415,9 +416,10 @@ When making changes across 3+ files:
 
 1. Read all affected files first before editing any
 2. Make changes in dependency order (utils → components → pages)
-3. Run type checker after all edits
+3. **Run `npm run type-check` after every 5–6 edits** — do not wait until all files are done
 4. Run tests if available
-5. Summarize all changed files at the end
+5. Verify build succeeds with `npm run build` before committing
+6. Summarize all changed files at the end
 
 ## Testing Strategy
 
@@ -512,6 +514,44 @@ Category: bugfix
 - [ ] Database migrations run (if needed)
 - [ ] News announcement created (if user-facing)
 
+## SQL Migration Rules
+
+When writing or reviewing SQL migrations for Supabase/PostgreSQL:
+
+1. **Never use `CREATE POLICY IF NOT EXISTS`** — this is invalid PostgreSQL syntax. Use the correct pattern:
+
+   ```sql
+   -- Correct pattern
+   DROP POLICY IF EXISTS "policy name" ON table_name;
+   CREATE POLICY "policy name" ON table_name ...;
+   ```
+
+2. **Handle duplicate key constraints** with `ON CONFLICT`:
+
+   ```sql
+   -- Bad: will error if row exists
+   INSERT INTO users (uid, username) VALUES (...);
+
+   -- Good: upsert safely
+   INSERT INTO users (uid, username) VALUES (...)
+   ON CONFLICT (uid) DO UPDATE SET username = EXCLUDED.username;
+   ```
+
+3. **Always test migrations** with a `BEGIN; ... ROLLBACK;` block before running for real.
+
+4. **RLS policy order matters**: drop old policies before creating new ones to avoid conflicts.
+
+## Debugging
+
+When a bug or unexpected behavior is reported, always check environment variables **before** investigating code logic:
+
+1. **Read `.env.development`** and compare against what's configured in Vercel (`vercel env ls`)
+2. **Check for URL mismatches** — local `localhost` vs production Supabase/API URLs are a frequent root cause
+3. **Verify required keys are set** — missing `SUPABASE_URL`, `ANON_KEY`, or `SERVICE_ROLE_KEY` will cause silent failures
+4. Only after confirming env vars are correct, investigate code logic
+
+This has been the root cause of multiple debugging sessions that appeared to be code bugs but were actually misconfigured environment variables.
+
 ## Gotchas & Pitfalls
 
 ### 1. Team Selection Modal Loop
@@ -530,19 +570,19 @@ const checkedUsername = useRef<string | null>(null);
 
 **Fixed in**: `src/AppRoutes.tsx` (commit ccda0ea and later fix)
 
-### 2. Firebase vs Supabase
+### 2. Firebase → Supabase (Migration Complete)
 
-**Current State**: Migration in progress
+**Current State**: Firebase fully removed. Supabase Auth is the sole auth provider.
 
-- **Authentication**: Still using Firebase Auth
-- **Database**: Moved to Supabase
-- **User IDs**: Firebase UIDs used as primary keys in Supabase
+- **Authentication**: Supabase Auth (Google OAuth + Email/Password)
+- **Database**: Supabase (PostgreSQL)
+- **User IDs**: Supabase Auth UUID (`user.id`) is the primary key
 
 **Important**:
 
-- User `uid` in Supabase = Firebase Auth `uid`
-- Always use Firebase Auth user ID for Supabase queries
-- Don't create new Supabase auth users
+- `auth.uid()` in RLS policies = Supabase UUID (not Firebase UID)
+- `user.id` is the Supabase UUID; `user.user_metadata.full_name` is the display name
+- Do not reference Firebase anywhere — it has been fully removed
 
 ### 3. Redis Session Optional
 
