@@ -17,18 +17,18 @@ export interface GamePageProps {
   username?: string;
 }
 
-const GamePageContent = ({ username }: GamePageProps) => {
+function GamePageContent({ username }: GamePageProps) {
   const { validStreets, getHintStreets, isLoading: streetsLoading } = useStreets();
-  const gameStateResult = useGameState(validStreets, getHintStreets);
   const {
     state,
     dispatch,
+    currentStreet,
     setupGame,
     processAnswer,
     handleSelectAnswer,
     handleNext,
     handleRegister,
-  } = gameStateResult;
+  } = useGameState(validStreets, getHintStreets);
   const location = useLocation();
 
   // Handle register mode from navigation
@@ -53,7 +53,7 @@ const GamePageContent = ({ username }: GamePageProps) => {
   const achievements = useAchievements(state.username || '', state.gameState, location.pathname);
 
   // District check — prompts logged-in users without a team to pick one
-  const { showDistrictModal, handleDistrictComplete } = useAuthRedirect({
+  const { showDistrictModal, handleDistrictComplete, handleDistrictDismiss } = useAuthRedirect({
     username: state.username,
     handleRegister,
   });
@@ -70,7 +70,7 @@ const GamePageContent = ({ username }: GamePageProps) => {
     () => ({
       state,
       dispatch,
-      currentStreet: gameStateResult.currentStreet,
+      currentStreet,
       handlers: {
         setupGame,
         processAnswer,
@@ -83,7 +83,7 @@ const GamePageContent = ({ username }: GamePageProps) => {
     [
       state,
       dispatch,
-      gameStateResult.currentStreet,
+      currentStreet,
       setupGame,
       processAnswer,
       handleSelectAnswer,
@@ -104,7 +104,6 @@ const GamePageContent = ({ username }: GamePageProps) => {
     <GameProvider value={providerValue}>
       <GameScreen />
 
-      {/* Modals managed by GamePage */}
       <AnimatePresence>
         {announcements.pendingAnnouncement && (
           <AnnouncementModal
@@ -129,12 +128,13 @@ const GamePageContent = ({ username }: GamePageProps) => {
             <DistrictSelectionModal
               username={state.username || ''}
               onComplete={handleDistrictComplete}
+              onDismiss={handleDistrictDismiss}
             />
           </Suspense>
         )}
       </AnimatePresence>
     </GameProvider>
   );
-};
+}
 
 export default GamePageContent;

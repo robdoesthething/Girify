@@ -1,21 +1,15 @@
-/**
- * useAuthRedirect Hook
- *
- * Handles Google OAuth redirect flow and district selection modal state.
- * With Supabase Auth, the redirect callback is handled automatically
- * by onAuthStateChange. This hook checks for district selection needs.
- */
-
 import { useEffect, useRef, useState } from 'react';
-import { DISTRICT_CHECK_DELAY_MS } from '../config/appConstants';
+import {
+  DISTRICT_CHECK_DELAY_MS,
+  getRandomAvatarId,
+  getRandomHandleSuffix,
+} from '../config/appConstants';
 import { STORAGE_KEYS } from '../config/constants';
 import { supabase } from '../services/supabase';
 import { debugLog } from '../utils/debug';
 import { normalizeUsername } from '../utils/format';
-import { getUserByEmail, getUserByUid, getUserProfile } from '../utils/social';
+import { ensureUserProfile, getUserByEmail, getUserByUid, getUserProfile } from '../utils/social';
 import { storage } from '../utils/storage';
-import { getRandomAvatarId, getRandomHandleSuffix } from '../config/appConstants';
-import { ensureUserProfile } from '../utils/social';
 
 interface UseAuthRedirectOptions {
   username: string | null;
@@ -28,6 +22,7 @@ export interface UseAuthRedirectReturn {
   isProcessingRedirect: boolean;
   districtFlowActive: React.MutableRefObject<boolean>;
   handleDistrictComplete: () => void;
+  handleDistrictDismiss: () => void;
 }
 
 export function useAuthRedirect({
@@ -37,6 +32,7 @@ export function useAuthRedirect({
   const [showDistrictModal, setShowDistrictModal] = useState(false);
   const [isProcessingRedirect, setIsProcessingRedirect] = useState(false);
   const [hasProcessedRedirect, setHasProcessedRedirect] = useState(false);
+  const [authTick, setAuthTick] = useState(0);
   const districtFlowActive = useRef(false);
   const checkedDistrictForUsername = useRef<string | null>(null);
 
@@ -126,26 +122,51 @@ export function useAuthRedirect({
     handleRedirectResult();
   }, [hasProcessedRedirect, handleRegister]);
 
-  // Check for missing district
+  // Reset the district check whenever the user signs in, so it re-runs even
+  // if the username string hasn't changed (e.g. old Firebase users whose
+  // localStorage username matches their DB username without the @ prefix).
+  useEffect(() => {
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange(event => {
+      if (event === 'SIGNED_IN') {
+        checkedDistrictForUsername.current = null;
+        setAuthTick(t => t + 1);
+      }
+    });
+    return () => subscription.unsubscribe();
+  }, []);
+
+  // Check for missing district — only for authenticated users.
+  // Legacy users (old Firebase session in localStorage) have no Supabase session
+  // and cannot complete the update, so skip the modal until they sign in.
   useEffect(() => {
     const checkDistrict = async () => {
       if (districtFlowActive.current) {
         return;
       }
 
-      const currentUsername = username;
-      if (!currentUsername || normalizeUsername(currentUsername).startsWith('guest')) {
+      if (!username || normalizeUsername(username).startsWith('guest')) {
         return;
       }
 
-      if (checkedDistrictForUsername.current === currentUsername) {
+      if (checkedDistrictForUsername.current === username) {
         return;
       }
 
-      checkedDistrictForUsername.current = currentUsername;
+      // Require an active Supabase session — the district update will fail otherwise.
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+      if (!session?.user) {
+        // Don't mark as checked so the check can re-run after the user signs in.
+        return;
+      }
+
+      checkedDistrictForUsername.current = username;
 
       try {
-        const profile = await getUserProfile(currentUsername);
+        const profile = await getUserProfile(username);
         if (profile && !profile.district) {
           if (districtFlowActive.current) {
             return;
@@ -161,7 +182,7 @@ export function useAuthRedirect({
 
     const timeout = setTimeout(checkDistrict, DISTRICT_CHECK_DELAY_MS);
     return () => clearTimeout(timeout);
-  }, [username]);
+  }, [username, authTick]);
 
   const handleDistrictComplete = () => {
     setShowDistrictModal(false);
@@ -170,13 +191,18 @@ export function useAuthRedirect({
     }
   };
 
+  const handleDistrictDismiss = () => {
+    districtFlowActive.current = false;
+    checkedDistrictForUsername.current = null;
+    setShowDistrictModal(false);
+  };
+
   return {
     showDistrictModal,
     setShowDistrictModal,
     isProcessingRedirect,
     districtFlowActive,
     handleDistrictComplete,
+    handleDistrictDismiss,
   };
 }
-
-export default useAuthRedirect;

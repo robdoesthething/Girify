@@ -1,25 +1,38 @@
 import { motion } from 'framer-motion';
-import React, { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useTheme } from '../context/ThemeContext';
-import { supabase } from '../services/supabase';
 import DistrictSelector from '../features/auth/components/DistrictSelector';
 import SelectedDistrictPreview from '../features/auth/components/SelectedDistrictPreview';
+import { supabase } from '../services/supabase';
 import { ensureUserProfile } from '../utils/social';
 import { themeClasses } from '../utils/themeUtils';
 
 interface DistrictSelectionModalProps {
   username: string;
   onComplete: () => void;
+  onDismiss?: () => void;
 }
 
-const DistrictSelectionModal: React.FC<DistrictSelectionModalProps> = ({
-  username,
-  onComplete,
-}) => {
+function DistrictSelectionModal({ username, onComplete, onDismiss }: DistrictSelectionModalProps) {
   const { theme, t } = useTheme();
   const [district, setDistrict] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+
+  useEffect(() => {
+    if (!onDismiss) {
+      return undefined;
+    }
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        onDismiss();
+      }
+    };
+    document.addEventListener('keydown', handleKeyDown);
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [onDismiss]);
 
   const handleSubmit = async () => {
     if (!district) {
@@ -58,8 +71,17 @@ const DistrictSelectionModal: React.FC<DistrictSelectionModalProps> = ({
       <motion.div
         initial={{ scale: 0.9, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
-        className={`w-full max-w-md p-8 rounded-3xl shadow-2xl border ${themeClasses(theme, 'bg-slate-900 border-slate-700 text-white', 'bg-white border-slate-200 text-slate-900')}`}
+        className={`relative w-full max-w-md p-8 rounded-3xl shadow-2xl border ${themeClasses(theme, 'bg-slate-900 border-slate-700 text-white', 'bg-white border-slate-200 text-slate-900')}`}
       >
+        {onDismiss && (
+          <button
+            onClick={onDismiss}
+            className={`absolute top-4 right-4 w-8 h-8 flex items-center justify-center rounded-full text-lg font-bold transition-colors ${themeClasses(theme, 'text-slate-400 hover:text-white hover:bg-slate-700', 'text-slate-400 hover:text-slate-700 hover:bg-slate-100')}`}
+            aria-label="Skip for now"
+          >
+            ×
+          </button>
+        )}
         <div className="text-center mb-6">
           <span className="text-4xl mb-2 block">🏆</span>
           <h2 className="text-2xl font-black mb-2 tracking-tight">
@@ -105,6 +127,6 @@ const DistrictSelectionModal: React.FC<DistrictSelectionModalProps> = ({
       </motion.div>
     </div>
   );
-};
+}
 
 export default DistrictSelectionModal;
