@@ -111,7 +111,7 @@ export async function syncUserProfile(
 /**
  * One-time sync of local game history
  */
-async function syncLocalHistory(displayName: string) {
+export async function syncLocalHistory(displayName: string) {
   if (storage.get(STORAGE_KEYS.HISTORY_SYNCED, false)) {
     return;
   }
@@ -135,7 +135,7 @@ async function syncLocalHistory(displayName: string) {
 /**
  * One-time sync of local cosmetics/currency
  */
-async function syncLocalCosmetics(displayName: string) {
+export async function syncLocalCosmetics(displayName: string) {
   if (storage.get(STORAGE_KEYS.COSMETICS_SYNCED, false)) {
     return;
   }
@@ -166,7 +166,7 @@ async function syncLocalCosmetics(displayName: string) {
 /**
  * Backfill join date from local history if older
  */
-async function backfillJoinDate(displayName: string, profile: UserProfile | null) {
+export async function backfillJoinDate(displayName: string, profile: UserProfile | null) {
   let earliestDate: Date | null = null;
 
   try {
