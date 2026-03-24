@@ -6,40 +6,10 @@ import {
   updateShopItem as dbUpdateShopItem,
 } from '../../services/database';
 import { ShopItemRow } from '../../types/supabase';
+import type { GroupedShopItems, OperationResult, ShopItem, ShopItemType } from './types';
 
-export type ShopItemType = 'frame' | 'title' | 'special' | 'avatar' | 'avatars';
-
-export interface ShopItem {
-  id: string;
-  name?: string;
-  type: ShopItemType;
-  cost?: number;
-  price?: number;
-  rarity?: string;
-  color?: string;
-  description?: string;
-  image?: string;
-  emoji?: string;
-  cssClass?: string;
-  flavorText?: string;
-  prefix?: string;
-  unlockCondition?: { type: string; value: number };
-  [key: string]: unknown;
-}
-
-export interface GroupedShopItems {
-  avatarFrames: ShopItem[];
-  frames: ShopItem[]; // Alias for avatarFrames - used by ShopScreen tabs
-  titles: ShopItem[];
-  special: ShopItem[];
-  avatars: ShopItem[];
-  all: ShopItem[];
-}
-
-interface OperationResult {
-  success: boolean;
-  error?: string;
-}
+export type { GroupedShopItems, OperationResult, ShopItem, ShopItemType } from './types';
+export { checkUnlockCondition } from './unlock';
 
 // Simple in-memory cache
 let shopItemsCache: GroupedShopItems | null = null;
@@ -299,46 +269,4 @@ export const syncWithLocal = async (): Promise<{ updated: number; errors: number
 
   shopItemsCache = null;
   return { updated, errors };
-};
-
-import { UserProfile } from '../../types/user';
-
-/**
- * Check if a shop item is locked for the user
- * @param item - The shop item to check
- * @param userStats - The user's stats
- * @returns Object indicating lock status and reason if locked
- */
-export const checkUnlockCondition = (
-  item: ShopItem,
-  userStats: Partial<UserProfile> | null
-): { locked: boolean; reason?: string } => {
-  if (!item.unlockCondition || !userStats) {
-    return { locked: false };
-  }
-
-  const { type, value } = item.unlockCondition;
-
-  if (type === 'streak') {
-    const currentStreak = userStats.streak || 0;
-    if (currentStreak < value) {
-      return { locked: true, reason: `Need ${value} day streak (Current: ${currentStreak})` };
-    }
-  }
-
-  if (type === 'gamesPlayed') {
-    const games = userStats.gamesPlayed || 0;
-    if (games < value) {
-      return { locked: true, reason: `Play ${value} games (Current: ${games})` };
-    }
-  }
-
-  if (type === 'bestScore') {
-    const best = userStats.bestScore || 0;
-    if (best < value) {
-      return { locked: true, reason: `Score > ${value} in one game (Best: ${best})` };
-    }
-  }
-
-  return { locked: false };
 };
