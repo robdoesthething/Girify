@@ -111,6 +111,54 @@ export async function isUserAdmin(uid: string): Promise<boolean> {
 }
 
 /**
+ * Credit giuros to a user via the add_giuros RPC using service_role (bypasses ownership check)
+ * Only call from server-side code — never expose as a public unauthenticated endpoint.
+ */
+export async function creditGiuros(
+  username: string,
+  amount: number,
+  reason: string
+): Promise<{ success: boolean; error?: string }> {
+  try {
+    const supabase = getSupabaseAdmin();
+    const { data, error } = await (supabase as any).rpc('add_giuros', {
+      p_username: username,
+      p_amount: amount,
+      p_reason: reason,
+    });
+    if (error) {
+      return { success: false, error: error.message };
+    }
+    const result = data as { success: boolean; error?: string };
+    return result.success ? { success: true } : { success: false, error: result.error };
+  } catch (e) {
+    return { success: false, error: (e as Error).message };
+  }
+}
+
+/**
+ * Look up a user's username by their Supabase Auth UID
+ * @param uid Supabase Auth UUID
+ * @returns Normalized username or null if not found
+ */
+export async function getUsernameByUid(uid: string): Promise<string | null> {
+  try {
+    const supabase = getSupabaseAdmin();
+    const { data, error } = await supabase
+      .from('users')
+      .select('username')
+      .eq('supabase_uid', uid)
+      .single();
+    if (error || !data) {
+      return null;
+    }
+    return data.username as string;
+  } catch {
+    return null;
+  }
+}
+
+/**
  * Insert a feedback record
  * @param username Normalized username (no @ prefix)
  * @param text Feedback text

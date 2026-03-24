@@ -1,59 +1,69 @@
 import { renderHook } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import * as giurosUtils from '../../../../utils/shop/giuros';
-import * as socialUtils from '../../../../utils/social/referrals';
 import { useGameReferrals } from '../../hooks/useGameReferrals';
 
-// Mock dependencies
-vi.mock('../../../../utils/social/referrals', () => ({
-  getReferrer: vi.fn(),
-  updateUserGameStats: vi.fn(),
+vi.mock('../../../../services/supabase', () => ({
+  supabase: {
+    auth: {
+      getSession: vi.fn(),
+    },
+  },
 }));
 
-vi.mock('../../../../utils/shop/giuros', () => ({
-  awardReferralBonus: vi.fn(),
-}));
-
-vi.mock('../../../../hooks/useNotification', () => ({
-  useNotification: () => ({ notify: vi.fn() }),
-}));
+const mockFetch = vi.fn();
+vi.stubGlobal('fetch', mockFetch);
 
 describe('useGameReferrals', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    mockFetch.mockResolvedValue({ ok: true });
   });
 
-  it('should do nothing if no referrer found', async () => {
-    vi.mocked(socialUtils.getReferrer).mockResolvedValue(null);
+  it('should do nothing if no username provided', async () => {
+    const { result } = renderHook(() => useGameReferrals());
+    await result.current.processReferrals('');
+    expect(mockFetch).not.toHaveBeenCalled();
+  });
+
+  it('should do nothing if no session', async () => {
+    const { supabase } = await import('../../../../services/supabase');
+    vi.mocked(supabase.auth.getSession).mockResolvedValue({
+      data: { session: null },
+      error: null,
+    } as any);
 
     const { result } = renderHook(() => useGameReferrals());
     await result.current.processReferrals('testuser');
 
-    expect(socialUtils.getReferrer).toHaveBeenCalledWith('testuser');
-    expect(giurosUtils.awardReferralBonus).not.toHaveBeenCalled();
+    expect(mockFetch).not.toHaveBeenCalled();
   });
 
-  it('should award bonus if referrer found', async () => {
-    vi.mocked(socialUtils.getReferrer).mockResolvedValue('referrer');
-    vi.mocked(giurosUtils.awardReferralBonus).mockResolvedValue({
-      success: true,
-      newBalance: 100,
+  it('should call /api/referral when session exists', async () => {
+    const { supabase } = await import('../../../../services/supabase');
+    vi.mocked(supabase.auth.getSession).mockResolvedValue({
+      data: { session: { access_token: 'test-token' } },
+      error: null,
+    } as any);
+
+    const { result } = renderHook(() => useGameReferrals());
+    await result.current.processReferrals('testuser');
+
+    expect(mockFetch).toHaveBeenCalledWith('/api/referral', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: 'Bearer test-token',
+      },
+      body: JSON.stringify({ referredUsername: 'testuser' }),
     });
-
-    const { result } = renderHook(() => useGameReferrals());
-    await result.current.processReferrals('testuser');
-
-    expect(socialUtils.getReferrer).toHaveBeenCalledWith('testuser');
-    expect(giurosUtils.awardReferralBonus).toHaveBeenCalledWith('referrer');
   });
 
   it('should handle errors gracefully', async () => {
-    vi.mocked(socialUtils.getReferrer).mockRejectedValue(new Error('Network error'));
+    const { supabase } = await import('../../../../services/supabase');
+    vi.mocked(supabase.auth.getSession).mockRejectedValue(new Error('Network error'));
 
     const { result } = renderHook(() => useGameReferrals());
     // Should not throw
     await result.current.processReferrals('testuser');
-
-    expect(giurosUtils.awardReferralBonus).not.toHaveBeenCalled();
   });
 });
