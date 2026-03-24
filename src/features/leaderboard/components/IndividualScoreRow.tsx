@@ -51,7 +51,6 @@ const IndividualScoreRow: React.FC<IndividualScoreRowProps> = ({
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: index * UI.ANIMATION.DURATION_FAST }}
-      key={s.id || index}
       onClick={handleClick}
       role="button"
       tabIndex={0}
