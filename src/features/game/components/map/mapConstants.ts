@@ -32,4 +32,4 @@ export const OPACITY_LOW = 0.5;
 export const OPACITY_HIGH = 1.0;
 export const OPACITY_HIGHLIGHT = 0.8;
 
-export const RECENTER_BUTTON_STYLE = { bottom: '20px', left: '20px', zIndex: 1000 };
+export const RECENTER_BUTTON_STYLE = { bottom: '20px', left: '20px', zIndex: 50 };
