@@ -7,15 +7,16 @@
  */
 
 import type { VercelRequest, VercelResponse } from '@vercel/node';
+import { extractBearerToken, verifySupabaseToken } from './_lib/auth';
 import { handleCors } from './_lib/cors';
 import { handleError } from './_lib/errorHandler';
 import { checkRateLimit } from './_lib/rate-limit';
 import { ErrorResponses, sendSuccess } from './_lib/response';
-import { insertFeedbackRecord } from './_lib/supabase';
+import { getUsernameByUid, insertFeedbackRecord } from './_lib/supabase';
 import { validateRequestBody, ValidationSchema } from './_lib/validation';
 
 const FEEDBACK_SCHEMA: ValidationSchema = {
-  username: { type: 'string', required: true, minLength: 1, maxLength: 50 },
+  username: { type: 'string', required: false, minLength: 1, maxLength: 50 },
   text: { type: 'string', required: true, minLength: 1, maxLength: 2000 },
   turnstileToken: { type: 'string', required: true },
 };
@@ -42,11 +43,30 @@ export default async function handler(req: VercelRequest, res: VercelResponse): 
       return;
     }
 
-    const { username, text, turnstileToken } = req.body as {
-      username: string;
+    const {
+      username: bodyUsername,
+      text,
+      turnstileToken,
+    } = req.body as {
+      username?: string;
       text: string;
       turnstileToken: string;
     };
+
+    // Prefer username derived from verified auth token; fall back to body value
+    let resolvedUsername = bodyUsername ?? 'anonymous';
+    const { token: authToken } = extractBearerToken(req.headers.authorization);
+    if (authToken) {
+      try {
+        const verified = await verifySupabaseToken(authToken);
+        const dbUsername = await getUsernameByUid(verified.uid);
+        if (dbUsername) {
+          resolvedUsername = dbUsername;
+        }
+      } catch {
+        // Token invalid or expired — proceed with body username
+      }
+    }
 
     const clientIp = String(req.headers['x-real-ip'] || req.socket.remoteAddress || 'unknown');
     const rateLimitKey = `feedback:${clientIp}`;
@@ -88,7 +108,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse): 
     }
 
     // Normalize username (strip @ prefix, lowercase)
-    const normalizedUsername = username.toLowerCase().replace(/^@/, '');
+    const normalizedUsername = resolvedUsername.toLowerCase().replace(/^@/, '');
 
     const result = await insertFeedbackRecord(normalizedUsername, text);
     if (!result.success) {

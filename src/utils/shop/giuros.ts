@@ -171,30 +171,27 @@ export const claimDailyLoginBonus = async (
     const config = await getPayoutConfig();
     const dailyBonus = config.DAILY_LOGIN_BONUS;
 
-    const user = await getUserByUsername(normalizedUsername);
-    if (!user) {
+    const { data, error } = await (supabase as any).rpc('claim_daily_login_bonus', {
+      p_username: normalizedUsername,
+      p_bonus: dailyBonus,
+    });
+
+    if (error) {
+      console.error('[Giuros] claim_daily_login_bonus RPC error:', error);
       return { claimed: false, bonus: 0, newBalance: 0 };
     }
 
-    // Compare simple date string YYYY-MM-DD
-    const today = new Date().toISOString().split('T')[0];
-    const lastLogin = user.last_login_date; // Database returns YYYY-MM-DD string for DATE type
-
-    if (lastLogin === today) {
-      return { claimed: false, bonus: 0, newBalance: user.giuros ?? 0 };
+    const result = data as { claimed: boolean; bonus: number; new_balance: number };
+    if (result.claimed) {
+      // eslint-disable-next-line no-console
+      console.log(`[Giuros] Daily login bonus +${dailyBonus} for ${normalizedUsername}`);
     }
 
-    const newBalance = (user.giuros ?? 0) + dailyBonus;
-
-    await updateUser(normalizedUsername, {
-      giuros: newBalance,
-      last_login_date: today,
-    });
-
-    // eslint-disable-next-line no-console
-    console.log(`[Giuros] Daily login bonus +${dailyBonus} for ${normalizedUsername}`);
-
-    return { claimed: true, bonus: dailyBonus, newBalance };
+    return {
+      claimed: result.claimed,
+      bonus: result.bonus ?? dailyBonus,
+      newBalance: result.new_balance ?? 0,
+    };
   } catch (e) {
     console.error('Error claiming daily login:', e);
     return { claimed: false, bonus: 0, newBalance: 0 };

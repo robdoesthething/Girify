@@ -1,6 +1,5 @@
 import { useCallback } from 'react';
-import { awardReferralBonus } from '../../../utils/shop/giuros';
-import { getReferrer } from '../../../utils/social/referrals';
+import { supabase } from '../../../services/supabase';
 
 export const useGameReferrals = () => {
   const processReferrals = useCallback(async (username: string) => {
@@ -9,10 +8,21 @@ export const useGameReferrals = () => {
     }
 
     try {
-      const referrer = await getReferrer(username);
-      if (referrer) {
-        await awardReferralBonus(referrer);
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+      if (!session?.access_token) {
+        return;
       }
+
+      await fetch('/api/referral', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${session.access_token}`,
+        },
+        body: JSON.stringify({ referredUsername: username }),
+      });
     } catch (error) {
       console.error('Error processing referrals:', error);
     }

@@ -87,6 +87,9 @@ export const deleteUserAndData = async (
   }
 
   try {
+    const { requireAdmin } = await import('../auth');
+    await requireAdmin();
+
     const { error } = await supabase
       .from('users')
       .delete()
