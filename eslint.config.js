@@ -17,6 +17,7 @@ export default defineConfig([
     'scripts/**/*.ts',
     'backups',
     'e2e',
+    '.claude',
   ]),
 
   // 1. Core JS Recommended

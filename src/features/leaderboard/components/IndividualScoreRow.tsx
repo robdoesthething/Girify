@@ -39,7 +39,7 @@ const IndividualScoreRow: React.FC<IndividualScoreRowProps> = ({
   const isMe = currentUser && usernamesMatch(s.username, currentUser);
 
   const handleClick = () => {
-    if (usernamesMatch(s.username, currentUser)) {
+    if (currentUser && usernamesMatch(s.username, currentUser)) {
       navigate('/profile');
     } else {
       navigate(`/user/${encodeURIComponent(s.username)}`);
