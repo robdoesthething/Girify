@@ -1,13 +1,8 @@
-import { motion } from 'framer-motion';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { useTopBarNav } from '../../../hooks/useTopBarNav';
 import TopBar from '../../../components/TopBar';
 import { PageHeader } from '../../../components/ui';
 import { useTheme } from '../../../context/ThemeContext';
-import { DISTRICTS } from '../../../data/districts';
-import { UI } from '../../../utils/constants';
-import { formatUsername, usernamesMatch } from '../../../utils/format';
 import {
   getLeaderboard,
   getTeamLeaderboard,
@@ -15,6 +10,8 @@ import {
   TeamScoreEntry,
 } from '../../../utils/social/leaderboard';
 import { themeClasses } from '../../../utils/themeUtils';
+import IndividualScoreRow from './IndividualScoreRow';
+import TeamScoreRow from './TeamScoreRow';
 
 const LEADERBOARD_TIMEOUT_MS = 10000;
 
@@ -24,7 +21,6 @@ interface LeaderboardScreenProps {
 
 const LeaderboardScreen: React.FC<LeaderboardScreenProps> = ({ currentUser }) => {
   const { theme, t } = useTheme();
-  const navigate = useNavigate();
   const topBarNav = useTopBarNav();
   const [scores, setScores] = useState<ScoreEntry[]>([]);
   const [teamScores, setTeamScores] = useState<TeamScoreEntry[]>([]);
@@ -154,59 +150,9 @@ const LeaderboardScreen: React.FC<LeaderboardScreenProps> = ({ currentUser }) =>
 
       return (
         <div className="space-y-2 pb-10">
-          {teamScores.map((team, index) => {
-            const district = DISTRICTS.find(d => d.teamName === team.teamName);
-            return (
-              <motion.div
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: index * UI.ANIMATION.DURATION_FAST }}
-                key={team.id}
-                className={`flex items-center justify-between p-4 rounded-2xl border transition-all
-                  ${themeClasses(theme, 'bg-slate-800 border-slate-700', 'bg-white border-slate-200 shadow-sm')}
-                `}
-              >
-                <div className="flex items-center gap-4">
-                  <div
-                    className={`w-10 h-10 flex items-center justify-center rounded-full font-black text-sm relative overflow-hidden
-                      ${index === 0 ? 'bg-yellow-400' : index === 1 ? 'bg-slate-300' : index === 2 ? 'bg-amber-600' : 'bg-slate-100 dark:bg-slate-700'}
-                    `}
-                  >
-                    {district?.logo ? (
-                      <img
-                        src={district.logo}
-                        alt={team.teamName}
-                        className="w-full h-full object-cover"
-                      />
-                    ) : (
-                      index + 1
-                    )}
-                  </div>
-                  <div>
-                    <div className="font-bold text-sm flex items-center gap-2 font-inter">
-                      {team.teamName}
-                    </div>
-                    <div className="text-[10px] opacity-50 font-mono flex items-center gap-2">
-                      <span>
-                        {team.memberCount} {team.memberCount === 1 ? 'player' : 'players'}
-                      </span>
-                      <span>•</span>
-                      <span>avg {team.avgScore.toLocaleString()} pts</span>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="text-right">
-                  <div className="font-black text-lg text-emerald-500 font-inter">
-                    {team.score.toLocaleString()}
-                  </div>
-                  <div className="text-[9px] font-bold opacity-40 uppercase font-inter">
-                    Total Points
-                  </div>
-                </div>
-              </motion.div>
-            );
-          })}
+          {teamScores.map((team, index) => (
+            <TeamScoreRow key={team.id} team={team} index={index} />
+          ))}
         </div>
       );
     }
@@ -223,85 +169,14 @@ const LeaderboardScreen: React.FC<LeaderboardScreenProps> = ({ currentUser }) =>
 
     return (
       <div className="space-y-2 pb-10">
-        {scores.map((s, index) => {
-          let dateStr = 'Unknown';
-          try {
-            const ts = s.timestamp;
-            if (ts && typeof ts === 'object' && 'seconds' in ts) {
-              dateStr = new Date(ts.seconds * 1000).toLocaleDateString(undefined, {
-                month: 'short',
-                day: 'numeric',
-              });
-            } else if (typeof ts === 'number' || typeof ts === 'string') {
-              dateStr = new Date(ts).toLocaleDateString(undefined, {
-                month: 'short',
-                day: 'numeric',
-              });
-            }
-          } catch {
-            dateStr = '--';
-          }
-
-          const isMe = currentUser && usernamesMatch(s.username, currentUser);
-
-          return (
-            <motion.div
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: index * UI.ANIMATION.DURATION_FAST }}
-              key={s.id || index}
-              onClick={() => {
-                if (usernamesMatch(s.username, currentUser)) {
-                  navigate('/profile');
-                } else {
-                  navigate(`/user/${encodeURIComponent(s.username)}`);
-                }
-              }}
-              role="button"
-              tabIndex={0}
-              onKeyDown={e => {
-                if (e.key === 'Enter' || e.key === ' ') {
-                  if (usernamesMatch(s.username, currentUser)) {
-                    navigate('/profile');
-                  } else {
-                    navigate(`/user/${encodeURIComponent(s.username)}`);
-                  }
-                }
-              }}
-              className={`flex items-center justify-between p-4 rounded-2xl border cursor-pointer transition-all hover:scale-[1.02]
-                  ${isMe ? 'border-sky-500 bg-sky-500/10 shadow-lg shadow-sky-500/10' : themeClasses(theme, 'bg-slate-800 border-slate-700 hover:border-slate-600', 'bg-white border-slate-200 hover:border-sky-200 shadow-sm')}
-                `}
-            >
-              <div className="flex items-center gap-4">
-                <div
-                  className={`w-8 h-8 flex items-center justify-center rounded-full font-black text-sm relative overflow-hidden
-                    ${index === 0 ? 'bg-yellow-400 text-yellow-900' : index === 1 ? 'bg-slate-300 text-slate-900' : index === 2 ? 'bg-amber-600 text-white' : 'bg-slate-100 dark:bg-slate-700 opacity-50'}
-                  `}
-                >
-                  {index + 1}
-                </div>
-                <div>
-                  <div className="font-bold text-sm flex items-center gap-2 font-inter">
-                    {formatUsername(s.username)}
-                    {isMe && (
-                      <span className="text-[10px] bg-sky-500 text-white px-1.5 rounded-full font-inter">
-                        YOU
-                      </span>
-                    )}
-                  </div>
-                  <div className="text-[10px] opacity-50 font-mono">{dateStr}</div>
-                </div>
-              </div>
-
-              <div className="text-right">
-                <div className="font-black text-lg text-sky-500 font-inter">
-                  {s.score.toLocaleString()}
-                </div>
-                <div className="text-[9px] font-bold opacity-40 uppercase font-inter">Points</div>
-              </div>
-            </motion.div>
-          );
-        })}
+        {scores.map((s, index) => (
+          <IndividualScoreRow
+            key={s.id || index}
+            entry={s}
+            index={index}
+            currentUser={currentUser}
+          />
+        ))}
       </div>
     );
   };
