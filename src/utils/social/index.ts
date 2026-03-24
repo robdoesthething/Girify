@@ -18,18 +18,18 @@ export type {
 
 // Profile functions
 export {
-  deleteUserAndData,
   ensureUserProfile,
-  getAllUsers,
   getUserByEmail,
   getUserByUid,
   getUserProfile,
   healMigration,
   migrateUser,
   rowToProfile,
-  updateUserAsAdmin,
   updateUserProfile,
 } from './profile';
+
+// Admin-only profile functions
+export { deleteUserAndData, getAllUsers, updateUserAsAdmin } from './profileAdmin';
 
 // Feedback functions
 export {
