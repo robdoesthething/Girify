@@ -130,7 +130,7 @@ const SettingsScreen: React.FC<SettingsScreenProps> = ({ onLogout, username }) =
 
       <div className="flex-1 w-full px-4 py-8 pt-20 overflow-x-hidden overflow-y-auto">
         <div className="max-w-2xl mx-auto w-full">
-          <PageHeader title={t('settings')} />
+          <PageHeader title={`⚙️ ${t('settings')}`} />
 
           <div className="space-y-6">
             {toast && (

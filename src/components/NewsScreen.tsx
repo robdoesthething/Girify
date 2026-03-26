@@ -55,7 +55,7 @@ const NewsScreen: React.FC<NewsScreenProps> = ({ username }) => {
 
       <div className="flex-1 w-full px-4 py-8 pt-20 overflow-x-hidden overflow-y-auto">
         <div className="max-w-2xl mx-auto w-full">
-          <PageHeader title={t('news') || 'News'} />
+          <PageHeader title={`📰 ${t('news') || 'News'}`} />
 
           {loading ? (
             <div className="flex items-center justify-center py-20">

@@ -105,7 +105,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ username }) => {
       <div className="flex-1 w-full px-4 py-8 pt-20 overflow-x-hidden">
         <div className="max-w-2xl mx-auto w-full">
           <PageHeader
-            title={t('profile') || 'Profile'}
+            title={`👤 ${t('profile') || 'Profile'}`}
             rightElement={
               <button
                 onClick={() => actions.toggleGiurosInfo()}
