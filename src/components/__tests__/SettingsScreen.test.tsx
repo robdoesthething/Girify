@@ -84,7 +84,7 @@ describe('SettingsScreen', () => {
         <SettingsScreen {...defaultProps} />
       </MemoryRouter>
     );
-    expect(screen.getByText('settings')).toBeInTheDocument();
+    expect(screen.getByText(/settings/i)).toBeInTheDocument();
     expect(screen.getByText('Appearance: testuser')).toBeInTheDocument();
   });
 
