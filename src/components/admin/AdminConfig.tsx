@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { GameConfig, getGameConfig, updateGameConfig } from '../../services/db/config';
-import FormInput from '../FormInput';
+import Input from '../ui/Input';
 
 interface AdminConfigProps {
   onNotify: (msg: string, type: 'success' | 'error' | 'info') => void;
@@ -83,7 +83,7 @@ const AdminConfig: React.FC<AdminConfigProps> = ({ onNotify }) => {
           </h3>
           <div className="space-y-4">
             <div>
-              <FormInput
+              <Input
                 id="config-score-mult"
                 label="Score Multiplier (Global)"
                 type="number"
@@ -98,7 +98,7 @@ const AdminConfig: React.FC<AdminConfigProps> = ({ onNotify }) => {
               <p className="text-[10px] opacity-40">Default: 1.0. Set to 2.0 for Double XP.</p>
             </div>
             <div>
-              <FormInput
+              <Input
                 id="config-giuros-mult"
                 label="Giuros Multiplier (Global)"
                 type="number"
@@ -120,7 +120,7 @@ const AdminConfig: React.FC<AdminConfigProps> = ({ onNotify }) => {
           </h3>
           <div className="space-y-4">
             <div>
-              <FormInput
+              <Input
                 id="config-game-limit"
                 label="Daily Game Limit (0 = Unlimited)"
                 type="number"
@@ -158,7 +158,7 @@ const AdminConfig: React.FC<AdminConfigProps> = ({ onNotify }) => {
             <span>📢</span> Global Notice
           </h3>
           <div>
-            <FormInput
+            <Input
               id="config-announcement"
               label="Top Bar Announcement (Optional)"
               type="text"

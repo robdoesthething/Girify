@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { PayoutConfig } from '../../services/db/config';
 import { themeClasses } from '../../utils/themeUtils';
-import FormInput from '../FormInput';
+import Input from '../ui/Input';
 
 interface IncomeConfigProps {
   payouts: PayoutConfig | null;
@@ -35,12 +35,12 @@ const EditableSourceRow: React.FC<EditableSourceRowProps> = ({ label, value, onC
     <span className="font-medium text-sm text-slate-700 dark:text-slate-300">{label}</span>
     <div className="flex items-center gap-2">
       <span className="text-emerald-500 font-bold">+</span>
-      <FormInput
+      <Input
         type="number"
         value={value}
         onChange={(e: React.ChangeEvent<HTMLInputElement>) => onChange(e.target.value)}
         aria-label={`Value for ${label}`}
-        containerClassName="w-20 mb-0"
+        containerClassName="w-20"
         className={`text-right font-mono font-bold ${themeClasses(
           theme,
           'text-emerald-400',

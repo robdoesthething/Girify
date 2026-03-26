@@ -8,11 +8,23 @@ interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
   fullWidth?: boolean;
   leftIcon?: React.ReactNode;
   rightIcon?: React.ReactNode;
+  containerClassName?: string;
 }
 
 const Input = forwardRef<HTMLInputElement, InputProps>(
   (
-    { label, error, fullWidth = true, leftIcon, rightIcon, className = '', disabled, id, ...props },
+    {
+      label,
+      error,
+      fullWidth = true,
+      leftIcon,
+      rightIcon,
+      className = '',
+      containerClassName = '',
+      disabled,
+      id,
+      ...props
+    },
     ref
   ) => {
     const { theme } = useTheme();
@@ -40,7 +52,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
     const errorStyles = error ? 'border-red-500 focus:border-red-500 focus:ring-red-500/10' : '';
 
     return (
-      <div className={`${fullWidth ? 'w-full' : ''} ${className}`}>
+      <div className={`${fullWidth ? 'w-full' : ''} ${className} ${containerClassName}`}>
         {label && (
           <label htmlFor={inputId} className="block text-sm font-bold mb-2 ml-1 opacity-80">
             {label}

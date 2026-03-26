@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Quest } from '../../utils/game/quests';
-import FormInput from '../FormInput';
+import Input from '../ui/Input';
 
 interface QuestEditorProps {
   initialQuest?: Partial<Quest> | null;
@@ -73,7 +73,7 @@ const QuestEditor: React.FC<QuestEditorProps> = ({ initialQuest, onSave, onCance
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
         <div className="md:col-span-2">
-          <FormInput
+          <Input
             id="quest-title"
             label="Quest Title"
             placeholder="e.g. Gracia Explorer"
@@ -119,7 +119,7 @@ const QuestEditor: React.FC<QuestEditorProps> = ({ initialQuest, onSave, onCance
           </select>
         </div>
 
-        <FormInput
+        <Input
           id="quest-criteria"
           label="Criteria Value"
           placeholder="e.g. 5, 2000, 'Main St'"
@@ -129,7 +129,7 @@ const QuestEditor: React.FC<QuestEditorProps> = ({ initialQuest, onSave, onCance
           }
         />
 
-        <FormInput
+        <Input
           id="quest-reward"
           label="Reward (Giuros)"
           type="number"

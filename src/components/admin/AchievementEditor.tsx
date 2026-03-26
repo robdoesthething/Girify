@@ -2,7 +2,7 @@ import { motion } from 'framer-motion';
 import React, { useEffect, useState } from 'react';
 import { Achievement } from '../../data/achievements';
 
-import FormInput from '../FormInput';
+import Input from '../ui/Input';
 
 interface AchievementEditorProps {
   initialItem: Partial<Achievement>;
@@ -41,7 +41,7 @@ const AchievementEditor: React.FC<AchievementEditorProps> = ({
         <h3 className="text-xl font-black mb-4">{isEdit ? 'Edit' : 'Create'} Achievement</h3>
 
         <div className="space-y-4">
-          <FormInput
+          <Input
             id="achieve-id"
             label="ID (Unique)"
             value={editingItem.id || ''}
@@ -50,7 +50,7 @@ const AchievementEditor: React.FC<AchievementEditorProps> = ({
             className="font-mono text-sm"
           />
 
-          <FormInput
+          <Input
             id="achieve-name"
             label="Name"
             value={editingItem.name || ''}
@@ -115,7 +115,7 @@ const AchievementEditor: React.FC<AchievementEditorProps> = ({
           </div>
 
           <div className="grid grid-cols-2 gap-4">
-            <FormInput
+            <Input
               id="achieve-image"
               label="Image URL"
               value={editingItem.image || ''}
@@ -123,7 +123,7 @@ const AchievementEditor: React.FC<AchievementEditorProps> = ({
               className="text-xs"
               placeholder="/badges/file.png"
             />
-            <FormInput
+            <Input
               id="achieve-emoji"
               label="Emoji (Alt)"
               value={editingItem.emoji || ''}
@@ -133,7 +133,7 @@ const AchievementEditor: React.FC<AchievementEditorProps> = ({
           </div>
 
           {editingItem.type === 'shop' && (
-            <FormInput
+            <Input
               id="achieve-cost"
               label="Cost (Giuros)"
               type="number"

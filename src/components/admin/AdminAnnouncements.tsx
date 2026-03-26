@@ -4,7 +4,7 @@ import { useTheme } from '../../context/ThemeContext';
 import { useAdminCRUD } from '../../hooks/useAdminCRUD';
 import { Announcement, createAnnouncement, deleteAnnouncement } from '../../utils/social/news';
 import { themeClasses } from '../../utils/themeUtils';
-import FormInput from '../FormInput';
+import Input from '../ui/Input';
 
 interface AdminAnnouncementsProps {
   announcements: Announcement[];
@@ -167,7 +167,7 @@ const AdminAnnouncements: React.FC<AdminAnnouncementsProps> = ({
             >
               <h3 className="text-2xl font-black mb-6">New Announcement</h3>
               <form onSubmit={onSubmit} className="space-y-4">
-                <FormInput
+                <Input
                   id="announce-title"
                   label="Title"
                   value={formData.title}
@@ -212,7 +212,7 @@ const AdminAnnouncements: React.FC<AdminAnnouncementsProps> = ({
                     </select>
                   </div>
 
-                  <FormInput
+                  <Input
                     id="announce-days"
                     label="Duration (Days)"
                     type="number"
