@@ -104,11 +104,13 @@ const ShopItemCard: React.FC<ShopItemCardProps> = memo(
             activeTab !== 'special' && (
               <Button
                 onClick={onEquip}
-                variant={isEquipped ? 'ghost' : 'secondary'}
+                variant={isEquipped ? 'ghost' : 'primary'}
                 size="sm"
                 fullWidth
                 className={
-                  isEquipped ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400' : ''
+                  isEquipped
+                    ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400'
+                    : 'bg-sky-500 hover:bg-sky-600 text-white'
                 }
               >
                 {isEquipped ? `✓ ${t('equipped')}` : t('equip')}
