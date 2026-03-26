@@ -39,7 +39,7 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
   return (
     <AnimatePresence>
       {isOpen && (
-        <div className={`fixed inset-0 ${Z_INDEX.CRITICAL} flex items-center justify-center p-4`}>
+        <div className={`fixed inset-0 ${Z_INDEX.MODAL} flex items-center justify-center p-4`}>
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
