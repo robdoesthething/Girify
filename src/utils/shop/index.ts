@@ -60,7 +60,6 @@ export const getShopItems = async (forceRefresh = false): Promise<GroupedShopIte
         // Helper to keep other fields if needed, but strict types preferred
       });
     });
-    // console.warn('Shop Fetch Success:', dbItems.length, 'DB items');
   } catch (error) {
     console.error('Error fetching shop items from DB:', error);
     // Continue with just local items

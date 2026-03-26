@@ -42,11 +42,11 @@ export interface ScoreEntry {
  */
 // Database response interface
 interface DatabaseGameResult {
-  id: string;
-  user_id: string;
+  id: number;
+  user_id: string | null;
   score: number;
-  time_taken: number;
-  played_at: string;
+  time_taken: number | null;
+  played_at: string | null;
   platform?: string;
 }
 
@@ -76,7 +76,6 @@ export const getLeaderboard = async (
       const startOfDay = new Date(
         Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(), 0, 0, 0, 0)
       ).toISOString();
-      console.warn('[Leaderboard] Daily filter - UTC start of day:', startOfDay);
       debugLog(`[Leaderboard] Fetching Daily >= ${startOfDay}`);
       queryBuilder = queryBuilder.gte('played_at', startOfDay);
     } else if (period === 'weekly') {
@@ -94,7 +93,6 @@ export const getLeaderboard = async (
           0
         )
       ).toISOString();
-      console.warn('[Leaderboard] Weekly filter - start of week (UTC):', startOfWeek);
       debugLog(`[Leaderboard] Fetching Weekly >= ${startOfWeek}`);
       queryBuilder = queryBuilder.gte('played_at', startOfWeek);
     } else if (period === 'monthly') {
@@ -102,7 +100,6 @@ export const getLeaderboard = async (
       const startOfMonth = new Date(
         Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1, 0, 0, 0, 0)
       ).toISOString();
-      console.warn('[Leaderboard] Monthly filter - start of month (UTC):', startOfMonth);
       debugLog(`[Leaderboard] Fetching Monthly >= ${startOfMonth}`);
       queryBuilder = queryBuilder.gte('played_at', startOfMonth);
     }
@@ -132,16 +129,18 @@ export const getLeaderboard = async (
     }
 
     // 2. Transform to ScoreEntry format
-    const scores: ScoreEntry[] = (rawData as unknown as DatabaseGameResult[]).map(row => ({
-      id: row.id,
+    const scores: ScoreEntry[] = (rawData as DatabaseGameResult[]).map(row => ({
+      id: String(row.id),
       username: formatLeaderboardUsername(row.user_id),
       score: row.score,
-      time: row.time_taken,
-      date: new Date(row.played_at).getTime(), // Numeric timestamp
-      timestamp: { seconds: Math.floor(new Date(row.played_at).getTime() / 1000) }, // Mock Firestore Timestamp
+      time: row.time_taken ?? 0,
+      date: row.played_at ? new Date(row.played_at).getTime() : undefined,
+      timestamp: row.played_at
+        ? { seconds: Math.floor(new Date(row.played_at).getTime() / 1000) }
+        : undefined,
       platform: row.platform,
-      isBonus: false, // Supabase schema might need this if we track bonuses
-      sortDate: new Date(row.played_at),
+      isBonus: false,
+      sortDate: row.played_at ? new Date(row.played_at) : undefined,
     }));
 
     // 3. Deduplicate

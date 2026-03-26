@@ -148,7 +148,11 @@ const ShopScreen: React.FC<ShopScreenProps> = ({ username }) => {
 
           {/* Tabs */}
           <div className="mb-6 overflow-x-auto pb-2 scrollbar-hide">
-            <Tabs tabs={tabs} activeTab={activeTab} onChange={id => setTab(id as any)} />
+            <Tabs
+              tabs={tabs}
+              activeTab={activeTab}
+              onChange={id => setTab(id as 'avatars' | 'frames' | 'titles' | 'special')}
+            />
           </div>
 
           {/* Content */}
