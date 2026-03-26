@@ -44,7 +44,7 @@ const Tabs: React.FC<TabsProps> = ({ tabs, activeTab, onChange, fullWidth = fals
               ${fullWidth ? 'flex-1' : ''}
               ${
                 isActive
-                  ? themeClasses(theme, 'text-white', 'text-slate-900')
+                  ? 'text-white'
                   : themeClasses(
                       theme,
                       'text-slate-400 hover:text-slate-300',
@@ -56,7 +56,7 @@ const Tabs: React.FC<TabsProps> = ({ tabs, activeTab, onChange, fullWidth = fals
             {isActive && (
               <motion.div
                 layoutId="activeTab"
-                className={`absolute inset-0 rounded-lg shadow-sm ${themeClasses(theme, 'bg-slate-700', 'bg-white')}`}
+                className="absolute inset-0 rounded-lg shadow-sm bg-sky-500"
                 transition={{ type: 'spring', duration: 0.5 }}
               />
             )}

@@ -147,11 +147,16 @@ const ShopScreen: React.FC<ShopScreenProps> = ({ username }) => {
           )}
 
           {/* Tabs */}
-          <div className="mb-6 overflow-x-auto pb-2 scrollbar-hide">
-            <Tabs
-              tabs={tabs}
-              activeTab={activeTab}
-              onChange={id => setTab(id as 'avatars' | 'frames' | 'titles' | 'special')}
+          <div className="relative mb-6">
+            <div className="overflow-x-auto pb-2 scrollbar-hide">
+              <Tabs
+                tabs={tabs}
+                activeTab={activeTab}
+                onChange={id => setTab(id as 'avatars' | 'frames' | 'titles' | 'special')}
+              />
+            </div>
+            <div
+              className={`pointer-events-none absolute right-0 top-0 bottom-2 w-10 ${themeClasses(theme, 'bg-gradient-to-l from-slate-900', 'bg-gradient-to-l from-slate-50')}`}
             />
           </div>
 
