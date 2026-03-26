@@ -38,7 +38,6 @@ const AnnouncementModal: React.FC<AnnouncementModalProps> = ({ announcement, onD
     >
       <div className="text-center mb-6">
         <div className="text-4xl mb-3">📰</div>
-        <h2 className="text-2xl font-black mb-1 font-inter">{announcement?.title}</h2>
         <p className="text-xs opacity-50 font-inter">
           {announcement ? formatDate(announcement.publishDate) : ''}
         </p>
