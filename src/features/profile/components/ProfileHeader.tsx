@@ -89,9 +89,9 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
       <h2 className="text-3xl font-black tracking-tight mb-1">{formatUsername(username)}</h2>
 
       <div className="flex flex-col items-center gap-2">
-        <p className="text-sm font-medium opacity-60 mb-2">
-          {profileData.realName || t('unknownName') || 'Unknown Player'}
-        </p>
+        {profileData.realName && (
+          <p className="text-sm font-medium opacity-60 mb-2">{profileData.realName}</p>
+        )}
       </div>
 
       <p className="text-[10px] font-bold uppercase tracking-widest opacity-40 mt-3 font-mono">
@@ -102,7 +102,6 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
         <p className="text-sm font-bold text-sky-500 uppercase tracking-widest mt-1 font-inter">
           {titleName}
         </p>
-        <p className="text-xs opacity-50 mt-1">Joined {joinedDate}</p>
       </div>
     </div>
   );

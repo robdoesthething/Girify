@@ -19,9 +19,9 @@ const AboutScreen: React.FC = () => {
 
       <div className="flex-1 overflow-y-auto w-full px-4 py-6 pt-16">
         <div className="max-w-2xl mx-auto">
-          <PageHeader title={t('aboutGirify')} />
+          <PageHeader title={`ℹ️ ${t('aboutGirify')}`} />
 
-          <div className="space-y-6 text-sm leading-relaxed opacity-90 px-2 pb-24">
+          <div className="space-y-8 text-sm leading-loose opacity-90 px-2 pb-24">
             <p className="text-base font-medium">{t('aboutDescription')}</p>
 
             <h3 className="font-bold text-lg mt-8 text-sky-500">Tech Stack</h3>
@@ -59,7 +59,7 @@ const AboutScreen: React.FC = () => {
             </div>
 
             <h3 className="font-bold text-lg mt-6 text-sky-500">{t('howToPlay')}</h3>
-            <ul className="space-y-4">
+            <ul className="space-y-5">
               <li className="flex items-start gap-4">
                 <span className="mt-1 w-1.5 h-1.5 rounded-full bg-slate-400 shrink-0" />
                 <span>{t('aboutPoint1')}</span>

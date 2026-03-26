@@ -146,9 +146,12 @@ const LeaderboardScreen: React.FC<LeaderboardScreenProps> = ({ currentUser }) =>
     if (viewMode === 'teams') {
       if (teamScores.length === 0) {
         return (
-          <div className="flex flex-col items-center justify-center py-20 opacity-40">
-            <span className="text-4xl mb-4">📭</span>
-            <p className="font-bold font-inter">{t('noRecords')}</p>
+          <div className="flex flex-col items-center justify-center py-20 text-center opacity-50">
+            <span className="text-5xl mb-4">🏙️</span>
+            <p className="font-bold font-inter text-base mb-1">No districts on the board yet</p>
+            <p className="text-xs font-inter opacity-70">
+              Play a game to represent your neighborhood!
+            </p>
           </div>
         );
       }
@@ -164,10 +167,18 @@ const LeaderboardScreen: React.FC<LeaderboardScreenProps> = ({ currentUser }) =>
 
     // Individual View
     if (scores.length === 0) {
+      const isFiltered = period !== 'all';
       return (
-        <div className="flex flex-col items-center justify-center py-20 opacity-40">
-          <span className="text-4xl mb-4">📭</span>
-          <p className="font-bold font-inter">{t('noRecords')}</p>
+        <div className="flex flex-col items-center justify-center py-20 text-center opacity-50">
+          <span className="text-5xl mb-4">{isFiltered ? '⏳' : '🏆'}</span>
+          <p className="font-bold font-inter text-base mb-1">
+            {isFiltered ? 'No games played yet this period' : 'Be the first on the board!'}
+          </p>
+          <p className="text-xs font-inter opacity-70">
+            {isFiltered
+              ? 'Try a different time range, or go play!'
+              : 'Play a game and claim the #1 spot.'}
+          </p>
         </div>
       );
     }
@@ -204,7 +215,7 @@ const LeaderboardScreen: React.FC<LeaderboardScreenProps> = ({ currentUser }) =>
               <button
                 onClick={() => setViewMode('individual')}
                 className={`px-4 py-2 text-xs font-bold rounded-lg transition-all uppercase
-                  ${viewMode === 'individual' ? 'bg-emerald-500 text-white shadow-md' : 'text-slate-500 hover:text-slate-800 dark:hover:text-slate-300'}`}
+                  ${viewMode === 'individual' ? 'bg-sky-500 text-white shadow-md' : 'text-slate-500 hover:text-slate-800 dark:hover:text-slate-300'}`}
                 type="button"
               >
                 👤 {t('individual') || 'Individual'}
@@ -212,7 +223,7 @@ const LeaderboardScreen: React.FC<LeaderboardScreenProps> = ({ currentUser }) =>
               <button
                 onClick={() => setViewMode('teams')}
                 className={`px-4 py-2 text-xs font-bold rounded-lg transition-all uppercase
-                  ${viewMode === 'teams' ? 'bg-emerald-500 text-white shadow-md' : 'text-slate-500 hover:text-slate-800 dark:hover:text-slate-300'}`}
+                  ${viewMode === 'teams' ? 'bg-sky-500 text-white shadow-md' : 'text-slate-500 hover:text-slate-800 dark:hover:text-slate-300'}`}
                 type="button"
               >
                 🏆 {t('teams') || 'Teams'}
