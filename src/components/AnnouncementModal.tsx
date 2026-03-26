@@ -30,6 +30,7 @@ const AnnouncementModal: React.FC<AnnouncementModalProps> = ({ announcement, onD
     <Modal
       isOpen={announcement !== null}
       onClose={onDismiss}
+      title={announcement?.title ?? ''}
       size="md"
       showCloseButton={false}
       closeOnBackdrop={true}
