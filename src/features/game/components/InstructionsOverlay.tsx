@@ -3,6 +3,7 @@ import { Z_INDEX } from '../../../config/zIndex';
 import { useGameContext } from '../../../context/GameContext';
 import { useTheme } from '../../../context/ThemeContext';
 import { themeClasses } from '../../../utils/themeUtils';
+import Button from '../../../components/ui/Button';
 
 const InstructionsOverlay: FC = () => {
   const { theme, t } = useTheme();
@@ -40,12 +41,9 @@ const InstructionsOverlay: FC = () => {
           <span>{t('instructionsPoint4')}</span>
         </li>
       </ul>
-      <button
-        onClick={handleNext}
-        className="px-10 py-4 bg-emerald-500 hover:bg-emerald-600 text-white rounded-2xl shadow-lg shadow-emerald-500/20 font-bold text-xl transition-all transform hover:scale-105"
-      >
+      <Button variant="primary" onClick={handleNext}>
         {state.username ? t('imReady') : t('next')}
-      </button>
+      </Button>
     </div>
   );
 };
