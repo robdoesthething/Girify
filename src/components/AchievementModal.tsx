@@ -1,5 +1,6 @@
 import { motion } from 'framer-motion';
 import React from 'react';
+import { Z_INDEX } from '../config/zIndex';
 import { useTheme } from '../context/ThemeContext';
 import { themeClasses } from '../utils/themeUtils';
 
@@ -35,7 +36,7 @@ const AchievementModal: React.FC<AchievementModalProps> = ({ achievement, onDism
   }
 
   return (
-    <div className="fixed inset-0 z-40 flex items-center justify-center p-4">
+    <div className={`fixed inset-0 ${Z_INDEX.MODAL} flex items-center justify-center p-4`}>
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}

@@ -1,5 +1,6 @@
 import { motion } from 'framer-motion';
 import React from 'react'; // React import needed for FC
+import { Z_INDEX } from '../../../config/zIndex';
 import { useTheme } from '../../../context/ThemeContext';
 import { themeClasses } from '../../../utils/themeUtils';
 
@@ -61,7 +62,9 @@ const RegisterPanel: React.FC<RegisterPanelProps> = ({
   }
 
   return (
-    <div className="absolute inset-0 z-50 flex items-center justify-center p-6 backdrop-blur-xl pointer-events-auto overflow-hidden overflow-y-auto">
+    <div
+      className={`absolute inset-0 ${Z_INDEX.CRITICAL} flex items-center justify-center p-6 backdrop-blur-xl pointer-events-auto overflow-hidden overflow-y-auto`}
+    >
       <motion.div
         initial={{ scale: 0.9, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}

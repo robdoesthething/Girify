@@ -1,5 +1,6 @@
 import { motion } from 'framer-motion';
 import { useEffect, useState } from 'react';
+import { Z_INDEX } from '../config/zIndex';
 import { useTheme } from '../context/ThemeContext';
 import DistrictSelector from '../features/auth/components/DistrictSelector';
 import SelectedDistrictPreview from '../features/auth/components/SelectedDistrictPreview';
@@ -67,7 +68,9 @@ function DistrictSelectionModal({ username, onComplete, onDismiss }: DistrictSel
   };
 
   return (
-    <div className="fixed inset-0 z-40 flex items-center justify-center p-6 bg-slate-900/80 backdrop-blur-sm">
+    <div
+      className={`fixed inset-0 ${Z_INDEX.MODAL} flex items-center justify-center p-6 bg-slate-900/80 backdrop-blur-sm`}
+    >
       <motion.div
         initial={{ scale: 0.9, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
