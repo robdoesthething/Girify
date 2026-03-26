@@ -6,6 +6,8 @@ import { Z_INDEX } from '../config/zIndex';
 import { useTheme } from '../context/ThemeContext';
 import { themeClasses } from '../utils/themeUtils';
 import Logo from './Logo';
+import Button from './ui/Button';
+import Modal from './ui/Modal';
 
 // Prefetch map for lazy-loaded route chunks
 const prefetchRouteChunk: Record<string, () => void> = {
@@ -208,64 +210,55 @@ backdrop-blur-md border-b ${themeClasses(theme, 'border-slate-600', 'border-slat
           )}
         </AnimatePresence>
 
-        <AnimatePresence>
-          {showLoginModal && (
-            <div className={`fixed inset-0 ${Z_INDEX.MODAL} flex items-center justify-center p-4`}>
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                onClick={() => setShowLoginModal(false)}
-                className="absolute inset-0 bg-black/50 backdrop-blur-sm"
-              />
-              <motion.div
-                initial={{ scale: 0.9, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                exit={{ scale: 0.9, opacity: 0 }}
-                className={`relative z-10 w-full max-w-sm p-6 rounded-2xl shadow-xl text-center
-                        ${themeClasses(theme, 'bg-slate-800 text-white', 'bg-white text-slate-800')}
-                    `}
+        <Modal
+          isOpen={showLoginModal}
+          onClose={() => setShowLoginModal(false)}
+          size="sm"
+          showCloseButton={false}
+        >
+          <div className="text-center">
+            <h3 className="text-xl font-black mb-2">{t('loginRequired') || 'Login Required'}</h3>
+            <p className="mb-6 opacity-70">
+              {t('loginRequiredMessage') ||
+                'Join the Girify community! Create a profile to track your progress, earn badges, and compete on the leaderboard.'}
+            </p>
+            <div className="flex flex-col gap-4">
+              <Button
+                variant="primary"
+                size="lg"
+                fullWidth
+                onClick={() => {
+                  setShowLoginModal(false);
+                  onTriggerLogin('signup');
+                }}
+                type="button"
               >
-                <h3 className="text-xl font-black mb-2">
-                  {t('loginRequired') || 'Login Required'}
-                </h3>
-                <p className="mb-6 opacity-70">
-                  {t('loginRequiredMessage') ||
-                    'Join the Girify community! Create a profile to track your progress, earn badges, and compete on the leaderboard.'}
-                </p>
-                <div className="flex flex-col gap-4">
-                  <button
-                    onClick={() => {
-                      setShowLoginModal(false);
-                      onTriggerLogin('signup');
-                    }}
-                    className="w-full py-3 bg-sky-500 hover:bg-sky-600 text-white rounded-xl font-bold shadow-lg shadow-sky-500/20 active:scale-95 transition-all"
-                    type="button"
-                  >
-                    {t('signUp')}
-                  </button>
-                  <button
-                    onClick={() => {
-                      setShowLoginModal(false);
-                      onTriggerLogin('signin');
-                    }}
-                    className={`w-full py-3 rounded-xl font-bold transition-all ${themeClasses(theme, 'bg-slate-800 border-2 border-slate-700 text-white', 'bg-white border-2 border-slate-200 hover:bg-slate-50 text-slate-900')}`}
-                    type="button"
-                  >
-                    {t('signIn')}
-                  </button>
-                  <button
-                    onClick={() => setShowLoginModal(false)}
-                    className={`w-full py-3 font-medium transition-colors ${themeClasses(theme, 'text-slate-500 hover:text-white', 'text-slate-500 hover:text-slate-800')}`}
-                    type="button"
-                  >
-                    {t('cancel') || 'Cancel'}
-                  </button>
-                </div>
-              </motion.div>
+                {t('signUp')}
+              </Button>
+              <Button
+                variant="outline"
+                size="lg"
+                fullWidth
+                onClick={() => {
+                  setShowLoginModal(false);
+                  onTriggerLogin('signin');
+                }}
+                type="button"
+              >
+                {t('signIn')}
+              </Button>
+              <Button
+                variant="ghost"
+                size="md"
+                fullWidth
+                onClick={() => setShowLoginModal(false)}
+                type="button"
+              >
+                {t('cancel') || 'Cancel'}
+              </Button>
             </div>
-          )}
-        </AnimatePresence>
+          </div>
+        </Modal>
       </>
     );
   }
