@@ -1,5 +1,6 @@
 import { AnimatePresence, motion } from 'framer-motion';
 import React, { ReactNode, useState } from 'react';
+import { Z_INDEX } from '../config/zIndex';
 import { NotificationContext } from '../context/NotificationContext';
 
 interface Notification {
@@ -48,7 +49,7 @@ interface NotificationContainerProps {
 const NotificationContainer: React.FC<NotificationContainerProps> = React.memo(
   ({ notifications, onDismiss }) => {
     return (
-      <div className="fixed top-20 right-4 z-50 space-y-2 pointer-events-none">
+      <div className={`fixed top-20 right-4 ${Z_INDEX.CRITICAL} space-y-2 pointer-events-none`}>
         <AnimatePresence>
           {notifications.map(notification => (
             <motion.div

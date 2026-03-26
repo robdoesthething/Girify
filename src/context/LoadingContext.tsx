@@ -7,6 +7,7 @@ import React, {
   useMemo,
   useState,
 } from 'react';
+import { Z_INDEX } from '../config/zIndex';
 
 interface LoadingState {
   [key: string]: boolean;
@@ -79,7 +80,7 @@ export const useLoading = () => {
 // Global loading indicator (top bar)
 const GlobalLoadingIndicator = React.memo(() => (
   <div
-    className="fixed top-0 left-0 right-0 h-1 bg-blue-500/20 z-50"
+    className={`fixed top-0 left-0 right-0 h-1 bg-blue-500/20 ${Z_INDEX.CRITICAL}`}
     role="progressbar"
     aria-label="Loading content"
   >

@@ -2,6 +2,7 @@ import { motion } from 'framer-motion';
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { STORAGE_KEYS } from '../../../config/constants';
+import { Z_INDEX } from '../../../config/zIndex';
 import { useTheme } from '../../../context/ThemeContext';
 import { getCuriosityByStreets } from '../../../data/curiosities';
 import { calculateStreak } from '../../../utils/stats';
@@ -132,7 +133,7 @@ const SummaryScreen: React.FC<SummaryScreenProps> = ({
 
   return (
     <div
-      className={`absolute inset-0 flex flex-col items-center justify-center p-6 text-center backdrop-blur-md transition-colors duration-500 pointer-events-auto overflow-y-auto font-inter z-40
+      className={`absolute inset-0 flex flex-col items-center justify-center p-6 text-center backdrop-blur-md transition-colors duration-500 pointer-events-auto overflow-y-auto font-inter ${Z_INDEX.MODAL}
             ${themeClasses(theme, 'bg-slate-950/95 text-white', 'bg-slate-50/95 text-slate-800')}`}
     >
       {view === 'curiosity' && (

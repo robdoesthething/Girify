@@ -1,5 +1,6 @@
 import { motion } from 'framer-motion';
 import React from 'react';
+import { Z_INDEX } from '../config/zIndex';
 import { useTheme } from '../context/ThemeContext';
 import { Announcement } from '../utils/social/news';
 import { themeClasses } from '../utils/themeUtils';
@@ -31,7 +32,7 @@ const AnnouncementModal: React.FC<AnnouncementModalProps> = ({ announcement, onD
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+    <div className={`fixed inset-0 ${Z_INDEX.CRITICAL} flex items-center justify-center p-4`}>
       {/* Backdrop */}
       <motion.div
         initial={{ opacity: 0 }}

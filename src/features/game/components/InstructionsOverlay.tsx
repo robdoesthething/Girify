@@ -1,4 +1,5 @@
 import { FC } from 'react';
+import { Z_INDEX } from '../../../config/zIndex';
 import { useGameContext } from '../../../context/GameContext';
 import { useTheme } from '../../../context/ThemeContext';
 import { themeClasses } from '../../../utils/themeUtils';
@@ -18,7 +19,7 @@ const InstructionsOverlay: FC = () => {
 
   return (
     <div
-      className={`absolute inset-0 z-20 flex flex-col items-center justify-center p-6 text-center backdrop-blur-md transition-colors duration-1000 ${themeClasses(theme, 'bg-slate-950/80 text-white', 'bg-slate-50/80 text-slate-900')}`}
+      className={`absolute inset-0 ${Z_INDEX.NAVIGATION} flex flex-col items-center justify-center p-6 text-center backdrop-blur-md transition-colors duration-1000 ${themeClasses(theme, 'bg-slate-950/80 text-white', 'bg-slate-50/80 text-slate-900')}`}
     >
       <h2 className="heading-lg mb-8 text-sky-400">{t('howToPlay')}</h2>
       <ul className="text-left space-y-6 text-xl mb-12 max-w-md mx-auto">

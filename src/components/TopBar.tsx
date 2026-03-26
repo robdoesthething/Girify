@@ -2,6 +2,7 @@ import { AnimatePresence, motion } from 'framer-motion';
 import React, { useCallback, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import { version } from '../../package.json';
+import { Z_INDEX } from '../config/zIndex';
 import { useTheme } from '../context/ThemeContext';
 import { themeClasses } from '../utils/themeUtils';
 import Logo from './Logo';
@@ -71,7 +72,7 @@ const TopBar: React.FC<TopBarProps> = React.memo(
     return (
       <>
         <div
-          className={`fixed top-0 left-0 right-0 h-12 z-20 flex items-center justify-between px-3 md:px-6 transition-colors duration-300
+          className={`fixed top-0 left-0 right-0 h-12 ${Z_INDEX.NAVIGATION} flex items-center justify-between px-3 md:px-6 transition-colors duration-300
                 ${themeClasses(theme, 'bg-slate-700/90 text-white', 'bg-white/90 text-slate-800')}
 backdrop-blur-md border-b ${themeClasses(theme, 'border-slate-600', 'border-slate-200')}
 `}
@@ -113,14 +114,14 @@ backdrop-blur-md border-b ${themeClasses(theme, 'border-slate-600', 'border-slat
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
                 onClick={() => setMenuOpen(false)}
-                className="fixed inset-0 bg-black/60 z-30"
+                className={`fixed inset-0 bg-black/60 ${Z_INDEX.BACKDROP}`}
               />
               <motion.div
                 initial={{ x: '-100%' }}
                 animate={{ x: 0 }}
                 exit={{ x: '-100%' }}
                 transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-                className={`fixed top-0 bottom-0 left-0 w-64 z-40 shadow-2xl flex flex-col
+                className={`fixed top-0 bottom-0 left-0 w-64 ${Z_INDEX.MODAL} shadow-2xl flex flex-col
                                     ${themeClasses(theme, 'bg-neutral-200 text-neutral-900', 'bg-white text-slate-800')}
 `}
               >
@@ -209,7 +210,7 @@ backdrop-blur-md border-b ${themeClasses(theme, 'border-slate-600', 'border-slat
 
         <AnimatePresence>
           {showLoginModal && (
-            <div className="fixed inset-0 z-40 flex items-center justify-center p-4">
+            <div className={`fixed inset-0 ${Z_INDEX.MODAL} flex items-center justify-center p-4`}>
               <motion.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
