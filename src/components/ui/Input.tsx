@@ -52,7 +52,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
     const errorStyles = error ? 'border-red-500 focus:border-red-500 focus:ring-red-500/10' : '';
 
     return (
-      <div className={`${fullWidth ? 'w-full' : ''} ${className} ${containerClassName}`}>
+      <div className={`${fullWidth ? 'w-full' : ''} ${containerClassName}`}>
         {label && (
           <label htmlFor={inputId} className="block text-sm font-bold mb-2 ml-1 opacity-80">
             {label}
@@ -72,7 +72,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
             disabled={disabled}
             aria-invalid={error ? true : undefined}
             aria-describedby={errorId}
-            className={`${baseInputRequest} ${themeStyles} ${errorStyles}`}
+            className={`${baseInputRequest} ${themeStyles} ${errorStyles} ${className}`}
             {...props}
           />
 
