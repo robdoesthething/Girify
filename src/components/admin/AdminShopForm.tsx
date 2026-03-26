@@ -12,7 +12,7 @@ interface AdminShopFormProps {
   onChange: (updates: Partial<ShopItem>) => void;
 }
 
-import FormInput from '../FormInput';
+import Input from '../ui/Input';
 
 // ... existing imports
 
@@ -35,7 +35,7 @@ const AdminShopForm: React.FC<AdminShopFormProps> = ({
         <h3 className="text-2xl font-black mb-6">{isCreating ? 'New Item' : 'Edit Item'}</h3>
         <form onSubmit={onSave} className="space-y-4">
           <div className="grid grid-cols-2 gap-4">
-            <FormInput
+            <Input
               id="shop-item-id"
               label="ID (Unique)"
               value={editingItem.id || ''}
@@ -65,7 +65,7 @@ const AdminShopForm: React.FC<AdminShopFormProps> = ({
             </div>
           </div>
 
-          <FormInput
+          <Input
             id="shop-item-name"
             label="Name"
             value={editingItem.name || ''}
@@ -74,7 +74,7 @@ const AdminShopForm: React.FC<AdminShopFormProps> = ({
           />
 
           <div className="grid grid-cols-2 gap-4">
-            <FormInput
+            <Input
               id="shop-item-cost"
               label="Cost (Giuros)"
               type="number"
@@ -82,7 +82,7 @@ const AdminShopForm: React.FC<AdminShopFormProps> = ({
               onChange={e => onChange({ cost: parseInt(e.target.value, 10) })}
               className="font-mono text-yellow-500 font-bold"
             />
-            <FormInput
+            <Input
               id="shop-item-emoji"
               label="Emoji (Optional)"
               value={editingItem.emoji || ''}
@@ -92,7 +92,7 @@ const AdminShopForm: React.FC<AdminShopFormProps> = ({
             />
           </div>
 
-          <FormInput
+          <Input
             id="shop-item-image"
             label="Image URL (Optional)"
             value={editingItem.image || ''}
@@ -102,7 +102,7 @@ const AdminShopForm: React.FC<AdminShopFormProps> = ({
           />
 
           {editingItem.type === 'frame' && (
-            <FormInput
+            <Input
               label="CSS Class (for Frames)"
               value={editingItem.cssClass || ''}
               onChange={e => onChange({ cssClass: e.target.value })}

@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { getUserProfile, updateUserAsAdmin } from '../../utils/social';
 
 import { supabase } from '../../services/supabase';
-import FormInput from '../FormInput';
+import Input from '../ui/Input';
 
 interface AdminGameMasterProps {
   onNotify: (msg: string, type: 'success' | 'error' | 'info') => void;
@@ -163,7 +163,7 @@ const AdminGameMaster: React.FC<AdminGameMasterProps> = ({ onNotify, confirm }) 
 
       {/* SEARCH */}
       <div className="flex gap-4 p-4 bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700">
-        <FormInput
+        <Input
           value={searchTerm}
           onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchTerm(e.target.value)}
           onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) =>
@@ -249,7 +249,7 @@ const AdminGameMaster: React.FC<AdminGameMasterProps> = ({ onNotify, confirm }) 
               <h3 className="text-lg font-bold mb-4">🎒 Inventory Editor</h3>
 
               <div className="flex gap-2 mb-6">
-                <FormInput
+                <Input
                   placeholder="Item ID (e.g. frame_gold)"
                   value={newItemId}
                   onChange={(e: React.ChangeEvent<HTMLInputElement>) =>

@@ -9,7 +9,7 @@ import React from 'react';
 import { useTheme } from '../../context/ThemeContext';
 import { UserProfile } from '../../types/user';
 import { themeClasses } from '../../utils/themeUtils';
-import FormInput from '../FormInput';
+import Input from '../ui/Input';
 
 interface EditUserModalProps {
   user: UserProfile;
@@ -39,7 +39,7 @@ const EditUserModal: React.FC<EditUserModalProps> = ({ user, setUser, onSave }) 
         <h3 className="text-2xl font-black mb-6">Edit User</h3>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="grid grid-cols-2 gap-4">
-            <FormInput
+            <Input
               id="edit-username"
               label="Username"
               value={user.username}
@@ -48,7 +48,7 @@ const EditUserModal: React.FC<EditUserModalProps> = ({ user, setUser, onSave }) 
               }
               className="font-bold"
             />
-            <FormInput
+            <Input
               id="edit-email"
               label="Email"
               value={user.email || ''}
@@ -57,7 +57,7 @@ const EditUserModal: React.FC<EditUserModalProps> = ({ user, setUser, onSave }) 
             />
           </div>
 
-          <FormInput
+          <Input
             id="edit-giuros"
             label="Giuros Balance"
             type="number"
