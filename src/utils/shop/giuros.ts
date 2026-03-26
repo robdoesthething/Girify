@@ -4,6 +4,7 @@ import { getPayoutConfig } from '../../services/db/config';
 import { supabase } from '../../services/supabase';
 import { assertCurrentUser } from '../auth';
 import { normalizeUsername } from '../format';
+import { logger } from '../logger';
 import { publishCosmeticPurchase } from '../social/publishActivity';
 
 // Default Constants
@@ -70,8 +71,7 @@ export const addGiuros = async (
     }
 
     const newBalance = result.new_balance ?? 0;
-    // eslint-disable-next-line no-console
-    console.log(
+    logger.debug(
       `[Giuros] +${amount} for ${normalizedUsername} (${reason}). New balance: ${newBalance}`
     );
     return { success: true, newBalance };
@@ -130,8 +130,7 @@ export const spendGiuros = async (
 
     const newBalance = result.new_balance ?? 0;
 
-    // eslint-disable-next-line no-console
-    console.log(
+    logger.debug(
       `[Giuros] -${cost} for ${normalizedUsername} (purchased ${itemId}). New balance: ${newBalance}`
     );
 
@@ -183,8 +182,7 @@ export const claimDailyLoginBonus = async (
 
     const result = data as { claimed: boolean; bonus: number; new_balance: number };
     if (result.claimed) {
-      // eslint-disable-next-line no-console
-      console.log(`[Giuros] Daily login bonus +${dailyBonus} for ${normalizedUsername}`);
+      logger.debug(`[Giuros] Daily login bonus +${dailyBonus} for ${normalizedUsername}`);
     }
 
     return {

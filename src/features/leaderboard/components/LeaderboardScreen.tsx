@@ -14,6 +14,7 @@ import IndividualScoreRow from './IndividualScoreRow';
 import TeamScoreRow from './TeamScoreRow';
 
 const LEADERBOARD_TIMEOUT_MS = 10000;
+const LEADERBOARD_CACHE_TTL_MS = 15 * 60 * 1000; // 15 minutes
 
 interface LeaderboardScreenProps {
   currentUser?: string;
@@ -28,14 +29,14 @@ const LeaderboardScreen: React.FC<LeaderboardScreenProps> = ({ currentUser }) =>
   const [period, setPeriod] = useState<'all' | 'monthly' | 'weekly' | 'daily'>('all');
   const [viewMode, setViewMode] = useState<'individual' | 'teams'>('individual');
   const [error, setError] = useState<string | null>(null);
-  const cacheRef = useRef<Map<string, { scores: ScoreEntry[]; teamScores: TeamScoreEntry[] }>>(
-    new Map()
-  );
+  const cacheRef = useRef<
+    Map<string, { scores: ScoreEntry[]; teamScores: TeamScoreEntry[]; fetchedAt: number }>
+  >(new Map());
 
   const loadScores = useCallback(async () => {
     const cacheKey = `${viewMode}-${period}`;
     const cached = cacheRef.current.get(cacheKey);
-    if (cached) {
+    if (cached && Date.now() - cached.fetchedAt < LEADERBOARD_CACHE_TTL_MS) {
       setScores(cached.scores);
       setTeamScores(cached.teamScores);
       setLoading(false);
@@ -60,18 +61,22 @@ const LeaderboardScreen: React.FC<LeaderboardScreenProps> = ({ currentUser }) =>
         const data = (await Promise.race([dataPromise, timeoutPromise])) as TeamScoreEntry[];
         const result = data || [];
         setTeamScores(result);
-        cacheRef.current.set(cacheKey, { scores: [], teamScores: result });
+        cacheRef.current.set(cacheKey, { scores: [], teamScores: result, fetchedAt: Date.now() });
       } else {
         const dataPromise = getLeaderboard(period);
         const data = (await Promise.race([dataPromise, timeoutPromise])) as ScoreEntry[] | null;
 
         if (data === null) {
           setScores([]);
-          cacheRef.current.set(cacheKey, { scores: [], teamScores: [] });
+          cacheRef.current.set(cacheKey, { scores: [], teamScores: [], fetchedAt: Date.now() });
         } else {
           const filtered = data.filter(s => s.username && s.username !== 'UNKNOWN');
           setScores(filtered);
-          cacheRef.current.set(cacheKey, { scores: filtered, teamScores: [] });
+          cacheRef.current.set(cacheKey, {
+            scores: filtered,
+            teamScores: [],
+            fetchedAt: Date.now(),
+          });
         }
       }
     } catch (err: unknown) {
