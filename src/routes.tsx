@@ -38,10 +38,18 @@ export const DistrictSelectionModal = lazy(() => import('./components/DistrictSe
 /**
  * PageLoader Component
  *
- * Loading fallback for lazy-loaded routes.
+ * Loading fallback for the auth init phase and lazy-loaded routes.
  */
 export const PageLoader = () => (
-  <div className="flex items-center justify-center h-full">
-    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-sky-500" />
+  <div className="fixed inset-0 flex flex-col items-center justify-center bg-slate-950 gap-6">
+    <img
+      src="/images/guiri_invasion.png"
+      alt=""
+      aria-hidden="true"
+      className="w-20 h-20 rounded-2xl object-cover opacity-80"
+    />
+    <div className="w-40 h-1 rounded-full bg-slate-800 overflow-hidden">
+      <div className="h-full bg-sky-500 rounded-full animate-loading-bar" />
+    </div>
   </div>
 );

@@ -49,6 +49,7 @@ const translations: Translations = {
     createAccount: 'Create Account',
     continueWithGoogle: 'Continue with Google',
     loginRequired: 'Login Required',
+    loginToShop: 'Please sign in to browse and purchase items in the shop.',
     loginRequiredMessage:
       'Join the Girify community! Create a profile to track your progress, earn badges, and collect Giuros.',
     displayName: 'Display Name',
@@ -209,7 +210,6 @@ const translations: Translations = {
     giurosExplainerText:
       'Earn Giuros by playing daily, maintaining streaks, and completing challenges. Spend them on cosmetics!',
     goToShop: 'Go to Shop',
-    loginToShop: 'Log in to access the shop and spend your Giuros.',
 
     // Achievements
     achievements: 'Achievements',
