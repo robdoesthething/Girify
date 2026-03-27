@@ -33,7 +33,7 @@ import ZoomHandler from './map/ZoomHandler';
 const createEmojiIcon = (emoji: string) => {
   return L.divIcon({
     className: 'custom-emoji-icon',
-    html: `<div style="font-size: 24px; text-shadow: 0 2px 4px rgba(0,0,0,0.3);">${emoji}</div>`,
+    html: `<div style="font-size: 24px; text-shadow: 0 2px 4px rgba(0,0,0,0.3); width: 44px; height: 44px; display: flex; align-items: center; justify-content: center;">${emoji}</div>`,
     iconSize: ICON_SIZE,
     iconAnchor: ICON_ANCHOR,
   });

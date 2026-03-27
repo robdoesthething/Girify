@@ -54,7 +54,7 @@ const PublicProfileScreen: React.FC<PublicProfileScreenProps> = ({ currentUser }
       <TopBar onOpenPage={topBarNav.onOpenPage} onTriggerLogin={topBarNav.onTriggerLogin} />
 
       <div className="flex-1 overflow-y-auto w-full px-4 py-8 pt-16">
-        <div className="max-w-2xl mx-auto">
+        <div className="max-w-2xl lg:max-w-5xl mx-auto">
           <div className="flex items-center justify-between mb-6">
             <button
               onClick={() => navigate(-1)}

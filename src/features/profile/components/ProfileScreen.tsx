@@ -103,7 +103,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ username }) => {
       <TopBar onOpenPage={topBarNav.onOpenPage} onTriggerLogin={topBarNav.onTriggerLogin} />
 
       <div className="flex-1 w-full px-4 py-8 pt-20 overflow-x-hidden">
-        <div className="max-w-2xl mx-auto w-full">
+        <div className="max-w-2xl lg:max-w-5xl mx-auto w-full">
           <PageHeader
             title={`👤 ${t('profile') || 'Profile'}`}
             rightElement={

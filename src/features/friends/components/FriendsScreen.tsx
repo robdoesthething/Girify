@@ -82,7 +82,7 @@ const FriendsScreen: React.FC<FriendsScreenProps> = ({ username }) => {
       <TopBar onOpenPage={topBarNav.onOpenPage} onTriggerLogin={topBarNav.onTriggerLogin} />
 
       <div className="flex-1 w-full px-4 py-8 pt-20 overflow-x-hidden overflow-y-auto">
-        <div className="max-w-2xl mx-auto w-full">
+        <div className="max-w-2xl lg:max-w-5xl mx-auto w-full">
           <PageHeader title={`👥 ${t('friends') || 'Friends'}`} />
 
           <div className="flex mb-6 border-b border-slate-200 dark:border-slate-800 shrink-0">
