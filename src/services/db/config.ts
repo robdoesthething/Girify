@@ -1,6 +1,5 @@
 /**
  * Configuration Service (Supabase)
- * Replaces Firebase configService.ts and adminConfig.ts
  *
  * Fetches and caches app configuration from Supabase.
  * Allows dynamic configuration of payouts and game settings without code changes.

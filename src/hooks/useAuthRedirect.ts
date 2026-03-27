@@ -123,8 +123,7 @@ export function useAuthRedirect({
   }, [hasProcessedRedirect, handleRegister]);
 
   // Reset the district check whenever the user signs in, so it re-runs even
-  // if the username string hasn't changed (e.g. old Firebase users whose
-  // localStorage username matches their DB username without the @ prefix).
+  // if the username string hasn't changed.
   useEffect(() => {
     const {
       data: { subscription },
@@ -138,8 +137,6 @@ export function useAuthRedirect({
   }, []);
 
   // Check for missing district — only for authenticated users.
-  // Legacy users (old Firebase session in localStorage) have no Supabase session
-  // and cannot complete the update, so skip the modal until they sign in.
   useEffect(() => {
     const checkDistrict = async () => {
       if (districtFlowActive.current) {

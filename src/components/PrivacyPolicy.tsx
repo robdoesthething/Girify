@@ -45,8 +45,8 @@ const PrivacyPolicy: React.FC = () => {
           <section>
             <h2 className="text-2xl font-bold mb-3 font-inter">3. Data Security</h2>
             <p className="opacity-80 font-inter">
-              We use Firebase (by Google) to securely store your data. We do not sell your personal
-              data to third parties.
+              We use Supabase to securely store your data. We do not sell your personal data to
+              third parties.
             </p>
           </section>
 

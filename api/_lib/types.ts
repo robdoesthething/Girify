@@ -13,7 +13,7 @@ export interface AdminPromoteResponse {
   error?: string;
 }
 
-export interface FirebaseUser {
+export interface AuthUser {
   uid: string;
   email?: string;
   displayName?: string;

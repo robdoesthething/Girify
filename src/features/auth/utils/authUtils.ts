@@ -74,7 +74,7 @@ export const generateHandle = (baseName: string): string => {
 export const getRandomAvatarId = (): number => Math.floor(Math.random() * DEFAULT_AVATAR_COUNT) + 1;
 
 /**
- * Map Firebase auth error codes to user-friendly messages
+ * Map auth error codes to user-friendly messages
  */
 export const getAuthErrorMessage = (code: string, message?: string): string => {
   switch (code) {

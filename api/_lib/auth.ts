@@ -4,7 +4,7 @@
 
 import { createHmac } from 'crypto';
 import { BEARER_PREFIX, BEARER_PREFIX_LENGTH } from './constants';
-import type { FirebaseUser } from './types';
+import type { AuthUser } from './types';
 
 export interface AuthExtractionResult {
   token?: string;
@@ -43,7 +43,7 @@ function base64urlDecode(str: string): string {
  *
  * Performs HS256 JWT verification using SUPABASE_JWT_SECRET — no external dependency needed.
  */
-export async function verifySupabaseToken(token: string): Promise<FirebaseUser> {
+export async function verifySupabaseToken(token: string): Promise<AuthUser> {
   const jwtSecret = process.env.SUPABASE_JWT_SECRET;
   if (!jwtSecret) {
     throw new Error('[Auth] SUPABASE_JWT_SECRET environment variable not set');
@@ -93,8 +93,3 @@ export async function verifySupabaseToken(token: string): Promise<FirebaseUser> 
     throw new Error('Invalid or expired authentication token');
   }
 }
-
-/**
- * @deprecated Use verifySupabaseToken instead. Kept as alias for backwards compatibility.
- */
-export const verifyFirebaseToken = verifySupabaseToken;
