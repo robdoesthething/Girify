@@ -102,7 +102,7 @@ export const spendGiuros = async (
   cost: number,
   itemId: string
 ): Promise<{ success: boolean; error?: string; newBalance?: number }> => {
-  if (!username || cost <= 0 || !itemId) {
+  if (!username || cost < 0 || !itemId) {
     return { success: false, error: 'Invalid parameters' };
   }
   const normalizedUsername = normalizeUsername(username);

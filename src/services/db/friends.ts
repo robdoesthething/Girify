@@ -90,11 +90,14 @@ export async function getSentFriendRequests(username: string): Promise<FriendReq
 }
 
 export async function createFriendRequest(fromUser: string, toUser: string): Promise<boolean> {
-  const { error } = await supabase.from('friend_requests').insert({
-    from_user: fromUser.toLowerCase(),
-    to_user: toUser.toLowerCase(),
-    status: 'pending',
-  });
+  const { error } = await supabase.from('friend_requests').upsert(
+    {
+      from_user: fromUser.toLowerCase(),
+      to_user: toUser.toLowerCase(),
+      status: 'pending',
+    },
+    { onConflict: 'from_user,to_user', ignoreDuplicates: true }
+  );
 
   if (error) {
     logger.error('createFriendRequest error:', error.message);
