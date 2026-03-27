@@ -106,6 +106,7 @@ describe('useGamePersistence Integration Tests', () => {
     ],
     currentQuestionIndex: 0,
     selectedAnswer: null,
+    selectedStreet: null,
     feedback: 'idle' as const,
     isInputLocked: false,
     options: [],
