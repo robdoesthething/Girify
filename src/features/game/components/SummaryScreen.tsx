@@ -1,18 +1,12 @@
 import { motion } from 'framer-motion';
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { STORAGE_KEYS } from '../../../config/constants';
-import { Z_INDEX } from '../../../config/zIndex';
-import { useTheme } from '../../../context/ThemeContext';
+import { STORAGE_KEYS, TIME, UI } from '../../../config/constants';
 import { getCuriosityByStreets } from '../../../data/curiosities';
-import { calculateStreak } from '../../../utils/stats';
-import { storage } from '../../../utils/storage';
-import { themeClasses } from '../../../utils/themeUtils';
-import { fetchWikiImage } from '../../../utils/wiki';
-
-import { TIME, UI } from '../../../config/constants';
 import { QuizResult, Street } from '../../../types/game';
 import { GameHistory } from '../../../types/user';
+import { storage } from '../../../utils/storage';
+import { fetchWikiImage } from '../../../utils/wiki';
 
 interface Curiosity {
   title: string;
@@ -28,7 +22,7 @@ interface SummaryScreenProps {
   realName?: string;
   streak?: number;
   onRestart: () => void;
-  onBackToMenu: () => void;
+  onBackToMenu?: () => void;
   quizResults: QuizResult[];
   quizStreets: Street[];
   t: (key: string) => string;
@@ -41,20 +35,20 @@ const SummaryScreen: React.FC<SummaryScreenProps> = ({
   username,
   streak,
   onRestart,
-  onBackToMenu,
   quizStreets,
   t,
 }) => {
   const navigate = useNavigate();
-  const { language } = useTheme();
   const [view, setView] = useState<'curiosity' | 'actions'>('curiosity');
   const [shareStatus, setShareStatus] = useState<string | null>(null);
 
-  // Max score is 100 per question (User request: max 1000 total)
   const maxPossibleScore = total * 100;
   const curiosity = useMemo<Curiosity>(
-    () => getCuriosityByStreets(quizStreets, undefined, language) as Curiosity,
-    [quizStreets, language]
+    () =>
+      getCuriosityByStreets(
+        quizStreets as unknown as { name: string; [key: string]: unknown }[]
+      ) as Curiosity,
+    [quizStreets]
   );
   const [displayImage, setDisplayImage] = useState(curiosity.image);
 
@@ -62,15 +56,40 @@ const SummaryScreen: React.FC<SummaryScreenProps> = ({
     if (streak && streak > 0) {
       return streak;
     }
-
     try {
-      const history = storage.get<GameHistory[]>(STORAGE_KEYS.HISTORY, []);
-      // Map local history to formatting expected by calculateStreak (number date)
-      const formattedHistory = history.map(h => ({
-        ...h,
-        date: typeof h.date === 'string' ? Number(h.date) : h.date,
-      }));
-      return Math.max(calculateStreak(formattedHistory), 1);
+      const history = storage.get(STORAGE_KEYS.HISTORY, []);
+      if (history.length === 0) {
+        return 1;
+      }
+
+      const uniqueDates = [...new Set(history.map((h: GameHistory) => h.date))].sort().reverse();
+      if (uniqueDates.length === 0) {
+        return 1;
+      }
+
+      const now = new Date();
+      const today = (now.toISOString().split('T')[0] ?? '').replace(/-/g, '');
+      const yesterdayDate = new Date(now);
+      yesterdayDate.setDate(yesterdayDate.getDate() - 1);
+      const yesterday = (yesterdayDate.toISOString().split('T')[0] ?? '').replace(/-/g, '');
+
+      if (uniqueDates[0] !== today && uniqueDates[0] !== yesterday) {
+        return 1;
+      }
+
+      let currentStreak = 0;
+      const expectedDate = new Date(now);
+
+      for (const dateStr of uniqueDates) {
+        const expected = (expectedDate.toISOString().split('T')[0] ?? '').replace(/-/g, '');
+        if (dateStr === expected) {
+          currentStreak++;
+          expectedDate.setDate(expectedDate.getDate() - 1);
+        } else {
+          break;
+        }
+      }
+      return Math.max(currentStreak, 1);
     } catch {
       return 1;
     }
@@ -80,15 +99,15 @@ const SummaryScreen: React.FC<SummaryScreenProps> = ({
     const ratio = score / maxPossibleScore;
 
     if (ratio >= UI.PERFORMANCE_THRESHOLDS.EXCELLENT) {
-      return t('greetingExcellent') || '🏆 Unstoppable! The streets know your name!';
+      return '🏆 Unstoppable! The streets know your name!';
     }
     if (ratio >= UI.PERFORMANCE_THRESHOLDS.GOOD) {
-      return t('greetingGood') || '🔥 Great job! You really know this city!';
+      return '🔥 Great job! You really know this city!';
     }
     if (ratio >= UI.PERFORMANCE_THRESHOLDS.FAIR) {
-      return t('greetingFair') || '👍 Not bad! Keep exploring!';
+      return '👍 Not bad! Keep exploring!';
     }
-    return t('greetingDefault') || '🗺️ Keep wandering! Every street has a story.';
+    return '🗺️ Keep wandering! Every street has a story.';
   };
 
   useEffect(() => {
@@ -123,18 +142,18 @@ const SummaryScreen: React.FC<SummaryScreenProps> = ({
         });
       } else {
         await navigator.clipboard.writeText(shareUrl);
-        setShareStatus(t('copied') || 'Copied!');
+        setShareStatus('Copied!');
         setTimeout(() => setShareStatus(null), TIME.SUMMARY_ANIMATION_DELAY);
       }
-    } catch {
-      // Share failed silently
+    } catch (e) {
+      console.error('Share failed:', e);
     }
   };
 
   return (
     <div
-      className={`absolute inset-0 flex flex-col items-center justify-center p-6 text-center backdrop-blur-md transition-colors duration-500 pointer-events-auto overflow-y-auto font-inter ${Z_INDEX.MODAL}
-            ${themeClasses(theme, 'bg-slate-950/95 text-white', 'bg-slate-50/95 text-slate-800')}`}
+      className={`absolute inset-0 flex flex-col items-center justify-center p-6 text-center backdrop-blur-md transition-colors duration-500 pointer-events-auto overflow-y-auto font-inter z-[5000]
+            ${theme === 'dark' ? 'bg-slate-950/95 text-white' : 'bg-slate-50/95 text-slate-800'}`}
     >
       {view === 'curiosity' && (
         <motion.div
@@ -153,7 +172,7 @@ const SummaryScreen: React.FC<SummaryScreenProps> = ({
             <div className="overflow-hidden h-48 md:h-64 w-full relative">
               <img
                 src={displayImage}
-                alt={curiosity.title || 'Barcelona curiosity'}
+                alt="Barcelona"
                 className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-slate-900/90 via-transparent to-transparent" />
@@ -162,7 +181,6 @@ const SummaryScreen: React.FC<SummaryScreenProps> = ({
                   onClick={handleShare}
                   className="p-2.5 rounded-full bg-sky-500 hover:bg-sky-600 transition-all active:scale-95 shadow-lg text-white"
                   title="Share this curiosity"
-                  aria-label="Share this curiosity"
                 >
                   🎁
                 </button>
@@ -179,10 +197,10 @@ const SummaryScreen: React.FC<SummaryScreenProps> = ({
             </div>
           </div>
 
-          <div className="flex gap-4 w-full">
+          <div className="flex gap-3 w-full">
             <button
               onClick={handleShare}
-              className={`flex-1 py-4 rounded-2xl font-bold text-sm transition-all ${themeClasses(theme, 'bg-white/5 hover:bg-white/10 border border-white/10 text-white', 'bg-slate-200 hover:bg-slate-300 border border-slate-300 text-slate-800')}`}
+              className="flex-1 py-4 bg-white/5 hover:bg-white/10 border border-white/10 text-white rounded-2xl font-bold text-sm transition-all"
             >
               {shareStatus || `🎁 ${t('share') || 'Share & Earn'}`}
             </button>
@@ -213,8 +231,8 @@ const SummaryScreen: React.FC<SummaryScreenProps> = ({
 
           <div className="grid grid-cols-2 gap-4 w-full mb-8">
             <div className="glass-panel p-4 flex flex-col items-center justify-center col-span-1 asp-square">
-              <span className="text-xs opacity-70 uppercase tracking-wider font-bold mb-1">
-                {t('yourScore') || 'Score'}
+              <span className="text-xs opacity-50 uppercase tracking-wider font-bold mb-1">
+                Score
               </span>
               <div className="flex flex-col items-center">
                 <span className="text-4xl md:text-5xl font-black text-emerald-400 leading-none">
@@ -238,7 +256,7 @@ const SummaryScreen: React.FC<SummaryScreenProps> = ({
 
           <button
             onClick={handleShare}
-            className="w-full py-5 bg-gradient-to-r from-emerald-500 to-sky-500 hover:from-emerald-400 hover:to-sky-400 text-white rounded-2xl shadow-2xl font-black text-lg transition-all transform hover:scale-[1.02] mb-4 flex items-center justify-center gap-4 group"
+            className="w-full py-5 bg-gradient-to-r from-emerald-500 to-sky-500 hover:from-emerald-400 hover:to-sky-400 text-white rounded-2xl shadow-2xl font-black text-lg transition-all transform hover:scale-[1.02] mb-4 flex items-center justify-center gap-3 group"
           >
             <span className="text-2xl group-hover:rotate-12 transition-transform">🎁</span>
             <div className="flex flex-col items-start leading-none">
@@ -252,17 +270,9 @@ const SummaryScreen: React.FC<SummaryScreenProps> = ({
           <button
             onClick={onRestart}
             className="w-full py-4 rounded-xl font-bold text-lg uppercase tracking-wider transition-all
-               bg-slate-800 text-slate-300 hover:bg-slate-700 hover:text-white border border-slate-700 hover:border-slate-500 glass-button mb-3"
+               bg-slate-800 text-slate-300 hover:bg-slate-700 hover:text-white border border-slate-700 hover:border-slate-500 glass-button mb-6"
           >
             🔄 {t('playAgain') || 'Play Again'}
-          </button>
-
-          <button
-            onClick={onBackToMenu}
-            className="w-full py-4 rounded-xl font-bold text-sm uppercase tracking-wider transition-all
-               bg-slate-800/60 text-slate-300 hover:bg-slate-700 hover:text-white border border-slate-700 hover:border-slate-500 mb-6"
-          >
-            🏠 {t('backToMenu') || 'Back to Menu'}
           </button>
 
           <button

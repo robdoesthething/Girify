@@ -27,8 +27,8 @@ export function calculateTimeScore(
 
 /**
  * Get score tier label
- * @param points - Points earned
- * @returns Tier label (Perfect, Excellent, etc)
+ * @param {number} points - Points earned
+ * @returns {string} - Tier label
  */
 export function getScoreTier(points: number): string {
   if (points >= GAME.SCORING_TIERS.PERFECT) {
@@ -56,11 +56,6 @@ export function getScoreTier(points: number): string {
  */
 // ...
 
-/**
- * Get stars count for accuracy percentage
- * @param percentage - The accuracy percentage
- * @returns Number of stars (0-3)
- */
 export const getAccuracyStars = (percentage: number): number => {
   if (percentage >= GAME.SCORING_TIERS.PERFECT) {
     return GAME.MAX_HINTS;
@@ -76,8 +71,8 @@ export const getAccuracyStars = (percentage: number): number => {
 
 /**
  * Get score tier color
- * @param points - Points earned
- * @returns Tailwind color class string
+ * @param {number} points - Points earned
+ * @returns {string} - Tailwind color class
  */
 export function getScoreTierColor(points: number): string {
   if (points >= GAME.SCORING_TIERS.PERFECT) {

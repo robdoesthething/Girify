@@ -20,8 +20,6 @@ export interface UserProfile {
   maxStreak?: number;
   avatarId?: number;
   notificationSettings?: NotificationSettings;
-  banned?: boolean;
-  role?: 'admin' | 'user';
 }
 
 export interface NotificationSettings {

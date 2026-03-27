@@ -1,10 +1,10 @@
-import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import React, { createContext, useContext, useEffect, useState } from 'react';
 import { UI } from '../config/constants';
 import { getTranslation, LANGUAGES } from '../i18n/translations';
 
 interface ThemeContextType {
   theme: 'light' | 'dark';
-  themeMode: string;
+  themeMode: 'light' | 'dark' | 'auto';
   changeTheme: (mode: 'light' | 'dark' | 'auto') => void;
   toggleTheme: () => void;
   deviceMode: 'mobile' | 'tablet' | 'desktop';
@@ -87,8 +87,8 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
     if (saved) {
       return saved;
     }
-    const browserLang = navigator.language?.split('-')[0];
-    if (browserLang && ['es', 'ca'].includes(browserLang)) {
+    const browserLang = navigator.language?.split('-')[0] ?? '';
+    if (['es', 'ca'].includes(browserLang)) {
       return browserLang;
     }
     return 'en';
@@ -126,52 +126,42 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  const changeTheme = useCallback((mode: 'light' | 'dark' | 'auto') => {
+  const changeTheme = (mode: 'light' | 'dark' | 'auto') => {
     setThemeMode(mode);
-  }, []);
+  };
 
-  const toggleTheme = useCallback(() => {
+  const toggleTheme = () => {
     setThemeMode(prev => (prev === 'light' ? 'dark' : 'light'));
-  }, []);
+  };
 
-  const changeLanguage = useCallback((lang: string) => {
+  const changeLanguage = (lang: string) => {
     setLanguage(lang);
     localStorage.setItem('girify_language', lang);
-  }, []);
+  };
 
-  const t = useCallback((key: string) => getTranslation(language, key), [language]);
+  const t = (key: string) => getTranslation(language, key);
 
   useEffect(() => {
     document.documentElement.setAttribute('class', theme);
   }, [theme]);
 
-  const value = useMemo(
-    () => ({
-      theme,
-      themeMode,
-      changeTheme,
-      toggleTheme,
-      deviceMode,
-      zoom,
-      setZoom,
-      language,
-      changeLanguage,
-      languages: LANGUAGES,
-      t,
-    }),
-    [
-      theme,
-      themeMode,
-      changeTheme,
-      toggleTheme,
-      deviceMode,
-      zoom,
-      setZoom,
-      language,
-      changeLanguage,
-      t,
-    ]
+  return (
+    <ThemeContext.Provider
+      value={{
+        theme,
+        themeMode,
+        changeTheme,
+        toggleTheme,
+        deviceMode,
+        zoom,
+        setZoom,
+        language,
+        changeLanguage,
+        languages: LANGUAGES,
+        t,
+      }}
+    >
+      {children}
+    </ThemeContext.Provider>
   );
-
-  return <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>;
 };

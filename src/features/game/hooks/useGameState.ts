@@ -49,7 +49,7 @@ export const useGameState = (
   validStreets: Street[],
   getHintStreets: (street: Street) => Street[]
 ): UseGameStateResult => {
-  const [state, dispatch] = useReducer(gameReducer, initialState) as [
+  const [state, dispatch] = useReducer(gameReducer, initialState) as unknown as [
     GameStateObject,
     Dispatch<GameAction>,
   ];
