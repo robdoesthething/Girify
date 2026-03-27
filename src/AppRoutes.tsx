@@ -1,6 +1,6 @@
 import { AnimatePresence } from 'framer-motion';
 import React, { Suspense } from 'react';
-import { Route, Routes } from 'react-router-dom';
+import { Navigate, Route, Routes } from 'react-router-dom';
 import TopBar from './components/TopBar';
 import { useAppInitialization } from './hooks/useAppInitialization';
 import { themeClasses } from './utils/themeUtils';
@@ -118,6 +118,10 @@ const AppRoutes: React.FC = () => {
                   <Route path="/fetch-streets" element={<StreetsFetcher />} />
                 )}
               </Route>
+
+              {/* Auth routes redirect to home with modal trigger */}
+              <Route path="/login" element={<Navigate to="/?auth=login" replace />} />
+              <Route path="/signup" element={<Navigate to="/?auth=signup" replace />} />
             </Routes>
           </AnimatePresence>
         </Suspense>

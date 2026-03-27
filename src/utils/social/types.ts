@@ -17,7 +17,7 @@ export interface UserProfile {
   email?: string | null;
   realName?: string;
   avatarId?: number;
-  joinedAt?: string;
+  joinedAt?: Date | string;
   createdAt?: string;
   updatedAt?: string;
   friendCount?: number;

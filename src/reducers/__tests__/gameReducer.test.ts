@@ -7,9 +7,6 @@ describe('gameReducer', () => {
     id: 's1',
     name: 'Test Street',
     geometry: [[[0, 0]]],
-    district: 'Test District',
-    osmid: '1',
-    length: 100,
   };
   const mockOptions = [
     mockStreet,
@@ -17,9 +14,6 @@ describe('gameReducer', () => {
       id: 's2',
       name: 'Other Street',
       geometry: [[[0, 0]]],
-      district: 'Test District',
-      osmid: '2',
-      length: 100,
     },
   ];
 

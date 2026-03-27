@@ -41,7 +41,7 @@ function base64urlDecode(str: string): string {
  * Verify a Supabase JWT using the SUPABASE_JWT_SECRET.
  * Returns the decoded user info (uid from `sub` claim, email).
  *
- * This replaces Firebase Admin SDK verification — no external dependency needed.
+ * Performs HS256 JWT verification using SUPABASE_JWT_SECRET — no external dependency needed.
  */
 export async function verifySupabaseToken(token: string): Promise<FirebaseUser> {
   const jwtSecret = process.env.SUPABASE_JWT_SECRET;

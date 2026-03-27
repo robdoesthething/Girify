@@ -66,24 +66,28 @@
       "id": "frame_gold",
       "name": "Golden Frame",
       "cost": 100,
+      "description": "Luxurious gold ring for champions",
       "cssClass": "ring-4 ring-yellow-500 shadow-lg shadow-yellow-500/50"
     },
     {
       "id": "frame_silver",
       "name": "Silver Frame",
       "cost": 50,
+      "description": "Classic silver finish, understated elegance",
       "cssClass": "ring-4 ring-slate-400 shadow-md shadow-slate-400/50"
     },
     {
       "id": "frame_bronze",
       "name": "Bronze Frame",
       "cost": 25,
+      "description": "Solid bronze, a great start",
       "cssClass": "ring-4 ring-orange-700 shadow-sm shadow-orange-700/50"
     },
     {
       "id": "frame_neon",
       "name": "Neon Frame",
       "cost": 150,
+      "description": "Glowing cyan ring that pulses",
       "cssClass": "ring-4 ring-cyan-400 shadow-lg shadow-cyan-400/50 animate-pulse"
     }
   ],

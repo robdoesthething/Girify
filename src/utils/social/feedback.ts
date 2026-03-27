@@ -81,9 +81,7 @@ export const approveFeedback = async (
       throw new Error('Feedback not found');
     }
 
-    const { awardGiuros } = await import('../shop/giuros');
-    await awardGiuros(feedback.username, giurosAmount);
-
+    // Mark approved first — if Giuros award fails the feedback is at least not re-approvable
     const { error: updateError } = await supabase
       .from('feedback')
       .update({
@@ -96,6 +94,9 @@ export const approveFeedback = async (
     if (updateError) {
       throw new Error(updateError.message);
     }
+
+    const { awardGiuros } = await import('../shop/giuros');
+    await awardGiuros(feedback.username, giurosAmount);
 
     return { success: true, username: feedback.username, reward: giurosAmount };
   } catch (e) {

@@ -7,7 +7,7 @@
 import { motion } from 'framer-motion';
 import React from 'react';
 import { useTheme } from '../../context/ThemeContext';
-import { UserProfile } from '../../types/user';
+import { UserProfile } from '../../utils/social';
 import { themeClasses } from '../../utils/themeUtils';
 import Input from '../ui/Input';
 
@@ -43,10 +43,8 @@ const EditUserModal: React.FC<EditUserModalProps> = ({ user, setUser, onSave }) 
               id="edit-username"
               label="Username"
               value={user.username}
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                setUser({ ...user, username: e.target.value.toLowerCase() })
-              }
-              className="font-bold"
+              disabled
+              className="font-bold opacity-50 cursor-not-allowed"
             />
             <Input
               id="edit-email"

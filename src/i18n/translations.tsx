@@ -49,6 +49,7 @@ const translations: Translations = {
     createAccount: 'Create Account',
     continueWithGoogle: 'Continue with Google',
     loginRequired: 'Login Required',
+    loginToShop: 'Please sign in to browse and purchase items in the shop.',
     loginRequiredMessage:
       'Join the Girify community! Create a profile to track your progress, earn badges, and collect Giuros.',
     displayName: 'Display Name',
@@ -500,6 +501,7 @@ const translations: Translations = {
     giurosExplainerText:
       'Gana Giuros jugando a diario, manteniendo rachas y completando retos. ¡Gástalos en cosméticos!',
     goToShop: 'Ir a la tienda',
+    loginToShop: 'Inicia sesión para acceder a la tienda y gastar tus Giuros.',
 
     // Achievements
     achievements: 'Logros',
@@ -770,6 +772,7 @@ const translations: Translations = {
     giurosExplainerText:
       "Guanya Giuros jugant cada dia, mantenint ratxes i completant reptes. Gasta'ls en cosmètics!",
     goToShop: 'Anar a la botiga',
+    loginToShop: 'Inicia sessió per accedir a la botiga i gastar els teus Giuros.',
 
     // Achievements
     achievements: 'Assoliments',

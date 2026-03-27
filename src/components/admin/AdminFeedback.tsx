@@ -58,15 +58,7 @@ const AdminFeedback: React.FC<AdminFeedbackProps> = ({ feedback, onRefresh, noti
     if (!date) {
       return '-';
     }
-
-    const d = date as any;
-    if (typeof d.toDate === 'function') {
-      return d.toDate().toLocaleDateString();
-    }
-    if (d.seconds) {
-      return new Date(d.seconds * 1000).toLocaleDateString();
-    }
-    return new Date(d as string | number | Date).toLocaleDateString();
+    return new Date(date as string | number | Date).toLocaleDateString();
   };
 
   const getStatusStyle = (status: string) => {

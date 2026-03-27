@@ -81,14 +81,16 @@ const FlavorModal: React.FC<FlavorModalProps> = ({
           )}
         </div>
 
-        <div className="text-sm opacity-60 italic mb-6 px-4">
-          &quot;
-          {t(item.flavorText || '') ||
-            item.flavorText ||
-            t(item.description || '') ||
-            item.description}
-          &quot;
-        </div>
+        {(item.flavorText || item.description) && (
+          <div className="text-sm opacity-60 italic mb-6 px-4">
+            &quot;
+            {t(item.flavorText || '') ||
+              item.flavorText ||
+              t(item.description || '') ||
+              item.description}
+            &quot;
+          </div>
+        )}
 
         <div className="flex justify-center mb-2">
           {isOwned ? (

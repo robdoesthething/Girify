@@ -18,7 +18,7 @@ const GameScreen: FC = () => {
   const { state, dispatch, currentStreet, handlers } = useGameContext();
   const [showOnboarding, setShowOnboarding] = useState<boolean>(() => {
     const completed = localStorage.getItem('girify_onboarding_completed');
-    return !completed && !state.username;
+    return !completed && !!state.username;
   });
 
   // Exit Warning

@@ -9,13 +9,19 @@ interface UseEquipProps {
   username: string;
   equipped: EquippedCosmetics;
   setEquipped: (equipped: EquippedCosmetics) => void;
+  purchased: string[];
 }
 
-export const useEquip = ({ username, equipped, setEquipped }: UseEquipProps) => {
-  const { success: showSuccess } = useToast();
+export const useEquip = ({ username, equipped, setEquipped, purchased }: UseEquipProps) => {
+  const { success: showSuccess, error: showError } = useToast();
   const { t } = useTheme();
 
   const handleEquip = async (item: ShopItem) => {
+    const isFree = (item.cost ?? 0) === 0;
+    if (!isFree && !purchased.includes(item.id)) {
+      showError(t('notOwned') || 'Item not owned', TOAST_SHORT_MS);
+      return false;
+    }
     const newEquipped = { ...equipped };
     let changed = false;
 

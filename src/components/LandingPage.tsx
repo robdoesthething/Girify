@@ -113,44 +113,40 @@ const LandingPage: React.FC<LandingPageProps> = ({ onLogin, theme }) => {
             </button>
           </div>
 
-          {/* Feature cards with improved design */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 w-full mb-16 text-left">
+          {/* Feature strip */}
+          <motion.div
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3 }}
+            className="flex flex-col sm:flex-row w-full mb-16 divide-y sm:divide-y-0 sm:divide-x divide-slate-200 dark:divide-slate-800 border border-slate-200 dark:border-slate-800 rounded-2xl overflow-hidden"
+          >
             {[
               {
-                emoji: '🏆',
-                title: 'Rankings',
+                label: 'Rankings',
                 desc: 'Compete with friends and neighbors for the top spot.',
               },
               {
-                emoji: '🤝',
-                title: 'Friendship',
+                label: 'Friendship',
                 desc: 'Challenge your friends and track their progress.',
               },
               {
-                emoji: '💰',
-                title: 'Rewards',
+                label: 'Rewards',
                 desc: 'Earn Giuros to customize your profile and unlock badges.',
               },
             ].map((feature, idx) => (
-              <motion.div
+              <div
                 key={idx}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: idx * 0.1 + 0.3 }}
-                className="glass-panel p-8 transition-all duration-300 group"
+                className="flex-1 px-6 py-5 text-left bg-white/60 dark:bg-slate-900/60"
               >
-                <div className="text-5xl mb-5 transform group-hover:scale-110 transition-transform duration-300">
-                  {feature.emoji}
-                </div>
-                <h3 className="font-bold text-xl mb-3 text-slate-900 dark:text-white">
-                  {feature.title}
-                </h3>
-                <p className="text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
+                <p className="font-black text-base text-slate-900 dark:text-white mb-1">
+                  {feature.label}
+                </p>
+                <p className="text-sm text-slate-500 dark:text-slate-400 leading-relaxed">
                   {feature.desc}
                 </p>
-              </motion.div>
+              </div>
             ))}
-          </div>
+          </motion.div>
 
           {/* District Showcase - MEET THE NEIGHBORHOODS */}
           <div className="w-full mb-16">

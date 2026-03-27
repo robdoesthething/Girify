@@ -1,34 +1,10 @@
-export interface UserProfile {
-  username: string;
-  uid: string;
-  email?: string;
-  realName?: string;
-  streak: number;
-  totalScore: number;
-  lastPlayDate: string;
-  joinedAt: Date | string;
-  purchasedCosmetics?: string[];
-  equippedCosmetics?: Record<string, string>;
-  giuros?: number;
-  referrer?: string;
-  friends?: string[];
-  // Legacy migration fields?
-  migrationStatus?: string;
-  gamesPlayed?: number;
-  bestScore?: number;
-  friendCount?: number;
-  maxStreak?: number;
-  avatarId?: number;
-  notificationSettings?: NotificationSettings;
-  banned?: boolean;
-  role?: 'admin' | 'user';
-}
-
-export interface NotificationSettings {
-  dailyReminder: boolean;
-  friendActivity: boolean;
-  newsUpdates: boolean;
-}
+/**
+ * @deprecated Import UserProfile and NotificationSettings directly from
+ * '../../utils/social/types' (or the relevant relative path). This file
+ * re-exports them for backward compatibility and also defines the types
+ * that live only here (GameHistory, LeaderboardEntry, FeedbackReward).
+ */
+export type { NotificationSettings, UserProfile } from '../utils/social/types';
 
 export interface GameHistory {
   date: string;

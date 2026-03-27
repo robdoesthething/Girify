@@ -10,7 +10,7 @@ vi.mock('../_lib/auth', async importOriginal => {
   const actual = await importOriginal<typeof import('../_lib/auth')>();
   return {
     ...actual,
-    verifyFirebaseToken: vi.fn(),
+    verifySupabaseToken: vi.fn(),
   };
 });
 
@@ -22,7 +22,7 @@ vi.mock('../_lib/rate-limit', () => ({
   checkRateLimit: vi.fn(),
 }));
 
-import { verifyFirebaseToken } from '../_lib/auth';
+import { verifySupabaseToken } from '../_lib/auth';
 import { checkRateLimit } from '../_lib/rate-limit';
 import { promoteUserToAdmin } from '../_lib/supabase';
 import handler from '../admin/promote';
@@ -132,7 +132,7 @@ describe('Admin Promotion API', () => {
       });
       const res = createMockRes();
 
-      vi.mocked(verifyFirebaseToken).mockResolvedValue(MOCK_USER_RECORD);
+      vi.mocked(verifySupabaseToken).mockResolvedValue(MOCK_USER_RECORD);
 
       await handler(req, res);
 
@@ -149,7 +149,7 @@ describe('Admin Promotion API', () => {
       });
       const res = createMockRes();
 
-      vi.mocked(verifyFirebaseToken).mockResolvedValue(MOCK_USER_RECORD);
+      vi.mocked(verifySupabaseToken).mockResolvedValue(MOCK_USER_RECORD);
 
       await handler(req, res);
 
@@ -166,7 +166,7 @@ describe('Admin Promotion API', () => {
       });
       const res = createMockRes();
 
-      vi.mocked(verifyFirebaseToken).mockResolvedValue(MOCK_USER_RECORD);
+      vi.mocked(verifySupabaseToken).mockResolvedValue(MOCK_USER_RECORD);
 
       await handler(req, res);
 
@@ -186,7 +186,7 @@ describe('Admin Promotion API', () => {
       });
       const res = createMockRes();
 
-      vi.mocked(verifyFirebaseToken).mockResolvedValue(MOCK_USER_RECORD);
+      vi.mocked(verifySupabaseToken).mockResolvedValue(MOCK_USER_RECORD);
 
       await handler(req, res);
 
@@ -203,7 +203,7 @@ describe('Admin Promotion API', () => {
       const req = createMockReq();
       const res = createMockRes();
 
-      vi.mocked(verifyFirebaseToken).mockRejectedValue(new Error('Invalid token'));
+      vi.mocked(verifySupabaseToken).mockRejectedValue(new Error('Invalid token'));
 
       await handler(req, res);
 
@@ -218,7 +218,7 @@ describe('Admin Promotion API', () => {
       const req = createMockReq();
       const res = createMockRes();
 
-      vi.mocked(verifyFirebaseToken).mockResolvedValue(MOCK_USER_RECORD);
+      vi.mocked(verifySupabaseToken).mockResolvedValue(MOCK_USER_RECORD);
 
       vi.mocked(checkRateLimit).mockResolvedValue({
         allowed: true,
@@ -230,7 +230,7 @@ describe('Admin Promotion API', () => {
 
       await handler(req, res);
 
-      expect(verifyFirebaseToken).toHaveBeenCalledWith('valid-token');
+      expect(verifySupabaseToken).toHaveBeenCalledWith('valid-token');
       expect(res.status).toHaveBeenCalledWith(200);
     });
   });
@@ -240,7 +240,7 @@ describe('Admin Promotion API', () => {
       const req = createMockReq();
       const res = createMockRes();
 
-      vi.mocked(verifyFirebaseToken).mockResolvedValue(MOCK_USER_RECORD);
+      vi.mocked(verifySupabaseToken).mockResolvedValue(MOCK_USER_RECORD);
 
       vi.mocked(checkRateLimit).mockResolvedValue({
         allowed: false,
@@ -261,7 +261,7 @@ describe('Admin Promotion API', () => {
       const req = createMockReq();
       const res = createMockRes();
 
-      vi.mocked(verifyFirebaseToken).mockResolvedValue(MOCK_USER_RECORD);
+      vi.mocked(verifySupabaseToken).mockResolvedValue(MOCK_USER_RECORD);
 
       const resetAt = Date.now() + 900000;
       vi.mocked(checkRateLimit).mockResolvedValue({
@@ -290,7 +290,7 @@ describe('Admin Promotion API', () => {
       });
       const res = createMockRes();
 
-      vi.mocked(verifyFirebaseToken).mockResolvedValue(MOCK_USER_RECORD);
+      vi.mocked(verifySupabaseToken).mockResolvedValue(MOCK_USER_RECORD);
 
       vi.mocked(checkRateLimit).mockResolvedValue({
         allowed: true,
@@ -313,7 +313,7 @@ describe('Admin Promotion API', () => {
       const req = createMockReq();
       const res = createMockRes();
 
-      vi.mocked(verifyFirebaseToken).mockResolvedValue(MOCK_USER_RECORD);
+      vi.mocked(verifySupabaseToken).mockResolvedValue(MOCK_USER_RECORD);
 
       vi.mocked(checkRateLimit).mockResolvedValue({
         allowed: true,
@@ -336,7 +336,7 @@ describe('Admin Promotion API', () => {
       const req = createMockReq();
       const res = createMockRes();
 
-      vi.mocked(verifyFirebaseToken).mockResolvedValue(MOCK_USER_RECORD);
+      vi.mocked(verifySupabaseToken).mockResolvedValue(MOCK_USER_RECORD);
 
       vi.mocked(checkRateLimit).mockResolvedValue({
         allowed: true,
@@ -360,7 +360,7 @@ describe('Admin Promotion API', () => {
       const req = createMockReq();
       const res = createMockRes();
 
-      vi.mocked(verifyFirebaseToken).mockResolvedValue(MOCK_USER_RECORD);
+      vi.mocked(verifySupabaseToken).mockResolvedValue(MOCK_USER_RECORD);
 
       vi.mocked(checkRateLimit).mockResolvedValue({
         allowed: true,
@@ -388,7 +388,7 @@ describe('Admin Promotion API', () => {
       const req = createMockReq();
       const res = createMockRes();
 
-      vi.mocked(verifyFirebaseToken).mockRejectedValue(new Error('Unexpected error'));
+      vi.mocked(verifySupabaseToken).mockRejectedValue(new Error('Unexpected error'));
 
       await handler(req, res);
 

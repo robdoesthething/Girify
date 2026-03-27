@@ -52,6 +52,7 @@ const ShopScreen: React.FC<ShopScreenProps> = ({ username }) => {
     username,
     equipped,
     setEquipped,
+    purchased,
   });
 
   const { checkUnlock } = useUnlockConditions(userStats);
@@ -76,8 +77,8 @@ const ShopScreen: React.FC<ShopScreenProps> = ({ username }) => {
   const isOwned = useCallback(
     (itemId: string) =>
       purchased.includes(itemId) ||
-      (shopItems.avatars && shopItems.avatars.find(a => a.id === itemId)?.cost === 0),
-    [purchased, shopItems.avatars]
+      (shopItems.all && shopItems.all.find(i => i.id === itemId)?.cost === 0),
+    [purchased, shopItems.all]
   );
 
   const isEquipped = useCallback(

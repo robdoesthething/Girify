@@ -18,8 +18,8 @@ export const MAX_BOUNDS: L.LatLngBoundsExpression = [
 export const BOUNDS_VISCOSITY = 0.5;
 export const MOBILE_BREAKPOINT = 768;
 
-export const ICON_SIZE: [number, number] = [30, 30];
-export const ICON_ANCHOR: [number, number] = [15, 15];
+export const ICON_SIZE: [number, number] = [44, 44];
+export const ICON_ANCHOR: [number, number] = [22, 22];
 export const TOOLTIP_OFFSET: [number, number] = [0, 5];
 export const TOOLTIP_OPACITY = 0.9;
 

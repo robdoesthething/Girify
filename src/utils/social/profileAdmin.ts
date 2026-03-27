@@ -6,7 +6,7 @@
  */
 
 import { supabase } from '../../services/supabase';
-import { updateUser } from '../../services/database';
+import { getUserByUsername, updateUser } from '../../services/database';
 import type { UserProfile } from './types';
 import { normalizeUsername } from '../format';
 import { rowToProfile } from './profile';
@@ -90,13 +90,30 @@ export const deleteUserAndData = async (
     const { requireAdmin } = await import('../auth');
     await requireAdmin();
 
-    const { error } = await supabase
-      .from('users')
-      .delete()
-      .eq('username', normalizeUsername(username));
+    const normalized = normalizeUsername(username);
+
+    // Fetch supabase_uid before deleting (needed to remove auth entry)
+    const userRow = await getUserByUsername(normalized);
+    const supabaseUid = (userRow as any)?.supabase_uid as string | undefined;
+
+    // Delete users row — ON DELETE CASCADE handles all child tables
+    const { error } = await supabase.from('users').delete().eq('username', normalized);
 
     if (error) {
       throw new Error(error.message);
+    }
+
+    // Remove auth entry via service-role API (best-effort — DB row already gone)
+    if (supabaseUid) {
+      const { data: sessionData } = await supabase.auth.getSession();
+      const token = sessionData.session?.access_token;
+      if (token) {
+        await fetch('/api/admin/delete-user', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+          body: JSON.stringify({ uid: supabaseUid }),
+        }).catch(e => console.error('[Admin] Failed to delete auth user:', e));
+      }
     }
 
     return { success: true };

@@ -3,10 +3,9 @@ export interface Street {
   name: string;
   geometry: number[][][]; // array of line strings or whatever the GeoJSON structure is
   properties?: Record<string, unknown>;
-  tier?: number; // 1-4 difficulty tier for street selection
-  lat?: number; // center latitude for proximity calculations
-  lng?: number; // center longitude for proximity calculations
-  [key: string]: any;
+  tier?: number;
+  lat?: number;
+  lng?: number;
 }
 
 export interface QuizQuestion {
@@ -45,7 +44,7 @@ export interface GameStateObject {
   options: Street[];
   quizResults: QuizResult[];
   feedback: Feedback;
-  // selectedStreet: Street | null; // Removed in favor of selectedAnswer
+  selectedStreet: Street | null;
   hintsRevealedCount: number;
   hintStreets: Street[];
   autoAdvance: boolean;
@@ -56,5 +55,5 @@ export interface GameStateObject {
   selectedAnswer: Street | null; // Added
   isInputLocked: boolean; // Added
   activePage: string | null; // Added
-  gameId: string | null; // Added for Redis/Supabase session
+  gameId?: string;
 }
