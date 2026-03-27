@@ -6,7 +6,7 @@
 
 import React from 'react';
 import { useTheme } from '../../context/ThemeContext';
-import { UserProfile } from '../../types/user';
+import { UserProfile } from '../../utils/social';
 import { themeClasses } from '../../utils/themeUtils';
 
 interface AdminUsersTabProps {

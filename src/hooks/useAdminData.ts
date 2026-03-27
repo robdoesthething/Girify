@@ -5,16 +5,16 @@
  */
 
 import { useCallback, useEffect, useState } from 'react';
-import { UserProfile } from '../types/user';
 import { DashboardMetrics, getDashboardMetrics } from '../utils/game/metrics';
 import { logger } from '../utils/logger';
-import { getShopItems, ShopItem } from '../utils/shop';
+import { getShopItems, GroupedShopItems } from '../utils/shop';
 import {
   deleteUserAndData,
   FeedbackItem,
   getAllUsers,
   getFeedbackList,
   updateUserAsAdmin,
+  UserProfile,
 } from '../utils/social';
 import { Announcement, getAllAnnouncements } from '../utils/social/news';
 
@@ -22,7 +22,7 @@ export interface AdminDataState {
   users: UserProfile[];
   feedback: FeedbackItem[];
   announcements: Announcement[];
-  shopItems: { all: ShopItem[] };
+  shopItems: GroupedShopItems;
   metrics: DashboardMetrics | null;
   loading: boolean;
   migrationStatus: string | null;
@@ -35,7 +35,14 @@ export function useAdminData(
   const [users, setUsers] = useState<UserProfile[]>([]);
   const [feedback, setFeedback] = useState<FeedbackItem[]>([]);
   const [announcements, setAnnouncements] = useState<Announcement[]>([]);
-  const [shopItems, setShopItems] = useState<{ all: ShopItem[] }>({ all: [] });
+  const [shopItems, setShopItems] = useState<GroupedShopItems>({
+    all: [],
+    avatars: [],
+    avatarFrames: [],
+    frames: [],
+    titles: [],
+    special: [],
+  });
   const [metrics, setMetrics] = useState<DashboardMetrics | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
   const [migrationStatus, setMigrationStatus] = useState<string | null>(null);
@@ -43,17 +50,16 @@ export function useAdminData(
   const fetchData = useCallback(async () => {
     setLoading(true);
     const [u, f, a, shop, m] = await Promise.all([
-      getAllUsers(100) as unknown as Promise<UserProfile[]>,
-      getFeedbackList() as unknown as Promise<FeedbackItem[]>,
+      getAllUsers(100),
+      getFeedbackList(),
       getAllAnnouncements(),
-      getShopItems(true) as unknown as Promise<{ all: ShopItem[] }>,
+      getShopItems(true),
       getDashboardMetrics(),
     ]);
     setUsers(u);
     setFeedback(f);
     setAnnouncements(a);
-
-    setShopItems(shop as any);
+    setShopItems(shop);
     setMetrics(m);
     setLoading(false);
   }, []);

@@ -7,21 +7,12 @@ const AdminRoute: React.FC = () => {
   const [isAdmin, setIsAdmin] = useState<boolean | null>(null); // null = checking, true/false
 
   useEffect(() => {
-    // Listen for auth changes
+    // onAuthStateChange fires INITIAL_SESSION immediately for the current session,
+    // so no separate getUser() call is needed.
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange(async (_event, session) => {
       if (!session?.user) {
-        setIsAdmin(false);
-      } else {
-        const admin = await isCurrentUserAdmin();
-        setIsAdmin(admin);
-      }
-    });
-
-    // Check initial state
-    supabase.auth.getUser().then(async ({ data: { user } }) => {
-      if (!user) {
         setIsAdmin(false);
       } else {
         const admin = await isCurrentUserAdmin();

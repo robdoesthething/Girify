@@ -154,9 +154,7 @@ describe('useAuth Hook', () => {
     expect(result.current.profile).toEqual(mockProfile);
   });
 
-  // TODO: Fix this test - the mockExecute doesn't properly wire through
-  // the async execution chain with navigate callback. Pre-existing issue.
-  it.skip('should logout user', async () => {
+  it('should logout user', async () => {
     const { result } = renderHook(() => useAuth());
 
     const mockNavigate = vi.fn();

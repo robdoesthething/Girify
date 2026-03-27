@@ -5,7 +5,7 @@ import { useTheme } from '../../context/ThemeContext';
 import { useAdminData } from '../../hooks/useAdminData';
 import { useConfirm } from '../../hooks/useConfirm';
 import { useNotification } from '../../hooks/useNotification';
-import { UserProfile } from '../../types/user';
+import { UserProfile } from '../../utils/social';
 import { themeClasses } from '../../utils/themeUtils';
 import { ConfirmDialog } from '../ConfirmDialog';
 

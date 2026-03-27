@@ -52,15 +52,13 @@ const AdminAnnouncements: React.FC<AdminAnnouncementsProps> = ({
     },
   });
 
-  const onSubmit = (e: React.FormEvent) => {
+  const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.title || !formData.body) {
       notify('Missing title or body', 'error');
       return;
     }
-    handleCreate(formData);
-    // Reset form after successful create (handled by hook implies close, but we need to clear state)
-    // Actually hook sets isCreating false. We should reset form when opening dialog or success.
+    await handleCreate(formData);
     setFormData({
       title: '',
       body: '',
@@ -75,12 +73,7 @@ const AdminAnnouncements: React.FC<AdminAnnouncementsProps> = ({
     if (!date) {
       return '-';
     }
-
-    const d = date as any;
-    if (d.toDate && typeof d.toDate === 'function') {
-      return d.toDate().toLocaleDateString();
-    }
-    return new Date(d as string | number | Date).toLocaleDateString();
+    return new Date(date as string | number | Date).toLocaleDateString();
   };
 
   return (

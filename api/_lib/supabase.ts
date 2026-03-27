@@ -38,7 +38,7 @@ function getSupabaseAdmin(): SupabaseClient {
 
 /**
  * Promote a user to admin status
- * @param uid Firebase user ID
+ * @param uid Supabase auth user ID
  * @param username User's username
  * @returns Success status
  */
@@ -89,7 +89,7 @@ export async function promoteUserToAdmin(
 
 /**
  * Check if a user is an admin
- * @param uid Firebase user ID
+ * @param uid Supabase auth user ID
  * @returns True if user is admin
  */
 export async function isUserAdmin(uid: string): Promise<boolean> {
@@ -178,5 +178,25 @@ export async function insertFeedbackRecord(
   } catch (error) {
     console.error('[Supabase] unexpected error inserting feedback:', error);
     return { success: false, error: 'Unexpected error' };
+  }
+}
+
+/**
+ * Delete a user from Supabase Auth by their UID.
+ * Requires service role — never expose this as a public endpoint without auth checks.
+ * The users table row (and all cascaded data) must be deleted separately.
+ */
+export async function deleteAuthUser(uid: string): Promise<{ success: boolean; error?: string }> {
+  try {
+    const supabase = getSupabaseAdmin();
+    const { error } = await supabase.auth.admin.deleteUser(uid);
+    if (error) {
+      console.error('[Supabase] deleteAuthUser error:', error.message);
+      return { success: false, error: error.message };
+    }
+    return { success: true };
+  } catch (e) {
+    console.error('[Supabase] unexpected error deleting auth user:', e);
+    return { success: false, error: (e as Error).message };
   }
 }

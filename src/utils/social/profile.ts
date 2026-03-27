@@ -200,7 +200,7 @@ export const getUserByEmail = async (email: string): Promise<UserProfile | null>
 
 /**
  * Look up a user profile by UID
- * @param uid - The firebase auth UID
+ * @param uid - The Supabase auth UID
  * @returns Promise resolving to profile or null if not found
  */
 export const getUserByUid = async (uid: string): Promise<UserProfile | null> => {

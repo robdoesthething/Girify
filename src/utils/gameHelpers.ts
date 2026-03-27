@@ -4,7 +4,7 @@ import {
   selectDailyStreets,
   selectDistractors,
   shuffleOptions,
-} from './dailyChallenge';
+} from './game/dailyChallenge';
 import { logger } from './logger';
 
 import { GAME_LOGIC } from '../config/constants';

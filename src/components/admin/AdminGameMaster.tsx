@@ -97,7 +97,7 @@ const AdminGameMaster: React.FC<AdminGameMasterProps> = ({ onNotify, confirm }) 
     }
 
     try {
-      await updateUserAsAdmin(targetUser.id, { banned: isBanning });
+      await updateUserAsAdmin(targetUser.username, { banned: isBanning });
       setTargetUser({ ...targetUser, banned: isBanning });
       onNotify(`User ${isBanning ? 'banned' : 'unbanned'} successfully`, 'success');
     } catch {
@@ -116,7 +116,7 @@ const AdminGameMaster: React.FC<AdminGameMasterProps> = ({ onNotify, confirm }) 
         return;
       }
       const updatedItems = [...currentItems, newItemId];
-      await updateUserAsAdmin(targetUser.id, { purchasedCosmetics: updatedItems });
+      await updateUserAsAdmin(targetUser.username, { purchasedCosmetics: updatedItems });
       setTargetUser({ ...targetUser, purchasedCosmetics: updatedItems });
       setNewItemId('');
       onNotify(`Added ${newItemId} to inventory`, 'success');
@@ -136,7 +136,7 @@ const AdminGameMaster: React.FC<AdminGameMasterProps> = ({ onNotify, confirm }) 
     try {
       const currentItems = (targetUser.purchasedCosmetics as string[]) || [];
       const updatedItems = currentItems.filter((i: string) => i !== itemId);
-      await updateUserAsAdmin(targetUser.id, { purchasedCosmetics: updatedItems });
+      await updateUserAsAdmin(targetUser.username, { purchasedCosmetics: updatedItems });
       setTargetUser({ ...targetUser, purchasedCosmetics: updatedItems });
       onNotify(`Removed ${itemId}`, 'success');
     } catch {

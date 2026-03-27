@@ -1,5 +1,5 @@
 import React from 'react';
-import { UserProfile } from '../../types/user';
+import { UserProfile } from '../../utils/social';
 import { themeClasses } from '../../utils/themeUtils';
 
 interface RichestUsersProps {

@@ -43,3 +43,4 @@ eslint-report.html
 IMPLEMENTATION_*.md
 NEXT_STEPS*.md
 coverage
+.gstack/

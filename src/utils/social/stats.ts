@@ -7,11 +7,11 @@
 import {
   getUserGameHistory as dbGetUserGameHistory,
   updateDistrictScore as dbUpdateDistrictScore,
-  getDistricts,
   getUserByUsername,
   updateUser,
 } from '../../services/database';
 import { normalizeUsername } from '../format';
+import { getTeamLeaderboard } from './leaderboard';
 
 import type { GameData, GameStatsUpdate } from './types';
 
@@ -106,12 +106,13 @@ export const updateDistrictScore = async (districtId: string, score: number): Pr
 
 /**
  * Get district rankings
+ * Aggregates all-time scores from game_results (same source as the player-facing team leaderboard).
  * @returns Promise resolving to list of districts with scores
  */
 export const getDistrictRankings = async (): Promise<{ id: string; score: number }[]> => {
   try {
-    const districts = await getDistricts();
-    return districts.map(d => ({ id: d.id, score: d.score ?? 0 }));
+    const teams = await getTeamLeaderboard('all');
+    return teams.map(t => ({ id: t.teamId, score: t.score }));
   } catch (e) {
     console.error('Error fetching district rankings:', e);
     return [];

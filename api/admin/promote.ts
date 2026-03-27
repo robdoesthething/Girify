@@ -3,7 +3,7 @@
  * POST /api/admin/promote
  *
  * Securely promotes a user to admin status after verifying:
- * 1. Valid Firebase authentication token
+ * 1. Valid Supabase authentication token
  * 2. Rate limiting compliance
  * 3. Correct admin secret key
  * 4. Supabase admin table update
@@ -11,7 +11,7 @@
 
 import { timingSafeEqual } from 'crypto';
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { extractBearerToken, verifyFirebaseToken } from '../_lib/auth';
+import { extractBearerToken, verifySupabaseToken } from '../_lib/auth';
 import { RATE_LIMIT_DEFAULTS, USERNAME_CONSTRAINTS } from '../_lib/constants';
 import { handleCors } from '../_lib/cors';
 import { handleError } from '../_lib/errorHandler';
@@ -58,7 +58,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse): 
   }
 
   try {
-    // 1. Verify Firebase authentication token
+    // 1. Verify Supabase authentication token
     const authResult = extractBearerToken(req.headers.authorization);
     if (!authResult.token) {
       ErrorResponses.MISSING_AUTH_HEADER(res);
@@ -67,7 +67,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse): 
 
     let user;
     try {
-      user = await verifyFirebaseToken(authResult.token);
+      user = await verifySupabaseToken(authResult.token);
     } catch (error) {
       console.error('[API] Token verification failed:', error);
       ErrorResponses.INVALID_TOKEN(res);

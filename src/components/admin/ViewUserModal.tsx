@@ -8,7 +8,7 @@ import { motion } from 'framer-motion';
 import React from 'react';
 import { useTheme } from '../../context/ThemeContext';
 import ProfileScreen from '../../features/profile/components/ProfileScreen';
-import { UserProfile } from '../../types/user';
+import { UserProfile } from '../../utils/social';
 import { themeClasses } from '../../utils/themeUtils';
 
 interface ViewUserModalProps {
