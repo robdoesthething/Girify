@@ -209,6 +209,7 @@ const translations: Translations = {
     giurosExplainerText:
       'Earn Giuros by playing daily, maintaining streaks, and completing challenges. Spend them on cosmetics!',
     goToShop: 'Go to Shop',
+    loginToShop: 'Log in to access the shop and spend your Giuros.',
 
     // Achievements
     achievements: 'Achievements',
@@ -500,6 +501,7 @@ const translations: Translations = {
     giurosExplainerText:
       'Gana Giuros jugando a diario, manteniendo rachas y completando retos. ¡Gástalos en cosméticos!',
     goToShop: 'Ir a la tienda',
+    loginToShop: 'Inicia sesión para acceder a la tienda y gastar tus Giuros.',
 
     // Achievements
     achievements: 'Logros',
@@ -770,6 +772,7 @@ const translations: Translations = {
     giurosExplainerText:
       "Guanya Giuros jugant cada dia, mantenint ratxes i completant reptes. Gasta'ls en cosmètics!",
     goToShop: 'Anar a la botiga',
+    loginToShop: 'Inicia sessió per accedir a la botiga i gastar els teus Giuros.',
 
     // Achievements
     achievements: 'Assoliments',
