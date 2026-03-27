@@ -40,7 +40,11 @@ const ShopItemCard: React.FC<ShopItemCardProps> = memo(
 
     const renderItemIcon = () => {
       if (item.cssClass) {
-        return <div className={`w-10 h-10 rounded-full ${item.cssClass}`} />;
+        return (
+          <div
+            className={`w-14 h-14 rounded-full bg-slate-400 dark:bg-slate-600 ${item.cssClass}`}
+          />
+        );
       }
       if (item.image) {
         return (
@@ -101,7 +105,11 @@ const ShopItemCard: React.FC<ShopItemCardProps> = memo(
 
         <div className="mt-auto pt-2 w-full">
           {isOwned ? (
-            activeTab !== 'special' && (
+            activeTab === 'special' ? (
+              <div className="text-center py-1.5 text-xs font-bold text-emerald-500 dark:text-emerald-400 bg-emerald-500/10 rounded-xl">
+                ✓ Purchased
+              </div>
+            ) : (
               <Button
                 onClick={onEquip}
                 variant={isEquipped ? 'ghost' : 'primary'}
