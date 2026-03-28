@@ -1,3 +1,4 @@
+import { AnimatePresence, motion } from 'framer-motion';
 import React, { FC, useEffect, useState } from 'react';
 import LandingPage from '../../../components/LandingPage';
 import { useGameContext } from '../../../context/GameContext';
@@ -16,6 +17,8 @@ import SummaryScreen from './SummaryScreen';
 const GameScreen: FC = () => {
   const { theme, deviceMode, t } = useTheme();
   const { state, dispatch, currentStreet, handlers } = useGameContext();
+  const lastResult =
+    state.quizResults.length > 0 ? state.quizResults[state.quizResults.length - 1] : null;
   const [showOnboarding, setShowOnboarding] = useState<boolean>(() => {
     const completed = localStorage.getItem('girify_onboarding_completed');
     return !completed && !!state.username;
@@ -75,6 +78,23 @@ const GameScreen: FC = () => {
             theme={theme}
             onAnimationComplete={() => dispatch({ type: 'UNLOCK_INPUT' })}
           />
+          <AnimatePresence>
+            {state.feedback === 'transitioning' && lastResult && (
+              <motion.div
+                key={state.currentQuestionIndex}
+                initial={{ opacity: 1, y: 0 }}
+                animate={{ opacity: 0, y: -56 }}
+                transition={{ duration: 0.8, ease: 'easeOut' }}
+                className="absolute top-1/3 left-1/2 -translate-x-1/2 z-30 pointer-events-none select-none"
+              >
+                <span
+                  className={`text-5xl font-black drop-shadow-lg ${lastResult.status === 'correct' ? 'text-emerald-400' : 'text-red-400'}`}
+                >
+                  {lastResult.status === 'correct' ? `+${lastResult.points}` : '✗'}
+                </span>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
 
         {/* Quiz Dashboard Panel */}
