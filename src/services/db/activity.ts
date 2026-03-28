@@ -5,6 +5,7 @@
  */
 
 import type { ActivityFeedRow } from '../../types/supabase';
+import { normalizeUsername } from '../../utils/format';
 import { supabase } from '../supabase';
 
 // ============================================================================
@@ -21,7 +22,7 @@ export async function getActivityFeed(
     return [];
   }
 
-  const normalizedUsernames = usernames.map(u => u.toLowerCase());
+  const normalizedUsernames = usernames.map(u => normalizeUsername(u));
   console.warn(
     `[DB] getActivityFeed: Querying for ${normalizedUsernames.length} users:`,
     normalizedUsernames
@@ -46,7 +47,7 @@ export async function getActivityFeed(
 export async function publishActivity(activity: Omit<ActivityFeedRow, 'id'>): Promise<boolean> {
   const { error } = await supabase.from('activity_feed').insert({
     ...activity,
-    username: activity.username.toLowerCase(),
+    username: normalizeUsername(activity.username),
   });
 
   if (error) {
@@ -67,8 +68,8 @@ export async function createReferral(
   referredEmail?: string
 ): Promise<boolean> {
   const { error } = await supabase.from('referrals').insert({
-    referrer: referrer.toLowerCase(),
-    referred: referred.toLowerCase(),
+    referrer: normalizeUsername(referrer),
+    referred: normalizeUsername(referred),
     referrer_email: referrerEmail || null,
     referred_email: referredEmail || null,
   });
@@ -84,7 +85,7 @@ export async function getReferralCount(username: string): Promise<number> {
   const { count, error } = await supabase
     .from('referrals')
     .select('*', { count: 'exact', head: true })
-    .eq('referrer', username.toLowerCase());
+    .eq('referrer', normalizeUsername(username));
 
   if (error) {
     console.error('[DB] getReferralCount error:', error.message);

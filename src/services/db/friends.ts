@@ -5,6 +5,7 @@
  */
 
 import type { FriendRequestRow } from '../../types/supabase';
+import { normalizeUsername } from '../../utils/format';
 import { createLogger } from '../../utils/logger';
 import { supabase } from '../supabase';
 import { executeQuery } from './utils';
@@ -20,7 +21,7 @@ export async function getFriends(
 ): Promise<Array<{ friend_username: string; since: string }>> {
   const data = await executeQuery<Array<{ friend_username: string; since: string }>>(
     supabase.rpc('get_friends', {
-      user_username: username.toLowerCase(),
+      user_username: normalizeUsername(username),
     }),
     'getFriends'
   );
@@ -30,8 +31,8 @@ export async function getFriends(
 export async function areFriends(user1: string, user2: string): Promise<boolean> {
   const data = await executeQuery<boolean>(
     supabase.rpc('are_friends', {
-      user1: user1.toLowerCase(),
-      user2: user2.toLowerCase(),
+      user1: normalizeUsername(user1),
+      user2: normalizeUsername(user2),
     }),
     'areFriends'
   );
@@ -41,8 +42,8 @@ export async function areFriends(user1: string, user2: string): Promise<boolean>
 export async function addFriendship(user1: string, user2: string): Promise<boolean> {
   const data = await executeQuery<boolean>(
     supabase.rpc('add_friendship', {
-      user1: user1.toLowerCase(),
-      user2: user2.toLowerCase(),
+      user1: normalizeUsername(user1),
+      user2: normalizeUsername(user2),
     }),
     'addFriendship'
   );
@@ -52,8 +53,8 @@ export async function addFriendship(user1: string, user2: string): Promise<boole
 export async function removeFriendship(user1: string, user2: string): Promise<boolean> {
   const data = await executeQuery<boolean>(
     supabase.rpc('remove_friendship', {
-      user1: user1.toLowerCase(),
-      user2: user2.toLowerCase(),
+      user1: normalizeUsername(user1),
+      user2: normalizeUsername(user2),
     }),
     'removeFriendship'
   );
@@ -69,7 +70,7 @@ export async function getPendingFriendRequests(username: string): Promise<Friend
     supabase
       .from('friend_requests')
       .select('*')
-      .eq('to_user', username.toLowerCase())
+      .eq('to_user', normalizeUsername(username))
       .eq('status', 'pending')
       .order('created_at', { ascending: false }),
     'getPendingFriendRequests'
@@ -82,7 +83,7 @@ export async function getSentFriendRequests(username: string): Promise<FriendReq
     supabase
       .from('friend_requests')
       .select('*')
-      .eq('from_user', username.toLowerCase())
+      .eq('from_user', normalizeUsername(username))
       .eq('status', 'pending'),
     'getSentFriendRequests'
   );
@@ -92,8 +93,8 @@ export async function getSentFriendRequests(username: string): Promise<FriendReq
 export async function createFriendRequest(fromUser: string, toUser: string): Promise<boolean> {
   const { error } = await supabase.from('friend_requests').upsert(
     {
-      from_user: fromUser.toLowerCase(),
-      to_user: toUser.toLowerCase(),
+      from_user: normalizeUsername(fromUser),
+      to_user: normalizeUsername(toUser),
       status: 'pending',
     },
     { onConflict: 'from_user,to_user', ignoreDuplicates: true }
@@ -114,8 +115,8 @@ export async function updateFriendRequestStatus(
   const { error } = await supabase
     .from('friend_requests')
     .update({ status })
-    .eq('from_user', fromUser.toLowerCase())
-    .eq('to_user', toUser.toLowerCase());
+    .eq('from_user', normalizeUsername(fromUser))
+    .eq('to_user', normalizeUsername(toUser));
 
   if (error) {
     logger.error('updateFriendRequestStatus error:', error.message);
@@ -128,8 +129,8 @@ export async function deleteFriendRequest(fromUser: string, toUser: string): Pro
   const { error } = await supabase
     .from('friend_requests')
     .delete()
-    .eq('from_user', fromUser.toLowerCase())
-    .eq('to_user', toUser.toLowerCase());
+    .eq('from_user', normalizeUsername(fromUser))
+    .eq('to_user', normalizeUsername(toUser));
 
   if (error) {
     logger.error('deleteFriendRequest error:', error.message);

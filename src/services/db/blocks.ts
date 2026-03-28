@@ -4,13 +4,14 @@
  * User blocking functionality.
  */
 
+import { normalizeUsername } from '../../utils/format';
 import { supabase } from '../supabase';
 
 export async function getBlockedUsers(username: string): Promise<string[]> {
   const { data, error } = await supabase
     .from('blocks')
     .select('blocked')
-    .eq('blocker', username.toLowerCase());
+    .eq('blocker', normalizeUsername(username));
 
   if (error) {
     console.error('[DB] getBlockedUsers error:', error.message);
@@ -23,8 +24,8 @@ export async function isUserBlocked(blocker: string, blocked: string): Promise<b
   const { data, error } = await supabase
     .from('blocks')
     .select('blocker')
-    .eq('blocker', blocker.toLowerCase())
-    .eq('blocked', blocked.toLowerCase())
+    .eq('blocker', normalizeUsername(blocker))
+    .eq('blocked', normalizeUsername(blocked))
     .single();
 
   if (error) {
@@ -39,8 +40,8 @@ export async function isUserBlocked(blocker: string, blocked: string): Promise<b
 
 export async function blockUser(blocker: string, blocked: string): Promise<boolean> {
   const { error } = await supabase.from('blocks').insert({
-    blocker: blocker.toLowerCase(),
-    blocked: blocked.toLowerCase(),
+    blocker: normalizeUsername(blocker),
+    blocked: normalizeUsername(blocked),
   });
 
   if (error) {
@@ -54,8 +55,8 @@ export async function unblockUser(blocker: string, blocked: string): Promise<boo
   const { error } = await supabase
     .from('blocks')
     .delete()
-    .eq('blocker', blocker.toLowerCase())
-    .eq('blocked', blocked.toLowerCase());
+    .eq('blocker', normalizeUsername(blocker))
+    .eq('blocked', normalizeUsername(blocked));
 
   if (error) {
     console.error('[DB] unblockUser error:', error.message);

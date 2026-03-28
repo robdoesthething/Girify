@@ -10,6 +10,7 @@ import type {
   BadgeStatsUpdate,
   ShopItemRow,
 } from '../../types/supabase';
+import { normalizeUsername } from '../../utils/format';
 import { supabase } from '../supabase';
 
 // ============================================================================
@@ -20,7 +21,7 @@ export async function getBadgeStats(username: string): Promise<BadgeStatsRow | n
   const { data, error } = await supabase
     .from('badge_stats')
     .select('*')
-    .eq('username', username.toLowerCase())
+    .eq('username', normalizeUsername(username))
     .single();
 
   if (error) {
@@ -39,7 +40,7 @@ export async function upsertBadgeStats(
 ): Promise<boolean> {
   const { error } = await supabase
     .from('badge_stats')
-    .upsert({ username: username.toLowerCase(), ...stats }, { onConflict: 'username' });
+    .upsert({ username: normalizeUsername(username), ...stats }, { onConflict: 'username' });
 
   if (error) {
     console.error('[DB] upsertBadgeStats error:', error.message);
@@ -182,7 +183,7 @@ export async function getUserPurchasedBadges(username: string): Promise<string[]
   const { data, error } = await supabase
     .from('purchased_badges')
     .select('badge_id')
-    .eq('username', username.toLowerCase());
+    .eq('username', normalizeUsername(username));
 
   if (error) {
     console.error('[DB] getUserPurchasedBadges error:', error.message);
@@ -193,7 +194,7 @@ export async function getUserPurchasedBadges(username: string): Promise<string[]
 
 export async function addPurchasedBadge(username: string, badgeId: string): Promise<boolean> {
   const { error } = await supabase.from('purchased_badges').insert({
-    username: username.toLowerCase(),
+    username: normalizeUsername(username),
     badge_id: badgeId,
   });
 
