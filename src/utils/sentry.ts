@@ -2,6 +2,7 @@
  * Lazy Sentry initialization.
  * Loads @sentry/react asynchronously after the app renders
  * to avoid blocking the critical rendering path.
+ * Uses named imports to enable tree-shaking of unused Sentry modules.
  */
 export async function initSentry(): Promise<void> {
   const dsn = import.meta.env.VITE_SENTRY_DSN;
@@ -9,20 +10,12 @@ export async function initSentry(): Promise<void> {
     return;
   }
 
-  const Sentry = await import('@sentry/react');
+  const { init, browserTracingIntegration } = await import('@sentry/react');
 
-  Sentry.init({
+  init({
     dsn,
-    integrations: [
-      Sentry.browserTracingIntegration(),
-      Sentry.replayIntegration({
-        maskAllText: false,
-        blockAllMedia: false,
-      }),
-    ],
+    integrations: [browserTracingIntegration()],
     tracesSampleRate: 1.0,
-    replaysSessionSampleRate: 0.1,
-    replaysOnErrorSampleRate: 1.0,
   });
 }
 
@@ -34,8 +27,8 @@ export async function captureException(
   extra?: Record<string, unknown>
 ): Promise<void> {
   try {
-    const Sentry = await import('@sentry/react');
-    Sentry.captureException(error, { extra });
+    const { captureException: sentryCaptureException } = await import('@sentry/react');
+    sentryCaptureException(error, { extra });
   } catch {
     // Sentry not available — silently ignore
   }
