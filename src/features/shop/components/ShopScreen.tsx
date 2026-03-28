@@ -3,7 +3,7 @@ import React, { useCallback, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTopBarNav } from '../../../hooks/useTopBarNav';
 import TopBar from '../../../components/TopBar';
-import { Button, Heading, PageHeader, Spinner, Tabs, Text } from '../../../components/ui';
+import { Button, Heading, PageHeader, Tabs, Text } from '../../../components/ui';
 import { useTheme } from '../../../context/ThemeContext';
 import { useTabs } from '../../../hooks/useTabs';
 import { useToast } from '../../../hooks/useToast';
@@ -163,8 +163,26 @@ const ShopScreen: React.FC<ShopScreenProps> = ({ username }) => {
 
           {/* Content */}
           {loading ? (
-            <div className="flex justify-center py-16">
-              <Spinner size="lg" />
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 pb-20 animate-pulse">
+              {[...Array(8)].map((_, i) => (
+                <div
+                  key={i}
+                  className={`rounded-2xl p-4 flex flex-col items-center gap-3 ${themeClasses(theme, 'bg-slate-800', 'bg-white border border-slate-200')}`}
+                >
+                  <div
+                    className={`w-16 h-16 rounded-2xl ${themeClasses(theme, 'bg-slate-700', 'bg-slate-200')}`}
+                  />
+                  <div
+                    className={`h-3 w-20 rounded ${themeClasses(theme, 'bg-slate-700', 'bg-slate-200')}`}
+                  />
+                  <div
+                    className={`h-2 w-28 rounded ${themeClasses(theme, 'bg-slate-700', 'bg-slate-200')}`}
+                  />
+                  <div
+                    className={`h-8 w-full rounded-xl mt-auto ${themeClasses(theme, 'bg-slate-700', 'bg-slate-200')}`}
+                  />
+                </div>
+              ))}
             </div>
           ) : !username ? (
             <div className="flex flex-col items-center justify-center py-20 text-center">
