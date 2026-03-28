@@ -225,13 +225,13 @@ const SummaryScreen: React.FC<SummaryScreenProps> = ({
           <div className="flex gap-3 w-full">
             <button
               onClick={handleShare}
-              className="flex-1 py-4 bg-white/5 hover:bg-white/10 border border-white/10 text-white rounded-2xl font-bold text-sm transition-all"
+              className="flex-1 py-4 bg-white/5 hover:bg-white/10 active:scale-95 border border-white/10 text-white rounded-2xl font-bold text-sm transition-all"
             >
               {shareStatus || `🎁 ${t('share') || 'Share & Earn'}`}
             </button>
             <button
               onClick={handleNext}
-              className="flex-[2] py-4 bg-sky-500 hover:bg-sky-400 text-white rounded-2xl shadow-xl shadow-sky-500/20 font-bold text-lg transition-all transform hover:scale-[1.02]"
+              className="flex-[2] py-4 bg-sky-500 hover:bg-sky-400 active:scale-95 text-white rounded-2xl shadow-xl shadow-sky-500/20 font-bold text-lg transition-all transform hover:scale-[1.02]"
             >
               {t('next') || 'Next'}
             </button>
@@ -286,7 +286,7 @@ const SummaryScreen: React.FC<SummaryScreenProps> = ({
 
           <button
             onClick={handleShare}
-            className="w-full py-5 bg-gradient-to-r from-emerald-500 to-sky-500 hover:from-emerald-400 hover:to-sky-400 text-white rounded-2xl shadow-2xl font-black text-lg transition-all transform hover:scale-[1.02] mb-4 flex items-center justify-center gap-3 group"
+            className="w-full py-5 bg-gradient-to-r from-emerald-500 to-sky-500 hover:from-emerald-400 hover:to-sky-400 active:scale-95 text-white rounded-2xl shadow-2xl font-black text-lg transition-all transform hover:scale-[1.02] mb-4 flex items-center justify-center gap-3 group"
           >
             <span className="text-2xl group-hover:rotate-12 transition-transform">🎁</span>
             <div className="flex flex-col items-start leading-none">
@@ -299,7 +299,7 @@ const SummaryScreen: React.FC<SummaryScreenProps> = ({
 
           <button
             onClick={onRestart}
-            className="w-full py-4 rounded-xl font-bold text-lg uppercase tracking-wider transition-all
+            className="w-full py-4 rounded-xl font-bold text-lg uppercase tracking-wider transition-all active:scale-95
                bg-slate-800 text-slate-300 hover:bg-slate-700 hover:text-white border border-slate-700 hover:border-slate-500 glass-button mb-6"
           >
             🔄 {t('playAgain') || 'Play Again'}
