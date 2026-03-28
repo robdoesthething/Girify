@@ -95,6 +95,17 @@ const SummaryScreen: React.FC<SummaryScreenProps> = ({
     }
   }, [streak]);
 
+  const getScoreColor = () => {
+    const ratio = score / maxPossibleScore;
+    if (ratio >= UI.PERFORMANCE_THRESHOLDS.GOOD) {
+      return 'text-emerald-400';
+    }
+    if (ratio >= UI.PERFORMANCE_THRESHOLDS.FAIR) {
+      return 'text-amber-400';
+    }
+    return 'text-red-400';
+  };
+
   const getGreeting = () => {
     const ratio = score / maxPossibleScore;
 
@@ -235,7 +246,7 @@ const SummaryScreen: React.FC<SummaryScreenProps> = ({
                 Score
               </span>
               <div className="flex flex-col items-center">
-                <span className="text-4xl md:text-5xl font-black text-emerald-400 leading-none">
+                <span className={`text-4xl md:text-5xl font-black leading-none ${getScoreColor()}`}>
                   {score}
                 </span>
                 <span className="text-sm font-bold text-slate-400 mt-1">
