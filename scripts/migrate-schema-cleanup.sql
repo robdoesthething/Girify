@@ -40,24 +40,24 @@ DROP POLICY IF EXISTS "Users can view friendships they're part of" ON friendship
 CREATE POLICY "Users can view friendships they're part of" ON friendships
   FOR SELECT TO authenticated
   USING (
-    auth.uid() = (SELECT supabase_uid FROM users WHERE username = friendships.user1) OR
-    auth.uid() = (SELECT supabase_uid FROM users WHERE username = friendships.user2)
+    auth.uid() = (SELECT supabase_uid FROM users WHERE username = friendships.user_a) OR
+    auth.uid() = (SELECT supabase_uid FROM users WHERE username = friendships.user_b)
   );
 
 DROP POLICY IF EXISTS "Users can create friendships involving themselves" ON friendships;
 CREATE POLICY "Users can create friendships involving themselves" ON friendships
   FOR INSERT TO authenticated
   WITH CHECK (
-    auth.uid() = (SELECT supabase_uid FROM users WHERE username = friendships.user1) OR
-    auth.uid() = (SELECT supabase_uid FROM users WHERE username = friendships.user2)
+    auth.uid() = (SELECT supabase_uid FROM users WHERE username = friendships.user_a) OR
+    auth.uid() = (SELECT supabase_uid FROM users WHERE username = friendships.user_b)
   );
 
 DROP POLICY IF EXISTS "Users can delete friendships they're part of" ON friendships;
 CREATE POLICY "Users can delete friendships they're part of" ON friendships
   FOR DELETE TO authenticated
   USING (
-    auth.uid() = (SELECT supabase_uid FROM users WHERE username = friendships.user1) OR
-    auth.uid() = (SELECT supabase_uid FROM users WHERE username = friendships.user2)
+    auth.uid() = (SELECT supabase_uid FROM users WHERE username = friendships.user_a) OR
+    auth.uid() = (SELECT supabase_uid FROM users WHERE username = friendships.user_b)
   );
 
 -- friend_requests
