@@ -73,7 +73,7 @@ const ShopItemCard: React.FC<ShopItemCardProps> = memo(
 
     return (
       <Card
-        className={`relative flex flex-col !p-4 transition-all h-full ${cardClasses} bg-white/50 dark:bg-slate-800/50 backdrop-blur-sm`}
+        className={`relative flex flex-col !p-4 transition-all h-full hover:shadow-lg hover:-translate-y-0.5 ${cardClasses} bg-white/50 dark:bg-slate-800/50 backdrop-blur-sm`}
       >
         {/* Locked Overlay */}
         {isLocked && !isOwned && (
