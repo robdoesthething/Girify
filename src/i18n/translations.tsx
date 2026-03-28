@@ -251,7 +251,7 @@ const translations: Translations = {
     replay: 'Replay',
     new: 'NEW',
     achievementUnlocked: 'Achievement Unlocked!',
-    okay: 'Okay',
+    okay: 'Got it',
     daysStreak: 'Days',
 
     // Landing Page
