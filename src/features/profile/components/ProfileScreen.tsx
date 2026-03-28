@@ -3,7 +3,7 @@ import React, { useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTopBarNav } from '../../../hooks/useTopBarNav';
 import TopBar from '../../../components/TopBar';
-import { Button, Card, Heading, PageHeader, Spinner, Text } from '../../../components/ui';
+import { Button, Card, Heading, PageHeader, Text } from '../../../components/ui';
 import { useTheme } from '../../../context/ThemeContext';
 import { updateUserProfile } from '../../../utils/social';
 import { themeClasses } from '../../../utils/themeUtils';
@@ -129,8 +129,32 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ username }) => {
           />
 
           {state.loading && (
-            <div className="py-20 flex justify-center">
-              <Spinner size="lg" />
+            <div className="flex flex-col items-center animate-pulse">
+              {/* Avatar skeleton */}
+              <div
+                className={`w-28 h-28 rounded-full mb-4 ${themeClasses(theme, 'bg-slate-700', 'bg-slate-200')}`}
+              />
+              {/* Title badge skeleton */}
+              <div
+                className={`h-5 w-24 rounded-full mb-3 ${themeClasses(theme, 'bg-slate-700', 'bg-slate-200')}`}
+              />
+              {/* Username skeleton */}
+              <div
+                className={`h-6 w-40 rounded mb-2 ${themeClasses(theme, 'bg-slate-700', 'bg-slate-200')}`}
+              />
+              {/* Join date skeleton */}
+              <div
+                className={`h-3 w-28 rounded mb-8 ${themeClasses(theme, 'bg-slate-700', 'bg-slate-200')}`}
+              />
+              {/* Stats grid skeleton */}
+              <div className="grid grid-cols-3 gap-3 w-full max-w-sm">
+                {[...Array(3)].map((_, i) => (
+                  <div
+                    key={i}
+                    className={`h-20 rounded-2xl ${themeClasses(theme, 'bg-slate-800', 'bg-slate-100')}`}
+                  />
+                ))}
+              </div>
             </div>
           )}
 
