@@ -177,7 +177,7 @@ describe('useGamePersistence Integration Tests', () => {
     expect(gameService.endGame).toHaveBeenCalled();
     expect(insertGameResult).toHaveBeenCalledWith(
       expect.objectContaining({
-        user_id: 'testuser',
+        username: 'testuser',
         score: 7500,
         correct_answers: 8,
       })

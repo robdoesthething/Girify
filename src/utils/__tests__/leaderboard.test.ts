@@ -50,7 +50,7 @@ describe('Leaderboard Service', () => {
       const mockData = [
         {
           id: '1',
-          user_id: 'User1',
+          username: 'User1',
           score: 1800,
           time_taken: 8.0,
           played_at: '2024-01-01T10:00:00Z',
@@ -58,7 +58,7 @@ describe('Leaderboard Service', () => {
         },
         {
           id: '2',
-          user_id: 'User1',
+          username: 'User1',
           score: 1700,
           time_taken: 9.0,
           played_at: '2024-01-01T09:00:00Z',
@@ -74,7 +74,7 @@ describe('Leaderboard Service', () => {
 
       expect(mockSupabase.from).toHaveBeenCalledWith('game_results');
       expect(mockQueryBuilder.select).toHaveBeenCalledWith(
-        'id, user_id, score, time_taken, played_at'
+        'id, username, score, time_taken, played_at'
       );
 
       // Deduplication logic: Both scores are same day, should take best (1800)
