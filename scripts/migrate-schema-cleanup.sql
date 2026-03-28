@@ -39,18 +39,10 @@ CREATE INDEX IF NOT EXISTS game_results_username_idx ON game_results(username);
 -- 2. Drop users.uid (legacy Firebase UID — fully replaced by supabase_uid)
 -- ============================================================================
 
--- Safety check: copy any non-null uid values to supabase_uid where supabase_uid is still null.
--- Only copies rows where uid is a valid UUID (Supabase Auth format).
--- Firebase UIDs are not UUIDs and are intentionally skipped — they cannot be used as supabase_uid.
-UPDATE users
-SET supabase_uid = uid::uuid
-WHERE supabase_uid IS NULL
-  AND uid IS NOT NULL
-  AND uid ~ '^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$'
-  AND NOT EXISTS (
-    SELECT 1 FROM users u2
-    WHERE u2.supabase_uid = uid::uuid
-  );
+-- Note: no data copy needed. Any user with a valid Supabase UID already has supabase_uid
+-- populated via authSyncHelpers.ts at login time. The uid column contains Firebase UIDs
+-- for old unmigrated users — those are text strings (not UUIDs) and cannot be used as
+-- supabase_uid. Those users will get supabase_uid linked on their next login.
 
--- Now safe to drop the column
+-- Drop the column
 ALTER TABLE users DROP COLUMN IF EXISTS uid;
