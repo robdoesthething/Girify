@@ -1,3 +1,7 @@
+# Autoresearch experiment log (intentionally untracked)
+results.tsv
+run.log
+
 # Logs
 logs
 *.log
