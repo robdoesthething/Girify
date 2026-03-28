@@ -80,7 +80,7 @@ const translations: Translations = {
     hints: 'HINTS',
     revealHint: 'Reveal Hint',
     nextQuestion: 'Next Question',
-    finishQuiz: 'Finish Quiz',
+    finishQuiz: 'See Results',
 
     // Instructions
     howToPlay: 'How to Play',
