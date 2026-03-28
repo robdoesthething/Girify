@@ -106,6 +106,20 @@ const SummaryScreen: React.FC<SummaryScreenProps> = ({
     return 'text-red-400';
   };
 
+  const getScoreTier = () => {
+    const ratio = score / maxPossibleScore;
+    if (ratio >= UI.PERFORMANCE_THRESHOLDS.EXCELLENT) {
+      return 'Street Expert';
+    }
+    if (ratio >= UI.PERFORMANCE_THRESHOLDS.GOOD) {
+      return 'City Local';
+    }
+    if (ratio >= UI.PERFORMANCE_THRESHOLDS.FAIR) {
+      return 'Local Knowledge';
+    }
+    return 'Keep Wandering';
+  };
+
   const getGreeting = () => {
     const ratio = score / maxPossibleScore;
 
@@ -251,6 +265,11 @@ const SummaryScreen: React.FC<SummaryScreenProps> = ({
                 </span>
                 <span className="text-sm font-bold text-slate-400 mt-1">
                   / {maxPossibleScore} {t('pts')}
+                </span>
+                <span
+                  className={`text-[10px] font-bold uppercase tracking-wider mt-1 ${getScoreColor()} opacity-70`}
+                >
+                  {getScoreTier()}
                 </span>
               </div>
             </div>
