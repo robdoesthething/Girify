@@ -20,7 +20,13 @@ const RequestsList: React.FC<RequestsListProps> = ({
   const { theme } = useTheme();
 
   if (requests.length === 0) {
-    return <p className="text-center py-10 opacity-50">No pending requests.</p>;
+    return (
+      <div className="text-center py-10 flex flex-col items-center gap-2 opacity-60">
+        <span className="text-4xl">✉️</span>
+        <p className="font-bold text-sm font-inter">No pending requests.</p>
+        <p className="text-xs font-inter">When someone adds you, they&apos;ll appear here.</p>
+      </div>
+    );
   }
 
   return (
@@ -46,7 +52,7 @@ const RequestsList: React.FC<RequestsListProps> = ({
                 className={`px-3 py-1 rounded text-xs font-bold transition-opacity ${themeClasses(theme, 'bg-slate-200', 'bg-slate-800')} ${isProcessing ? 'opacity-50 cursor-not-allowed' : ''}`}
                 type="button"
               >
-                {isDeclining ? 'Ignoring...' : 'Ignore'}
+                {isDeclining ? 'Ignoring...' : 'Not now'}
               </button>
               <button
                 onClick={() => onAccept(req.from)}
