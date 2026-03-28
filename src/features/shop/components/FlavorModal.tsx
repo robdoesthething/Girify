@@ -68,8 +68,19 @@ const FlavorModal: React.FC<FlavorModalProps> = ({
       }
     >
       <div className="flex flex-col items-center text-center">
-        <div className="w-20 h-20 mx-auto rounded-full flex items-center justify-center text-5xl mb-4 overflow-hidden bg-slate-100 dark:bg-slate-800">
-          {item.image ? (
+        <div
+          className={`w-20 h-20 mx-auto flex items-center justify-center text-5xl mb-4 ${item.cssClass ? '' : 'rounded-full overflow-hidden bg-slate-100 dark:bg-slate-800'}`}
+        >
+          {item.cssClass ? (
+            <div className={`w-full h-full rounded-full overflow-hidden ${item.cssClass}`}>
+              <img
+                src="/assets/pixel_avatar_guiri.png"
+                alt="Frame preview"
+                className="w-full h-full object-cover"
+                style={{ imageRendering: 'pixelated' }}
+              />
+            </div>
+          ) : item.image ? (
             <img
               src={item.image}
               alt={item.name}

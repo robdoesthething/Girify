@@ -255,11 +255,11 @@
       "id": "badge_pickpocket_proof",
       "name": "Pickpocket Proof",
       "cost": 1000,
-      "prefix": "💼",
+      "prefix": "💎",
       "category": "high_roller",
       "description": "Secure belongings.",
       "flavorText": "Your wallet is safe. Your dignity? Debatable.",
-      "image": "/assets/pixel_briefcase.png"
+      "image": "/assets/pixel_diamond.png"
     },
     {
       "id": "badge_scooter_menace",

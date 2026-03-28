@@ -40,10 +40,16 @@ const ShopItemCard: React.FC<ShopItemCardProps> = memo(
 
     const renderItemIcon = () => {
       if (item.cssClass) {
+        // Frame preview: show the default avatar inside the ring so users can see how it looks
         return (
-          <div
-            className={`w-14 h-14 rounded-full bg-slate-400 dark:bg-slate-600 ${item.cssClass}`}
-          />
+          <div className={`w-14 h-14 rounded-full overflow-hidden ${item.cssClass}`}>
+            <img
+              src="/assets/pixel_avatar_guiri.png"
+              alt="Frame preview"
+              className="w-full h-full object-cover"
+              style={{ imageRendering: 'pixelated' }}
+            />
+          </div>
         );
       }
       if (item.image) {
@@ -87,7 +93,7 @@ const ShopItemCard: React.FC<ShopItemCardProps> = memo(
                 onTitleClick?.();
               }
             }}
-            className={`w-16 h-16 mb-3 flex items-center justify-center text-3xl relative overflow-hidden shrink-0 rounded-2xl bg-transparent ${activeTab === 'titles' ? 'cursor-pointer hover:scale-105 transition-transform' : ''}`}
+            className={`w-16 h-16 mb-3 flex items-center justify-center text-3xl relative shrink-0 rounded-2xl bg-transparent ${activeTab === 'titles' ? 'cursor-pointer hover:scale-105 transition-transform' : ''}`}
           >
             {renderItemIcon()}
           </div>
