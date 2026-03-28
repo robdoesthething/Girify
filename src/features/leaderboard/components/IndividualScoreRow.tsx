@@ -60,7 +60,7 @@ const IndividualScoreRow: React.FC<IndividualScoreRowProps> = ({
         }
       }}
       className={`flex items-center justify-between p-4 rounded-2xl border cursor-pointer transition-all hover:scale-[1.02]
-        ${isMe ? 'border-sky-500 bg-sky-500/10 shadow-lg shadow-sky-500/10' : themeClasses(theme, 'bg-slate-800 border-slate-700 hover:border-slate-600', 'bg-white border-slate-200 hover:border-sky-200 shadow-sm')}
+        ${isMe ? 'border-sky-500 bg-sky-500/10 shadow-lg shadow-sky-500/10 hover:bg-sky-500/20 hover:shadow-sky-500/30' : themeClasses(theme, 'bg-slate-800 border-slate-700 hover:border-slate-600', 'bg-white border-slate-200 hover:border-sky-200 shadow-sm')}
       `}
     >
       <div className="flex items-center gap-4">
