@@ -30,16 +30,26 @@ const formatRelativeTime = (seconds: number): string => {
 
 const FeedList: React.FC<FeedListProps> = ({ feed, friends, onTabChange, t }) => {
   if (feed.length === 0) {
+    const hasFriends = friends.length > 0;
     return (
-      <div className="text-center py-10 opacity-50">
-        <p>No recent activity from friends.</p>
-        <button
-          onClick={() => onTabChange('friends')}
-          className="text-sky-500 font-bold mt-2 hover:underline"
-          type="button"
-        >
-          Add some friends!
-        </button>
+      <div className="text-center py-12 flex flex-col items-center gap-3">
+        <span className="text-5xl">📡</span>
+        <p className="font-bold text-base font-inter">
+          {hasFriends ? 'No activity yet.' : 'No friends yet.'}
+        </p>
+        <p className="text-sm opacity-60 font-inter">
+          {hasFriends ? (
+            'Play a round and get on the board.'
+          ) : (
+            <button
+              onClick={() => onTabChange('friends')}
+              className="text-sky-500 font-bold hover:underline"
+              type="button"
+            >
+              Add some friends to see their activity!
+            </button>
+          )}
+        </p>
       </div>
     );
   }
