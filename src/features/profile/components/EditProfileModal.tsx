@@ -80,7 +80,7 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({
                 <button
                   key={avatar.id}
                   onClick={() => setSelectedAvatarId(avatar.id)}
-                  className={`aspect-square rounded-xl overflow-hidden border-2 transition-all relative ${
+                  className={`aspect-square rounded-xl overflow-hidden border-2 transition-all active:scale-95 relative ${
                     isSelected
                       ? 'border-sky-500 ring-2 ring-sky-500/30 ring-offset-2 dark:ring-offset-slate-900'
                       : 'border-transparent hover:border-slate-300 dark:hover:border-slate-600'
@@ -117,7 +117,7 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({
                 <button
                   key={frame.id}
                   onClick={() => setSelectedFrameId(frame.id)}
-                  className={`aspect-square rounded-xl flex items-center justify-center border-2 transition-all relative ${
+                  className={`aspect-square rounded-xl flex items-center justify-center border-2 transition-all active:scale-95 relative ${
                     isSelected
                       ? 'border-sky-500 ring-2 ring-sky-500/30 ring-offset-2 dark:ring-offset-slate-900'
                       : 'border-transparent hover:border-slate-300 dark:hover:border-slate-600'
