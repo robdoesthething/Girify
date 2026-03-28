@@ -39,21 +39,21 @@ const Button: React.FC<ButtonProps> = ({
   // Variant classes
   const variantClasses: Record<ButtonVariant, string> = {
     primary: 'bg-sky-500 hover:bg-sky-600 text-white shadow-lg shadow-sky-500/20 active:scale-95',
-    secondary: themeClasses(
+    secondary: `active:scale-95 ${themeClasses(
       theme,
       'bg-slate-700 hover:bg-slate-600 text-white',
       'bg-slate-200 hover:bg-slate-300 text-slate-900'
-    ),
-    outline: themeClasses(
+    )}`,
+    outline: `active:scale-95 ${themeClasses(
       theme,
       'border-2 border-slate-600 hover:bg-slate-800 text-white',
       'border-2 border-slate-300 hover:bg-slate-100 text-slate-900'
-    ),
-    ghost: themeClasses(
+    )}`,
+    ghost: `active:scale-95 ${themeClasses(
       theme,
       'hover:bg-slate-800 text-slate-300',
       'hover:bg-slate-100 text-slate-600'
-    ),
+    )}`,
     danger: 'bg-red-500 hover:bg-red-600 text-white shadow-lg shadow-red-500/20 active:scale-95',
   };
 
