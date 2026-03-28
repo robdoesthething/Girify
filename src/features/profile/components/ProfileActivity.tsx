@@ -25,7 +25,11 @@ const ProfileActivity: React.FC<ProfileActivityProps> = ({ history, isLoading = 
     <div className="p-6 border-b border-slate-100 dark:border-slate-800">
       <h3 className="font-bold text-lg mb-4 text-sky-500 font-inter">{t('recentActivity')}</h3>
       {history.length === 0 ? (
-        <p className="text-center py-4 opacity-50 text-sm font-inter">No recent games</p>
+        <div className="text-center py-6 flex flex-col items-center gap-1 opacity-60">
+          <span className="text-3xl">🎮</span>
+          <p className="font-bold text-sm font-inter">No games yet.</p>
+          <p className="text-xs font-inter">This player hasn&apos;t played yet.</p>
+        </div>
       ) : (
         <div className="space-y-4">
           {history.slice(0, RECENT_GAMES_LIMIT).map((game, i) => (
