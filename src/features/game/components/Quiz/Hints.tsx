@@ -36,7 +36,7 @@ const Hints: React.FC<HintsProps> = ({ hintStreets, hintsRevealed, onReveal, fee
           {canReveal && (
             <button
               onClick={onReveal}
-              className="text-sky-500 hover:text-sky-600 transition-colors text-[10px] md:text-xs font-inter"
+              className="text-[10px] md:text-xs font-bold font-inter px-2 py-0.5 rounded-full bg-sky-500/10 text-sky-500 hover:bg-sky-500/20 active:scale-95 transition-all"
               type="button"
             >
               {t('revealHint')}
