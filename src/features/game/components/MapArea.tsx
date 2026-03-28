@@ -191,7 +191,11 @@ const MapArea: React.FC<MapAreaProps> = ({
                 lineCap: 'round',
                 lineJoin: 'round',
               }}
-            />
+            >
+              <Tooltip sticky className="font-bold text-xs font-inter">
+                Near: {street.name}
+              </Tooltip>
+            </Polyline>
           ))}
 
           {geometry && (
