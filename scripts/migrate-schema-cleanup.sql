@@ -46,7 +46,11 @@ UPDATE users
 SET supabase_uid = uid::uuid
 WHERE supabase_uid IS NULL
   AND uid IS NOT NULL
-  AND uid ~ '^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$';
+  AND uid ~ '^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$'
+  AND NOT EXISTS (
+    SELECT 1 FROM users u2
+    WHERE u2.supabase_uid = uid::uuid
+  );
 
 -- Now safe to drop the column
 ALTER TABLE users DROP COLUMN IF EXISTS uid;
