@@ -34,7 +34,7 @@ const PlayOverlay: FC = () => {
         </p>
         <button
           onClick={() => handlers.setupGame()}
-          className={`px-10 py-5 rounded-2xl text-white shadow-xl shadow-sky-500/20 transform hover:scale-105 transition-all duration-300 flex items-center justify-center mx-auto ${
+          className={`px-10 py-5 rounded-2xl text-white shadow-xl shadow-sky-500/20 transform hover:scale-105 active:scale-95 transition-all duration-300 flex items-center justify-center mx-auto ${
             playedToday
               ? 'bg-slate-700 hover:bg-slate-600'
               : 'bg-gradient-to-r from-sky-500 to-blue-600 hover:from-sky-400 hover:to-blue-500'
