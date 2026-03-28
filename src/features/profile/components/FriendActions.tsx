@@ -42,7 +42,7 @@ const FriendActions: React.FC<FriendActionsProps> = ({
       <button
         onClick={onAddFriend}
         disabled={isSendingRequest}
-        className="w-full py-4 bg-sky-500 hover:bg-sky-600 text-white rounded-xl font-bold transition-all disabled:opacity-50 shadow-lg shadow-sky-500/20"
+        className="w-full py-4 bg-sky-500 hover:bg-sky-600 active:scale-95 text-white rounded-xl font-bold transition-all disabled:opacity-50 shadow-lg shadow-sky-500/20"
         type="button"
       >
         {isSendingRequest ? 'Sending Friend Request...' : '👋 Add Friend'}
