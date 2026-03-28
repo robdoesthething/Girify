@@ -67,6 +67,7 @@ const Options: React.FC<OptionsProps> = ({
                 px-3 sm:px-5 rounded-2xl
                 text-center sm:text-left
                 transition-all duration-200
+                active:scale-95
                 relative overflow-hidden group
                 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500 focus-visible:ring-offset-2
                 ${btnClass}
