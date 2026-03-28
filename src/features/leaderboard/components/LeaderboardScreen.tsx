@@ -117,12 +117,39 @@ const LeaderboardScreen: React.FC<LeaderboardScreenProps> = ({ currentUser }) =>
 
   const renderContent = () => {
     if (loading) {
+      const skeletonWidths = [24, 28, 20, 32, 22, 26, 18, 30];
       return (
-        <div className="flex flex-col items-center justify-center py-20 opacity-50 space-y-4">
-          <div className="w-8 h-8 border-4 border-sky-500 border-t-transparent rounded-full animate-spin" />
-          <span className="text-xs uppercase tracking-widest font-bold font-inter">
-            {t('loadingRankings')}
-          </span>
+        <div className="space-y-2 pb-10">
+          {skeletonWidths.map((scoreW, i) => (
+            <div
+              key={i}
+              className={`flex items-center justify-between p-4 rounded-2xl border animate-pulse ${themeClasses(theme, 'bg-slate-800 border-slate-700', 'bg-white border-slate-200')}`}
+            >
+              <div className="flex items-center gap-4">
+                <div
+                  className={`w-8 h-8 rounded-full shrink-0 ${themeClasses(theme, 'bg-slate-700', 'bg-slate-200')}`}
+                />
+                <div className="space-y-2">
+                  <div
+                    className={`h-3 rounded ${themeClasses(theme, 'bg-slate-700', 'bg-slate-200')}`}
+                    style={{ width: `${60 + (i % 3) * 16}px` }}
+                  />
+                  <div
+                    className={`h-2 w-10 rounded ${themeClasses(theme, 'bg-slate-700', 'bg-slate-200')}`}
+                  />
+                </div>
+              </div>
+              <div className="flex flex-col items-end gap-2">
+                <div
+                  className={`h-5 rounded ${themeClasses(theme, 'bg-slate-700', 'bg-slate-200')}`}
+                  style={{ width: `${scoreW}px` }}
+                />
+                <div
+                  className={`h-2 w-8 rounded ${themeClasses(theme, 'bg-slate-700', 'bg-slate-200')}`}
+                />
+              </div>
+            </div>
+          ))}
         </div>
       );
     }
