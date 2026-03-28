@@ -11,6 +11,23 @@ interface FeedListProps {
   t: (key: string) => string;
 }
 
+const formatRelativeTime = (seconds: number): string => {
+  const diff = Math.floor(Date.now() / 1000) - seconds;
+  if (diff < 60) {
+    return 'Just now';
+  }
+  if (diff < 3600) {
+    return `${Math.floor(diff / 60)}m ago`;
+  }
+  if (diff < 86400) {
+    return `${Math.floor(diff / 3600)}h ago`;
+  }
+  if (diff < 604800) {
+    return `${Math.floor(diff / 86400)}d ago`;
+  }
+  return new Date(seconds * 1000).toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+};
+
 const FeedList: React.FC<FeedListProps> = ({ feed, friends, onTabChange, t }) => {
   if (feed.length === 0) {
     return (
@@ -54,7 +71,7 @@ const FeedList: React.FC<FeedListProps> = ({ feed, friends, onTabChange, t }) =>
                 </div>
                 <span className="text-xs text-slate-400">
                   {item.timestamp?.seconds
-                    ? new Date(item.timestamp.seconds * 1000).toLocaleDateString()
+                    ? formatRelativeTime(item.timestamp.seconds)
                     : 'Just now'}
                 </span>
               </div>
@@ -84,7 +101,7 @@ const FeedList: React.FC<FeedListProps> = ({ feed, friends, onTabChange, t }) =>
                 )}
                 <span className="text-xs text-slate-400 absolute top-4 right-4">
                   {item.timestamp?.seconds
-                    ? new Date(item.timestamp.seconds * 1000).toLocaleDateString()
+                    ? formatRelativeTime(item.timestamp.seconds)
                     : 'Just now'}
                 </span>
               </div>
@@ -114,7 +131,7 @@ const FeedList: React.FC<FeedListProps> = ({ feed, friends, onTabChange, t }) =>
                 </UserLink>
                 <span className="text-xs text-slate-400">
                   {item.timestamp?.seconds
-                    ? new Date(item.timestamp.seconds * 1000).toLocaleDateString()
+                    ? formatRelativeTime(item.timestamp.seconds)
                     : 'Just now'}
                 </span>
               </div>
