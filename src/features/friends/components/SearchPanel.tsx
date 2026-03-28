@@ -56,7 +56,7 @@ const SearchPanel: React.FC<SearchPanelProps> = ({
         <button
           type="submit"
           disabled={searching}
-          className="px-4 py-2 bg-sky-500 text-white font-bold rounded-lg text-sm disabled:opacity-50"
+          className="px-4 py-2 bg-sky-500 hover:bg-sky-600 active:scale-95 text-white font-bold rounded-lg text-sm disabled:opacity-50 transition-all"
         >
           {searching ? '...' : 'Search'}
         </button>
@@ -73,7 +73,7 @@ const SearchPanel: React.FC<SearchPanelProps> = ({
               <button
                 onClick={() => handleSend(u.username)}
                 disabled={successfulRequests.has(u.username)}
-                className={`text-xs px-3 py-1 rounded transition-colors font-bold
+                className={`text-xs px-3 py-1 rounded transition-all font-bold active:scale-95
                     ${
                       successfulRequests.has(u.username)
                         ? 'bg-emerald-500 text-white cursor-default'
