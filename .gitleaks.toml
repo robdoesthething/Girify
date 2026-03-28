@@ -1,0 +1,8 @@
+title = "Girify Secret Detection"
+
+[allowlist]
+  description = "Safe files that may contain placeholder values"
+  paths = [
+    ".env.template",
+    "src/utils/security.ts",
+  ]
