@@ -45,7 +45,7 @@ const RecentActivity: React.FC<RecentActivityProps> = ({ history }) => {
         <EmptyState
           emoji="🎮"
           title={t('noGamesYet') || 'No Games Yet'}
-          description="Play your first game to see your activity here!"
+          description="You haven't played yet. Today's challenge awaits."
           className="py-8"
         />
       ) : (
