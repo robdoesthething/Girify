@@ -11,8 +11,10 @@ interface FriendsListProps {
 const FriendsList: React.FC<FriendsListProps> = ({ friends, onRemove, onBlock }) => {
   if (friends.length === 0) {
     return (
-      <div className="text-center py-10 opacity-50">
-        <p>No friends yet. Search to add some!</p>
+      <div className="text-center py-12 flex flex-col items-center gap-3">
+        <span className="text-5xl">👥</span>
+        <p className="font-bold text-base font-inter">No friends yet.</p>
+        <p className="text-sm opacity-60 font-inter">Share your score and challenge someone!</p>
       </div>
     );
   }
