@@ -1,6 +1,8 @@
-# Autoresearch experiment log (intentionally untracked)
+# Autoresearch experiment logs (intentionally untracked)
 results.tsv
+quality-results.tsv
 run.log
+quality.log
 
 # Logs
 logs
