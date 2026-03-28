@@ -47,7 +47,11 @@ const ProfileAchievements: React.FC<ProfileAchievementsProps> = ({
           ))}
         </div>
       ) : (
-        <p className="text-sm opacity-50 text-center py-4">No achievements yet.</p>
+        <div className="text-center py-6 flex flex-col items-center gap-1 opacity-60">
+          <span className="text-3xl">🏅</span>
+          <p className="font-bold text-sm font-inter">No achievements yet.</p>
+          <p className="text-xs font-inter">Keep playing to earn them.</p>
+        </div>
       )}
     </div>
   );
