@@ -16,14 +16,9 @@ export const useGameStreaks = () => {
     try {
       const historyForStreak = storage.get<GameHistory[]>(STORAGE_KEYS.HISTORY, []);
       const streak = calculateStreak(historyForStreak.map(h => ({ ...h, date: Number(h.date) })));
-      const totalScore = historyForStreak.reduce(
-        (acc: number, h: GameHistory) => acc + (h.score || 0),
-        0
-      );
 
       await updateUserGameStats(username, {
         streak,
-        totalScore,
         lastPlayDate: String(getTodaySeed()),
         currentScore: score,
       });

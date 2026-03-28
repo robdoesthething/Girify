@@ -83,7 +83,6 @@ export interface AdditionalProfileData {
 
 export interface GameStatsUpdate {
   streak: number;
-  totalScore: number;
   lastPlayDate: string;
   currentScore?: number;
 }

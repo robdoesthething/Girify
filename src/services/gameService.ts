@@ -121,8 +121,12 @@ export async function endGame(
       };
     }
 
-    // Clean up Redis only after successful save
-    await redis.del(sessionKey);
+    // Clean up Redis — best-effort, insert already succeeded
+    try {
+      await redis.del(sessionKey);
+    } catch (cleanupError) {
+      logger.warn('Redis cleanup failed (insert already succeeded):', cleanupError);
+    }
 
     return { success: true, gameId };
   } catch (error) {

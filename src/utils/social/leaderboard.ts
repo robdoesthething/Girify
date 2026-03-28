@@ -62,25 +62,20 @@ export const getLeaderboard = async (
 ): Promise<ScoreEntry[]> => {
   try {
     // 1. Fetch from Supabase
-    // Start building the query
     let queryBuilder = supabase
       .from('game_results')
       .select('id, user_id, score, time_taken, played_at');
 
-    // Apply period filters (timestamp based usage of played_at)
     const now = new Date();
 
     if (period === 'daily') {
-      // Use Start of Day (UTC) to match standard daily leaderboard behavior
-      // This ensures games played "today" (universal time) are shown, rather than just last 24h
       const startOfDay = new Date(
         Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(), 0, 0, 0, 0)
       ).toISOString();
       debugLog(`[Leaderboard] Fetching Daily >= ${startOfDay}`);
       queryBuilder = queryBuilder.gte('played_at', startOfDay);
     } else if (period === 'weekly') {
-      // Calculate start of week (Monday) using UTC to match game save timestamps
-      const currentDayUTC = now.getUTCDay(); // 0 = Sunday
+      const currentDayUTC = now.getUTCDay();
       const distanceToMonday = currentDayUTC === 0 ? DAYS_IN_WEEK_MINUS_ONE : currentDayUTC - 1;
       const startOfWeek = new Date(
         Date.UTC(
@@ -96,7 +91,6 @@ export const getLeaderboard = async (
       debugLog(`[Leaderboard] Fetching Weekly >= ${startOfWeek}`);
       queryBuilder = queryBuilder.gte('played_at', startOfWeek);
     } else if (period === 'monthly') {
-      // Use UTC for consistent monthly boundaries
       const startOfMonth = new Date(
         Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1, 0, 0, 0, 0)
       ).toISOString();
@@ -104,10 +98,12 @@ export const getLeaderboard = async (
       queryBuilder = queryBuilder.gte('played_at', startOfMonth);
     }
 
-    // Apply ordering and limit LAST to ensure we filter the dataset first
-    queryBuilder = queryBuilder
-      .order('score', { ascending: false })
-      .limit(limitCount * FETCH_BUFFER_MULTIPLIER);
+    // Daily: limit before dedup (rows per day is bounded).
+    // Weekly/monthly/all: fetch all rows in the period, then aggregate — no pre-aggregation cap.
+    queryBuilder = queryBuilder.order('score', { ascending: false });
+    if (period === 'daily') {
+      queryBuilder = queryBuilder.limit(limitCount * FETCH_BUFFER_MULTIPLIER);
+    }
 
     const { data: rawData, error } = await queryBuilder;
 

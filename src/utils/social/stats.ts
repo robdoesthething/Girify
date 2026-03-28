@@ -6,10 +6,10 @@
 
 import {
   getUserGameHistory as dbGetUserGameHistory,
-  updateDistrictScore as dbUpdateDistrictScore,
   getUserByUsername,
   updateUser,
 } from '../../services/database';
+import { supabase } from '../../services/supabase';
 import { normalizeUsername } from '../format';
 import { getTeamLeaderboard } from './leaderboard';
 
@@ -23,7 +23,7 @@ import type { GameData, GameStatsUpdate } from './types';
  */
 export const updateUserGameStats = async (
   username: string,
-  { streak, totalScore, lastPlayDate, currentScore }: GameStatsUpdate
+  { streak, lastPlayDate, currentScore }: GameStatsUpdate
 ): Promise<void> => {
   if (!username) {
     return;
@@ -31,14 +31,22 @@ export const updateUserGameStats = async (
   const normalizedName = normalizeUsername(username);
 
   try {
-    const existingUser = await getUserByUsername(normalizedName);
+    const [existingUser, totalScoreResult] = await Promise.all([
+      getUserByUsername(normalizedName),
+      supabase
+        .from('game_results')
+        .select('score')
+        .eq('user_id', normalizedName)
+        .then(({ data }) => (data ?? []).reduce((sum, r) => sum + (r.score ?? 0), 0)),
+    ]);
+
     if (!existingUser) {
       return;
     }
 
     const updates: Record<string, unknown> = {
       games_played: (existingUser.games_played ?? 0) + 1,
-      total_score: totalScore,
+      total_score: totalScoreResult,
       streak: Math.min(streak, (existingUser.games_played ?? 0) + 1),
       last_play_date: lastPlayDate,
     };
@@ -52,10 +60,6 @@ export const updateUserGameStats = async (
     }
 
     await updateUser(normalizedName, updates);
-
-    if (existingUser.district && currentScore) {
-      await dbUpdateDistrictScore(existingUser.district, currentScore);
-    }
   } catch (e) {
     console.error('Error updating game stats:', e);
   }
@@ -89,19 +93,6 @@ export const getUserGameHistory = async (username: string): Promise<GameData[]> 
     console.error('Error fetching user game history:', e);
     return [];
   }
-};
-
-/**
- * Update district score
- * @param districtId - The district ID to update
- * @param score - The score to add
- * @returns Promise resolving when update is complete
- */
-export const updateDistrictScore = async (districtId: string, score: number): Promise<void> => {
-  if (!districtId || !score) {
-    return;
-  }
-  await dbUpdateDistrictScore(districtId, score);
 };
 
 /**

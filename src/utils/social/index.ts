@@ -43,12 +43,7 @@ export {
 } from './feedback';
 
 // Stats functions
-export {
-  getDistrictRankings,
-  getUserGameHistory,
-  updateDistrictScore,
-  updateUserGameStats,
-} from './stats';
+export { getDistrictRankings, getUserGameHistory, updateUserGameStats } from './stats';
 
 // Referral functions
 export { getReferrer, hasDailyReferral, recordReferral } from './referrals';
