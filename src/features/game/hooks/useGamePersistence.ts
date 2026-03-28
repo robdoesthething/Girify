@@ -31,7 +31,7 @@ const fallbackSaveScore = async (state: GameStateObject, avgTime: number): Promi
   try {
     debugLog(`[Fallback] Saving directly to DB...`);
     const { success, error } = await insertGameResult({
-      user_id: state.username,
+      username: state.username,
       score: state.score,
       time_taken: avgTime,
       correct_answers: state.correct,

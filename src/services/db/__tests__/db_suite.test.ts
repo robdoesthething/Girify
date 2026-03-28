@@ -130,7 +130,7 @@ describe('Database Integration Suite', () => {
 
       const { insertGameResult } = await import('../games');
       const result = await insertGameResult({
-        user_id: 'TestUser',
+        username: 'TestUser',
         score: 1000,
         time_taken: 10,
         correct_answers: 5,

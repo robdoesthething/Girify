@@ -102,7 +102,7 @@ export async function endGame(
 
     // Save to Supabase
     const { success, error } = await insertGameResult({
-      user_id: session.userId || null,
+      username: session.userId || null,
       score: finalScore,
       time_taken: finalTime,
       correct_answers: correctAnswers,

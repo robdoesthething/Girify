@@ -81,15 +81,12 @@ export const publishActivity = async (
 
   // Verify the current user owns this username
   const userProfile = await getUserByUsername(normalizedUsername);
-  if (!userProfile || (userProfile.supabase_uid && userProfile.supabase_uid !== currentUser.id)) {
-    // Fallback: check by uid for users who haven't migrated supabase_uid yet
-    if (!userProfile || userProfile.uid !== currentUser.id) {
-      console.error('[Activity] Auth failed: user does not own username', {
-        requested: normalizedUsername,
-        currentUid: currentUser.id,
-      });
-      return;
-    }
+  if (!userProfile || userProfile.supabase_uid !== currentUser.id) {
+    console.error('[Activity] Auth failed: user does not own username', {
+      requested: normalizedUsername,
+      currentUid: currentUser.id,
+    });
+    return;
   }
 
   try {

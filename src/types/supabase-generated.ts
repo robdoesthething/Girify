@@ -433,7 +433,7 @@ export type Database = {
           score: number;
           streak_at_play: number | null;
           time_taken: number | null;
-          user_id: string | null;
+          username: string | null;
         };
         Insert: {
           correct_answers?: number | null;
@@ -445,7 +445,7 @@ export type Database = {
           score: number;
           streak_at_play?: number | null;
           time_taken?: number | null;
-          user_id?: string | null;
+          username?: string | null;
         };
         Update: {
           correct_answers?: number | null;
@@ -457,12 +457,12 @@ export type Database = {
           score?: number;
           streak_at_play?: number | null;
           time_taken?: number | null;
-          user_id?: string | null;
+          username?: string | null;
         };
         Relationships: [
           {
-            foreignKeyName: 'game_results_user_id_fkey';
-            columns: ['user_id'];
+            foreignKeyName: 'game_results_username_fkey';
+            columns: ['username'];
             isOneToOne: false;
             referencedRelation: 'users';
             referencedColumns: ['username'];
@@ -737,7 +737,6 @@ export type Database = {
           theme: string | null;
           total_score: number | null;
           supabase_uid: string | null;
-          uid: string | null;
           updated_at: string | null;
           username: string;
         };
@@ -770,7 +769,6 @@ export type Database = {
           theme?: string | null;
           total_score?: number | null;
           supabase_uid?: string | null;
-          uid?: string | null;
           updated_at?: string | null;
           username: string;
         };
@@ -803,7 +801,6 @@ export type Database = {
           theme?: string | null;
           total_score?: number | null;
           supabase_uid?: string | null;
-          uid?: string | null;
           updated_at?: string | null;
           username?: string;
         };

@@ -17,7 +17,7 @@ const logger = createLogger('DB:Games');
 // ============================================================================
 
 export interface GameResultData {
-  user_id: string | null;
+  username: string | null;
   score: number;
   time_taken: number;
   correct_answers: number;
@@ -37,7 +37,7 @@ export async function insertGameResult(
   // Ensure username is normalized if present
   const payload = {
     ...data,
-    user_id: data.user_id ? normalizeUsername(data.user_id) : null,
+    username: data.username ? normalizeUsername(data.username) : null,
   };
 
   const { error } = await supabase.from('game_results').insert(payload);
@@ -58,7 +58,7 @@ export async function getUserGameHistory(username: string, limit = 30): Promise<
     supabase
       .from('game_results')
       .select('*')
-      .eq('user_id', normalizedUsername)
+      .eq('username', normalizedUsername)
       .order('played_at', { ascending: false })
       .limit(limit),
     'getUserGameHistory'

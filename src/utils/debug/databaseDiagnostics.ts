@@ -24,7 +24,7 @@ async function checkUserExists(username: string): Promise<DiagnosticResult> {
   const normalized = normalizeUsername(username);
   const { data, error } = await supabase
     .from('users')
-    .select('username, uid, games_played')
+    .select('username, supabase_uid, games_played')
     .eq('username', normalized)
     .single();
 
@@ -39,7 +39,7 @@ async function checkUserExists(username: string): Promise<DiagnosticResult> {
   return {
     check: 'User Profile',
     status: 'pass',
-    message: `User found: ${data.username} (UID: ${data.uid}, Games: ${data.games_played})`,
+    message: `User found: ${data.username} (UID: ${data.supabase_uid}, Games: ${data.games_played})`,
     data,
   };
 }
@@ -52,7 +52,7 @@ async function checkGameResults(username: string): Promise<DiagnosticResult> {
   const { data, error, count } = await supabase
     .from('game_results')
     .select('*', { count: 'exact' })
-    .eq('user_id', normalized)
+    .eq('username', normalized)
     .order('played_at', { ascending: false })
     .limit(5);
 

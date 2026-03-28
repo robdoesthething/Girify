@@ -19,7 +19,7 @@ export async function getUserByUsername(username: string): Promise<UserRow | nul
 
 export async function getUserByUid(uid: string): Promise<UserRow | null> {
   return executeQuery<UserRow>(
-    supabase.from('users').select('*').eq('uid', uid).single(),
+    supabase.from('users').select('*').eq('supabase_uid', uid).single(),
     'getUserByUid'
   );
 }

@@ -43,7 +43,7 @@ export interface ScoreEntry {
 // Database response interface
 interface DatabaseGameResult {
   id: number;
-  user_id: string | null;
+  username: string | null;
   score: number;
   time_taken: number | null;
   played_at: string | null;
@@ -64,7 +64,7 @@ export const getLeaderboard = async (
     // 1. Fetch from Supabase
     let queryBuilder = supabase
       .from('game_results')
-      .select('id, user_id, score, time_taken, played_at');
+      .select('id, username, score, time_taken, played_at');
 
     const now = new Date();
 
@@ -127,7 +127,7 @@ export const getLeaderboard = async (
     // 2. Transform to ScoreEntry format
     const scores: ScoreEntry[] = (rawData as DatabaseGameResult[]).map(row => ({
       id: String(row.id),
-      username: formatLeaderboardUsername(row.user_id),
+      username: formatLeaderboardUsername(row.username),
       score: row.score,
       time: row.time_taken ?? 0,
       date: row.played_at ? new Date(row.played_at).getTime() : undefined,

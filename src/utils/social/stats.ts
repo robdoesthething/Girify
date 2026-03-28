@@ -36,7 +36,7 @@ export const updateUserGameStats = async (
       supabase
         .from('game_results')
         .select('score')
-        .eq('user_id', normalizedName)
+        .eq('username', normalizedName)
         .then(({ data }) => (data ?? []).reduce((sum, r) => sum + (r.score ?? 0), 0)),
     ]);
 

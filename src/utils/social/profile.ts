@@ -30,7 +30,7 @@ export function rowToProfile(row: UserRow): UserProfile {
   return {
     id: row.username,
     username: row.username,
-    uid: row.uid,
+    uid: row.supabase_uid,
     email: row.email,
     realName: row.real_name || '',
     avatarId: row.avatar_id || undefined,
@@ -103,7 +103,6 @@ export const ensureUserProfile = async (
 
     const newUser = await createUser({
       username,
-      uid: uid,
       supabase_uid: uid,
       email: additionalData.email ? additionalData.email.toLowerCase().trim() : null,
       real_name: additionalData.realName || null,
@@ -144,9 +143,6 @@ export const ensureUserProfile = async (
 
   const updates: Record<string, unknown> = {};
 
-  if (uid && userDbRecord.uid !== uid) {
-    updates.uid = uid;
-  }
   if (uid && !userDbRecord.supabase_uid) {
     updates.supabase_uid = uid;
   }
@@ -319,7 +315,7 @@ export const migrateUser = async (oldUsername: string, newHandle: string): Promi
 
       await upsertUser({
         username: newHandle,
-        uid: oldUser.uid,
+        supabase_uid: oldUser.supabase_uid,
         email: oldUser.email,
         real_name: oldUser.real_name || oldUsername,
         avatar_id: oldUser.avatar_id,
@@ -344,7 +340,10 @@ export const migrateUser = async (oldUsername: string, newHandle: string): Promi
         team: oldUser.team,
       });
 
-      await supabase.from('game_results').update({ user_id: newHandle }).eq('user_id', oldUsername);
+      await supabase
+        .from('game_results')
+        .update({ username: newHandle })
+        .eq('username', oldUsername);
 
       console.warn(`[Migration] Successfully migrated ${oldUsername} to ${newHandle}`);
     }

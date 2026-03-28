@@ -52,7 +52,7 @@ export const getDashboardMetrics = async (forceRefresh = false): Promise<Dashboa
     // 3. Games Played (24h)
     const { data: recentGames, error: gamesError } = await supabase
       .from('game_results')
-      .select('user_id')
+      .select('username')
       .gte('played_at', yesterday);
 
     if (gamesError) {
@@ -64,8 +64,8 @@ export const getDashboardMetrics = async (forceRefresh = false): Promise<Dashboa
     // 4. Active Users (24h) - count distinct usernames
     const uniquePlayers = new Set<string>();
     recentGames?.forEach(game => {
-      if (game.user_id) {
-        uniquePlayers.add(game.user_id);
+      if (game.username) {
+        uniquePlayers.add(game.username);
       }
     });
     const activeUsers24h = uniquePlayers.size;
