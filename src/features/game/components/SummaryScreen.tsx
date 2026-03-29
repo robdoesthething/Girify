@@ -3,6 +3,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { STORAGE_KEYS, TIME, UI } from '../../../config/constants';
 import { getCuriosityByStreets } from '../../../data/curiosities';
+import { useAuth } from '../../auth/hooks/useAuth';
 import { QuizResult, Street } from '../../../types/game';
 import { GameHistory } from '../../../types/user';
 import { storage } from '../../../utils/storage';
@@ -32,17 +33,18 @@ const SummaryScreen: React.FC<SummaryScreenProps> = ({
   score,
   total,
   theme,
-  username,
   streak,
   onRestart,
+  quizResults,
   quizStreets,
   t,
 }) => {
   const navigate = useNavigate();
+  const { profile } = useAuth();
   const [view, setView] = useState<'curiosity' | 'actions'>('curiosity');
   const [shareStatus, setShareStatus] = useState<string | null>(null);
 
-  const maxPossibleScore = total * 100;
+  const maxPossibleScore = total * 1000;
   const curiosity = useMemo<Curiosity>(
     () =>
       getCuriosityByStreets(
@@ -153,25 +155,45 @@ const SummaryScreen: React.FC<SummaryScreenProps> = ({
 
   const handleNext = () => setView('actions');
 
-  const handleShare = async () => {
-    const baseUrl = 'https://girify.com';
-    const refCode = username ? username.toLowerCase().replace(/[^a-z0-9]/g, '') : '';
-    const shareUrl = refCode ? `${baseUrl}?ref=${refCode}` : baseUrl;
-    const text = `🌆 Girify Daily Challenge:\nScore: ${score}/${maxPossibleScore}\n\nCan you beat me? Play here: ${shareUrl} #Girify #Barcelona`;
+  const buildShareText = () => {
+    const epoch = new Date('2026-01-09');
+    const dayNumber = Math.floor((Date.now() - epoch.getTime()) / 86400000) + 1;
 
+    const squares = quizResults
+      .map(r => {
+        if (r.status === 'failed') {
+          return '⬛';
+        }
+        return r.points >= 700 ? '🟩' : '🟨';
+      })
+      .join('');
+
+    const formattedScore = score.toLocaleString('ca-ES');
+    const formattedMax = maxPossibleScore.toLocaleString('ca-ES');
+    const districtLine = profile?.team ? `🏙️ ${profile.team}\n` : '';
+    const streakLine = streakValue > 1 ? `🔥 ${streakValue} dies · ` : '';
+
+    return (
+      `Girify #${dayNumber} — Conec Barcelona?\n` +
+      `${squares}\n` +
+      `${formattedScore} / ${formattedMax}\n` +
+      `${districtLine}` +
+      `${streakLine}girify.vercel.app`
+    );
+  };
+
+  const handleShare = async () => {
+    const shareText = buildShareText();
     try {
       if (navigator.share) {
-        await navigator.share({
-          title: 'Girify - Barcelona Street Quiz',
-          text,
-        });
+        await navigator.share({ text: shareText });
       } else {
-        await navigator.clipboard.writeText(shareUrl);
-        setShareStatus('Copied!');
+        await navigator.clipboard.writeText(shareText);
+        setShareStatus(t('copied') || 'Copiat!');
         setTimeout(() => setShareStatus(null), TIME.SUMMARY_ANIMATION_DELAY);
       }
     } catch (e) {
-      console.error('Share failed:', e);
+      console.error('[Game] Share failed:', e);
     }
   };
 
