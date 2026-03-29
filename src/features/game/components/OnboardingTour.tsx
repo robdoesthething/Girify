@@ -103,7 +103,7 @@ const OnboardingTour: React.FC<OnboardingTourProps> = ({ onComplete }) => {
                 storage.set('girify_onboarding_completed', 'true');
                 onComplete();
               }}
-              className="px-6 py-4 font-bold opacity-50 hover:opacity-100 focus:opacity-100 transition-opacity outline-none focus:ring-2 focus:ring-sky-500 rounded-xl"
+              className="px-6 py-4 font-bold opacity-50 hover:opacity-100 focus:opacity-100 active:scale-95 transition-all outline-none focus:ring-2 focus:ring-sky-500 rounded-xl"
               type="button"
             >
               Skip
