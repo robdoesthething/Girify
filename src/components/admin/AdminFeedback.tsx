@@ -77,7 +77,7 @@ const AdminFeedback: React.FC<AdminFeedbackProps> = ({ feedback, onRefresh, noti
         <h2 className="text-3xl font-black">Feedback Management</h2>
         <button
           onClick={onRefresh}
-          className="px-4 py-2 bg-slate-200 dark:bg-slate-800 rounded-lg font-bold hover:bg-slate-300 dark:hover:bg-slate-700"
+          className="px-4 py-2 bg-slate-200 dark:bg-slate-800 rounded-lg font-bold hover:bg-slate-300 dark:hover:bg-slate-700 transition-all active:scale-95"
         >
           Refesh
         </button>
@@ -140,13 +140,13 @@ const AdminFeedback: React.FC<AdminFeedbackProps> = ({ feedback, onRefresh, noti
                       <>
                         <button
                           onClick={() => handleApprove(item.id)}
-                          className="px-3 py-1 bg-emerald-500/10 text-emerald-500 rounded hover:bg-emerald-500 hover:text-white transition-colors text-xs font-bold"
+                          className="px-3 py-1 bg-emerald-500/10 text-emerald-500 rounded hover:bg-emerald-500 hover:text-white transition-all active:scale-95 text-xs font-bold"
                         >
                           Approve
                         </button>
                         <button
                           onClick={() => handleReject(item.id)}
-                          className="px-3 py-1 bg-rose-500/10 text-rose-500 rounded hover:bg-rose-500 hover:text-white transition-colors text-xs font-bold"
+                          className="px-3 py-1 bg-rose-500/10 text-rose-500 rounded hover:bg-rose-500 hover:text-white transition-all active:scale-95 text-xs font-bold"
                         >
                           Reject
                         </button>
@@ -154,7 +154,7 @@ const AdminFeedback: React.FC<AdminFeedbackProps> = ({ feedback, onRefresh, noti
                     )}
                     <button
                       onClick={() => handleDelete(item.id)}
-                      className="px-3 py-1 bg-slate-500/10 text-slate-500 rounded hover:bg-slate-500 hover:text-white transition-colors text-xs font-bold"
+                      className="px-3 py-1 bg-slate-500/10 text-slate-500 rounded hover:bg-slate-500 hover:text-white transition-all active:scale-95 text-xs font-bold"
                     >
                       Delete
                     </button>
