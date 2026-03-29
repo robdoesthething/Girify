@@ -140,7 +140,14 @@ const IncomeConfig: React.FC<IncomeConfigProps> = ({ payouts, onSave, theme }) =
           />
         </div>
       ) : (
-        <p className="text-center opacity-50">Loading configuration...</p>
+        <div className="space-y-3 animate-pulse">
+          {Array.from({ length: 5 }).map((_, i) => (
+            <div key={i} className="flex items-center justify-between py-2">
+              <div className="h-3 w-32 rounded bg-slate-200 dark:bg-slate-700" />
+              <div className="h-8 w-24 rounded-lg bg-slate-200 dark:bg-slate-700" />
+            </div>
+          ))}
+        </div>
       )}
       {hasChanges && (
         <button
