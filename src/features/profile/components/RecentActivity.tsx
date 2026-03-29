@@ -6,6 +6,25 @@ import { getActivityClasses } from '../utils/profileHelpers';
 
 const HISTORY_LIMIT = 7;
 
+function formatRelativeDate(timestamp: number): string {
+  const now = Date.now();
+  const diff = now - timestamp;
+  const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+  if (days === 0) {
+    return 'Today';
+  }
+  if (days === 1) {
+    return 'Yesterday';
+  }
+  if (days < 7) {
+    return `${days} days ago`;
+  }
+  if (days < 30) {
+    return `${Math.floor(days / 7)} weeks ago`;
+  }
+  return new Date(timestamp).toLocaleDateString();
+}
+
 interface RecentActivityProps {
   history: GameHistory[];
 }
@@ -64,7 +83,7 @@ const RecentActivity: React.FC<RecentActivityProps> = ({ history }) => {
                     {t('dailyChallenge')}
                   </Text>
                   <Text variant="caption" className="!mb-0 mt-0.5" muted>
-                    {game.timestamp ? new Date(game.timestamp).toLocaleDateString() : 'Just now'}
+                    {game.timestamp ? formatRelativeDate(game.timestamp) : 'Just now'}
                   </Text>
                 </div>
                 <div className="text-right">
