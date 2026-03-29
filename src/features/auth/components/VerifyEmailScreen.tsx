@@ -46,7 +46,7 @@ const VerifyEmailScreen: React.FC<VerifyEmailScreenProps> = ({ theme }) => {
         <div className="space-y-4">
           <button
             onClick={() => window.location.reload()}
-            className="w-full py-3 bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl font-bold shadow-lg transition-all"
+            className="w-full py-3 bg-emerald-500 hover:bg-emerald-600 active:scale-95 text-white rounded-xl font-bold shadow-lg transition-all"
             type="button"
           >
             {t('iHaveVerified') || "I've Verified It!"}
@@ -55,7 +55,7 @@ const VerifyEmailScreen: React.FC<VerifyEmailScreenProps> = ({ theme }) => {
           <button
             onClick={handleResend}
             disabled={sent}
-            className="w-full py-3 bg-sky-500/10 text-sky-500 hover:bg-sky-500 hover:text-white rounded-xl font-bold transition-all"
+            className="w-full py-3 bg-sky-500/10 text-sky-500 hover:bg-sky-500 hover:text-white active:scale-95 rounded-xl font-bold transition-all"
             type="button"
           >
             {sent ? t('sent') : t('resendEmail') || 'Resend Email'}
