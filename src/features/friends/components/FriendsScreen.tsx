@@ -68,7 +68,7 @@ const FriendsScreen: React.FC<FriendsScreenProps> = ({ username }) => {
 
   const tabClass = (
     isActive: boolean
-  ) => `flex-1 py-3 text-sm font-bold uppercase tracking-wider transition-colors border-b-2
+  ) => `flex-1 py-3 text-sm font-bold uppercase tracking-wider transition-all active:scale-95 border-b-2
     ${
       isActive
         ? 'border-sky-500 text-sky-500'
