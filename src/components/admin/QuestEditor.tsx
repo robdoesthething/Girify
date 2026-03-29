@@ -173,7 +173,7 @@ const QuestEditor: React.FC<QuestEditorProps> = ({ initialQuest, onSave, onCance
 
       <button
         onClick={handleSubmit}
-        className="w-full py-3 bg-emerald-500 hover:bg-emerald-600 text-white font-bold rounded-xl shadow-lg shadow-emerald-500/20 transition-all"
+        className="w-full py-3 bg-emerald-500 hover:bg-emerald-600 text-white font-bold rounded-xl shadow-lg shadow-emerald-500/20 transition-all active:scale-95"
       >
         {initialQuest ? 'Save Changes' : 'Create Quest'}
       </button>
