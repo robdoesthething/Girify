@@ -19,7 +19,7 @@ const LanguageSettings: React.FC = () => {
             <button
               key={lang.code}
               onClick={() => changeLanguage(lang.code)}
-              className={`flex-1 py-2 px-3 rounded-lg text-sm font-medium transition-all font-inter ${getToggleButtonClass(theme, language === lang.code)}`}
+              className={`flex-1 py-2 px-3 rounded-lg text-sm font-medium transition-all active:scale-95 font-inter ${getToggleButtonClass(theme, language === lang.code)}`}
               type="button"
             >
               <span className="mr-1">{lang.flag}</span> {lang.name}
