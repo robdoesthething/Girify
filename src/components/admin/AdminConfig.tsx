@@ -41,7 +41,16 @@ const AdminConfig: React.FC<AdminConfigProps> = ({ onNotify }) => {
   };
 
   if (loading) {
-    return <div className="py-12 text-center opacity-50">Loading configuration...</div>;
+    return (
+      <div className="space-y-8 max-w-4xl mx-auto animate-pulse">
+        {Array.from({ length: 3 }).map((_, i) => (
+          <div key={i} className="space-y-3">
+            <div className="h-3 w-40 rounded bg-slate-200 dark:bg-slate-700" />
+            <div className="h-10 w-full rounded-lg bg-slate-200 dark:bg-slate-700" />
+          </div>
+        ))}
+      </div>
+    );
   }
 
   if (!config) {
