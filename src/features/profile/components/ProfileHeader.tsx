@@ -71,7 +71,7 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
 
         <button
           onClick={onEdit}
-          className={`absolute -bottom-1 -right-1 p-2 rounded-full shadow-lg ${themeClasses(theme, 'bg-slate-700 text-white', 'bg-white text-slate-900')}`}
+          className={`absolute -bottom-1 -right-1 p-2 rounded-full shadow-lg hover:scale-110 active:scale-95 transition-transform ${themeClasses(theme, 'bg-slate-700 text-white', 'bg-white text-slate-900')}`}
           type="button"
           aria-label={t('editProfile') || 'Edit Profile'}
         >
