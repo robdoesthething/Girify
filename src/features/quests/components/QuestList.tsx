@@ -88,7 +88,7 @@ export const QuestList: React.FC<QuestListProps> = ({ onRefresh, username }) => 
         <button
           onClick={() => handleClaim(quest.id)}
           disabled={!!claiming}
-          className="px-3 py-1.5 text-[10px] font-bold rounded-lg bg-emerald-500 text-white hover:bg-emerald-400 shadow-lg shadow-emerald-500/20 animate-pulse uppercase transition-all"
+          className="px-3 py-1.5 text-[10px] font-bold rounded-lg bg-emerald-500 text-white hover:bg-emerald-400 shadow-lg shadow-emerald-500/20 animate-pulse uppercase transition-all active:scale-95"
         >
           {claiming === quest.id ? '...' : t('claim') || 'Claim'}
         </button>
