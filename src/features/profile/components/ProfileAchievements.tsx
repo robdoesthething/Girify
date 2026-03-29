@@ -15,7 +15,22 @@ const ProfileAchievements: React.FC<ProfileAchievementsProps> = ({
   const { theme, t } = useTheme();
 
   if (isLoading) {
-    return null;
+    return (
+      <div className="p-6 border-b border-slate-100 dark:border-slate-800">
+        <div className="h-3 w-28 rounded bg-slate-200 dark:bg-slate-700 mb-4 animate-pulse" />
+        <div className="grid grid-cols-4 sm:grid-cols-5 gap-4 animate-pulse">
+          {Array.from({ length: 5 }).map((_, i) => (
+            <div
+              key={i}
+              className={`flex flex-col items-center p-2 rounded-xl ${themeClasses(theme, 'bg-slate-700/50', 'bg-slate-50')}`}
+            >
+              <div className="w-10 h-10 rounded-full bg-slate-200 dark:bg-slate-600 mb-1" />
+              <div className="h-2 w-8 rounded bg-slate-200 dark:bg-slate-600" />
+            </div>
+          ))}
+        </div>
+      </div>
+    );
   }
 
   return (
