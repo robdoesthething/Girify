@@ -132,8 +132,26 @@ const FriendsScreen: React.FC<FriendsScreenProps> = ({ username }) => {
             )}
 
             {loading && (
-              <div className="flex justify-center py-10 opacity-50">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-sky-500" />
+              <div className="space-y-2">
+                {[1, 2, 3, 4].map(i => (
+                  <div
+                    key={i}
+                    className={`flex items-center gap-4 p-3 rounded-lg border animate-pulse ${themeClasses(theme, 'bg-slate-900 border-slate-800', 'bg-white border-slate-200')}`}
+                  >
+                    <div
+                      className={`w-10 h-10 rounded-full shrink-0 ${themeClasses(theme, 'bg-slate-700', 'bg-slate-200')}`}
+                    />
+                    <div className="flex-1 space-y-2">
+                      <div
+                        className={`h-3 rounded ${themeClasses(theme, 'bg-slate-700', 'bg-slate-200')}`}
+                        style={{ width: `${40 + ((i * 17) % 30)}%` }}
+                      />
+                      <div
+                        className={`h-2 w-16 rounded ${themeClasses(theme, 'bg-slate-700', 'bg-slate-200')}`}
+                      />
+                    </div>
+                  </div>
+                ))}
               </div>
             )}
 
