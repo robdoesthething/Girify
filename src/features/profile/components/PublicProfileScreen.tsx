@@ -88,8 +88,21 @@ const PublicProfileScreen: React.FC<PublicProfileScreenProps> = ({ currentUser }
             <div className="p-0">
               {}
               {loading ? (
-                <div className="flex justify-center py-12">
-                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-sky-500" />
+                <div className="animate-pulse p-6 space-y-4">
+                  <div className="grid grid-cols-5 gap-2 border-b border-slate-100 dark:border-slate-800 pb-6">
+                    {Array.from({ length: 5 }).map((_, i) => (
+                      <div key={i} className="flex flex-col items-center gap-1">
+                        <div className="h-7 w-10 rounded bg-slate-200 dark:bg-slate-700" />
+                        <div className="h-2 w-8 rounded bg-slate-200 dark:bg-slate-700" />
+                      </div>
+                    ))}
+                  </div>
+                  <div className="h-4 w-32 rounded bg-slate-200 dark:bg-slate-700" />
+                  <div className="grid grid-cols-4 gap-3">
+                    {Array.from({ length: 4 }).map((_, i) => (
+                      <div key={i} className="h-16 rounded-xl bg-slate-200 dark:bg-slate-700" />
+                    ))}
+                  </div>
                 </div>
               ) : profile ? (
                 <>
