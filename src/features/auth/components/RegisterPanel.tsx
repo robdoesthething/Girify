@@ -74,7 +74,7 @@ const RegisterPanel: React.FC<RegisterPanelProps> = ({
         {onClose && (
           <button
             onClick={onClose}
-            className={`absolute -top-2 -right-2 z-10 p-2 rounded-full transition-colors ${themeClasses(theme, 'bg-slate-700 hover:bg-slate-600 text-white', 'bg-slate-200 hover:bg-slate-300 text-slate-700')}`}
+            className={`absolute -top-2 -right-2 z-10 p-2 rounded-full transition-all active:scale-90 ${themeClasses(theme, 'bg-slate-700 hover:bg-slate-600 text-white', 'bg-slate-200 hover:bg-slate-300 text-slate-700')}`}
             aria-label={t('close') || 'Close'}
             type="button"
           >

@@ -1,7 +1,6 @@
 import { Dispatch, useCallback, useEffect, useMemo, useReducer, useRef } from 'react';
 import { GAME_LOGIC, STORAGE_KEYS, TIME } from '../../../config/constants';
 import { calculateScore } from '../../../config/gameConfig';
-import quizPlan from '../../../data/quizPlan.json';
 import { gameReducer, initialState } from '../../../reducers/gameReducer';
 import { startGame } from '../../../services/gameService';
 import { GameStateObject, QuizResult, Street } from '../../../types/game';
@@ -13,6 +12,15 @@ import {
 } from '../../../utils/game/gameHelpers';
 import { storage } from '../../../utils/storage';
 import { useGamePersistence } from './useGamePersistence';
+
+let cachedQuizPlan: { quizzes: unknown[] } | null = null;
+async function getQuizPlan(): Promise<{ quizzes: unknown[] }> {
+  if (!cachedQuizPlan) {
+    const res = await fetch('/quizPlan.json');
+    cachedQuizPlan = await res.json();
+  }
+  return cachedQuizPlan!;
+}
 
 interface GameAction {
   type: string;
@@ -91,7 +99,11 @@ export const useGameState = (
         return;
       }
 
-      const setupResult = calculateGameSetup(validStreets, quizPlan);
+      const plan = await getQuizPlan();
+      const setupResult = calculateGameSetup(
+        validStreets,
+        plan as { quizzes: import('../../../types/game').QuizPlan[] }
+      );
 
       if (!setupResult) {
         dispatch({ type: 'SET_GAME_STATE', payload: 'intro' });
