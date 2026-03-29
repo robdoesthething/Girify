@@ -34,7 +34,7 @@ const AppearanceSettings: React.FC<AppearanceSettingsProps> = ({ username }) => 
           <button
             key={mode.id}
             onClick={() => handleThemeChange(mode.id as 'light' | 'dark' | 'auto')}
-            className={`flex-1 py-2 rounded-lg text-sm font-bold flex items-center justify-center gap-2 transition-all font-inter ${getToggleButtonClass(theme, themeMode === mode.id)}`}
+            className={`flex-1 py-2 rounded-lg text-sm font-bold flex items-center justify-center gap-2 transition-all active:scale-95 font-inter ${getToggleButtonClass(theme, themeMode === mode.id)}`}
             type="button"
           >
             <span className="text-lg">{mode.icon}</span>
