@@ -109,7 +109,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ username }) => {
             rightElement={
               <button
                 onClick={() => actions.toggleGiurosInfo()}
-                className="flex items-center gap-2 hover:scale-105 transition-transform"
+                className="flex items-center gap-2 hover:scale-105 active:scale-95 transition-transform"
                 type="button"
                 aria-label={`${state.giuros} Giuros`}
               >
