@@ -49,7 +49,7 @@ const RequestsList: React.FC<RequestsListProps> = ({
               <button
                 onClick={() => onDecline(req.from)}
                 disabled={isProcessing}
-                className={`px-3 py-1 rounded text-xs font-bold transition-opacity ${themeClasses(theme, 'bg-slate-200', 'bg-slate-800')} ${isProcessing ? 'opacity-50 cursor-not-allowed' : ''}`}
+                className={`px-3 py-1 rounded text-xs font-bold transition-all active:scale-95 ${themeClasses(theme, 'bg-slate-200', 'bg-slate-800')} ${isProcessing ? 'opacity-50 cursor-not-allowed' : ''}`}
                 type="button"
               >
                 {isDeclining ? 'Ignoring...' : 'Not now'}
@@ -57,7 +57,7 @@ const RequestsList: React.FC<RequestsListProps> = ({
               <button
                 onClick={() => onAccept(req.from)}
                 disabled={isProcessing}
-                className={`px-3 py-1 bg-sky-500 text-white rounded text-xs font-bold transition-opacity ${isProcessing ? 'opacity-50 cursor-not-allowed' : ''}`}
+                className={`px-3 py-1 bg-sky-500 text-white rounded text-xs font-bold transition-all active:scale-95 ${isProcessing ? 'opacity-50 cursor-not-allowed' : ''}`}
                 type="button"
               >
                 {isAccepting ? 'Accepting...' : 'Accept'}
