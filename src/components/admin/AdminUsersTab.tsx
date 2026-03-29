@@ -25,7 +25,7 @@ const AdminUsersTab: React.FC<AdminUsersTabProps> = ({ users, onRefresh, onView,
         <h2 className="text-3xl font-black">User Management</h2>
         <button
           onClick={onRefresh}
-          className="px-4 py-2 bg-slate-200 dark:bg-slate-800 rounded-lg text-sm font-bold"
+          className="px-4 py-2 bg-slate-200 dark:bg-slate-800 rounded-lg text-sm font-bold transition-all active:scale-95"
         >
           Refresh
         </button>
@@ -67,13 +67,13 @@ const AdminUsersTab: React.FC<AdminUsersTabProps> = ({ users, onRefresh, onView,
                 <td className="p-4 flex gap-2">
                   <button
                     onClick={() => onView(user)}
-                    className="px-3 py-1 bg-purple-500/10 text-purple-500 rounded-lg text-xs font-bold hover:bg-purple-500 hover:text-white transition-colors"
+                    className="px-3 py-1 bg-purple-500/10 text-purple-500 rounded-lg text-xs font-bold hover:bg-purple-500 hover:text-white transition-all active:scale-95"
                   >
                     View
                   </button>
                   <button
                     onClick={() => onEdit(user)}
-                    className="px-3 py-1 bg-sky-500/10 text-sky-500 rounded-lg text-xs font-bold hover:bg-sky-500 hover:text-white transition-colors"
+                    className="px-3 py-1 bg-sky-500/10 text-sky-500 rounded-lg text-xs font-bold hover:bg-sky-500 hover:text-white transition-all active:scale-95"
                   >
                     Edit
                   </button>
