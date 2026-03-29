@@ -30,7 +30,7 @@ const DistrictSelector: React.FC<DistrictSelectorProps> = ({
           key={d.id}
           type="button"
           onClick={() => onSelect(d.id)}
-          className={`relative flex items-center gap-4 p-3 rounded-xl border-2 transition-all text-left group
+          className={`relative flex items-center gap-4 p-3 rounded-xl border-2 transition-all active:scale-95 text-left group
             ${
               selectedDistrict === d.id
                 ? `border-${d.color.split('-')[1]}-500 bg-${d.color.split('-')[1]}-500/10 active-district-ring`
