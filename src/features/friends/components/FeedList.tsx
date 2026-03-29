@@ -168,9 +168,7 @@ const FeedList: React.FC<FeedListProps> = ({ feed, friends, onTabChange, t }) =>
                 </UserLink>
               </div>
               <span className="text-xs text-slate-400 whitespace-nowrap ml-2">
-                {item.timestamp?.seconds
-                  ? new Date(item.timestamp.seconds * 1000).toLocaleDateString()
-                  : 'Just now'}
+                {item.timestamp?.seconds ? formatRelativeTime(item.timestamp.seconds) : 'Just now'}
               </span>
             </div>
           </div>
