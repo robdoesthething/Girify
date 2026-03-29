@@ -112,7 +112,7 @@ const AchievementModal: React.FC<AchievementModalProps> = ({ achievement, onDism
 
           <button
             onClick={onDismiss}
-            className="w-full py-4 bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-400 hover:to-orange-400 text-white rounded-xl font-black text-lg shadow-lg shadow-yellow-500/30 transform hover:scale-[1.02] transition-all font-inter"
+            className="w-full py-4 bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-400 hover:to-orange-400 active:scale-95 text-white rounded-xl font-black text-lg shadow-lg shadow-yellow-500/30 transform hover:scale-[1.02] transition-all font-inter"
             type="button"
           >
             {t('okay') || 'Okay'}
