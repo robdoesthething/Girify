@@ -70,7 +70,7 @@ const NotificationContainer: React.FC<NotificationContainerProps> = React.memo(
               <span>{notification.message}</span>
               <button
                 onClick={() => onDismiss(notification.id)}
-                className="ml-4 hover:opacity-75 transition-opacity"
+                className="ml-4 hover:opacity-75 active:scale-90 transition-all"
                 type="button"
                 aria-label="Dismiss"
               >
