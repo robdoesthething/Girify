@@ -25,8 +25,9 @@ const AdminRoute: React.FC = () => {
 
   if (isAdmin === null) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-slate-50 dark:bg-slate-900">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-sky-500" />
+      <div className="flex flex-col items-center justify-center min-h-screen gap-4 bg-slate-50 dark:bg-slate-900 animate-pulse">
+        <div className="w-16 h-16 rounded-full bg-sky-500/20" />
+        <div className="h-3 w-32 rounded bg-slate-200 dark:bg-slate-700" />
       </div>
     );
   }
