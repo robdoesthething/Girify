@@ -49,7 +49,18 @@ const FriendRequests: React.FC<FriendRequestsProps> = ({ username }) => {
 
   if (loading) {
     return (
-      <div className="text-center py-4 opacity-50 text-xs font-inter">Loading requests...</div>
+      <div
+        className={`mb-6 p-4 rounded-2xl border animate-pulse ${theme === 'dark' ? 'bg-neutral-800/50 border-neutral-700' : 'bg-slate-50 border-slate-100'}`}
+      >
+        <div className="h-3 w-32 rounded bg-slate-200 dark:bg-slate-700 mb-3" />
+        <div className="flex items-center justify-between py-2">
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 rounded-full bg-slate-200 dark:bg-slate-700 shrink-0" />
+            <div className="h-3 w-24 rounded bg-slate-200 dark:bg-slate-700" />
+          </div>
+          <div className="h-7 w-16 rounded-lg bg-slate-200 dark:bg-slate-700" />
+        </div>
+      </div>
     );
   }
 
