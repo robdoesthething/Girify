@@ -130,7 +130,7 @@ const FeedbackForm: React.FC<FeedbackFormProps> = ({ username, onSuccess, onClos
             <button
               type="button"
               onClick={onClose}
-              className={`flex-1 py-3 rounded-xl font-bold text-sm transition-colors font-inter ${themeClasses(theme, 'bg-slate-700 hover:bg-slate-600', 'bg-slate-100 hover:bg-slate-200')}`}
+              className={`flex-1 py-3 rounded-xl font-bold text-sm transition-all active:scale-95 font-inter ${themeClasses(theme, 'bg-slate-700 hover:bg-slate-600', 'bg-slate-100 hover:bg-slate-200')}`}
             >
               {t('cancel')}
             </button>
@@ -139,7 +139,7 @@ const FeedbackForm: React.FC<FeedbackFormProps> = ({ username, onSuccess, onClos
           <button
             type="submit"
             disabled={isSubmitting || !feedback.trim() || !turnstileToken}
-            className="w-full py-3 rounded-xl font-bold text-sm bg-sky-500 hover:bg-sky-600 text-white shadow-lg shadow-sky-500/20 disabled:opacity-50 disabled:cursor-not-allowed font-inter"
+            className="w-full py-3 rounded-xl font-bold text-sm bg-sky-500 hover:bg-sky-600 active:scale-95 text-white shadow-lg shadow-sky-500/20 disabled:opacity-50 disabled:cursor-not-allowed transition-all font-inter"
           >
             {isSubmitting ? 'Sending...' : t('submitFeedback') || 'Submit Feedback'}
           </button>
