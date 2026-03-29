@@ -123,8 +123,16 @@ const PublicProfileScreen: React.FC<PublicProfileScreenProps> = ({ currentUser }
                   )}
                 </>
               ) : (
-                <div className="text-center py-8 opacity-50">
-                  <p>{error || 'Profile not found'}</p>
+                <div className="text-center py-16 flex flex-col items-center gap-3 opacity-60">
+                  <span className="text-5xl">🕵️</span>
+                  <p className="font-bold text-base font-inter">
+                    {error ? 'Could not load profile' : 'Player not found'}
+                  </p>
+                  <p className="text-xs font-inter opacity-70">
+                    {error
+                      ? 'Check your connection and try again.'
+                      : "This username doesn't exist."}
+                  </p>
                 </div>
               )}
             </div>
