@@ -103,7 +103,7 @@ const Modal: React.FC<ModalProps> = ({
                 {showCloseButton && (
                   <button
                     onClick={onClose}
-                    className={`p-2 rounded-lg transition-colors ${themeClasses(
+                    className={`p-2 rounded-lg transition-all active:scale-90 ${themeClasses(
                       theme,
                       'hover:bg-slate-700',
                       'hover:bg-slate-100'
