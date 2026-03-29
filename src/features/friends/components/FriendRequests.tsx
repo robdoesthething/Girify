@@ -79,7 +79,7 @@ const FriendRequests: React.FC<FriendRequestsProps> = ({ username }) => {
             </div>
             <button
               onClick={() => handleAccept(req.id)}
-              className="bg-emerald-500 hover:bg-emerald-600 text-white text-xs font-bold py-1.5 px-3 rounded-lg transition-colors font-inter"
+              className="bg-emerald-500 hover:bg-emerald-600 active:scale-95 text-white text-xs font-bold py-1.5 px-3 rounded-lg transition-all font-inter"
               type="button"
             >
               Accept
