@@ -63,7 +63,7 @@ const VerifyEmailScreen: React.FC<VerifyEmailScreenProps> = ({ theme }) => {
 
           <button
             onClick={() => supabase.auth.signOut()}
-            className="text-sm opacity-50 hover:opacity-100 underline mt-4"
+            className="text-sm opacity-50 hover:opacity-100 underline mt-4 transition-all active:scale-95"
             type="button"
           >
             {t('logout') || 'Log Out'}
