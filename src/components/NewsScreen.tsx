@@ -58,8 +58,23 @@ const NewsScreen: React.FC<NewsScreenProps> = ({ username }) => {
           <PageHeader title={`📰 ${t('news') || 'News'}`} />
 
           {loading ? (
-            <div className="flex items-center justify-center py-20">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-sky-500" />
+            <div className="space-y-6">
+              {Array.from({ length: 3 }).map((_, i) => (
+                <div
+                  key={i}
+                  className={`p-6 rounded-2xl border animate-pulse ${themeClasses(theme, 'bg-slate-900 border-slate-800', 'bg-white border-slate-200')}`}
+                >
+                  <div className="flex items-start justify-between mb-3">
+                    <div className="h-6 w-48 rounded bg-slate-200 dark:bg-slate-700" />
+                    <div className="h-4 w-16 rounded bg-slate-200 dark:bg-slate-700 ml-4" />
+                  </div>
+                  <div className="space-y-2">
+                    <div className="h-3 w-full rounded bg-slate-200 dark:bg-slate-700" />
+                    <div className="h-3 w-5/6 rounded bg-slate-200 dark:bg-slate-700" />
+                    <div className="h-3 w-4/6 rounded bg-slate-200 dark:bg-slate-700" />
+                  </div>
+                </div>
+              ))}
             </div>
           ) : announcements.length === 0 ? (
             <div className="text-center py-20">
