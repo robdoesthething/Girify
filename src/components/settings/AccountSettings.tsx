@@ -63,7 +63,7 @@ const AccountSettings: React.FC<AccountSettingsProps> = ({ onLogout, isAdmin, on
       </h3>
       <button
         onClick={handleClearHistory}
-        className="w-full flex items-center gap-4 p-4 rounded-xl border border-rose-200 bg-rose-50 text-rose-700 hover:bg-rose-100 transition-colors font-medium dark:bg-rose-900/20 dark:border-rose-900/50 dark:text-rose-400 font-inter"
+        className="w-full flex items-center gap-4 p-4 rounded-xl border border-rose-200 bg-rose-50 text-rose-700 hover:bg-rose-100 active:scale-95 transition-all font-medium dark:bg-rose-900/20 dark:border-rose-900/50 dark:text-rose-400 font-inter"
         type="button"
       >
         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -79,7 +79,7 @@ const AccountSettings: React.FC<AccountSettingsProps> = ({ onLogout, isAdmin, on
 
       <button
         onClick={handleSignOut}
-        className={`w-full flex items-center gap-4 p-4 rounded-xl border transition-colors font-medium font-inter ${themeClasses(theme, 'border-slate-700 hover:bg-slate-800', 'border-slate-200 hover:bg-slate-50')}`}
+        className={`w-full flex items-center gap-4 p-4 rounded-xl border transition-all active:scale-95 font-medium font-inter ${themeClasses(theme, 'border-slate-700 hover:bg-slate-800', 'border-slate-200 hover:bg-slate-50')}`}
         type="button"
       >
         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
