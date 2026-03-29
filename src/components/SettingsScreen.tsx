@@ -124,7 +124,7 @@ const SettingsScreen: React.FC<SettingsScreenProps> = ({
           <h2 className="text-2xl font-black tracking-tight font-inter">{t('settings')}</h2>
           <button
             onClick={() => onClose?.()}
-            className={`p-2 rounded-full transition-colors ${theme === 'dark' ? 'hover:bg-slate-800' : 'hover:bg-slate-100'}`}
+            className={`p-2 rounded-full transition-all active:scale-90 ${theme === 'dark' ? 'hover:bg-slate-800' : 'hover:bg-slate-100'}`}
             type="button"
           >
             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -301,7 +301,7 @@ const SettingsScreen: React.FC<SettingsScreenProps> = ({
             </h3>
             <button
               onClick={handleClearHistory}
-              className="w-full flex items-center gap-3 p-4 rounded-xl border border-rose-200 bg-rose-50 text-rose-700 hover:bg-rose-100 transition-colors font-medium dark:bg-rose-900/20 dark:border-rose-900/50 dark:text-rose-400 font-inter"
+              className="w-full flex items-center gap-3 p-4 rounded-xl border border-rose-200 bg-rose-50 text-rose-700 hover:bg-rose-100 active:scale-95 transition-all font-medium dark:bg-rose-900/20 dark:border-rose-900/50 dark:text-rose-400 font-inter"
               type="button"
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -317,7 +317,7 @@ const SettingsScreen: React.FC<SettingsScreenProps> = ({
 
             <button
               onClick={handleSignOut}
-              className={`w-full flex items-center gap-3 p-4 rounded-xl border transition-colors font-medium font-inter ${theme === 'dark' ? 'border-slate-700 hover:bg-slate-800' : 'border-slate-200 hover:bg-slate-50'}`}
+              className={`w-full flex items-center gap-3 p-4 rounded-xl border transition-all active:scale-95 font-medium font-inter ${theme === 'dark' ? 'border-slate-700 hover:bg-slate-800' : 'border-slate-200 hover:bg-slate-50'}`}
               type="button"
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
