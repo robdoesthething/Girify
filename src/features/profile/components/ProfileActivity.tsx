@@ -18,7 +18,25 @@ const ProfileActivity: React.FC<ProfileActivityProps> = ({ history, isLoading = 
   const { theme, t } = useTheme();
 
   if (isLoading) {
-    return null;
+    return (
+      <div className="p-6 border-b border-slate-100 dark:border-slate-800">
+        <div className="h-4 w-32 rounded bg-slate-200 dark:bg-slate-700 mb-4 animate-pulse" />
+        <div className="space-y-3 animate-pulse">
+          {Array.from({ length: 3 }).map((_, i) => (
+            <div
+              key={i}
+              className={`flex items-center justify-between p-3 rounded-xl border ${themeClasses(theme, 'bg-slate-800/50 border-slate-700', 'bg-white border-slate-100')}`}
+            >
+              <div className="space-y-1.5">
+                <div className="h-2.5 w-24 rounded bg-slate-200 dark:bg-slate-600" />
+                <div className="h-2 w-16 rounded bg-slate-200 dark:bg-slate-600" />
+              </div>
+              <div className="h-5 w-12 rounded bg-slate-200 dark:bg-slate-600" />
+            </div>
+          ))}
+        </div>
+      </div>
+    );
   }
 
   return (
