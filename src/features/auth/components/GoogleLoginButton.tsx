@@ -17,7 +17,7 @@ const GoogleLoginButton: React.FC<GoogleLoginButtonProps> = ({ onClick, disabled
     <button
       onClick={onClick}
       disabled={disabled}
-      className="w-full py-3 mb-4 rounded-xl border flex items-center justify-center gap-2 transition-colors bg-white hover:bg-slate-50 text-slate-700 border-slate-200 font-bold text-sm shadow-sm"
+      className="w-full py-3 mb-4 rounded-xl border flex items-center justify-center gap-2 transition-all active:scale-95 bg-white hover:bg-slate-50 text-slate-700 border-slate-200 font-bold text-sm shadow-sm"
       type="button"
     >
       <svg className="w-5 h-5" viewBox="0 0 24 24">
