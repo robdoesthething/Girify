@@ -62,7 +62,7 @@ const FriendItem: React.FC<FriendItemProps> = ({ friend, onRemove, onBlock }) =>
             e.stopPropagation();
             setActiveMenu(!activeMenu);
           }}
-          className="p-2 ml-2 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors"
+          className="p-2 ml-2 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-all active:scale-90"
           type="button"
           aria-label="Friend Options"
         >
