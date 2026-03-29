@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/error-boundaries */
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import React, { useEffect, useState } from 'react';
@@ -76,8 +77,9 @@ const MapArea: React.FC<MapAreaProps> = ({
   }, [currentStreet]);
 
   useEffect(() => {
-    import('../../../data/boundary.json')
-      .then(mod => setBoundary(mod.default as unknown as L.LatLngExpression[]))
+    fetch('/boundary.json')
+      .then(res => res.json())
+      .then(data => setBoundary(data as unknown as L.LatLngExpression[]))
       .catch(() => logger.info('No boundary data found'));
   }, []);
 
