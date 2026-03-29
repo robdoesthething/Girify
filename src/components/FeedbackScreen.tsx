@@ -153,7 +153,7 @@ const FeedbackScreen: React.FC<FeedbackScreenProps> = ({ username }) => {
 
                 <button
                   onClick={() => navigate(-1)}
-                  className="mt-12 px-8 py-3 bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 rounded-xl font-bold transition-colors font-inter"
+                  className="mt-12 px-8 py-3 bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 active:scale-95 rounded-xl font-bold transition-all font-inter"
                   type="button"
                 >
                   {t('close') || 'Close'}
