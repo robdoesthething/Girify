@@ -102,7 +102,20 @@ export const QuestList: React.FC<QuestListProps> = ({ onRefresh, username }) => 
   };
 
   if (loading) {
-    return <div className="text-center py-4 text-xs opacity-50">Loading quests...</div>;
+    return (
+      <div className="space-y-3">
+        {Array.from({ length: 3 }).map((_, i) => (
+          <div
+            key={i}
+            className={`p-3 rounded-xl border animate-pulse ${themeClasses(theme, 'bg-slate-800 border-slate-700', 'bg-white border-slate-200')}`}
+          >
+            <div className="h-4 w-36 rounded bg-slate-200 dark:bg-slate-700 mb-2" />
+            <div className="h-3 w-48 rounded bg-slate-200 dark:bg-slate-700 mb-3" />
+            <div className="h-1.5 w-full rounded-full bg-slate-200 dark:bg-slate-700" />
+          </div>
+        ))}
+      </div>
+    );
   }
 
   if (quests.length === 0) {
