@@ -102,7 +102,7 @@ const MapArea: React.FC<MapAreaProps> = ({
           <p className="text-slate-600 dark:text-slate-400 mb-4 font-inter">Map failed to load</p>
           <button
             onClick={() => window.location.reload()}
-            className="px-4 py-2 bg-sky-500 text-white rounded-lg hover:bg-sky-600 font-inter"
+            className="px-4 py-2 bg-sky-500 text-white rounded-lg hover:bg-sky-600 active:scale-95 transition-all font-inter"
             type="button"
           >
             Reload Page
