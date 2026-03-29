@@ -76,7 +76,7 @@ const EditUserModal: React.FC<EditUserModalProps> = ({ user, setUser, onSave }) 
             </button>
             <button
               type="submit"
-              className="flex-1 py-3 bg-sky-500 hover:bg-sky-600 text-white rounded-xl font-bold shadow-lg"
+              className="flex-1 py-3 bg-sky-500 hover:bg-sky-600 text-white rounded-xl font-bold shadow-lg transition-all active:scale-95"
             >
               Save Changes
             </button>
