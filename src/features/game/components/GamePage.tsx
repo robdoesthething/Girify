@@ -94,8 +94,10 @@ function GamePageContent({ username }: GamePageProps) {
 
   if (streetsLoading) {
     return (
-      <div className="flex items-center justify-center h-full">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-sky-500" />
+      <div className="flex flex-col items-center justify-center h-full gap-4 animate-pulse">
+        <div className="w-16 h-16 rounded-full bg-sky-500/20" />
+        <div className="h-3 w-40 rounded bg-slate-200 dark:bg-slate-700" />
+        <div className="h-2 w-24 rounded bg-slate-200 dark:bg-slate-700" />
       </div>
     );
   }
