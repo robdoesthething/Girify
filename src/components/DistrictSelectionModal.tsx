@@ -79,7 +79,7 @@ function DistrictSelectionModal({ username, onComplete, onDismiss }: DistrictSel
         {onDismiss && (
           <button
             onClick={onDismiss}
-            className={`absolute top-4 right-4 w-8 h-8 flex items-center justify-center rounded-full text-lg font-bold transition-colors ${themeClasses(theme, 'text-slate-400 hover:text-white hover:bg-slate-700', 'text-slate-400 hover:text-slate-700 hover:bg-slate-100')}`}
+            className={`absolute top-4 right-4 w-8 h-8 flex items-center justify-center rounded-full text-lg font-bold transition-all active:scale-90 ${themeClasses(theme, 'text-slate-400 hover:text-white hover:bg-slate-700', 'text-slate-400 hover:text-slate-700 hover:bg-slate-100')}`}
             aria-label="Skip for now"
           >
             ×
