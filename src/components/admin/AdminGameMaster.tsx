@@ -154,7 +154,7 @@ const AdminGameMaster: React.FC<AdminGameMasterProps> = ({ onNotify, confirm }) 
         <div className="flex gap-2">
           <button
             onClick={seedMayorJaume}
-            className="px-4 py-2 bg-amber-500 hover:bg-amber-600 text-white font-bold rounded-xl text-xs shadow-lg shadow-amber-500/20"
+            className="px-4 py-2 bg-amber-500 hover:bg-amber-600 text-white font-bold rounded-xl text-xs shadow-lg shadow-amber-500/20 transition-all active:scale-95"
           >
             👑 Seed Mayor Jaume
           </button>
@@ -177,7 +177,7 @@ const AdminGameMaster: React.FC<AdminGameMasterProps> = ({ onNotify, confirm }) 
         <button
           onClick={handleSearch}
           disabled={loading}
-          className="px-6 py-3 bg-indigo-500 hover:bg-indigo-600 text-white font-bold rounded-xl shadow-lg shadow-indigo-500/20"
+          className="px-6 py-3 bg-indigo-500 hover:bg-indigo-600 text-white font-bold rounded-xl shadow-lg shadow-indigo-500/20 transition-all active:scale-95"
         >
           {loading ? 'Searching...' : 'Search User'}
         </button>
@@ -229,7 +229,7 @@ const AdminGameMaster: React.FC<AdminGameMasterProps> = ({ onNotify, confirm }) 
                 <div className="flex flex-col gap-2">
                   <button
                     onClick={handleBanToggle}
-                    className={`px-4 py-2 rounded-lg font-bold text-sm ${
+                    className={`px-4 py-2 rounded-lg font-bold text-sm transition-all active:scale-95 ${
                       targetUser.banned
                         ? 'bg-emerald-100 text-emerald-700 hover:bg-emerald-200'
                         : 'bg-red-100 text-red-700 hover:bg-red-200'
