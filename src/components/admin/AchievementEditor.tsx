@@ -233,13 +233,13 @@ const AchievementEditor: React.FC<AchievementEditorProps> = ({
         <div className="flex gap-4 mt-8">
           <button
             onClick={onCancel}
-            className="flex-1 py-3 rounded-xl bg-slate-100 dark:bg-slate-800 font-bold"
+            className="flex-1 py-3 rounded-xl bg-slate-100 dark:bg-slate-800 font-bold transition-all active:scale-95"
           >
             Cancel
           </button>
           <button
             onClick={handleSave}
-            className="flex-1 py-3 rounded-xl bg-sky-500 text-white font-bold hover:bg-sky-600"
+            className="flex-1 py-3 rounded-xl bg-sky-500 text-white font-bold hover:bg-sky-600 transition-all active:scale-95"
           >
             Save Changes
           </button>
