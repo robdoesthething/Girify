@@ -37,7 +37,7 @@ const RecenterControl: React.FC<RecenterControlProps> = ({ center, zoom, bounds 
     <div className="leaflet-bottom leaflet-left !pointer-events-auto" style={RECENTER_BUTTON_STYLE}>
       <button
         onClick={handleRecenter}
-        className="bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 p-2 rounded-lg shadow-lg hover:scale-105 transition-transform border border-slate-200 dark:border-slate-700 font-inter"
+        className="bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 p-2 rounded-lg shadow-lg hover:scale-105 active:scale-95 transition-transform border border-slate-200 dark:border-slate-700 font-inter"
         title="Re-center Map"
         aria-label="Re-center Map"
         type="button"
