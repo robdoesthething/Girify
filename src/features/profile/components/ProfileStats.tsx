@@ -12,8 +12,13 @@ const ProfileStats: React.FC<ProfileStatsProps> = ({ profile, isLoading }) => {
 
   if (isLoading) {
     return (
-      <div className="flex justify-center py-12">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-sky-500" />
+      <div className="p-6 grid grid-cols-5 gap-2 border-b border-slate-100 dark:border-slate-800">
+        {Array.from({ length: 5 }).map((_, i) => (
+          <div key={i} className="text-center flex flex-col items-center gap-1">
+            <div className="h-7 w-10 rounded bg-slate-200 dark:bg-slate-700 animate-pulse" />
+            <div className="h-2 w-8 rounded bg-slate-200 dark:bg-slate-700 animate-pulse" />
+          </div>
+        ))}
       </div>
     );
   }
