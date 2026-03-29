@@ -69,7 +69,23 @@ const AdminAchievements: React.FC<AdminAchievementsProps> = ({ onNotify, confirm
       </div>
 
       {loading ? (
-        <div className="py-20 text-center opacity-50">Loading...</div>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 animate-pulse">
+          {Array.from({ length: 6 }).map((_, i) => (
+            <div
+              key={i}
+              className="p-4 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700"
+            >
+              <div className="flex items-center gap-3 mb-3">
+                <div className="w-10 h-10 rounded-full bg-slate-200 dark:bg-slate-700 shrink-0" />
+                <div className="flex-1 space-y-2">
+                  <div className="h-3 w-3/4 rounded bg-slate-200 dark:bg-slate-700" />
+                  <div className="h-2 w-1/2 rounded bg-slate-200 dark:bg-slate-700" />
+                </div>
+              </div>
+              <div className="h-2 w-full rounded bg-slate-200 dark:bg-slate-700" />
+            </div>
+          ))}
+        </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {filteredItems.map(item => (
