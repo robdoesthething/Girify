@@ -69,9 +69,11 @@ const AchievementsList: React.FC<AchievementsListProps> = ({
           ))}
         </div>
       ) : (
-        <p className="text-sm opacity-50 text-center py-4 bg-slate-100 dark:bg-slate-800 rounded-xl font-inter">
-          Play games to unlock achievements!
-        </p>
+        <div className="flex flex-col items-center py-6 bg-slate-100 dark:bg-slate-800 rounded-xl">
+          <span className="text-4xl mb-2">🏅</span>
+          <p className="text-sm font-bold font-inter">No achievements yet</p>
+          <p className="text-xs opacity-50 mt-1 font-inter">Play games to unlock achievements!</p>
+        </div>
       )}
 
       <AnimatePresence>
