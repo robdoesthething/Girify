@@ -98,7 +98,16 @@ const AppRoutes: React.FC = () => {
                 path="/settings"
                 element={<SettingsScreen onLogout={handleLogout} username={currentUsername} />}
               />
-              <Route path="/friends" element={<FriendsScreen username={currentUsername || ''} />} />
+              <Route
+                path="/friends"
+                element={
+                  user ? (
+                    <FriendsScreen username={currentUsername || ''} />
+                  ) : (
+                    <Navigate to="/" replace />
+                  )
+                }
+              />
               <Route path="/shop" element={<ShopScreen username={currentUsername || ''} />} />
               <Route path="/about" element={<AboutScreen />} />
               <Route path="/news" element={<NewsScreen username={currentUsername} />} />
@@ -106,7 +115,16 @@ const AppRoutes: React.FC = () => {
                 path="/feedback"
                 element={<FeedbackScreen username={currentUsername || ''} />}
               />
-              <Route path="/profile" element={<ProfileScreen username={currentUsername || ''} />} />
+              <Route
+                path="/profile"
+                element={
+                  user ? (
+                    <ProfileScreen username={currentUsername || ''} />
+                  ) : (
+                    <Navigate to="/" replace />
+                  )
+                }
+              />
               <Route
                 path="/u/:handle"
                 element={<PublicProfileScreen currentUser={currentUsername} />}
