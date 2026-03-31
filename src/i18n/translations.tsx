@@ -326,6 +326,93 @@ const translations: Translations = {
     greetingDefault: '🗺️ Keep wandering! Every street has a story.',
     copied: 'Copied!',
     backToMenu: 'Back to Menu',
+
+    // News headlines (Mayor Jaume)
+    newsHeadline1: 'BREAKING: Local man finds parking in Gràcia on first try.',
+    newsHeadline2: "ALERT: Guiri asks for 'Sangria' at classic Bodega.",
+    newsHeadline3: 'UPDATE: Rent prices drop by 0.00% this month.',
+    newsHeadline4: 'SCANDAL: Pigeon steals whole croissant from tourist.',
+
+    // Landing page extras
+    landingHeroTitle: 'Become the Ultimate Local',
+    landingHeroSubtitle: 'Show you know the real Barcelona... street by street',
+    landingSubtitle:
+      'Navigate the city without a map. Earn Giuros, climb the rankings, and celebrate your neighborhood.',
+    signUpToPlay: 'Sign Up to Play',
+    featureRankingsLabel: 'Rankings',
+    featureRankingsDesc: 'Compete with friends and neighbors for the top spot.',
+    featureFriendshipLabel: 'Friendship',
+    featureFriendshipDesc: 'Challenge your friends and track their progress.',
+    featureRewardsLabel: 'Rewards',
+    featureRewardsDesc: 'Earn Giuros to customize your profile and unlock badges.',
+    chooseYourAllegiance: 'Choose Your Allegiance',
+    mayorLabel: 'MAYOR',
+    mayorReports: '🎙️ Mayor Jaume Reports',
+    newsWord: 'NEWS',
+    privacyLink: 'Privacy',
+    termsLink: 'Terms',
+
+    // Onboarding
+    onboardingStep1Title: 'Welcome to the Neighborhood!',
+    onboardingStep1Content:
+      "Hi! I am Mayor Jaume. I run this district, and I'm looking for someone who knows these streets.",
+    onboardingStep2Title: 'The Challenge',
+    onboardingStep2Content:
+      "I'll highlight a street on the map. You need to identify it. Zoom, pan, do whatever... just don't get lost.",
+    onboardingStep3Title: 'Prove Yourself',
+    onboardingStep3Content:
+      'Select the correct street name. Be quick! Tourists are slow. Locals are fast.',
+    onboardingStep4Title: 'Earn Respect (and Giuros)',
+    onboardingStep4Content:
+      'Score points to earn Giuros. Use them to buy fancy titles and look important, like me!',
+    districtManager: 'District Manager',
+    startPlaying: 'Start Playing!',
+
+    // Score tiers & summary extras
+    scoreTierExpert: 'Street Expert',
+    scoreTierLocal: 'City Local',
+    scoreTierKnowledge: 'Local Knowledge',
+    scoreTierWander: 'Keep Wandering',
+    scoreLabel: 'Score',
+    shareCuriosity: 'Share this curiosity',
+    shareTextQuestion: 'Do I know Barcelona?',
+    shareStreakDays: 'days',
+
+    // Legal
+    backToHome: '← Back to Home',
+    termsTitle: 'Terms of Service',
+    termsSection1Title: '1. Acceptance of Terms',
+    termsSection1Content:
+      'By accessing and using Girify, you agree to be bound by these Terms of Service.',
+    termsSection2Title: '2. User Conduct',
+    termsSection2Intro: 'You agree not to:',
+    termsSection2Item1: 'Use the service for any illegal purpose.',
+    termsSection2Item2: 'Attempt to cheat, exploit, or manipulate game mechanics or leaderboards.',
+    termsSection2Item3: 'Harass or harm other users.',
+    termsSection3Title: '3. Disclaimer',
+    termsSection3Content:
+      'The game is provided "as is" without warranties of any kind. We are not responsible for any errors in map data or service interruptions.',
+    termsSection4Title: '4. Changes to Terms',
+    termsSection4Content:
+      'We reserve the right to modify these terms at any time. Continued use of the service constitutes acceptance of new terms.',
+    legalLastUpdated: 'Last updated: January 2026',
+    privacyTitle: 'Privacy Policy',
+    privacySection1Title: '1. Information We Collect',
+    privacySection1Intro: 'We collect minimal information to provide the Girify experience:',
+    privacySection1Item1: 'Authentication data (via Google or Email) to secure your account.',
+    privacySection1Item2: 'Game progress, scores, and shop purchases.',
+    privacySection1Item3: 'Basic analytics to understand how the app is used.',
+    privacySection2Title: '2. How We Use Information',
+    privacySection2Intro: 'Your data is used solely to:',
+    privacySection2Item1: 'Maintain your profile and game history.',
+    privacySection2Item2: 'Display leaderboards and rankings.',
+    privacySection2Item3: 'Improve game mechanics and content.',
+    privacySection3Title: '3. Data Security',
+    privacySection3Content:
+      'We use Supabase to securely store your data. We do not sell your personal data to third parties.',
+    privacySection4Title: '4. Contact',
+    privacySection4Content:
+      'If you have any questions about this policy, please contact us at support@girify.app.',
   },
 
   es: {
@@ -597,6 +684,94 @@ const translations: Translations = {
     greetingDefault: '🗺️ ¡Sigue paseando! Cada calle tiene su historia.',
     copied: '¡Copiado!',
     backToMenu: 'Volver al menú',
+
+    // News headlines (Mayor Jaume)
+    newsHeadline1: 'ÚLTIMA HORA: Un vecino encuentra aparcamiento en Gràcia al primer intento.',
+    newsHeadline2: "ALERTA: Un guiri pide 'Sangría' en una bodega tradicional.",
+    newsHeadline3: 'ACTUALIZACIÓN: Los alquileres bajan un 0,00% este mes.',
+    newsHeadline4: 'ESCÁNDALO: Una paloma roba un croissant entero a un turista.',
+
+    // Landing page extras
+    landingHeroTitle: 'Conviértete en el Local Definitivo',
+    landingHeroSubtitle: 'Demuestra que conoces la verdadera Barcelona... calle a calle',
+    landingSubtitle:
+      'Navega la ciudad sin mapa. Gana Giuros, sube en la clasificación y celebra tu barrio.',
+    signUpToPlay: 'Regístrate para Jugar',
+    featureRankingsLabel: 'Rankings',
+    featureRankingsDesc: 'Compite con amigos y vecinos por el primer puesto.',
+    featureFriendshipLabel: 'Amistad',
+    featureFriendshipDesc: 'Reta a tus amigos y sigue su progreso.',
+    featureRewardsLabel: 'Recompensas',
+    featureRewardsDesc: 'Gana Giuros para personalizar tu perfil y desbloquear insignias.',
+    chooseYourAllegiance: 'Elige tu Distrito',
+    mayorLabel: 'ALCALDE',
+    mayorReports: '🎙️ El Alcalde Jaume Informa',
+    newsWord: 'NOTICIAS',
+    privacyLink: 'Privacidad',
+    termsLink: 'Términos',
+
+    // Onboarding
+    onboardingStep1Title: '¡Bienvenido al Barrio!',
+    onboardingStep1Content:
+      '¡Hola! Soy el Alcalde Jaume. Dirijo este distrito y busco a alguien que conozca estas calles.',
+    onboardingStep2Title: 'El Reto',
+    onboardingStep2Content:
+      'Resaltaré una calle en el mapa. Tienes que identificarla. Haz zoom, muévete... no te pierdas.',
+    onboardingStep3Title: 'Demuéstrate',
+    onboardingStep3Content:
+      'Selecciona el nombre correcto de la calle. ¡Rápido! Los turistas son lentos. Los locales son rápidos.',
+    onboardingStep4Title: 'Gana Respeto (y Giuros)',
+    onboardingStep4Content:
+      '¡Anota puntos para ganar Giuros. Úsalos para comprar títulos elegantes y parecer importante, como yo!',
+    districtManager: 'Gestor del Distrito',
+    startPlaying: '¡Empezar a Jugar!',
+
+    // Score tiers & summary extras
+    scoreTierExpert: 'Experto Callejero',
+    scoreTierLocal: 'Local de la Ciudad',
+    scoreTierKnowledge: 'Conocedor Local',
+    scoreTierWander: 'Sigue Explorando',
+    scoreLabel: 'Puntuación',
+    shareCuriosity: 'Compartir esta curiosidad',
+    shareTextQuestion: '¿Conozco Barcelona?',
+    shareStreakDays: 'días',
+
+    // Legal
+    backToHome: '← Volver al inicio',
+    termsTitle: 'Términos de Servicio',
+    termsSection1Title: '1. Aceptación de los Términos',
+    termsSection1Content:
+      'Al acceder y usar Girify, aceptas estar sujeto a estos Términos de Servicio.',
+    termsSection2Title: '2. Conducta del Usuario',
+    termsSection2Intro: 'Aceptas no:',
+    termsSection2Item1: 'Usar el servicio para ningún propósito ilegal.',
+    termsSection2Item2:
+      'Intentar hacer trampa, explotar o manipular la mecánica del juego o las clasificaciones.',
+    termsSection2Item3: 'Acosar o dañar a otros usuarios.',
+    termsSection3Title: '3. Descargo de Responsabilidad',
+    termsSection3Content:
+      'El juego se proporciona "tal cual" sin garantías de ningún tipo. No somos responsables de errores en datos de mapas o interrupciones del servicio.',
+    termsSection4Title: '4. Cambios en los Términos',
+    termsSection4Content:
+      'Nos reservamos el derecho de modificar estos términos en cualquier momento. El uso continuado del servicio constituye la aceptación de los nuevos términos.',
+    legalLastUpdated: 'Última actualización: enero de 2026',
+    privacyTitle: 'Política de Privacidad',
+    privacySection1Title: '1. Información que Recopilamos',
+    privacySection1Intro: 'Recopilamos información mínima para ofrecer la experiencia Girify:',
+    privacySection1Item1: 'Datos de autenticación (vía Google o Email) para proteger tu cuenta.',
+    privacySection1Item2: 'Progreso del juego, puntuaciones y compras en la tienda.',
+    privacySection1Item3: 'Análisis básicos para entender cómo se usa la aplicación.',
+    privacySection2Title: '2. Cómo Usamos la Información',
+    privacySection2Intro: 'Tus datos se usan únicamente para:',
+    privacySection2Item1: 'Mantener tu perfil e historial de juego.',
+    privacySection2Item2: 'Mostrar clasificaciones y rankings.',
+    privacySection2Item3: 'Mejorar la mecánica y el contenido del juego.',
+    privacySection3Title: '3. Seguridad de Datos',
+    privacySection3Content:
+      'Usamos Supabase para almacenar tus datos de forma segura. No vendemos tus datos personales a terceros.',
+    privacySection4Title: '4. Contacto',
+    privacySection4Content:
+      'Si tienes preguntas sobre esta política, contáctanos en support@girify.app.',
   },
 
   ca: {
@@ -869,6 +1044,94 @@ const translations: Translations = {
     greetingDefault: '🗺️ Segueix passejant! Cada carrer té la seva història.',
     copied: 'Copiat!',
     backToMenu: 'Tornar al menú',
+
+    // News headlines (Mayor Jaume)
+    newsHeadline1: 'ÚLTIMA HORA: Un veí troba aparcament a Gràcia al primer intent.',
+    newsHeadline2: "ALERTA: Un guiri demana 'Sangria' en una bodega tradicional.",
+    newsHeadline3: 'ACTUALITZACIÓ: Els lloguers baixen un 0,00% aquest mes.',
+    newsHeadline4: 'ESCÀNDOL: Un colom roba un croissant sencer a un turista.',
+
+    // Landing page extras
+    landingHeroTitle: 'Converteix-te en el Local Definitiu',
+    landingHeroSubtitle: 'Demostra que coneixes la veritable Barcelona... carrer a carrer',
+    landingSubtitle:
+      'Navega la ciutat sense mapa. Guanya Giuros, puja a la classificació i celebra el teu barri.',
+    signUpToPlay: "Registra't per Jugar",
+    featureRankingsLabel: 'Rànquings',
+    featureRankingsDesc: 'Competeix amb amics i veïns pel primer lloc.',
+    featureFriendshipLabel: 'Amistat',
+    featureFriendshipDesc: 'Repte els teus amics i segueix el seu progrés.',
+    featureRewardsLabel: 'Recompenses',
+    featureRewardsDesc: 'Guanya Giuros per personalitzar el teu perfil i desbloquejar insígnies.',
+    chooseYourAllegiance: 'Tria el teu Districte',
+    mayorLabel: 'ALCALDE',
+    mayorReports: "🎙️ L'Alcalde Jaume Informa",
+    newsWord: 'NOTÍCIES',
+    privacyLink: 'Privacitat',
+    termsLink: 'Condicions',
+
+    // Onboarding
+    onboardingStep1Title: 'Benvingut al Barri!',
+    onboardingStep1Content:
+      "Hola! Soc l'Alcalde Jaume. Dirigeixo aquest districte i busco algú que conegui aquests carrers.",
+    onboardingStep2Title: 'El Repte',
+    onboardingStep2Content:
+      "Ressaltaré un carrer al mapa. Has d'identificar-lo. Fes zoom, mou-te... no et perdis.",
+    onboardingStep3Title: 'Demostra el que Vals',
+    onboardingStep3Content:
+      'Selecciona el nom correcte del carrer. Ràpid! Els turistes són lents. Els locals són ràpids.',
+    onboardingStep4Title: 'Guanya Respecte (i Giuros)',
+    onboardingStep4Content:
+      "Puntua per guanyar Giuros. Usa'ls per comprar títols elegants i semblar important, com jo!",
+    districtManager: 'Gestor del Districte',
+    startPlaying: 'Comença a Jugar!',
+
+    // Score tiers & summary extras
+    scoreTierExpert: 'Expert dels Carrers',
+    scoreTierLocal: 'Local de la Ciutat',
+    scoreTierKnowledge: 'Coneixedor Local',
+    scoreTierWander: 'Segueix Explorant',
+    scoreLabel: 'Puntuació',
+    shareCuriosity: 'Compartir aquesta curiositat',
+    shareTextQuestion: 'Conec Barcelona?',
+    shareStreakDays: 'dies',
+
+    // Legal
+    backToHome: "← Tornar a l'inici",
+    termsTitle: 'Condicions de Servei',
+    termsSection1Title: '1. Acceptació de les Condicions',
+    termsSection1Content:
+      'En accedir i usar Girify, acceptes estar subjecte a aquestes Condicions de Servei.',
+    termsSection2Title: "2. Conducta de l'Usuari",
+    termsSection2Intro: 'Acceptes no:',
+    termsSection2Item1: 'Usar el servei per a cap propòsit il·legal.',
+    termsSection2Item2:
+      'Intentar fer trampa, explotar o manipular la mecànica del joc o les classificacions.',
+    termsSection2Item3: 'Assetjar o perjudicar altres usuaris.',
+    termsSection3Title: '3. Exempció de Responsabilitat',
+    termsSection3Content:
+      'El joc es proporciona "tal qual" sense garanties de cap tipus. No som responsables d\'errors en dades de mapes o interrupcions del servei.',
+    termsSection4Title: '4. Canvis a les Condicions',
+    termsSection4Content:
+      "Ens reservem el dret de modificar aquestes condicions en qualsevol moment. L'ús continuat del servei constitueix l'acceptació de les noves condicions.",
+    legalLastUpdated: 'Última actualització: gener de 2026',
+    privacyTitle: 'Política de Privacitat',
+    privacySection1Title: '1. Informació que Recollim',
+    privacySection1Intro: "Recollim informació mínima per oferir l'experiència Girify:",
+    privacySection1Item1: "Dades d'autenticació (via Google o Email) per protegir el teu compte.",
+    privacySection1Item2: 'Progrés del joc, puntuacions i compres a la botiga.',
+    privacySection1Item3: "Anàlisis bàsiques per entendre com s'usa l'aplicació.",
+    privacySection2Title: '2. Com Usem la Informació',
+    privacySection2Intro: "Les teves dades s'usen únicament per:",
+    privacySection2Item1: 'Mantenir el teu perfil i historial de joc.',
+    privacySection2Item2: 'Mostrar classificacions i rànquings.',
+    privacySection2Item3: 'Millorar la mecànica i el contingut del joc.',
+    privacySection3Title: '3. Seguretat de Dades',
+    privacySection3Content:
+      'Usem Supabase per emmagatzemar les teves dades de forma segura. No venem les teves dades personals a tercers.',
+    privacySection4Title: '4. Contacte',
+    privacySection4Content:
+      "Si tens preguntes sobre aquesta política, contacta'ns a support@girify.app.",
   },
 };
 

@@ -53,10 +53,14 @@ function DistrictSelectionModal({ username, onComplete, onDismiss }: DistrictSel
         throw new Error('No authenticated user found');
       }
 
-      await ensureUserProfile(username, currentUser.id, {
+      const result = await ensureUserProfile(username, currentUser.id, {
         district,
         email: currentUser.email || undefined,
       });
+
+      if (!result) {
+        throw new Error('Failed to save district — database update rejected');
+      }
 
       setLoading(false);
       onComplete();

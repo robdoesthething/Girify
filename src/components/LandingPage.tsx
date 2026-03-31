@@ -6,11 +6,11 @@ import { DISTRICTS } from '../data/districts';
 import { themeClasses } from '../utils/themeUtils';
 import SeoHead from './SeoHead';
 
-const NEWS_HEADLINES = [
-  'BREAKING: Local man finds parking in Gràcia on first try.',
-  "ALERT: Guiri asks for 'Sangria' at classic Bodega.",
-  'UPDATE: Rent prices drop by 0.00% this month.',
-  'SCANDAL: Pidgeon steals whole croissant from tourist.',
+const getNewsHeadlines = (t: (key: string) => string) => [
+  t('newsHeadline1'),
+  t('newsHeadline2'),
+  t('newsHeadline3'),
+  t('newsHeadline4'),
 ];
 
 interface LandingPageProps {
@@ -21,13 +21,14 @@ interface LandingPageProps {
 const LandingPage: React.FC<LandingPageProps> = ({ onLogin, theme }) => {
   const { t } = useTheme();
   const [newsIndex, setNewsIndex] = useState(0);
+  const newsHeadlines = getNewsHeadlines(t);
 
   useEffect(() => {
     const interval = setInterval(() => {
-      setNewsIndex(prev => (prev + 1) % NEWS_HEADLINES.length);
+      setNewsIndex(prev => (prev + 1) % newsHeadlines.length);
     }, 4000);
     return () => clearInterval(interval);
-  }, []);
+  }, [newsHeadlines.length]);
 
   return (
     <div
@@ -63,10 +64,10 @@ const LandingPage: React.FC<LandingPageProps> = ({ onLogin, theme }) => {
             />
             <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/90 via-black/50 to-transparent p-6 pt-24">
               <h2 className="text-white text-2xl md:text-4xl font-black tracking-tight text-balance leading-tight">
-                Become the Ultimate Local
+                {t('landingHeroTitle')}
               </h2>
               <p className="text-white/90 text-sm md:text-lg mt-3 font-medium">
-                Show you know the real Barcelona... street by street
+                {t('landingHeroSubtitle')}
               </p>
             </div>
           </div>
@@ -78,11 +79,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onLogin, theme }) => {
 
           {/* Subtitle with better spacing */}
           <p className="text-lg md:text-xl font-medium text-slate-600 dark:text-slate-300 mb-12 max-w-2xl leading-relaxed text-balance">
-            Navigate the city without a map. Earn{' '}
-            <span className="text-yellow-500 dark:text-yellow-400 font-bold px-1.5 py-0.5 bg-yellow-100 dark:bg-yellow-500/20 rounded">
-              Giuros
-            </span>
-            , climb the rankings, and celebrate your neighborhood.
+            {t('landingSubtitle')}
           </p>
 
           {/* CTA Button - completely redesigned */}
@@ -95,7 +92,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onLogin, theme }) => {
               <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 -translate-x-full group-hover:translate-x-full" />
 
               <span className="relative flex items-center justify-center gap-2">
-                Sign Up to Play
+                {t('signUpToPlay')}
                 <svg
                   className="w-6 h-6 group-hover:translate-x-1 transition-transform"
                   fill="none"
@@ -122,16 +119,16 @@ const LandingPage: React.FC<LandingPageProps> = ({ onLogin, theme }) => {
           >
             {[
               {
-                label: 'Rankings',
-                desc: 'Compete with friends and neighbors for the top spot.',
+                label: t('featureRankingsLabel'),
+                desc: t('featureRankingsDesc'),
               },
               {
-                label: 'Friendship',
-                desc: 'Challenge your friends and track their progress.',
+                label: t('featureFriendshipLabel'),
+                desc: t('featureFriendshipDesc'),
               },
               {
-                label: 'Rewards',
-                desc: 'Earn Giuros to customize your profile and unlock badges.',
+                label: t('featureRewardsLabel'),
+                desc: t('featureRewardsDesc'),
               },
             ].map((feature, idx) => (
               <div
@@ -153,7 +150,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onLogin, theme }) => {
             <div className="flex items-center gap-4 mb-8">
               <div className="h-px bg-slate-200 dark:bg-slate-800 flex-1" />
               <h2 className="text-2xl font-black uppercase tracking-widest text-slate-400">
-                Choose Your Allegiance
+                {t('chooseYourAllegiance')}
               </h2>
               <div className="h-px bg-slate-200 dark:bg-slate-800 flex-1" />
             </div>
@@ -207,7 +204,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onLogin, theme }) => {
             <div className="bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-900 dark:to-slate-800 rounded-3xl p-6 sm:p-8 flex flex-col sm:flex-row items-center gap-6 text-left border-2 border-slate-300 dark:border-slate-700 shadow-xl relative overflow-hidden group hover:shadow-2xl transition-all duration-300">
               {/* Background decoration */}
               <div className="absolute top-0 right-0 p-4 opacity-5 font-black text-8xl pointer-events-none">
-                NEWS
+                {t('newsWord')}
               </div>
 
               {/* Mayor Jaume Pixel Art */}
@@ -219,13 +216,13 @@ const LandingPage: React.FC<LandingPageProps> = ({ onLogin, theme }) => {
                   style={{ imageRendering: 'pixelated' }}
                 />
                 <div className="absolute -bottom-2 -right-2 bg-yellow-500 text-yellow-900 text-[10px] font-black px-2 py-0.5 rounded-full border-2 border-white dark:border-slate-900">
-                  MAYOR
+                  {t('mayorLabel')}
                 </div>
               </div>
 
               <div className="flex-1 text-center sm:text-left">
                 <div className="inline-block text-yellow-600 dark:text-yellow-400 font-bold text-xs uppercase mb-2 px-3 py-1 bg-yellow-100 dark:bg-yellow-500/20 rounded-full">
-                  🎙️ Mayor Jaume Reports
+                  {t('mayorReports')}
                 </div>
                 <div className="font-bold text-base sm:text-lg min-h-[3rem] flex items-center">
                   <AnimatePresence mode="wait">
@@ -236,7 +233,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onLogin, theme }) => {
                       exit={{ opacity: 0, y: -10 }}
                       className="line-clamp-2 text-slate-800 dark:text-slate-200 font-medium italic"
                     >
-                      &quot;{NEWS_HEADLINES[newsIndex]}&quot;
+                      &quot;{newsHeadlines[newsIndex]}&quot;
                     </motion.p>
                   </AnimatePresence>
                 </div>
@@ -254,13 +251,13 @@ const LandingPage: React.FC<LandingPageProps> = ({ onLogin, theme }) => {
             to="/privacy"
             className="hover:text-slate-700 dark:hover:text-white underline decoration-dotted underline-offset-4 transition-colors"
           >
-            Privacy
+            {t('privacyLink')}
           </Link>
           <Link
             to="/terms"
             className="hover:text-slate-700 dark:hover:text-white underline decoration-dotted underline-offset-4 transition-colors"
           >
-            Terms
+            {t('termsLink')}
           </Link>
         </div>
       </footer>

@@ -33,7 +33,7 @@ import {
 const AppRoutes: React.FC = () => {
   const {
     theme,
-    // t is used via themeClasses only
+    t,
     location,
     navigate,
     isLoading,
@@ -154,7 +154,7 @@ const AppRoutes: React.FC = () => {
         <p
           className={`text-[10px] font-medium font-inter ${themeClasses(theme, 'text-slate-400', 'text-slate-500')}`}
         >
-          © {new Date().getFullYear()} Girify. All rights reserved.
+          {t('rightsReserved')}
         </p>
       </div>
 

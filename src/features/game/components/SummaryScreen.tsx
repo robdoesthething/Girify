@@ -111,30 +111,30 @@ const SummaryScreen: React.FC<SummaryScreenProps> = ({
   const getScoreTier = () => {
     const ratio = score / maxPossibleScore;
     if (ratio >= UI.PERFORMANCE_THRESHOLDS.EXCELLENT) {
-      return 'Street Expert';
+      return t('scoreTierExpert');
     }
     if (ratio >= UI.PERFORMANCE_THRESHOLDS.GOOD) {
-      return 'City Local';
+      return t('scoreTierLocal');
     }
     if (ratio >= UI.PERFORMANCE_THRESHOLDS.FAIR) {
-      return 'Local Knowledge';
+      return t('scoreTierKnowledge');
     }
-    return 'Keep Wandering';
+    return t('scoreTierWander');
   };
 
   const getGreeting = () => {
     const ratio = score / maxPossibleScore;
 
     if (ratio >= UI.PERFORMANCE_THRESHOLDS.EXCELLENT) {
-      return '🏆 Unstoppable! The streets know your name!';
+      return t('greetingExcellent');
     }
     if (ratio >= UI.PERFORMANCE_THRESHOLDS.GOOD) {
-      return '🔥 Great job! You really know this city!';
+      return t('greetingGood');
     }
     if (ratio >= UI.PERFORMANCE_THRESHOLDS.FAIR) {
-      return '👍 Not bad! Keep exploring!';
+      return t('greetingFair');
     }
-    return '🗺️ Keep wandering! Every street has a story.';
+    return t('greetingDefault');
   };
 
   useEffect(() => {
@@ -171,10 +171,10 @@ const SummaryScreen: React.FC<SummaryScreenProps> = ({
     const formattedScore = score.toLocaleString('ca-ES');
     const formattedMax = maxPossibleScore.toLocaleString('ca-ES');
     const districtLine = profile?.team ? `🏙️ ${profile.team}\n` : '';
-    const streakLine = streakValue > 1 ? `🔥 ${streakValue} dies · ` : '';
+    const streakLine = streakValue > 1 ? `🔥 ${streakValue} ${t('shareStreakDays')} · ` : '';
 
     return (
-      `Girify #${dayNumber} — Conec Barcelona?\n` +
+      `Girify #${dayNumber} — ${t('shareTextQuestion')}\n` +
       `${squares}\n` +
       `${formattedScore} / ${formattedMax}\n` +
       `${districtLine}` +
@@ -227,7 +227,7 @@ const SummaryScreen: React.FC<SummaryScreenProps> = ({
                 <button
                   onClick={handleShare}
                   className="p-2.5 rounded-full bg-sky-500 hover:bg-sky-600 transition-all active:scale-95 shadow-lg text-white"
-                  title="Share this curiosity"
+                  title={t('shareCuriosity')}
                 >
                   🎁
                 </button>
@@ -279,7 +279,7 @@ const SummaryScreen: React.FC<SummaryScreenProps> = ({
           <div className="grid grid-cols-2 gap-4 w-full mb-8">
             <div className="glass-panel p-4 flex flex-col items-center justify-center col-span-1 asp-square">
               <span className="text-xs opacity-50 uppercase tracking-wider font-bold mb-1">
-                Score
+                {t('scoreLabel')}
               </span>
               <div className="flex flex-col items-center">
                 <span className={`text-4xl md:text-5xl font-black leading-none ${getScoreColor()}`}>

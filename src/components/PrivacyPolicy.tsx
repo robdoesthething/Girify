@@ -4,7 +4,7 @@ import { useTheme } from '../context/ThemeContext';
 import { themeClasses } from '../utils/themeUtils';
 
 const PrivacyPolicy: React.FC = () => {
-  const { theme } = useTheme();
+  const { theme, t } = useTheme();
 
   return (
     <div
@@ -13,51 +13,44 @@ const PrivacyPolicy: React.FC = () => {
       <div className="max-w-3xl mx-auto">
         <div className="mb-8">
           <Link to="/" className="text-sky-500 font-bold hover:underline">
-            ← Back to Home
+            {t('backToHome')}
           </Link>
         </div>
 
-        <h1 className="text-4xl font-black mb-8 font-inter">Privacy Policy</h1>
+        <h1 className="text-4xl font-black mb-8 font-inter">{t('privacyTitle')}</h1>
 
         <div className="space-y-6">
           <section>
-            <h2 className="text-2xl font-bold mb-3 font-inter">1. Information We Collect</h2>
-            <p className="opacity-80 font-inter">
-              We collect minimal information to provide the Girify experience:
-            </p>
+            <h2 className="text-2xl font-bold mb-3 font-inter">{t('privacySection1Title')}</h2>
+            <p className="opacity-80 font-inter">{t('privacySection1Intro')}</p>
             <ul className="list-disc pl-5 mt-2 space-y-2 opacity-80 font-inter">
-              <li>Authentication data (via Google or Email) to secure your account.</li>
-              <li>Game progress, scores, and shop purchases.</li>
-              <li>Basic analytics to understand how the app is used.</li>
+              <li>{t('privacySection1Item1')}</li>
+              <li>{t('privacySection1Item2')}</li>
+              <li>{t('privacySection1Item3')}</li>
             </ul>
           </section>
 
           <section>
-            <h2 className="text-2xl font-bold mb-3 font-inter">2. How We Use Information</h2>
-            <p className="opacity-80 font-inter">Your data is used solely to:</p>
+            <h2 className="text-2xl font-bold mb-3 font-inter">{t('privacySection2Title')}</h2>
+            <p className="opacity-80 font-inter">{t('privacySection2Intro')}</p>
             <ul className="list-disc pl-5 mt-2 space-y-2 opacity-80 font-inter">
-              <li>Maintain your profile and game history.</li>
-              <li>Display leaderboards and rankings.</li>
-              <li>Improve game mechanics and content.</li>
+              <li>{t('privacySection2Item1')}</li>
+              <li>{t('privacySection2Item2')}</li>
+              <li>{t('privacySection2Item3')}</li>
             </ul>
           </section>
 
           <section>
-            <h2 className="text-2xl font-bold mb-3 font-inter">3. Data Security</h2>
-            <p className="opacity-80 font-inter">
-              We use Supabase to securely store your data. We do not sell your personal data to
-              third parties.
-            </p>
+            <h2 className="text-2xl font-bold mb-3 font-inter">{t('privacySection3Title')}</h2>
+            <p className="opacity-80 font-inter">{t('privacySection3Content')}</p>
           </section>
 
           <section>
-            <h2 className="text-2xl font-bold mb-3 font-inter">4. Contact</h2>
-            <p className="opacity-80 font-inter">
-              If you have any questions about this policy, please contact us at support@girify.app.
-            </p>
+            <h2 className="text-2xl font-bold mb-3 font-inter">{t('privacySection4Title')}</h2>
+            <p className="opacity-80 font-inter">{t('privacySection4Content')}</p>
           </section>
 
-          <div className="pt-8 text-sm opacity-50 font-inter">Last updated: January 2026</div>
+          <div className="pt-8 text-sm opacity-50 font-inter">{t('legalLastUpdated')}</div>
         </div>
       </div>
     </div>

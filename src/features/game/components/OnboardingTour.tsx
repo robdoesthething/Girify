@@ -16,35 +16,32 @@ interface OnboardingTourProps {
 }
 
 const OnboardingTour: React.FC<OnboardingTourProps> = ({ onComplete }) => {
-  const { theme } = useTheme();
+  const { theme, t } = useTheme();
   const [step, setStep] = useState(0);
 
   const steps: Step[] = [
     {
       target: 'center',
-      title: 'Welcome to the Neighborhood!',
-      content:
-        "Hola! I am Mayor Jaume. I run this district, and I'm looking for someone who knows these streets.",
+      title: t('onboardingStep1Title'),
+      content: t('onboardingStep1Content'),
       position: 'center',
     },
     {
       target: 'map-area',
-      title: 'The Challenge',
-      content:
-        "I'll highlight a street on the map. You need to identify it. Zoom, pan, do whatever... just don't get lost.",
+      title: t('onboardingStep2Title'),
+      content: t('onboardingStep2Content'),
       position: 'top',
     },
     {
       target: 'quiz-input',
-      title: 'Prove Yourself',
-      content: 'Select the correct street name. Be quick! Tourists are slow. Locals are fast.',
+      title: t('onboardingStep3Title'),
+      content: t('onboardingStep3Content'),
       position: 'bottom',
     },
     {
       target: 'top-bar-coins',
-      title: 'Earn Respect (and Giuros)',
-      content:
-        'Score points to earn Giuros. Use them to buy fancy titles and look important, like me!',
+      title: t('onboardingStep4Title'),
+      content: t('onboardingStep4Content'),
       position: 'top-right',
     },
   ];
@@ -81,7 +78,7 @@ const OnboardingTour: React.FC<OnboardingTourProps> = ({ onComplete }) => {
           </div>
           <div className="ml-24 pl-4 text-white">
             <h2 className="text-xl font-black uppercase tracking-wider opacity-80">Mayor Jaume</h2>
-            <p className="text-xs font-bold opacity-60">District Manager</p>
+            <p className="text-xs font-bold opacity-60">{t('districtManager')}</p>
           </div>
         </div>
 
@@ -106,14 +103,14 @@ const OnboardingTour: React.FC<OnboardingTourProps> = ({ onComplete }) => {
               className="px-6 py-4 font-bold opacity-50 hover:opacity-100 focus:opacity-100 active:scale-95 transition-all outline-none focus:ring-2 focus:ring-sky-500 rounded-xl"
               type="button"
             >
-              Skip
+              {t('skip')}
             </button>
             <button
               onClick={handleNext}
               className="flex-1 py-4 bg-yellow-500 hover:bg-yellow-600 text-white rounded-2xl font-bold shadow-lg shadow-yellow-500/20 text-lg transition-all transform hover:scale-105"
               type="button"
             >
-              {step === steps.length - 1 ? 'Start Playing!' : 'Next ➤'}
+              {step === steps.length - 1 ? t('startPlaying') : `${t('next')} ➤`}
             </button>
           </div>
 
