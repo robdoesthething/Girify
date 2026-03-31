@@ -41,6 +41,11 @@ export const useAppInitialization = () => {
         setInitError('Failed to initialize resources');
         setIsInitialized(true);
       }
+
+      // Retry any scores that failed to save in a previous session (fire-and-forget)
+      import('../utils/game/pendingScores').then(({ flushPendingScores }) => {
+        flushPendingScores().catch(e => console.error('[Init] Pending score flush failed:', e));
+      });
     };
     init();
   }, []);

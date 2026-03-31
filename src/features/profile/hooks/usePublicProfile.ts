@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { getEquippedCosmetics } from '../../../utils/shop/giuros';
 import { getUserGameHistory, getUserProfile, UserProfile } from '../../../utils/social';
+import { EquippedCosmetics } from '../../../utils/social/types';
 import {
   blockUser,
   getBlockStatus,
@@ -17,7 +18,7 @@ interface UsePublicProfileReturn {
   requestSent: boolean;
   blocking: boolean;
   error: string | null;
-  equippedCosmetics: Record<string, string>;
+  equippedCosmetics: EquippedCosmetics;
   history: any[];
   handleAddFriend: () => Promise<void>;
   handleBlock: () => Promise<void>;
@@ -35,7 +36,7 @@ export const usePublicProfile = (
   const [requestSent, setRequestSent] = useState(false);
   const [blocking, setBlocking] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [equippedCosmetics, setEquippedCosmetics] = useState<Record<string, string>>({});
+  const [equippedCosmetics, setEquippedCosmetics] = useState<EquippedCosmetics>({});
   const [history, setHistory] = useState<any[]>([]);
 
   useEffect(() => {

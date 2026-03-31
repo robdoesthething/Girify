@@ -1,5 +1,6 @@
 import { Achievement } from '../data/achievements';
 import { GameHistory, UserProfile } from '../types/user';
+import { EquippedCosmetics } from '../utils/social/types';
 import { ShopItem } from '../utils/shop';
 
 // Profile state types
@@ -14,7 +15,7 @@ export interface ProfileState {
   allHistory: GameHistory[];
   friendCount: number;
   giuros: number;
-  equippedCosmetics: Record<string, string>;
+  equippedCosmetics: EquippedCosmetics;
   joinedDate: string;
   loading: boolean;
   shopAvatars: ShopItem[];
@@ -29,7 +30,7 @@ export type ProfileAction =
   | { type: 'SET_HISTORY'; payload: GameHistory[] }
   | { type: 'SET_FRIEND_COUNT'; payload: number }
   | { type: 'SET_GIUROS'; payload: number }
-  | { type: 'SET_EQUIPPED_COSMETICS'; payload: Record<string, string> }
+  | { type: 'SET_EQUIPPED_COSMETICS'; payload: EquippedCosmetics }
   | { type: 'SET_JOINED_DATE'; payload: string }
   | {
       type: 'SET_SHOP_ITEMS';
@@ -51,7 +52,7 @@ export type ProfileAction =
         allHistory: GameHistory[];
         friendCount: number;
         giuros: number;
-        equippedCosmetics: Record<string, string>;
+        equippedCosmetics: EquippedCosmetics;
         joinedDate: string;
         shopAvatars: ShopItem[];
         shopFrames: ShopItem[];

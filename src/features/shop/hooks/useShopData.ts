@@ -1,13 +1,9 @@
 import { useCallback, useEffect, useState } from 'react';
 import { getUserPurchasedBadges, getUserShopData } from '../../../services/database';
 import { getShopItems, GroupedShopItems } from '../../../utils/shop';
+import type { EquippedCosmetics } from '../../../utils/social/types';
 
-export interface EquippedCosmetics {
-  frameId?: string;
-  badgeIds?: string[];
-  titleId?: string;
-  avatarId?: string;
-}
+export type { EquippedCosmetics };
 
 export interface UserStats {
   streak?: number;

@@ -147,6 +147,9 @@ export const STORAGE_KEYS = {
   HISTORY_SYNCED: 'girify_history_synced',
   COSMETICS_SYNCED: 'girify_cosmetics_synced',
 
+  // Offline score queue
+  PENDING_SCORES: 'girify_pending_scores',
+
   // App state
   THEME_MODE: 'girify_theme_mode',
   LANGUAGE: 'girify_language',

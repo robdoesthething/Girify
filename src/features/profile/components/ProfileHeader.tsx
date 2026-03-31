@@ -4,6 +4,7 @@ import { AVATARS } from '../../../data/avatars';
 import { UserProfile } from '../../../types/user';
 import { formatUsername } from '../../../utils/format';
 import { ShopItem } from '../../../utils/shop';
+import { EquippedCosmetics } from '../../../utils/social/types';
 import { themeClasses } from '../../../utils/themeUtils';
 import { parseJoinedDate } from '../utils/profileHelpers';
 
@@ -11,7 +12,7 @@ interface ProfileHeaderProps {
   username: string;
   profileData: UserProfile;
   cosmetics: {
-    equipped: Record<string, string>;
+    equipped: EquippedCosmetics;
     allAvatars: ShopItem[];
     allFrames: ShopItem[];
     allTitles: ShopItem[];

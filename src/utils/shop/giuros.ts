@@ -284,7 +284,7 @@ export const setEquippedCosmetics = async (
  */
 export const getEquippedCosmetics = async (
   username: string | null
-): Promise<{ frameId?: string; badgeIds?: string[]; titleId?: string } | {}> => {
+): Promise<{ frameId?: string; badgeIds?: string[]; titleId?: string; avatarId?: string }> => {
   if (!username) {
     return {};
   }
@@ -292,7 +292,14 @@ export const getEquippedCosmetics = async (
   try {
     const user = await getUserByUsername(normalizedUsername);
     // UserRow equipped_cosmetics is Record<string, string>
-    return user?.equipped_cosmetics || {};
+    return (
+      (user?.equipped_cosmetics as {
+        frameId?: string;
+        badgeIds?: string[];
+        titleId?: string;
+        avatarId?: string;
+      }) || {}
+    );
   } catch (e) {
     console.error('Error getting equipped cosmetics:', e);
     return {};

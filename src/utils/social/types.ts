@@ -10,6 +10,13 @@ export interface NotificationSettings {
   newsUpdates: boolean;
 }
 
+export interface EquippedCosmetics {
+  frameId?: string;
+  badgeIds?: string[];
+  titleId?: string;
+  avatarId?: string;
+}
+
 export interface UserProfile {
   id?: string;
   username: string;
@@ -31,7 +38,7 @@ export interface UserProfile {
   lastPlayDate?: string | null;
   giuros?: number;
   purchasedCosmetics?: string[];
-  equippedCosmetics?: Record<string, string>;
+  equippedCosmetics?: EquippedCosmetics;
   equippedBadges?: string[];
   lastLoginDate?: string | null;
   language?: string;

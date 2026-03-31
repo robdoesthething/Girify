@@ -4,56 +4,38 @@ import { STORAGE_KEYS, TIME } from '../../../config/constants';
 import { shouldPromptFeedback } from '../../../config/gameConfig';
 import { useAsyncOperation } from '../../../hooks/useAsyncOperation';
 import { useNotification } from '../../../hooks/useNotification';
-import { insertGameResult } from '../../../services/db/games';
+import { updateDistrictScore } from '../../../services/db/games';
 import { checkAndProgressQuests } from '../../../services/db/quests';
+import { getUserByUsername } from '../../../services/db/users';
 import { endGame } from '../../../services/gameService';
 import { GameStateObject, QuizResult } from '../../../types/game';
 import { GameHistory } from '../../../types/user';
 import { debugLog } from '../../../utils/debug';
 import { getTodaySeed, markTodayAsPlayed } from '../../../utils/game/dailyChallenge';
+import { queuePendingScore } from '../../../utils/game/pendingScores';
 import { publishActivity } from '../../../utils/social/publishActivity';
 import { storage } from '../../../utils/storage';
 import { useGameReferrals } from './useGameReferrals';
 import { useGameStreaks } from './useGameStreaks';
 
 /**
- * Fallback function to save score directly to Supabase without Redis
- * Used when Redis session is missing or endGame fails
+ * Queues a score to localStorage when the DB save fails.
+ * flushPendingScores() retries them on next app load.
  */
-const fallbackSaveScore = async (state: GameStateObject, avgTime: number): Promise<void> => {
-  // Use username from state (consistent with how gameService stores it)
-  // This ensures leaderboard queries work correctly
+const queueScoreLocally = (state: GameStateObject, avgTime: number): void => {
   if (!state.username) {
-    console.warn('[Fallback] No username in state, cannot save to Supabase');
     return;
   }
-
-  try {
-    debugLog(`[Fallback] Saving directly to DB...`);
-    const { success, error } = await insertGameResult({
-      username: state.username,
-      score: state.score,
-      time_taken: avgTime,
-      correct_answers: state.correct,
-      question_count: state.quizStreets.length,
-      platform: 'web',
-      is_bonus: false,
-      played_at: new Date().toISOString(),
-    });
-
-    if (!success) {
-      console.error('[Fallback] Failed to save directly to Supabase:', error);
-      debugLog(
-        `[Fallback] DB Save Error: ${error instanceof Error ? error.message : String(error)}`
-      );
-    } else {
-      console.warn('[Fallback] Score saved directly to Supabase');
-      debugLog(`[Fallback] DB Save Success`);
-    }
-  } catch (err) {
-    console.error('[Fallback] Exception during direct save:', err);
-    debugLog(`[Fallback] Exception: ${String(err)}`);
-  }
+  queuePendingScore({
+    username: state.username,
+    score: state.score,
+    time_taken: avgTime,
+    correct_answers: state.correct,
+    question_count: state.quizStreets.length,
+    platform: 'web',
+    is_bonus: false,
+    played_at: new Date().toISOString(),
+  });
 };
 
 export const useGamePersistence = () => {
@@ -89,39 +71,53 @@ export const useGamePersistence = () => {
           storage.set(STORAGE_KEYS.HISTORY, history);
 
           if (state.username) {
-            // [MIGRATION] Use Game Service to end game (Redis -> Supabase)
-            // Replaces legacy saveScore() logic
-            if (state.gameId) {
-              try {
-                const result = await endGame(
-                  state.gameId,
-                  state.score,
-                  Number(localRecord.avgTime),
-                  state.correct,
-                  state.quizStreets.length,
-                  state.username
-                );
+            const avgTimeNum = Number(localRecord.avgTime);
+            let saved = false;
 
-                if (!result.success) {
-                  console.error('[Save Error] Failed to save game:', result.error);
-                  debugLog(`[Persistence] Save Failed: ${result.error}. Trying fallback.`);
-                  // Try fallback: direct Supabase insert without Redis
-                  await fallbackSaveScore(state, Number(localRecord.avgTime));
-                } else {
-                  console.warn('[Save Success] Game saved:', result.gameId);
-                  debugLog(`[Persistence] Save Success (GameID: ${result.gameId})`);
-                }
-              } catch (error) {
-                console.error('[Save Exception] Critical error:', error);
-                // Last resort: Try direct Supabase insert
-                await fallbackSaveScore(state, Number(localRecord.avgTime));
+            try {
+              const result = await endGame(
+                state.gameId || 'local',
+                state.score,
+                avgTimeNum,
+                state.correct,
+                state.quizStreets.length,
+                state.username
+              );
+
+              if (result.success) {
+                saved = true;
+                debugLog(`[Persistence] Save Success (GameID: ${result.gameId})`);
+              } else {
+                console.error('[Save Error] Failed to save game:', result.error);
+                debugLog(`[Persistence] Save Failed: ${result.error}`);
+              }
+            } catch (error) {
+              console.error('[Save Exception] Critical error:', error);
+            }
+
+            if (!saved) {
+              // Queue locally so the score is retried on next app load
+              queueScoreLocally(state, avgTimeNum);
+              if (notify) {
+                notify(
+                  "Score couldn't be saved right now — it'll be submitted automatically next time you open the app.",
+                  'warning',
+                  8000
+                );
               }
             } else {
-              console.warn(
-                '[Migration] No gameId found - using fallback save (Redis session missing)'
-              );
-              // No gameId = no Redis session, use fallback directly
-              await fallbackSaveScore(state, Number(localRecord.avgTime));
+              // Update district aggregate score (fire-and-forget background task)
+              getUserByUsername(state.username)
+                .then(userRow => {
+                  if (userRow?.team) {
+                    updateDistrictScore(userRow.team, state.score).catch(err => {
+                      console.error('[District] Failed to update district score:', err);
+                    });
+                  }
+                })
+                .catch(err => {
+                  console.error('[District] Failed to fetch user for district update:', err);
+                });
             }
 
             // Publish activity to friends feed

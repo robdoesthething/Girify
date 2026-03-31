@@ -1,20 +1,39 @@
 import { useCallback, useEffect, useState } from 'react';
+import cosmetics from '../../../data/cosmetics.json';
 import { getUserGameHistory } from '../../../services/db/games';
 import { GameResultRow } from '../../../types/supabase';
 import { GameHistory, UserProfile } from '../../../types/user';
 import { normalizeUsername } from '../../../utils/format';
 import { getShopItems, GroupedShopItems, ShopItem } from '../../../utils/shop';
+import { EquippedCosmetics } from '../../../utils/social/types';
 import { getEquippedCosmetics, getGiuros } from '../../../utils/shop/giuros';
 import { getUserProfile } from '../../../utils/social';
 import { getFriendCount } from '../../../utils/social/friends';
 import { parseJoinedDate } from '../utils/profileHelpers';
+
+// Derive local fallback arrays from the bundled cosmetics.json so that
+// equipped cosmetics can be resolved immediately on first render — before
+// the background getShopItems() call completes.
+const rawCosmetics = cosmetics as Record<string, any[]>;
+const LOCAL_AVATARS: ShopItem[] = (rawCosmetics.avatars || []).map((i: any) => ({
+  ...i,
+  type: 'avatar' as const,
+}));
+const LOCAL_FRAMES: ShopItem[] = (rawCosmetics.avatarFrames || []).map((i: any) => ({
+  ...i,
+  type: 'frame' as const,
+}));
+const LOCAL_TITLES: ShopItem[] = (rawCosmetics.titles || []).map((i: any) => ({
+  ...i,
+  type: 'title' as const,
+}));
 
 export interface UseProfileDataResult {
   profileData: UserProfile | null;
   allHistory: GameHistory[];
   friendCount: number;
   giuros: number;
-  equippedCosmetics: Record<string, string>;
+  equippedCosmetics: EquippedCosmetics;
   joinedDate: string;
   loading: boolean;
   shopAvatars: ShopItem[];
@@ -32,12 +51,12 @@ export const useProfileData = (username: string): UseProfileDataResult => {
   const [allHistory, setAllHistory] = useState<GameHistory[]>([]);
   const [friendCount, setFriendCount] = useState(0);
   const [giuros, setGiuros] = useState(0);
-  const [equippedCosmetics, setEquippedCosmetics] = useState<Record<string, string>>({});
+  const [equippedCosmetics, setEquippedCosmetics] = useState<EquippedCosmetics>({});
   const [joinedDate, setJoinedDate] = useState('');
   const [loading, setLoading] = useState(true);
-  const [shopAvatars, setShopAvatars] = useState<ShopItem[]>([]);
-  const [shopFrames, setShopFrames] = useState<ShopItem[]>([]);
-  const [shopTitles, setShopTitles] = useState<ShopItem[]>([]);
+  const [shopAvatars, setShopAvatars] = useState<ShopItem[]>(LOCAL_AVATARS);
+  const [shopFrames, setShopFrames] = useState<ShopItem[]>(LOCAL_FRAMES);
+  const [shopTitles, setShopTitles] = useState<ShopItem[]>(LOCAL_TITLES);
 
   const loadProfile = useCallback(async () => {
     if (!normalizedUsername) {
@@ -56,8 +75,9 @@ export const useProfileData = (username: string): UseProfileDataResult => {
       ]);
 
       setGiuros(prev => (prev !== bal ? bal : prev));
+      const equippedVal = (equipped || {}) as EquippedCosmetics;
       setEquippedCosmetics(prev =>
-        JSON.stringify(prev) !== JSON.stringify(equipped || {}) ? equipped || {} : prev
+        JSON.stringify(prev) !== JSON.stringify(equippedVal) ? equippedVal : prev
       );
 
       if (profile) {
@@ -88,7 +108,8 @@ export const useProfileData = (username: string): UseProfileDataResult => {
             return {
               date: h.played_at ? h.played_at.split('T')[0] || '' : '',
               score: h.score,
-              avgTime: '0s',
+              avgTime:
+                h.time_taken !== null && h.time_taken !== undefined ? String(h.time_taken) : '0',
               timestamp: ts,
               username: normalizedUsername,
             };

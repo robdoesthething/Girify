@@ -5,12 +5,13 @@ import { getAvatar } from '../../../data/avatars';
 import cosmetics from '../../../data/cosmetics.json';
 import { formatUsername } from '../../../utils/format';
 import { UserProfile } from '../../../utils/social';
+import { EquippedCosmetics } from '../../../utils/social/types';
 import { themeClasses } from '../../../utils/themeUtils';
 
 interface PublicProfileHeaderProps {
   profile: UserProfile | null;
   isLoading: boolean;
-  equippedCosmetics: Record<string, string>;
+  equippedCosmetics: EquippedCosmetics;
   username: string;
 }
 

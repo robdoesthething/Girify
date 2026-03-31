@@ -16,7 +16,12 @@ import { supabase } from '../../services/supabase';
 import type { UserRow } from '../../types/supabase';
 import { normalizeUsername } from '../format';
 
-import type { AdditionalProfileData, NotificationSettings, UserProfile } from './types';
+import type {
+  AdditionalProfileData,
+  EquippedCosmetics,
+  NotificationSettings,
+  UserProfile,
+} from './types';
 
 const DEFAULT_AVATAR_COUNT = 20;
 const DEFAULT_GIUROS = 10;
@@ -48,7 +53,7 @@ export function rowToProfile(row: UserRow): UserProfile {
     lastPlayDate: row.last_play_date,
     giuros: row.giuros ?? 0,
     purchasedCosmetics: row.purchased_cosmetics || [],
-    equippedCosmetics: (row.equipped_cosmetics as Record<string, string>) || {},
+    equippedCosmetics: (row.equipped_cosmetics as EquippedCosmetics) || {},
     equippedBadges: row.equipped_badges || [],
     lastLoginDate: row.last_login_date,
     language: row.language || 'en',
@@ -158,7 +163,16 @@ export const ensureUserProfile = async (
   }
 
   if (Object.keys(updates).length > 0) {
-    await updateUser(userDbRecord.username, updates);
+    const ok = await updateUser(userDbRecord.username, updates);
+    if (!ok) {
+      console.error(
+        '[Profile] updateUser failed for',
+        userDbRecord.username,
+        'updates:',
+        Object.keys(updates)
+      );
+      return null;
+    }
     Object.assign(userDbRecord, updates);
   }
 
