@@ -30,7 +30,6 @@ SET
   notification_settings = src.notification_settings,
   district              = src.district,
   team                  = src.team,
-  supabase_uid          = src.supabase_uid,
   friend_count          = src.friend_count,
   referred_by           = src.referred_by,
   banned                = src.banned
