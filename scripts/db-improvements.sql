@@ -190,12 +190,12 @@ CREATE INDEX IF NOT EXISTS idx_users_supabase_uid ON users(supabase_uid);
 -- Apply to the highest-traffic policies.
 -- ============================================================================
 
--- game_results: read policy
+-- game_results: read policy (column is 'username', not 'user_id')
 DROP POLICY IF EXISTS "Users can view own game results" ON game_results;
 CREATE POLICY "Users can view own game results" ON game_results
   FOR SELECT TO authenticated
   USING (
-    user_id IN (
+    username IN (
       SELECT username FROM users WHERE supabase_uid = (SELECT auth.uid())
     )
   );

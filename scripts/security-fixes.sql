@@ -64,7 +64,7 @@ DROP POLICY IF EXISTS "Users can insert own game results" ON game_results;
 CREATE POLICY "Users can insert own game results" ON game_results
 FOR INSERT TO authenticated
 WITH CHECK (
-  user_id IN (SELECT username FROM users WHERE supabase_uid = auth.uid())
+  username IN (SELECT username FROM users WHERE supabase_uid = auth.uid())
 );
 
 -- Apply same ownership fix to activity_feed and user_games while we're here
