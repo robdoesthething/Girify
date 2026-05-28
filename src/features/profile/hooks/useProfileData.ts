@@ -6,8 +6,7 @@ import { GameHistory, UserProfile } from '../../../types/user';
 import { normalizeUsername } from '../../../utils/format';
 import { getShopItems, GroupedShopItems, ShopItem } from '../../../utils/shop';
 import { EquippedCosmetics } from '../../../utils/social/types';
-import { getEquippedCosmetics, getGiuros } from '../../../utils/shop/giuros';
-import { getUserProfile } from '../../../utils/social';
+import { getUserProfileWithBalance } from '../../../utils/social';
 import { getFriendCount } from '../../../utils/social/friends';
 import { parseJoinedDate } from '../utils/profileHelpers';
 
@@ -66,13 +65,13 @@ export const useProfileData = (username: string): UseProfileDataResult => {
 
     try {
       setLoading(true);
-      // CRITICAL: Load only essential data immediately (300-400ms)
-      // User profile, balance, and equipped cosmetics are needed for initial render
-      const [profile, bal, equipped] = await Promise.all([
-        getUserProfile(normalizedUsername),
-        getGiuros(normalizedUsername),
-        getEquippedCosmetics(normalizedUsername),
-      ]);
+      // CRITICAL: Load only essential data immediately (single DB round-trip)
+      // User profile, balance, and equipped cosmetics derive from the same row
+      const {
+        profile,
+        giuros: bal,
+        equippedCosmetics: equipped,
+      } = await getUserProfileWithBalance(normalizedUsername);
 
       setGiuros(prev => (prev !== bal ? bal : prev));
       const equippedVal = (equipped || {}) as EquippedCosmetics;

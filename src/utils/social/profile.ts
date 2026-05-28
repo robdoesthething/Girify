@@ -70,6 +70,38 @@ export function rowToProfile(row: UserRow): UserProfile {
 }
 
 /**
+ * Fetch profile, giuros balance, and equipped cosmetics in a single DB call.
+ * Use this instead of calling getUserProfile + getGiuros + getEquippedCosmetics separately.
+ */
+export async function getUserProfileWithBalance(username: string): Promise<{
+  profile: UserProfile | null;
+  giuros: number;
+  equippedCosmetics: { frameId?: string; badgeIds?: string[]; titleId?: string; avatarId?: string };
+}> {
+  const empty = { profile: null, giuros: 10, equippedCosmetics: {} };
+  if (!username) {
+    return empty;
+  }
+
+  const row = await getUserByUsername(normalizeUsername(username));
+  if (!row) {
+    return empty;
+  }
+
+  return {
+    profile: rowToProfile(row),
+    giuros: row.giuros ?? 10,
+    equippedCosmetics:
+      (row.equipped_cosmetics as {
+        frameId?: string;
+        badgeIds?: string[];
+        titleId?: string;
+        avatarId?: string;
+      }) || {},
+  };
+}
+
+/**
  * Get or create user profile document in Supabase.
  * @param usernameInput - The desired username (will be normalized)
  * @param uid - Optional Auth UID to link

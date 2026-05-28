@@ -17,6 +17,7 @@ import { supabase } from '../../../services/supabase';
 /**
  * Link existing user row to Supabase Auth by setting supabase_uid.
  * Matches by email on first login after migration.
+ * Single atomic UPDATE — no separate read needed.
  */
 export async function linkSupabaseUid(user: User): Promise<void> {
   if (!user.email) {
@@ -24,17 +25,11 @@ export async function linkSupabaseUid(user: User): Promise<void> {
   }
 
   try {
-    // Check if already linked
-    const { data: existing } = await supabase
+    await supabase
       .from('users')
-      .select('supabase_uid')
+      .update({ supabase_uid: user.id })
       .eq('email', user.email)
-      .single();
-
-    if (existing && !existing.supabase_uid) {
-      await supabase.from('users').update({ supabase_uid: user.id }).eq('email', user.email);
-      logger.info('[Auth] Linked supabase_uid for', user.email);
-    }
+      .is('supabase_uid', null);
   } catch (e) {
     console.warn('[Auth] Failed to link supabase_uid:', e);
   }
@@ -68,15 +63,17 @@ export async function syncUserProfile(
       // Self-heal any broken migration links
       healMigration(displayName).catch((err: Error) => console.error(err));
 
-      // Claim daily login bonus
+      // Claim daily login bonus and check feedback rewards in parallel
       const { claimDailyLoginBonus } = await import('../../../utils/shop/giuros');
-      const bonusResult = await claimDailyLoginBonus(displayName);
+      const [bonusResult, rewards] = await Promise.all([
+        claimDailyLoginBonus(displayName),
+        checkUnseenFeedbackRewards(displayName) as Promise<FeedbackReward[]>,
+      ]);
+
       if (bonusResult.claimed) {
         logger.info(`[Giuros] Daily login bonus claimed: +${bonusResult.bonus}`);
       }
 
-      // Check for feedback rewards
-      const rewards = (await checkUnseenFeedbackRewards(displayName)) as FeedbackReward[];
       if (rewards && rewards.length > 0) {
         const total = rewards.reduce((acc: number, r: FeedbackReward) => acc + (r.reward || 0), 0);
         if (notify) {
@@ -94,10 +91,12 @@ export async function syncUserProfile(
         onAnnouncementsCheck();
       }
 
-      // Sync local history (one-time migration)
-      await syncLocalHistory(displayName);
-      await syncLocalCosmetics(displayName);
-      await backfillJoinDate(displayName, profile);
+      // Sync local history, cosmetics, and join date in parallel (one-time migrations)
+      await Promise.allSettled([
+        syncLocalHistory(displayName),
+        syncLocalCosmetics(displayName),
+        backfillJoinDate(displayName, profile),
+      ]);
 
       return profile;
     }

@@ -22,6 +22,7 @@ export {
   getUserByEmail,
   getUserByUid,
   getUserProfile,
+  getUserProfileWithBalance,
   healMigration,
   migrateUser,
   rowToProfile,

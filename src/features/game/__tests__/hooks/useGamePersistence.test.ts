@@ -69,6 +69,31 @@ vi.mock('../../../../hooks/useAsyncOperation', () => ({
   }),
 }));
 
+vi.mock('../../../../context/ThemeContext', () => ({
+  useTheme: () => ({
+    t: (key: string) => key,
+    theme: 'dark',
+    setTheme: vi.fn(),
+    language: 'en',
+  }),
+}));
+
+vi.mock('../../../../utils/social/publishActivity', () => ({
+  publishActivity: vi.fn(() => Promise.resolve()),
+}));
+
+vi.mock('../../../../services/db/users', () => ({
+  getUserByUsername: vi.fn(() => Promise.resolve(null)),
+}));
+
+vi.mock('../../../../utils/storage', () => ({
+  storage: {
+    get: vi.fn(() => []),
+    set: vi.fn(),
+    remove: vi.fn(),
+  },
+}));
+
 describe('useGamePersistence Integration Tests', () => {
   // ... (keep mockGameState)
   const mockGameState: GameStateObject = {
@@ -157,16 +182,15 @@ describe('useGamePersistence Integration Tests', () => {
     expect(mockUpdateStreaks).toHaveBeenCalled();
   });
 
-  it('should fallback to Supabase when Redis fails', async () => {
-    // Mock Redis failure
+  it('should queue score locally when save fails', async () => {
     vi.spyOn(gameService, 'endGame').mockResolvedValue({
       success: false,
-      error: 'Redis connection failed',
+      error: 'Save failed',
     });
+    vi.spyOn(dailyChallengeUtils, 'markTodayAsPlayed').mockReturnValue(undefined);
+    vi.spyOn(dailyChallengeUtils, 'getTodaySeed').mockReturnValue(20260124);
 
-    const { insertGameResult } = await import('../../../../services/db/games');
-    // @ts-ignore
-    insertGameResult.mockResolvedValue({ success: true });
+    const { storage: mockStorage } = await import('../../../../utils/storage');
 
     const { result } = renderHook(() => useGamePersistence());
 
@@ -175,19 +199,16 @@ describe('useGamePersistence Integration Tests', () => {
     });
 
     expect(gameService.endGame).toHaveBeenCalled();
-    expect(insertGameResult).toHaveBeenCalledWith(
-      expect.objectContaining({
-        username: 'testuser',
-        score: 7500,
-        correct_answers: 8,
-      })
-    );
+    // Failed save queues the score via storage.set
+    expect(mockStorage.set).toHaveBeenCalled();
   });
 
-  it('should store game history in local storage', async () => {
+  it('should store game history via storage utility', async () => {
     vi.spyOn(gameService, 'endGame').mockResolvedValue({ success: true });
     vi.spyOn(dailyChallengeUtils, 'markTodayAsPlayed').mockReturnValue(undefined);
     vi.spyOn(dailyChallengeUtils, 'getTodaySeed').mockReturnValue(20260124);
+
+    const { storage: mockStorage } = await import('../../../../utils/storage');
 
     const { result } = renderHook(() => useGamePersistence());
 
@@ -195,9 +216,9 @@ describe('useGamePersistence Integration Tests', () => {
       await result.current.saveGameResults(mockGameState);
     });
 
-    expect(global.localStorage.setItem).toHaveBeenCalledWith(
+    expect(mockStorage.set).toHaveBeenCalledWith(
       expect.any(String),
-      expect.stringContaining('"score":7500')
+      expect.arrayContaining([expect.objectContaining({ score: 7500 })])
     );
   });
 

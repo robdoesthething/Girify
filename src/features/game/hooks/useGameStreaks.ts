@@ -17,13 +17,14 @@ export const useGameStreaks = () => {
       const historyForStreak = storage.get<GameHistory[]>(STORAGE_KEYS.HISTORY, []);
       const streak = calculateStreak(historyForStreak.map(h => ({ ...h, date: Number(h.date) })));
 
-      await updateUserGameStats(username, {
-        streak,
-        lastPlayDate: String(getTodaySeed()),
-        currentScore: score,
-      });
-
-      await awardChallengeBonus(username, streak);
+      await Promise.all([
+        updateUserGameStats(username, {
+          streak,
+          lastPlayDate: String(getTodaySeed()),
+          currentScore: score,
+        }),
+        awardChallengeBonus(username, streak),
+      ]);
     } catch (error) {
       console.error('Error updating streaks:', error);
     }

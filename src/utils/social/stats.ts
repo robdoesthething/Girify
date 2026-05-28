@@ -9,7 +9,6 @@ import {
   getUserByUsername,
   updateUser,
 } from '../../services/database';
-import { supabase } from '../../services/supabase';
 import { normalizeUsername } from '../format';
 import { getTeamLeaderboard } from './leaderboard';
 
@@ -31,14 +30,7 @@ export const updateUserGameStats = async (
   const normalizedName = normalizeUsername(username);
 
   try {
-    const [existingUser, totalScoreResult] = await Promise.all([
-      getUserByUsername(normalizedName),
-      supabase
-        .from('game_results')
-        .select('score')
-        .eq('username', normalizedName)
-        .then(({ data }) => (data ?? []).reduce((sum, r) => sum + (r.score ?? 0), 0)),
-    ]);
+    const existingUser = await getUserByUsername(normalizedName);
 
     if (!existingUser) {
       return;
@@ -46,7 +38,7 @@ export const updateUserGameStats = async (
 
     const updates: Record<string, unknown> = {
       games_played: (existingUser.games_played ?? 0) + 1,
-      total_score: totalScoreResult,
+      total_score: (existingUser.total_score ?? 0) + (currentScore ?? 0),
       streak: Math.min(streak, (existingUser.games_played ?? 0) + 1),
       last_play_date: lastPlayDate,
     };

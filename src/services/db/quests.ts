@@ -212,7 +212,9 @@ export async function checkAndProgressQuests(
       return [];
     }
 
-    // 2. Evaluate each quest
+    // 2. Evaluate each quest and collect updates
+    const updatePromises: Promise<void>[] = [];
+
     for (const quest of quests) {
       if (quest.progress?.is_completed) {
         continue;
@@ -230,20 +232,10 @@ export async function checkAndProgressQuests(
 
       switch (quest.criteria_type) {
         case 'score_attack':
-          // Accumulate score or Single game high score?
-          // If description says "Get X points", usually cumulative or single.
-          // Let's assume cumulative for "daily" quests unless specified.
-          // BUT given it's "Daily Challenge", maybe it's "Get X points in one game"?
-          // For simplicity/safey, let's treat it as cumulative addition of the current game score.
-          // If we wanted "High Score", we'd check if gameState.score >= targetValue.
-          // Let's assume CUMULATIVE for specific quests like "Earn 5000 points today".
           newProgress += gameState.score;
           break;
 
         case 'find_street': {
-          // Check if any correctly answered street matches the target value (street name)
-          // Target value would be the street name or ID.
-          // We check quizResults for status='correct'
           const foundStreets = gameState.quizResults.filter(
             r =>
               r.status === 'correct' &&
@@ -256,8 +248,6 @@ export async function checkAndProgressQuests(
         }
 
         case 'district_explorer': {
-          // Count correct answers in distinct districts? Or just correct answers in a specific district?
-          // Assuming criteria_value is the district name (e.g. "Eixample")
           const districtMatches = gameState.quizResults.filter(
             r =>
               r.status === 'correct' &&
@@ -279,14 +269,17 @@ export async function checkAndProgressQuests(
         isCompleted = true;
       }
 
-      // Update if changed
+      // Collect update if progress changed
       if (newProgress !== currentProgress || isCompleted) {
-        await updateQuestProgress(cleanUserId, quest.id, newProgress, isCompleted);
+        updatePromises.push(updateQuestProgress(cleanUserId, quest.id, newProgress, isCompleted));
         if (isCompleted) {
           completedQuests.push(quest.title);
         }
       }
     }
+
+    // Flush all quest updates in parallel
+    await Promise.all(updatePromises);
     return completedQuests;
   } catch (error) {
     logger.error('Error checking quest progress', error);
