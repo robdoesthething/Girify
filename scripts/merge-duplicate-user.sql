@@ -5,6 +5,10 @@
 
 BEGIN;
 
+-- Step 0: Free the email on the source row so the unique constraint doesn't
+-- fire when we assign it to the destination row in Step 1.
+UPDATE users SET email = NULL WHERE username = '@robertosnc9113';
+
 -- Step 1: Copy all meaningful columns from @robertosnc9113 to robertosnc9113.
 -- robertosnc9113 exists but is empty (0 games, NULL email after the dedup fix).
 UPDATE users
