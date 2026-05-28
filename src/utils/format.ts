@@ -77,3 +77,45 @@ export const usernamesMatch = (
 ): boolean => {
   return normalizeUsername(username1) === normalizeUsername(username2);
 };
+
+/**
+ * Compact relative time for feed items (seconds-based Firestore timestamps).
+ * Returns strings like "Just now", "5m ago", "3h ago", "2d ago", or a locale date.
+ */
+export function formatCompactRelativeTime(seconds: number, t: (key: string) => string): string {
+  const diff = Math.floor(Date.now() / 1000) - seconds;
+  if (diff < 60) {
+    return t('justNow');
+  }
+  if (diff < 3600) {
+    return `${Math.floor(diff / 60)}${t('minuteSuffix')}`;
+  }
+  if (diff < 86400) {
+    return `${Math.floor(diff / 3600)}${t('hourSuffix')}`;
+  }
+  if (diff < 604800) {
+    return `${Math.floor(diff / 86400)}${t('daySuffix')}`;
+  }
+  return new Date(seconds * 1000).toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+}
+
+/**
+ * Day-precision relative date for game history (milliseconds-based timestamps).
+ * Returns strings like "Today", "Yesterday", "3 days ago", "2 weeks ago", or a locale date.
+ */
+export function formatRelativeDate(ms: number, t: (key: string) => string): string {
+  const days = Math.floor((Date.now() - ms) / (1000 * 60 * 60 * 24));
+  if (days === 0) {
+    return t('today');
+  }
+  if (days === 1) {
+    return t('yesterday');
+  }
+  if (days < 7) {
+    return `${days} ${t('daysAgo')}`;
+  }
+  if (days < 30) {
+    return `${Math.floor(days / 7)} ${t('weeksAgo')}`;
+  }
+  return new Date(ms).toLocaleDateString();
+}

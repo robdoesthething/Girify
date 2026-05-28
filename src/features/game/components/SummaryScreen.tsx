@@ -1,7 +1,7 @@
 import { motion } from 'framer-motion';
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { STORAGE_KEYS, TIME, UI } from '../../../config/constants';
+import { GAME, GIRIFY_EPOCH, STORAGE_KEYS, TIME, UI } from '../../../config/constants';
 import { getCuriosityByStreets } from '../../../data/curiosities';
 import { useAuth } from '../../auth/hooks/useAuth';
 import { QuizResult, Street } from '../../../types/game';
@@ -19,8 +19,6 @@ interface SummaryScreenProps {
   score: number;
   total: number;
   theme: 'light' | 'dark';
-  username?: string;
-  realName?: string;
   streak?: number;
   onRestart: () => void;
   onBackToMenu?: () => void;
@@ -156,15 +154,14 @@ const SummaryScreen: React.FC<SummaryScreenProps> = ({
   const handleNext = () => setView('actions');
 
   const buildShareText = () => {
-    const epoch = new Date('2026-01-09');
-    const dayNumber = Math.floor((Date.now() - epoch.getTime()) / 86400000) + 1;
+    const dayNumber = Math.floor((Date.now() - GIRIFY_EPOCH.getTime()) / TIME.ONE_DAY) + 1;
 
     const squares = quizResults
       .map(r => {
         if (r.status === 'failed') {
           return '⬛';
         }
-        return r.points >= 700 ? '🟩' : '🟨';
+        return r.points >= GAME.POINTS.GOOD_THRESHOLD ? '🟩' : '🟨';
       })
       .join('');
 

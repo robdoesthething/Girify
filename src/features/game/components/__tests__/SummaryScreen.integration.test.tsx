@@ -42,6 +42,14 @@ vi.mock('../../../hooks/useToast', () => ({
   }),
 }));
 
+vi.mock('../../../auth/hooks/useAuth', () => ({
+  useAuth: () => ({
+    user: null,
+    profile: null,
+    loading: false,
+  }),
+}));
+
 import { MemoryRouter } from 'react-router-dom';
 
 describe('SummaryScreen Integration', () => {
@@ -92,7 +100,7 @@ describe('SummaryScreen Integration', () => {
     // It DOES NOT show "Correct Answers" count explicitly in the `actions` view.
     // So `expect(screen.getByText('5 / 5'))` will fail.
 
-    // I should assert `maxPossibleScore` (500).
-    expect(screen.getByText('/ 500 pts')).toBeInTheDocument();
+    // maxPossibleScore = 5 * 1000 = 5000
+    expect(screen.getByText('/ 5000 pts')).toBeInTheDocument();
   });
 });

@@ -377,6 +377,16 @@ const translations: Translations = {
     shareCuriosity: 'Share this curiosity',
     shareTextQuestion: 'Do I know Barcelona?',
     shareStreakDays: 'days',
+    justNow: 'Just now',
+    today: 'Today',
+    yesterday: 'Yesterday',
+    minuteSuffix: 'm ago',
+    hourSuffix: 'h ago',
+    daySuffix: 'd ago',
+    daysAgo: 'days ago',
+    weeksAgo: 'weeks ago',
+    scorePendingWarning:
+      "Score couldn't be saved right now — it'll be submitted automatically next time you open the app.",
 
     // Legal
     backToHome: '← Back to Home',
@@ -735,6 +745,16 @@ const translations: Translations = {
     shareCuriosity: 'Compartir esta curiosidad',
     shareTextQuestion: '¿Conozco Barcelona?',
     shareStreakDays: 'días',
+    justNow: 'Ahora mismo',
+    today: 'Hoy',
+    yesterday: 'Ayer',
+    minuteSuffix: 'm atrás',
+    hourSuffix: 'h atrás',
+    daySuffix: 'd atrás',
+    daysAgo: 'días atrás',
+    weeksAgo: 'semanas atrás',
+    scorePendingWarning:
+      'La puntuación no se pudo guardar ahora — se enviará automáticamente la próxima vez que abras la app.',
 
     // Legal
     backToHome: '← Volver al inicio',
@@ -1095,6 +1115,16 @@ const translations: Translations = {
     shareCuriosity: 'Compartir aquesta curiositat',
     shareTextQuestion: 'Conec Barcelona?',
     shareStreakDays: 'dies',
+    justNow: 'Ara mateix',
+    today: 'Avui',
+    yesterday: 'Ahir',
+    minuteSuffix: 'm fa',
+    hourSuffix: 'h fa',
+    daySuffix: 'd fa',
+    daysAgo: 'dies fa',
+    weeksAgo: 'setmanes fa',
+    scorePendingWarning:
+      "La puntuació no s'ha pogut guardar ara — s'enviarà automàticament la propera vegada que obris l'app.",
 
     // Legal
     backToHome: "← Tornar a l'inici",

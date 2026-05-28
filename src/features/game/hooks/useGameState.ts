@@ -14,10 +14,27 @@ import { storage } from '../../../utils/storage';
 import { useGamePersistence } from './useGamePersistence';
 
 let cachedQuizPlan: { quizzes: unknown[] } | null = null;
+// In dev, quizPlan.json changes don't trigger HMR on this module — clear the
+// cache so the next setupGame() picks up the new data without a hard reload.
+if (import.meta.hot) {
+  import.meta.hot.on('vite:afterUpdate', () => {
+    cachedQuizPlan = null;
+  });
+}
 async function getQuizPlan(): Promise<{ quizzes: unknown[] }> {
   if (!cachedQuizPlan) {
-    const res = await fetch('/quizPlan.json');
-    cachedQuizPlan = await res.json();
+    try {
+      const res = await fetch('/quizPlan.json');
+      if (!res.ok) {
+        throw new Error(`HTTP ${res.status}`);
+      }
+      cachedQuizPlan = await res.json();
+    } catch {
+      // Fall back to the bundled copy so the game can still start offline
+      cachedQuizPlan = (await import('../../../data/quizPlan.json')).default as {
+        quizzes: unknown[];
+      };
+    }
   }
   return cachedQuizPlan!;
 }
@@ -110,9 +127,9 @@ export const useGameState = (
         return;
       }
 
-      // Initialize Redis session (non-blocking, with timeout)
+      // Initialize game session (non-blocking)
       const redisPromise = Promise.race([
-        startGame(activeName).then(gameId => {
+        startGame().then(gameId => {
           dispatch({ type: 'SET_GAME_ID', payload: gameId });
         }),
         new Promise((_, reject) => setTimeout(() => reject(new Error('Redis timeout')), 3000)),

@@ -42,6 +42,7 @@ export const GAME = {
     TIME_BONUS_MAX: 900, // Max time bonus (scaled to 90 per question)
     HINT_PENALTY: 50, // Penalty per hint (scaled to 5 per question)
     STREAK_MULTIPLIER: 1.1,
+    GOOD_THRESHOLD: 700, // Min points per question for a green square (70% of max 1000)
   },
 
   // Scoring Tiers (Accuracy % or Time)
@@ -193,3 +194,6 @@ export const PRNG = {
 };
 
 export const NEARBY_THRESHOLD = 0.003;
+
+// Day-0 for the Girify puzzle counter (Girify #1 = 2026-01-09)
+export const GIRIFY_EPOCH = new Date('2026-01-09');

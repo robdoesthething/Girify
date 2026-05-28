@@ -12,6 +12,7 @@ import { GameStateObject, QuizResult } from '../../../types/game';
 import { GameHistory } from '../../../types/user';
 import { debugLog } from '../../../utils/debug';
 import { getTodaySeed, markTodayAsPlayed } from '../../../utils/game/dailyChallenge';
+import { useTheme } from '../../../context/ThemeContext';
 import { queuePendingScore } from '../../../utils/game/pendingScores';
 import { publishActivity } from '../../../utils/social/publishActivity';
 import { storage } from '../../../utils/storage';
@@ -42,6 +43,7 @@ export const useGamePersistence = () => {
   const navigate = useNavigate();
   const { execute } = useAsyncOperation();
   const { notify } = useNotification();
+  const { t } = useTheme();
   const { processReferrals } = useGameReferrals();
   const { updateStreaks } = useGameStreaks();
 
@@ -75,14 +77,13 @@ export const useGamePersistence = () => {
             let saved = false;
 
             try {
-              const result = await endGame(
-                state.gameId || 'local',
-                state.score,
-                avgTimeNum,
-                state.correct,
-                state.quizStreets.length,
-                state.username
-              );
+              const result = await endGame(state.gameId || 'local', {
+                finalScore: state.score,
+                finalTime: avgTimeNum,
+                correctAnswers: state.correct,
+                questionCount: state.quizStreets.length,
+                username: state.username,
+              });
 
               if (result.success) {
                 saved = true;
@@ -99,18 +100,14 @@ export const useGamePersistence = () => {
               // Queue locally so the score is retried on next app load
               queueScoreLocally(state, avgTimeNum);
               if (notify) {
-                notify(
-                  "Score couldn't be saved right now — it'll be submitted automatically next time you open the app.",
-                  'warning',
-                  8000
-                );
+                notify(t('scorePendingWarning'), 'warning', 8000);
               }
             } else {
               // Update district aggregate score (fire-and-forget background task)
               getUserByUsername(state.username)
                 .then(userRow => {
-                  if (userRow?.team) {
-                    updateDistrictScore(userRow.team, state.score).catch(err => {
+                  if (userRow?.district) {
+                    updateDistrictScore(userRow.district, state.score).catch(err => {
                       console.error('[District] Failed to update district score:', err);
                     });
                   }
@@ -163,7 +160,7 @@ export const useGamePersistence = () => {
         { loadingKey: 'save-game', errorMessage: 'Failed to save game results' }
       );
     },
-    [navigate, execute, notify, processReferrals, updateStreaks]
+    [navigate, execute, notify, t, processReferrals, updateStreaks]
   );
 
   return { saveGameResults };

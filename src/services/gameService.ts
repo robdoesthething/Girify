@@ -13,7 +13,7 @@ function generateId(): string {
 /**
  * Start a new game session. Returns a local game ID.
  */
-export async function startGame(_userId: string): Promise<string> {
+export async function startGame(): Promise<string> {
   return generateId();
 }
 
@@ -23,18 +23,19 @@ export interface EndGameResult {
   gameId?: string;
 }
 
+export interface EndGameOptions {
+  finalScore: number;
+  finalTime: number;
+  correctAnswers: number;
+  questionCount: number;
+  username?: string;
+}
+
 /**
  * End the game and save result to Supabase.
- * @returns EndGameResult with success status and optional error message
  */
-export async function endGame(
-  gameId: string,
-  finalScore: number,
-  finalTime: number,
-  correctAnswers: number,
-  questionCount: number,
-  username?: string
-): Promise<EndGameResult> {
+export async function endGame(gameId: string, options: EndGameOptions): Promise<EndGameResult> {
+  const { finalScore, finalTime, correctAnswers, questionCount, username } = options;
   try {
     const { success, error } = await insertGameResult({
       username: username || null,

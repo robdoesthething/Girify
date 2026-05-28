@@ -184,9 +184,7 @@ const GameScreen: FC = () => {
             score={state.score}
             total={state.quizStreets.length}
             theme={theme}
-            username={state.username ?? undefined}
-            realName={state.realName ?? undefined} // Pass real name
-            streak={state.streak} // Pass streak
+            streak={state.streak}
             onRestart={() => handlers.setupGame()}
             onBackToMenu={() => dispatch({ type: 'SET_GAME_STATE', payload: 'intro' })}
             quizResults={state.quizResults}

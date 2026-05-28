@@ -1,6 +1,7 @@
 import React from 'react';
 import { ACTIVITY_TYPES } from '../../../data/activityTypes';
 import { getAvatar } from '../../../data/avatars';
+import { formatCompactRelativeTime } from '../../../utils/format';
 import { FeedItem, Friend } from '../hooks/useFriends';
 import UserLink from './UserLink';
 
@@ -10,23 +11,6 @@ interface FeedListProps {
   onTabChange: (tab: 'friends') => void;
   t: (key: string) => string;
 }
-
-const formatRelativeTime = (seconds: number): string => {
-  const diff = Math.floor(Date.now() / 1000) - seconds;
-  if (diff < 60) {
-    return 'Just now';
-  }
-  if (diff < 3600) {
-    return `${Math.floor(diff / 60)}m ago`;
-  }
-  if (diff < 86400) {
-    return `${Math.floor(diff / 3600)}h ago`;
-  }
-  if (diff < 604800) {
-    return `${Math.floor(diff / 86400)}d ago`;
-  }
-  return new Date(seconds * 1000).toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
-};
 
 const FeedList: React.FC<FeedListProps> = ({ feed, friends, onTabChange, t }) => {
   if (feed.length === 0) {
@@ -81,8 +65,8 @@ const FeedList: React.FC<FeedListProps> = ({ feed, friends, onTabChange, t }) =>
                 </div>
                 <span className="text-xs text-slate-400">
                   {item.timestamp?.seconds
-                    ? formatRelativeTime(item.timestamp.seconds)
-                    : 'Just now'}
+                    ? formatCompactRelativeTime(item.timestamp.seconds, t)
+                    : t('justNow')}
                 </span>
               </div>
             </div>
@@ -111,8 +95,8 @@ const FeedList: React.FC<FeedListProps> = ({ feed, friends, onTabChange, t }) =>
                 )}
                 <span className="text-xs text-slate-400 absolute top-4 right-4">
                   {item.timestamp?.seconds
-                    ? formatRelativeTime(item.timestamp.seconds)
-                    : 'Just now'}
+                    ? formatCompactRelativeTime(item.timestamp.seconds, t)
+                    : t('justNow')}
                 </span>
               </div>
             </div>
@@ -141,8 +125,8 @@ const FeedList: React.FC<FeedListProps> = ({ feed, friends, onTabChange, t }) =>
                 </UserLink>
                 <span className="text-xs text-slate-400">
                   {item.timestamp?.seconds
-                    ? formatRelativeTime(item.timestamp.seconds)
-                    : 'Just now'}
+                    ? formatCompactRelativeTime(item.timestamp.seconds, t)
+                    : t('justNow')}
                 </span>
               </div>
             </div>
@@ -168,7 +152,9 @@ const FeedList: React.FC<FeedListProps> = ({ feed, friends, onTabChange, t }) =>
                 </UserLink>
               </div>
               <span className="text-xs text-slate-400 whitespace-nowrap ml-2">
-                {item.timestamp?.seconds ? formatRelativeTime(item.timestamp.seconds) : 'Just now'}
+                {item.timestamp?.seconds
+                  ? formatCompactRelativeTime(item.timestamp.seconds, t)
+                  : t('justNow')}
               </span>
             </div>
           </div>

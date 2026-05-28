@@ -69,48 +69,6 @@ export async function getUserGameHistory(username: string, limit = 30): Promise<
   return data || [];
 }
 
-/**
- * Returns recent game results for all members of a district/team.
- * Since game_results has no district_id, we resolve via the users table:
- *   1. Fetch usernames where users.team = teamName
- *   2. Fetch their game results ordered by recency
- */
-export async function getDistrictGameHistory(
-  teamName: string,
-  limit = 50
-): Promise<(GameResultRow & { username: string })[]> {
-  // Step 1: get all usernames belonging to this team
-  const { data: members, error: membersError } = await supabase
-    .from('users')
-    .select('username')
-    .eq('team', teamName)
-    .not('username', 'is', null);
-
-  if (membersError || !members?.length) {
-    logger.error('getDistrictGameHistory: failed to fetch members', membersError?.message);
-    return [];
-  }
-
-  const usernames = members.map(m => normalizeUsername(m.username as string));
-
-  // Step 2: fetch their game results
-  const data = await executeQuery<GameResultRow[]>(
-    supabase
-      .from('game_results')
-      .select('*')
-      .in('username', usernames)
-      .order('played_at', { ascending: false })
-      .limit(limit),
-    'getDistrictGameHistory'
-  );
-
-  logger.info(
-    `Retrieved ${data?.length || 0} game records for district "${teamName}" (${usernames.length} members)`
-  );
-
-  return (data || []) as (GameResultRow & { username: string })[];
-}
-
 // ============================================================================
 // DISTRICTS
 // ============================================================================

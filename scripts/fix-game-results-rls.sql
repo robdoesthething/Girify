@@ -8,14 +8,18 @@ DROP POLICY IF EXISTS "Users can insert their own results" ON game_results;
 DROP POLICY IF EXISTS "Users can insert own game results" ON game_results;
 DROP POLICY IF EXISTS "Enable insert for all users" ON game_results;
 
--- Create working policy: any authenticated user can insert game results.
--- user_id ownership is validated at the app layer (normalizeUsername).
+-- Create working policy: only the authenticated user can insert results for their own username.
+-- Binds the inserted row's username to the users.username of the caller's Supabase UID.
 CREATE POLICY "Users can insert own game results" ON game_results
 FOR INSERT TO authenticated
-WITH CHECK (true);
-
--- Also ensure anonymous (unauthenticated) inserts are blocked.
--- The above policy already limits to 'authenticated', so no extra step needed.
+WITH CHECK (
+  lower(username) = (
+    SELECT lower(username)
+    FROM users
+    WHERE supabase_uid = auth.uid()
+    LIMIT 1
+  )
+);
 
 -- Verify the result
 SELECT policyname, cmd, roles, qual, with_check

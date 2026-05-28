@@ -16,6 +16,11 @@ import Anthropic from '@anthropic-ai/sdk';
 import { chromium, type Page } from '@playwright/test';
 
 // ─── Config ────────────────────────────────────────────────────────────────
+//
+// WARNING: Do NOT run this in CI with a staging/production URL.
+// With ANTHROPIC_API_KEY set and GIRIFY_URL pointing to a live environment,
+// this script will autonomously interact with the app (up to MAX_ITERATIONS=40
+// turns) and incur real API costs. Run only locally against a dev server.
 
 const BASE_URL = process.env.GIRIFY_URL ?? 'http://localhost:5173';
 const DISPLAY_WIDTH = 1280;
