@@ -11,9 +11,6 @@ const formatLeaderboardUsername = (userId: string | null | undefined): string =>
   return userId.startsWith('@') ? userId : `@${userId}`;
 };
 
-const FETCH_BUFFER_MULTIPLIER = 2;
-const DAYS_IN_WEEK_MINUS_ONE = 6;
-
 export type LeaderboardPeriod = 'all' | 'daily' | 'weekly' | 'monthly';
 
 export interface ScoreEntry {
@@ -40,16 +37,6 @@ export interface ScoreEntry {
  * @param limitCount - Max number of entries to return (default: constant)
  * @returns Promise resolving to list of ranked score entries
  */
-// Database response interface
-interface DatabaseGameResult {
-  id: number;
-  username: string | null;
-  score: number;
-  time_taken: number | null;
-  played_at: string | null;
-  platform?: string;
-}
-
 /**
  * Fetch leaderboard scores using Supabase
  * @param period - The time period to filter by (all, daily, weekly, monthly)
@@ -61,101 +48,39 @@ export const getLeaderboard = async (
   limitCount: number = SOCIAL.LEADERBOARD.FETCH_LIMIT
 ): Promise<ScoreEntry[]> => {
   try {
-    // 1. Fetch from Supabase
-    let queryBuilder = supabase
-      .from('game_results')
-      .select('id, username, score, time_taken, played_at');
-
-    const now = new Date();
-
-    if (period === 'daily') {
-      const startOfDay = new Date(
-        Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(), 0, 0, 0, 0)
-      ).toISOString();
-      debugLog(`[Leaderboard] Fetching Daily >= ${startOfDay}`);
-      queryBuilder = queryBuilder.gte('played_at', startOfDay);
-    } else if (period === 'weekly') {
-      const currentDayUTC = now.getUTCDay();
-      const distanceToMonday = currentDayUTC === 0 ? DAYS_IN_WEEK_MINUS_ONE : currentDayUTC - 1;
-      const startOfWeek = new Date(
-        Date.UTC(
-          now.getUTCFullYear(),
-          now.getUTCMonth(),
-          now.getUTCDate() - distanceToMonday,
-          0,
-          0,
-          0,
-          0
-        )
-      ).toISOString();
-      debugLog(`[Leaderboard] Fetching Weekly >= ${startOfWeek}`);
-      queryBuilder = queryBuilder.gte('played_at', startOfWeek);
-    } else if (period === 'monthly') {
-      const startOfMonth = new Date(
-        Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1, 0, 0, 0, 0)
-      ).toISOString();
-      debugLog(`[Leaderboard] Fetching Monthly >= ${startOfMonth}`);
-      queryBuilder = queryBuilder.gte('played_at', startOfMonth);
-    }
-
-    // Daily: limit before dedup (rows per day is bounded).
-    // Weekly/monthly/all: fetch all rows in the period, then aggregate — no pre-aggregation cap.
-    queryBuilder = queryBuilder.order('score', { ascending: false });
-    if (period === 'daily') {
-      queryBuilder = queryBuilder.limit(limitCount * FETCH_BUFFER_MULTIPLIER);
-    }
-
-    const { data: rawData, error } = await queryBuilder;
+    // Server-side aggregation via RPC — Postgres does the GROUP BY and returns
+    // only the final N rows instead of streaming all matching raw rows to the client.
+    const { data, error } = await (supabase as any).rpc('get_leaderboard', {
+      p_period: period,
+      p_limit: limitCount,
+    });
 
     if (error) {
-      console.error('[Leaderboard] Supabase error:', error);
-      console.error('[Leaderboard] Error details:', {
-        message: error.message,
-        code: error.code,
-        details: error.details,
-      });
-      debugLog(`[Leaderboard] DB Error: ${error.message}`);
+      console.error('[Leaderboard] Supabase RPC error:', error);
+      debugLog(`[Leaderboard] RPC Error: ${error.message}`);
       throw error;
     }
 
-    debugLog(`[Leaderboard] Fetched ${rawData?.length || 0} rows for ${period}`);
+    debugLog(`[Leaderboard] Fetched ${data?.length || 0} rows for ${period}`);
 
-    if (!rawData) {
+    if (!data) {
       return [];
     }
 
-    // 2. Transform to ScoreEntry format
-    const scores: ScoreEntry[] = (rawData as DatabaseGameResult[]).map(row => ({
-      id: String(row.id),
-      username: formatLeaderboardUsername(row.username),
-      score: row.score,
-      time: row.time_taken ?? 0,
-      date: row.played_at ? new Date(row.played_at).getTime() : undefined,
-      timestamp: row.played_at
-        ? { seconds: Math.floor(new Date(row.played_at).getTime() / 1000) }
-        : undefined,
-      platform: row.platform,
-      isBonus: false,
-      sortDate: row.played_at ? new Date(row.played_at) : undefined,
-    }));
-
-    // 3. Deduplicate
-    let finalScores: ScoreEntry[];
-    if (period === 'daily') {
-      finalScores = deduplicateBestScore(scores);
-    } else {
-      finalScores = aggregateCumulativeScores(scores);
+    interface RpcRow {
+      username: string;
+      score: number;
+      avg_time: number | null;
+      games_count: number;
     }
 
-    // Sort again
-    finalScores.sort((a, b) => {
-      if (b.score !== a.score) {
-        return b.score - a.score;
-      }
-      return a.time - b.time;
-    });
-
-    return finalScores.slice(0, limitCount);
+    return (data as RpcRow[]).map(row => ({
+      id: row.username,
+      username: formatLeaderboardUsername(row.username),
+      score: row.score,
+      time: row.avg_time ?? 0,
+      gamesCount: row.games_count,
+    }));
   } catch (e) {
     console.error('[Leaderboard] Error fetching leaderboard from Supabase:', e);
     return [];
@@ -168,77 +93,6 @@ export const getLeaderboard = async (
  * Actually calling it 'deduplicateBestScore' but implementation logic was specific.
  * For now, let's just keep the BEST score per user.
  */
-/**
- * Daily Mode: Keep ONLY the BEST score per user.
- * This ensures each user appears at most once on the daily leaderboard with their highest score.
- */
-const deduplicateBestScore = (scores: ScoreEntry[]): ScoreEntry[] => {
-  const bestScoreByUser: Record<string, ScoreEntry> = {};
-
-  // Sort by score DESC first to easily pick the top one
-  const sorted = [...scores].sort((a, b) => b.score - a.score);
-
-  sorted.forEach(s => {
-    // If not present, add it (since we sorted by score DESC, the first one encountered is the best)
-    if (!bestScoreByUser[s.username]) {
-      bestScoreByUser[s.username] = s;
-    }
-  });
-
-  return Object.values(bestScoreByUser);
-};
-
-/**
- * Cumulative Mode: Sum of scores.
- */
-/**
- * Cumulative Mode: Sum of scores.
- * For users who played multiple times on the same day, we take their BEST score of that day.
- */
-const aggregateCumulativeScores = (scores: ScoreEntry[]): ScoreEntry[] => {
-  const userDailyGames: Record<string, Record<string, ScoreEntry>> = {};
-
-  scores.forEach(s => {
-    const dateKey = s.sortDate?.toISOString().split('T')[0] || '';
-    const username = s.username;
-
-    if (!userDailyGames[username]) {
-      userDailyGames[username] = {};
-    }
-
-    // Logic: Keep the highest score for each day
-    if (!userDailyGames[username][dateKey] || s.score > userDailyGames[username][dateKey].score) {
-      userDailyGames[username][dateKey] = s;
-    }
-  });
-
-  const aggregated: ScoreEntry[] = [];
-  Object.keys(userDailyGames).forEach(username => {
-    const dailyGamesMap = userDailyGames[username];
-    if (!dailyGamesMap) {
-      return;
-    }
-    const dailyGames = Object.values(dailyGamesMap);
-    let totalScore = 0;
-    let totalTime = 0;
-
-    dailyGames.forEach(g => {
-      totalScore += g.score;
-      totalTime += g.time;
-    });
-
-    aggregated.push({
-      id: username,
-      username: username,
-      score: totalScore,
-      time: dailyGames.length ? totalTime / dailyGames.length : 0,
-      gamesCount: dailyGames.length,
-      timestamp: { seconds: Date.now() / 1000 },
-    });
-  });
-
-  return aggregated;
-};
 
 export interface TeamScoreEntry {
   id: string;

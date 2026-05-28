@@ -57,7 +57,9 @@ export async function getUserGameHistory(username: string, limit = 30): Promise<
   const data = await executeQuery<GameResultRow[]>(
     supabase
       .from('game_results')
-      .select('*')
+      .select(
+        'id, username, score, time_taken, played_at, correct_answers, question_count, is_bonus, platform, streak_at_play'
+      )
       .eq('username', normalizedUsername)
       .order('played_at', { ascending: false })
       .limit(limit),

@@ -58,6 +58,7 @@ const DEFAULT_GAME_CONFIG: GameConfig = {
 
 let cachedPayouts: PayoutConfig | null = null;
 let payoutCacheTimestamp = 0;
+let pendingPayoutFetch: Promise<PayoutConfig> | null = null;
 
 let cachedGameConfig: GameConfig | null = null;
 let gameConfigCacheTimestamp = 0;
@@ -79,44 +80,52 @@ const CACHE_TTL = CACHE.TTL_MINUTES * TIME.SECONDS_PER_MINUTE * TIME.MS_PER_SECO
 export const getPayoutConfig = async (): Promise<PayoutConfig> => {
   const now = Date.now();
 
-  // Return cached if still valid
   if (cachedPayouts && now - payoutCacheTimestamp < CACHE_TTL) {
     return cachedPayouts;
   }
 
-  try {
-    const client = supabase as AnySupabaseClient;
-    const { data, error } = await client
-      .from('app_config')
-      .select('*')
-      .eq('id', 'default')
-      .single();
-
-    if (error) {
-      console.error('[Config] Error fetching payout config:', error);
-      return DEFAULT_PAYOUTS;
-    }
-
-    if (data) {
-      // Map database column names to PayoutConfig format
-      cachedPayouts = {
-        STARTING_GIUROS: data.starting_giuros ?? DEFAULT_PAYOUTS.STARTING_GIUROS,
-        DAILY_LOGIN_BONUS: data.daily_login_bonus ?? DEFAULT_PAYOUTS.DAILY_LOGIN_BONUS,
-        DAILY_CHALLENGE_BONUS: data.daily_challenge_bonus ?? DEFAULT_PAYOUTS.DAILY_CHALLENGE_BONUS,
-        STREAK_WEEK_BONUS: data.streak_week_bonus ?? DEFAULT_PAYOUTS.STREAK_WEEK_BONUS,
-        PERFECT_SCORE_BONUS: data.perfect_score_bonus ?? DEFAULT_PAYOUTS.PERFECT_SCORE_BONUS,
-        REFERRAL_BONUS: data.referral_bonus ?? DEFAULT_PAYOUTS.REFERRAL_BONUS,
-      };
-    } else {
-      cachedPayouts = DEFAULT_PAYOUTS;
-    }
-
-    payoutCacheTimestamp = now;
-    return cachedPayouts;
-  } catch (e) {
-    console.error('[Config] Exception fetching payout config:', e);
-    return DEFAULT_PAYOUTS;
+  // Reuse an in-flight request so concurrent cold-cache callers share one DB round-trip.
+  if (pendingPayoutFetch) {
+    return pendingPayoutFetch;
   }
+
+  pendingPayoutFetch = (async (): Promise<PayoutConfig> => {
+    try {
+      const client = supabase as AnySupabaseClient;
+      const { data, error } = await client
+        .from('app_config')
+        .select('*')
+        .eq('id', 'default')
+        .single();
+
+      if (error) {
+        console.error('[Config] Error fetching payout config:', error);
+        return DEFAULT_PAYOUTS;
+      }
+
+      cachedPayouts = data
+        ? {
+            STARTING_GIUROS: data.starting_giuros ?? DEFAULT_PAYOUTS.STARTING_GIUROS,
+            DAILY_LOGIN_BONUS: data.daily_login_bonus ?? DEFAULT_PAYOUTS.DAILY_LOGIN_BONUS,
+            DAILY_CHALLENGE_BONUS:
+              data.daily_challenge_bonus ?? DEFAULT_PAYOUTS.DAILY_CHALLENGE_BONUS,
+            STREAK_WEEK_BONUS: data.streak_week_bonus ?? DEFAULT_PAYOUTS.STREAK_WEEK_BONUS,
+            PERFECT_SCORE_BONUS: data.perfect_score_bonus ?? DEFAULT_PAYOUTS.PERFECT_SCORE_BONUS,
+            REFERRAL_BONUS: data.referral_bonus ?? DEFAULT_PAYOUTS.REFERRAL_BONUS,
+          }
+        : DEFAULT_PAYOUTS;
+
+      payoutCacheTimestamp = Date.now();
+      return cachedPayouts;
+    } catch (e) {
+      console.error('[Config] Exception fetching payout config:', e);
+      return DEFAULT_PAYOUTS;
+    } finally {
+      pendingPayoutFetch = null;
+    }
+  })();
+
+  return pendingPayoutFetch;
 };
 
 /**

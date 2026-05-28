@@ -4,11 +4,8 @@
  * Functions for updating user game statistics and district scores.
  */
 
-import {
-  getUserGameHistory as dbGetUserGameHistory,
-  getUserByUsername,
-  updateUser,
-} from '../../services/database';
+import { getUserGameHistory as dbGetUserGameHistory } from '../../services/database';
+import { supabase } from '../../services/supabase';
 import { normalizeUsername } from '../format';
 import { getTeamLeaderboard } from './leaderboard';
 
@@ -30,28 +27,16 @@ export const updateUserGameStats = async (
   const normalizedName = normalizeUsername(username);
 
   try {
-    const existingUser = await getUserByUsername(normalizedName);
+    const { data, error } = await (supabase as any).rpc('record_game_result', {
+      p_username: normalizedName,
+      p_score: currentScore ?? 0,
+      p_streak: streak,
+      p_last_play_date: lastPlayDate,
+    });
 
-    if (!existingUser) {
-      return;
+    if (error || !(data as any)?.success) {
+      console.error('Error updating game stats:', error || (data as any)?.error);
     }
-
-    const updates: Record<string, unknown> = {
-      games_played: (existingUser.games_played ?? 0) + 1,
-      total_score: (existingUser.total_score ?? 0) + (currentScore ?? 0),
-      streak: Math.min(streak, (existingUser.games_played ?? 0) + 1),
-      last_play_date: lastPlayDate,
-    };
-
-    if (streak > (existingUser.max_streak ?? 0)) {
-      updates.max_streak = streak;
-    }
-
-    if (currentScore !== undefined && currentScore > (existingUser.best_score ?? 0)) {
-      updates.best_score = currentScore;
-    }
-
-    await updateUser(normalizedName, updates);
   } catch (e) {
     console.error('Error updating game stats:', e);
   }
