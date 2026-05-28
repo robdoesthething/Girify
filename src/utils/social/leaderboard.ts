@@ -87,13 +87,6 @@ export const getLeaderboard = async (
   }
 };
 
-/**
- * Daily Mode: Keep FIRST score per user (First Attempt) OR Best Score?
- * Original logic: `if (s.isBonus && s.score > current.score)` -> Only update if bonus?
- * Actually calling it 'deduplicateBestScore' but implementation logic was specific.
- * For now, let's just keep the BEST score per user.
- */
-
 export interface TeamScoreEntry {
   id: string;
   teamName: string;
