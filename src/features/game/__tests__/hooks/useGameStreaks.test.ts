@@ -34,6 +34,21 @@ vi.mock('../../../../hooks/useNotification', () => ({
   useNotification: () => ({ notify: vi.fn() }),
 }));
 
+vi.mock('../../../../utils/storage', () => ({
+  storage: {
+    get: vi.fn(() => []),
+    set: vi.fn(),
+  },
+}));
+
+vi.mock('../../../../utils/shop/giuros', () => ({
+  awardChallengeBonus: vi.fn(() => Promise.resolve({ bonus: 5, newBalance: 15 })),
+}));
+
+vi.mock('../../../../utils/game/dailyChallenge', () => ({
+  getTodaySeed: vi.fn(() => 20260528),
+}));
+
 describe('useGameStreaks', () => {
   beforeEach(() => {
     vi.clearAllMocks();
