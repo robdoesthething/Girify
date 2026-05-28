@@ -78,8 +78,10 @@ export async function getDailyQuests(userId?: string): Promise<QuestWithProgress
 }
 
 /**
- * Claims a quest reward.
- * Verifies validity and updates user balance + quest status.
+ * Claims a quest reward atomically via the claim_quest_reward RPC.
+ * The RPC marks is_claimed=true and credits giuros in a single transaction,
+ * preventing the previous two-step race where the quest could be consumed
+ * without the giuros being credited.
  */
 export async function claimQuestReward(
   questId: number,
@@ -88,72 +90,20 @@ export async function claimQuestReward(
   try {
     const cleanUserId = normalizeUsername(userId);
 
-    // 1. Fetch quest and progress
-    const [quests, progressList] = await Promise.all([
-      executeQuery<QuestRow[]>(
-        supabase.from('quests').select('*').eq('id', questId),
-        'claimReward:quest'
-      ),
-      executeQuery<UserQuestRow[]>(
-        (supabase.from('user_quests' as any) as any)
-          .select('*')
-          .eq('username', cleanUserId)
-          .eq('quest_id', questId),
-        'claimReward:progress'
-      ),
-    ]);
+    const { data, error } = await (supabase as any).rpc('claim_quest_reward', {
+      p_username: cleanUserId,
+      p_quest_id: questId,
+    });
 
-    const quest = quests?.[0];
-    const progress = progressList?.[0];
-
-    if (!quest) {
-      return { success: false, error: 'Quest not found' };
-    }
-
-    // Verify completion
-    // In a robust system, we double-check criteria here.
-    // For now, we rely on the client/game logic having updated 'is_completed' to true,
-    // OR the progress row simply exists and we trust 'is_completed'.
-    // NOTE: If logic updates is_completed, we just check that.
-    if (!progress || !progress.is_completed) {
-      return { success: false, error: 'Quest not completed' };
-    }
-
-    if (progress.is_claimed) {
-      return { success: false, error: 'Reward already claimed' };
-    }
-
-    // 2. Transact (RPC would be better, but doing client-side for now)
-    // Update is_claimed = true
-
-    const { error: updateError } = await (supabase.from('user_quests' as any) as any)
-
-      .update({ is_claimed: true } as any) // Type assertion due to manual type
-      .eq('id', progress.id);
-
-    if (updateError) {
-      logger.error('Failed to mark quest claimed', updateError);
+    if (error) {
+      logger.error('Failed to claim quest reward', error);
       return { success: false, error: 'Failed to claim reward' };
     }
 
-    // 3. Add Giuros — atomic via RPC to avoid TOCTOU race
-    if (quest.reward_giuros && quest.reward_giuros > 0) {
-      const { data: rpcData, error: rpcError } = await (supabase as any).rpc('add_giuros', {
-        p_username: cleanUserId,
-        p_amount: quest.reward_giuros,
-        p_reason: `quest_reward:${questId}`,
-      });
-
-      if (rpcError || !(rpcData as any)?.success) {
-        logger.error('Failed to add giuros via RPC', rpcError || (rpcData as any)?.error);
-        // Quest is claimed; currency failed — don't fail the whole claim.
-        return { success: true, reward: 0, error: 'Claimed, but failed to add currency' };
-      }
-
-      return { success: true, reward: quest.reward_giuros };
-    }
-
-    return { success: true, reward: 0 };
+    const result = data as { success: boolean; error?: string; reward?: number };
+    return result.success
+      ? { success: true, reward: result.reward ?? 0 }
+      : { success: false, error: result.error };
   } catch (error) {
     logger.error('Exception in claimQuestReward', error);
     return { success: false, error: 'Unexpected error' };

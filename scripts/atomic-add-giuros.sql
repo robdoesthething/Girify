@@ -1,3 +1,9 @@
+-- DEPRECATED: superseded by scripts/security-fixes.sql
+-- DO NOT RUN — this version has no ownership check and will overwrite the
+-- secured add_giuros function from security-fixes.sql with an insecure one.
+-- The authoritative version lives in security-fixes.sql (Fix 1).
+--
+-- Original rationale (kept for reference only):
 -- Atomic giuros increment function.
 -- Uses a single UPDATE to avoid TOCTOU race between read and write.
 -- SECURITY DEFINER bypasses RLS for the update; caller identity is enforced
