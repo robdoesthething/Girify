@@ -167,12 +167,9 @@ export const claimDailyLoginBonus = async (
   const normalizedUsername = normalizeUsername(username);
 
   try {
-    const config = await getPayoutConfig();
-    const dailyBonus = config.DAILY_LOGIN_BONUS;
-
+    // Bonus amount is now read server-side from app_config — do not pass p_bonus.
     const { data, error } = await (supabase as any).rpc('claim_daily_login_bonus', {
       p_username: normalizedUsername,
-      p_bonus: dailyBonus,
     });
 
     if (error) {
@@ -182,12 +179,12 @@ export const claimDailyLoginBonus = async (
 
     const result = data as { claimed: boolean; bonus: number; new_balance: number };
     if (result.claimed) {
-      logger.debug(`[Giuros] Daily login bonus +${dailyBonus} for ${normalizedUsername}`);
+      logger.debug(`[Giuros] Daily login bonus +${result.bonus} for ${normalizedUsername}`);
     }
 
     return {
       claimed: result.claimed,
-      bonus: result.bonus ?? dailyBonus,
+      bonus: result.bonus ?? 0,
       newBalance: result.new_balance ?? 0,
     };
   } catch (e) {

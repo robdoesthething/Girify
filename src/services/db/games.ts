@@ -40,7 +40,13 @@ export async function insertGameResult(
     username: data.username ? normalizeUsername(data.username) : null,
   };
 
-  const { error } = await supabase.from('game_results').insert(payload);
+  // ON CONFLICT DO NOTHING guards against duplicate rows when a save succeeds
+  // on the DB side but the network response is lost (causing the client to
+  // retry via the pending-scores queue).
+  const { error } = await supabase.from('game_results').upsert(payload, {
+    onConflict: 'username,play_date',
+    ignoreDuplicates: true,
+  });
 
   if (error) {
     logger.error('insertGameResult error:', error.message);

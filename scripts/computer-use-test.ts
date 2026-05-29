@@ -16,16 +16,22 @@ import Anthropic from '@anthropic-ai/sdk';
 import { chromium, type Page } from '@playwright/test';
 
 // ─── Config ────────────────────────────────────────────────────────────────
-//
-// WARNING: Do NOT run this in CI with a staging/production URL.
-// With ANTHROPIC_API_KEY set and GIRIFY_URL pointing to a live environment,
-// this script will autonomously interact with the app (up to MAX_ITERATIONS=40
-// turns) and incur real API costs. Run only locally against a dev server.
 
 const BASE_URL = process.env.GIRIFY_URL ?? 'http://localhost:5173';
 const DISPLAY_WIDTH = 1280;
 const DISPLAY_HEIGHT = 800;
 const MAX_ITERATIONS = 40;
+
+// Guard: refuse to run against any non-localhost URL to prevent accidental
+// production interactions (API costs + real data mutations).
+if (!BASE_URL.startsWith('http://localhost') && !BASE_URL.startsWith('http://127.0.0.1')) {
+  console.error(
+    `\n[computer-use-test] BLOCKED: BASE_URL="${BASE_URL}" is not localhost.\n` +
+      `This script performs up to ${MAX_ITERATIONS} autonomous browser interactions.\n` +
+      `Run only against a local dev server (npm run dev).\n`
+  );
+  process.exit(1);
+}
 
 // ─── Types ──────────────────────────────────────────────────────────────────
 
@@ -217,7 +223,7 @@ async function run(prompt: string) {
     console.log(`── Iteration ${iterations}/${MAX_ITERATIONS} ──`);
 
     const response = await client.beta.messages.create({
-      model: 'claude-opus-4-6',
+      model: 'claude-haiku-4-5-20251001',
       max_tokens: 4096,
       tools,
       messages,
