@@ -68,11 +68,13 @@ export const publishActivity = async (
     return;
   }
 
-  // Security: Verify user owns this username to prevent impersonation
+  // Security: Verify user owns this username to prevent impersonation.
+  // getSession() reads from the local token cache — no network round-trip.
   const normalizedUsername = normalizeUsername(username);
   const {
-    data: { user: currentUser },
-  } = await supabase.auth.getUser();
+    data: { session },
+  } = await supabase.auth.getSession();
+  const currentUser = session?.user ?? null;
 
   if (!currentUser) {
     console.error('[Activity] Auth failed: no authenticated user');

@@ -39,17 +39,23 @@ BEGIN
   END CASE;
 
   IF p_period = 'daily' THEN
-    -- Best single score per user within the day window
+    -- Best single score per user within the day window, ordered by score descending.
+    -- DISTINCT ON picks the highest score per user (first row after ORDER BY score DESC),
+    -- then the outer query re-orders the result set by score so the caller gets a ranked list.
     RETURN QUERY
-    SELECT DISTINCT ON (gr.username)
-      gr.username,
-      gr.score::BIGINT,
-      gr.time_taken::NUMERIC AS avg_time,
-      1::BIGINT              AS games_count
-    FROM game_results gr
-    WHERE gr.username IS NOT NULL
-      AND (v_start_date IS NULL OR gr.played_at >= v_start_date)
-    ORDER BY gr.username, gr.score DESC, gr.time_taken ASC NULLS LAST
+    SELECT sub.username, sub.score, sub.avg_time, sub.games_count
+    FROM (
+      SELECT DISTINCT ON (gr.username)
+        gr.username,
+        gr.score::BIGINT,
+        gr.time_taken::NUMERIC AS avg_time,
+        1::BIGINT              AS games_count
+      FROM game_results gr
+      WHERE gr.username IS NOT NULL
+        AND (v_start_date IS NULL OR gr.played_at >= v_start_date)
+      ORDER BY gr.username, gr.score DESC, gr.time_taken ASC NULLS LAST
+    ) sub
+    ORDER BY sub.score DESC, sub.avg_time ASC NULLS LAST
     LIMIT p_limit;
   ELSE
     -- Sum of best-per-calendar-day scores per user
@@ -78,7 +84,15 @@ BEGIN
 END;
 $$;
 
+REVOKE ALL ON FUNCTION get_leaderboard(TEXT, INTEGER) FROM PUBLIC;
 GRANT EXECUTE ON FUNCTION get_leaderboard(TEXT, INTEGER) TO anon, authenticated;
+
+-- Index supporting both leaderboard paths: covers the username IS NOT NULL filter,
+-- allows the daily DISTINCT ON to avoid a sort, and lets the non-daily GROUP BY
+-- range-scan by played_at without a full sequential scan.
+CREATE INDEX IF NOT EXISTS idx_game_results_username_played_at
+ON game_results (username, played_at DESC)
+WHERE username IS NOT NULL;
 
 -- ============================================================================
 -- FIX 2 (High): record_game_result RPC — atomic stats update
@@ -100,14 +114,8 @@ LANGUAGE plpgsql
 SECURITY DEFINER
 AS $$
 BEGIN
-  IF auth.uid() IS NOT NULL THEN
-    IF NOT EXISTS (
-      SELECT 1 FROM users WHERE username = p_username AND supabase_uid = auth.uid()
-    ) THEN
-      RETURN jsonb_build_object('success', false, 'error', 'Unauthorized');
-    END IF;
-  END IF;
-
+  -- Ownership check is folded into the UPDATE WHERE clause — atomic, no TOCTOU gap.
+  -- When auth.uid() IS NULL (service-role caller), the supabase_uid condition is skipped.
   UPDATE users
   SET
     games_played   = COALESCE(games_played,  0) + 1,
@@ -116,10 +124,12 @@ BEGIN
     streak         = p_streak,
     max_streak     = GREATEST(COALESCE(max_streak,  0), p_streak),
     last_play_date = p_last_play_date::DATE
-  WHERE username = p_username;
+  WHERE username = p_username
+    AND (auth.uid() IS NULL OR supabase_uid = auth.uid());
 
   IF NOT FOUND THEN
-    RETURN jsonb_build_object('success', false, 'error', 'User not found');
+    -- Either user not found or ownership check failed — return the same error to avoid enumeration.
+    RETURN jsonb_build_object('success', false, 'error', 'Unauthorized or user not found');
   END IF;
 
   RETURN jsonb_build_object('success', true);

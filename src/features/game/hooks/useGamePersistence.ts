@@ -115,33 +115,34 @@ export const useGamePersistence = () => {
                 .catch(err => {
                   console.error('[District] Failed to fetch user for district update:', err);
                 });
-            }
 
-            // Run all post-game side effects in parallel
-            const [activityResult, , , questsResult] = await Promise.allSettled([
-              publishActivity(state.username, 'daily_score', {
-                score: state.score,
-                time: Number(localRecord.avgTime),
-              }),
-              updateStreaks(state.username, state.score),
-              processReferrals(state.username),
-              checkAndProgressQuests(state.username, state),
-            ]);
+              // Economy side-effects (streaks, quests, referrals) only run when the
+              // score was durably saved — prevents crediting rewards for unsaved games.
+              const [activityResult, , , questsResult] = await Promise.allSettled([
+                publishActivity(state.username, 'daily_score', {
+                  score: state.score,
+                  time: Number(localRecord.avgTime),
+                }),
+                updateStreaks(state.username, state.score),
+                processReferrals(state.username),
+                checkAndProgressQuests(state.username, state),
+              ]);
 
-            if (activityResult.status === 'fulfilled') {
-              debugLog(`[Activity] Published game completion for ${state.username}`);
-            } else {
-              console.error('[Activity] Failed to publish game activity:', activityResult.reason);
-            }
+              if (activityResult.status === 'fulfilled') {
+                debugLog(`[Activity] Published game completion for ${state.username}`);
+              } else {
+                console.error('[Activity] Failed to publish game activity:', activityResult.reason);
+              }
 
-            if (questsResult.status === 'fulfilled') {
-              questsResult.value.forEach(title => {
-                if (notify) {
-                  notify(`Quest Completed: ${title}`, 'success', 5000);
-                }
-              });
-            } else {
-              console.error('Quest check failed', questsResult.reason);
+              if (questsResult.status === 'fulfilled') {
+                questsResult.value.forEach(title => {
+                  if (notify) {
+                    notify(`Quest Completed: ${title}`, 'success', 5000);
+                  }
+                });
+              } else {
+                console.error('Quest check failed', questsResult.reason);
+              }
             }
 
             // Check for feedback prompt

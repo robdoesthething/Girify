@@ -1,10 +1,14 @@
--- Restore the two fields that didn't copy across during the merge.
--- Email was nulled before the SELECT captured it; supabase_uid was
--- skipped to avoid the unique constraint (source row still held it).
+-- One-time repair: restores email and supabase_uid that failed to copy during
+-- the @robertosnc9113 → robertosnc9113 merge (email was NULLed before the
+-- subquery captured it; supabase_uid was skipped to avoid the unique constraint).
+--
+-- Replace the placeholders below with the actual values before running.
+-- Retrieve them from the Supabase Auth dashboard or your records — do NOT
+-- commit real email addresses or UUIDs to version control.
 UPDATE users
 SET
-  email        = 'robertosaga96@gmail.com',
-  supabase_uid = '4ae2d39e-1d49-4ece-b587-516141458ff3'
+  email        = '<USER_EMAIL>',
+  supabase_uid = '<SUPABASE_AUTH_UUID>'
 WHERE username = 'robertosnc9113';
 
 -- Verify

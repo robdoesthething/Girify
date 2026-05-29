@@ -15,6 +15,9 @@ import { storage } from '../storage';
 
 const logger = createLogger('PendingScores');
 
+// Prevent concurrent flush calls (React strict-mode double-invoke, re-mounts)
+let flushInProgress: Promise<void> | null = null;
+
 export function queuePendingScore(data: GameResultData): void {
   const pending = storage.get<GameResultData[]>(STORAGE_KEYS.PENDING_SCORES, []);
 
@@ -36,7 +39,16 @@ export function queuePendingScore(data: GameResultData): void {
   );
 }
 
-export async function flushPendingScores(): Promise<void> {
+export function flushPendingScores(): Promise<void> {
+  if (!flushInProgress) {
+    flushInProgress = _doFlush().finally(() => {
+      flushInProgress = null;
+    });
+  }
+  return flushInProgress;
+}
+
+async function _doFlush(): Promise<void> {
   const pending = storage.get<GameResultData[]>(STORAGE_KEYS.PENDING_SCORES, []);
   if (pending.length === 0) {
     return;
