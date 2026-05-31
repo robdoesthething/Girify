@@ -29,7 +29,7 @@ Three comprehensive analysis documents have been created:
 
 - ✅ 136 tests passing
 - ❌ 1 test failing
-- 📊 **~8-12% file coverage** (21 test files / 233 source files)
+- 📊 **\~8-12% file coverage** (21 test files / 233 source files)
 - 🚫 **0 E2E tests** (despite Playwright configured)
 - ❌ **0% database layer coverage** (12 untested modules)
 - ⚠️ **Quests System Untested** (New feature needs coverage)
@@ -93,7 +93,7 @@ Three comprehensive analysis documents have been created:
 
 - [ ] Fix failing test
 - [ ] Add database layer tests (12 modules)
-- [ ] **[NEW] Unit tests for Quests (`src/services/db/quests.ts`)**
+- [ ] **\[NEW] Unit tests for Quests (`src/services/db/quests.ts`)**
 - [ ] Test critical hooks (`useAuth`, `useProfileData`)
 - **Result:** 30% coverage
 
@@ -101,7 +101,7 @@ Three comprehensive analysis documents have been created:
 
 - [ ] Create 5 integration tests
 - [ ] Set up Playwright properly
-- [ ] **[NEW] E2E Test: Game Completion -> Quest Notification -> Claim Reward**
+- [ ] **\[NEW] E2E Test: Game Completion -> Quest Notification -> Claim Reward**
 - [ ] Create 10 E2E user journey tests
 - **Result:** 50% coverage
 
@@ -127,7 +127,7 @@ Three comprehensive analysis documents have been created:
 
 **Phase 1: New Tech Debt (4 hours)**
 
-1. **[NEW] Decouple `useGamePersistence`**: Break down the "God Hook" into `useQuestProgress`, `useGameReferrals`, `useGameStreak`.
+1. **\[NEW] Decouple `useGamePersistence`**: Break down the "God Hook" into `useQuestProgress`, `useGameReferrals`, `useGameStreak`.
 2. Quest system polish (UI animations, edge cases).
 
 **Phase 2: Polish (6 hours)** 8. Type safety improvements (3h) 9. Query builder pattern (1h) 10. Remaining cleanup (2h)
@@ -221,7 +221,7 @@ npm run test -- useGamePersistence.test.ts
 2. ✅ Fix failing test (30min) (Fixed `useGamePersistence.test.ts`)
 3. ✅ Add security headers (30min) (Added to `vercel.json`)
 4. ✅ Set up coverage reporting (15min)
-5. ✅ **[NEW] Add Unit Tests for Quests** (Created `quests.test.ts`)
+5. ✅ **\[NEW] Add Unit Tests for Quests** (Created `quests.test.ts`)
 
 **Total:** 1 day
 **Impact:** Critical bug verification, new feature coverage
@@ -229,7 +229,7 @@ npm run test -- useGamePersistence.test.ts
 ### Next Week
 
 6. ✅ Database layer tests (3 days)
-7. ✅ **[NEW] Decouple useGamePersistence** (2h)
+7. ✅ **\[NEW] Decouple useGamePersistence** (2h)
 8. ✅ Code splitting (2h)
 9. ✅ First 5 E2E tests (including Quests flow)
 
@@ -303,7 +303,7 @@ npm run test -- useGamePersistence.test.ts
 - **Week 1:** 1 day (critical fixes)
 - **Weeks 2-4:** 3 weeks (testing + refactoring)
 - **Month 2:** 2 weeks (polish)
-- **Total:** ~6 weeks
+- **Total:** \~6 weeks
 
 ### Expected Benefits
 

@@ -30,9 +30,9 @@
 **Coverage Metrics (Estimated):**
 
 - **Total Source Files:** 233 TypeScript files
-- **Files with Tests:** ~20 files
-- **Estimated Coverage:** ~8-12% of files
-- **Critical Path Coverage:** ~40% (game logic, scoring)
+- **Files with Tests:** \~20 files
+- **Estimated Coverage:** \~8-12% of files
+- **Critical Path Coverage:** \~40% (game logic, scoring)
 
 ---
 
@@ -1001,26 +1001,26 @@ npx husky add .husky/pre-commit "npm run lint && npm test -- --run"
 
 ### Testing
 
-- **Vitest:** https://vitest.dev
-- **Playwright:** https://playwright.dev
-- **Testing Library:** https://testing-library.com
-- **Stryker (Mutation):** https://stryker-mutator.io
+- **Vitest:** <https://vitest.dev>
+- **Playwright:** <https://playwright.dev>
+- **Testing Library:** <https://testing-library.com>
+- **Stryker (Mutation):** <https://stryker-mutator.io>
 
 ### Performance
 
-- **Lighthouse CI:** https://github.com/GoogleChrome/lighthouse-ci
-- **Web Vitals:** https://web.dev/vitals/
+- **Lighthouse CI:** <https://github.com/GoogleChrome/lighthouse-ci>
+- **Web Vitals:** <https://web.dev/vitals/>
 
 ### Security
 
-- **Snyk:** https://snyk.io
+- **Snyk:** <https://snyk.io>
 - **npm audit:** Built-in
-- **OWASP:** https://owasp.org/www-project-top-ten/
+- **OWASP:** <https://owasp.org/www-project-top-ten/>
 
 ### Monitoring
 
-- **Sentry:** https://sentry.io
-- **Plausible:** https://plausible.io (privacy-friendly analytics)
+- **Sentry:** <https://sentry.io>
+- **Plausible:** <https://plausible.io> (privacy-friendly analytics)
 
 ---
 

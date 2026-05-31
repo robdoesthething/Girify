@@ -568,7 +568,7 @@ const hasChecked = useRef(false);
 const checkedUsername = useRef<string | null>(null);
 ```
 
-**Fixed in**: `src/AppRoutes.tsx` (commit ccda0ea and later fix)
+**Fixed in**: `src/AppRoutes.tsx` (commit [`ccda0ea`](https://github.com/robdoesthething/Girify/commit/ccda0ea) and later fix)
 
 ### 2. Firebase → Supabase (Migration Complete)
 
@@ -948,8 +948,8 @@ VITE_UPSTASH_REDIS_REST_TOKEN=
 
 ### Key URLs
 
-- Production: https://girify.vercel.app
-- GitHub: https://github.com/robdoesthething/Girify
+- Production: <https://girify.vercel.app>
+- GitHub: <https://github.com/robdoesthething/Girify>
 - Supabase Dashboard: (project-specific)
 - Firebase Console: (project-specific)
 
@@ -991,3 +991,23 @@ When in doubt: **Ask** > Assume, **Simple** > Clever, **Focused** > Comprehensiv
 ---
 
 **Last Updated**: January 27, 2026
+
+## Skill routing
+
+When the user's request matches an available skill, invoke it via the Skill tool. When in doubt, invoke the skill.
+
+Key routing rules:
+
+- Product ideas/brainstorming → invoke /office-hours
+- Strategy/scope → invoke /plan-ceo-review
+- Architecture → invoke /plan-eng-review
+- Design system/plan review → invoke /design-consultation or /plan-design-review
+- Full review pipeline → invoke /autoplan
+- Bugs/errors → invoke /investigate
+- QA/testing site behavior → invoke /qa or /qa-only
+- Code review/diff check → invoke /review
+- Visual polish → invoke /design-review
+- Ship/deploy/PR → invoke /ship or /land-and-deploy
+- Save progress → invoke /context-save
+- Resume context → invoke /context-restore
+- Author a backlog-ready spec/issue → invoke /spec

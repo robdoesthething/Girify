@@ -1,16 +1,5 @@
 # Changelog
 
-All notable changes to this project will be documented in this file.
-
-The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
-and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
-
-## [Unreleased]
-
-### Fixed
-
-- Team selection modal no longer appears repeatedly due to username state changes
-
 ## [0.2.0] - 2026-01-23
 
 ### Added
@@ -40,7 +29,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Improved mobile device authentication handling
 - Final code formatting and consistency improvements
 
-## [0.1.0] - Initial Release
+## [0.1.0] - 2026-01-01
 
 ### Added
 
@@ -59,6 +48,5 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - PWA support with offline capabilities
 - Responsive design for mobile, tablet, and desktop
 
-[unreleased]: https://github.com/robdoesthething/Girify/compare/v0.2.0...HEAD
 [0.2.0]: https://github.com/robdoesthething/Girify/releases/tag/v0.2.0
 [0.1.0]: https://github.com/robdoesthething/Girify/releases/tag/v0.1.0
