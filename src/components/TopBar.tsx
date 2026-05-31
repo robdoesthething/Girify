@@ -1,6 +1,6 @@
 import { AnimatePresence, motion } from 'framer-motion';
 import React, { useCallback, useState } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { version } from '../../package.json';
 import { Z_INDEX } from '../config/zIndex';
 import { useTheme } from '../context/ThemeContext';
@@ -28,8 +28,10 @@ const TopBar: React.FC<TopBarProps> = React.memo(
   ({ onOpenPage, username, onTriggerLogin, onLogout }) => {
     const { theme, t } = useTheme();
     const location = useLocation();
+    const navigate = useNavigate();
     const [menuOpen, setMenuOpen] = useState(false);
     const [showLoginModal, setShowLoginModal] = useState(false);
+    const isHome = location.pathname === '/';
 
     const handlePrefetch = useCallback((page: string | null) => {
       if (page && prefetchRouteChunk[page]) {
@@ -41,7 +43,7 @@ const TopBar: React.FC<TopBarProps> = React.memo(
       page === null ? location.pathname === '/' : location.pathname === `/${page}`;
 
     const handleMenuClick = (page: string | null) => {
-      const RESTRICTED_PAGES = ['profile', 'friends', 'leaderboard', 'shop', 'admin'];
+      const RESTRICTED_PAGES = ['profile', 'friends', 'admin'];
 
       if (page === 'login') {
         onTriggerLogin('signin');
@@ -74,7 +76,7 @@ const TopBar: React.FC<TopBarProps> = React.memo(
     return (
       <>
         <div
-          className={`fixed top-0 left-0 right-0 h-12 ${Z_INDEX.NAVIGATION} flex items-center justify-between px-3 md:px-6 transition-colors duration-300
+          className={`w-full h-12 shrink-0 ${Z_INDEX.NAVIGATION} flex items-center justify-between px-3 md:px-6 transition-colors duration-300
                 ${themeClasses(theme, 'bg-slate-700/90 text-white', 'bg-white/90 text-slate-800')}
 backdrop-blur-md border-b ${themeClasses(theme, 'border-slate-600', 'border-slate-200')}
 `}
@@ -106,6 +108,25 @@ backdrop-blur-md border-b ${themeClasses(theme, 'border-slate-600', 'border-slat
               <Logo className="h-5 md:h-7 w-auto object-contain" />
             </button>
           </div>
+
+          {!isHome && (
+            <button
+              onClick={() => navigate(-1)}
+              className={`flex items-center gap-1 px-3 py-1.5 rounded-full text-sm font-medium transition-all active:scale-90 ${themeClasses(theme, 'hover:bg-neutral-300', 'hover:bg-slate-100')}`}
+              type="button"
+              aria-label="Go back"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M15 19l-7-7 7-7"
+                />
+              </svg>
+              <span className="hidden sm:inline text-sm">{t('back') || 'Back'}</span>
+            </button>
+          )}
         </div>
 
         <AnimatePresence>
@@ -146,7 +167,7 @@ backdrop-blur-md border-b ${themeClasses(theme, 'border-slate-600', 'border-slat
                   </button>
                 </div>
 
-                <nav className="flex-1 flex flex-col gap-2 overflow-y-auto px-6 pb-20">
+                <nav className="flex-1 flex flex-col gap-2 overflow-y-auto px-6 pb-4">
                   {[
                     { page: null, emoji: '🏠', label: t('home') },
                     { page: 'profile', emoji: '👤', label: t('myProfile') },
@@ -167,6 +188,24 @@ backdrop-blur-md border-b ${themeClasses(theme, 'border-slate-600', 'border-slat
                       type="button"
                     >
                       <span className="text-xl">{item.emoji}</span> {item.label}
+                    </button>
+                  ))}
+
+                  <div
+                    className={`h-px my-2 shrink-0 ${themeClasses(theme, 'bg-slate-700', 'bg-slate-200')}`}
+                  />
+
+                  {[
+                    { page: 'privacy', emoji: '🔒', label: t('privacy') || 'Privacy' },
+                    { page: 'terms', emoji: '📋', label: t('terms') || 'Terms' },
+                  ].map(item => (
+                    <button
+                      key={item.page}
+                      onClick={() => handleMenuClick(item.page)}
+                      className={`text-left py-1.5 px-3 rounded-lg hover:bg-slate-500/10 text-sm flex items-center gap-3 shrink-0 opacity-50 hover:opacity-100 transition-opacity ${isActivePage(item.page) ? 'text-sky-500 bg-sky-500/10 opacity-100' : ''}`}
+                      type="button"
+                    >
+                      <span>{item.emoji}</span> {item.label}
                     </button>
                   ))}
 
@@ -200,11 +239,8 @@ backdrop-blur-md border-b ${themeClasses(theme, 'border-slate-600', 'border-slat
                       <span className="text-xl">🚪</span> {t('logout')}
                     </button>
                   )}
+                  <p className="text-xs text-slate-400 text-center py-2 mt-1">v{version} Girify</p>
                 </nav>
-
-                <div className="mb-6 mx-6 p-2 text-xs text-slate-500 text-center shrink-0">
-                  v{version} Girify
-                </div>
               </motion.div>
             </>
           )}

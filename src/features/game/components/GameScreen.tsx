@@ -1,5 +1,6 @@
 import { AnimatePresence, motion } from 'framer-motion';
 import React, { FC, useEffect, useState } from 'react';
+import { useBlocker } from 'react-router-dom';
 import LandingPage from '../../../components/LandingPage';
 import { useGameContext } from '../../../context/GameContext';
 import { useTheme } from '../../../context/ThemeContext';
@@ -24,7 +25,13 @@ const GameScreen: FC = () => {
     return !completed && !!state.username;
   });
 
-  // Exit Warning
+  // Block in-app navigation during an active game
+  const blocker = useBlocker(
+    ({ currentLocation, nextLocation }) =>
+      state.gameState === 'playing' && currentLocation.pathname !== nextLocation.pathname
+  );
+
+  // Exit Warning (hard reload / tab close)
   useEffect(() => {
     const handleBeforeUnload = (e: BeforeUnloadEvent) => {
       if (state.gameState === 'playing') {
@@ -195,6 +202,33 @@ const GameScreen: FC = () => {
       )}
 
       {showOnboarding && <OnboardingTour onComplete={() => setShowOnboarding(false)} />}
+
+      {blocker.state === 'blocked' && (
+        <div className="absolute inset-0 z-[9999] flex items-center justify-center bg-black/70 backdrop-blur-sm">
+          <div className="bg-slate-800 rounded-2xl p-6 max-w-sm mx-4 text-white text-center shadow-2xl">
+            <p className="text-lg font-bold mb-1">{t('exitGameWarning') || 'Leave game?'}</p>
+            <p className="text-sm opacity-60 mb-6">
+              {t('exitGameWarningDetail') || 'Your progress will be lost.'}
+            </p>
+            <div className="flex gap-3">
+              <button
+                onClick={() => blocker.reset()}
+                className="flex-1 py-3 rounded-xl bg-slate-700 hover:bg-slate-600 font-bold transition-colors"
+                type="button"
+              >
+                {t('cancel') || 'Cancel'}
+              </button>
+              <button
+                onClick={() => blocker.proceed()}
+                className="flex-1 py-3 rounded-xl bg-red-500 hover:bg-red-400 font-bold transition-colors"
+                type="button"
+              >
+                {t('leave') || 'Leave'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

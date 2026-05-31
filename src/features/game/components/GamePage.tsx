@@ -34,7 +34,7 @@ function GamePageContent({ username }: GamePageProps) {
   // Handle register mode from navigation
   useEffect(() => {
     if (location.state?.mode === 'register' && state.gameState !== 'register') {
-      dispatch({ type: 'SET_REGISTER_MODE', payload: 'signup' });
+      dispatch({ type: 'SET_REGISTER_MODE', payload: location.state?.submode || 'signup' });
       dispatch({ type: 'SET_GAME_STATE', payload: 'register' });
       // Clear the location state to prevent re-triggering after panel close
       window.history.replaceState({}, document.title);

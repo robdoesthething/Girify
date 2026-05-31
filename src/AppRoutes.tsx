@@ -104,7 +104,7 @@ const AppRoutes: React.FC = () => {
                   user ? (
                     <FriendsScreen username={currentUsername || ''} />
                   ) : (
-                    <Navigate to="/" replace />
+                    <Navigate to="/" state={{ mode: 'register', submode: 'signin' }} />
                   )
                 }
               />
@@ -121,7 +121,7 @@ const AppRoutes: React.FC = () => {
                   user ? (
                     <ProfileScreen username={currentUsername || ''} />
                   ) : (
-                    <Navigate to="/" replace />
+                    <Navigate to="/" state={{ mode: 'register', submode: 'signin' }} />
                   )
                 }
               />

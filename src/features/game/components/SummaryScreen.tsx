@@ -316,6 +316,23 @@ const SummaryScreen: React.FC<SummaryScreenProps> = ({
             </div>
           </button>
 
+          <div className="flex gap-3 w-full mb-4">
+            <button
+              onClick={() => navigate('/leaderboard')}
+              className="flex-1 py-3 rounded-xl font-bold text-sm transition-all active:scale-95 bg-slate-800 text-slate-300 hover:bg-slate-700 hover:text-white border border-slate-700 hover:border-slate-500"
+            >
+              🏆 {t('leaderboard') || 'Leaderboard'}
+            </button>
+            {profile && (
+              <button
+                onClick={() => navigate('/profile')}
+                className="flex-1 py-3 rounded-xl font-bold text-sm transition-all active:scale-95 bg-slate-800 text-slate-300 hover:bg-slate-700 hover:text-white border border-slate-700 hover:border-slate-500"
+              >
+                👤 {t('myProfile') || 'My Profile'}
+              </button>
+            )}
+          </div>
+
           <button
             onClick={onRestart}
             className="w-full py-4 rounded-xl font-bold text-lg uppercase tracking-wider transition-all active:scale-95
