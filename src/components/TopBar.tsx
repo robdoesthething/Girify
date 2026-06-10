@@ -1,5 +1,5 @@
 import { AnimatePresence, motion } from 'framer-motion';
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { version } from '../../package.json';
 import { Z_INDEX } from '../config/zIndex';
@@ -32,6 +32,38 @@ const TopBar: React.FC<TopBarProps> = React.memo(
     const [menuOpen, setMenuOpen] = useState(false);
     const [showLoginModal, setShowLoginModal] = useState(false);
     const isHome = location.pathname === '/';
+
+    // Close the drawer when navigation happens outside it (back button, in-page links).
+    // State is adjusted during render to avoid a cascading effect re-render.
+    const [lastPathname, setLastPathname] = useState(location.pathname);
+    if (lastPathname !== location.pathname) {
+      setLastPathname(location.pathname);
+      setMenuOpen(false);
+    }
+
+    // Escape closes the drawer
+    useEffect(() => {
+      if (!menuOpen) {
+        return undefined;
+      }
+      const onKeyDown = (e: KeyboardEvent) => {
+        if (e.key === 'Escape') {
+          setMenuOpen(false);
+        }
+      };
+      window.addEventListener('keydown', onKeyDown);
+      return () => window.removeEventListener('keydown', onKeyDown);
+    }, [menuOpen]);
+
+    const handleBack = () => {
+      // Fall back to home when there is no in-app history (e.g. direct link)
+      const historyIndex = (window.history.state as { idx?: number } | null)?.idx ?? 0;
+      if (historyIndex > 0) {
+        navigate(-1);
+      } else {
+        navigate('/');
+      }
+    };
 
     const handlePrefetch = useCallback((page: string | null) => {
       if (page && prefetchRouteChunk[page]) {
@@ -111,7 +143,7 @@ backdrop-blur-md border-b ${themeClasses(theme, 'border-slate-600', 'border-slat
 
           {!isHome && (
             <button
-              onClick={() => navigate(-1)}
+              onClick={handleBack}
               className={`flex items-center gap-1 px-3 py-1.5 rounded-full text-sm font-medium transition-all active:scale-90 ${themeClasses(theme, 'hover:bg-neutral-300', 'hover:bg-slate-100')}`}
               type="button"
               aria-label="Go back"

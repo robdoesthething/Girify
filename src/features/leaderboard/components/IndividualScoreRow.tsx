@@ -42,7 +42,7 @@ const IndividualScoreRow: React.FC<IndividualScoreRowProps> = ({
     if (currentUser && usernamesMatch(s.username, currentUser)) {
       navigate('/profile');
     } else {
-      navigate(`/user/${encodeURIComponent(s.username)}`);
+      navigate(`/u/${encodeURIComponent(s.username)}`);
     }
   };
 

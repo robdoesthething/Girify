@@ -1,8 +1,9 @@
 import { AnimatePresence } from 'framer-motion';
-import React, { Suspense } from 'react';
-import { Navigate, Route, Routes } from 'react-router-dom';
+import React, { Suspense, useEffect, useRef } from 'react';
+import { Navigate, Route, Routes, useParams } from 'react-router-dom';
 import TopBar from './components/TopBar';
 import { useAppInitialization } from './hooks/useAppInitialization';
+import { usePageTitle } from './hooks/usePageTitle';
 import { themeClasses } from './utils/themeUtils';
 
 // Lazy loaded components for better code splitting
@@ -19,6 +20,7 @@ import {
   GamePage,
   LeaderboardScreen,
   NewsScreen,
+  NotFoundScreen,
   PageLoader,
   PrivacyPolicy,
   ProfileScreen,
@@ -29,6 +31,12 @@ import {
   TermsOfService,
   VerifyEmailScreen,
 } from './routes';
+
+/** Redirect legacy /user/:handle links to the canonical /u/:handle route */
+const LegacyUserRedirect: React.FC = () => {
+  const { handle } = useParams();
+  return <Navigate to={`/u/${encodeURIComponent(handle || '')}`} replace />;
+};
 
 const AppRoutes: React.FC = () => {
   const {
@@ -44,6 +52,14 @@ const AppRoutes: React.FC = () => {
     profile,
     handleLogout,
   } = useAppInitialization();
+
+  usePageTitle(location.pathname);
+
+  // Reset scroll when navigating to a new page — screens share this container
+  const scrollRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    scrollRef.current?.scrollTo({ top: 0, behavior: 'instant' });
+  }, [location.pathname]);
 
   // Show loader while initializing
   if (isLoading) {
@@ -74,7 +90,10 @@ const AppRoutes: React.FC = () => {
       />
 
       {/* Scrollable Content Area */}
-      <div className="flex-1 w-full h-full overflow-y-auto overflow-x-hidden relative scroll-smooth no-scrollbar">
+      <div
+        ref={scrollRef}
+        className="flex-1 w-full h-full overflow-y-auto overflow-x-hidden relative scroll-smooth no-scrollbar"
+      >
         <Suspense fallback={<PageLoader />}>
           <AnimatePresence mode="wait">
             <Routes location={location} key={location.pathname}>
@@ -129,6 +148,7 @@ const AppRoutes: React.FC = () => {
                 path="/u/:handle"
                 element={<PublicProfileScreen currentUser={currentUsername} />}
               />
+              <Route path="/user/:handle" element={<LegacyUserRedirect />} />
 
               <Route element={<AdminRoute />}>
                 <Route path="/admin" element={<AdminPanel />} />
@@ -140,6 +160,8 @@ const AppRoutes: React.FC = () => {
               {/* Auth routes redirect to home with modal trigger */}
               <Route path="/login" element={<Navigate to="/?auth=login" replace />} />
               <Route path="/signup" element={<Navigate to="/?auth=signup" replace />} />
+
+              <Route path="*" element={<NotFoundScreen />} />
             </Routes>
           </AnimatePresence>
         </Suspense>

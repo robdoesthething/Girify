@@ -18,7 +18,7 @@ interface PublicProfileScreenProps {
 
 const PublicProfileScreen: React.FC<PublicProfileScreenProps> = ({ currentUser }) => {
   const { theme, t } = useTheme();
-  const { username: encodedUsername } = useParams<{ username: string }>();
+  const { handle: encodedUsername } = useParams<{ handle: string }>();
   const username = decodeURIComponent(encodedUsername || '');
   const navigate = useNavigate();
   const topBarNav = useTopBarNav();

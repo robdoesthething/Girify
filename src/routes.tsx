@@ -12,6 +12,7 @@ export { default as AboutScreen } from './components/AboutScreen';
 export { ConfirmDialog } from './components/ConfirmDialog';
 export { default as FeedbackScreen } from './components/FeedbackScreen';
 export { default as NewsScreen } from './components/NewsScreen';
+export { default as NotFoundScreen } from './components/NotFoundScreen';
 export { default as PrivacyPolicy } from './components/PrivacyPolicy';
 export { default as SettingsScreen } from './components/SettingsScreen';
 export { default as TermsOfService } from './components/TermsOfService';
@@ -43,7 +44,7 @@ export const DistrictSelectionModal = lazy(() => import('./components/DistrictSe
 export const PageLoader = () => (
   <div className="fixed inset-0 flex flex-col items-center justify-center bg-slate-950 gap-6">
     <img
-      src="/images/guiri_invasion.png"
+      src="/images/guiri_invasion.webp"
       alt=""
       aria-hidden="true"
       className="w-20 h-20 rounded-2xl object-cover opacity-80"
