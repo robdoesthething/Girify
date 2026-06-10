@@ -283,24 +283,22 @@ export const getFriends = async (username: string): Promise<Friend[]> => {
     }
 
     const friendUsernames = dbFriends.map(f => f.friend_username);
+    const todayStr = new Date().toISOString().split('T')[0];
 
-    // Batch fetch profiles
-    const { data: profiles } = await supabase
-      .from('users')
-      .select('username, equipped_badges, avatar_id, equipped_cosmetics')
-      .in('username', friendUsernames);
+    // Batch fetch profiles and today's games count in parallel
+    const [{ data: profiles }, { data: todayGamesEntries }] = await Promise.all([
+      supabase
+        .from('users')
+        .select('username, equipped_badges, avatar_id, equipped_cosmetics')
+        .in('username', friendUsernames),
+      supabase
+        .from('user_games')
+        .select('username')
+        .eq('date', todayStr as string)
+        .in('username', friendUsernames),
+    ]);
 
     const profilesMap = new Map(profiles?.map(p => [p.username, p]) || []);
-
-    // Batch fetch today's games count
-    const today = new Date();
-    const todayStr = today.toISOString().split('T')[0];
-
-    const { data: todayGamesEntries } = await supabase
-      .from('user_games')
-      .select('username')
-      .eq('date', todayStr as string)
-      .in('username', friendUsernames);
 
     const gamesCountMap = new Map<string, number>();
     todayGamesEntries?.forEach((g: { username: string }) => {

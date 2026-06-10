@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { CosmeticAvatar } from '../../../components/ui';
 import { getAvatar } from '../../../data/avatars';
 import { formatUsername } from '../../../utils/format';
+import { getCosmeticAvatarImage } from '../../../utils/shop/catalog';
 
 export interface Friend {
   username: string;
@@ -25,22 +27,18 @@ const FriendItem: React.FC<FriendItemProps> = ({ friend, onRemove, onBlock }) =>
   const navigate = useNavigate();
   const [activeMenu, setActiveMenu] = useState(false);
 
-  const equippedAvatarId = friend.equippedCosmetics?.avatarId;
-  const hasCustomAvatar = equippedAvatarId && equippedAvatarId.startsWith('pixel_');
-  const avatarUrl = hasCustomAvatar ? `/assets/districts/${equippedAvatarId}.png` : null;
+  const avatarUrl = getCosmeticAvatarImage(friend.equippedCosmetics?.avatarId);
 
   return (
     <div className="p-3 rounded-lg border flex justify-between items-center bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 transition-colors relative">
       <div className="flex items-center gap-4">
-        <div
-          className={`w-10 h-10 rounded-full flex items-center justify-center text-xl bg-gradient-to-br from-sky-400 to-indigo-600 border-2 border-white dark:border-slate-800 shadow-sm overflow-hidden`}
-        >
-          {avatarUrl ? (
-            <img src={avatarUrl} alt={friend.username} className="w-full h-full object-cover" />
-          ) : (
-            getAvatar(friend.avatarId || 1)
-          )}
-        </div>
+        <CosmeticAvatar
+          image={avatarUrl}
+          fallback={getAvatar(friend.avatarId || 1)}
+          size={40}
+          alt={friend.username}
+          className="border-2 border-white dark:border-slate-800 shadow-sm"
+        />
         <div>
           <h4 className="font-bold text-sm leading-tight">{formatUsername(friend.username)}</h4>
           {friend.badges && friend.badges.length > 0 && (
@@ -80,7 +78,7 @@ const FriendItem: React.FC<FriendItemProps> = ({ friend, onRemove, onBlock }) =>
             <div className="absolute right-0 top-full mt-1 w-40 bg-white dark:bg-slate-800 rounded-xl shadow-xl border border-slate-100 dark:border-slate-700 z-50 overflow-hidden py-1">
               <button
                 onClick={() => {
-                  navigate(`/user/${encodeURIComponent(friend.username)}`);
+                  navigate(`/u/${encodeURIComponent(friend.username)}`);
                   setActiveMenu(false);
                 }}
                 className="w-full text-left px-4 py-2.5 text-sm font-bold hover:bg-slate-50 dark:hover:bg-slate-700 flex items-center gap-2"

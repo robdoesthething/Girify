@@ -1,9 +1,11 @@
 import React, { useMemo } from 'react';
+import { CosmeticAvatar } from '../../../components/ui';
 import { useTheme } from '../../../context/ThemeContext';
 import { AVATARS } from '../../../data/avatars';
 import { UserProfile } from '../../../types/user';
 import { formatUsername } from '../../../utils/format';
 import { ShopItem } from '../../../utils/shop';
+import { getCosmeticAvatarImage, getFrameClass, getTitleName } from '../../../utils/shop/catalog';
 import { EquippedCosmetics } from '../../../utils/social/types';
 import { themeClasses } from '../../../utils/themeUtils';
 import { parseJoinedDate } from '../utils/profileHelpers';
@@ -36,14 +38,16 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
   );
 
   const equippedAvatarId = cosmetics.equipped?.avatarId;
+  // Prefer the live (DB-merged) shop items, fall back to the bundled catalog
   const cosmeticAvatar = cosmetics.allAvatars.find(a => a.id === equippedAvatarId);
+  const avatarImage = (cosmeticAvatar?.image as string) || getCosmeticAvatarImage(equippedAvatarId);
   const legacyAvatarIndex = profileData?.avatarId ? profileData.avatarId - 1 : 0;
   const legacyAvatar = AVATARS[Math.max(0, Math.min(legacyAvatarIndex, AVATARS.length - 1))];
   const equippedFrame = cosmetics.allFrames.find(f => f.id === cosmetics.equipped.frameId);
-  const frameClass = equippedFrame?.cssClass || 'ring-4 ring-white dark:ring-slate-700';
+  const frameClass = equippedFrame?.cssClass || getFrameClass(cosmetics.equipped.frameId);
   const titleName =
     cosmetics.allTitles.find(tItem => tItem.id === cosmetics.equipped.titleId)?.name ||
-    'Street Explorer';
+    getTitleName(cosmetics.equipped.titleId);
 
   return (
     <div className="flex flex-col items-center mb-8">
@@ -57,17 +61,15 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
               onNavigateShop();
             }
           }}
-          className={`w-28 h-28 rounded-full ${cosmeticAvatar ? 'bg-transparent' : 'bg-gradient-to-br from-sky-400 to-indigo-600'} flex items-center justify-center text-5xl shadow-2xl ${frameClass} select-none outline-none focus:ring-sky-500 cursor-pointer hover:scale-105 transition-transform overflow-hidden`}
+          className="rounded-full outline-none focus:ring-sky-500 cursor-pointer hover:scale-105 transition-transform"
         >
-          {cosmeticAvatar ? (
-            <img
-              src={cosmeticAvatar.image as string}
-              alt="Avatar"
-              className="w-full h-full object-cover"
-            />
-          ) : (
-            legacyAvatar
-          )}
+          <CosmeticAvatar
+            image={avatarImage}
+            fallback={legacyAvatar}
+            size={112}
+            alt="Avatar"
+            className={`shadow-2xl ${frameClass}`}
+          />
         </div>
 
         <button

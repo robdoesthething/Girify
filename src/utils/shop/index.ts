@@ -1,4 +1,3 @@
-import cosmetics from '../../data/cosmetics.json';
 import {
   createShopItem as dbCreateShopItem,
   deleteShopItem as dbDeleteShopItem,
@@ -6,9 +5,17 @@ import {
   updateShopItem as dbUpdateShopItem,
 } from '../../services/database';
 import { ShopItemRow } from '../../types/supabase';
+import { LOCAL_SHOP_ITEMS } from './catalog';
 import type { GroupedShopItems, OperationResult, ShopItem, ShopItemType } from './types';
 
-export type { GroupedShopItems, OperationResult, ShopItem, ShopItemType } from './types';
+export type {
+  GroupedShopItems,
+  OperationResult,
+  RawCosmeticItem,
+  ShopItem,
+  ShopItemType,
+} from './types';
+export * from './catalog';
 export { checkUnlockCondition } from './unlock';
 
 // Simple in-memory cache
@@ -30,15 +37,8 @@ export const getShopItems = async (forceRefresh = false): Promise<GroupedShopIte
     return shopItemsCache;
   }
 
-  // Start with local cosmetics.json as the base source of truth
-
-  const rawCosmetics = cosmetics as Record<string, any[]>;
-  const localItems: ShopItem[] = [
-    ...(rawCosmetics.avatarFrames || []).map(i => ({ ...i, type: 'frame' as const })),
-    ...(rawCosmetics.titles || []).map(i => ({ ...i, type: 'title' as const })),
-    ...(rawCosmetics.special || []).map(i => ({ ...i, type: 'special' as const })),
-    ...(rawCosmetics.avatars || []).map(i => ({ ...i, type: 'avatar' as const })),
-  ] as ShopItem[];
+  // Start with the bundled cosmetics catalog as the base source of truth
+  const localItems: ShopItem[] = LOCAL_SHOP_ITEMS;
 
   const dbItems: ShopItem[] = [];
   try {
@@ -217,13 +217,7 @@ export const deleteShopItem = async (id: string): Promise<OperationResult> => {
  * @returns Promise resolving to sync stats { updated, errors }
  */
 export const syncWithLocal = async (): Promise<{ updated: number; errors: number }> => {
-  const rawCosmetics = cosmetics as Record<string, any[]>;
-  const localItems: ShopItem[] = [
-    ...(rawCosmetics.avatarFrames || []).map(i => ({ ...i, type: 'frame' as const })),
-    ...(rawCosmetics.titles || []).map(i => ({ ...i, type: 'title' as const })),
-    ...(rawCosmetics.special || []).map(i => ({ ...i, type: 'special' as const })),
-    ...(rawCosmetics.avatars || []).map(i => ({ ...i, type: 'avatar' as const })),
-  ] as ShopItem[];
+  const localItems: ShopItem[] = LOCAL_SHOP_ITEMS;
 
   let updated = 0;
   let errors = 0;

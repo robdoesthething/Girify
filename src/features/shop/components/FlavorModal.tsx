@@ -2,6 +2,7 @@ import React from 'react';
 import { Button, Modal } from '../../../components/ui';
 import { useTheme } from '../../../context/ThemeContext';
 import { ShopItem } from '../../../utils/shop';
+import { DEFAULT_AVATAR_IMAGE } from '../../../utils/shop/catalog';
 
 interface FlavorModalProps {
   item: ShopItem | null;
@@ -74,7 +75,8 @@ const FlavorModal: React.FC<FlavorModalProps> = ({
           {item.cssClass ? (
             <div className={`w-full h-full rounded-full overflow-hidden ${item.cssClass}`}>
               <img
-                src="/assets/pixel_avatar_guiri.png"
+                src={DEFAULT_AVATAR_IMAGE}
+                loading="lazy"
                 alt="Frame preview"
                 className="w-full h-full object-cover"
                 style={{ imageRendering: 'pixelated' }}
@@ -83,6 +85,7 @@ const FlavorModal: React.FC<FlavorModalProps> = ({
           ) : item.image ? (
             <img
               src={item.image}
+              loading="lazy"
               alt={item.name}
               className="w-full h-full object-contain"
               style={{ imageRendering: 'pixelated' }}

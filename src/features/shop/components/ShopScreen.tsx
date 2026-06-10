@@ -235,11 +235,8 @@ const ShopScreen: React.FC<ShopScreenProps> = ({ username }) => {
             item={flavorModal}
             onClose={() => setFlavorModal(null)}
             onPurchase={item => {
+              // Modal stays open so the user can equip right after purchasing
               handlePurchase(item);
-              // Do not setFlavorModal(null) here if you want to allow equip immediately after purchase in the same modal,
-              // but FlavorModal handles rendering purchase vs equip button based on isOwned.
-              // Usually we might want to keep it open or close it.
-              // Original logic wasn't explicit inside modal logic, but here we likely want to keep it open or let user close.
             }}
             onEquip={item => handleEquip(item)}
             isOwned={isOwned(flavorModal.id)}

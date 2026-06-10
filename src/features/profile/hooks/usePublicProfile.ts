@@ -1,5 +1,4 @@
 import { useEffect, useState } from 'react';
-import { getEquippedCosmetics } from '../../../utils/shop/giuros';
 import { getUserGameHistory, getUserProfile, UserProfile } from '../../../utils/social';
 import { EquippedCosmetics } from '../../../utils/social/types';
 import {
@@ -44,10 +43,18 @@ export const usePublicProfile = (
       setLoading(true);
       setError(null);
       try {
-        const [data, cosmeticsData, historyData] = await Promise.all([
+        // Single parallel wave: the profile row already includes equipped
+        // cosmetics, and friendship/block status don't depend on it.
+        const isOtherUser = Boolean(currentUser && currentUser !== username);
+        const [data, historyData, status, blocked] = await Promise.all([
           getUserProfile(username),
-          getEquippedCosmetics(username) as Promise<Record<string, string>>,
           getUserGameHistory(username),
+          isOtherUser
+            ? (getFriendshipStatus(currentUser as string, username) as Promise<
+                'none' | 'friends' | 'pending'
+              >)
+            : Promise.resolve('none' as const),
+          isOtherUser ? getBlockStatus(currentUser as string, username) : Promise.resolve(false),
         ]);
 
         if (data) {
@@ -69,14 +76,10 @@ export const usePublicProfile = (
             avatarId: 0,
           });
         }
-        setEquippedCosmetics(cosmeticsData || {});
+        setEquippedCosmetics(data?.equippedCosmetics || {});
         setHistory(historyData || []);
 
-        if (currentUser && currentUser !== username) {
-          const [status, blocked] = await Promise.all([
-            getFriendshipStatus(currentUser, username) as Promise<'none' | 'friends' | 'pending'>,
-            getBlockStatus(currentUser, username),
-          ]);
+        if (isOtherUser) {
           setFriendStatus(status);
           setIsBlocked(blocked);
           if (status === 'pending') {

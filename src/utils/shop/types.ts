@@ -18,6 +18,24 @@ export interface ShopItem {
   [key: string]: unknown;
 }
 
+/** A cosmetics.json entry: a ShopItem before its category type is assigned */
+export interface RawCosmeticItem {
+  id: string;
+  name?: string;
+  cost?: number;
+  price?: number;
+  rarity?: string;
+  color?: string;
+  description?: string;
+  image?: string;
+  emoji?: string;
+  cssClass?: string;
+  flavorText?: string;
+  prefix?: string;
+  unlockCondition?: { type: string; value: number };
+  [key: string]: unknown;
+}
+
 export interface GroupedShopItems {
   avatarFrames: ShopItem[];
   frames: ShopItem[]; // Alias for avatarFrames - used by ShopScreen tabs

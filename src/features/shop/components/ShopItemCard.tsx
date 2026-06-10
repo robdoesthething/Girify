@@ -9,6 +9,7 @@ import { Button, Card, Heading, Text } from '../../../components/ui';
 import { useTheme } from '../../../context/ThemeContext';
 import { getItemCardClass } from '../../../utils/buttonClasses';
 import type { ShopItem } from '../../../utils/shop';
+import { DEFAULT_AVATAR_IMAGE } from '../../../utils/shop/catalog';
 
 interface ShopItemCardProps {
   item: ShopItem;
@@ -44,7 +45,8 @@ const ShopItemCard: React.FC<ShopItemCardProps> = memo(
         return (
           <div className={`w-14 h-14 rounded-full overflow-hidden ${item.cssClass}`}>
             <img
-              src="/assets/pixel_avatar_guiri.png"
+              src={DEFAULT_AVATAR_IMAGE}
+              loading="lazy"
               alt="Frame preview"
               className="w-full h-full object-cover"
               style={{ imageRendering: 'pixelated' }}
@@ -56,6 +58,7 @@ const ShopItemCard: React.FC<ShopItemCardProps> = memo(
         return (
           <img
             src={item.image}
+            loading="lazy"
             alt={item.name}
             className="w-full h-full object-contain"
             style={{ imageRendering: 'pixelated' }}

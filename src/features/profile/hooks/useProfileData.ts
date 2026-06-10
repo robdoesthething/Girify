@@ -1,31 +1,17 @@
 import { useCallback, useEffect, useState } from 'react';
-import cosmetics from '../../../data/cosmetics.json';
 import { getUserGameHistory } from '../../../services/db/games';
 import { GameResultRow } from '../../../types/supabase';
 import { GameHistory, UserProfile } from '../../../types/user';
 import { normalizeUsername } from '../../../utils/format';
 import { getShopItems, GroupedShopItems, ShopItem } from '../../../utils/shop';
+import { LOCAL_AVATARS, LOCAL_FRAMES, LOCAL_TITLES } from '../../../utils/shop/catalog';
 import { EquippedCosmetics } from '../../../utils/social/types';
 import { getUserProfileWithBalance } from '../../../utils/social';
 import { getFriendCount } from '../../../utils/social/friends';
 import { parseJoinedDate } from '../utils/profileHelpers';
 
-// Derive local fallback arrays from the bundled cosmetics.json so that
-// equipped cosmetics can be resolved immediately on first render — before
-// the background getShopItems() call completes.
-const rawCosmetics = cosmetics as Record<string, any[]>;
-const LOCAL_AVATARS: ShopItem[] = (rawCosmetics.avatars || []).map((i: any) => ({
-  ...i,
-  type: 'avatar' as const,
-}));
-const LOCAL_FRAMES: ShopItem[] = (rawCosmetics.avatarFrames || []).map((i: any) => ({
-  ...i,
-  type: 'frame' as const,
-}));
-const LOCAL_TITLES: ShopItem[] = (rawCosmetics.titles || []).map((i: any) => ({
-  ...i,
-  type: 'title' as const,
-}));
+// The bundled catalog resolves equipped cosmetics immediately on first
+// render — before the background getShopItems() call completes.
 
 export interface UseProfileDataResult {
   profileData: UserProfile | null;
