@@ -55,6 +55,7 @@ const AchievementsList: React.FC<AchievementsListProps> = ({
               {badge.image ? (
                 <img
                   src={badge.image}
+                  loading="lazy"
                   alt={badge.name}
                   className="w-10 h-10 object-contain mb-1 drop-shadow-sm"
                   style={{ imageRendering: 'pixelated' }}
@@ -88,6 +89,7 @@ const AchievementsList: React.FC<AchievementsListProps> = ({
               {selectedAchievement.image ? (
                 <img
                   src={selectedAchievement.image}
+                  loading="lazy"
                   alt={selectedAchievement.name}
                   className="w-16 h-16 object-contain drop-shadow-md"
                   style={{ imageRendering: 'pixelated' }}
@@ -115,6 +117,7 @@ const AchievementsList: React.FC<AchievementsListProps> = ({
             {nextBadge.image ? (
               <img
                 src={nextBadge.image}
+                loading="lazy"
                 alt={nextBadge.name}
                 className="w-8 h-8 object-contain"
                 style={{ imageRendering: 'pixelated' }}

@@ -4,7 +4,7 @@ import { ShopItem } from '../../../utils/shop';
 /**
  * Parse joined date from various formats (object with seconds, Date, or string)
  */
-export const parseJoinedDate = (joinedAt: any): Date => {
+export const parseJoinedDate = (joinedAt: unknown): Date => {
   if (!joinedAt) {
     return new Date();
   }
@@ -12,7 +12,7 @@ export const parseJoinedDate = (joinedAt: any): Date => {
     return joinedAt;
   }
   if (typeof joinedAt === 'object' && 'seconds' in joinedAt) {
-    return new Date(joinedAt.seconds * 1000);
+    return new Date((joinedAt as { seconds: number }).seconds * 1000);
   }
   return new Date(joinedAt as string);
 };

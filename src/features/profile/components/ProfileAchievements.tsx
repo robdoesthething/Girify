@@ -49,6 +49,7 @@ const ProfileAchievements: React.FC<ProfileAchievementsProps> = ({
               {badge.image ? (
                 <img
                   src={badge.image}
+                  loading="lazy"
                   alt={badge.name}
                   className="w-10 h-10 object-contain mb-1 drop-shadow-sm"
                 />

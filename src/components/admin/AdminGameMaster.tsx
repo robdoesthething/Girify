@@ -202,6 +202,7 @@ const AdminGameMaster: React.FC<AdminGameMasterProps> = ({ onNotify, confirm }) 
               <div className="flex flex-col md:flex-row gap-6 items-start mt-4">
                 <img
                   src={targetUser.avatar || 'https://api.dicebear.com/7.x/avataaars/svg?seed=Felix'}
+                  loading="lazy"
                   alt="avatar"
                   className="w-24 h-24 rounded-full bg-indigo-50 border-4 border-indigo-100"
                 />

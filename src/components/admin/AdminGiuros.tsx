@@ -54,8 +54,6 @@ const AdminGiuros: React.FC<AdminGiurosProps> = ({
     const result = await updatePayoutConfig(newConfig);
     if (result.success) {
       setPayouts(newConfig);
-      // Optional: show toast via prop if available, or just console log as before
-      // console.log('Payout configuration saved successfully!');
     } else {
       console.error(`Failed to save: ${result.error || 'Unknown error'}`);
     }

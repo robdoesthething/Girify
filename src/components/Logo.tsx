@@ -1,6 +1,6 @@
 import React from 'react';
-import logoDark from '../assets/girify-logo-dark.png';
-import logoImage from '../assets/girify-logo.png';
+import logoDark from '../assets/girify-logo-dark.webp';
+import logoImage from '../assets/girify-logo.webp';
 import { useTheme } from '../context/ThemeContext';
 import { themeValue } from '../utils/themeUtils';
 

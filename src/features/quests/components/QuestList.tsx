@@ -181,7 +181,7 @@ export const QuestList: React.FC<QuestListProps> = ({ onRefresh, username }) => 
               <div className="ml-4 flex flex-col items-end gap-1">
                 <div className="text-xs font-black text-yellow-500 flex items-center gap-1">
                   <span>+{quest.reward_giuros}</span>
-                  <img src="/giuro.png" alt="G" className="w-3 h-3" />
+                  <img src="/giuro.png" alt="G" loading="lazy" className="w-3 h-3" />
                 </div>
                 {renderActionButton(quest, isCompleted, isClaimed)}
               </div>

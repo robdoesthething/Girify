@@ -7,7 +7,10 @@
 
 import { SupabaseClient } from '@supabase/supabase-js';
 import { CACHE, TIME } from '../../utils/constants';
+import { createLogger } from '../../utils/logger';
 import { supabase } from '../supabase';
+
+const logger = createLogger('Config');
 
 // ============================================================================
 // TYPES
@@ -176,8 +179,7 @@ export const updatePayoutConfig = async (
     // Fetch fresh data to update cache
     await getPayoutConfig();
 
-    // eslint-disable-next-line no-console
-    console.log('[Config] Payout config updated:', updates);
+    logger.info('Payout config updated:', updates);
     return { success: true };
   } catch (e: unknown) {
     console.error('[Config] Exception updating payout config:', e);
@@ -334,8 +336,7 @@ export const updateGameConfig = async (
     // Fetch fresh data to update cache
     await getGameConfig();
 
-    // eslint-disable-next-line no-console
-    console.log('[Config] Game config updated:', updates);
+    logger.info('Game config updated:', updates);
     return { success: true };
   } catch (error) {
     console.error('[Config] Exception updating game config:', error);

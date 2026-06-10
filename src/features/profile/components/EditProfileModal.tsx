@@ -89,6 +89,7 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({
                   {img ? (
                     <img
                       src={img as string}
+                      loading="lazy"
                       alt={avatar.name}
                       className="w-full h-full object-cover"
                       style={{ imageRendering: 'pixelated' }}

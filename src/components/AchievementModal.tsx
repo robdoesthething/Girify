@@ -82,6 +82,7 @@ const AchievementModal: React.FC<AchievementModalProps> = ({ achievement, onDism
                 <div className="absolute inset-0 bg-yellow-500 blur-2xl opacity-30 rounded-full" />
                 <img
                   src={achievement.image}
+                  loading="lazy"
                   alt={achievement.name}
                   className="w-32 h-32 object-contain relative z-10 drop-shadow-2xl hover:scale-110 transition-transform duration-500"
                 />

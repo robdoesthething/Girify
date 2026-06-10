@@ -31,7 +31,12 @@ const TeamScoreRow: React.FC<TeamScoreRowProps> = ({ team, index }) => {
           `}
         >
           {district?.logo ? (
-            <img src={district.logo} alt={team.teamName} className="w-full h-full object-cover" />
+            <img
+              src={district.logo}
+              alt={team.teamName}
+              loading="lazy"
+              className="w-full h-full object-cover"
+            />
           ) : (
             index + 1
           )}

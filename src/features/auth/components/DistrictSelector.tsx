@@ -40,6 +40,7 @@ const DistrictSelector: React.FC<DistrictSelectorProps> = ({
         >
           <img
             src={d.logo}
+            loading="lazy"
             alt={d.teamName}
             className="w-8 h-8 object-contain"
             style={{ imageRendering: 'pixelated' }}

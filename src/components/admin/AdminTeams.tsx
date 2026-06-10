@@ -173,6 +173,7 @@ const AdminTeams: React.FC = () => {
                       {DISTRICTS.find(d => d.id === team.id)?.logo && (
                         <img
                           src={DISTRICTS.find(d => d.id === team.id)?.logo}
+                          loading="lazy"
                           alt=""
                           className="w-6 h-6 rounded-full object-cover"
                         />

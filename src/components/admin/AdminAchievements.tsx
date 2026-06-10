@@ -112,6 +112,7 @@ const AdminAchievements: React.FC<AdminAchievementsProps> = ({ onNotify, confirm
                 {item.image ? (
                   <img
                     src={item.image}
+                    loading="lazy"
                     alt=""
                     className="w-10 h-10 object-contain rounded-full bg-slate-100"
                   />

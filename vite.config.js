@@ -16,7 +16,7 @@ export default defineConfig(({ mode }) => ({
     }),
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['favicon2.png', 'giuro.png', 'girify-logo.png'],
+      includeAssets: ['favicon2.png', 'favicon-512.png', 'giuro.png'],
       manifest: {
         name: 'Girify - Barcelona Streets Quiz',
         short_name: 'Girify',
@@ -32,7 +32,7 @@ export default defineConfig(({ mode }) => ({
             type: 'image/png',
           },
           {
-            src: 'favicon2.png',
+            src: 'favicon-512.png',
             sizes: '512x512',
             type: 'image/png',
           },

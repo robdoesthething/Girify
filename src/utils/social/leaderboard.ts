@@ -153,7 +153,7 @@ export const getTeamLeaderboard = async (
       }
       const k = key.toLowerCase();
 
-      return DISTRICTS.find((d: any) => {
+      return DISTRICTS.find(d => {
         const dId = d.id?.toLowerCase();
         const dTeam = d.teamName?.toLowerCase();
         const dName = d.name?.toLowerCase();

@@ -58,8 +58,11 @@ const LandingPage: React.FC<LandingPageProps> = ({ onLogin, theme }) => {
           {/* Hero image with improved styling */}
           <div className="relative w-full max-w-2xl aspect-video rounded-3xl overflow-hidden shadow-2xl border-4 border-slate-200 dark:border-slate-800 mb-10 group">
             <img
-              src="/images/guiri_invasion.png"
+              src="/images/guiri_invasion.webp"
               alt="Barcelona Streets"
+              width="1024"
+              height="1024"
+              fetchPriority="high"
               className="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-700"
             />
             <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/90 via-black/50 to-transparent p-6 pt-24">
@@ -177,6 +180,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onLogin, theme }) => {
                         <div className="w-full h-full bg-slate-900 rounded-full flex items-center justify-center">
                           <img
                             src={district.logo}
+                            loading="lazy"
                             alt={district.teamName}
                             className="w-16 h-16 object-contain drop-shadow-lg"
                             style={{ imageRendering: 'pixelated' }}
@@ -211,6 +215,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onLogin, theme }) => {
               <div className="relative">
                 <img
                   src="/assets/pixel_mayor_jaume.png"
+                  loading="lazy"
                   alt="Mayor Jaume"
                   className="w-28 h-28 sm:w-32 sm:h-32 rounded-xl border-4 border-yellow-500 shadow-xl shadow-yellow-500/20 bg-indigo-900/50 object-cover flex-shrink-0 transform group-hover:scale-105 transition-transform duration-300"
                   style={{ imageRendering: 'pixelated' }}
