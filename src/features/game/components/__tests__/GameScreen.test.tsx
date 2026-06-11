@@ -1,9 +1,13 @@
 import { render, screen } from '@testing-library/react';
 import React from 'react';
-import { BrowserRouter } from 'react-router-dom';
+import { createMemoryRouter, RouterProvider } from 'react-router-dom';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { Feedback, GameState } from '../../../../types/game';
 import GameScreen from '../GameScreen';
+
+// GameScreen uses useBlocker, which requires a data router (same as the app)
+const renderWithRouter = (ui: React.ReactElement) =>
+  render(<RouterProvider router={createMemoryRouter([{ path: '*', element: ui }])} />);
 
 // Mock mocks first
 const mockDispatch = vi.fn();
@@ -152,11 +156,7 @@ describe('GameScreen Component', () => {
   });
 
   it('renders LandingPage when not logged in and in intro state', () => {
-    render(
-      <BrowserRouter>
-        <GameScreen />
-      </BrowserRouter>
-    );
+    renderWithRouter(<GameScreen />);
     expect(screen.getByTestId('landing-page')).toBeInTheDocument();
   });
 
@@ -166,11 +166,7 @@ describe('GameScreen Component', () => {
       state: { ...defaultGameState, username: '@TestUser' },
     });
 
-    render(
-      <BrowserRouter>
-        <GameScreen />
-      </BrowserRouter>
-    );
+    renderWithRouter(<GameScreen />);
     expect(screen.getByTestId('play-overlay')).toBeInTheDocument();
   });
 
@@ -180,11 +176,7 @@ describe('GameScreen Component', () => {
       state: { ...defaultGameState, gameState: 'register' },
     });
 
-    render(
-      <BrowserRouter>
-        <GameScreen />
-      </BrowserRouter>
-    );
+    renderWithRouter(<GameScreen />);
     expect(screen.getByTestId('register-panel')).toBeInTheDocument();
   });
 
@@ -199,11 +191,7 @@ describe('GameScreen Component', () => {
       },
     });
 
-    render(
-      <BrowserRouter>
-        <GameScreen />
-      </BrowserRouter>
-    );
+    renderWithRouter(<GameScreen />);
     expect(screen.getByTestId('map-area')).toBeInTheDocument();
     expect(screen.getByTestId('quiz')).toBeInTheDocument();
     expect(screen.getByTestId('quiz-banner')).toBeInTheDocument();
@@ -215,11 +203,7 @@ describe('GameScreen Component', () => {
       state: { ...defaultGameState, gameState: 'summary', username: '@TestUser' },
     });
 
-    render(
-      <BrowserRouter>
-        <GameScreen />
-      </BrowserRouter>
-    );
+    renderWithRouter(<GameScreen />);
     expect(screen.getByTestId('summary-screen')).toBeInTheDocument();
   });
 
@@ -229,11 +213,7 @@ describe('GameScreen Component', () => {
       state: { ...defaultGameState, gameState: 'instructions' },
     });
 
-    render(
-      <BrowserRouter>
-        <GameScreen />
-      </BrowserRouter>
-    );
+    renderWithRouter(<GameScreen />);
     expect(screen.getByTestId('instructions-overlay')).toBeInTheDocument();
   });
 });

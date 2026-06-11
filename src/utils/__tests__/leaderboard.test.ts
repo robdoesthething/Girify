@@ -1,25 +1,13 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { getLeaderboard } from '../social/leaderboard';
 
-// Mock Supabase using vi.hoisted to ensure accessibility in vi.mock
-const { mockSupabase, mockQueryBuilder } = vi.hoisted(() => {
-  const qb: any = {
-    select: vi.fn(),
-    order: vi.fn(),
-    limit: vi.fn(),
-    gte: vi.fn(),
-    then: vi.fn(),
-  };
-  // Chain setup
-  qb.select.mockReturnValue(qb);
-  qb.order.mockReturnValue(qb);
-  qb.limit.mockReturnValue(qb);
-  qb.gte.mockReturnValue(qb);
-
+// getLeaderboard aggregates server-side via the get_leaderboard RPC
+const { mockSupabase } = vi.hoisted(() => {
   const sb = {
-    from: vi.fn(() => qb),
+    rpc: vi.fn(),
+    from: vi.fn(),
   };
-  return { mockSupabase: sb, mockQueryBuilder: qb };
+  return { mockSupabase: sb };
 });
 
 vi.mock('../../services/supabase', () => ({
@@ -37,71 +25,54 @@ vi.mock('../dailyChallenge', () => ({
 describe('Leaderboard Service', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    // Reset call chain
-    mockSupabase.from.mockReturnValue(mockQueryBuilder);
-    mockQueryBuilder.select.mockReturnValue(mockQueryBuilder);
-    mockQueryBuilder.order.mockReturnValue(mockQueryBuilder);
-    mockQueryBuilder.limit.mockReturnValue(mockQueryBuilder);
-    mockQueryBuilder.gte.mockReturnValue(mockQueryBuilder);
   });
 
   describe('getLeaderboard', () => {
-    it('should fetch from Supabase and transform scores', async () => {
-      const mockData = [
-        {
-          id: '1',
-          username: 'User1',
-          score: 1800,
-          time_taken: 8.0,
-          played_at: '2024-01-01T10:00:00Z',
-          platform: 'web',
-        },
-        {
-          id: '2',
-          username: 'User1',
-          score: 1700,
-          time_taken: 9.0,
-          played_at: '2024-01-01T09:00:00Z',
-          platform: 'web',
-        },
+    it('should fetch via the get_leaderboard RPC and transform rows', async () => {
+      const mockRows = [
+        { username: 'User1', score: 1800, avg_time: 8.0, games_count: 2 },
+        { username: '@User2', score: 1700, avg_time: null, games_count: 1 },
       ];
-
-      mockQueryBuilder.then.mockImplementation((resolve: any, _reject: any) => {
-        resolve({ data: mockData, error: null });
-      });
+      mockSupabase.rpc.mockResolvedValue({ data: mockRows, error: null });
 
       const result = await getLeaderboard('all');
 
-      expect(mockSupabase.from).toHaveBeenCalledWith('game_results');
-      expect(mockQueryBuilder.select).toHaveBeenCalledWith(
-        'id, username, score, time_taken, played_at'
-      );
-
-      // Deduplication logic: Both scores are same day, should take best (1800)
-      expect(result).toHaveLength(1);
-      expect(result[0]!.score).toBe(1800);
-      expect(result[0]!.username).toBe('@User1');
+      expect(mockSupabase.rpc).toHaveBeenCalledWith('get_leaderboard', {
+        p_period: 'all',
+        p_limit: expect.any(Number),
+      });
+      expect(result).toHaveLength(2);
+      expect(result[0]).toEqual({
+        id: 'User1',
+        username: '@User1',
+        score: 1800,
+        time: 8.0,
+        gamesCount: 2,
+      });
+      // null avg_time falls back to 0; @-prefixed usernames stay as-is
+      expect(result[1]!.time).toBe(0);
+      expect(result[1]!.username).toBe('@User2');
     });
 
     it('should handle Supabase errors gracefully', async () => {
-      // Mock error response
-      mockQueryBuilder.then.mockImplementation((resolve: any, _reject: any) => {
-        resolve({ data: null, error: { message: 'Connection failed' } });
+      mockSupabase.rpc.mockResolvedValue({
+        data: null,
+        error: { message: 'Connection failed' },
       });
 
       const result = await getLeaderboard('all');
       expect(result).toEqual([]);
     });
 
-    it('should filter by date for daily period', async () => {
-      mockQueryBuilder.then.mockImplementation((resolve: any) =>
-        resolve({ data: [], error: null })
-      );
+    it('should pass the requested period to the RPC', async () => {
+      mockSupabase.rpc.mockResolvedValue({ data: [], error: null });
 
       await getLeaderboard('daily');
 
-      // Check if .gte was called (filtering by played_at)
-      expect(mockQueryBuilder.gte).toHaveBeenCalledWith('played_at', expect.any(String));
+      expect(mockSupabase.rpc).toHaveBeenCalledWith('get_leaderboard', {
+        p_period: 'daily',
+        p_limit: expect.any(Number),
+      });
     });
   });
 });
