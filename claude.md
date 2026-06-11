@@ -471,16 +471,20 @@ npm run test:e2e:ui    # Interactive mode
 
 **Critical**: After deploying a user-facing feature, create an announcement.
 
+**Option A — Admin panel** (preferred): log in as an admin user, navigate to `/admin`, open the Announcements tab, and use the "New Announcement" form. No credentials file needed.
+
+**Option B — CLI script** (requires `SUPABASE_SERVICE_ROLE_KEY` in `.env.development`):
+
 ```bash
 node scripts/publishNews.js
 ```
 
 **Required Info**:
 
-- Title: User-friendly description
-- Content: 1-3 sentences explaining the change
-- Category: `feature`, `bugfix`, `maintenance`, `event`
-- Publish date & optional expiry
+- Title: User-friendly description (e.g. "Performance improvements")
+- Body: 1-3 sentences explaining the change
+- Priority: `low`, `normal`, `high`, `urgent`
+- Duration in days (default 7)
 
 **Privacy Rule**: Never include:
 
@@ -492,17 +496,16 @@ node scripts/publishNews.js
 **Good Example**:
 
 ```
-Title: "Weekly Leaderboard Reset"
-Content: "Weekly leaderboards now reset every Monday at midnight!"
-Category: feature
+Title: "Faster load times & smoother navigation"
+Body: "The app loads quicker and profile pages are snappier. Shop avatars now display correctly everywhere."
+Priority: normal
 ```
 
 **Bad Example**:
 
 ```
 Title: "Fixed RLS policies in game_results table"
-Content: "Updated SQL to handle null values in cosmetics.avatar_url"
-Category: bugfix
+Body: "Updated SQL to handle null values in cosmetics.avatar_url"
 ```
 
 ### Deployment Checklist
@@ -921,7 +924,7 @@ npm run test:e2e         # E2E tests
 
 # Utilities
 npm run fetch-streets    # Update street data from OSM
-node scripts/publishNews.js  # Create announcement
+node scripts/publishNews.js  # Create announcement (or use /admin → Announcements)
 ```
 
 ### Environment Variables
