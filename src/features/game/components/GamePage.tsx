@@ -28,6 +28,7 @@ function GamePageContent({ username }: GamePageProps) {
     handleSelectAnswer,
     handleNext,
     handleRegister,
+    startPracticeMode,
   } = useGameState(validStreets, getHintStreets);
   const location = useLocation();
 
@@ -78,6 +79,7 @@ function GamePageContent({ username }: GamePageProps) {
         handleNext,
         handleRegister,
         hasPlayedToday,
+        startPracticeMode,
       },
     }),
     [
@@ -89,6 +91,7 @@ function GamePageContent({ username }: GamePageProps) {
       handleSelectAnswer,
       handleNext,
       handleRegister,
+      startPracticeMode,
     ]
   );
 
