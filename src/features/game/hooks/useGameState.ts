@@ -8,6 +8,7 @@ import { getTodaySeed, shuffleOptions } from '../../../utils/game/dailyChallenge
 import {
   calculateGameSetup,
   GameSetupResult,
+  generatePracticeQuestion,
   generateOptionsList,
 } from '../../../utils/game/gameHelpers';
 import { storage } from '../../../utils/storage';
@@ -62,6 +63,7 @@ export interface UseGameStateResult {
   handleSelectAnswer: (selectedStreet: Street) => void;
   handleNext: () => void;
   handleRegister: (name: string) => void;
+  startPracticeMode: () => void;
 }
 
 /**
@@ -150,6 +152,28 @@ export const useGameState = (
   );
 
   /**
+   * Start an unscored practice session: one street at a time, seeded by
+   * session start time instead of the date, looping until the player exits.
+   */
+  const startPracticeMode = useCallback(() => {
+    const sessionSeed = Date.now();
+    const firstQuestion = generatePracticeQuestion(validStreets, sessionSeed, 0);
+    if (!firstQuestion) {
+      return;
+    }
+    dispatch({
+      type: 'START_GAME',
+      payload: {
+        quizStreets: [firstQuestion.street],
+        initialOptions: firstQuestion.options,
+        plannedQuestions: null,
+        practiceMode: true,
+        sessionSeed,
+      },
+    });
+  }, [validStreets, dispatch]);
+
+  /**
    * Process answer submission
    */
   const processAnswer = useCallback(
@@ -204,6 +228,24 @@ export const useGameState = (
     }
 
     const nextIndex = state.currentQuestionIndex + 1;
+
+    if (state.practiceMode) {
+      const nextQuestion = generatePracticeQuestion(
+        validStreets,
+        state.sessionSeed ?? Date.now(),
+        nextIndex
+      );
+      if (!nextQuestion) {
+        // Street pool exhausted (should not happen in practice) — exit gracefully
+        dispatch({ type: 'SET_GAME_STATE', payload: 'intro' });
+        return;
+      }
+      dispatch({
+        type: 'NEXT_QUESTION',
+        payload: { options: nextQuestion.options, appendStreets: [nextQuestion.street] },
+      });
+      return;
+    }
 
     if (nextIndex >= state.quizStreets.length) {
       // Game complete
@@ -292,6 +334,7 @@ export const useGameState = (
     handleSelectAnswer,
     handleNext,
     handleRegister,
+    startPracticeMode,
   };
 };
 
