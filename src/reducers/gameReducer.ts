@@ -38,6 +38,8 @@ export interface GameState {
   registerMode: RegisterMode;
   isInputLocked: boolean;
   gameId: string | null;
+  practiceMode: boolean;
+  sessionSeed: number | null;
 }
 
 // Action types
@@ -53,6 +55,8 @@ export type GameAction =
         quizStreets: Street[];
         initialOptions?: Street[];
         plannedQuestions?: PlannedQuestion[];
+        practiceMode?: boolean;
+        sessionSeed?: number;
       };
     }
   | { type: 'SET_OPTIONS'; payload: Street[] }
@@ -67,7 +71,7 @@ export type GameAction =
         selectedStreet: Street;
       };
     }
-  | { type: 'NEXT_QUESTION'; payload: { options: Street[] } }
+  | { type: 'NEXT_QUESTION'; payload: { options?: Street[]; appendStreets?: Street[] } }
   | { type: 'SET_ACTIVE_PAGE'; payload: string | null }
   | { type: 'SET_AUTO_ADVANCE'; payload: boolean }
   | { type: 'SET_REGISTER_MODE'; payload: RegisterMode }
@@ -102,6 +106,8 @@ export const initialState: GameState = {
   registerMode: 'signin',
   isInputLocked: false,
   gameId: null,
+  practiceMode: false,
+  sessionSeed: null,
 };
 
 const MAX_SCORE = 1000;
@@ -156,6 +162,8 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
         isInputLocked: true,
         selectedAnswer: null,
         plannedQuestions: action.payload.plannedQuestions || null,
+        practiceMode: action.payload.practiceMode ?? false,
+        sessionSeed: action.payload.sessionSeed ?? null,
       };
 
     case 'SET_OPTIONS':
@@ -199,12 +207,16 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
     }
 
     case 'NEXT_QUESTION': {
+      const appendStreets = action.payload.appendStreets ?? [];
+      const quizStreets =
+        appendStreets.length > 0 ? [...state.quizStreets, ...appendStreets] : state.quizStreets;
       const nextIndex = state.currentQuestionIndex + 1;
-      const isFinished = nextIndex >= state.quizStreets.length;
+      const isFinished = !state.practiceMode && nextIndex >= quizStreets.length;
 
       if (isFinished) {
         return {
           ...state,
+          quizStreets,
           gameState: 'summary',
           feedback: 'idle',
         };
@@ -212,6 +224,7 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
 
       return {
         ...state,
+        quizStreets,
         currentQuestionIndex: nextIndex,
         feedback: 'idle',
         selectedAnswer: null,

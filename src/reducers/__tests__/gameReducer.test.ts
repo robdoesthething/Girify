@@ -39,6 +39,64 @@ describe('gameReducer', () => {
     expect(newState.isInputLocked).toBe(true);
   });
 
+  it('handle START_GAME with practiceMode and sessionSeed', () => {
+    const action: GameAction = {
+      type: 'START_GAME',
+      payload: {
+        quizStreets: [mockStreet],
+        initialOptions: mockOptions,
+        practiceMode: true,
+        sessionSeed: 1750000000000,
+      },
+    };
+    const newState = gameReducer(initialState, action);
+    expect(newState.practiceMode).toBe(true);
+    expect(newState.sessionSeed).toBe(1750000000000);
+  });
+
+  it('handle START_GAME without practiceMode defaults to false/null', () => {
+    const action: GameAction = {
+      type: 'START_GAME',
+      payload: { quizStreets: [mockStreet], initialOptions: mockOptions },
+    };
+    const newState = gameReducer(initialState, action);
+    expect(newState.practiceMode).toBe(false);
+    expect(newState.sessionSeed).toBeNull();
+  });
+
+  it('handle NEXT_QUESTION with appendStreets grows quizStreets and does not finish', () => {
+    const startState: GameState = {
+      ...initialState,
+      practiceMode: true,
+      sessionSeed: 123,
+      currentQuestionIndex: 0,
+      quizStreets: [mockStreet], // length 1 — would normally finish on advance
+    };
+    const action: GameAction = {
+      type: 'NEXT_QUESTION',
+      payload: { options: mockOptions, appendStreets: [mockStreet] },
+    };
+    const newState = gameReducer(startState, action);
+    expect(newState.gameState).not.toBe('summary');
+    expect(newState.currentQuestionIndex).toBe(1);
+    expect(newState.quizStreets).toHaveLength(2);
+  });
+
+  it('handle NEXT_QUESTION (Finish Game) still finishes when practiceMode is false', () => {
+    const startState: GameState = {
+      ...initialState,
+      practiceMode: false,
+      currentQuestionIndex: 0,
+      quizStreets: [mockStreet],
+    };
+    const action: GameAction = {
+      type: 'NEXT_QUESTION',
+      payload: {},
+    };
+    const newState = gameReducer(startState, action);
+    expect(newState.gameState).toBe('summary');
+  });
+
   it('handle UNLOCK_INPUT', () => {
     // Should set input locked to false and start timer
     const action: GameAction = { type: 'UNLOCK_INPUT' };
