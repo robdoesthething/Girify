@@ -56,4 +56,6 @@ export interface GameStateObject {
   isInputLocked: boolean; // Added
   activePage: string | null; // Added
   gameId?: string;
+  practiceMode: boolean;
+  sessionSeed: number | null;
 }

@@ -145,6 +145,8 @@ describe('useGamePersistence Integration Tests', () => {
     plannedQuestions: null,
     activePage: null,
     realName: null,
+    practiceMode: false,
+    sessionSeed: null,
   };
 
   beforeEach(() => {
