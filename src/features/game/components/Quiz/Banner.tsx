@@ -5,9 +5,16 @@ import { themeClasses } from '../../../../utils/themeUtils';
 interface BannerProps {
   currentQuestionIndex: number;
   totalQuestions: number;
+  practiceMode?: boolean;
+  onExit?: () => void;
 }
 
-const Banner: React.FC<BannerProps> = ({ currentQuestionIndex, totalQuestions }) => {
+const Banner: React.FC<BannerProps> = ({
+  currentQuestionIndex,
+  totalQuestions,
+  practiceMode = false,
+  onExit,
+}) => {
   const { theme, t } = useTheme();
 
   return (
@@ -27,12 +34,21 @@ const Banner: React.FC<BannerProps> = ({ currentQuestionIndex, totalQuestions })
                   d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"
                 />
               </svg>
-              {t('whichStreet')}
+              {practiceMode ? t('practiceMode') || 'Practice Mode' : t('whichStreet')}
             </span>
-            {/* Better styled counter with rounded badge */}
-            <span className="text-xs font-bold font-mono bg-white/20 backdrop-blur-sm px-3 py-1.5 rounded-full shadow-inner">
-              {currentQuestionIndex + 1} / {totalQuestions}
-            </span>
+            {practiceMode ? (
+              <button
+                type="button"
+                onClick={onExit}
+                className="text-xs font-bold font-mono bg-white/20 hover:bg-white/30 backdrop-blur-sm px-3 py-1.5 rounded-full shadow-inner transition-colors"
+              >
+                ✕ {t('backToHome') || 'Home'}
+              </button>
+            ) : (
+              <span className="text-xs font-bold font-mono bg-white/20 backdrop-blur-sm px-3 py-1.5 rounded-full shadow-inner">
+                {currentQuestionIndex + 1} / {totalQuestions}
+              </span>
+            )}
           </div>
 
           {/* Progress bar container with improved styling */}
@@ -43,7 +59,9 @@ const Banner: React.FC<BannerProps> = ({ currentQuestionIndex, totalQuestions })
             <div
               className="absolute inset-y-0 left-0 bg-gradient-to-r from-sky-400 to-sky-500 transition-all duration-500 shadow-glow"
               style={{
-                width: `${((currentQuestionIndex + 1) / totalQuestions) * 100}%`,
+                width: practiceMode
+                  ? '100%'
+                  : `${((currentQuestionIndex + 1) / totalQuestions) * 100}%`,
               }}
             >
               {/* Pulse animation at the end */}
