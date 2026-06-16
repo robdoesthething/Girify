@@ -1,6 +1,7 @@
 import { QuizPlan, QuizQuestion, Street } from '../../types/game';
 import { logger } from '../logger';
 import {
+  getDailyStreetIndex,
   getTodaySeed,
   selectDailyStreets,
   selectDistractors,
@@ -14,15 +15,16 @@ import { GAME_LOGIC } from '../../config/constants';
  * @param target - The correct street
  * @param allStreets - All available streets
  * @param questionIndex - The index of the question
+ * @param baseSeed - Seed to derive the question seed from (defaults to today's date seed)
  * @returns Shuffled array of options
  */
 export const generateOptionsList = (
   target: Street,
   allStreets: Street[],
-  questionIndex: number
+  questionIndex: number,
+  baseSeed: number = getTodaySeed()
 ): Street[] => {
-  const todaySeed = getTodaySeed();
-  const questionSeed = todaySeed + questionIndex * GAME_LOGIC.QUESTION_SEED_MULTIPLIER;
+  const questionSeed = baseSeed + questionIndex * GAME_LOGIC.QUESTION_SEED_MULTIPLIER;
   const distractors = selectDistractors(allStreets, target, questionSeed);
   const opts = [target, ...distractors];
   return shuffleOptions(opts, questionSeed + GAME_LOGIC.SHUFFLE_SEED_OFFSET);
@@ -88,4 +90,32 @@ export const calculateGameSetup = (
     initialOptions: initialOptions || [],
     plannedQuestions: plannedQuiz?.questions || null,
   };
+};
+
+export interface PracticeQuestion {
+  street: Street;
+  options: Street[];
+}
+
+/**
+ * Generate a single practice-mode question deterministically from a session seed.
+ * Unlike the daily challenge, this is not date-bound — it picks one street at a
+ * time so practice sessions can run indefinitely without pre-allocating a list.
+ * @param validStreets - The pool of streets to pick from
+ * @param sessionSeed - Seed generated once per practice session (e.g. Date.now())
+ * @param questionIndex - Running count of streets shown so far this session
+ * @returns The next street and its shuffled options, or null if no streets are available
+ */
+export const generatePracticeQuestion = (
+  validStreets: Street[],
+  sessionSeed: number,
+  questionIndex: number
+): PracticeQuestion | null => {
+  if (validStreets.length === 0) {
+    return null;
+  }
+  const index = getDailyStreetIndex(validStreets, sessionSeed, questionIndex);
+  const street = validStreets[index]!;
+  const options = generateOptionsList(street, validStreets, questionIndex, sessionSeed);
+  return { street, options };
 };
