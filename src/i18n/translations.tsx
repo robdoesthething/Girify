@@ -392,6 +392,15 @@ const translations: Translations = {
     keepPlaying: 'Keep Playing',
     exitPractice: 'Exit',
 
+    // 404
+    notFoundTitle: 'This street does not exist',
+    notFoundMessage:
+      'Even the locals get lost sometimes. The page you were looking for has moved or never existed.',
+
+    // Nav labels (distinct from page titles)
+    privacy: 'Privacy',
+    terms: 'Terms',
+
     // Legal
     backToHome: '← Back to Home',
     termsTitle: 'Terms of Service',
@@ -786,6 +795,15 @@ const translations: Translations = {
     practiceMode: 'Modo práctica',
     keepPlaying: 'Seguir jugando',
     exitPractice: 'Salir',
+
+    // 404
+    notFoundTitle: 'Esta calle no existe',
+    notFoundMessage:
+      'Hasta los locales se pierden a veces. La página que buscabas se ha movido o nunca existió.',
+
+    // Nav labels
+    privacy: 'Privacidad',
+    terms: 'Términos',
 
     // Legal
     backToHome: '← Volver al inicio',
@@ -1184,6 +1202,15 @@ const translations: Translations = {
     practiceMode: 'Mode pràctica',
     keepPlaying: 'Continuar jugant',
     exitPractice: 'Sortir',
+
+    // 404
+    notFoundTitle: 'Aquest carrer no existeix',
+    notFoundMessage:
+      "Fins els locals es perden de vegades. La pàgina que buscaves s'ha mogut o mai va existir.",
+
+    // Nav labels
+    privacy: 'Privadesa',
+    terms: 'Termes',
 
     // Legal
     backToHome: "← Tornar a l'inici",
