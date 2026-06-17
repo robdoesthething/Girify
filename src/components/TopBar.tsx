@@ -210,6 +210,8 @@ backdrop-blur-md border-b ${themeClasses(theme, 'border-slate-600', 'border-slat
                     { page: 'news', emoji: '📰', label: t('news') || 'News' },
                     { page: 'feedback', emoji: '📝', label: t('feedback') || 'Feedback' },
                     { page: 'settings', emoji: '⚙️', label: t('settings') },
+                    { page: 'privacy', emoji: '🔒', label: t('privacy') || 'Privacy' },
+                    { page: 'terms', emoji: '📋', label: t('terms') || 'Terms' },
                   ].map(item => (
                     <button
                       key={item.page ?? 'home'}
@@ -220,24 +222,6 @@ backdrop-blur-md border-b ${themeClasses(theme, 'border-slate-600', 'border-slat
                       type="button"
                     >
                       <span className="text-xl">{item.emoji}</span> {item.label}
-                    </button>
-                  ))}
-
-                  <div
-                    className={`h-px my-2 shrink-0 ${themeClasses(theme, 'bg-slate-700', 'bg-slate-200')}`}
-                  />
-
-                  {[
-                    { page: 'privacy', emoji: '🔒', label: t('privacy') || 'Privacy' },
-                    { page: 'terms', emoji: '📋', label: t('terms') || 'Terms' },
-                  ].map(item => (
-                    <button
-                      key={item.page}
-                      onClick={() => handleMenuClick(item.page)}
-                      className={`text-left py-1.5 px-3 rounded-lg hover:bg-slate-500/10 text-sm flex items-center gap-3 shrink-0 opacity-50 hover:opacity-100 transition-opacity ${isActivePage(item.page) ? 'text-sky-500 bg-sky-500/10 opacity-100' : ''}`}
-                      type="button"
-                    >
-                      <span>{item.emoji}</span> {item.label}
                     </button>
                   ))}
 

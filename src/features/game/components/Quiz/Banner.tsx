@@ -24,28 +24,21 @@ const Banner: React.FC<BannerProps> = ({
         <div className="glass-panel rounded-2xl overflow-hidden shadow-2xl ring-1 ring-white/10 pointer-events-auto transform transition-all duration-300">
           {/* Header section with gradient background */}
           <div className="flex items-center justify-between px-6 py-3 bg-gradient-to-r from-navy to-navy-light backdrop-blur-md text-white">
-            <span className="text-sm font-bold uppercase tracking-wider opacity-95 font-inter flex items-center gap-2">
-              {/* Added icon for visual interest */}
-              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"
-                />
-              </svg>
-              {practiceMode ? t('practiceMode') || 'Practice Mode' : t('whichStreet')}
+            <span className="text-sm font-bold uppercase tracking-wider opacity-95 font-inter whitespace-nowrap">
+              {practiceMode
+                ? t('practiceMode') || 'Practice Mode'
+                : t('dailyChallenge') || 'Daily Challenge'}
             </span>
             {practiceMode ? (
               <button
                 type="button"
                 onClick={onExit}
-                className="text-xs font-bold font-mono bg-white/20 hover:bg-white/30 backdrop-blur-sm px-3 py-1.5 rounded-full shadow-inner transition-colors"
+                className="text-xs font-bold font-mono bg-white/20 hover:bg-white/30 backdrop-blur-sm px-3 py-1.5 rounded-full shadow-inner transition-colors flex-shrink-0 ml-2"
               >
                 ✕ {t('exitPractice') || 'Exit'}
               </button>
             ) : (
-              <span className="text-xs font-bold font-mono bg-white/20 backdrop-blur-sm px-3 py-1.5 rounded-full shadow-inner">
+              <span className="text-xs font-bold font-mono bg-white/20 backdrop-blur-sm px-3 py-1.5 rounded-full shadow-inner flex-shrink-0 ml-2">
                 {currentQuestionIndex + 1} / {totalQuestions}
               </span>
             )}

@@ -243,6 +243,16 @@ const SummaryScreen: React.FC<SummaryScreenProps> = ({
             </div>
           </div>
 
+          {onKeepPlaying && (
+            <button
+              onClick={onKeepPlaying}
+              className="w-full py-4 rounded-2xl font-bold text-lg uppercase tracking-wider transition-all active:scale-95
+                 bg-gradient-to-r from-sky-500 to-emerald-500 hover:from-sky-400 hover:to-emerald-400 text-white shadow-xl mb-3"
+            >
+              ♾️ {t('keepPlaying') || 'Keep Playing'}
+            </button>
+          )}
+
           <div className="flex gap-3 w-full">
             <button
               onClick={handleShare}
