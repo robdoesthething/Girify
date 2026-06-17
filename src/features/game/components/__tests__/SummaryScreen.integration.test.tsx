@@ -103,4 +103,26 @@ describe('SummaryScreen Integration', () => {
     // maxPossibleScore = 5 * 1000 = 5000
     expect(screen.getByText('/ 5000 pts')).toBeInTheDocument();
   });
+
+  it('calls onKeepPlaying when the Keep Playing button is clicked', () => {
+    const onKeepPlaying = vi.fn();
+    const props = {
+      score: 5000,
+      total: 5,
+      theme: 'light' as const,
+      streak: 5,
+      onRestart: vi.fn(),
+      onBackToMenu: vi.fn(),
+      onKeepPlaying,
+      quizResults: Array(5).fill({ time: 5, status: 'correct', points: 1000 }),
+      quizStreets: Array(5).fill({ id: 's1', name: 'Test Street' }),
+      t: (key: string) => key,
+    };
+    renderWithRouter(<SummaryScreen {...props} />);
+
+    fireEvent.click(screen.getByText('next'));
+    fireEvent.click(screen.getByText('keepPlaying', { exact: false }));
+
+    expect(onKeepPlaying).toHaveBeenCalledTimes(1);
+  });
 });

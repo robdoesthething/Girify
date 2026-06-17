@@ -22,6 +22,7 @@ interface SummaryScreenProps {
   streak?: number;
   onRestart: () => void;
   onBackToMenu?: () => void;
+  onKeepPlaying?: () => void;
   quizResults: QuizResult[];
   quizStreets: Street[];
   t: (key: string) => string;
@@ -33,6 +34,7 @@ const SummaryScreen: React.FC<SummaryScreenProps> = ({
   theme,
   streak,
   onRestart,
+  onKeepPlaying,
   quizResults,
   quizStreets,
   t,
@@ -332,6 +334,16 @@ const SummaryScreen: React.FC<SummaryScreenProps> = ({
               </button>
             )}
           </div>
+
+          {onKeepPlaying && (
+            <button
+              onClick={onKeepPlaying}
+              className="w-full py-4 rounded-xl font-bold text-lg uppercase tracking-wider transition-all active:scale-95
+                 bg-gradient-to-r from-sky-500 to-emerald-500 hover:from-sky-400 hover:to-emerald-400 text-white shadow-xl mb-3"
+            >
+              ♾️ {t('keepPlaying') || 'Keep Playing'}
+            </button>
+          )}
 
           <button
             onClick={onRestart}
