@@ -8,6 +8,7 @@ import { UserProfile } from '../../../types/user';
 import { logger } from '../../../utils/logger';
 import { sanitizeInput } from '../../../utils/security';
 import { storage } from '../../../utils/storage';
+import { getUserByUid } from '../../../utils/social';
 import { linkSupabaseUid, syncUserProfile } from './authSyncHelpers';
 
 import type { Session, User } from '@supabase/supabase-js';
@@ -81,20 +82,29 @@ export const useAuth = (onAnnouncementsCheck?: () => void): UseAuthResult => {
     // Email verification check
     setEmailVerified(authUser.email_confirmed_at !== null);
 
-    // Determine username
-    const existingUsername = storage.get(STORAGE_KEYS.USERNAME, '');
+    // Look up existing account by UID first (survives new-device logins)
+    let usernameToUse = storage.get(STORAGE_KEYS.USERNAME, '');
 
-    let displayName = sanitizeInput(
-      authUser.user_metadata?.full_name ||
-        authUser.user_metadata?.name ||
-        authUser.email?.split('@')[0] ||
-        'User'
-    ).toLowerCase();
+    const existingByUid = await getUserByUid(authUser.id);
+    if (existingByUid?.username) {
+      // Repair localStorage so subsequent loads skip the DB lookup
+      if (!usernameToUse) {
+        storage.set(STORAGE_KEYS.USERNAME, existingByUid.username);
+      }
+      usernameToUse = existingByUid.username;
+    }
 
-    // Handle format migration
-    displayName = await UserMigrationService.migrateToNewFormat(displayName);
-
-    const usernameToUse = existingUsername || displayName;
+    if (!usernameToUse) {
+      // Truly new user — derive a handle and migrate format if needed
+      const displayName = sanitizeInput(
+        authUser.user_metadata?.display_name ||
+          authUser.user_metadata?.full_name ||
+          authUser.user_metadata?.name ||
+          authUser.email?.split('@')[0] ||
+          'User'
+      ).toLowerCase();
+      usernameToUse = await UserMigrationService.migrateToNewFormat(displayName);
+    }
 
     // Sync user profile
     await execute(
