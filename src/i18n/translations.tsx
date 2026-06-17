@@ -638,7 +638,7 @@ const translations: Translations = {
     unlockedCosmetic: 'desbloqueó',
 
     // Game flow
-    exitGameWarning: '¿Salir del juego? Tu progreso no se perderá,¡vuelve cuando quieras!',
+    exitGameWarning: '¿Salir del juego? Tu progreso no se perderá, ¡vuelve cuando quieras!',
     haveFeedback: '¿Tienes sugerencias? Comparte tus ideas',
     play: 'Jugar',
     replay: 'Repetir',
@@ -655,6 +655,28 @@ const translations: Translations = {
     landingSubheadline:
       'Únete a miles de locales y exploradores en el reto diario definitivo de trivia callejera.',
     login: 'Iniciar sesión',
+    howItWorks: 'Cómo Funciona',
+    explore: 'Explora',
+    exploreDesc:
+      'Resaltamos una calle aleatoria de Barcelona en el mapa. Haz zoom, desplázate e investiga.',
+    guess: 'Adivina',
+    guessDesc: 'Elige el nombre correcto entre 4 opciones. Conocimiento local puro.',
+    rankUp: 'Sube de Rango',
+    rankUpDesc:
+      'Gana Giuros, compra mejoras y sube en la clasificación diaria. Conviértete en leyenda.',
+    dailyChallengeTitle: 'Reto Diario',
+    dailyChallengeDesc:
+      'Cada día, 5 calles nuevas. Compite con toda la ciudad por el primer puesto. ¿Puedes conseguir 5/5?',
+    buildStreaks: 'Mantén Rachas',
+    buildStreaksDesc:
+      'La constancia es clave. Juega cada día para mantener tu racha y ganar el doble de Giuros.',
+    rankUpTitle: 'Sube de Rango',
+    rankUpFeatureDesc: 'Sube en la clasificación local. Compara tu nivel con el de tus vecinos.',
+    earnAndCustomize: 'Gana y Personaliza',
+    earnAndCustomizeDesc:
+      'Consigue Giuros para desbloquear insignias, marcos y títulos exclusivos. Muestra tu expertise con estilo.',
+    joinPlayers: 'Únete a',
+    playersMastering: 'jugadores dominando la ciudad',
 
     // New additions
     proveLocal: 'Demuestra que eres local',
@@ -680,6 +702,7 @@ const translations: Translations = {
     loadingTeamStats: 'Cargando estadísticas...',
     members: 'Miembros',
     totalScore: 'Puntuación Total',
+    avgScore: 'Puntuación media',
 
     team: 'Equipo',
 
@@ -711,7 +734,7 @@ const translations: Translations = {
     landingSubtitle:
       'Navega la ciudad sin mapa. Gana Giuros, sube en la clasificación y celebra tu barrio.',
     signUpToPlay: 'Regístrate para Jugar',
-    featureRankingsLabel: 'Rankings',
+    featureRankingsLabel: 'Clasificación',
     featureRankingsDesc: 'Compite con amigos y vecinos por el primer puesto.',
     featureFriendshipLabel: 'Amistad',
     featureFriendshipDesc: 'Reta a tus amigos y sigue su progreso.',
@@ -933,7 +956,7 @@ const translations: Translations = {
     instructionsPoint2: 'Endevina el nom correcte entre 4 opcions.',
     instructionsPoint3: 'Necessites ajuda? Revela pistes per trobar-lo.',
     instructionsPoint4: 'La velocitat compta! Més punts per respondre ràpid.',
-    imReady: 'ESTIC APUNT!',
+    imReady: 'ESTIC A PUNT!',
     next: 'SEGÜENT',
     startQuiz: 'JUGAR',
     replayChallenge: 'REPETIR REPTE',
@@ -997,7 +1020,7 @@ const translations: Translations = {
     feedbackPending: 'La teva opinió està sent revisada. Et notificarem quan sigui aprovada!',
     cancel: 'Cancel·lar',
     skip: 'Salta',
-    shapeTheFuture: 'MODELA EL FUTURO',
+    shapeTheFuture: 'MODELA EL FUTUR',
     whatFeaturesTitle: 'Quines funcions vols?',
     earnForFeedback: 'Guanya Giuros per les teves idees útils!',
     feedbackPlaceholderFeatures: "M'agradaria que el joc tingués...",
@@ -1029,6 +1052,29 @@ const translations: Translations = {
     landingSubheadline:
       'Uneix-te a milers de locals i exploradores en el repte diari definitiu de trivia de carrer.',
     login: 'Iniciar sessió',
+    howItWorks: 'Com Funciona',
+    explore: 'Explora',
+    exploreDesc:
+      "Ressaltem un carrer aleatori de Barcelona al mapa. Fes zoom, desplaça't i investiga.",
+    guess: 'Endevina',
+    guessDesc: 'Tria el nom correcte entre 4 opcions. Coneixement local pur.',
+    rankUp: 'Puja de Rang',
+    rankUpDesc:
+      'Guanya Giuros, compra millores i puja a la classificació diària. Converteix-te en llegenda.',
+    dailyChallengeTitle: 'Repte Diari',
+    dailyChallengeDesc:
+      'Cada dia, 5 carrers nous. Competeix amb tota la ciutat pel primer lloc. Pots aconseguir 5/5?',
+    buildStreaks: 'Manté Ratxes',
+    buildStreaksDesc:
+      'La constància és clau. Juga cada dia per mantenir la teva ratxa i guanyar el doble de Giuros.',
+    rankUpTitle: 'Puja de Rang',
+    rankUpFeatureDesc:
+      'Puja a la classificació local. Compara el teu nivell amb el dels teus veïns.',
+    earnAndCustomize: 'Guanya i Personalitza',
+    earnAndCustomizeDesc:
+      'Aconsegueix Giuros per desbloquejar insígnies, marcs i títols exclusius. Mostra la teva experiència amb estil.',
+    joinPlayers: 'Uneix-te a',
+    playersMastering: 'jugadors dominant la ciutat',
 
     // New additions
     proveLocal: 'Demostra que ets local',
@@ -1054,6 +1100,7 @@ const translations: Translations = {
     loadingTeamStats: 'Carregant estadístiques...',
     members: 'Membres',
     totalScore: 'Puntuació Total',
+    avgScore: 'Puntuació mitjana',
 
     team: 'Equip',
 
