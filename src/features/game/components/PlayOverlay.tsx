@@ -44,6 +44,13 @@ const PlayOverlay: FC = () => {
             {playedToday ? t('replay') || 'Replay' : t('play') || 'Play'}
           </span>
         </button>
+
+        <button
+          onClick={() => handlers.startPracticeMode()}
+          className={`mt-4 px-8 py-3 rounded-2xl font-bold text-sm uppercase tracking-wider transition-all active:scale-95 hover:scale-105 flex items-center gap-2 mx-auto ${themeClasses(theme, 'text-slate-300 hover:text-white bg-white/10 hover:bg-white/20', 'text-slate-600 hover:text-slate-900 bg-slate-900/10 hover:bg-slate-900/20')}`}
+        >
+          ♾️ {t('practiceMode') || 'Practice Mode'}
+        </button>
       </div>
     </div>
   );
