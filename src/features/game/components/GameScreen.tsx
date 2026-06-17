@@ -65,6 +65,8 @@ const GameScreen: FC = () => {
         <Quiz.Banner
           currentQuestionIndex={state.currentQuestionIndex}
           totalQuestions={state.quizStreets.length}
+          practiceMode={state.practiceMode}
+          onExit={() => dispatch({ type: 'SET_GAME_STATE', payload: 'intro' })}
         />
       )}
 
@@ -194,6 +196,7 @@ const GameScreen: FC = () => {
             streak={state.streak}
             onRestart={() => handlers.setupGame()}
             onBackToMenu={() => dispatch({ type: 'SET_GAME_STATE', payload: 'intro' })}
+            onKeepPlaying={handlers.startPracticeMode}
             quizResults={state.quizResults}
             quizStreets={state.quizStreets}
             t={t}

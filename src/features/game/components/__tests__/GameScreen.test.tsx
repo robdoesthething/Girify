@@ -41,7 +41,11 @@ vi.mock('../Quiz', () => {
   );
   MockQuiz.displayName = 'MockQuiz';
 
-  const Banner = () => <div data-testid="quiz-banner">Quiz Banner</div>;
+  const Banner = (props: { practiceMode?: boolean; onExit?: () => void }) => (
+    <div data-testid="quiz-banner" data-practice-mode={String(!!props.practiceMode)}>
+      Quiz Banner
+    </div>
+  );
   Banner.displayName = 'MockQuizBanner';
   MockQuiz.Banner = Banner;
 
@@ -195,6 +199,22 @@ describe('GameScreen Component', () => {
     expect(screen.getByTestId('map-area')).toBeInTheDocument();
     expect(screen.getByTestId('quiz')).toBeInTheDocument();
     expect(screen.getByTestId('quiz-banner')).toBeInTheDocument();
+  });
+
+  it('passes practiceMode and onExit to Quiz.Banner when in practice mode', () => {
+    mockUseGameContext.mockReturnValue({
+      ...defaultContext,
+      state: {
+        ...defaultGameState,
+        gameState: 'playing',
+        username: '@TestUser',
+        quizStreets: [{ id: '1', name: 'Street' }],
+        practiceMode: true,
+      },
+    });
+
+    renderWithRouter(<GameScreen />);
+    expect(screen.getByTestId('quiz-banner')).toHaveAttribute('data-practice-mode', 'true');
   });
 
   it('renders SummaryScreen when in summary state', () => {
