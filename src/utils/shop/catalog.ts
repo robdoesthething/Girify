@@ -17,13 +17,15 @@ const withType = (items: RawCosmeticItem[] | undefined, type: ShopItemType): Sho
 
 export const LOCAL_FRAMES: ShopItem[] = withType(rawCosmetics.avatarFrames, 'frame');
 export const LOCAL_TITLES: ShopItem[] = withType(rawCosmetics.titles, 'title');
+export const LOCAL_BADGES: ShopItem[] = withType(rawCosmetics.badges, 'badge');
 export const LOCAL_SPECIAL: ShopItem[] = withType(rawCosmetics.special, 'special');
 export const LOCAL_AVATARS: ShopItem[] = withType(rawCosmetics.avatars, 'avatar');
 
-/** All bundled cosmetics, in shop merge order (frames, titles, special, avatars). */
+/** All bundled cosmetics, in shop merge order (frames, titles, badges, special, avatars). */
 export const LOCAL_SHOP_ITEMS: ShopItem[] = [
   ...LOCAL_FRAMES,
   ...LOCAL_TITLES,
+  ...LOCAL_BADGES,
   ...LOCAL_SPECIAL,
   ...LOCAL_AVATARS,
 ];

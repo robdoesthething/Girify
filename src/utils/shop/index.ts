@@ -95,12 +95,11 @@ export const getShopItems = async (forceRefresh = false): Promise<GroupedShopIte
   const frameItems = allItems.filter(i => i.type === 'frame');
   const grouped: GroupedShopItems = {
     avatarFrames: frameItems,
-    frames: frameItems, // Alias for ShopScreen tabs compatibility
+    frames: frameItems,
     titles: allItems.filter(i => i.type === 'title'),
+    badges: allItems.filter(i => i.type === 'badge'),
     special: allItems.filter(i => i.type === 'special'),
-    avatars: allItems.filter(
-      i => i.type === 'avatar' || i.type === 'avatars' || (i.id && i.id.startsWith('avatar_'))
-    ),
+    avatars: allItems.filter(i => i.type === 'avatar'),
     all: allItems,
   };
 

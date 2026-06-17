@@ -51,6 +51,7 @@ vi.mock('../../../../utils/social', () => ({
   healMigration: vi.fn().mockResolvedValue(undefined),
   migrateUser: vi.fn(),
   getUserGameHistory: vi.fn().mockResolvedValue([]),
+  getUserByUid: vi.fn().mockResolvedValue(null),
 }));
 
 vi.mock('../../../../utils/shop/giuros', () => ({

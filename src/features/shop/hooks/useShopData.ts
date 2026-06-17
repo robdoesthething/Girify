@@ -19,6 +19,7 @@ export function useShopData(username: string) {
     avatarFrames: [],
     frames: [],
     titles: [],
+    badges: [],
     special: [],
     avatars: [],
     all: [],

@@ -150,7 +150,9 @@
       "description": "The ultimate flex.",
       "flavorText": "Access to absolutely nothing extra, but you look cool doing it.",
       "image": "/assets/pixel_merit_vip.png"
-    },
+    }
+  ],
+  "badges": [
     {
       "id": "badge_paellador",
       "name": "Paellador Connoisseur",

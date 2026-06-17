@@ -96,7 +96,7 @@ const ShopItemCard: React.FC<ShopItemCardProps> = memo(
                 onTitleClick?.();
               }
             }}
-            className={`w-16 h-16 mb-3 flex items-center justify-center text-3xl relative shrink-0 rounded-2xl bg-transparent ${activeTab === 'titles' ? 'cursor-pointer hover:scale-105 transition-transform' : ''}`}
+            className={`w-16 h-16 mb-3 flex items-center justify-center text-3xl relative shrink-0 rounded-2xl bg-transparent ${activeTab === 'titles' || activeTab === 'badges' ? 'cursor-pointer hover:scale-105 transition-transform' : ''}`}
           >
             {renderItemIcon()}
           </div>
@@ -106,7 +106,7 @@ const ShopItemCard: React.FC<ShopItemCardProps> = memo(
           </Heading>
 
           <Text variant="caption" className="opacity-60 leading-relaxed !mb-0">
-            {activeTab === 'titles' && item.flavorText
+            {(activeTab === 'titles' || activeTab === 'badges') && item.flavorText
               ? `"${item.flavorText}"`
               : t(item.description || '') || item.description}
           </Text>

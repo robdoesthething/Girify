@@ -29,10 +29,10 @@ export const useEquip = ({ username, equipped, setEquipped, purchased }: UseEqui
     if (item.type === 'frame') {
       newEquipped.frameId = item.id;
       changed = true;
-    } else if (item.type === 'title') {
+    } else if (item.type === 'title' || item.type === 'badge') {
       newEquipped.titleId = item.id;
       changed = true;
-    } else if (item.type === 'avatar' || item.type === 'avatars') {
+    } else if (item.type === 'avatar') {
       newEquipped.avatarId = item.id;
       changed = true;
     }

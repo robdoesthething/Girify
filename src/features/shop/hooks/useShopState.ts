@@ -54,6 +54,7 @@ export function useShopState(username: string): UseShopStateReturn {
     avatarFrames: [],
     frames: [],
     titles: [],
+    badges: [],
     special: [],
     avatars: [],
     all: [],

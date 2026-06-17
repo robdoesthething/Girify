@@ -41,6 +41,7 @@ export function useAdminData(
     avatarFrames: [],
     frames: [],
     titles: [],
+    badges: [],
     special: [],
   });
   const [metrics, setMetrics] = useState<DashboardMetrics | null>(null);

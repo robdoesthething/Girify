@@ -25,7 +25,9 @@ const ShopScreen: React.FC<ShopScreenProps> = ({ username }) => {
   const navigate = useNavigate();
   const topBarNav = useTopBarNav();
   // Hooks
-  const { activeTab, setTab } = useTabs<'avatars' | 'frames' | 'titles' | 'special'>('avatars');
+  const { activeTab, setTab } = useTabs<'avatars' | 'frames' | 'titles' | 'badges' | 'special'>(
+    'avatars'
+  );
   const { toast } = useToast();
   const {
     balance,
@@ -64,6 +66,7 @@ const ShopScreen: React.FC<ShopScreenProps> = ({ username }) => {
       { id: 'avatars', label: t('avatars') || 'Avatars', icon: <span>👤</span> },
       { id: 'frames', label: t('frames'), icon: <span>🖼️</span> },
       { id: 'titles', label: t('titles'), icon: <span>🏷️</span> },
+      { id: 'badges', label: t('badges') || 'Badges', icon: <span>🏅</span> },
       { id: 'special', label: t('special'), icon: <span>✨</span> },
     ],
     [t]
@@ -86,7 +89,7 @@ const ShopScreen: React.FC<ShopScreenProps> = ({ username }) => {
       if (activeTab === 'frames') {
         return equipped.frameId === itemId;
       }
-      if (activeTab === 'titles') {
+      if (activeTab === 'titles' || activeTab === 'badges') {
         return equipped.titleId === itemId;
       }
       if (activeTab === 'avatars') {
@@ -99,7 +102,7 @@ const ShopScreen: React.FC<ShopScreenProps> = ({ username }) => {
 
   const handleTitleClick = useCallback(
     (item: ShopItem) => {
-      if (activeTab === 'titles') {
+      if (activeTab === 'titles' || activeTab === 'badges') {
         setFlavorModal(item);
       }
     },
@@ -153,7 +156,9 @@ const ShopScreen: React.FC<ShopScreenProps> = ({ username }) => {
               <Tabs
                 tabs={tabs}
                 activeTab={activeTab}
-                onChange={id => setTab(id as 'avatars' | 'frames' | 'titles' | 'special')}
+                onChange={id =>
+                  setTab(id as 'avatars' | 'frames' | 'titles' | 'badges' | 'special')
+                }
               />
             </div>
             <div

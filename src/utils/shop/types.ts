@@ -1,4 +1,4 @@
-export type ShopItemType = 'frame' | 'title' | 'special' | 'avatar' | 'avatars';
+export type ShopItemType = 'frame' | 'title' | 'badge' | 'special' | 'avatar';
 
 export interface ShopItem {
   id: string;
@@ -38,8 +38,9 @@ export interface RawCosmeticItem {
 
 export interface GroupedShopItems {
   avatarFrames: ShopItem[];
-  frames: ShopItem[]; // Alias for avatarFrames - used by ShopScreen tabs
+  frames: ShopItem[];
   titles: ShopItem[];
+  badges: ShopItem[];
   special: ShopItem[];
   avatars: ShopItem[];
   all: ShopItem[];
