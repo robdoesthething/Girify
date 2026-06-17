@@ -390,6 +390,7 @@ const translations: Translations = {
 
     practiceMode: 'Practice Mode',
     keepPlaying: 'Keep Playing',
+    exitPractice: 'Exit',
 
     // Legal
     backToHome: '← Back to Home',
@@ -761,6 +762,7 @@ const translations: Translations = {
 
     practiceMode: 'Modo práctica',
     keepPlaying: 'Seguir jugando',
+    exitPractice: 'Salir',
 
     // Legal
     backToHome: '← Volver al inicio',
@@ -1134,6 +1136,7 @@ const translations: Translations = {
 
     practiceMode: 'Mode pràctica',
     keepPlaying: 'Continuar jugant',
+    exitPractice: 'Sortir',
 
     // Legal
     backToHome: "← Tornar a l'inici",

@@ -42,7 +42,7 @@ const Banner: React.FC<BannerProps> = ({
                 onClick={onExit}
                 className="text-xs font-bold font-mono bg-white/20 hover:bg-white/30 backdrop-blur-sm px-3 py-1.5 rounded-full shadow-inner transition-colors"
               >
-                ✕ {t('backToHome') || 'Home'}
+                ✕ {t('exitPractice') || 'Exit'}
               </button>
             ) : (
               <span className="text-xs font-bold font-mono bg-white/20 backdrop-blur-sm px-3 py-1.5 rounded-full shadow-inner">
