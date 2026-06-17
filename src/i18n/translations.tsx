@@ -388,6 +388,9 @@ const translations: Translations = {
     scorePendingWarning:
       "Score couldn't be saved right now — it'll be submitted automatically next time you open the app.",
 
+    practiceMode: 'Practice Mode',
+    keepPlaying: 'Keep Playing',
+
     // Legal
     backToHome: '← Back to Home',
     termsTitle: 'Terms of Service',
@@ -755,6 +758,9 @@ const translations: Translations = {
     weeksAgo: 'semanas atrás',
     scorePendingWarning:
       'La puntuación no se pudo guardar ahora — se enviará automáticamente la próxima vez que abras la app.',
+
+    practiceMode: 'Modo práctica',
+    keepPlaying: 'Seguir jugando',
 
     // Legal
     backToHome: '← Volver al inicio',
@@ -1125,6 +1131,9 @@ const translations: Translations = {
     weeksAgo: 'setmanes fa',
     scorePendingWarning:
       "La puntuació no s'ha pogut guardar ara — s'enviarà automàticament la propera vegada que obris l'app.",
+
+    practiceMode: 'Mode pràctica',
+    keepPlaying: 'Continuar jugant',
 
     // Legal
     backToHome: "← Tornar a l'inici",
