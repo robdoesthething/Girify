@@ -66,9 +66,9 @@ const LandingPage: React.FC<LandingPageProps> = ({ onLogin, theme }) => {
               className="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-700"
             />
             <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/90 via-black/50 to-transparent p-6 pt-24">
-              <h2 className="text-white text-2xl md:text-4xl font-black tracking-tight text-balance leading-tight">
+              <p className="text-white text-2xl md:text-4xl font-black tracking-tight text-balance leading-tight">
                 {t('landingHeroTitle')}
-              </h2>
+              </p>
               <p className="text-white/90 text-sm md:text-lg mt-3 font-medium">
                 {t('landingHeroSubtitle')}
               </p>
@@ -254,13 +254,13 @@ const LandingPage: React.FC<LandingPageProps> = ({ onLogin, theme }) => {
         <div className="flex justify-center gap-6">
           <Link
             to="/privacy"
-            className="hover:text-slate-700 dark:hover:text-white underline decoration-dotted underline-offset-4 transition-colors"
+            className="inline-flex items-center min-h-[44px] px-2 hover:text-slate-700 dark:hover:text-white underline decoration-dotted underline-offset-4 transition-colors"
           >
             {t('privacyLink')}
           </Link>
           <Link
             to="/terms"
-            className="hover:text-slate-700 dark:hover:text-white underline decoration-dotted underline-offset-4 transition-colors"
+            className="inline-flex items-center min-h-[44px] px-2 hover:text-slate-700 dark:hover:text-white underline decoration-dotted underline-offset-4 transition-colors"
           >
             {t('termsLink')}
           </Link>

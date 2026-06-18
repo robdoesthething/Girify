@@ -3,7 +3,7 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTheme } from '../../../context/ThemeContext';
 import { UI } from '../../../utils/constants';
-import { formatUsername, usernamesMatch } from '../../../utils/format';
+import { displayUsername, usernamesMatch } from '../../../utils/format';
 import { ScoreEntry } from '../../../utils/social/leaderboard';
 import { themeClasses } from '../../../utils/themeUtils';
 
@@ -21,7 +21,7 @@ const IndividualScoreRow: React.FC<IndividualScoreRowProps> = ({
   const { theme } = useTheme();
   const navigate = useNavigate();
 
-  let dateStr = 'Unknown';
+  let dateStr = '--';
   try {
     const ts = s.timestamp;
     if (ts && typeof ts === 'object' && 'seconds' in ts) {
@@ -73,7 +73,7 @@ const IndividualScoreRow: React.FC<IndividualScoreRowProps> = ({
         </div>
         <div>
           <div className="font-bold text-sm flex items-center gap-2 font-inter">
-            {formatUsername(s.username)}
+            {displayUsername(s.username)}
             {isMe && (
               <span className="text-[10px] bg-sky-500 text-white px-1.5 rounded-full font-inter">
                 YOU

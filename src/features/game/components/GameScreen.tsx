@@ -166,14 +166,16 @@ const GameScreen: FC = () => {
       {/* For logged-in users in intro state: show map with play overlay */}
       {state.gameState === 'intro' && state.username && <PlayOverlay />}
 
-      {/* For non-logged users: show full LandingPage */}
+      {/* For non-logged users: show full LandingPage (scrollable over the clipped game layout) */}
       {state.gameState === 'intro' && !state.username && (
-        <LandingPage
-          theme={theme}
-          onLogin={() => {
-            dispatch({ type: 'SET_GAME_STATE', payload: 'register' });
-          }}
-        />
+        <div className="absolute inset-0 overflow-y-auto z-20">
+          <LandingPage
+            theme={theme}
+            onLogin={() => {
+              dispatch({ type: 'SET_GAME_STATE', payload: 'register' });
+            }}
+          />
+        </div>
       )}
 
       {state.gameState === 'instructions' && <InstructionsOverlay />}
