@@ -25,23 +25,19 @@ const AboutScreen: React.FC = () => {
             <p className="text-base font-medium">{t('aboutDescription')}</p>
 
             <h3 className="font-bold text-lg mt-8 text-sky-500">Tech Stack</h3>
-            <div className="grid grid-cols-2 gap-4">
-              <div className="p-3 bg-slate-100 dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700">
-                <div className="font-bold mb-1">React 19</div>
-                <div className="text-xs opacity-60">Vite 7, Hooks, Context</div>
-              </div>
-              <div className="p-3 bg-slate-100 dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700">
-                <div className="font-bold mb-1">Supabase</div>
-                <div className="text-xs opacity-60">PostgreSQL, Auth, Realtime</div>
-              </div>
-              <div className="p-3 bg-slate-100 dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700">
-                <div className="font-bold mb-1">TailwindCSS</div>
-                <div className="text-xs opacity-60">Utility-first styling</div>
-              </div>
-              <div className="p-3 bg-slate-100 dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700">
-                <div className="font-bold mb-1">Leaflet</div>
-                <div className="text-xs opacity-60">Interactive Maps</div>
-              </div>
+            <div className="flex flex-col gap-3 pl-1">
+              {[
+                { name: 'React 19 · Vite 7', detail: 'Hooks, Context API' },
+                { name: 'Supabase', detail: 'PostgreSQL, Auth, Realtime' },
+                { name: 'TailwindCSS', detail: 'Utility-first styling' },
+                { name: 'Leaflet', detail: 'Interactive maps' },
+              ].map(item => (
+                <div key={item.name} className="flex items-baseline gap-2 min-w-0">
+                  <span className="font-bold text-sm shrink-0">{item.name}</span>
+                  <span className="opacity-30 shrink-0">—</span>
+                  <span className="text-xs opacity-55 truncate">{item.detail}</span>
+                </div>
+              ))}
             </div>
 
             <h3 className="font-bold text-lg mt-8 text-sky-500">About the Author</h3>
