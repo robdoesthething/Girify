@@ -76,7 +76,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onLogin, theme }) => {
           </div>
 
           {/* Main heading - improved typography */}
-          <h1 className="text-4xl md:text-6xl font-black mb-4 max-w-3xl mx-auto text-balance bg-clip-text text-transparent bg-gradient-to-r from-sky-600 via-blue-600 to-cyan-600 dark:from-sky-400 dark:via-blue-400 dark:to-cyan-400 leading-tight">
+          <h1 className="font-display text-5xl md:text-7xl font-black mb-4 max-w-3xl mx-auto text-balance bg-clip-text text-transparent bg-gradient-to-r from-sky-600 via-blue-600 to-cyan-600 dark:from-sky-400 dark:via-blue-400 dark:to-cyan-400 leading-none tracking-wide uppercase">
             {t('masterSelectedStreets') || 'Master Selected Streets!'}
           </h1>
 

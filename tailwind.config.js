@@ -3,6 +3,9 @@ export default {
   content: ['./index.html', './src/**/*.{js,ts,jsx,tsx}'],
   theme: {
     extend: {
+      fontFamily: {
+        display: ['Barlow Condensed', 'Inter', 'sans-serif'],
+      },
       // Enhanced color palette
       colors: {
         primary: {

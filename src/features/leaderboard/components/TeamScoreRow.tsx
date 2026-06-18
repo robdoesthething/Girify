@@ -55,7 +55,7 @@ const TeamScoreRow: React.FC<TeamScoreRowProps> = ({ team, index }) => {
         </div>
       </div>
       <div className="text-right">
-        <div className="font-black text-lg text-emerald-500 font-inter">
+        <div className="font-display font-black text-xl text-emerald-500 tracking-wide">
           {team.score.toLocaleString()}
         </div>
         <div className="text-[9px] font-bold opacity-40 uppercase font-inter">Total Points</div>

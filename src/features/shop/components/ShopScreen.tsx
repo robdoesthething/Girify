@@ -132,7 +132,9 @@ const ShopScreen: React.FC<ShopScreenProps> = ({ username }) => {
                   className="h-6 w-auto object-contain"
                 />
                 <div className="flex flex-col items-end leading-none">
-                  <span className="text-lg font-black text-yellow-500">{balance}</span>
+                  <span className="font-display text-xl font-black text-yellow-500 tracking-wide">
+                    {balance}
+                  </span>
                   <span className="text-[10px] uppercase font-bold opacity-60 font-inter">
                     Giuros
                   </span>

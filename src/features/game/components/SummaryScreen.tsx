@@ -291,7 +291,9 @@ const SummaryScreen: React.FC<SummaryScreenProps> = ({
                 {t('scoreLabel')}
               </span>
               <div className="flex flex-col items-center">
-                <span className={`text-4xl md:text-5xl font-black leading-none ${getScoreColor()}`}>
+                <span
+                  className={`font-display text-5xl md:text-6xl font-black leading-none tracking-wide ${getScoreColor()}`}
+                >
                   {score}
                 </span>
                 <span className="text-sm font-bold text-slate-400 mt-1">

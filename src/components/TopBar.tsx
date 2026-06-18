@@ -1,4 +1,20 @@
 import { AnimatePresence, motion } from 'framer-motion';
+import {
+  FileText,
+  Home,
+  Info,
+  Lock,
+  LogIn,
+  LogOut,
+  MessageSquare,
+  Newspaper,
+  Settings,
+  ShoppingCart,
+  Trophy,
+  User,
+  UserPlus,
+  Users,
+} from 'lucide-react';
 import React, { useCallback, useEffect, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import { version } from '../../package.json';
@@ -171,27 +187,38 @@ backdrop-blur-md border-b ${themeClasses(theme, 'border-slate-600', 'border-slat
 
                 <nav className="flex-1 flex flex-col gap-2 overflow-y-auto px-6 pb-4">
                   {[
-                    { page: null, emoji: '🏠', label: t('home') },
-                    { page: 'profile', emoji: '👤', label: t('myProfile') },
-                    { page: 'friends', emoji: '👥', label: t('friends') },
-                    { page: 'leaderboard', emoji: '🏆', label: t('leaderboard') },
-                    { page: 'shop', emoji: '🛒', label: t('shop') },
-                    { page: 'about', emoji: 'ℹ️', label: t('about') },
-                    { page: 'news', emoji: '📰', label: t('news') || 'News' },
-                    { page: 'feedback', emoji: '📝', label: t('feedback') || 'Feedback' },
-                    { page: 'settings', emoji: '⚙️', label: t('settings') },
-                    { page: 'privacy', emoji: '🔒', label: t('privacy') || 'Privacy' },
-                    { page: 'terms', emoji: '📋', label: t('terms') || 'Terms' },
+                    { page: null, icon: <Home size={18} />, label: t('home') },
+                    { page: 'profile', icon: <User size={18} />, label: t('myProfile') },
+                    { page: 'friends', icon: <Users size={18} />, label: t('friends') },
+                    { page: 'leaderboard', icon: <Trophy size={18} />, label: t('leaderboard') },
+                    { page: 'shop', icon: <ShoppingCart size={18} />, label: t('shop') },
+                    { page: 'about', icon: <Info size={18} />, label: t('about') },
+                    { page: 'news', icon: <Newspaper size={18} />, label: t('news') || 'News' },
+                    {
+                      page: 'feedback',
+                      icon: <MessageSquare size={18} />,
+                      label: t('feedback') || 'Feedback',
+                    },
+                    { page: 'settings', icon: <Settings size={18} />, label: t('settings') },
+                    { page: 'privacy', icon: <Lock size={18} />, label: t('privacy') || 'Privacy' },
+                    {
+                      page: 'terms',
+                      icon: <FileText size={18} />,
+                      label: t('terms') || 'Terms',
+                    },
                   ].map(item => (
                     <button
                       key={item.page ?? 'home'}
                       onClick={() => handleMenuClick(item.page)}
                       onMouseEnter={() => handlePrefetch(item.page)}
                       onTouchStart={() => handlePrefetch(item.page)}
-                      className={`text-left py-2 px-3 rounded-lg hover:bg-slate-500/10 font-medium flex items-center gap-4 shrink-0 ${isActivePage(item.page) ? 'text-sky-500 bg-sky-500/10' : ''}`}
+                      className={`text-left py-2.5 px-3 rounded-lg hover:bg-slate-500/10 font-medium flex items-center gap-3 shrink-0 ${isActivePage(item.page) ? 'text-sky-500 bg-sky-500/10' : ''}`}
                       type="button"
                     >
-                      <span className="text-xl">{item.emoji}</span> {item.label}
+                      <span className="w-5 flex items-center justify-center opacity-70 shrink-0">
+                        {item.icon}
+                      </span>
+                      {item.label}
                     </button>
                   ))}
 
@@ -203,26 +230,35 @@ backdrop-blur-md border-b ${themeClasses(theme, 'border-slate-600', 'border-slat
                     <>
                       <button
                         onClick={() => handleMenuClick('login')}
-                        className={`text-left py-2 px-3 rounded-lg hover:bg-emerald-500/10 font-bold flex items-center gap-4 shrink-0 ${themeClasses(theme, 'text-emerald-400', 'text-emerald-600')}`}
+                        className={`text-left py-2.5 px-3 rounded-lg hover:bg-emerald-500/10 font-bold flex items-center gap-3 shrink-0 ${themeClasses(theme, 'text-emerald-400', 'text-emerald-600')}`}
                         type="button"
                       >
-                        <span className="text-xl">🔑</span> {t('signIn')}
+                        <span className="w-5 flex items-center justify-center shrink-0">
+                          <LogIn size={18} />
+                        </span>
+                        {t('signIn')}
                       </button>
                       <button
                         onClick={() => handleMenuClick('signup')}
-                        className="text-left py-2 px-3 rounded-lg hover:bg-sky-500/10 font-bold text-sky-500 flex items-center gap-4 shrink-0"
+                        className="text-left py-2.5 px-3 rounded-lg hover:bg-sky-500/10 font-bold text-sky-500 flex items-center gap-3 shrink-0"
                         type="button"
                       >
-                        <span className="text-xl">✨</span> {t('signUp')}
+                        <span className="w-5 flex items-center justify-center shrink-0">
+                          <UserPlus size={18} />
+                        </span>
+                        {t('signUp')}
                       </button>
                     </>
                   ) : (
                     <button
                       onClick={() => handleMenuClick('logout')}
-                      className="text-left py-2 px-3 rounded-lg hover:bg-red-500/10 font-bold text-red-500 flex items-center gap-4 shrink-0"
+                      className="text-left py-2.5 px-3 rounded-lg hover:bg-red-500/10 font-bold text-red-500 flex items-center gap-3 shrink-0"
                       type="button"
                     >
-                      <span className="text-xl">🚪</span> {t('logout')}
+                      <span className="w-5 flex items-center justify-center shrink-0">
+                        <LogOut size={18} />
+                      </span>
+                      {t('logout')}
                     </button>
                   )}
                   <p className="text-xs text-slate-400 text-center py-2 mt-1">v{version} Girify</p>

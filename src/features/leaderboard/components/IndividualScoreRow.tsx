@@ -84,7 +84,9 @@ const IndividualScoreRow: React.FC<IndividualScoreRowProps> = ({
         </div>
       </div>
       <div className="text-right">
-        <div className="font-black text-lg text-sky-500 font-inter">{s.score.toLocaleString()}</div>
+        <div className="font-display font-black text-xl text-sky-500 tracking-wide">
+          {s.score.toLocaleString()}
+        </div>
         <div className="text-[9px] font-bold opacity-40 uppercase font-inter">Points</div>
       </div>
     </motion.div>
