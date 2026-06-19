@@ -1,0 +1,9 @@
+User-agent: *
+Disallow: /admin
+Disallow: /settings
+Disallow: /feedback
+Disallow: /friends
+Disallow: /fetch-streets
+Allow: /
+
+Sitemap: https://girify.vercel.app/sitemap.xml
