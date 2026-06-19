@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useTopBarNav } from '../../../hooks/useTopBarNav';
 import TopBar from '../../../components/TopBar';
 import { PageHeader } from '../../../components/ui';
+import SeoHead from '../../../components/SeoHead';
 import { useTheme } from '../../../context/ThemeContext';
 import {
   getLeaderboard,
@@ -228,6 +229,11 @@ const LeaderboardScreen: React.FC<LeaderboardScreenProps> = ({ currentUser }) =>
     <div
       className={`fixed inset-0 w-full h-full flex flex-col overflow-hidden transition-colors duration-500 ${themeClasses(theme, 'bg-slate-900 text-white', 'bg-slate-50 text-slate-900')}`}
     >
+      <SeoHead
+        title="Leaderboard"
+        description="See who's top of the Girify Barcelona streets leaderboard. Daily, weekly, monthly, and all-time rankings for the geography quiz."
+        path="/leaderboard"
+      />
       <TopBar onOpenPage={topBarNav.onOpenPage} onTriggerLogin={topBarNav.onTriggerLogin} />
 
       <div className="flex-1 w-full px-4 py-8 pt-20 overflow-x-hidden overflow-y-auto">

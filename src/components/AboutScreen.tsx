@@ -4,6 +4,7 @@ import { useTheme } from '../context/ThemeContext';
 import { themeClasses } from '../utils/themeUtils';
 import TopBar from './TopBar';
 import { PageHeader } from './ui';
+import SeoHead from './SeoHead';
 
 const AboutScreen: React.FC = () => {
   const { theme, t } = useTheme();
@@ -15,6 +16,11 @@ const AboutScreen: React.FC = () => {
            ${themeClasses(theme, 'bg-slate-900 text-white', 'bg-slate-50 text-slate-900')}
       `}
     >
+      <SeoHead
+        title="About"
+        description="Learn about Girify — a free daily Barcelona streets geography quiz built with React, Supabase, and Leaflet."
+        path="/about"
+      />
       <TopBar onOpenPage={topBarNav.onOpenPage} onTriggerLogin={topBarNav.onTriggerLogin} />
 
       <div className="flex-1 overflow-y-auto w-full px-4 py-6 pt-16">
