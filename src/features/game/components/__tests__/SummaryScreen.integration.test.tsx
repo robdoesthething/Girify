@@ -100,8 +100,8 @@ describe('SummaryScreen Integration', () => {
     // It DOES NOT show "Correct Answers" count explicitly in the `actions` view.
     // So `expect(screen.getByText('5 / 5'))` will fail.
 
-    // maxPossibleScore = 5 * 1000 = 5000
-    expect(screen.getByText('/ 5000 pts')).toBeInTheDocument();
+    // maxPossibleScore = 5 * 100 = 500
+    expect(screen.getByText('/ 500 pts')).toBeInTheDocument();
   });
 
   it('calls onKeepPlaying when the Keep Playing button is clicked', () => {
