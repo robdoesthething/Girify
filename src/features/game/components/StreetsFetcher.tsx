@@ -1,8 +1,11 @@
 import { AlertCircle, Download, Play } from 'lucide-react';
 import React, { useState } from 'react';
 import { API } from '../../../config/constants';
+import { useTheme } from '../../../context/ThemeContext';
+import { themeClasses } from '../../../utils/themeUtils';
 
 const StreetsFetcher: React.FC = () => {
+  const { theme } = useTheme();
   const [status, setStatus] = useState('');
   const [progress, setProgress] = useState('');
   const [streets, setStreets] = useState<any[]>([]);
@@ -170,22 +173,28 @@ const StreetsFetcher: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-8 pt-20">
+    <div className={`min-h-screen p-8 pt-20 ${themeClasses(theme, 'bg-slate-950', 'bg-slate-50')}`}>
       <div className="max-w-4xl mx-auto">
-        <div className="bg-white rounded-lg shadow-lg p-8">
+        <div
+          className={`rounded-2xl shadow-xl p-8 border ${themeClasses(theme, 'bg-slate-900 border-slate-700', 'bg-white border-slate-200')}`}
+        >
           <div className="flex justify-between items-start mb-6">
             <div>
-              <h1 className="text-3xl font-bold text-gray-800 mb-2 font-inter">
+              <h1
+                className={`text-3xl font-bold mb-2 font-inter ${themeClasses(theme, 'text-slate-100', 'text-slate-800')}`}
+              >
                 Barcelona Streets Fetcher
               </h1>
-              <p className="text-gray-600 font-inter">
+              <p
+                className={`font-inter ${themeClasses(theme, 'text-slate-400', 'text-slate-600')}`}
+              >
                 Fetch all streets from OpenStreetMap with proper tier classification
               </p>
             </div>
             <div className="flex flex-col items-end gap-2">
               <label
                 htmlFor="api-mirror-select"
-                className="text-sm font-semibold text-gray-700 font-inter"
+                className={`text-sm font-semibold font-inter ${themeClasses(theme, 'text-slate-300', 'text-slate-700')}`}
               >
                 API Mirror:
               </label>
@@ -193,7 +202,7 @@ const StreetsFetcher: React.FC = () => {
                 id="api-mirror-select"
                 value={apiMirror}
                 onChange={e => setApiMirror(e.target.value)}
-                className="p-2 border rounded-md text-sm bg-gray-50 hover:bg-white transition-colors cursor-pointer font-inter"
+                className={`p-2 border rounded-xl text-sm transition-colors cursor-pointer font-inter ${themeClasses(theme, 'bg-slate-800 border-slate-600 text-slate-200', 'bg-slate-50 border-slate-300 text-slate-800 hover:bg-white')}`}
               >
                 {API_MIRRORS.map(m => (
                   <option key={m.url} value={m.url}>
@@ -208,7 +217,7 @@ const StreetsFetcher: React.FC = () => {
             <button
               onClick={fetchStreets}
               disabled={loading}
-              className="w-full bg-indigo-600 hover:bg-indigo-700 disabled:bg-gray-400 text-white font-semibold py-3 px-6 rounded-lg flex items-center justify-center gap-2 transition-colors font-inter"
+              className="w-full bg-sky-500 hover:bg-sky-600 disabled:bg-slate-600 disabled:text-slate-400 text-white font-semibold py-3 px-6 rounded-xl flex items-center justify-center gap-2 transition-colors font-inter"
               type="button"
             >
               {loading ? (
@@ -226,20 +235,24 @@ const StreetsFetcher: React.FC = () => {
 
             {status && (
               <div
-                className={`p-4 rounded-lg ${status.includes('Error') ? 'bg-red-50 border border-red-200' : 'bg-green-50 border border-green-200'}`}
+                className={`p-4 rounded-xl border ${status.includes('Error') ? themeClasses(theme, 'bg-red-950/50 border-red-800', 'bg-red-50 border-red-200') : themeClasses(theme, 'bg-emerald-950/50 border-emerald-800', 'bg-green-50 border-green-200')}`}
               >
                 <div className="flex items-start gap-2">
                   <AlertCircle
-                    className={`w-5 h-5 mt-0.5 ${status.includes('Error') ? 'text-red-600' : 'text-green-600'}`}
+                    className={`w-5 h-5 mt-0.5 ${status.includes('Error') ? 'text-red-500' : 'text-emerald-500'}`}
                   />
                   <div className="flex-1">
                     <p
-                      className={`font-medium font-inter ${status.includes('Error') ? 'text-red-800' : 'text-green-800'}`}
+                      className={`font-medium font-inter ${status.includes('Error') ? themeClasses(theme, 'text-red-300', 'text-red-800') : themeClasses(theme, 'text-emerald-300', 'text-green-800')}`}
                     >
                       {status}
                     </p>
                     {progress && (
-                      <p className="text-sm text-gray-600 mt-1 font-inter">{progress}</p>
+                      <p
+                        className={`text-sm mt-1 font-inter ${themeClasses(theme, 'text-slate-400', 'text-slate-600')}`}
+                      >
+                        {progress}
+                      </p>
                     )}
                   </div>
                 </div>
@@ -250,30 +263,46 @@ const StreetsFetcher: React.FC = () => {
               <div className="space-y-4">
                 <button
                   onClick={downloadJSON}
-                  className="w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-3 px-6 rounded-lg flex items-center justify-center gap-2 transition-colors font-inter"
+                  className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-3 px-6 rounded-xl flex items-center justify-center gap-2 transition-colors font-inter"
                   type="button"
                 >
                   <Download className="w-5 h-5" />
                   Download JSON ({streets.length} streets)
                 </button>
 
-                <div className="bg-gray-50 rounded-lg p-4 max-h-96 overflow-y-auto">
-                  <h3 className="font-semibold text-gray-800 mb-3 font-inter">
+                <div
+                  className={`rounded-xl p-4 max-h-96 overflow-y-auto ${themeClasses(theme, 'bg-slate-800', 'bg-slate-50')}`}
+                >
+                  <h3
+                    className={`font-semibold mb-3 font-inter ${themeClasses(theme, 'text-slate-200', 'text-slate-800')}`}
+                  >
                     Preview (first 10 streets):
                   </h3>
-                  <pre className="text-xs text-gray-700 whitespace-pre-wrap font-mono">
+                  <pre
+                    className={`text-xs whitespace-pre-wrap font-mono ${themeClasses(theme, 'text-slate-300', 'text-slate-700')}`}
+                  >
                     {JSON.stringify(streets.slice(0, 10), null, 2)}
                   </pre>
                   {streets.length > 10 && (
-                    <p className="text-sm text-gray-500 mt-2 italic font-inter">
+                    <p
+                      className={`text-sm mt-2 italic font-inter ${themeClasses(theme, 'text-slate-500', 'text-slate-500')}`}
+                    >
                       ... and {streets.length - 10} more streets
                     </p>
                   )}
                 </div>
 
-                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                  <h3 className="font-semibold text-blue-900 mb-2 font-inter">Data Format:</h3>
-                  <ul className="text-sm text-blue-800 space-y-1 font-inter">
+                <div
+                  className={`border rounded-xl p-4 ${themeClasses(theme, 'bg-sky-950/50 border-sky-800', 'bg-blue-50 border-blue-200')}`}
+                >
+                  <h3
+                    className={`font-semibold mb-2 font-inter ${themeClasses(theme, 'text-sky-300', 'text-blue-900')}`}
+                  >
+                    Data Format:
+                  </h3>
+                  <ul
+                    className={`text-sm space-y-1 font-inter ${themeClasses(theme, 'text-sky-200', 'text-blue-800')}`}
+                  >
                     <li>
                       • <strong>id</strong>: Unique identifier (auto-generated)
                     </li>

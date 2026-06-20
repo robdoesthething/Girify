@@ -162,7 +162,7 @@ const LeaderboardScreen: React.FC<LeaderboardScreenProps> = ({ currentUser }) =>
           <p className="font-bold text-red-400 mb-2 font-inter">{error}</p>
           <button
             onClick={loadScores}
-            className="px-4 py-2 bg-slate-200 dark:bg-slate-800 rounded-lg hover:opacity-80 active:scale-95 transition-all text-sm font-bold font-inter"
+            className="px-4 py-2 bg-slate-200 dark:bg-slate-800 rounded-xl hover:opacity-80 active:scale-95 transition-all text-sm font-bold font-inter"
             type="button"
           >
             Try Again
@@ -247,7 +247,7 @@ const LeaderboardScreen: React.FC<LeaderboardScreenProps> = ({ currentUser }) =>
             >
               <button
                 onClick={() => setViewMode('individual')}
-                className={`px-4 py-2 text-xs font-bold rounded-lg transition-all active:scale-95 uppercase
+                className={`px-4 py-2 text-xs font-bold rounded-xl transition-all active:scale-95 uppercase
                   ${viewMode === 'individual' ? 'bg-sky-500 text-white shadow-md' : 'text-slate-500 hover:text-slate-800 dark:hover:text-slate-300'}`}
                 type="button"
               >
@@ -255,7 +255,7 @@ const LeaderboardScreen: React.FC<LeaderboardScreenProps> = ({ currentUser }) =>
               </button>
               <button
                 onClick={() => setViewMode('teams')}
-                className={`px-4 py-2 text-xs font-bold rounded-lg transition-all active:scale-95 uppercase
+                className={`px-4 py-2 text-xs font-bold rounded-xl transition-all active:scale-95 uppercase
                   ${viewMode === 'teams' ? 'bg-sky-500 text-white shadow-md' : 'text-slate-500 hover:text-slate-800 dark:hover:text-slate-300'}`}
                 type="button"
               >
@@ -273,7 +273,7 @@ const LeaderboardScreen: React.FC<LeaderboardScreenProps> = ({ currentUser }) =>
                 <button
                   key={tab.id}
                   onClick={() => setPeriod(tab.id)}
-                  className={`px-4 py-2 text-xs font-bold rounded-lg transition-all tracking-wider uppercase
+                  className={`px-4 py-2 text-xs font-bold rounded-xl transition-all tracking-wider uppercase
                          ${period === tab.id ? 'bg-sky-500 text-white shadow-md' : 'text-slate-500 hover:text-slate-800 dark:hover:text-slate-300'}
                       `}
                   type="button"

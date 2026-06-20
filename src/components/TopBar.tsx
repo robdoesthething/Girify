@@ -96,8 +96,8 @@ const TopBar: React.FC<TopBarProps> = React.memo(
       <>
         <div
           className={`w-full h-12 shrink-0 ${Z_INDEX.NAVIGATION} flex items-center justify-between px-3 md:px-6 transition-colors duration-300
-                ${themeClasses(theme, 'bg-slate-700/90 text-white', 'bg-white/90 text-slate-800')}
-backdrop-blur-md border-b ${themeClasses(theme, 'border-slate-600', 'border-slate-200')}
+                ${themeClasses(theme, 'bg-slate-950/90 text-white', 'bg-white/90 text-slate-800')}
+backdrop-blur-md border-b ${themeClasses(theme, 'border-white/8', 'border-slate-200')}
 `}
         >
           <div className="flex items-center gap-4 md:gap-4">
@@ -147,7 +147,7 @@ backdrop-blur-md border-b ${themeClasses(theme, 'border-slate-600', 'border-slat
                 exit={{ x: '-100%' }}
                 transition={{ type: 'spring', damping: 25, stiffness: 200 }}
                 className={`fixed top-0 bottom-0 left-0 w-64 ${Z_INDEX.MODAL} shadow-2xl flex flex-col
-                                    ${themeClasses(theme, 'bg-neutral-200 text-neutral-900', 'bg-white text-slate-800')}
+                                    ${themeClasses(theme, 'bg-slate-900 text-slate-100', 'bg-white text-slate-800')}
 `}
               >
                 <div className="flex justify-between items-center p-6 pb-4 shrink-0">
