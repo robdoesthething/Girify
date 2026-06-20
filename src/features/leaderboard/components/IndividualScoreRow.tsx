@@ -1,6 +1,7 @@
 import { motion } from 'framer-motion';
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
+import { DISTRICTS } from '../../../data/districts';
 import { useTheme } from '../../../context/ThemeContext';
 import { UI } from '../../../utils/constants';
 import { displayUsername, usernamesMatch } from '../../../utils/format';
@@ -37,6 +38,7 @@ const IndividualScoreRow: React.FC<IndividualScoreRowProps> = ({
   }
 
   const isMe = currentUser && usernamesMatch(s.username, currentUser);
+  const teamName = s.district ? (DISTRICTS.find(d => d.id === s.district)?.teamName ?? null) : null;
 
   const handleClick = () => {
     if (currentUser && usernamesMatch(s.username, currentUser)) {
@@ -80,9 +82,9 @@ const IndividualScoreRow: React.FC<IndividualScoreRowProps> = ({
               </span>
             )}
           </div>
-          {s.team ? (
+          {teamName ? (
             <div className="text-[10px] font-semibold opacity-60 font-inter truncate max-w-[140px]">
-              {s.team}
+              {teamName}
             </div>
           ) : (
             <div className="text-[10px] opacity-50 font-mono">{dateStr}</div>

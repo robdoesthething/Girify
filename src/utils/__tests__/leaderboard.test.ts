@@ -9,8 +9,6 @@ const { mockSupabase } = vi.hoisted(() => {
   const sb = {
     rpc: vi.fn(),
     from: fromFn,
-    _select: selectFn,
-    _in: inFn,
   };
   return { mockSupabase: sb };
 });
@@ -53,7 +51,6 @@ describe('Leaderboard Service', () => {
         score: 1800,
         time: 8.0,
         gamesCount: 2,
-        team: null,
         district: null,
       });
       // null avg_time falls back to 0; @-prefixed usernames stay as-is
