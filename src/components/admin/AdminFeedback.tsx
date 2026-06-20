@@ -79,7 +79,7 @@ const AdminFeedback: React.FC<AdminFeedbackProps> = ({ feedback, onRefresh, noti
           onClick={onRefresh}
           className="px-4 py-2 bg-slate-200 dark:bg-slate-800 rounded-lg font-bold hover:bg-slate-300 dark:hover:bg-slate-700 transition-all active:scale-95"
         >
-          Refesh
+          Refresh
         </button>
       </div>
 

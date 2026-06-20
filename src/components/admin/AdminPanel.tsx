@@ -9,7 +9,6 @@ import { UserProfile } from '../../utils/social';
 import { themeClasses } from '../../utils/themeUtils';
 import { ConfirmDialog } from '../ConfirmDialog';
 
-// Child components
 import AdminAchievements from './AdminAchievements';
 import AdminAnnouncements from './AdminAnnouncements';
 import AdminConfig from './AdminConfig';
@@ -23,6 +22,7 @@ import AdminUsersTab from './AdminUsersTab';
 import EditUserModal from './EditUserModal';
 import MetricCard from './MetricCard';
 import ViewUserModal from './ViewUserModal';
+import { updateShopItem } from '../../utils/shop';
 
 const ADMIN_TABS = [
   { id: 'dashboard', label: 'Dashboard' },
@@ -47,8 +47,8 @@ const AdminPanel: React.FC = () => {
   const { confirm, confirmConfig, handleClose } = useConfirm();
 
   const { state, actions } = useAdminData(notify, confirm);
-  const { users, feedback, announcements, shopItems, metrics, loading, migrationStatus } = state;
-  const { fetchData, handleMigration, handleCleanupUser, handleUpdateUser } = actions;
+  const { users, feedback, announcements, shopItems, metrics, loading } = state;
+  const { fetchData, handleCleanupUser, handleUpdateUser } = actions;
 
   // Render content based on active tab
   const renderContent = () => {
@@ -61,8 +61,25 @@ const AdminPanel: React.FC = () => {
         return <AdminAchievements onNotify={notify} confirm={confirm} />;
       case 'content':
         return <AdminContent onNotify={notify} confirm={confirm} />;
-      case 'giuros':
-        return <AdminGiuros users={users} shopItems={shopItems} theme={theme} />;
+      case 'giuros': {
+        const handleUpdateShopItem = async (id: string, updates: { cost?: number }) => {
+          const ok = await updateShopItem(id, updates);
+          if (ok) {
+            notify('Price updated', 'success');
+            fetchData();
+          } else {
+            notify('Failed to update price', 'error');
+          }
+        };
+        return (
+          <AdminGiuros
+            users={users}
+            shopItems={shopItems}
+            theme={theme}
+            onUpdateShopItem={handleUpdateShopItem}
+          />
+        );
+      }
       case 'shop':
         return (
           <AdminShop items={shopItems} onRefresh={fetchData} notify={notify} confirm={confirm} />
@@ -139,22 +156,11 @@ const AdminPanel: React.FC = () => {
               </Heading>
               <div className="flex items-center gap-4 flex-wrap">
                 <Button
-                  onClick={handleMigration}
-                  className="bg-orange-500 hover:bg-orange-600 text-white shadow-orange-500/20"
-                >
-                  ⚠️ Fix Usernames (Lowercase)
-                </Button>
-                <Button
                   onClick={handleCleanupUser}
                   className="bg-rose-500 hover:bg-rose-600 text-white shadow-rose-500/20"
                 >
                   🗑️ Cleanup No-Email Users
                 </Button>
-                {migrationStatus && (
-                  <span className="font-mono text-sm opacity-70 bg-slate-100 dark:bg-slate-900 px-3 py-1 rounded">
-                    {migrationStatus}
-                  </span>
-                )}
               </div>
             </Card>
           </div>

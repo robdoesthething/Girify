@@ -144,6 +144,34 @@ const AdminGameMaster: React.FC<AdminGameMasterProps> = ({ onNotify, confirm }) 
     }
   };
 
+  const handleResetPassword = async () => {
+    if (!targetUser?.email) {
+      onNotify('This user has no email address on record', 'error');
+      return;
+    }
+    if (
+      !(await confirm(
+        `Send a password reset email to ${targetUser.email}?`,
+        'Reset Password',
+        false
+      ))
+    ) {
+      return;
+    }
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(targetUser.email, {
+        redirectTo: `${window.location.origin}/settings`,
+      });
+      if (error) {
+        onNotify(`Reset failed: ${error.message}`, 'error');
+      } else {
+        onNotify(`Password reset email sent to ${targetUser.email}`, 'success');
+      }
+    } catch {
+      onNotify('Failed to send reset email', 'error');
+    }
+  };
+
   return (
     <div className="space-y-6 max-w-4xl mx-auto">
       <div className="flex justify-between items-center">
@@ -238,7 +266,11 @@ const AdminGameMaster: React.FC<AdminGameMasterProps> = ({ onNotify, confirm }) 
                   >
                     {targetUser.banned ? '✅ Unban User' : '⛔ Ban User'}
                   </button>
-                  <button className="px-4 py-2 rounded-lg font-bold text-sm bg-slate-100 dark:bg-slate-700 text-slate-500 cursor-not-allowed">
+                  <button
+                    onClick={handleResetPassword}
+                    disabled={!targetUser?.email}
+                    className="px-4 py-2 rounded-lg font-bold text-sm bg-sky-100 text-sky-700 hover:bg-sky-200 transition-all active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed"
+                  >
                     📧 Reset Password
                   </button>
                 </div>

@@ -25,7 +25,6 @@ export interface AdminDataState {
   shopItems: GroupedShopItems;
   metrics: DashboardMetrics | null;
   loading: boolean;
-  migrationStatus: string | null;
 }
 
 export function useAdminData(
@@ -46,7 +45,6 @@ export function useAdminData(
   });
   const [metrics, setMetrics] = useState<DashboardMetrics | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
-  const [migrationStatus, setMigrationStatus] = useState<string | null>(null);
 
   const fetchData = useCallback(async () => {
     setLoading(true);
@@ -71,30 +69,6 @@ export function useAdminData(
     };
     loadData();
   }, [fetchData]);
-
-  const handleMigration = async () => {
-    if (
-      !(await confirm(
-        'WARNING: This will migrate ALL users to lowercase usernames. This is destructive. Are you sure?',
-        'Start Migration',
-        true
-      ))
-    ) {
-      return;
-    }
-
-    setMigrationStatus('Starting migration...');
-    try {
-      // Migration now handled via Supabase. This is a legacy admin action.
-      // Lowercase username migration is no longer needed (Supabase data is already normalized).
-      setMigrationStatus('Migration is no longer needed — all data is in Supabase.');
-      fetchData();
-    } catch (e: unknown) {
-      logger.error(e);
-      const errorMessage = e instanceof Error ? e.message : String(e);
-      setMigrationStatus(`Error: ${errorMessage}`);
-    }
-  };
 
   const handleCleanupUser = async () => {
     const badUser = users.find(u => !u.email);
@@ -153,8 +127,8 @@ export function useAdminData(
   };
 
   return {
-    state: { users, feedback, announcements, shopItems, metrics, loading, migrationStatus },
-    actions: { fetchData, handleMigration, handleCleanupUser, handleUpdateUser },
+    state: { users, feedback, announcements, shopItems, metrics, loading },
+    actions: { fetchData, handleCleanupUser, handleUpdateUser },
   };
 }
 
