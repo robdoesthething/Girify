@@ -29,6 +29,8 @@ export interface ScoreEntry {
   uid?: string | null;
   sortDate?: Date;
   gamesCount?: number;
+  team?: string | null;
+  district?: string | null;
 }
 
 /**
@@ -74,12 +76,32 @@ export const getLeaderboard = async (
       games_count: number;
     }
 
-    return (data as RpcRow[]).map(row => ({
+    const rows = data as RpcRow[];
+    const usernames = rows.map(r => r.username).filter(Boolean);
+
+    const teamMap: Record<string, { team: string | null; district: string | null }> = {};
+    if (usernames.length > 0) {
+      const { data: usersData } = await supabase
+        .from('users')
+        .select('username, team, district')
+        .in('username', usernames);
+      (usersData || []).forEach(
+        (u: { username: string; team: string | null; district: string | null }) => {
+          if (u.username) {
+            teamMap[u.username] = { team: u.team, district: u.district };
+          }
+        }
+      );
+    }
+
+    return rows.map(row => ({
       id: row.username,
       username: formatLeaderboardUsername(row.username),
       score: row.score,
       time: row.avg_time ?? 0,
       gamesCount: row.games_count,
+      team: teamMap[row.username]?.team ?? null,
+      district: teamMap[row.username]?.district ?? null,
     }));
   } catch (e) {
     console.error('[Leaderboard] Error fetching leaderboard from Supabase:', e);

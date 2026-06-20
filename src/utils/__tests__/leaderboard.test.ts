@@ -3,9 +3,14 @@ import { getLeaderboard } from '../social/leaderboard';
 
 // getLeaderboard aggregates server-side via the get_leaderboard RPC
 const { mockSupabase } = vi.hoisted(() => {
+  const inFn = vi.fn().mockResolvedValue({ data: [], error: null });
+  const selectFn = vi.fn().mockReturnValue({ in: inFn });
+  const fromFn = vi.fn().mockReturnValue({ select: selectFn });
   const sb = {
     rpc: vi.fn(),
-    from: vi.fn(),
+    from: fromFn,
+    _select: selectFn,
+    _in: inFn,
   };
   return { mockSupabase: sb };
 });
@@ -48,6 +53,8 @@ describe('Leaderboard Service', () => {
         score: 1800,
         time: 8.0,
         gamesCount: 2,
+        team: null,
+        district: null,
       });
       // null avg_time falls back to 0; @-prefixed usernames stay as-is
       expect(result[1]!.time).toBe(0);

@@ -80,7 +80,13 @@ const IndividualScoreRow: React.FC<IndividualScoreRowProps> = ({
               </span>
             )}
           </div>
-          <div className="text-[10px] opacity-50 font-mono">{dateStr}</div>
+          {s.team ? (
+            <div className="text-[10px] font-semibold opacity-60 font-inter truncate max-w-[140px]">
+              {s.team}
+            </div>
+          ) : (
+            <div className="text-[10px] opacity-50 font-mono">{dateStr}</div>
+          )}
         </div>
       </div>
       <div className="text-right">
