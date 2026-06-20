@@ -52,7 +52,7 @@ This document provides context and best practices for AI assistants (Claude) wor
 
 ### Backend & Services
 
-- **Firebase Auth** - User authentication (Google, Email/Password)
+- **Supabase Auth** - User authentication (Google OAuth, Email/Password)
 - **Supabase** - Primary database (PostgreSQL)
   - User profiles
   - Game results & leaderboards
@@ -199,7 +199,7 @@ refactor(game): extract scoring logic to hook
 **Authentication**:
 
 - `src/features/auth/hooks/useAuth.ts` - Auth logic
-- `src/utils/firebase.ts` - Firebase initialization
+- `src/features/auth/hooks/authSyncHelpers.ts` - Profile sync and uid linking on login
 
 ### Scripts
 
@@ -932,21 +932,25 @@ node scripts/publishNews.js  # Create announcement (or use /admin → Announceme
 Required in `.env.development`:
 
 ```bash
-# Firebase (Auth only)
-VITE_FIREBASE_API_KEY=
-VITE_FIREBASE_AUTH_DOMAIN=
-VITE_FIREBASE_PROJECT_ID=
-VITE_FIREBASE_STORAGE_BUCKET=
-VITE_FIREBASE_MESSAGING_SENDER_ID=
-VITE_FIREBASE_APP_ID=
+# Site URL (canonical links and OG meta)
+VITE_SITE_URL=https://girify.vercel.app
 
-# Supabase (Database)
+# Supabase (Auth + Database)
 VITE_SUPABASE_URL=
 VITE_SUPABASE_ANON_KEY=
 
 # Upstash Redis (Optional)
 VITE_UPSTASH_REDIS_REST_URL=
 VITE_UPSTASH_REDIS_REST_TOKEN=
+
+# Cloudflare Turnstile
+VITE_TURNSTILE_SITE_KEY=
+
+# Server-only (Vercel serverless functions)
+ADMIN_SECRET_KEY=
+SUPABASE_SERVICE_ROLE_KEY=
+SUPABASE_JWT_SECRET=
+TURNSTILE_SECRET_KEY=
 ```
 
 ### Key URLs
@@ -954,7 +958,7 @@ VITE_UPSTASH_REDIS_REST_TOKEN=
 - Production: <https://girify.vercel.app>
 - GitHub: <https://github.com/robdoesthething/Girify>
 - Supabase Dashboard: (project-specific)
-- Firebase Console: (project-specific)
+- Vercel Dashboard: (project-specific)
 
 ---
 
