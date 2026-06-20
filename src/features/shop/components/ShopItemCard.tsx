@@ -96,7 +96,7 @@ const ShopItemCard: React.FC<ShopItemCardProps> = memo(
                 onTitleClick?.();
               }
             }}
-            className={`w-16 h-16 mb-3 flex items-center justify-center text-3xl relative shrink-0 rounded-2xl bg-transparent ${activeTab === 'titles' || activeTab === 'badges' ? 'cursor-pointer hover:scale-105 transition-transform' : ''}`}
+            className={`w-16 h-16 mb-3 flex items-center justify-center text-3xl relative shrink-0 rounded-2xl bg-slate-100 dark:bg-slate-900/60 ${activeTab === 'titles' || activeTab === 'badges' ? 'cursor-pointer hover:scale-105 transition-transform' : ''}`}
           >
             {renderItemIcon()}
           </div>
