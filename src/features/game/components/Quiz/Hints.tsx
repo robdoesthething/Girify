@@ -1,6 +1,5 @@
 import React from 'react';
 import { useTheme } from '../../../../context/ThemeContext';
-import { themeClasses } from '../../../../utils/themeUtils';
 
 interface HintStreet {
   id: string;
@@ -15,49 +14,48 @@ interface HintsProps {
 }
 
 const Hints: React.FC<HintsProps> = ({ hintStreets, hintsRevealed, onReveal, feedback }) => {
-  const { theme, t } = useTheme();
+  const { t } = useTheme();
 
   const canReveal = hintsRevealed < 3 && hintsRevealed < hintStreets.length;
+  const hasRevealed = hintsRevealed > 0;
 
-  if (feedback !== 'idle' && hintStreets.length === 0) {
-    return null;
-  }
-  if (feedback === 'idle' && hintStreets.length === 0) {
+  if (hintStreets.length === 0) {
     return null;
   }
 
   return (
-    <div
-      className={`p-2 md:p-4 border-t ${themeClasses(theme, 'border-neutral-800 bg-neutral-900', 'border-slate-100 bg-slate-50')}`}
-    >
-      <div className="flex flex-col gap-2 md:gap-4">
-        <div className="flex justify-between items-center text-[10px] md:text-xs text-slate-500 uppercase font-bold tracking-wider">
-          <span>{t('hints')}</span>
-          {canReveal && (
-            <button
-              onClick={onReveal}
-              className="text-[10px] md:text-xs font-bold font-inter px-2 py-0.5 rounded-full bg-sky-500/10 text-sky-500 hover:bg-sky-500/20 active:scale-95 transition-all"
-              type="button"
-            >
-              {t('revealHint')}
-            </button>
-          )}
-        </div>
-
-        <div className="flex flex-col gap-2 md:gap-2">
+    <div className="px-3 pb-2 flex flex-col gap-1.5">
+      {/* Revealed hints */}
+      {hasRevealed && (
+        <div className="flex flex-col gap-1">
           {hintStreets.slice(0, hintsRevealed).map(street => (
             <div
               key={street.id}
-              className={`text-xs md:text-sm px-2 md:px-3 py-1 md:py-2 rounded-lg border flex items-center gap-2 animate-fadeIn
-                            ${themeClasses(theme, 'bg-slate-700 border-slate-600 text-slate-200', 'bg-white border-slate-200 text-slate-600')}
-                        `}
+              className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-sky-500/10 border border-sky-500/20 animate-fadeIn"
             >
-              <div className="w-1.5 h-1.5 md:w-2 md:h-2 rounded-full bg-sky-500" />
-              <span className="font-inter">Near: {street.name}</span>
+              <div className="w-1.5 h-1.5 rounded-full bg-sky-400 shrink-0" />
+              <span className="text-xs font-semibold text-sky-300">Near: {street.name}</span>
             </div>
           ))}
         </div>
-      </div>
+      )}
+
+      {/* Reveal button */}
+      {canReveal && feedback === 'idle' && (
+        <button
+          onClick={onReveal}
+          type="button"
+          className="w-full py-2 rounded-xl bg-sky-500/15 hover:bg-sky-500/25 active:scale-95 transition-all border border-sky-500/30 flex items-center justify-center gap-2"
+        >
+          <span className="text-sky-400 text-sm">💡</span>
+          <span className="text-xs font-black uppercase tracking-wider text-sky-400">
+            {t('revealHint') || 'Hint'}{' '}
+            <span className="opacity-60 font-mono">
+              ({hintsRevealed}/{Math.min(3, hintStreets.length)})
+            </span>
+          </span>
+        </button>
+      )}
     </div>
   );
 };

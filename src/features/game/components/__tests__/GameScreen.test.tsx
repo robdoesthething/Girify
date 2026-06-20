@@ -69,6 +69,10 @@ vi.mock('../Quiz', () => {
   NextButton.displayName = 'MockQuizNextButton';
   MockQuiz.NextButton = NextButton;
 
+  const ScoreTimer = () => null;
+  ScoreTimer.displayName = 'MockQuizScoreTimer';
+  MockQuiz.ScoreTimer = ScoreTimer;
+
   return { default: MockQuiz };
 });
 

@@ -4,6 +4,7 @@ import Banner from './Banner';
 import Hints from './Hints';
 import NextButton from './NextButton';
 import Options from './Options';
+import ScoreTimer from './ScoreTimer';
 
 interface QuizProps {
   children?: ReactNode;
@@ -15,6 +16,7 @@ interface QuizComponent extends FC<QuizProps> {
   Options: typeof Options;
   Hints: typeof Hints;
   NextButton: typeof NextButton;
+  ScoreTimer: typeof ScoreTimer;
   Container: FC<{ children: ReactNode; keyProp: string | number }>;
   Content: FC<{ children: ReactNode }>;
 }
@@ -56,7 +58,7 @@ const Container: FC<{ children: ReactNode; keyProp: string | number }> = ({
 // Wrapper for the Main content area (Options usually)
 const Content: FC<{ children: ReactNode }> = ({ children }) => {
   return (
-    <div className="flex-1 flex flex-col justify-evenly p-2 pt-4 w-full overflow-hidden relative z-10">
+    <div className="flex-1 flex flex-col justify-evenly p-2 pt-2 w-full overflow-hidden relative z-10">
       {children}
     </div>
   );
@@ -66,6 +68,7 @@ Quiz.Banner = Banner;
 Quiz.Options = Options;
 Quiz.Hints = Hints;
 Quiz.NextButton = NextButton;
+Quiz.ScoreTimer = ScoreTimer;
 Quiz.Container = Container;
 Quiz.Content = Content;
 

@@ -121,6 +121,11 @@ const GameScreen: FC = () => {
           >
             <Quiz>
               <Quiz.Container keyProp={state.currentQuestionIndex}>
+                <Quiz.ScoreTimer
+                  questionStartTime={state.questionStartTime}
+                  hintsUsed={state.hintsRevealedCount}
+                  feedback={state.feedback as any}
+                />
                 <Quiz.Content>
                   <Quiz.Options
                     options={state.options}
