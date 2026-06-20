@@ -25,14 +25,14 @@ A daily geography challenge where users identify Barcelona streets on an interac
 
 ## 🛠️ Tech Stack
 
-| Category       | Technologies                                |
-| -------------- | ------------------------------------------- |
-| **Frontend**   | React 19, TypeScript, Vite 7, Tailwind CSS  |
-| **Map**        | Leaflet.js, React-Leaflet, OpenStreetMap    |
-| **Backend**    | Firebase (Auth, Firestore, Cloud Messaging) |
-| **Animation**  | Framer Motion                               |
-| **Testing**    | Vitest, React Testing Library, Playwright   |
-| **Deployment** | Vercel (auto-deploy on push)                |
+| Category       | Technologies                                  |
+| -------------- | --------------------------------------------- |
+| **Frontend**   | React 19, TypeScript, Vite 7, Tailwind CSS    |
+| **Map**        | Leaflet.js, React-Leaflet, OpenStreetMap      |
+| **Backend**    | Supabase (Auth, PostgreSQL), Vercel Functions |
+| **Animation**  | Framer Motion                                 |
+| **Testing**    | Vitest, React Testing Library, Playwright     |
+| **Deployment** | Vercel (auto-deploy on push)                  |
 
 ## 🚀 Quick Start
 
@@ -42,9 +42,8 @@ git clone https://github.com/robdoesthething/Girify.git
 cd Girify
 npm install
 
-# Configure Firebase (copy .env.template to .env.development)
+# Copy env template and fill in your credentials
 cp .env.template .env.development
-# Fill in your Firebase credentials
 
 # Run development server
 npm run dev
