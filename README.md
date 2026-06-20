@@ -68,7 +68,7 @@ src/
 ├── data/            # Static data (streets, cosmetics, districts)
 ├── hooks/           # Custom React hooks
 ├── types/           # TypeScript type definitions
-└── utils/           # Utility functions & Firebase helpers
+└── utils/           # Utility functions & helpers
 ```
 
 ## 🎮 Game Mechanics
