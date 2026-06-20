@@ -1,5 +1,13 @@
 # Changelog
 
+## [Unreleased] - 2026-06-19
+
+### Added
+
+- The site is now discoverable by search engines and AI assistants — a sitemap and crawler guidance file have been added.
+- Pages now include the correct shareable URL, so links posted to social media or messaging apps show the right preview.
+- The leaderboard and About pages now have proper titles and descriptions for search results.
+
 ## [0.2.0] - 2026-01-23
 
 ### Added
