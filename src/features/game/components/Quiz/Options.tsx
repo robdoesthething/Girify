@@ -34,18 +34,18 @@ const Options: React.FC<OptionsProps> = ({
             if (isSelected) {
               // User's answer - Navy blue with glow
               btnClass =
-                'bg-gradient-to-br from-navy to-navy-dark text-white border-navy ring-4 ring-navy/30 shadow-lg transform scale-[0.98]';
+                'bg-gradient-to-br from-navy to-navy-dark text-white border-2 border-navy ring-4 ring-navy/30 shadow-lg transform scale-[0.98]';
               accentClass = 'bg-sky-400';
             } else {
               // Other options - muted
               btnClass =
-                'bg-slate-100/50 dark:bg-slate-800/30 text-slate-400 border-slate-200 dark:border-slate-700/50';
+                'bg-slate-100/50 dark:bg-slate-800/30 text-slate-400 border-2 border-slate-200 dark:border-slate-700/50';
               accentClass = 'bg-slate-300 dark:bg-slate-700';
             }
           } else if (isSelected) {
             // Selected but not submitted yet
             btnClass =
-              'bg-gradient-to-br from-sky-500 to-sky-600 text-white border-sky-500 ring-4 ring-sky-500/30 shadow-lg shadow-sky-500/20 transform scale-[1.02]';
+              'bg-gradient-to-br from-sky-500 to-sky-600 text-white border-2 border-sky-500 ring-4 ring-sky-500/30 shadow-lg shadow-sky-500/20 transform scale-[1.02]';
             accentClass = 'bg-sky-300';
           } else {
             // Default unselected - improved hover state

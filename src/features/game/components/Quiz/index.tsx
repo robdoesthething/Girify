@@ -1,4 +1,4 @@
-import { motion } from 'framer-motion';
+import { AnimatePresence, motion } from 'framer-motion';
 import { FC, ReactNode } from 'react';
 import Banner from './Banner';
 import Hints from './Hints';
@@ -38,16 +38,18 @@ const Container: FC<{ children: ReactNode; keyProp: string | number }> = ({
   keyProp,
 }) => {
   return (
-    <motion.div
-      key={keyProp}
-      initial={{ opacity: 0, x: 50 }}
-      animate={{ opacity: 1, x: 0 }}
-      exit={{ opacity: 0, x: -50 }}
-      transition={{ duration: 0.3 }}
-      className="w-full h-full flex flex-col overflow-hidden"
-    >
-      {children}
-    </motion.div>
+    <AnimatePresence mode="popLayout" initial={false}>
+      <motion.div
+        key={keyProp}
+        initial={{ opacity: 0, x: 50 }}
+        animate={{ opacity: 1, x: 0 }}
+        exit={{ opacity: 0, x: -50 }}
+        transition={{ duration: 0.3 }}
+        className="w-full h-full flex flex-col overflow-hidden"
+      >
+        {children}
+      </motion.div>
+    </AnimatePresence>
   );
 };
 
