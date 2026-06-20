@@ -15,7 +15,6 @@ export const useAppInitialization = () => {
 
   // UI State
   const [isInitialized, setIsInitialized] = useState(false);
-  const [, setInitError] = useState<string | null>(null);
 
   // Application Initialization (Global only)
   // Game-specific init (streets, etc) moved to GamePage
@@ -25,24 +24,25 @@ export const useAppInitialization = () => {
     // Actually, syncWithLocal imports 'shop' which might pull in other stuff.
     // Let's dynamic import it.
 
-    const init = async () => {
-      try {
-        const { syncWithLocal } = await import('../utils/shop');
-        const { updated, errors } = await syncWithLocal();
-        if (updated > 0) {
-          console.warn(`[Init] Synced ${updated} shop items`);
-        }
-        if (errors > 0) {
-          console.error(`[Init] Failed to sync ${errors} shop items`);
-        }
-        setIsInitialized(true);
-      } catch (error) {
-        console.error('Initialization failed:', error);
-        setInitError('Failed to initialize resources');
-        setIsInitialized(true);
-      }
+    const init = () => {
+      setIsInitialized(true);
 
-      // Retry any scores that failed to save in a previous session (fire-and-forget)
+      // Shop sync and pending score flush run in background — don't block the UI.
+      import('../utils/shop')
+        .then(({ syncWithLocal }) =>
+          syncWithLocal()
+            .then(({ updated, errors }) => {
+              if (updated > 0) {
+                console.warn(`[Init] Synced ${updated} shop items`);
+              }
+              if (errors > 0) {
+                console.error(`[Init] Failed to sync ${errors} shop items`);
+              }
+            })
+            .catch(e => console.error('Initialization failed:', e))
+        )
+        .catch(e => console.error('Initialization failed:', e));
+
       import('../utils/game/pendingScores').then(({ flushPendingScores }) => {
         flushPendingScores().catch(e => console.error('[Init] Pending score flush failed:', e));
       });

@@ -190,7 +190,7 @@
 }
 
 .animate-loading-bar {
-  animation: loading-bar 1.5s ease-in-out infinite;
+  animation: loading-bar 0.7s ease-in-out infinite;
 }
 
 /* Scale-in animation for checkmarks and icons */
