@@ -1,10 +1,4 @@
-/**
- * AdminUsersTab Component
- *
- * User management table for admin panel.
- */
-
-import React from 'react';
+import React, { useState } from 'react';
 import { useTheme } from '../../context/ThemeContext';
 import { UserProfile } from '../../utils/social';
 import { themeClasses } from '../../utils/themeUtils';
@@ -18,17 +12,40 @@ interface AdminUsersTabProps {
 
 const AdminUsersTab: React.FC<AdminUsersTabProps> = ({ users, onRefresh, onView, onEdit }) => {
   const { theme } = useTheme();
+  const [showBannedOnly, setShowBannedOnly] = useState(false);
+
+  const bannedCount = users.filter(u => u.banned).length;
+  const filtered = showBannedOnly ? users.filter(u => u.banned) : users;
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <h2 className="text-3xl font-black">User Management</h2>
-        <button
-          onClick={onRefresh}
-          className="px-4 py-2 bg-slate-200 dark:bg-slate-800 rounded-lg text-sm font-bold transition-all active:scale-95"
-        >
-          Refresh
-        </button>
+      <div className="flex flex-wrap justify-between items-center gap-3">
+        <div>
+          <h2 className="text-3xl font-black">User Management</h2>
+          <p className="text-sm opacity-50 mt-0.5">
+            {users.length} total · {bannedCount} banned
+          </p>
+        </div>
+        <div className="flex gap-3 items-center">
+          {bannedCount > 0 && (
+            <button
+              onClick={() => setShowBannedOnly(v => !v)}
+              className={`px-4 py-2 rounded-lg text-sm font-bold transition-all active:scale-95 ${
+                showBannedOnly
+                  ? 'bg-rose-500 text-white'
+                  : 'bg-rose-500/10 text-rose-400 hover:bg-rose-500/20'
+              }`}
+            >
+              ⛔ {showBannedOnly ? `Showing ${bannedCount} banned` : `${bannedCount} banned`}
+            </button>
+          )}
+          <button
+            onClick={onRefresh}
+            className="px-4 py-2 bg-slate-200 dark:bg-slate-800 rounded-lg text-sm font-bold transition-all active:scale-95"
+          >
+            Refresh
+          </button>
+        </div>
       </div>
 
       <div
@@ -45,13 +62,24 @@ const AdminUsersTab: React.FC<AdminUsersTabProps> = ({ users, onRefresh, onView,
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-200 dark:divide-slate-700">
-            {users.map(user => (
+            {filtered.map(user => (
               <tr
                 key={user.uid || user.username}
-                className={themeClasses(theme, 'hover:bg-slate-800/50', 'hover:bg-slate-50')}
+                className={`transition-colors ${
+                  user.banned
+                    ? 'bg-rose-500/5 hover:bg-rose-500/10'
+                    : themeClasses(theme, 'hover:bg-slate-800/50', 'hover:bg-slate-50')
+                }`}
               >
                 <td className="p-4">
-                  <div className="font-bold">{user.username}</div>
+                  <div className="flex items-center gap-2">
+                    <span className="font-bold">{user.username}</span>
+                    {user.banned && (
+                      <span className="text-[10px] font-black px-1.5 py-0.5 bg-rose-500 text-white rounded uppercase tracking-wide">
+                        Banned
+                      </span>
+                    )}
+                  </div>
                   <div className="text-xs opacity-50">{user.realName}</div>
                 </td>
                 <td className="p-4 text-sm font-mono opacity-70">{user.email || 'No email'}</td>
@@ -64,22 +92,31 @@ const AdminUsersTab: React.FC<AdminUsersTabProps> = ({ users, onRefresh, onView,
                   </div>
                 </td>
                 <td className="p-4 font-mono font-bold text-yellow-500">{user.giuros || 0} 🪙</td>
-                <td className="p-4 flex gap-2">
-                  <button
-                    onClick={() => onView(user)}
-                    className="px-3 py-1 bg-purple-500/10 text-purple-500 rounded-lg text-xs font-bold hover:bg-purple-500 hover:text-white transition-all active:scale-95"
-                  >
-                    View
-                  </button>
-                  <button
-                    onClick={() => onEdit(user)}
-                    className="px-3 py-1 bg-sky-500/10 text-sky-500 rounded-lg text-xs font-bold hover:bg-sky-500 hover:text-white transition-all active:scale-95"
-                  >
-                    Edit
-                  </button>
+                <td className="p-4">
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => onView(user)}
+                      className="px-3 py-1 bg-purple-500/10 text-purple-500 rounded-lg text-xs font-bold hover:bg-purple-500 hover:text-white transition-all active:scale-95"
+                    >
+                      View
+                    </button>
+                    <button
+                      onClick={() => onEdit(user)}
+                      className="px-3 py-1 bg-sky-500/10 text-sky-500 rounded-lg text-xs font-bold hover:bg-sky-500 hover:text-white transition-all active:scale-95"
+                    >
+                      Edit
+                    </button>
+                  </div>
                 </td>
               </tr>
             ))}
+            {filtered.length === 0 && (
+              <tr>
+                <td colSpan={5} className="p-8 text-center opacity-40 text-sm">
+                  {showBannedOnly ? 'No banned users.' : 'No users found.'}
+                </td>
+              </tr>
+            )}
           </tbody>
         </table>
       </div>

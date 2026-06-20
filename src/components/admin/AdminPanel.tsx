@@ -1,11 +1,12 @@
 import { AnimatePresence } from 'framer-motion';
 import React, { useState } from 'react';
-import { Button, Card, Heading, Spinner, Tabs } from '../../components/ui';
+import { Heading, Spinner, Tabs } from '../../components/ui';
 import { useTheme } from '../../context/ThemeContext';
 import { useAdminData } from '../../hooks/useAdminData';
 import { useConfirm } from '../../hooks/useConfirm';
 import { useNotification } from '../../hooks/useNotification';
 import { UserProfile } from '../../utils/social';
+import { updateShopItem } from '../../utils/shop';
 import { themeClasses } from '../../utils/themeUtils';
 import { ConfirmDialog } from '../ConfirmDialog';
 
@@ -13,6 +14,7 @@ import AdminAchievements from './AdminAchievements';
 import AdminAnnouncements from './AdminAnnouncements';
 import AdminConfig from './AdminConfig';
 import AdminContent from './AdminContent';
+import AdminDashboard from './AdminDashboard';
 import AdminFeedback from './AdminFeedback';
 import AdminGameMaster from './AdminGameMaster';
 import AdminGiuros from './AdminGiuros';
@@ -20,9 +22,7 @@ import AdminShop from './AdminShop';
 import AdminTeams from './AdminTeams';
 import AdminUsersTab from './AdminUsersTab';
 import EditUserModal from './EditUserModal';
-import MetricCard from './MetricCard';
 import ViewUserModal from './ViewUserModal';
-import { updateShopItem } from '../../utils/shop';
 
 const ADMIN_TABS = [
   { id: 'dashboard', label: 'Dashboard' },
@@ -47,10 +47,9 @@ const AdminPanel: React.FC = () => {
   const { confirm, confirmConfig, handleClose } = useConfirm();
 
   const { state, actions } = useAdminData(notify, confirm);
-  const { users, feedback, announcements, shopItems, metrics, loading } = state;
-  const { fetchData, handleCleanupUser, handleUpdateUser } = actions;
+  const { users, feedback, announcements, shopItems, metrics, loading, migrationStatus } = state;
+  const { fetchData, handleMigration, handleCleanupUser, handleUpdateUser } = actions;
 
-  // Render content based on active tab
   const renderContent = () => {
     switch (activeTab) {
       case 'gamemaster':
@@ -116,54 +115,14 @@ const AdminPanel: React.FC = () => {
       case 'dashboard':
       default:
         return (
-          <div className="space-y-8">
-            <Heading variant="h2">Overview</Heading>
-            {metrics ? (
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-                <MetricCard title="Total Users" value={metrics.totalUsers} color="text-sky-500" />
-                <MetricCard
-                  title="New (24h)"
-                  value={metrics.newUsers24h}
-                  color="text-emerald-500"
-                />
-                <MetricCard
-                  title="Active (24h)"
-                  value={metrics.activeUsers24h}
-                  color="text-purple-500"
-                />
-                <MetricCard
-                  title="Games (24h)"
-                  value={metrics.gamesPlayed24h}
-                  color="text-orange-500"
-                />
-                <MetricCard title="Feedback" value={feedback.length} color="text-pink-500" />
-                <MetricCard
-                  title="Items"
-                  value={shopItems.all?.length || 0}
-                  color="text-yellow-500"
-                />
-              </div>
-            ) : (
-              <div className="py-12 flex justify-center">
-                <Spinner />
-              </div>
-            )}
-
-            {/* Data Tools */}
-            <Card className="p-6">
-              <Heading variant="h4" className="mb-4">
-                Data Tools
-              </Heading>
-              <div className="flex items-center gap-4 flex-wrap">
-                <Button
-                  onClick={handleCleanupUser}
-                  className="bg-rose-500 hover:bg-rose-600 text-white shadow-rose-500/20"
-                >
-                  🗑️ Cleanup No-Email Users
-                </Button>
-              </div>
-            </Card>
-          </div>
+          <AdminDashboard
+            metrics={metrics}
+            feedbackCount={feedback.length}
+            shopItemsCount={shopItems.all?.length || 0}
+            onMigration={handleMigration}
+            onCleanup={handleCleanupUser}
+            migrationStatus={migrationStatus}
+          />
         );
     }
   };
@@ -185,7 +144,6 @@ const AdminPanel: React.FC = () => {
         </div>
       </div>
 
-      {/* Main Content */}
       <div className="flex-1 overflow-y-auto p-6 pb-20">
         {loading ? (
           <div className="flex items-center justify-center h-full">
@@ -196,7 +154,6 @@ const AdminPanel: React.FC = () => {
         )}
       </div>
 
-      {/* Modals */}
       <AnimatePresence>
         {editingUser && (
           <EditUserModal user={editingUser} setUser={setEditingUser} onSave={handleUpdateUser} />

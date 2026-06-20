@@ -25,6 +25,7 @@ export interface AdminDataState {
   shopItems: GroupedShopItems;
   metrics: DashboardMetrics | null;
   loading: boolean;
+  migrationStatus: string | null;
 }
 
 export function useAdminData(
@@ -45,6 +46,7 @@ export function useAdminData(
   });
   const [metrics, setMetrics] = useState<DashboardMetrics | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
+  const [migrationStatus, setMigrationStatus] = useState<string | null>(null);
 
   const fetchData = useCallback(async () => {
     setLoading(true);
@@ -69,6 +71,20 @@ export function useAdminData(
     };
     loadData();
   }, [fetchData]);
+
+  const handleMigration = async () => {
+    if (
+      !(await confirm(
+        'WARNING: This will migrate ALL users to lowercase usernames. Are you sure?',
+        'Start Migration',
+        true
+      ))
+    ) {
+      return;
+    }
+    setMigrationStatus('Migration is no longer needed — data is already normalized.');
+    fetchData();
+  };
 
   const handleCleanupUser = async () => {
     const badUser = users.find(u => !u.email);
@@ -127,8 +143,8 @@ export function useAdminData(
   };
 
   return {
-    state: { users, feedback, announcements, shopItems, metrics, loading },
-    actions: { fetchData, handleCleanupUser, handleUpdateUser },
+    state: { users, feedback, announcements, shopItems, metrics, loading, migrationStatus },
+    actions: { fetchData, handleMigration, handleCleanupUser, handleUpdateUser },
   };
 }
 
