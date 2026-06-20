@@ -37,10 +37,10 @@ const Options: React.FC<OptionsProps> = ({
                 'bg-gradient-to-br from-navy to-navy-dark text-white border-2 border-navy ring-4 ring-navy/30 shadow-lg transform scale-[0.98]';
               accentClass = 'bg-sky-400';
             } else {
-              // Other options - muted
+              // Other options - muted (no bar so it can't bleed into the next question's transition)
               btnClass =
                 'bg-slate-100/50 dark:bg-slate-800/30 text-slate-400 border-2 border-slate-200 dark:border-slate-700/50';
-              accentClass = 'bg-slate-300 dark:bg-slate-700';
+              accentClass = 'bg-transparent';
             }
           } else if (isSelected) {
             // Selected but not submitted yet
