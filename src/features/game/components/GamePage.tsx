@@ -54,10 +54,11 @@ function GamePageContent({ username }: GamePageProps) {
   const achievements = useAchievements(state.username || '', state.gameState, location.pathname);
 
   // District check — prompts logged-in users without a team to pick one
-  const { showDistrictModal, handleDistrictComplete, handleDistrictDismiss } = useAuthRedirect({
-    username: state.username,
-    handleRegister,
-  });
+  const { showDistrictModal, handleDistrictComplete, handleDistrictDismiss, pendingOAuthHandle } =
+    useAuthRedirect({
+      username: state.username,
+      handleRegister,
+    });
 
   // Check announcements on home screen
   useEffect(() => {
@@ -131,7 +132,7 @@ function GamePageContent({ username }: GamePageProps) {
         {showDistrictModal && (
           <Suspense fallback={null}>
             <DistrictSelectionModal
-              username={state.username || ''}
+              username={pendingOAuthHandle || state.username || ''}
               onComplete={handleDistrictComplete}
               onDismiss={handleDistrictDismiss}
             />

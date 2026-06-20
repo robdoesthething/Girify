@@ -23,6 +23,7 @@ export interface UseAuthRedirectReturn {
   districtFlowActive: React.MutableRefObject<boolean>;
   handleDistrictComplete: () => void;
   handleDistrictDismiss: () => void;
+  pendingOAuthHandle: string | null;
 }
 
 export function useAuthRedirect({
@@ -33,6 +34,7 @@ export function useAuthRedirect({
   const [isProcessingRedirect, setIsProcessingRedirect] = useState(false);
   const [hasProcessedRedirect, setHasProcessedRedirect] = useState(false);
   const [authTick, setAuthTick] = useState(0);
+  const [pendingOAuthHandle, setPendingOAuthHandle] = useState<string | null>(null);
   const districtFlowActive = useRef(false);
   const checkedDistrictForUsername = useRef<string | null>(null);
 
@@ -98,6 +100,7 @@ export function useAuthRedirect({
             } else {
               await supabase.auth.updateUser({ data: { display_name: handle } });
               storage.set(STORAGE_KEYS.USERNAME, handle);
+              setPendingOAuthHandle(handle);
               districtFlowActive.current = true;
               setShowDistrictModal(true);
             }
@@ -107,6 +110,7 @@ export function useAuthRedirect({
 
             await supabase.auth.updateUser({ data: { display_name: handle } });
             storage.set(STORAGE_KEYS.USERNAME, handle);
+            setPendingOAuthHandle(handle);
             districtFlowActive.current = true;
             setShowDistrictModal(true);
           }
@@ -183,15 +187,18 @@ export function useAuthRedirect({
 
   const handleDistrictComplete = () => {
     setShowDistrictModal(false);
-    if (username) {
-      handleRegister(username);
+    const resolvedHandle = pendingOAuthHandle || username;
+    if (resolvedHandle) {
+      handleRegister(resolvedHandle);
     }
+    setPendingOAuthHandle(null);
   };
 
   const handleDistrictDismiss = () => {
     districtFlowActive.current = false;
     checkedDistrictForUsername.current = null;
     setShowDistrictModal(false);
+    setPendingOAuthHandle(null);
   };
 
   return {
@@ -201,5 +208,6 @@ export function useAuthRedirect({
     districtFlowActive,
     handleDistrictComplete,
     handleDistrictDismiss,
+    pendingOAuthHandle,
   };
 }
