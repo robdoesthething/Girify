@@ -1,8 +1,8 @@
 import { motion } from 'framer-motion';
 import React, { useEffect, useState } from 'react';
-import { Achievement } from '../../data/achievements';
+import { Achievement } from '../../../data/achievements';
 
-import Input from '../ui/Input';
+import Input from '../../../components/ui/Input';
 
 interface AchievementEditorProps {
   initialItem: Partial<Achievement>;

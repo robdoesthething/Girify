@@ -1,6 +1,6 @@
 import React from 'react';
-import { ShopItem } from '../../utils/shop';
-import { themeClasses } from '../../utils/themeUtils';
+import { ShopItem } from '../../../utils/shop';
+import { themeClasses } from '../../../utils/themeUtils';
 
 interface ShopPriceEditorProps {
   items: ShopItem[];

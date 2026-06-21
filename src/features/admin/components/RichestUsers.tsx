@@ -1,6 +1,6 @@
 import React from 'react';
-import { UserProfile } from '../../utils/social';
-import { themeClasses } from '../../utils/themeUtils';
+import { UserProfile } from '../../../utils/social';
+import { themeClasses } from '../../../utils/themeUtils';
 
 interface RichestUsersProps {
   users: UserProfile[];

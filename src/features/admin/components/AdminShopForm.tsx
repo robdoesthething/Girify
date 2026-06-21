@@ -1,7 +1,7 @@
 import { motion } from 'framer-motion';
 import React from 'react';
-import { ShopItem, ShopItemType } from '../../utils/shop';
-import { themeClasses } from '../../utils/themeUtils';
+import { ShopItem, ShopItemType } from '../../../utils/shop';
+import { themeClasses } from '../../../utils/themeUtils';
 
 interface AdminShopFormProps {
   editingItem: Partial<ShopItem>;
@@ -12,7 +12,7 @@ interface AdminShopFormProps {
   onChange: (updates: Partial<ShopItem>) => void;
 }
 
-import Input from '../ui/Input';
+import Input from '../../../components/ui/Input';
 
 // ... existing imports
 

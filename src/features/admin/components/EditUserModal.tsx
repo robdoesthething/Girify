@@ -6,10 +6,10 @@
 
 import { motion } from 'framer-motion';
 import React from 'react';
-import { useTheme } from '../../context/ThemeContext';
-import { UserProfile } from '../../utils/social';
-import { themeClasses } from '../../utils/themeUtils';
-import Input from '../ui/Input';
+import { useTheme } from '../../../context/ThemeContext';
+import { UserProfile } from '../../../utils/social';
+import { themeClasses } from '../../../utils/themeUtils';
+import Input from '../../../components/ui/Input';
 
 interface EditUserModalProps {
   user: UserProfile;

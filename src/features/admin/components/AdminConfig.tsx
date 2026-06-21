@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { GameConfig, getGameConfig, updateGameConfig } from '../../services/db/config';
-import Input from '../ui/Input';
+import { GameConfig, getGameConfig, updateGameConfig } from '../../../services/db/config';
+import Input from '../../../components/ui/Input';
 
 interface AdminConfigProps {
   onNotify: (msg: string, type: 'success' | 'error' | 'info') => void;

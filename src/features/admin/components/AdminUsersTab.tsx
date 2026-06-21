@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import { useTheme } from '../../context/ThemeContext';
-import { UserProfile } from '../../utils/social';
-import { themeClasses } from '../../utils/themeUtils';
+import { useTheme } from '../../../context/ThemeContext';
+import { UserProfile } from '../../../utils/social';
+import { themeClasses } from '../../../utils/themeUtils';
 
 interface AdminUsersTabProps {
   users: UserProfile[];

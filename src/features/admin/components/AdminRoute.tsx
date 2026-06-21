@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Navigate, Outlet } from 'react-router-dom';
-import { supabase } from '../../services/supabase';
-import { isCurrentUserAdmin } from '../../utils/auth';
+import { supabase } from '../../../services/supabase';
+import { isCurrentUserAdmin } from '../../../utils/auth';
 
 const AdminRoute: React.FC = () => {
   const [isAdmin, setIsAdmin] = useState<boolean | null>(null); // null = checking, true/false

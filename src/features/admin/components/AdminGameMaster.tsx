@@ -1,9 +1,9 @@
 import { AnimatePresence, motion } from 'framer-motion';
 import React, { useState } from 'react';
-import { getUserProfile, updateUserAsAdmin } from '../../utils/social';
+import { getUserProfile, updateUserAsAdmin } from '../../../utils/social';
 
-import { supabase } from '../../services/supabase';
-import Input from '../ui/Input';
+import { supabase } from '../../../services/supabase';
+import Input from '../../../components/ui/Input';
 
 interface AdminGameMasterProps {
   onNotify: (msg: string, type: 'success' | 'error' | 'info') => void;

@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
-import { useTheme } from '../../context/ThemeContext';
-import { DISTRICTS } from '../../data/districts';
-import { getAllUsers, getDistrictRankings } from '../../utils/social';
-import { themeClasses } from '../../utils/themeUtils';
+import { useTheme } from '../../../context/ThemeContext';
+import { DISTRICTS } from '../../../data/districts';
+import { getAllUsers, getDistrictRankings } from '../../../utils/social';
+import { themeClasses } from '../../../utils/themeUtils';
 
 interface TeamStats {
   id: string;

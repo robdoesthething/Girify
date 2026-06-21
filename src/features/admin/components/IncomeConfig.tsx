@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import { PayoutConfig } from '../../services/db/config';
-import { themeClasses } from '../../utils/themeUtils';
-import Input from '../ui/Input';
+import { PayoutConfig } from '../../../services/db/config';
+import { themeClasses } from '../../../utils/themeUtils';
+import Input from '../../../components/ui/Input';
 
 interface IncomeConfigProps {
   payouts: PayoutConfig | null;

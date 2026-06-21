@@ -1,8 +1,13 @@
 import React, { useState } from 'react';
-import { useTheme } from '../../context/ThemeContext';
-import { approveFeedback, deleteFeedback, FeedbackItem, rejectFeedback } from '../../utils/social';
-import { themeClasses } from '../../utils/themeUtils';
-import Input from '../ui/Input';
+import { useTheme } from '../../../context/ThemeContext';
+import {
+  approveFeedback,
+  deleteFeedback,
+  FeedbackItem,
+  rejectFeedback,
+} from '../../../utils/social';
+import { themeClasses } from '../../../utils/themeUtils';
+import Input from '../../../components/ui/Input';
 
 interface AdminFeedbackProps {
   feedback: FeedbackItem[];

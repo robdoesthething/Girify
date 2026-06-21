@@ -5,8 +5,8 @@
  */
 
 import React from 'react';
-import { useTheme } from '../../context/ThemeContext';
-import { themeClasses } from '../../utils/themeUtils';
+import { useTheme } from '../../../context/ThemeContext';
+import { themeClasses } from '../../../utils/themeUtils';
 
 interface MetricCardProps {
   title: string;

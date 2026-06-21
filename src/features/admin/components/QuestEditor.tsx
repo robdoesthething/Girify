@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { Quest } from '../../utils/game/quests';
-import Input from '../ui/Input';
+import { Quest } from '../../../utils/game/quests';
+import Input from '../../../components/ui/Input';
 
 interface QuestEditorProps {
   initialQuest?: Partial<Quest> | null;

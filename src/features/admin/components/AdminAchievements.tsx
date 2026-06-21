@@ -1,7 +1,7 @@
 import { AnimatePresence } from 'framer-motion';
 import React, { useEffect, useState } from 'react';
-import { useAdminAchievements } from '../../features/admin/hooks/useAdminAchievements';
-import Input from '../ui/Input';
+import { useAdminAchievements } from '../hooks/useAdminAchievements';
+import Input from '../../../components/ui/Input';
 import AchievementEditor from './AchievementEditor';
 
 interface AdminAchievementsProps {

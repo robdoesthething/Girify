@@ -1,16 +1,16 @@
 import { AnimatePresence } from 'framer-motion';
 import React from 'react';
-import { Button, Card, Heading } from '../../components/ui';
-import { useTheme } from '../../context/ThemeContext';
-import { useAdminCRUD } from '../../features/admin/hooks/useAdminCRUD';
+import { Button, Card, Heading } from '../../../components/ui';
+import { useTheme } from '../../../context/ThemeContext';
+import { useAdminCRUD } from '../hooks/useAdminCRUD';
 import {
   createShopItem,
   deleteShopItem,
   ShopItem,
   syncWithLocal,
   updateShopItem,
-} from '../../utils/shop';
-import { themeClasses } from '../../utils/themeUtils';
+} from '../../../utils/shop';
+import { themeClasses } from '../../../utils/themeUtils';
 import AdminShopForm from './AdminShopForm';
 
 interface AdminShopProps {

@@ -1,6 +1,6 @@
 import React from 'react';
-import { Card } from '../../components/ui';
-import { DashboardMetrics } from '../../utils/game/metrics';
+import { Card } from '../../../components/ui';
+import { DashboardMetrics } from '../../../utils/game/metrics';
 
 interface AdminDashboardProps {
   metrics: DashboardMetrics | null;

@@ -20,8 +20,8 @@ export { default as TermsOfService } from './components/TermsOfService';
 // Lazy loaded heavy route components
 export const GamePage = lazy(() => import('./features/game/components/GamePage'));
 export const GameScreen = lazy(() => import('./features/game/components/GameScreen'));
-export const AdminPanel = lazy(() => import('./components/admin/AdminPanel'));
-export const AdminRoute = lazy(() => import('./components/admin/AdminRoute'));
+export const AdminPanel = lazy(() => import('./features/admin/components/AdminPanel'));
+export const AdminRoute = lazy(() => import('./features/admin/components/AdminRoute'));
 export const FriendsScreen = lazy(() => import('./features/friends/components/FriendsScreen'));
 export const LeaderboardScreen = lazy(
   () => import('./features/leaderboard/components/LeaderboardScreen')

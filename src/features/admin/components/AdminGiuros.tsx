@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { getPayoutConfig, PayoutConfig, updatePayoutConfig } from '../../services/db/config';
-import { UserProfile } from '../../utils/social';
-import { ShopItem } from '../../utils/shop';
+import { getPayoutConfig, PayoutConfig, updatePayoutConfig } from '../../../services/db/config';
+import { UserProfile } from '../../../utils/social';
+import { ShopItem } from '../../../utils/shop';
 import EconomyMetrics from './EconomyMetrics';
 import IncomeConfig from './IncomeConfig';
 import RichestUsers from './RichestUsers';
