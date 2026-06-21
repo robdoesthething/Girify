@@ -153,7 +153,6 @@ const GameScreen: FC = () => {
                     selectedAnswer={state.selectedAnswer}
                     feedback={state.feedback as any}
                     disabled={state.isInputLocked}
-                    correctStreetId={currentStreet?.id}
                   />
                 </Quiz.Content>
 

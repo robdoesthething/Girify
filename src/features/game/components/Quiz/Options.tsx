@@ -11,7 +11,6 @@ interface OptionsProps {
   selectedAnswer: Option | null;
   feedback: 'idle' | 'selected' | 'transitioning';
   disabled?: boolean;
-  correctStreetId?: string;
 }
 
 const Options: React.FC<OptionsProps> = ({
@@ -20,7 +19,6 @@ const Options: React.FC<OptionsProps> = ({
   selectedAnswer,
   feedback,
   disabled,
-  correctStreetId,
 }) => {
   return (
     <div className="flex-1 min-h-0 flex flex-col justify-center px-3 pb-2">
@@ -28,23 +26,16 @@ const Options: React.FC<OptionsProps> = ({
         {options.map(opt => {
           const isSelected = selectedAnswer && opt.id === selectedAnswer.id;
           const isSubmitted = feedback !== 'idle' && feedback !== 'selected';
-          const isCorrectAnswer = isSubmitted && !!correctStreetId && opt.id === correctStreetId;
-          const isWrongSelection = isSubmitted && !!isSelected && !isCorrectAnswer;
 
           let btnClass = '';
           let accentClass = '';
 
           if (isSubmitted) {
-            if (isCorrectAnswer) {
-              // Correct answer - green
+            if (isSelected) {
+              // User's answer - Navy blue with glow
               btnClass =
-                'bg-gradient-to-br from-emerald-500 to-emerald-600 text-white border-2 border-emerald-500 ring-4 ring-emerald-500/30 shadow-lg transform scale-[0.98]';
-              accentClass = 'bg-emerald-300';
-            } else if (isWrongSelection) {
-              // User's wrong selection - red
-              btnClass =
-                'bg-gradient-to-br from-red-500 to-red-600 text-white border-2 border-red-500 ring-4 ring-red-500/30 shadow-lg transform scale-[0.98]';
-              accentClass = 'bg-red-300';
+                'bg-gradient-to-br from-navy to-navy-dark text-white border-2 border-navy ring-4 ring-navy/30 shadow-lg transform scale-[0.98]';
+              accentClass = 'bg-sky-400';
             } else {
               // Other options - muted
               btnClass =
@@ -102,10 +93,10 @@ const Options: React.FC<OptionsProps> = ({
                 {opt.name}
               </span>
 
-              {/* Result icon */}
-              {isSubmitted && isCorrectAnswer && (
+              {/* Checkmark for selected state */}
+              {isSelected && isSubmitted && (
                 <svg
-                  className="absolute right-3 sm:right-4 w-5 h-5 sm:w-6 sm:h-6 text-white animate-scale-in flex-shrink-0"
+                  className="absolute right-3 sm:right-4 w-5 h-5 sm:w-6 sm:h-6 text-white animate-scale-in"
                   fill="none"
                   viewBox="0 0 24 24"
                   stroke="currentColor"
@@ -115,21 +106,6 @@ const Options: React.FC<OptionsProps> = ({
                     strokeLinejoin="round"
                     strokeWidth={3}
                     d="M5 13l4 4L19 7"
-                  />
-                </svg>
-              )}
-              {isSubmitted && isWrongSelection && (
-                <svg
-                  className="absolute right-3 sm:right-4 w-5 h-5 sm:w-6 sm:h-6 text-white animate-scale-in flex-shrink-0"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={3}
-                    d="M6 18L18 6M6 6l12 12"
                   />
                 </svg>
               )}
