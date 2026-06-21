@@ -1,5 +1,24 @@
 # Changelog
 
+## [Unreleased] - 2026-06-20
+
+### Added
+
+- Your district team is now shown below your username in the individual leaderboard.
+- The quiz now shows a live score countdown while you think — the faster you answer, the higher your score. Hints are more prominent and the quiz layout is more compact.
+
+### Fixed
+
+- Fixed a visual glitch where a leftover shadow appeared on an answer option at the start of a new question.
+- Team names in the leaderboard now always display in their correct English form.
+- New players signing in with Google are now correctly prompted to choose a district team.
+- Score totals on the end-of-game summary now show the correct maximum value.
+
+### Improved
+
+- The app loads faster — the loading screen clears as soon as sign-in resolves, without waiting for background sync.
+- Pages appear more quickly on first visit thanks to faster initial rendering.
+
 ## [Unreleased] - 2026-06-19
 
 ### Added
