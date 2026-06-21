@@ -92,23 +92,6 @@ const Options: React.FC<OptionsProps> = ({
               <span className="relative z-10 text-sm sm:text-base font-semibold leading-tight line-clamp-3 sm:line-clamp-2 w-full font-inter pl-2 sm:pl-3">
                 {opt.name}
               </span>
-
-              {/* Checkmark for selected state */}
-              {isSelected && isSubmitted && (
-                <svg
-                  className="absolute right-3 sm:right-4 w-5 h-5 sm:w-6 sm:h-6 text-white animate-scale-in"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={3}
-                    d="M5 13l4 4L19 7"
-                  />
-                </svg>
-              )}
             </button>
           );
         })}
