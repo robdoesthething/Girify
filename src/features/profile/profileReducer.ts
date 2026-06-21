@@ -1,7 +1,7 @@
-import { Achievement } from '../data/achievements';
-import { GameHistory, UserProfile } from '../types/user';
-import { EquippedCosmetics } from '../utils/social/types';
-import { ShopItem } from '../utils/shop';
+import { Achievement } from '../../data/achievements';
+import { GameHistory, UserProfile } from '../../types/user';
+import { EquippedCosmetics } from '../../utils/social/types';
+import { ShopItem } from '../../utils/shop';
 
 // Profile state types
 export interface ProfileState {

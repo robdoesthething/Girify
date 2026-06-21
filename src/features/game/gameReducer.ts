@@ -1,5 +1,5 @@
-import { QuizResult, Street } from '../types/game';
-import { storage } from '../utils/storage';
+import { QuizResult, Street } from '../../types/game';
+import { storage } from '../../utils/storage';
 
 // Game state types
 export type GameStateType = 'intro' | 'register' | 'playing' | 'summary';

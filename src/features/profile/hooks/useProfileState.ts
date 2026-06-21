@@ -6,7 +6,7 @@ import {
   ProfileAction,
   profileReducer,
   ProfileState,
-} from '../../../reducers/profileReducer';
+} from '../profileReducer';
 import { UseProfileDataResult } from './useProfileData';
 
 export interface UseProfileStateResult {

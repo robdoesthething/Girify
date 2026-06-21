@@ -1,7 +1,7 @@
 import { Dispatch, useCallback, useEffect, useMemo, useReducer, useRef } from 'react';
 import { GAME_LOGIC, STORAGE_KEYS, TIME } from '../../../config/constants';
 import { calculateScore } from '../../../config/gameConfig';
-import { gameReducer, initialState } from '../../../reducers/gameReducer';
+import { gameReducer, initialState } from '../gameReducer';
 import { startGame } from '../../../services/gameService';
 import { GameStateObject, QuizResult, Street } from '../../../types/game';
 import { getTodaySeed, shuffleOptions } from '../../../utils/game/dailyChallenge';

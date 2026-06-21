@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { QuizResult, Street } from '../../types/game';
-import { GameAction, gameReducer, GameState, initialState } from '../gameReducer';
+import { QuizResult, Street } from '../../../../types/game';
+import { GameAction, gameReducer, GameState, initialState } from '../../gameReducer';
 
 describe('gameReducer', () => {
   const mockStreet: Street = {
