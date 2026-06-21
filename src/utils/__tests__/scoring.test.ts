@@ -24,9 +24,9 @@ describe('Scoring Logic (gameConfig)', () => {
     expect(slowScore).toBeGreaterThanOrEqual(0);
   });
 
-  it('gives base score only after TIME_DECAY_RATE (8s)', () => {
+  it('gives base score only after TIME_DECAY_RATE (15s)', () => {
     const score = calculateScore(GAME.TIME_DECAY_RATE, true, 0);
-    expect(score).toBe(10); // Scaled base: 100/10 = 10
+    expect(score).toBe(40); // Scaled base: 400/10 = 40
   });
 
   it('subtracts points for using hints', () => {
