@@ -1,4 +1,12 @@
-import { Dispatch, useCallback, useEffect, useMemo, useReducer, useRef } from 'react';
+import {
+  Dispatch,
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useReducer,
+  useRef,
+} from 'react';
 import { GAME_LOGIC, STORAGE_KEYS, TIME } from '../../../config/constants';
 import { calculateScore } from '../../../config/gameConfig';
 import { gameReducer, initialState } from '../gameReducer';
@@ -81,6 +89,14 @@ export const useGameState = (
     Dispatch<GameAction>,
   ];
   const { saveGameResults } = useGamePersistence();
+
+  // Ref-based timer: always reflects the latest questionStartTime without
+  // stale-closure issues. useLayoutEffect runs synchronously after each
+  // commit (before paint), so the ref is current before any click can fire.
+  const questionStartTimeRef = useRef<number | null>(null);
+  useLayoutEffect(() => {
+    questionStartTimeRef.current = state.questionStartTime;
+  }, [state.questionStartTime]);
 
   // Current street being quizzed
   const currentStreet = useMemo(
@@ -186,9 +202,10 @@ export const useGameState = (
       }
 
       const isCorrect = selectedStreet.id === currentStreet.id;
-      const timeElapsed = state.questionStartTime
-        ? (Date.now() - state.questionStartTime) / 1000
-        : 0;
+      // Read from the ref so we always get the current start time regardless of
+      // whether this callback's closure captured a stale state.questionStartTime.
+      const startTime = questionStartTimeRef.current;
+      const timeElapsed = startTime ? (Date.now() - startTime) / 1000 : 0;
       const points = calculateScore(timeElapsed, isCorrect, state.hintsRevealedCount);
 
       const result: QuizResult = {
@@ -205,7 +222,7 @@ export const useGameState = (
         payload: { result, points, selectedStreet },
       });
     },
-    [currentStreet, state.feedback, state.questionStartTime, state.hintsRevealedCount, dispatch]
+    [currentStreet, state.feedback, state.hintsRevealedCount, dispatch]
   );
 
   /**
