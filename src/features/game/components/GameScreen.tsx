@@ -95,13 +95,19 @@ const GameScreen: FC = () => {
             {state.feedback === 'transitioning' && lastResult && (
               <motion.div
                 key={state.currentQuestionIndex}
-                initial={{ opacity: 1, y: 0 }}
-                animate={{ opacity: 0, y: -56 }}
-                transition={{ duration: 0.8, ease: 'easeOut' }}
+                initial={{ opacity: 1, y: 0, scale: 1.3 }}
+                animate={{ opacity: 0, y: -80, scale: 0.9 }}
+                transition={{ duration: 1.4, ease: 'easeOut' }}
                 className="absolute top-1/3 left-1/2 -translate-x-1/2 z-30 pointer-events-none select-none"
               >
                 <span
-                  className={`text-5xl font-black drop-shadow-lg ${lastResult.status === 'correct' ? 'text-emerald-400' : 'text-red-400'}`}
+                  className={`text-7xl font-black drop-shadow-2xl ${lastResult.status === 'correct' ? 'text-emerald-400' : 'text-red-400'}`}
+                  style={{
+                    textShadow:
+                      lastResult.status === 'correct'
+                        ? '0 0 30px rgba(52,211,153,0.6)'
+                        : '0 0 30px rgba(248,113,113,0.6)',
+                  }}
                 >
                   {lastResult.status === 'correct' ? `+${lastResult.points}` : '✗'}
                 </span>
@@ -147,6 +153,7 @@ const GameScreen: FC = () => {
                     selectedAnswer={state.selectedAnswer}
                     feedback={state.feedback as any}
                     disabled={state.isInputLocked}
+                    correctStreetId={currentStreet?.id}
                   />
                 </Quiz.Content>
 

@@ -315,6 +315,43 @@ const SummaryScreen: React.FC<SummaryScreenProps> = ({
             </div>
           </div>
 
+          {/* Per-question results breakdown */}
+          <div className="w-full mb-6">
+            <p className="text-[10px] font-black uppercase tracking-[0.2em] opacity-40 mb-2.5">
+              {t('resultsBreakdown') || 'Resultats'}
+            </p>
+            <div className="space-y-1.5">
+              {quizResults.map((result, i) => (
+                <div
+                  key={i}
+                  className={`flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm ${
+                    result.status === 'correct'
+                      ? 'bg-emerald-500/10 border border-emerald-500/20'
+                      : 'bg-red-500/10 border border-red-500/20'
+                  }`}
+                >
+                  <span
+                    className={`text-base font-black w-4 flex-shrink-0 ${
+                      result.status === 'correct' ? 'text-emerald-400' : 'text-red-400'
+                    }`}
+                  >
+                    {result.status === 'correct' ? '✓' : '✗'}
+                  </span>
+                  <span className="flex-1 font-semibold truncate opacity-90">
+                    {result.street.name}
+                  </span>
+                  <span
+                    className={`font-black tabular-nums flex-shrink-0 ${
+                      result.status === 'correct' ? 'text-emerald-400' : 'text-red-500 opacity-50'
+                    }`}
+                  >
+                    {result.status === 'correct' ? `+${result.points}` : '0'}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
+
           <button
             onClick={handleShare}
             className="w-full py-5 bg-gradient-to-r from-emerald-500 to-sky-500 hover:from-emerald-400 hover:to-sky-400 active:scale-95 text-white rounded-2xl shadow-2xl font-black text-lg transition-all transform hover:scale-[1.02] mb-4 flex items-center justify-center gap-3 group"
