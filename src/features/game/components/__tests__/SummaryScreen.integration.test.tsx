@@ -71,7 +71,12 @@ describe('SummaryScreen Integration', () => {
       streak: 5,
       onRestart: vi.fn(),
       onBackToMenu: vi.fn(),
-      quizResults: Array(5).fill({ time: 5, status: 'correct', points: 1000 }),
+      quizResults: Array(5).fill({
+        time: 5,
+        status: 'correct',
+        points: 1000,
+        street: { id: 's1', name: 'Test Street', coordinates: [] },
+      }),
       quizStreets: Array(5).fill({ id: 's1', name: 'Test Street' }),
       t: (key: string) => key,
     };
@@ -114,7 +119,12 @@ describe('SummaryScreen Integration', () => {
       onRestart: vi.fn(),
       onBackToMenu: vi.fn(),
       onKeepPlaying,
-      quizResults: Array(5).fill({ time: 5, status: 'correct', points: 1000 }),
+      quizResults: Array(5).fill({
+        time: 5,
+        status: 'correct',
+        points: 1000,
+        street: { id: 's1', name: 'Test Street', coordinates: [] },
+      }),
       quizStreets: Array(5).fill({ id: 's1', name: 'Test Street' }),
       t: (key: string) => key,
     };
