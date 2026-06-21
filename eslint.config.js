@@ -25,7 +25,15 @@ export default defineConfig([
 
   // 2. JS/TS Configuration and script files - No project-based type information needed
   {
-    files: ['*.js', '*.cjs', '*.mjs', 'scripts/**/*.js', '.storybook/**/*.js', 'verify_streets.js'],
+    files: [
+      '*.js',
+      '*.cjs',
+      '*.mjs',
+      'scripts/**/*.js',
+      'scripts/**/*.cjs',
+      '.storybook/**/*.js',
+      'verify_streets.js',
+    ],
     languageOptions: {
       globals: {
         ...globals.node,
