@@ -1,6 +1,8 @@
 import React from 'react';
 import { Card } from '../../../components/ui';
+import { useTheme } from '../../../context/ThemeContext';
 import { DashboardMetrics } from '../../../utils/game/metrics';
+import { themeClasses } from '../../../utils/themeUtils';
 
 interface AdminDashboardProps {
   metrics: DashboardMetrics | null;
@@ -16,21 +18,29 @@ const Stat: React.FC<{
   value: string | number;
   sub?: string;
   color?: string;
-  bg?: string;
-}> = ({ label, value, sub, color = 'text-white', bg = 'bg-slate-800/60' }) => (
-  <div className={`${bg} border border-white/5 rounded-2xl p-5 flex flex-col gap-1`}>
-    <span className="text-[11px] font-bold uppercase tracking-widest opacity-50">{label}</span>
-    <span className={`text-3xl font-black leading-none ${color}`}>{value}</span>
-    {sub && <span className="text-xs opacity-40 mt-0.5">{sub}</span>}
-  </div>
-);
+}> = ({ label, value, sub, color }) => {
+  const { theme } = useTheme();
+  const valueColor = color ?? themeClasses(theme, 'text-white', 'text-slate-900');
+  return (
+    <div
+      className={`border rounded-2xl p-5 flex flex-col gap-1 ${themeClasses(theme, 'bg-slate-800/60 border-slate-700', 'bg-white border-slate-200')}`}
+    >
+      <span className="text-[11px] font-bold uppercase tracking-widest opacity-50">{label}</span>
+      <span className={`text-3xl font-black leading-none ${valueColor}`}>{value}</span>
+      {sub && <span className="text-xs opacity-40 mt-0.5">{sub}</span>}
+    </div>
+  );
+};
 
 const RetentionBar: React.FC<{ value: number }> = ({ value }) => {
-  const color = value >= 60 ? 'bg-emerald-500' : value >= 30 ? 'bg-amber-500' : 'bg-rose-500';
+  const { theme } = useTheme();
+  const fill = value >= 60 ? 'bg-emerald-500' : value >= 30 ? 'bg-amber-500' : 'bg-rose-500';
   return (
-    <div className="w-full h-1.5 bg-white/10 rounded-full overflow-hidden mt-2">
+    <div
+      className={`w-full h-1.5 rounded-full overflow-hidden mt-2 ${themeClasses(theme, 'bg-white/10', 'bg-slate-200')}`}
+    >
       <div
-        className={`h-full ${color} rounded-full transition-all duration-700`}
+        className={`h-full ${fill} rounded-full transition-all duration-700`}
         style={{ width: `${Math.min(value, 100)}%` }}
       />
     </div>
@@ -42,11 +52,14 @@ const RetentionCard: React.FC<{ label: string; value: number; cohortNote: string
   value,
   cohortNote,
 }) => {
-  const color = value >= 60 ? 'text-emerald-400' : value >= 30 ? 'text-amber-400' : 'text-rose-400';
+  const { theme } = useTheme();
+  const color = value >= 60 ? 'text-emerald-500' : value >= 30 ? 'text-amber-500' : 'text-rose-500';
   const status = value >= 60 ? 'Healthy' : value >= 30 ? 'Needs attention' : 'Critical';
 
   return (
-    <div className="bg-slate-800/60 border border-white/5 rounded-2xl p-5">
+    <div
+      className={`border rounded-2xl p-5 ${themeClasses(theme, 'bg-slate-800/60 border-slate-700', 'bg-white border-slate-200')}`}
+    >
       <span className="text-[11px] font-bold uppercase tracking-widest opacity-50">{label}</span>
       <div className={`text-4xl font-black mt-1 ${color}`}>{value}%</div>
       <RetentionBar value={value} />
@@ -70,11 +83,16 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
   onCleanup,
   migrationStatus,
 }) => {
+  const { theme } = useTheme();
+
   if (!metrics) {
     return (
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 animate-pulse">
         {Array.from({ length: 8 }).map((_, i) => (
-          <div key={i} className="bg-slate-800/40 rounded-2xl h-24" />
+          <div
+            key={i}
+            className={`rounded-2xl h-24 ${themeClasses(theme, 'bg-slate-800/40', 'bg-slate-200/60')}`}
+          />
         ))}
       </div>
     );

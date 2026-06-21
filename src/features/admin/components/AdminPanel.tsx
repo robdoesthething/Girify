@@ -129,10 +129,10 @@ const AdminPanel: React.FC = () => {
 
   return (
     <div
-      className={`fixed inset-0 pt-16 flex flex-col ${themeClasses(theme, 'bg-slate-900 text-white', 'bg-slate-50 text-slate-900')}`}
+      className={`flex flex-col min-h-full ${themeClasses(theme, 'bg-slate-900 text-white', 'bg-slate-50 text-slate-900')}`}
     >
       <div
-        className={`px-6 py-4 border-b ${themeClasses(theme, 'border-slate-800 bg-slate-900', 'border-slate-200 bg-white')}`}
+        className={`sticky top-0 z-20 px-6 py-4 border-b ${themeClasses(theme, 'border-slate-800 bg-slate-900', 'border-slate-200 bg-white')}`}
       >
         <div className="flex items-center justify-between mb-4">
           <Heading variant="h3" className="text-sky-500 mb-0">
@@ -144,9 +144,9 @@ const AdminPanel: React.FC = () => {
         </div>
       </div>
 
-      <div className="flex-1 overflow-y-auto p-6 pb-20">
+      <div className="p-6 pb-20">
         {loading ? (
-          <div className="flex items-center justify-center h-full">
+          <div className="flex items-center justify-center py-20">
             <Spinner size="lg" />
           </div>
         ) : (
