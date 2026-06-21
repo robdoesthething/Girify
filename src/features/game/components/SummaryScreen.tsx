@@ -44,7 +44,7 @@ const SummaryScreen: React.FC<SummaryScreenProps> = ({
   const [view, setView] = useState<'curiosity' | 'actions'>('curiosity');
   const [shareStatus, setShareStatus] = useState<string | null>(null);
 
-  const maxPossibleScore = total * 1000;
+  const maxPossibleScore = total * 100;
   const curiosity = useMemo<Curiosity>(
     () =>
       getCuriosityByStreets(
