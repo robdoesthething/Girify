@@ -110,7 +110,7 @@ export const initialState: GameState = {
   sessionSeed: null,
 };
 
-const MAX_SCORE = 1000;
+const MAX_SCORE = 10000;
 
 export function gameReducer(state: GameState, action: GameAction): GameState {
   switch (action.type) {

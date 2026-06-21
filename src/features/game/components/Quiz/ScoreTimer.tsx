@@ -8,7 +8,7 @@ interface ScoreTimerProps {
 }
 
 const ScoreTimer: React.FC<ScoreTimerProps> = ({ questionStartTime, hintsUsed, feedback }) => {
-  const [potential, setPotential] = useState(100);
+  const [potential, setPotential] = useState(1000);
 
   useEffect(() => {
     if (feedback !== 'idle' || !questionStartTime) {
@@ -30,11 +30,11 @@ const ScoreTimer: React.FC<ScoreTimerProps> = ({ questionStartTime, hintsUsed, f
   }
 
   const color =
-    potential >= 80 ? 'text-emerald-400' : potential >= 50 ? 'text-amber-400' : 'text-rose-400';
+    potential >= 800 ? 'text-emerald-400' : potential >= 500 ? 'text-amber-400' : 'text-rose-400';
   const bg =
-    potential >= 80
+    potential >= 800
       ? 'bg-emerald-500/10 border-emerald-500/20'
-      : potential >= 50
+      : potential >= 500
         ? 'bg-amber-500/10 border-amber-500/20'
         : 'bg-rose-500/10 border-rose-500/20';
 
@@ -45,10 +45,10 @@ const ScoreTimer: React.FC<ScoreTimerProps> = ({ questionStartTime, hintsUsed, f
       <div className="flex-1 h-1 bg-white/10 rounded-full overflow-hidden">
         <div
           className={`h-full rounded-full transition-none ${potential >= 80 ? 'bg-emerald-400' : potential >= 50 ? 'bg-amber-400' : 'bg-rose-400'}`}
-          style={{ width: `${potential}%` }}
+          style={{ width: `${potential / 10}%` }}
         />
       </div>
-      <span className="text-[10px] opacity-30">/ 100</span>
+      <span className="text-[10px] opacity-30">/ 1000</span>
     </div>
   );
 };

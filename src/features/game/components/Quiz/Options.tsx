@@ -35,7 +35,7 @@ const Options: React.FC<OptionsProps> = ({
               // User's answer - Navy blue with glow
               btnClass =
                 'bg-gradient-to-br from-navy to-navy-dark text-white border-2 border-navy ring-4 ring-navy/30 shadow-lg transform scale-[0.98]';
-              accentClass = 'bg-sky-400';
+              accentClass = 'bg-white/20';
             } else {
               // Other options - muted
               btnClass =
@@ -43,10 +43,10 @@ const Options: React.FC<OptionsProps> = ({
               accentClass = 'bg-transparent';
             }
           } else if (isSelected) {
-            // Selected but not submitted yet
+            // Selected but not submitted yet — neutral so colour doesn't hint at correct/wrong
             btnClass =
-              'bg-gradient-to-br from-sky-500 to-sky-600 text-white border-2 border-sky-500 ring-4 ring-sky-500/30 shadow-lg shadow-sky-500/20 transform scale-[1.02]';
-            accentClass = 'bg-sky-300';
+              'bg-slate-200 dark:bg-slate-700 text-slate-900 dark:text-white border-2 border-slate-400 dark:border-slate-500 ring-2 ring-slate-400/30 dark:ring-slate-500/30 shadow-md transform scale-[1.01]';
+            accentClass = 'bg-slate-400 dark:bg-slate-500';
           } else {
             // Default unselected - improved hover state
             btnClass =

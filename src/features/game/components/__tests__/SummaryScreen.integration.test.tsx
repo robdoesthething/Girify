@@ -92,7 +92,7 @@ describe('SummaryScreen Integration', () => {
 
     // Check correct answers (5/5) is NOT directly shown as "5 / 5" text maybe?
     // In code: <span ...> / {maxPossibleScore} {t('pts')} </span>
-    // maxPossibleScore = 5 * 100 = 500.
+    // maxPossibleScore = 5 * 1000 = 5000.
     // Wait. "Score" section shows score.
     // Does it show "5 / 5"?
     // Code:
@@ -105,8 +105,8 @@ describe('SummaryScreen Integration', () => {
     // It DOES NOT show "Correct Answers" count explicitly in the `actions` view.
     // So `expect(screen.getByText('5 / 5'))` will fail.
 
-    // maxPossibleScore = 5 * 100 = 500
-    expect(screen.getByText('/ 500 pts')).toBeInTheDocument();
+    // maxPossibleScore = 5 * 1000 = 5000
+    expect(screen.getByText('/ 5000 pts')).toBeInTheDocument();
   });
 
   it('calls onKeepPlaying when the Keep Playing button is clicked', () => {

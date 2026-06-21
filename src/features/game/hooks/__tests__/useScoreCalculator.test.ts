@@ -11,8 +11,8 @@ describe('useScoreCalculator', () => {
   it('calculates score correctly via hook', () => {
     const { result } = renderHook(() => useScoreCalculator());
     const score = result.current.calculateScore(0, true, 0);
-    // Scaled max: (100 + 900) / 10 = 100
-    expect(score).toBe(100);
+    // Unscaled max: 100 + 900 = 1000
+    expect(score).toBe(1000);
   });
 
   it('function reference remains stable (useCallback)', () => {
