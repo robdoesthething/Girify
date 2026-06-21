@@ -12,28 +12,28 @@ describe('Scoring Logic (gameConfig)', () => {
   it('awards maximum points for fast answers', () => {
     // timeElapsed <= TIME_BONUS_THRESHOLD (3s) should give full bonus
     const score = calculateScore(0, true, 0);
-    // 100 + 900 = 1000 per question (unscaled)
-    expect(score).toBe(1000);
+    // Scaled: (100 + 900) / 10 = 100 per question
+    expect(score).toBe(100);
   });
 
   it('reduces score based on time (linear decay)', () => {
     const fastScore = calculateScore(1, true, 0); // < 3s = max
     const slowScore = calculateScore(20, true, 0); // 20s > TIME_DECAY_RATE(8) = base only
-    expect(fastScore).toBe(1000);
+    expect(fastScore).toBe(100);
     expect(slowScore).toBeLessThan(fastScore);
     expect(slowScore).toBeGreaterThanOrEqual(0);
   });
 
   it('gives base score only after TIME_DECAY_RATE (8s)', () => {
     const score = calculateScore(GAME.TIME_DECAY_RATE, true, 0);
-    expect(score).toBe(100); // CORRECT_BASE only, no time bonus
+    expect(score).toBe(10); // Scaled base: 100/10 = 10
   });
 
   it('subtracts points for using hints', () => {
     const scoreWithoutHints = calculateScore(2, true, 0);
     const scoreWithHints = calculateScore(2, true, 1);
 
-    expect(scoreWithHints).toBe(scoreWithoutHints - 50); // HINT_PENALTY = 50
+    expect(scoreWithHints).toBe(scoreWithoutHints - 5); // Scaled penalty: 50/10 = 5
   });
 
   it('never returns negative scores', () => {
