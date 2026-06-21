@@ -1,5 +1,5 @@
 import { AnimatePresence, motion } from 'framer-motion';
-import React, { FC, useEffect, useState } from 'react';
+import React, { FC, useCallback, useEffect, useState } from 'react';
 import { useBlocker } from 'react-router-dom';
 import LandingPage from '../../../components/LandingPage';
 import { useGameContext } from '../../../context/GameContext';
@@ -46,6 +46,10 @@ const GameScreen: FC = () => {
     return () => window.removeEventListener('beforeunload', handleBeforeUnload);
   }, [state.gameState, t]);
 
+  const handleAnimationComplete = useCallback(() => {
+    dispatch({ type: 'UNLOCK_INPUT' });
+  }, [dispatch]);
+
   const handleManualNext = () => {
     if (state.feedback === 'selected' && state.selectedAnswer) {
       handlers.processAnswer(state.selectedAnswer);
@@ -85,7 +89,7 @@ const GameScreen: FC = () => {
                 : []
             }
             theme={theme}
-            onAnimationComplete={() => dispatch({ type: 'UNLOCK_INPUT' })}
+            onAnimationComplete={handleAnimationComplete}
           />
           <AnimatePresence>
             {state.feedback === 'transitioning' && lastResult && (
