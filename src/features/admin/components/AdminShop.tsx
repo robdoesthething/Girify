@@ -10,6 +10,7 @@ import {
   syncWithLocal,
   updateShopItem,
 } from '../../../utils/shop';
+import { DEFAULT_AVATAR_IMAGE } from '../../../utils/shop/catalog';
 import { themeClasses } from '../../../utils/themeUtils';
 import AdminShopForm from './AdminShopForm';
 
@@ -60,21 +61,64 @@ const AdminShop: React.FC<AdminShopProps> = ({ items, onRefresh, notify, confirm
   };
 
   const getTypeStyle = (type: string) => {
-    if (type === 'avatar') {
-      return themeClasses(
-        theme,
-        'bg-purple-900/30 text-purple-400',
-        'bg-purple-100 text-purple-600'
+    switch (type) {
+      case 'avatar':
+        return themeClasses(
+          theme,
+          'bg-purple-900/30 text-purple-400',
+          'bg-purple-100 text-purple-600'
+        );
+      case 'frame':
+        return themeClasses(
+          theme,
+          'bg-orange-900/30 text-orange-400',
+          'bg-orange-100 text-orange-600'
+        );
+      case 'title':
+        return themeClasses(theme, 'bg-sky-900/30 text-sky-400', 'bg-sky-100 text-sky-600');
+      case 'badge':
+        return themeClasses(
+          theme,
+          'bg-emerald-900/30 text-emerald-400',
+          'bg-emerald-100 text-emerald-600'
+        );
+      case 'special':
+        return themeClasses(
+          theme,
+          'bg-yellow-900/30 text-yellow-400',
+          'bg-yellow-100 text-yellow-600'
+        );
+      default:
+        return themeClasses(theme, 'bg-slate-700 text-slate-300', 'bg-slate-100 text-slate-600');
+    }
+  };
+
+  const renderPreview = (item: ShopItem) => {
+    if (item.cssClass) {
+      return (
+        <div className={`w-10 h-10 rounded-full overflow-hidden shrink-0 ${item.cssClass}`}>
+          <img
+            src={DEFAULT_AVATAR_IMAGE}
+            loading="lazy"
+            alt="Frame preview"
+            className="w-full h-full object-cover"
+            style={{ imageRendering: 'pixelated' }}
+          />
+        </div>
       );
     }
-    if (type === 'frame') {
-      return themeClasses(
-        theme,
-        'bg-orange-900/30 text-orange-400',
-        'bg-orange-100 text-orange-600'
+    if (item.image) {
+      return (
+        <img
+          src={item.image}
+          loading="lazy"
+          alt={item.name}
+          className="w-10 h-10 object-contain rounded-md"
+          style={{ imageRendering: 'pixelated' }}
+        />
       );
     }
-    return themeClasses(theme, 'bg-slate-700 text-slate-300', 'bg-slate-100 text-slate-600');
+    return <span className="text-2xl">{item.prefix || item.emoji || '📦'}</span>;
   };
 
   return (
@@ -141,19 +185,7 @@ const AdminShop: React.FC<AdminShopProps> = ({ items, onRefresh, notify, confirm
                   key={item.id}
                   className={themeClasses(theme, 'hover:bg-slate-800/50', 'hover:bg-slate-50')}
                 >
-                  <td className="p-4">
-                    {item.image ? (
-                      <img
-                        src={item.image}
-                        loading="lazy"
-                        alt={item.name}
-                        className="w-10 h-10 object-contain rounded-md"
-                        style={{ imageRendering: 'pixelated' }}
-                      />
-                    ) : (
-                      <span className="text-2xl">{item.emoji || '📦'}</span>
-                    )}
-                  </td>
+                  <td className="p-4">{renderPreview(item)}</td>
                   <td className="p-4">
                     <div className="font-bold">{item.name || item.id}</div>
                     <div className="text-xs opacity-50 font-mono">{item.id}</div>
