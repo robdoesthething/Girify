@@ -58,7 +58,7 @@ const Container: FC<{ children: ReactNode; keyProp: string | number }> = ({
 // Wrapper for the Main content area (Options usually)
 const Content: FC<{ children: ReactNode }> = ({ children }) => {
   return (
-    <div className="flex-1 flex flex-col justify-evenly p-2 pt-2 w-full overflow-hidden relative z-10">
+    <div className="flex-1 flex flex-col justify-evenly p-2 pt-2 w-full overflow-hidden relative">
       {children}
     </div>
   );

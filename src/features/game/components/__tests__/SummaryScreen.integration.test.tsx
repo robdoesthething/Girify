@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
 import React from 'react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { GameStateObject } from '../../../../types/game';
@@ -52,6 +52,23 @@ vi.mock('../../../auth/hooks/useAuth', () => ({
 
 import { MemoryRouter } from 'react-router-dom';
 
+const baseProps = {
+  score: 5000,
+  total: 5,
+  theme: 'light' as const,
+  streak: 5,
+  onRestart: vi.fn(),
+  onBackToMenu: vi.fn(),
+  quizResults: Array(5).fill({
+    time: 5,
+    status: 'correct',
+    points: 1000,
+    street: { id: 's1', name: 'Test Street', coordinates: [] },
+  }),
+  quizStreets: Array(5).fill({ id: 's1', name: 'Test Street' }),
+  t: (key: string) => key,
+};
+
 describe('SummaryScreen Integration', () => {
   const renderWithRouter = (ui: React.ReactElement) => {
     return render(<MemoryRouter>{ui}</MemoryRouter>);
@@ -59,80 +76,23 @@ describe('SummaryScreen Integration', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
-    mockState.username = 'testuser'; // Reset state
+    mockState.username = 'testuser';
   });
 
-  it('renders summary stats correctly', () => {
-    // Need to pass required props to SummaryScreen
-    const props = {
-      score: 5000,
-      total: 5,
-      theme: 'light' as const,
-      streak: 5,
-      onRestart: vi.fn(),
-      onBackToMenu: vi.fn(),
-      quizResults: Array(5).fill({
-        time: 5,
-        status: 'correct',
-        points: 1000,
-        street: { id: 's1', name: 'Test Street', coordinates: [] },
-      }),
-      quizStreets: Array(5).fill({ id: 's1', name: 'Test Street' }),
-      t: (key: string) => key,
-    };
-    renderWithRouter(<SummaryScreen {...props} />);
+  it('renders summary stats immediately without an intermediate screen', () => {
+    renderWithRouter(<SummaryScreen {...baseProps} />);
 
-    // Initially shows city curiosity view
-    // Click Next to see stats
-    const nextBtn = screen.getByText('next'); // Mock t returns 'next'
-    fireEvent.click(nextBtn);
-
-    // Check score display (5000)
+    // Score is visible directly — no curiosity step to click through
     expect(screen.getByText('5000')).toBeInTheDocument();
-
-    // Check correct answers (5/5) is NOT directly shown as "5 / 5" text maybe?
-    // In code: <span ...> / {maxPossibleScore} {t('pts')} </span>
-    // maxPossibleScore = 5 * 1000 = 5000.
-    // Wait. "Score" section shows score.
-    // Does it show "5 / 5"?
-    // Code:
-    // <span ...>{score}</span>
-    // <span ...>/ {maxPossibleScore} pts</span>
-    // It DOES NOT show "5 / 5" correct answers count explicitly in the code I read?
-    // Let's check SummaryScreen.tsx again.
-
-    // It shows Streak.
-    // It DOES NOT show "Correct Answers" count explicitly in the `actions` view.
-    // So `expect(screen.getByText('5 / 5'))` will fail.
-
     // maxPossibleScore = 5 * 100 = 500
     expect(screen.getByText('/ 500 pts')).toBeInTheDocument();
   });
 
   it('calls onKeepPlaying when the Keep Playing button is clicked', () => {
     const onKeepPlaying = vi.fn();
-    const props = {
-      score: 5000,
-      total: 5,
-      theme: 'light' as const,
-      streak: 5,
-      onRestart: vi.fn(),
-      onBackToMenu: vi.fn(),
-      onKeepPlaying,
-      quizResults: Array(5).fill({
-        time: 5,
-        status: 'correct',
-        points: 1000,
-        street: { id: 's1', name: 'Test Street', coordinates: [] },
-      }),
-      quizStreets: Array(5).fill({ id: 's1', name: 'Test Street' }),
-      t: (key: string) => key,
-    };
-    renderWithRouter(<SummaryScreen {...props} />);
+    renderWithRouter(<SummaryScreen {...baseProps} onKeepPlaying={onKeepPlaying} />);
 
-    fireEvent.click(screen.getByText('next'));
     fireEvent.click(screen.getByText('keepPlaying', { exact: false }));
-
     expect(onKeepPlaying).toHaveBeenCalledTimes(1);
   });
 });

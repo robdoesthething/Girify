@@ -1,19 +1,11 @@
 import { motion } from 'framer-motion';
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { GAME, GIRIFY_EPOCH, STORAGE_KEYS, TIME, UI } from '../../../config/constants';
-import { getCuriosityByStreets } from '../../../data/curiosities';
 import { useAuth } from '../../auth/hooks/useAuth';
 import { QuizResult, Street } from '../../../types/game';
 import { GameHistory } from '../../../types/user';
 import { storage } from '../../../utils/storage';
-import { fetchWikiImage } from '../../../utils/wiki';
-
-interface Curiosity {
-  title: string;
-  fact: string;
-  image?: string;
-}
 
 interface SummaryScreenProps {
   score: number;
@@ -36,23 +28,13 @@ const SummaryScreen: React.FC<SummaryScreenProps> = ({
   onRestart,
   onKeepPlaying,
   quizResults,
-  quizStreets,
   t,
 }) => {
   const navigate = useNavigate();
   const { profile } = useAuth();
-  const [view, setView] = useState<'curiosity' | 'actions'>('curiosity');
   const [shareStatus, setShareStatus] = useState<string | null>(null);
 
   const maxPossibleScore = total * 100;
-  const curiosity = useMemo<Curiosity>(
-    () =>
-      getCuriosityByStreets(
-        quizStreets as unknown as { name: string; [key: string]: unknown }[]
-      ) as Curiosity,
-    [quizStreets]
-  );
-  const [displayImage, setDisplayImage] = useState(curiosity.image);
 
   const streakValue = useMemo(() => {
     if (streak && streak > 0) {
@@ -124,7 +106,6 @@ const SummaryScreen: React.FC<SummaryScreenProps> = ({
 
   const getGreeting = () => {
     const ratio = score / maxPossibleScore;
-
     if (ratio >= UI.PERFORMANCE_THRESHOLDS.EXCELLENT) {
       return t('greetingExcellent');
     }
@@ -136,24 +117,6 @@ const SummaryScreen: React.FC<SummaryScreenProps> = ({
     }
     return t('greetingDefault');
   };
-
-  useEffect(() => {
-    let active = true;
-    const loadDynamicImage = async () => {
-      if (curiosity.title) {
-        const url = await fetchWikiImage(curiosity.title);
-        if (active && url) {
-          setDisplayImage(url);
-        }
-      }
-    };
-    loadDynamicImage();
-    return () => {
-      active = false;
-    };
-  }, [curiosity]);
-
-  const handleNext = () => setView('actions');
 
   const buildShareText = () => {
     const dayNumber = Math.floor((Date.now() - GIRIFY_EPOCH.getTime()) / TIME.ONE_DAY) + 1;
@@ -198,216 +161,144 @@ const SummaryScreen: React.FC<SummaryScreenProps> = ({
 
   return (
     <div
-      className={`absolute inset-0 flex flex-col items-center justify-center p-6 text-center backdrop-blur-md transition-colors duration-500 pointer-events-auto overflow-y-auto font-inter z-[5000]
+      className={`absolute inset-0 flex flex-col items-center justify-center p-6 text-center backdrop-blur-md transition-colors duration-500 pointer-events-auto overflow-y-auto font-inter
             ${theme === 'dark' ? 'bg-slate-950/95 text-white' : 'bg-slate-50/95 text-slate-800'}`}
     >
-      {view === 'curiosity' && (
-        <motion.div
-          initial={{ opacity: 0, scale: 0.95 }}
-          animate={{ opacity: 1, scale: 1 }}
-          className="flex flex-col items-center max-w-md relative z-20 w-full"
-        >
-          <h2 className="text-xs font-black mb-2 text-sky-400 uppercase tracking-[0.3em] drop-shadow-md">
-            {t('cityCuriosity') || 'City Curiosity'}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="flex flex-col items-center w-full max-w-md"
+      >
+        <div className="mb-8 text-center">
+          <h2 className="text-2xl md:text-3xl font-black mb-2 bg-gradient-to-br from-white to-slate-400 bg-clip-text text-transparent">
+            {getGreeting()}
           </h2>
-          <h3 className="text-3xl md:text-4xl font-black tracking-tight mb-6 text-balance text-white drop-shadow-[0_2px_10px_rgba(0,0,0,0.8)] leading-tight">
-            {curiosity.title}
-          </h3>
+          <p className="text-sm opacity-60 uppercase tracking-widest font-bold">
+            {t('todaysChallenge') || "Today's Challenge"}
+          </p>
+        </div>
 
-          <div className="glass-panel w-full overflow-hidden mb-6 shadow-2xl group border border-white/10 relative rounded-3xl">
-            <div className="overflow-hidden h-48 md:h-64 w-full relative">
-              <img
-                src={displayImage}
-                alt="Barcelona"
-                className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-slate-900/90 via-transparent to-transparent" />
-              <div className="absolute bottom-3 right-3">
-                <button
-                  onClick={handleShare}
-                  className="p-2.5 rounded-full bg-sky-500 hover:bg-sky-600 transition-all active:scale-95 shadow-lg text-white"
-                  title={t('shareCuriosity')}
-                >
-                  🎁
-                </button>
-              </div>
-            </div>
-
-            <div className="p-6 text-left relative z-10 bg-slate-950/80 backdrop-blur-md border-t border-white/10">
-              <span className="text-xs font-bold text-sky-400 uppercase tracking-wider mb-2 block">
-                {t('didYouKnow') || 'Did you know?'}
+        <div className="grid grid-cols-2 gap-4 w-full mb-8">
+          <div className="glass-panel p-4 flex flex-col items-center justify-center col-span-1">
+            <span className="text-xs opacity-50 uppercase tracking-wider font-bold mb-1">
+              {t('scoreLabel')}
+            </span>
+            <div className="flex flex-col items-center">
+              <span className={`text-4xl md:text-5xl font-black leading-none ${getScoreColor()}`}>
+                {score}
               </span>
-              <p className="text-lg leading-relaxed font-medium text-white drop-shadow-sm">
-                &quot;{curiosity.fact}&quot;
-              </p>
+              <span className="text-sm font-bold text-slate-400 mt-1">
+                / {maxPossibleScore} {t('pts')}
+              </span>
+              <span
+                className={`text-[10px] font-bold uppercase tracking-wider mt-1 ${getScoreColor()} opacity-70`}
+              >
+                {getScoreTier()}
+              </span>
             </div>
           </div>
 
-          {onKeepPlaying && (
-            <button
-              onClick={onKeepPlaying}
-              className="w-full py-4 rounded-2xl font-bold text-lg uppercase tracking-wider transition-all active:scale-95
-                 bg-gradient-to-r from-sky-500 to-emerald-500 hover:from-sky-400 hover:to-emerald-400 text-white shadow-xl mb-3"
-            >
-              ♾️ {t('keepPlaying') || 'Keep Playing'}
-            </button>
-          )}
-
-          <div className="flex gap-3 w-full">
-            <button
-              onClick={handleShare}
-              className="flex-1 py-4 bg-white/5 hover:bg-white/10 active:scale-95 border border-white/10 text-white rounded-2xl font-bold text-sm transition-all"
-            >
-              {shareStatus || `🎁 ${t('share') || 'Share & Earn'}`}
-            </button>
-            <button
-              onClick={handleNext}
-              className="flex-[2] py-4 bg-sky-500 hover:bg-sky-400 active:scale-95 text-white rounded-2xl shadow-xl shadow-sky-500/20 font-bold text-lg transition-all transform hover:scale-[1.02]"
-            >
-              {t('next') || 'Next'}
-            </button>
+          <div className="glass-panel p-4 flex flex-col items-center justify-center col-span-1 bg-orange-500/10 border-orange-500/20 relative overflow-hidden">
+            <div className="absolute -right-4 -top-4 opacity-10 text-6xl">🔥</div>
+            <span className="text-xs font-bold text-orange-400 uppercase tracking-wider mb-1">
+              {t('streak') || 'Streak'}
+            </span>
+            <span className="text-3xl md:text-4xl font-black text-white">{streakValue}</span>
+            <span className="text-[10px] opacity-60 uppercase">{t('daysStreak') || 'Days'}</span>
           </div>
-        </motion.div>
-      )}
+        </div>
 
-      {view === 'actions' && (
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="flex flex-col items-center w-full max-w-md animate-fadeIn"
-        >
-          <div className="mb-8 text-center animate-slide-up">
-            <h2 className="text-2xl md:text-3xl font-black mb-2 bg-gradient-to-br from-white to-slate-400 bg-clip-text text-transparent">
-              {getGreeting()}
-            </h2>
-            <p className="text-sm opacity-60 uppercase tracking-widest font-bold">
-              {t('todaysChallenge') || "Today's Challenge"}
-            </p>
-          </div>
-
-          <div className="grid grid-cols-2 gap-4 w-full mb-8">
-            <div className="glass-panel p-4 flex flex-col items-center justify-center col-span-1 asp-square">
-              <span className="text-xs opacity-50 uppercase tracking-wider font-bold mb-1">
-                {t('scoreLabel')}
-              </span>
-              <div className="flex flex-col items-center">
-                <span className={`text-4xl md:text-5xl font-black leading-none ${getScoreColor()}`}>
-                  {score}
-                </span>
-                <span className="text-sm font-bold text-slate-400 mt-1">
-                  / {maxPossibleScore} {t('pts')}
-                </span>
+        <div className="w-full mb-6">
+          <p className="text-[10px] font-black uppercase tracking-[0.2em] opacity-40 mb-2.5">
+            {t('resultsBreakdown') || 'Resultats'}
+          </p>
+          <div className="space-y-1.5">
+            {quizResults.map((result, i) => (
+              <div
+                key={i}
+                className={`flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm ${
+                  result.status === 'correct'
+                    ? 'bg-emerald-500/10 border border-emerald-500/20'
+                    : 'bg-red-500/10 border border-red-500/20'
+                }`}
+              >
                 <span
-                  className={`text-[10px] font-bold uppercase tracking-wider mt-1 ${getScoreColor()} opacity-70`}
-                >
-                  {getScoreTier()}
-                </span>
-              </div>
-            </div>
-
-            <div className="glass-panel p-4 flex flex-col items-center justify-center col-span-1 asp-square bg-orange-500/10 border-orange-500/20 relative overflow-hidden">
-              <div className="absolute -right-4 -top-4 opacity-10 text-6xl">🔥</div>
-              <span className="text-xs font-bold text-orange-400 uppercase tracking-wider mb-1">
-                {t('streak') || 'Streak'}
-              </span>
-              <span className="text-3xl md:text-4xl font-black text-white">{streakValue}</span>
-              <span className="text-[10px] opacity-60 uppercase">{t('daysStreak') || 'Days'}</span>
-            </div>
-          </div>
-
-          {/* Per-question results breakdown */}
-          <div className="w-full mb-6">
-            <p className="text-[10px] font-black uppercase tracking-[0.2em] opacity-40 mb-2.5">
-              {t('resultsBreakdown') || 'Resultats'}
-            </p>
-            <div className="space-y-1.5">
-              {quizResults.map((result, i) => (
-                <div
-                  key={i}
-                  className={`flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm ${
-                    result.status === 'correct'
-                      ? 'bg-emerald-500/10 border border-emerald-500/20'
-                      : 'bg-red-500/10 border border-red-500/20'
+                  className={`text-base font-black w-4 flex-shrink-0 ${
+                    result.status === 'correct' ? 'text-emerald-400' : 'text-red-400'
                   }`}
                 >
-                  <span
-                    className={`text-base font-black w-4 flex-shrink-0 ${
-                      result.status === 'correct' ? 'text-emerald-400' : 'text-red-400'
-                    }`}
-                  >
-                    {result.status === 'correct' ? '✓' : '✗'}
-                  </span>
-                  <span className="flex-1 font-semibold truncate opacity-90">
-                    {result.street.name}
-                  </span>
-                  <span
-                    className={`font-black tabular-nums flex-shrink-0 ${
-                      result.status === 'correct' ? 'text-emerald-400' : 'text-red-500 opacity-50'
-                    }`}
-                  >
-                    {result.status === 'correct' ? `+${result.points}` : '0'}
-                  </span>
-                </div>
-              ))}
-            </div>
+                  {result.status === 'correct' ? '✓' : '✗'}
+                </span>
+                <span className="flex-1 font-semibold truncate opacity-90">
+                  {result.street.name}
+                </span>
+                <span
+                  className={`font-black tabular-nums flex-shrink-0 ${
+                    result.status === 'correct' ? 'text-emerald-400' : 'text-red-500 opacity-50'
+                  }`}
+                >
+                  {result.status === 'correct' ? `+${result.points}` : '0'}
+                </span>
+              </div>
+            ))}
           </div>
+        </div>
 
+        <button
+          onClick={handleShare}
+          className="w-full py-5 bg-gradient-to-r from-emerald-500 to-sky-500 hover:from-emerald-400 hover:to-sky-400 active:scale-95 text-white rounded-2xl shadow-2xl font-black text-lg transition-all transform hover:scale-[1.02] mb-4 flex items-center justify-center gap-3 group"
+        >
+          <span className="text-2xl group-hover:rotate-12 transition-transform">🎁</span>
+          <div className="flex flex-col items-start leading-none">
+            <span>{shareStatus || t('shareAndEarnGiuros') || 'Share & Earn Giuros'}</span>
+            <span className="text-[10px] font-medium opacity-80 mt-1 uppercase tracking-wide">
+              {t('inviteFriendsEarnRewards') || 'Invite friends & earn'}
+            </span>
+          </div>
+        </button>
+
+        <div className="flex gap-3 w-full mb-4">
           <button
-            onClick={handleShare}
-            className="w-full py-5 bg-gradient-to-r from-emerald-500 to-sky-500 hover:from-emerald-400 hover:to-sky-400 active:scale-95 text-white rounded-2xl shadow-2xl font-black text-lg transition-all transform hover:scale-[1.02] mb-4 flex items-center justify-center gap-3 group"
+            onClick={() => navigate('/leaderboard')}
+            className="flex-1 py-3 rounded-xl font-bold text-sm transition-all active:scale-95 bg-slate-800 text-slate-300 hover:bg-slate-700 hover:text-white border border-slate-700 hover:border-slate-500"
           >
-            <span className="text-2xl group-hover:rotate-12 transition-transform">🎁</span>
-            <div className="flex flex-col items-start leading-none">
-              <span>{t('shareAndEarnGiuros') || 'Share & Earn Giuros'}</span>
-              <span className="text-[10px] font-medium opacity-80 mt-1 uppercase tracking-wide">
-                {t('inviteFriendsEarnRewards') || 'Invite friends & earn'}
-              </span>
-            </div>
+            🏆 {t('leaderboard') || 'Leaderboard'}
           </button>
-
-          <div className="flex gap-3 w-full mb-4">
+          {profile && (
             <button
-              onClick={() => navigate('/leaderboard')}
+              onClick={() => navigate('/profile')}
               className="flex-1 py-3 rounded-xl font-bold text-sm transition-all active:scale-95 bg-slate-800 text-slate-300 hover:bg-slate-700 hover:text-white border border-slate-700 hover:border-slate-500"
             >
-              🏆 {t('leaderboard') || 'Leaderboard'}
-            </button>
-            {profile && (
-              <button
-                onClick={() => navigate('/profile')}
-                className="flex-1 py-3 rounded-xl font-bold text-sm transition-all active:scale-95 bg-slate-800 text-slate-300 hover:bg-slate-700 hover:text-white border border-slate-700 hover:border-slate-500"
-              >
-                👤 {t('myProfile') || 'My Profile'}
-              </button>
-            )}
-          </div>
-
-          {onKeepPlaying && (
-            <button
-              onClick={onKeepPlaying}
-              className="w-full py-4 rounded-xl font-bold text-lg uppercase tracking-wider transition-all active:scale-95
-                 bg-gradient-to-r from-sky-500 to-emerald-500 hover:from-sky-400 hover:to-emerald-400 text-white shadow-xl mb-3"
-            >
-              ♾️ {t('keepPlaying') || 'Keep Playing'}
+              👤 {t('myProfile') || 'My Profile'}
             </button>
           )}
+        </div>
 
+        {onKeepPlaying && (
           <button
-            onClick={onRestart}
+            onClick={onKeepPlaying}
             className="w-full py-4 rounded-xl font-bold text-lg uppercase tracking-wider transition-all active:scale-95
-               bg-slate-800 text-slate-300 hover:bg-slate-700 hover:text-white border border-slate-700 hover:border-slate-500 glass-button mb-6"
+               bg-gradient-to-r from-sky-500 to-emerald-500 hover:from-sky-400 hover:to-emerald-400 text-white shadow-xl mb-3"
           >
-            🔄 {t('playAgain') || 'Play Again'}
+            ♾️ {t('keepPlaying') || 'Keep Playing'}
           </button>
+        )}
 
-          <button
-            onClick={() => navigate('/feedback')}
-            className="text-xs opacity-40 hover:opacity-100 hover:text-sky-400 transition-colors uppercase tracking-widest font-semibold"
-          >
-            📝 {t('haveFeedback') || 'Share Feedback'}
-          </button>
-        </motion.div>
-      )}
+        <button
+          onClick={onRestart}
+          className="w-full py-4 rounded-xl font-bold text-lg uppercase tracking-wider transition-all active:scale-95
+             bg-slate-800 text-slate-300 hover:bg-slate-700 hover:text-white border border-slate-700 hover:border-slate-500 glass-button mb-6"
+        >
+          🔄 {t('playAgain') || 'Play Again'}
+        </button>
+
+        <button
+          onClick={() => navigate('/feedback')}
+          className="text-xs opacity-40 hover:opacity-100 hover:text-sky-400 transition-colors uppercase tracking-widest font-semibold"
+        >
+          📝 {t('haveFeedback') || 'Share Feedback'}
+        </button>
+      </motion.div>
     </div>
   );
 };

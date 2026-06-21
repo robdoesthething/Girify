@@ -200,7 +200,7 @@ const GameScreen: FC = () => {
       )}
 
       {state.gameState === 'summary' && (
-        <div className="absolute inset-0 z-50 pointer-events-auto">
+        <div className="absolute inset-0 z-30 pointer-events-auto">
           <SummaryScreen
             score={state.score}
             total={state.quizStreets.length}

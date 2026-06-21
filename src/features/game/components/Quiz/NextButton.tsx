@@ -35,7 +35,7 @@ const NextButton: React.FC<NextButtonProps> = ({
     <motion.div
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
-      className="mt-2 md:mt-4 flex justify-center pb-4 relative z-50"
+      className="mt-2 md:mt-4 flex justify-center pb-4"
     >
       <button
         onClick={e => {
