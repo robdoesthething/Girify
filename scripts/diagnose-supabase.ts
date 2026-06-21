@@ -207,7 +207,7 @@ async function runDiagnostics() {
     console.log('\n✅ All diagnostics passed! Supabase is working correctly.');
     console.log("   If you're still experiencing issues, check:");
     console.log('   - Browser console for client-side errors');
-    console.log('   - Firebase authentication status');
+    console.log('   - Supabase authentication status');
     console.log('   - Network tab for failed requests');
   } else {
     console.log('\n⚠️  Some tests failed. See errors above for details.');

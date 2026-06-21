@@ -28,7 +28,7 @@
       "id": "pixel_avatar_cat",
       "name": "Street Cat",
       "cost": 0,
-      "image": "/assets/pixel_avatar_cat.svg",
+      "image": "/assets/pixel_avatar_cat.png",
       "emoji": "😺",
       "description": "Unlock: 3 Day Streak",
       "unlockCondition": { "type": "streak", "value": 3 }
@@ -37,7 +37,7 @@
       "id": "pixel_avatar_robot",
       "name": "Retro Bot",
       "cost": 0,
-      "image": "/assets/pixel_avatar_robot.svg",
+      "image": "/assets/pixel_avatar_robot.png",
       "emoji": "🤖",
       "description": "Unlock: Play 10 Games",
       "unlockCondition": { "type": "gamesPlayed", "value": 10 }
@@ -46,7 +46,7 @@
       "id": "pixel_avatar_alien",
       "name": "Tourist Alien",
       "cost": 0,
-      "image": "/assets/pixel_avatar_alien.svg",
+      "image": "/assets/pixel_avatar_alien.png",
       "emoji": "👽",
       "description": "Unlock: Score > 1200 pts",
       "unlockCondition": { "type": "bestScore", "value": 1200 }
@@ -281,7 +281,7 @@
       "category": "high_roller",
       "description": "Luxury living.",
       "flavorText": "You don't guess streets anymore; you buy them.",
-      "image": "/assets/pixel_yacht.svg"
+      "image": "/assets/pixel_yacht.png"
     }
   ],
   "special": [

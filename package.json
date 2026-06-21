@@ -109,6 +109,7 @@
     "husky": "^9.1.7",
     "jsdom": "26.1.0",
     "lint-staged": "^16.2.7",
+    "pixelarticons": "^2.1.2",
     "playwright": "^1.57.0",
     "postcss": "^8.5.6",
     "prettier": "^3.7.4",

@@ -1,6 +1,6 @@
 import { AnimatePresence, motion } from 'framer-motion';
-import React, { useCallback, useEffect, useState } from 'react';
-import { useLocation } from 'react-router-dom';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { version } from '../../package.json';
 import { Z_INDEX } from '../config/zIndex';
 import { useTheme } from '../context/ThemeContext';
@@ -28,8 +28,27 @@ const TopBar: React.FC<TopBarProps> = React.memo(
   ({ onOpenPage, username, onTriggerLogin, onLogout }) => {
     const { theme, t } = useTheme();
     const location = useLocation();
+    const navigate = useNavigate();
     const [menuOpen, setMenuOpen] = useState(false);
     const [showLoginModal, setShowLoginModal] = useState(false);
+    const versionTapCount = useRef(0);
+    const versionTapTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+    const handleVersionTap = useCallback(() => {
+      versionTapCount.current += 1;
+      if (versionTapTimer.current) {
+        clearTimeout(versionTapTimer.current);
+      }
+      if (versionTapCount.current >= 7) {
+        versionTapCount.current = 0;
+        setMenuOpen(false);
+        navigate('/admin');
+        return;
+      }
+      versionTapTimer.current = setTimeout(() => {
+        versionTapCount.current = 0;
+      }, 2000);
+    }, [navigate]);
     // Close the drawer when navigation happens outside it (back button, in-page links).
     // State is adjusted during render to avoid a cascading effect re-render.
     const [lastPathname, setLastPathname] = useState(location.pathname);
@@ -225,7 +244,12 @@ backdrop-blur-md border-b ${themeClasses(theme, 'border-white/8', 'border-slate-
                       <span className="text-xl">🚪</span> {t('logout')}
                     </button>
                   )}
-                  <p className="text-xs text-slate-400 text-center py-2 mt-1">v{version} Girify</p>
+                  <p
+                    className="text-xs text-slate-400 text-center py-2 mt-1 select-none cursor-default"
+                    onClick={handleVersionTap}
+                  >
+                    v{version} Girify
+                  </p>
                 </nav>
               </motion.div>
             </>

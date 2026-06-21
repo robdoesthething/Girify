@@ -74,7 +74,7 @@ export const LEADERBOARD_FETCH_MULTIPLIER = 4;
 // BATCH PROCESSING
 // =============================================================================
 
-/** Firestore batch write size limit */
+/** Supabase batch write size limit */
 export const FIRESTORE_BATCH_SIZE = 200;
 
 // =============================================================================

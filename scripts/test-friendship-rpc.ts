@@ -100,7 +100,7 @@ async function testFriendshipRPC() {
   console.log('If friendships are still not working in the app, check:');
   console.log('  - Browser console for client-side errors');
   console.log('  - Network tab for failed API requests');
-  console.log('  - User is properly authenticated with Firebase\n');
+  console.log('  - User is properly authenticated with Supabase\n');
 }
 
 testFriendshipRPC().catch(console.error);

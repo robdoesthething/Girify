@@ -17,6 +17,6 @@ const tier4 = shuffled.filter(s => s.tier === 4).slice(0, 2);
 let selected = [...tier1, ...tier2, ...tier3, ...tier4];
 console.log(`Tier logic yields: ${selected.length}`);
 if (selected.length < 10) {
-    selected = shuffled.slice(0, 10);
-    console.log(`Fallback yields: ${selected.length}`);
+  selected = shuffled.slice(0, 10);
+  console.log(`Fallback yields: ${selected.length}`);
 }

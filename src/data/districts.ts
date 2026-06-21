@@ -21,7 +21,7 @@ export const DISTRICTS: District[] = [
     name: 'Eixample',
     teamName: 'Eixample Dragons',
     color: 'from-red-500 to-orange-600',
-    logo: '/assets/districts/pixel_dragon.svg',
+    logo: '/assets/districts/pixel_dragon.png',
     animalName: 'Dragons',
   },
   {

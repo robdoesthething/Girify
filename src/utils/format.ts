@@ -79,7 +79,7 @@ export const usernamesMatch = (
 };
 
 /**
- * Compact relative time for feed items (seconds-based Firestore timestamps).
+ * Compact relative time for feed items (seconds-based timestamps).
  * Returns strings like "Just now", "5m ago", "3h ago", "2d ago", or a locale date.
  */
 export function formatCompactRelativeTime(seconds: number, t: (key: string) => string): string {

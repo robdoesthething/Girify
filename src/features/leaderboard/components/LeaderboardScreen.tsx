@@ -94,7 +94,7 @@ const LeaderboardScreen: React.FC<LeaderboardScreenProps> = ({ currentUser }) =>
         msg = String(err) || msg;
       }
       if (msg.includes('Missing or insufficient permissions')) {
-        msg = 'Database permissions error. Ask admin to check Firestore rules.';
+        msg = 'Database permissions error. Ask admin to check Supabase RLS policies.';
       } else if (msg.includes('Timeout')) {
         msg = 'Connection timed out. Please check your internet.';
       }

@@ -105,7 +105,7 @@ async function checkRecentActivity() {
     console.log('   ⚠️  No games found - this suggests:');
     console.log('      - Users are playing but saves are failing');
     console.log('      - Check browser console for errors');
-    console.log('      - Verify Firebase authentication is working');
+    console.log('      - Verify Supabase authentication is working');
   } else if (games && games[0]) {
     const lastGame = new Date(games[0].played_at);
     const hoursAgo = Math.round((Date.now() - lastGame.getTime()) / (1000 * 60 * 60));

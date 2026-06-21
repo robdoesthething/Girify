@@ -18,12 +18,12 @@ async function testFrontendFlow() {
   console.log('\n🔍 Testing Full Frontend Flow\n');
   console.log('══════════════════════════════════════════════════\n');
 
-  // Simulate user logged in with Firebase displayName
-  const firebaseDisplayName = '@robertosnc7344';
-  console.log(`1️⃣  User logged in with displayName: "${firebaseDisplayName}"\n`);
+  // Simulate user logged in with displayName
+  const displayName = '@robertosnc7344';
+  console.log(`1️⃣  User logged in with displayName: "${displayName}"\n`);
 
   // Frontend sanitizes username (removes @)
-  const sanitized = sanitizeUsername(firebaseDisplayName);
+  const sanitized = sanitizeUsername(displayName);
   console.log(`2️⃣  Frontend sanitizes to: "${sanitized}"\n`);
 
   // Frontend calls get_friends RPC

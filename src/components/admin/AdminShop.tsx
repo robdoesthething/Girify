@@ -89,7 +89,7 @@ const AdminShop: React.FC<AdminShopProps> = ({ items, onRefresh, notify, confirm
             onClick={async () => {
               if (
                 await confirm(
-                  'This will overwrite Firestore shop items with local cosmetics.json data. Continue?',
+                  'This will overwrite Supabase shop items with local cosmetics.json data. Continue?',
                   'Sync Shop Items',
                   true
                 )
