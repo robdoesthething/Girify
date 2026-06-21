@@ -1,6 +1,6 @@
 import { useState } from 'react';
-import { supabase } from '../services/supabase';
-import { HTTP } from '../utils/constants';
+import { supabase } from '../../../services/supabase';
+import { HTTP } from '../../../utils/constants';
 
 interface UseAdminPromotionOptions {
   onSuccess?: (uid: string) => void;

@@ -1,6 +1,6 @@
 import { motion } from 'framer-motion';
 import React, { useCallback, useEffect } from 'react';
-import { useAdminCRUD } from '../../hooks/useAdminCRUD';
+import { useAdminCRUD } from '../../features/admin/hooks/useAdminCRUD';
 import { createQuest, deleteQuest, getQuests, Quest, updateQuest } from '../../utils/game/quests';
 import QuestEditor from './QuestEditor';
 

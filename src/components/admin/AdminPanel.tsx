@@ -2,7 +2,7 @@ import { AnimatePresence } from 'framer-motion';
 import React, { useState } from 'react';
 import { Heading, Spinner, Tabs } from '../../components/ui';
 import { useTheme } from '../../context/ThemeContext';
-import { useAdminData } from '../../hooks/useAdminData';
+import { useAdminData } from '../../features/admin/hooks/useAdminData';
 import { useConfirm } from '../../hooks/useConfirm';
 import { useNotification } from '../../hooks/useNotification';
 import { UserProfile } from '../../utils/social';

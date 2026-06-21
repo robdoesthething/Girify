@@ -2,7 +2,7 @@ import { AnimatePresence } from 'framer-motion';
 import React from 'react';
 import { Button, Card, Heading } from '../../components/ui';
 import { useTheme } from '../../context/ThemeContext';
-import { useAdminCRUD } from '../../hooks/useAdminCRUD';
+import { useAdminCRUD } from '../../features/admin/hooks/useAdminCRUD';
 import {
   createShopItem,
   deleteShopItem,

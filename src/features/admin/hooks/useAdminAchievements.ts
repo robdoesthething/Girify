@@ -1,6 +1,6 @@
 import { useCallback, useLayoutEffect, useRef } from 'react';
 import { Achievement } from '../../../data/achievements';
-import { useAdminCRUD } from '../../../hooks/useAdminCRUD';
+import { useAdminCRUD } from './useAdminCRUD';
 import {
   createAchievement,
   deleteAchievement,
