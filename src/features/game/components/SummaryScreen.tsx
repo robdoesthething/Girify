@@ -1,5 +1,6 @@
-import { motion } from 'framer-motion';
+import { AnimatePresence, motion } from 'framer-motion';
 import { useMemo, useState } from 'react';
+import StreetSnapshotMap from './StreetSnapshotMap';
 import { useNavigate } from 'react-router-dom';
 import { GAME, GIRIFY_EPOCH, STORAGE_KEYS, TIME, UI } from '../../../config/constants';
 import { useAuth } from '../../auth/hooks/useAuth';
@@ -33,6 +34,7 @@ const SummaryScreen: React.FC<SummaryScreenProps> = ({
   const navigate = useNavigate();
   const { profile } = useAuth();
   const [shareStatus, setShareStatus] = useState<string | null>(null);
+  const [expandedIndex, setExpandedIndex] = useState<number | null>(null);
 
   const maxPossibleScore = total * 100;
 
@@ -213,34 +215,70 @@ const SummaryScreen: React.FC<SummaryScreenProps> = ({
             {t('resultsBreakdown') || 'Resultats'}
           </p>
           <div className="space-y-1.5">
-            {quizResults.map((result, i) => (
-              <div
-                key={i}
-                className={`flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm ${
-                  result.status === 'correct'
-                    ? 'bg-emerald-500/10 border border-emerald-500/20'
-                    : 'bg-red-500/10 border border-red-500/20'
-                }`}
-              >
-                <span
-                  className={`text-base font-black w-4 flex-shrink-0 ${
-                    result.status === 'correct' ? 'text-emerald-400' : 'text-red-400'
-                  }`}
-                >
-                  {result.status === 'correct' ? '✓' : '✗'}
-                </span>
-                <span className="flex-1 font-semibold truncate opacity-90">
-                  {result.street.name}
-                </span>
-                <span
-                  className={`font-black tabular-nums flex-shrink-0 ${
-                    result.status === 'correct' ? 'text-emerald-400' : 'text-red-500 opacity-50'
-                  }`}
-                >
-                  {result.status === 'correct' ? `+${result.points}` : '0'}
-                </span>
-              </div>
-            ))}
+            {quizResults.map((result, i) => {
+              const isExpanded = expandedIndex === i;
+              const isCorrect = result.status === 'correct';
+              return (
+                <div key={i}>
+                  <button
+                    type="button"
+                    onClick={() => setExpandedIndex(isExpanded ? null : i)}
+                    className={`w-full flex items-center gap-3 px-4 py-2.5 text-sm text-left transition-opacity active:opacity-70 ${
+                      isExpanded ? 'rounded-t-xl' : 'rounded-xl'
+                    } ${
+                      isCorrect
+                        ? 'bg-emerald-500/10 border border-emerald-500/20'
+                        : 'bg-red-500/10 border border-red-500/20'
+                    }`}
+                  >
+                    <span
+                      className={`text-base font-black w-4 flex-shrink-0 ${
+                        isCorrect ? 'text-emerald-400' : 'text-red-400'
+                      }`}
+                    >
+                      {isCorrect ? '✓' : '✗'}
+                    </span>
+                    <span className="flex-1 font-semibold truncate opacity-90">
+                      {result.street.name}
+                    </span>
+                    <span
+                      className={`font-black tabular-nums flex-shrink-0 ${
+                        isCorrect ? 'text-emerald-400' : 'text-red-500 opacity-50'
+                      }`}
+                    >
+                      {isCorrect ? `+${result.points}` : '0'}
+                    </span>
+                    <span className="text-xs opacity-40 flex-shrink-0 ml-1">
+                      {isExpanded ? '▲' : '🗺'}
+                    </span>
+                  </button>
+                  <AnimatePresence>
+                    {isExpanded && (
+                      <motion.div
+                        initial={{ height: 0, opacity: 0 }}
+                        animate={{ height: 'auto', opacity: 1 }}
+                        exit={{ height: 0, opacity: 0 }}
+                        transition={{ duration: 0.2 }}
+                        className="overflow-hidden"
+                      >
+                        <button
+                          type="button"
+                          onClick={() => setExpandedIndex(null)}
+                          className={`w-full p-1.5 pt-0 rounded-b-xl ${
+                            isCorrect
+                              ? 'bg-emerald-500/10 border-x border-b border-emerald-500/20'
+                              : 'bg-red-500/10 border-x border-b border-red-500/20'
+                          }`}
+                          aria-label="Hide street map"
+                        >
+                          <StreetSnapshotMap street={result.street} theme={theme} />
+                        </button>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
+              );
+            })}
           </div>
         </div>
 
