@@ -46,7 +46,8 @@ const FeedbackForm: React.FC<FeedbackFormProps> = ({ username, onSuccess, onClos
 
   const { feedback, isSubmitting, error } = formState;
 
-  const turnstileSiteKey = import.meta.env.VITE_TURNSTILE_SITE_KEY as string | undefined;
+  const rawSiteKey = import.meta.env.VITE_TURNSTILE_SITE_KEY as string | undefined;
+  const turnstileSiteKey = rawSiteKey?.startsWith('0x') ? rawSiteKey : undefined;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

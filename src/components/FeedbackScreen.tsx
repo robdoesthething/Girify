@@ -26,7 +26,10 @@ const FeedbackScreen: React.FC<FeedbackScreenProps> = ({ username }) => {
   const [error, setError] = useState<string | null>(null);
   const turnstileRef = useRef<TurnstileInstance | undefined>(undefined);
 
-  const turnstileSiteKey = import.meta.env.VITE_TURNSTILE_SITE_KEY as string | undefined;
+  const rawSiteKey = import.meta.env.VITE_TURNSTILE_SITE_KEY as string | undefined;
+  // Cloudflare real keys start with "0x". Test keys (1x/2x/3x) auto-resolve
+  // and show a "testing only" banner — skip Turnstile when a test key is in use.
+  const turnstileSiteKey = rawSiteKey?.startsWith('0x') ? rawSiteKey : undefined;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
