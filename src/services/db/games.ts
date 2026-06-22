@@ -43,6 +43,12 @@ export async function insertGameResult(
   const { error } = await supabase.from('game_results').insert(payload);
 
   if (error) {
+    // Duplicate key means the score is already saved (e.g. from a prior flush).
+    // Treat it as success so the pending queue clears instead of retrying forever.
+    if (error.code === '23505' || error.message?.includes('duplicate key')) {
+      logger.info('insertGameResult: duplicate entry — score already recorded, clearing queue');
+      return { success: true };
+    }
     logger.error('insertGameResult error:', error.message);
     return { success: false, error };
   }

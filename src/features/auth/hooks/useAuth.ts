@@ -86,12 +86,13 @@ export const useAuth = (onAnnouncementsCheck?: () => void): UseAuthResult => {
     let usernameToUse = storage.get(STORAGE_KEYS.USERNAME, '');
 
     const existingByUid = await getUserByUid(authUser.id);
-    if (existingByUid?.username) {
+    const alreadyLinked = !!existingByUid?.username;
+    if (alreadyLinked) {
       // Repair localStorage so subsequent loads skip the DB lookup
       if (!usernameToUse) {
-        storage.set(STORAGE_KEYS.USERNAME, existingByUid.username);
+        storage.set(STORAGE_KEYS.USERNAME, existingByUid!.username);
       }
-      usernameToUse = existingByUid.username;
+      usernameToUse = existingByUid!.username;
     }
 
     if (!usernameToUse) {
@@ -119,8 +120,12 @@ export const useAuth = (onAnnouncementsCheck?: () => void): UseAuthResult => {
           setProfile(fetchedProfile);
         }
 
-        // Link supabase_uid for migrated users (after profile exists in DB)
-        await linkSupabaseUid(authUser);
+        // Only attempt to link supabase_uid for users found by email (not UID).
+        // If we already found the user by UID, supabase_uid is already set — skip
+        // to avoid a 403 from the RLS UPDATE policy on rows with no matching UID.
+        if (!alreadyLinked) {
+          await linkSupabaseUid(authUser);
+        }
       },
       { loadingKey: 'profile-sync', errorMessage: undefined }
     );
