@@ -73,7 +73,7 @@ const AchievementsList: React.FC<AchievementsListProps> = ({
         <div className="flex flex-col items-center py-6 bg-slate-100 dark:bg-slate-800 rounded-xl">
           <span className="text-4xl mb-2">🏅</span>
           <p className="text-sm font-bold font-inter">No achievements yet</p>
-          <p className="text-xs opacity-50 mt-1 font-inter">Play games to unlock achievements!</p>
+          <p className="text-xs opacity-70 mt-1 font-inter">Play games to unlock achievements!</p>
         </div>
       )}
 
@@ -139,7 +139,7 @@ const AchievementsList: React.FC<AchievementsListProps> = ({
               {Math.round((nextBadge.progress ?? 0) * ROUND_FACTOR)}%
             </span>
           </div>
-          <p className="text-xs opacity-50 mt-2 font-inter">
+          <p className="text-xs opacity-70 mt-2 font-inter">
             {nextBadge.name}: {nextBadge.description}
           </p>
         </div>

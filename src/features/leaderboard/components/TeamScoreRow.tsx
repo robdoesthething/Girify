@@ -45,7 +45,7 @@ const TeamScoreRow: React.FC<TeamScoreRowProps> = ({ team, index }) => {
           <div className="font-bold text-sm flex items-center gap-2 font-inter">
             {team.teamName}
           </div>
-          <div className="text-[10px] opacity-50 font-mono flex items-center gap-2">
+          <div className="text-[10px] opacity-70 font-mono flex items-center gap-2">
             <span>
               {team.memberCount} {team.memberCount === 1 ? 'player' : 'players'}
             </span>
@@ -58,7 +58,7 @@ const TeamScoreRow: React.FC<TeamScoreRowProps> = ({ team, index }) => {
         <div className="font-black text-lg text-emerald-500 font-inter">
           {team.score.toLocaleString()}
         </div>
-        <div className="text-[9px] font-bold opacity-40 uppercase font-inter">Total Points</div>
+        <div className="text-[9px] font-bold opacity-65 uppercase font-inter">Total Points</div>
       </div>
     </motion.div>
   );

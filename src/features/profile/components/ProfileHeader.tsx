@@ -97,7 +97,7 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
         )}
       </div>
 
-      <p className="text-[10px] font-bold uppercase tracking-widest opacity-40 mt-3 font-mono">
+      <p className="text-[10px] font-bold uppercase tracking-widest opacity-65 mt-3 font-mono">
         {t('playerSince')} {joinedDate}
       </p>
 

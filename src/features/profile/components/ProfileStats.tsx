@@ -29,7 +29,7 @@ const ProfileStats: React.FC<ProfileStatsProps> = ({ profile, isLoading }) => {
 
   return (
     <div className="p-6 grid grid-cols-5 gap-2 border-b border-slate-100 dark:border-slate-800">
-      <div className="text-center opacity-50">
+      <div className="text-center opacity-70">
         <p className="text-xl font-black text-slate-400">-</p>
         <p className="text-[9px] uppercase font-bold text-slate-400 tracking-wider font-inter">
           {t('streak')}
@@ -55,7 +55,7 @@ const ProfileStats: React.FC<ProfileStatsProps> = ({ profile, isLoading }) => {
           {t('best')}
         </p>
       </div>
-      <div className="text-center opacity-50">
+      <div className="text-center opacity-70">
         <p className="text-xl font-black text-slate-400">-</p>
         <p className="text-[9px] uppercase font-bold text-slate-400 tracking-wider font-inter">
           {t('avg')}

@@ -65,7 +65,7 @@ const NotificationSettings: React.FC<NotificationSettingsProps> = ({
 
   return (
     <div className="space-y-4">
-      <h3 className="text-sm font-bold uppercase tracking-wider opacity-50 font-inter">
+      <h3 className="text-sm font-bold uppercase tracking-wider opacity-70 font-inter">
         Notifications
       </h3>
 
@@ -87,7 +87,7 @@ const NotificationSettings: React.FC<NotificationSettingsProps> = ({
         className={`flex items-center justify-between p-4 rounded-xl border ${themeClasses(theme, 'border-slate-800 bg-slate-800/50', 'border-slate-100 bg-slate-50')}`}
       >
         <div className="flex items-center gap-4">
-          <div className="opacity-40">
+          <div className="opacity-65">
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path
                 strokeLinecap="round"
@@ -99,7 +99,7 @@ const NotificationSettings: React.FC<NotificationSettingsProps> = ({
           </div>
           <div>
             <span className="font-medium font-inter">Daily Reminders</span>
-            <p className="text-xs opacity-50 font-inter">Get reminded to play each day</p>
+            <p className="text-xs opacity-70 font-inter">Get reminded to play each day</p>
           </div>
         </div>
         <button

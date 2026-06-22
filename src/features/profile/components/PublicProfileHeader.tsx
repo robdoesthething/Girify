@@ -54,9 +54,9 @@ const PublicProfileHeader: React.FC<PublicProfileHeaderProps> = ({
       )}
 
       <h2 className="text-2xl font-black tracking-tight">{formattedUsername}</h2>
-      {profile?.realName && <p className="text-sm font-bold opacity-50 mt-1">{profile.realName}</p>}
+      {profile?.realName && <p className="text-sm font-bold opacity-70 mt-1">{profile.realName}</p>}
       {profile?.joinedAt && (
-        <p className="text-xs font-bold uppercase tracking-widest opacity-40 mt-2">
+        <p className="text-xs font-bold uppercase tracking-widest opacity-65 mt-2">
           {t('playerSince')} {new Date(profile.joinedAt).toLocaleDateString()}
         </p>
       )}

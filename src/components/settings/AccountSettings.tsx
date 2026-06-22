@@ -58,7 +58,7 @@ const AccountSettings: React.FC<AccountSettingsProps> = ({ onLogout, isAdmin, on
         </div>
       )}
 
-      <h3 className="text-sm font-bold uppercase tracking-wider opacity-50 font-inter">
+      <h3 className="text-sm font-bold uppercase tracking-wider opacity-70 font-inter">
         Data & Account
       </h3>
       <button

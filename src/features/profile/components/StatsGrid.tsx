@@ -24,7 +24,7 @@ const StatsGrid: React.FC<StatsGridProps> = ({ stats }) => {
         <span className="text-2xl mb-1">🔥</span>
         <div className="flex flex-col items-center leading-none">
           <span className="text-xl font-black text-orange-500">{stats.dailyStreak}</span>
-          <span className="text-[10px] font-bold opacity-50 font-mono">
+          <span className="text-[10px] font-bold opacity-70 font-mono">
             Max: {Math.max(stats.dailyStreak, stats.maxStreak)}
           </span>
         </div>

@@ -175,14 +175,18 @@ const SummaryScreen: React.FC<SummaryScreenProps> = ({
           <h2 className="text-2xl md:text-3xl font-black mb-2 bg-gradient-to-br from-white to-slate-400 bg-clip-text text-transparent">
             {getGreeting()}
           </h2>
-          <p className="text-sm opacity-60 uppercase tracking-widest font-bold">
+          <p
+            className={`text-sm uppercase tracking-widest font-bold ${theme === 'dark' ? 'text-slate-400' : 'text-slate-500'}`}
+          >
             {t('todaysChallenge') || "Today's Challenge"}
           </p>
         </div>
 
         <div className="grid grid-cols-2 gap-4 w-full mb-8">
           <div className="glass-panel p-4 flex flex-col items-center justify-center col-span-1">
-            <span className="text-xs opacity-50 uppercase tracking-wider font-bold mb-1">
+            <span
+              className={`text-xs uppercase tracking-wider font-bold mb-1 ${theme === 'dark' ? 'text-slate-400' : 'text-slate-500'}`}
+            >
               {t('scoreLabel')}
             </span>
             <div className="flex flex-col items-center">
@@ -211,7 +215,9 @@ const SummaryScreen: React.FC<SummaryScreenProps> = ({
         </div>
 
         <div className="w-full mb-6">
-          <p className="text-[10px] font-black uppercase tracking-[0.2em] opacity-40 mb-2.5">
+          <p
+            className={`text-[10px] font-black uppercase tracking-[0.2em] mb-2.5 ${theme === 'dark' ? 'text-slate-400' : 'text-slate-500'}`}
+          >
             {t('resultsBreakdown') || 'Resultats'}
           </p>
           <div className="space-y-1.5">
@@ -243,12 +249,14 @@ const SummaryScreen: React.FC<SummaryScreenProps> = ({
                     </span>
                     <span
                       className={`font-black tabular-nums flex-shrink-0 ${
-                        isCorrect ? 'text-emerald-400' : 'text-red-500 opacity-50'
+                        isCorrect ? 'text-emerald-400' : 'text-red-400'
                       }`}
                     >
                       {isCorrect ? `+${result.points}` : '0'}
                     </span>
-                    <span className="text-xs opacity-40 flex-shrink-0 ml-1">
+                    <span
+                      className={`text-xs flex-shrink-0 ml-1 ${theme === 'dark' ? 'text-slate-400' : 'text-slate-500'}`}
+                    >
                       {isExpanded ? '▲' : '🗺'}
                     </span>
                   </button>

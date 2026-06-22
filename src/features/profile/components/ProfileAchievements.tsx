@@ -35,7 +35,7 @@ const ProfileAchievements: React.FC<ProfileAchievementsProps> = ({
 
   return (
     <div className="p-6 border-b border-slate-100 dark:border-slate-800">
-      <h3 className="text-sm font-bold uppercase tracking-wider opacity-50 mb-4 font-inter">
+      <h3 className="text-sm font-bold uppercase tracking-wider opacity-70 mb-4 font-inter">
         {t('achievements')} ({unlockedBadges.length})
       </h3>
       {unlockedBadges.length > 0 ? (

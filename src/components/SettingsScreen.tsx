@@ -140,7 +140,7 @@ const SettingsScreen: React.FC<SettingsScreenProps> = ({
 
         <div className="flex-1 overflow-y-auto p-6 space-y-6 scrollbar-hide">
           <div className="space-y-4">
-            <h3 className="text-sm font-bold uppercase tracking-wider opacity-50 font-inter">
+            <h3 className="text-sm font-bold uppercase tracking-wider opacity-70 font-inter">
               {t('language')}
             </h3>
             <div
@@ -162,7 +162,7 @@ const SettingsScreen: React.FC<SettingsScreenProps> = ({
           </div>
 
           <div className="space-y-4">
-            <h3 className="text-sm font-bold uppercase tracking-wider opacity-50 font-inter">
+            <h3 className="text-sm font-bold uppercase tracking-wider opacity-70 font-inter">
               {t('appearance') || 'Appearance'}
             </h3>
             <div
@@ -192,7 +192,7 @@ const SettingsScreen: React.FC<SettingsScreenProps> = ({
           </div>
 
           <div className="space-y-4">
-            <h3 className="text-sm font-bold uppercase tracking-wider opacity-50 font-inter">
+            <h3 className="text-sm font-bold uppercase tracking-wider opacity-70 font-inter">
               Gameplay
             </h3>
             <div
@@ -213,7 +213,7 @@ const SettingsScreen: React.FC<SettingsScreenProps> = ({
                 </div>
                 <div>
                   <span className="font-medium font-inter">{t('autoAdvance')}</span>
-                  <p className="text-xs opacity-50 font-inter">{t('autoAdvanceDesc')}</p>
+                  <p className="text-xs opacity-70 font-inter">{t('autoAdvanceDesc')}</p>
                 </div>
               </div>
               <button
@@ -229,7 +229,7 @@ const SettingsScreen: React.FC<SettingsScreenProps> = ({
           </div>
 
           <div className="space-y-4">
-            <h3 className="text-sm font-bold uppercase tracking-wider opacity-50 font-inter">
+            <h3 className="text-sm font-bold uppercase tracking-wider opacity-70 font-inter">
               Notifications
             </h3>
             <div
@@ -250,7 +250,7 @@ const SettingsScreen: React.FC<SettingsScreenProps> = ({
                 </div>
                 <div>
                   <span className="font-medium font-inter">Daily Reminders</span>
-                  <p className="text-xs opacity-50 font-inter">Get reminded to play each day</p>
+                  <p className="text-xs opacity-70 font-inter">Get reminded to play each day</p>
                 </div>
               </div>
               <button
@@ -296,7 +296,7 @@ const SettingsScreen: React.FC<SettingsScreenProps> = ({
           </div>
 
           <div className="space-y-4">
-            <h3 className="text-sm font-bold uppercase tracking-wider opacity-50 font-inter">
+            <h3 className="text-sm font-bold uppercase tracking-wider opacity-70 font-inter">
               Data & Account
             </h3>
             <button

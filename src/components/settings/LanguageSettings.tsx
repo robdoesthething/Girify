@@ -8,7 +8,7 @@ const LanguageSettings: React.FC = () => {
 
   return (
     <div className="space-y-4">
-      <h3 className="text-sm font-bold uppercase tracking-wider opacity-50 font-inter">
+      <h3 className="text-sm font-bold uppercase tracking-wider opacity-70 font-inter">
         {t('language')}
       </h3>
       <div
