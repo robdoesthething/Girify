@@ -26,9 +26,11 @@ const FeedbackScreen: React.FC<FeedbackScreenProps> = ({ username }) => {
   const [error, setError] = useState<string | null>(null);
   const turnstileRef = useRef<TurnstileInstance | undefined>(undefined);
 
+  const turnstileSiteKey = import.meta.env.VITE_TURNSTILE_SITE_KEY as string | undefined;
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!feedback.trim() || !turnstileToken) {
+    if (!feedback.trim() || (turnstileSiteKey && !turnstileToken)) {
       return;
     }
 
@@ -104,16 +106,18 @@ const FeedbackScreen: React.FC<FeedbackScreenProps> = ({ username }) => {
                       className={`w-full h-48 p-4 rounded-xl resize-none outline-none border focus:ring-2 focus:ring-sky-500 transition-all mb-4 text-lg font-inter ${themeClasses(theme, 'bg-slate-800 border-slate-700 placeholder-slate-600 text-white', 'bg-slate-50 border-slate-200 placeholder-slate-400 text-slate-900')}`}
                     />
 
-                    <div className="flex justify-center mb-4">
-                      <Turnstile
-                        ref={turnstileRef}
-                        siteKey={import.meta.env.VITE_TURNSTILE_SITE_KEY ?? ''}
-                        onSuccess={setTurnstileToken}
-                        onError={() => setTurnstileToken(null)}
-                        onExpire={() => setTurnstileToken(null)}
-                        options={{ theme }}
-                      />
-                    </div>
+                    {turnstileSiteKey && feedback.trim() && (
+                      <div className="flex justify-center mb-4">
+                        <Turnstile
+                          ref={turnstileRef}
+                          siteKey={turnstileSiteKey}
+                          onSuccess={setTurnstileToken}
+                          onError={() => setTurnstileToken(null)}
+                          onExpire={() => setTurnstileToken(null)}
+                          options={{ theme }}
+                        />
+                      </div>
+                    )}
 
                     {error && (
                       <div className="mb-6 p-3 bg-red-100 dark:bg-red-900/30 border border-red-200 dark:border-red-700/50 rounded-xl text-sm font-bold text-red-600 dark:text-red-400 text-center animate-shake font-inter">
@@ -123,7 +127,9 @@ const FeedbackScreen: React.FC<FeedbackScreenProps> = ({ username }) => {
 
                     <button
                       type="submit"
-                      disabled={isSubmitting || !feedback.trim() || !turnstileToken}
+                      disabled={
+                        isSubmitting || !feedback.trim() || (!!turnstileSiteKey && !turnstileToken)
+                      }
                       className="w-full py-4 rounded-xl font-bold text-lg bg-sky-500 hover:bg-sky-600 text-white shadow-lg shadow-sky-500/20 disabled:opacity-50 disabled:cursor-not-allowed transition-all transform active:scale-95 font-inter"
                     >
                       {isSubmitting ? 'Sending...' : t('submitFeedback') || 'Submit Feedback'}
