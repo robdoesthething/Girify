@@ -2,6 +2,8 @@ import type { VercelResponse } from '@vercel/node';
 import { CORS_MAX_AGE_SECONDS } from './constants.js';
 
 const ALLOWED_ORIGINS = [
+  'https://www.girifyapp.com',
+  'https://girifyapp.com',
   'https://girify.vercel.app',
   'http://localhost:5173', // Development
   'http://localhost:3000', // Vercel dev

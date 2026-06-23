@@ -90,18 +90,26 @@ export default async function handler(req: VercelRequest, res: VercelResponse): 
     }
 
     // Verify Turnstile token with Cloudflare
-    const verifyRes = await fetch(TURNSTILE_VERIFY_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-      body: new URLSearchParams({
-        secret: secretKey,
-        response: turnstileToken,
-        remoteip: clientIp,
-      }),
-    });
-    const verifyData = (await verifyRes.json()) as { success: boolean };
+    let turnstileSuccess = false;
+    try {
+      const verifyRes = await fetch(TURNSTILE_VERIFY_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: new URLSearchParams({
+          secret: secretKey,
+          response: turnstileToken,
+          remoteip: clientIp,
+        }),
+      });
+      const verifyData = (await verifyRes.json()) as { success: boolean };
+      turnstileSuccess = verifyData.success;
+    } catch (err) {
+      console.error('[API] Turnstile verification request failed:', err);
+      ErrorResponses.SERVER_ERROR(res, 'CAPTCHA verification unavailable. Please try again.');
+      return;
+    }
 
-    if (!verifyData.success) {
+    if (!turnstileSuccess) {
       console.warn('[API] Turnstile verification failed');
       ErrorResponses.BAD_REQUEST(res, 'CAPTCHA verification failed');
       return;
