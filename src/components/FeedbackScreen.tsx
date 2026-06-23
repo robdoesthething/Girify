@@ -23,6 +23,7 @@ const FeedbackScreen: React.FC<FeedbackScreenProps> = ({ username }) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
+  const [turnstileErrored, setTurnstileErrored] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const turnstileRef = useRef<TurnstileInstance | undefined>(undefined);
 
@@ -33,7 +34,7 @@ const FeedbackScreen: React.FC<FeedbackScreenProps> = ({ username }) => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!feedback.trim()) {
+    if (!feedback.trim() || (turnstileSiteKey && !turnstileToken)) {
       return;
     }
 
@@ -110,15 +111,43 @@ const FeedbackScreen: React.FC<FeedbackScreenProps> = ({ username }) => {
                     />
 
                     {turnstileSiteKey && feedback.trim() && (
-                      <div className="flex justify-center mb-4">
-                        <Turnstile
-                          ref={turnstileRef}
-                          siteKey={turnstileSiteKey}
-                          onSuccess={token => setTurnstileToken(token)}
-                          onError={() => setTurnstileToken(null)}
-                          onExpire={() => setTurnstileToken(null)}
-                          options={{ theme }}
-                        />
+                      <div className="flex flex-col items-center mb-4 gap-2">
+                        {!turnstileErrored && (
+                          <Turnstile
+                            ref={turnstileRef}
+                            siteKey={turnstileSiteKey}
+                            onSuccess={token => {
+                              setTurnstileToken(token);
+                              setTurnstileErrored(false);
+                            }}
+                            onError={() => {
+                              setTurnstileToken(null);
+                              setTurnstileErrored(true);
+                            }}
+                            onExpire={() => {
+                              setTurnstileToken(null);
+                              setTurnstileErrored(false);
+                            }}
+                            options={{ theme }}
+                          />
+                        )}
+                        {turnstileErrored && (
+                          <div className="flex flex-col items-center gap-2 p-3 bg-red-100 dark:bg-red-900/30 border border-red-200 dark:border-red-700/50 rounded-xl w-full text-center">
+                            <p className="text-sm font-bold text-red-600 dark:text-red-400 font-inter">
+                              Verification failed. Please try again.
+                            </p>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setTurnstileErrored(false);
+                                setTurnstileToken(null);
+                              }}
+                              className="text-xs font-bold text-red-600 dark:text-red-400 underline underline-offset-2 font-inter"
+                            >
+                              Retry
+                            </button>
+                          </div>
+                        )}
                       </div>
                     )}
 
@@ -130,7 +159,9 @@ const FeedbackScreen: React.FC<FeedbackScreenProps> = ({ username }) => {
 
                     <button
                       type="submit"
-                      disabled={isSubmitting || !feedback.trim()}
+                      disabled={
+                        isSubmitting || !feedback.trim() || (!!turnstileSiteKey && !turnstileToken)
+                      }
                       className="w-full py-4 rounded-xl font-bold text-lg bg-sky-500 hover:bg-sky-600 text-white shadow-lg shadow-sky-500/20 disabled:opacity-50 disabled:cursor-not-allowed transition-all transform active:scale-95 font-inter"
                     >
                       {isSubmitting ? 'Sending...' : t('submitFeedback') || 'Submit Feedback'}
