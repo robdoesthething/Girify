@@ -46,21 +46,22 @@ export async function checkRateLimit(
   key: string,
   options: RateLimitOptions
 ): Promise<RateLimitResult> {
-  const client = getRedis();
-
-  if (!client) {
-    // If Redis is unavailable, allow the request (fail-open)
-    return {
-      allowed: true,
-      remaining: options.maxAttempts - 1,
-      resetAt: Date.now() + options.windowMs,
-    };
-  }
-
-  const redisKey = `ratelimit:${key}`;
-  const windowSeconds = Math.ceil(options.windowMs / 1000);
+  const fallback: RateLimitResult = {
+    allowed: true,
+    remaining: options.maxAttempts - 1,
+    resetAt: Date.now() + options.windowMs,
+  };
 
   try {
+    const client = getRedis();
+
+    if (!client) {
+      return fallback;
+    }
+
+    const redisKey = `ratelimit:${key}`;
+    const windowSeconds = Math.ceil(options.windowMs / 1000);
+
     // Atomic increment with TTL
     const attempts = await client.incr(redisKey);
 
@@ -71,7 +72,7 @@ export async function checkRateLimit(
 
     // Get TTL to calculate resetAt
     const ttl = await client.ttl(redisKey);
-    const resetAt = Date.now() + ttl * 1000;
+    const resetAt = Number.isFinite(ttl) ? Date.now() + ttl * 1000 : fallback.resetAt;
 
     const remaining = Math.max(0, options.maxAttempts - attempts);
     const allowed = attempts <= options.maxAttempts;
@@ -79,12 +80,7 @@ export async function checkRateLimit(
     return { allowed, remaining, resetAt };
   } catch (error) {
     console.error('[RateLimit] Redis error, allowing request:', error);
-    // Fail-open: allow request if Redis errors
-    return {
-      allowed: true,
-      remaining: options.maxAttempts - 1,
-      resetAt: Date.now() + options.windowMs,
-    };
+    return fallback;
   }
 }
 
