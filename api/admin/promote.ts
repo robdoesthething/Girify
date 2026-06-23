@@ -11,15 +11,15 @@
 
 import { timingSafeEqual } from 'crypto';
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { extractBearerToken, verifySupabaseToken } from '../_lib/auth';
-import { RATE_LIMIT_DEFAULTS, USERNAME_CONSTRAINTS } from '../_lib/constants';
-import { handleCors } from '../_lib/cors';
-import { handleError } from '../_lib/errorHandler';
-import { checkRateLimit } from '../_lib/rate-limit';
-import { ErrorResponses, sendSuccess } from '../_lib/response';
-import { promoteUserToAdmin } from '../_lib/supabase';
-import type { AdminPromoteRequest } from '../_lib/types';
-import { validateRequestBody, ValidationSchema } from '../_lib/validation';
+import { extractBearerToken, verifySupabaseToken } from '../_lib/auth.js';
+import { RATE_LIMIT_DEFAULTS, USERNAME_CONSTRAINTS } from '../_lib/constants.js';
+import { handleCors } from '../_lib/cors.js';
+import { handleError } from '../_lib/errorHandler.js';
+import { checkRateLimit } from '../_lib/rate-limit.js';
+import { ErrorResponses, sendSuccess } from '../_lib/response.js';
+import { promoteUserToAdmin } from '../_lib/supabase.js';
+import type { AdminPromoteRequest } from '../_lib/types.js';
+import { validateRequestBody, ValidationSchema } from '../_lib/validation.js';
 
 /**
  * Rate limiting configuration

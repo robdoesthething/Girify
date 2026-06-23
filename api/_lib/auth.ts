@@ -3,8 +3,8 @@
  */
 
 import { createHmac } from 'crypto';
-import { BEARER_PREFIX, BEARER_PREFIX_LENGTH } from './constants';
-import type { AuthUser } from './types';
+import { BEARER_PREFIX, BEARER_PREFIX_LENGTH } from './constants.js';
+import type { AuthUser } from './types.js';
 
 export interface AuthExtractionResult {
   token?: string;

@@ -12,12 +12,12 @@
 
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { createClient } from '@supabase/supabase-js';
-import { extractBearerToken, verifySupabaseToken } from './_lib/auth';
-import { handleCors } from './_lib/cors';
-import { handleError } from './_lib/errorHandler';
-import { ErrorResponses, sendSuccess } from './_lib/response';
-import { creditGiuros, getUsernameByUid } from './_lib/supabase';
-import { validateRequestBody, ValidationSchema } from './_lib/validation';
+import { extractBearerToken, verifySupabaseToken } from './_lib/auth.js';
+import { handleCors } from './_lib/cors.js';
+import { handleError } from './_lib/errorHandler.js';
+import { ErrorResponses, sendSuccess } from './_lib/response.js';
+import { creditGiuros, getUsernameByUid } from './_lib/supabase.js';
+import { validateRequestBody, ValidationSchema } from './_lib/validation.js';
 
 const SCHEMA: ValidationSchema = {
   referredUsername: { type: 'string', required: true, minLength: 1, maxLength: 50 },

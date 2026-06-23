@@ -8,11 +8,11 @@
  */
 
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { extractBearerToken, verifySupabaseToken } from '../_lib/auth';
-import { handleCors } from '../_lib/cors';
-import { handleError } from '../_lib/errorHandler';
-import { ErrorResponses, sendSuccess } from '../_lib/response';
-import { deleteAuthUser, isUserAdmin } from '../_lib/supabase';
+import { extractBearerToken, verifySupabaseToken } from '../_lib/auth.js';
+import { handleCors } from '../_lib/cors.js';
+import { handleError } from '../_lib/errorHandler.js';
+import { ErrorResponses, sendSuccess } from '../_lib/response.js';
+import { deleteAuthUser, isUserAdmin } from '../_lib/supabase.js';
 
 export default async function handler(req: VercelRequest, res: VercelResponse): Promise<void> {
   if (handleCors(res, req.headers.origin, req.method || 'GET')) {

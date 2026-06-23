@@ -7,13 +7,13 @@
  */
 
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { extractBearerToken, verifySupabaseToken } from './_lib/auth';
-import { handleCors } from './_lib/cors';
-import { handleError } from './_lib/errorHandler';
-import { checkRateLimit } from './_lib/rate-limit';
-import { ErrorResponses, sendSuccess } from './_lib/response';
-import { getUsernameByUid, insertFeedbackRecord } from './_lib/supabase';
-import { validateRequestBody, ValidationSchema } from './_lib/validation';
+import { extractBearerToken, verifySupabaseToken } from './_lib/auth.js';
+import { handleCors } from './_lib/cors.js';
+import { handleError } from './_lib/errorHandler.js';
+import { checkRateLimit } from './_lib/rate-limit.js';
+import { ErrorResponses, sendSuccess } from './_lib/response.js';
+import { getUsernameByUid, insertFeedbackRecord } from './_lib/supabase.js';
+import { validateRequestBody, ValidationSchema } from './_lib/validation.js';
 
 const FEEDBACK_SCHEMA: ValidationSchema = {
   username: { type: 'string', required: false, minLength: 1, maxLength: 50 },

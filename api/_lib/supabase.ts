@@ -3,7 +3,7 @@
  */
 
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
-import { SUPABASE_ERROR_CODES } from './constants';
+import { SUPABASE_ERROR_CODES } from './constants.js';
 
 let supabaseAdmin: SupabaseClient | null = null;
 

@@ -1,5 +1,5 @@
 import { VercelResponse } from '@vercel/node';
-import { sendError } from './response';
+import { sendError } from './response.js';
 
 export class ApiError extends Error {
   statusCode: number;
