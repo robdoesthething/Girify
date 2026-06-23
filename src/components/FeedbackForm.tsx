@@ -42,7 +42,6 @@ const FeedbackForm: React.FC<FeedbackFormProps> = ({ username, onSuccess, onClos
     error: null,
   });
   const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
-  const [turnstileErrored, setTurnstileErrored] = useState(false);
   const turnstileRef = useRef<TurnstileInstance | undefined>(undefined);
 
   const { feedback, isSubmitting, error } = formState;
@@ -52,7 +51,7 @@ const FeedbackForm: React.FC<FeedbackFormProps> = ({ username, onSuccess, onClos
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!feedback.trim() || (turnstileSiteKey && !turnstileToken && !turnstileErrored)) {
+    if (!feedback.trim()) {
       return;
     }
 
@@ -114,14 +113,8 @@ const FeedbackForm: React.FC<FeedbackFormProps> = ({ username, onSuccess, onClos
             <Turnstile
               ref={turnstileRef}
               siteKey={turnstileSiteKey}
-              onSuccess={token => {
-                setTurnstileToken(token);
-                setTurnstileErrored(false);
-              }}
-              onError={() => {
-                setTurnstileToken(null);
-                setTurnstileErrored(true);
-              }}
+              onSuccess={token => setTurnstileToken(token)}
+              onError={() => setTurnstileToken(null)}
               onExpire={() => setTurnstileToken(null)}
               options={{ theme, size: 'compact' }}
             />
@@ -147,11 +140,7 @@ const FeedbackForm: React.FC<FeedbackFormProps> = ({ username, onSuccess, onClos
 
           <button
             type="submit"
-            disabled={
-              isSubmitting ||
-              !feedback.trim() ||
-              (!!turnstileSiteKey && !turnstileToken && !turnstileErrored)
-            }
+            disabled={isSubmitting || !feedback.trim()}
             className="w-full py-3 rounded-xl font-bold text-sm bg-sky-500 hover:bg-sky-600 active:scale-95 text-white shadow-lg shadow-sky-500/20 disabled:opacity-50 disabled:cursor-not-allowed transition-all font-inter"
           >
             {isSubmitting ? 'Sending...' : t('submitFeedback') || 'Submit Feedback'}

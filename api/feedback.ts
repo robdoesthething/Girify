@@ -18,7 +18,7 @@ import { validateRequestBody, ValidationSchema } from './_lib/validation';
 const FEEDBACK_SCHEMA: ValidationSchema = {
   username: { type: 'string', required: false, minLength: 1, maxLength: 50 },
   text: { type: 'string', required: true, minLength: 1, maxLength: 2000 },
-  turnstileToken: { type: 'string', required: true },
+  turnstileToken: { type: 'string', required: false },
 };
 
 const TURNSTILE_VERIFY_URL = 'https://challenges.cloudflare.com/turnstile/v0/siteverify';
@@ -50,7 +50,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse): 
     } = req.body as {
       username?: string;
       text: string;
-      turnstileToken: string;
+      turnstileToken?: string;
     };
 
     // Prefer username derived from verified auth token; fall back to body value
@@ -82,29 +82,35 @@ export default async function handler(req: VercelRequest, res: VercelResponse): 
       return;
     }
 
-    const secretKey = process.env.TURNSTILE_SECRET_KEY;
-    if (!secretKey) {
-      console.error('[API] TURNSTILE_SECRET_KEY is not configured');
-      ErrorResponses.SERVER_ERROR(res, 'Server configuration error');
-      return;
-    }
+    if (turnstileToken) {
+      const secretKey = process.env.TURNSTILE_SECRET_KEY;
+      if (!secretKey) {
+        console.error('[API] TURNSTILE_SECRET_KEY is not configured');
+        ErrorResponses.SERVER_ERROR(res, 'Server configuration error');
+        return;
+      }
 
-    // Verify Turnstile token with Cloudflare
-    const verifyRes = await fetch(TURNSTILE_VERIFY_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-      body: new URLSearchParams({
-        secret: secretKey,
-        response: turnstileToken,
-        remoteip: clientIp,
-      }),
-    });
-    const verifyData = (await verifyRes.json()) as { success: boolean };
+      // Verify Turnstile token with Cloudflare
+      const verifyRes = await fetch(TURNSTILE_VERIFY_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: new URLSearchParams({
+          secret: secretKey,
+          response: turnstileToken,
+          remoteip: clientIp,
+        }),
+      });
+      const verifyData = (await verifyRes.json()) as { success: boolean };
 
-    if (!verifyData.success) {
-      console.warn('[API] Turnstile verification failed');
-      ErrorResponses.BAD_REQUEST(res, 'CAPTCHA verification failed');
-      return;
+      if (!verifyData.success) {
+        console.warn('[API] Turnstile verification failed');
+        ErrorResponses.BAD_REQUEST(res, 'CAPTCHA verification failed');
+        return;
+      }
+    } else {
+      console.log(
+        `[API] Feedback submitted without Turnstile token from ${clientIp} (rate limiting still applies)`
+      );
     }
 
     // Normalize username (strip @ prefix, lowercase)

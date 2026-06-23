@@ -23,7 +23,6 @@ const FeedbackScreen: React.FC<FeedbackScreenProps> = ({ username }) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
-  const [turnstileErrored, setTurnstileErrored] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const turnstileRef = useRef<TurnstileInstance | undefined>(undefined);
 
@@ -34,7 +33,7 @@ const FeedbackScreen: React.FC<FeedbackScreenProps> = ({ username }) => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!feedback.trim() || (turnstileSiteKey && !turnstileToken && !turnstileErrored)) {
+    if (!feedback.trim()) {
       return;
     }
 
@@ -115,14 +114,8 @@ const FeedbackScreen: React.FC<FeedbackScreenProps> = ({ username }) => {
                         <Turnstile
                           ref={turnstileRef}
                           siteKey={turnstileSiteKey}
-                          onSuccess={token => {
-                            setTurnstileToken(token);
-                            setTurnstileErrored(false);
-                          }}
-                          onError={() => {
-                            setTurnstileToken(null);
-                            setTurnstileErrored(true);
-                          }}
+                          onSuccess={token => setTurnstileToken(token)}
+                          onError={() => setTurnstileToken(null)}
                           onExpire={() => setTurnstileToken(null)}
                           options={{ theme }}
                         />
@@ -137,11 +130,7 @@ const FeedbackScreen: React.FC<FeedbackScreenProps> = ({ username }) => {
 
                     <button
                       type="submit"
-                      disabled={
-                        isSubmitting ||
-                        !feedback.trim() ||
-                        (!!turnstileSiteKey && !turnstileToken && !turnstileErrored)
-                      }
+                      disabled={isSubmitting || !feedback.trim()}
                       className="w-full py-4 rounded-xl font-bold text-lg bg-sky-500 hover:bg-sky-600 text-white shadow-lg shadow-sky-500/20 disabled:opacity-50 disabled:cursor-not-allowed transition-all transform active:scale-95 font-inter"
                     >
                       {isSubmitting ? 'Sending...' : t('submitFeedback') || 'Submit Feedback'}
