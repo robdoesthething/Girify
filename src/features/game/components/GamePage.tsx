@@ -4,10 +4,12 @@ import { useLocation } from 'react-router-dom';
 import AchievementModal from '../../../components/AchievementModal';
 import AnnouncementModal from '../../../components/AnnouncementModal';
 import DistrictSelectionModal from '../../../components/DistrictSelectionModal';
+import UpdateModal from '../../../components/UpdateModal';
 import { GameProvider } from '../../../context/GameContext';
 import { useAchievements } from '../../../hooks/useAchievements';
 import { useAnnouncements } from '../../../hooks/useAnnouncements';
 import { useAuthRedirect } from '../../../hooks/useAuthRedirect';
+import { useUpdateModal } from '../../../hooks/useUpdateModal';
 import { hasPlayedToday } from '../../../utils/game/dailyChallenge';
 import useGameState from '../hooks/useGameState';
 import useStreets from '../hooks/useStreets';
@@ -52,6 +54,9 @@ function GamePageContent({ username }: GamePageProps) {
   // Social / Notifications
   const announcements = useAnnouncements(state.username || '');
   const achievements = useAchievements(state.username || '', state.gameState, location.pathname);
+  const { showUpdateModal, giurosAwarded, dismissUpdateModal } = useUpdateModal(
+    state.username || ''
+  );
 
   // District check — prompts logged-in users without a team to pick one
   const { showDistrictModal, handleDistrictComplete, handleDistrictDismiss, pendingOAuthHandle } =
@@ -137,6 +142,11 @@ function GamePageContent({ username }: GamePageProps) {
               onDismiss={handleDistrictDismiss}
             />
           </Suspense>
+        )}
+      </AnimatePresence>
+      <AnimatePresence>
+        {showUpdateModal && (
+          <UpdateModal giurosAwarded={giurosAwarded} onDismiss={dismissUpdateModal} />
         )}
       </AnimatePresence>
     </GameProvider>
