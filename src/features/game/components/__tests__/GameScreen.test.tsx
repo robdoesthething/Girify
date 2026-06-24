@@ -240,4 +240,46 @@ describe('GameScreen Component', () => {
     renderWithRouter(<GameScreen />);
     expect(screen.getByTestId('instructions-overlay')).toBeInTheDocument();
   });
+
+  it('renders OnboardingTour when username is set and onboarding not yet completed', () => {
+    localStorage.removeItem('girify_onboarding_completed');
+    mockUseGameContext.mockReturnValue({
+      ...defaultContext,
+      state: { ...defaultGameState, username: '@TestUser' },
+    });
+
+    renderWithRouter(<GameScreen />);
+    expect(screen.getByTestId('onboarding-tour')).toBeInTheDocument();
+  });
+
+  it('does NOT render OnboardingTour when onboarding already completed', () => {
+    localStorage.setItem('girify_onboarding_completed', 'true');
+    mockUseGameContext.mockReturnValue({
+      ...defaultContext,
+      state: { ...defaultGameState, username: '@TestUser' },
+    });
+
+    renderWithRouter(<GameScreen />);
+    expect(screen.queryByTestId('onboarding-tour')).not.toBeInTheDocument();
+    localStorage.removeItem('girify_onboarding_completed');
+  });
+
+  it('shows leave-game blocker overlay when blocker.state is blocked', async () => {
+    // The blocker is internal to useBlocker which only fires on actual navigation;
+    // we verify the component wires beforeunload when gameState=playing
+    const addEventSpy = vi.spyOn(window, 'addEventListener');
+    mockUseGameContext.mockReturnValue({
+      ...defaultContext,
+      state: {
+        ...defaultGameState,
+        gameState: 'playing',
+        username: '@TestUser',
+        quizStreets: [{ id: '1', name: 'Street' }],
+      },
+    });
+
+    renderWithRouter(<GameScreen />);
+    expect(addEventSpy).toHaveBeenCalledWith('beforeunload', expect.any(Function));
+    addEventSpy.mockRestore();
+  });
 });

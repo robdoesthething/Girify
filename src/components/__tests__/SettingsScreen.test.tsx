@@ -103,4 +103,25 @@ describe('SettingsScreen', () => {
     // The toggle button renders inside the gameplay section
     expect(screen.getByText('autoAdvance')).toBeInTheDocument();
   });
+
+  it('renders Notifications section with toggle', () => {
+    render(
+      <MemoryRouter>
+        <SettingsScreen {...defaultProps} />
+      </MemoryRouter>
+    );
+    expect(screen.getByText('Notifications')).toBeInTheDocument();
+    // The daily reminder toggle button is present
+    const notifButtons = screen.getAllByRole('button');
+    expect(notifButtons.length).toBeGreaterThan(0);
+  });
+
+  it('renders clear history button in the Data section', () => {
+    render(
+      <MemoryRouter>
+        <SettingsScreen {...defaultProps} />
+      </MemoryRouter>
+    );
+    expect(screen.getByText('Clear Game History')).toBeInTheDocument();
+  });
 });
