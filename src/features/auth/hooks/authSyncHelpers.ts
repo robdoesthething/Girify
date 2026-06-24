@@ -60,6 +60,13 @@ export async function syncUserProfile(
     })) as unknown as UserProfile;
 
     if (profile) {
+      // Sync onboarding state from DB so incognito / new-device sessions skip onboarding for returning users
+      const meta = (profile as unknown as { metadata?: Record<string, unknown> | null }).metadata;
+      const gamesPlayed = (profile as unknown as { games_played?: number }).games_played ?? 0;
+      if (meta?.onboarding_completed || gamesPlayed > 0) {
+        storage.set('girify_onboarding_completed', 'true');
+      }
+
       // Self-heal any broken migration links
       healMigration(displayName).catch((err: Error) => console.error(err));
 
