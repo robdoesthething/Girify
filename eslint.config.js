@@ -18,6 +18,7 @@ export default defineConfig([
     'backups',
     'e2e',
     '.claude',
+    '.vercel',
   ]),
 
   // 1. Core JS Recommended
