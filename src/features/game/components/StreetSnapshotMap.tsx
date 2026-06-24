@@ -28,8 +28,8 @@ interface StreetSnapshotMapProps {
 const StreetSnapshotMap: React.FC<StreetSnapshotMapProps> = ({ street, theme = 'dark' }) => {
   const tileUrl =
     theme === 'dark'
-      ? 'https://{s}.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}{r}.png'
-      : 'https://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}{r}.png';
+      ? 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png'
+      : 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png';
 
   return (
     <MapContainer
