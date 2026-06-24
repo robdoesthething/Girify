@@ -13,7 +13,7 @@ export interface GameHandlers {
   setupGame: (freshName?: string) => void;
   handleRegister: (name: string) => void;
   hasPlayedToday: () => boolean;
-  startPracticeMode: () => void;
+  startPracticeMode: (districtId?: string) => void;
 }
 
 export interface GameContextType {

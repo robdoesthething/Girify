@@ -8,6 +8,7 @@ import {
   useRef,
 } from 'react';
 import { GAME_LOGIC, STORAGE_KEYS, TIME } from '../../../config/constants';
+import { filterStreetsByDistrict } from '../../../utils/game/districtFilter';
 import { calculateScore } from '../../../config/gameConfig';
 import { gameReducer, initialState } from '../gameReducer';
 import { startGame } from '../../../services/gameService';
@@ -71,7 +72,7 @@ export interface UseGameStateResult {
   handleSelectAnswer: (selectedStreet: Street) => void;
   handleNext: () => void;
   handleRegister: (name: string) => void;
-  startPracticeMode: () => void;
+  startPracticeMode: (districtId?: string) => void;
 }
 
 /**
@@ -94,6 +95,10 @@ export const useGameState = (
   // stale-closure issues. useLayoutEffect runs synchronously after each
   // commit (before paint), so the ref is current before any click can fire.
   const questionStartTimeRef = useRef<number | null>(null);
+
+  // Holds the street pool for the current practice session (may be district-filtered).
+  // A ref avoids coupling the pool to reducer state and keeps handleNext simple.
+  const practiceStreetPoolRef = useRef<Street[]>([]);
   useLayoutEffect(() => {
     questionStartTimeRef.current = state.questionStartTime;
   }, [state.questionStartTime]);
@@ -170,24 +175,35 @@ export const useGameState = (
   /**
    * Start an unscored practice session: one street at a time, seeded by
    * session start time instead of the date, looping until the player exits.
+   * Pass a districtId to restrict the pool to streets in that Barcelona district.
    */
-  const startPracticeMode = useCallback(() => {
-    const sessionSeed = Date.now();
-    const firstQuestion = generatePracticeQuestion(validStreets, sessionSeed, 0);
-    if (!firstQuestion) {
-      return;
-    }
-    dispatch({
-      type: 'START_GAME',
-      payload: {
-        quizStreets: [firstQuestion.street],
-        initialOptions: firstQuestion.options,
-        plannedQuestions: null,
-        practiceMode: true,
-        sessionSeed,
-      },
-    });
-  }, [validStreets, dispatch]);
+  const startPracticeMode = useCallback(
+    (districtId?: string) => {
+      const filtered = districtId
+        ? filterStreetsByDistrict(validStreets, districtId)
+        : validStreets;
+      // Need at least correct + 3 distractors; fall back to all streets if too few.
+      const pool = filtered.length >= GAME_LOGIC.DISTRACTORS_COUNT + 1 ? filtered : validStreets;
+      practiceStreetPoolRef.current = pool;
+
+      const sessionSeed = Date.now();
+      const firstQuestion = generatePracticeQuestion(pool, sessionSeed, 0);
+      if (!firstQuestion) {
+        return;
+      }
+      dispatch({
+        type: 'START_GAME',
+        payload: {
+          quizStreets: [firstQuestion.street],
+          initialOptions: firstQuestion.options,
+          plannedQuestions: null,
+          practiceMode: true,
+          sessionSeed,
+        },
+      });
+    },
+    [validStreets, dispatch]
+  );
 
   /**
    * Process answer submission
@@ -247,8 +263,10 @@ export const useGameState = (
     const nextIndex = state.currentQuestionIndex + 1;
 
     if (state.practiceMode) {
+      const pool =
+        practiceStreetPoolRef.current.length > 0 ? practiceStreetPoolRef.current : validStreets;
       const nextQuestion = generatePracticeQuestion(
-        validStreets,
+        pool,
         state.sessionSeed ?? Date.now(),
         nextIndex
       );
