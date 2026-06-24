@@ -8,6 +8,7 @@ interface Step {
   target: string;
   title: string;
   content: string;
+  emoji: string;
   position: 'center' | 'top' | 'bottom' | 'top-right';
 }
 
@@ -24,25 +25,50 @@ const OnboardingTour: React.FC<OnboardingTourProps> = ({ onComplete }) => {
       target: 'center',
       title: t('onboardingStep1Title'),
       content: t('onboardingStep1Content'),
+      emoji: '🏘️',
       position: 'center',
     },
     {
       target: 'map-area',
       title: t('onboardingStep2Title'),
       content: t('onboardingStep2Content'),
+      emoji: '🗺️',
       position: 'top',
     },
     {
       target: 'quiz-input',
       title: t('onboardingStep3Title'),
       content: t('onboardingStep3Content'),
+      emoji: '⚡',
       position: 'bottom',
     },
     {
       target: 'top-bar-coins',
       title: t('onboardingStep4Title'),
       content: t('onboardingStep4Content'),
+      emoji: '🪙',
       position: 'top-right',
+    },
+    {
+      target: 'center',
+      title: t('onboardingStep5Title'),
+      content: t('onboardingStep5Content'),
+      emoji: '🏆',
+      position: 'center',
+    },
+    {
+      target: 'center',
+      title: t('onboardingStep6Title'),
+      content: t('onboardingStep6Content'),
+      emoji: '📊',
+      position: 'center',
+    },
+    {
+      target: 'center',
+      title: t('onboardingStep7Title'),
+      content: t('onboardingStep7Content'),
+      emoji: '🛍️',
+      position: 'center',
     },
   ];
 
@@ -92,6 +118,7 @@ const OnboardingTour: React.FC<OnboardingTourProps> = ({ onComplete }) => {
             <span className="text-4xl absolute -top-4 -left-2 opacity-20">❝</span>
             {steps[step]?.content}
             <span className="text-4xl absolute -bottom-6 -right-2 opacity-20">❞</span>
+            <span className="absolute -bottom-3 right-4 text-3xl">{steps[step]?.emoji}</span>
           </div>
 
           <div className="flex gap-2 w-full pt-4">

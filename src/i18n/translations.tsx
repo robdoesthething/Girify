@@ -365,6 +365,15 @@ const translations: Translations = {
     onboardingStep4Title: 'Earn Respect (and Giuros)',
     onboardingStep4Content:
       'Score points to earn Giuros. Use them to buy fancy titles and look important, like me!',
+    onboardingStep5Title: 'Pick Your District',
+    onboardingStep5Content:
+      'Every neighborhood has its team. Join a Barcelona district and compete collectively. Where do your loyalties lie?',
+    onboardingStep6Title: 'Climb the Rankings',
+    onboardingStep6Content:
+      'Daily, weekly, all-time — the leaderboard never sleeps. Show the whole city who knows these streets best.',
+    onboardingStep7Title: 'Visit the Shop',
+    onboardingStep7Content:
+      "Spend your Giuros on exclusive avatars, frames, and titles. First coins are on me. Don't waste them!",
     districtManager: 'District Manager',
     startPlaying: 'Start Playing!',
 
@@ -769,6 +778,15 @@ const translations: Translations = {
     onboardingStep4Title: 'Gana Respeto (y Giuros)',
     onboardingStep4Content:
       '¡Anota puntos para ganar Giuros. Úsalos para comprar títulos elegantes y parecer importante, como yo!',
+    onboardingStep5Title: 'Elige tu Distrito',
+    onboardingStep5Content:
+      'Cada barrio tiene su equipo. Únete a un distrito de Barcelona y compite colectivamente. ¿Cuál es el tuyo?',
+    onboardingStep6Title: 'Sube en el Ranking',
+    onboardingStep6Content:
+      'Diario, semanal, histórico... el marcador no descansa. Demuestra quién conoce mejor estas calles.',
+    onboardingStep7Title: 'Visita la Tienda',
+    onboardingStep7Content:
+      'Gasta tus Giuros en avatares, marcos y títulos exclusivos. Las primeras monedas las pongo yo. ¡No las malgastes!',
     districtManager: 'Gestor del Distrito',
     startPlaying: '¡Empezar a Jugar!',
 
@@ -1176,6 +1194,15 @@ const translations: Translations = {
     onboardingStep4Title: 'Guanya Respecte (i Giuros)',
     onboardingStep4Content:
       "Puntua per guanyar Giuros. Usa'ls per comprar títols elegants i semblar important, com jo!",
+    onboardingStep5Title: 'Tria el teu Districte',
+    onboardingStep5Content:
+      'Cada barri té el seu equip. Uneix-te a un districte de Barcelona i competeix col·lectivament. On són les teves lleialitats?',
+    onboardingStep6Title: 'Puja al Rànquing',
+    onboardingStep6Content:
+      'Diari, setmanal, històric... el marcador no dorm. Demostra qui coneix millor aquests carrers.',
+    onboardingStep7Title: 'Visita la Botiga',
+    onboardingStep7Content:
+      'Gasta els teus Giuros en avatars, marcs i títols exclusius. Les primeres monedes les poso jo. No les malbaratis!',
     districtManager: 'Gestor del Districte',
     startPlaying: 'Comença a Jugar!',
 
