@@ -24,6 +24,11 @@ export async function linkSupabaseUid(user: User): Promise<void> {
     return;
   }
 
+  // Only link verified emails to prevent account takeover via unverified registrations.
+  if (!user.email_confirmed_at) {
+    return;
+  }
+
   try {
     await supabase
       .from('users')
