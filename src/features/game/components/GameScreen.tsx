@@ -114,6 +114,46 @@ const GameScreen: FC = () => {
               </motion.div>
             )}
           </AnimatePresence>
+
+          {/* Floating hints overlay — left side of map */}
+          {state.gameState === 'playing' && state.hintStreets.length > 0 && (
+            <div className="absolute left-3 bottom-4 z-[500] flex flex-col gap-1.5 pointer-events-auto max-w-[180px]">
+              <AnimatePresence>
+                {state.hintStreets.slice(0, state.hintsRevealedCount).map(street => (
+                  <motion.div
+                    key={street.id}
+                    initial={{ opacity: 0, x: -12 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: -12 }}
+                    transition={{ duration: 0.25 }}
+                    className="flex items-center gap-2 px-2.5 py-1.5 rounded-xl bg-slate-900/85 backdrop-blur-sm border border-sky-500/30 shadow-lg"
+                  >
+                    <div className="w-1.5 h-1.5 rounded-full bg-sky-400 shrink-0" />
+                    <span className="text-xs font-semibold text-sky-300 line-clamp-1">
+                      Near: {street.name}
+                    </span>
+                  </motion.div>
+                ))}
+              </AnimatePresence>
+              {state.hintsRevealedCount < 3 &&
+                state.hintsRevealedCount < state.hintStreets.length &&
+                state.feedback === 'idle' && (
+                  <button
+                    type="button"
+                    onClick={() => dispatch({ type: 'REVEAL_HINT' })}
+                    className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-slate-900/85 backdrop-blur-sm hover:bg-sky-500/20 active:scale-95 transition-all border border-sky-500/30 shadow-lg"
+                  >
+                    <span className="text-sm">💡</span>
+                    <span className="text-xs font-black uppercase tracking-wide text-sky-400">
+                      {t('revealHint') || 'Hint'}{' '}
+                      <span className="opacity-60 font-mono">
+                        ({state.hintsRevealedCount}/{Math.min(3, state.hintStreets.length)})
+                      </span>
+                    </span>
+                  </button>
+                )}
+            </div>
+          )}
         </div>
 
         {/* Quiz Dashboard Panel */}
@@ -150,13 +190,6 @@ const GameScreen: FC = () => {
                     disabled={state.isInputLocked}
                   />
                 </Quiz.Content>
-
-                <Quiz.Hints
-                  hintStreets={state.hintStreets}
-                  hintsRevealed={state.hintsRevealedCount}
-                  onReveal={() => dispatch({ type: 'REVEAL_HINT' })}
-                  feedback={state.feedback as any}
-                />
 
                 {!state.autoAdvance && (
                   <Quiz.NextButton
