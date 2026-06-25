@@ -8,9 +8,10 @@ interface DistrictBounds {
 }
 
 // Approximate bounding boxes for each Barcelona district.
-// Streets whose centroid falls inside a box are considered part of that district.
-// Boxes intentionally overlap near borders so boundary streets appear in both adjacent
-// districts during practice — a better UX than silently excluding them.
+// These intentionally overlap near borders so boundary streets appear in
+// adjacent districts; however the actual assignment uses a best-district
+// algorithm (see filterStreetsByDistrict) to avoid streets from one district
+// appearing in a clearly different one just because the boxes overlap.
 const DISTRICT_BOUNDS: Record<string, DistrictBounds> = {
   ciutat_vella: { minLat: 41.373, maxLat: 41.393, minLng: 2.163, maxLng: 2.197 },
   eixample: { minLat: 41.376, maxLat: 41.4, minLng: 2.138, maxLng: 2.196 },
@@ -24,32 +25,47 @@ const DISTRICT_BOUNDS: Record<string, DistrictBounds> = {
   sant_marti: { minLat: 41.384, maxLat: 41.432, minLng: 2.18, maxLng: 2.232 },
 };
 
-function getStreetCentroid(street: Street): { lat: number; lng: number } | null {
-  const allPoints = street.geometry.flat();
-  if (allPoints.length === 0) {
-    return null;
+const ALL_BOUNDS = Object.entries(DISTRICT_BOUNDS);
+
+// Streets within 12 percentage-points of the best-matching district are
+// considered border streets and may appear in multiple adjacent districts.
+const BORDER_TOLERANCE = 0.12;
+
+function pctInBounds(points: number[][], b: DistrictBounds): number {
+  if (points.length === 0) {
+    return 0;
   }
-  const lat = allPoints.reduce((sum, p) => sum + (p[0] ?? 0), 0) / allPoints.length;
-  const lng = allPoints.reduce((sum, p) => sum + (p[1] ?? 0), 0) / allPoints.length;
-  return { lat, lng };
+  const inside = points.filter(
+    p =>
+      (p[0] ?? 0) >= b.minLat &&
+      (p[0] ?? 0) <= b.maxLat &&
+      (p[1] ?? 0) >= b.minLng &&
+      (p[1] ?? 0) <= b.maxLng
+  ).length;
+  return inside / points.length;
 }
 
 export function filterStreetsByDistrict(streets: Street[], districtId: string): Street[] {
-  const bounds = DISTRICT_BOUNDS[districtId];
-  if (!bounds) {
+  const targetBounds = DISTRICT_BOUNDS[districtId];
+  if (!targetBounds) {
     return streets;
   }
 
   return streets.filter(street => {
-    const centroid = getStreetCentroid(street);
-    if (!centroid) {
+    const allPoints = street.geometry.flat();
+    if (allPoints.length === 0) {
       return false;
     }
-    return (
-      centroid.lat >= bounds.minLat &&
-      centroid.lat <= bounds.maxLat &&
-      centroid.lng >= bounds.minLng &&
-      centroid.lng <= bounds.maxLng
-    );
+
+    const targetPct = pctInBounds(allPoints, targetBounds);
+    if (targetPct === 0) {
+      return false;
+    }
+
+    // Find the highest score across all districts.
+    // A street is included only when the target district is the best match
+    // or within BORDER_TOLERANCE of it (genuine boundary streets).
+    const bestPct = Math.max(...ALL_BOUNDS.map(([, b]) => pctInBounds(allPoints, b)));
+    return targetPct >= bestPct - BORDER_TOLERANCE;
   });
 }
