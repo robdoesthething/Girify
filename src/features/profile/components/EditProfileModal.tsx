@@ -1,7 +1,9 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Button, Heading, Input, Modal } from '../../../components/ui';
 import { useTheme } from '../../../context/ThemeContext';
 import { ShopItem } from '../../../utils/shop';
+
+const NAME_MAX = 30;
 
 interface EditProfileModalProps {
   isOpen: boolean;
@@ -12,7 +14,7 @@ interface EditProfileModalProps {
   currentFrameId: string;
   ownedAvatars: ShopItem[];
   ownedFrames: ShopItem[];
-  allAvatars: ShopItem[]; // Needed to show images for owned items
+  allAvatars: ShopItem[];
 }
 
 const EditProfileModal: React.FC<EditProfileModalProps> = ({
@@ -31,8 +33,30 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({
   const [selectedAvatarId, setSelectedAvatarId] = useState(currentAvatarId);
   const [selectedFrameId, setSelectedFrameId] = useState(currentFrameId);
 
+  // Sync state whenever the modal opens with fresh prop values.
+  /* eslint-disable react-hooks/set-state-in-effect */
+  useEffect(() => {
+    if (isOpen) {
+      setName(currentName);
+      setSelectedAvatarId(currentAvatarId);
+      setSelectedFrameId(currentFrameId);
+    }
+  }, [isOpen, currentName, currentAvatarId, currentFrameId]);
+  /* eslint-enable react-hooks/set-state-in-effect */
+
+  const trimmedName = name.trim();
+  const nameError =
+    trimmedName.length === 0
+      ? t('nameRequired') || 'Name is required'
+      : trimmedName.length > NAME_MAX
+        ? `${t('nameTooLong') || 'Name too long'} (${NAME_MAX} ${t('charsMax') || 'chars max'})`
+        : '';
+
   const handleSave = () => {
-    onSave(name, selectedAvatarId, selectedFrameId);
+    if (nameError) {
+      return;
+    }
+    onSave(trimmedName, selectedAvatarId, selectedFrameId);
     onClose();
   };
 
@@ -52,7 +76,7 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({
           <Button variant="ghost" onClick={onClose} className="flex-1">
             {t('cancel') || 'Cancel'}
           </Button>
-          <Button variant="primary" onClick={handleSave} className="flex-1">
+          <Button variant="primary" onClick={handleSave} className="flex-1" disabled={!!nameError}>
             {t('saveChanges') || 'Save Changes'}
           </Button>
         </div>
@@ -60,12 +84,21 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({
     >
       <div className="space-y-6">
         {/* Name Input */}
-        <Input
-          label={t('displayName') || 'Display Name'}
-          value={name}
-          onChange={e => setName(e.target.value)}
-          placeholder="Enter your name"
-        />
+        <div>
+          <Input
+            label={t('displayName') || 'Display Name'}
+            value={name}
+            onChange={e => setName(e.target.value.slice(0, NAME_MAX + 1))}
+            placeholder={t('enterYourName') || 'Enter your name'}
+            error={name.length > 0 && nameError ? nameError : undefined}
+            maxLength={NAME_MAX + 1}
+          />
+          <p
+            className={`mt-1 text-right text-xs font-mono ${name.trim().length > NAME_MAX ? 'text-red-500' : 'opacity-40'}`}
+          >
+            {name.trim().length}/{NAME_MAX}
+          </p>
+        </div>
 
         {/* Avatar Selection */}
         <div>
