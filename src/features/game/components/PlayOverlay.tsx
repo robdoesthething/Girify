@@ -1,10 +1,11 @@
 import { AnimatePresence, motion } from 'framer-motion';
-import { FC, useState } from 'react';
+import { FC, useEffect, useState } from 'react';
 import Logo from '../../../components/Logo';
 import { useGameContext } from '../../../context/GameContext';
 import { useTheme } from '../../../context/ThemeContext';
 import { DISTRICTS } from '../../../data/districts';
 import { displayUsername } from '../../../utils/format';
+import { getTimeUntilNext } from '../../../utils/game/dailyChallenge';
 import { themeClasses } from '../../../utils/themeUtils';
 
 const PlayOverlay: FC = () => {
@@ -12,6 +13,15 @@ const PlayOverlay: FC = () => {
   const { state, handlers } = useGameContext();
   const playedToday = handlers.hasPlayedToday();
   const [showDistrictPicker, setShowDistrictPicker] = useState(false);
+  const [timeUntilNext, setTimeUntilNext] = useState(() => getTimeUntilNext());
+
+  useEffect(() => {
+    if (!playedToday) {
+      return undefined;
+    }
+    const id = setInterval(() => setTimeUntilNext(getTimeUntilNext()), 60_000);
+    return () => clearInterval(id);
+  }, [playedToday]);
 
   const handleStartPractice = (districtId?: string) => {
     setShowDistrictPicker(false);
@@ -40,6 +50,35 @@ const PlayOverlay: FC = () => {
           </span>
           !
         </p>
+
+        {/* Next challenge countdown — shown when daily is already done */}
+        {playedToday && (
+          <div
+            className={`w-full rounded-2xl px-5 py-4 mb-4 flex items-center gap-4 ${themeClasses(theme, 'bg-white/10', 'bg-slate-900/8')}`}
+          >
+            <span className="text-3xl">🔥</span>
+            <div className="flex-1 text-left">
+              <p
+                className={`text-xs font-bold uppercase tracking-widest opacity-60 ${themeClasses(theme, 'text-white', 'text-slate-800')}`}
+              >
+                {t('nextChallenge') || 'Next challenge'}
+              </p>
+              <p
+                className={`text-xl font-black tabular-nums ${themeClasses(theme, 'text-white', 'text-slate-900')}`}
+              >
+                {timeUntilNext}
+              </p>
+            </div>
+            {state.streak && state.streak > 1 && (
+              <div className="text-right">
+                <p className="text-2xl font-black text-orange-400">{state.streak}</p>
+                <p className="text-[10px] font-bold uppercase text-orange-400/70">
+                  {t('dayStreak') || 'day streak'}
+                </p>
+              </div>
+            )}
+          </div>
+        )}
 
         {/* Play button */}
         <button

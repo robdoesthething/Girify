@@ -3,6 +3,7 @@ import { useMemo, useState } from 'react';
 import StreetSnapshotMap from './StreetSnapshotMap';
 import { useNavigate } from 'react-router-dom';
 import { GAME, GIRIFY_EPOCH, STORAGE_KEYS, TIME, UI } from '../../../config/constants';
+import { getTimeUntilNext } from '../../../utils/game/dailyChallenge';
 import { useAuth } from '../../auth/hooks/useAuth';
 import { QuizResult, Street } from '../../../types/game';
 import { GameHistory } from '../../../types/user';
@@ -213,6 +214,26 @@ const SummaryScreen: React.FC<SummaryScreenProps> = ({
             <span className="text-[10px] opacity-60 uppercase">{t('daysStreak') || 'Days'}</span>
           </div>
         </div>
+
+        {/* Next challenge hook */}
+        {!onKeepPlaying && (
+          <div className="w-full mb-6 rounded-2xl bg-gradient-to-r from-sky-500/10 to-blue-500/10 border border-sky-500/20 px-5 py-4 flex items-center gap-4">
+            <span className="text-3xl">⏰</span>
+            <div className="flex-1">
+              <p
+                className={`text-[10px] font-black uppercase tracking-widest mb-0.5 ${theme === 'dark' ? 'text-slate-400' : 'text-slate-500'}`}
+              >
+                {t('nextChallenge') || 'Next challenge'}
+              </p>
+              <p className="text-xl font-black text-sky-400 tabular-nums">{getTimeUntilNext()}</p>
+            </div>
+            <p
+              className={`text-xs font-semibold text-right max-w-[100px] leading-tight ${theme === 'dark' ? 'text-slate-400' : 'text-slate-500'}`}
+            >
+              {t('comeBackTomorrow') || 'Come back tomorrow to keep your streak!'}
+            </p>
+          </div>
+        )}
 
         <div className="w-full mb-6">
           <p

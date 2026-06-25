@@ -122,16 +122,27 @@ const OnboardingTour: React.FC<OnboardingTourProps> = ({ onComplete }) => {
           </div>
 
           <div className="flex gap-2 w-full pt-4">
-            <button
-              onClick={() => {
-                storage.set('girify_onboarding_completed', 'true');
-                onComplete();
-              }}
-              className="px-6 py-4 font-bold opacity-50 hover:opacity-100 focus:opacity-100 active:scale-95 transition-all outline-none focus:ring-2 focus:ring-sky-500 rounded-xl"
-              type="button"
-            >
-              {t('skip')}
-            </button>
+            {step > 0 ? (
+              <button
+                onClick={() => setStep(step - 1)}
+                className="px-6 py-4 font-bold opacity-60 hover:opacity-100 active:scale-95 transition-all outline-none focus:ring-2 focus:ring-sky-500 rounded-xl"
+                type="button"
+                aria-label="Go back"
+              >
+                ◀ {t('back') || 'Back'}
+              </button>
+            ) : (
+              <button
+                onClick={() => {
+                  storage.set('girify_onboarding_completed', 'true');
+                  onComplete();
+                }}
+                className="px-6 py-4 font-bold opacity-50 hover:opacity-100 active:scale-95 transition-all outline-none focus:ring-2 focus:ring-sky-500 rounded-xl"
+                type="button"
+              >
+                {t('skip')}
+              </button>
+            )}
             <button
               onClick={handleNext}
               className="flex-1 py-4 bg-yellow-500 hover:bg-yellow-600 text-white rounded-2xl font-bold shadow-lg shadow-yellow-500/20 text-lg transition-all transform hover:scale-105"
