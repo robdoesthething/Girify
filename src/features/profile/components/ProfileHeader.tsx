@@ -20,7 +20,6 @@ interface ProfileHeaderProps {
     allTitles: ShopItem[];
   };
   onEdit: () => void;
-  onNavigateShop: () => void;
 }
 
 const ProfileHeader: React.FC<ProfileHeaderProps> = ({
@@ -28,7 +27,6 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
   profileData,
   cosmetics,
   onEdit,
-  onNavigateShop,
 }) => {
   const { theme, t } = useTheme();
 
@@ -52,16 +50,11 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
   return (
     <div className="flex flex-col items-center mb-8">
       <div className="relative group mb-4">
-        <div
-          role="button"
-          tabIndex={0}
-          onClick={onNavigateShop}
-          onKeyDown={e => {
-            if (e.key === 'Enter' || e.key === ' ') {
-              onNavigateShop();
-            }
-          }}
-          className="rounded-full outline-none focus:ring-sky-500 cursor-pointer hover:scale-105 transition-transform"
+        <button
+          type="button"
+          onClick={onEdit}
+          className="rounded-full outline-none focus-visible:ring-2 focus-visible:ring-sky-500 cursor-pointer hover:scale-105 active:scale-95 transition-transform relative"
+          aria-label={t('changeAvatar') || 'Change avatar'}
         >
           <CosmeticAvatar
             image={avatarImage}
@@ -70,7 +63,8 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
             alt="Avatar"
             className={`shadow-2xl ${frameClass}`}
           />
-        </div>
+          <span className="absolute inset-0 rounded-full bg-black/0 group-hover:bg-black/20 transition-colors" />
+        </button>
 
         <button
           onClick={onEdit}

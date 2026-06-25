@@ -5,7 +5,7 @@ import { useTopBarNav } from '../../../hooks/useTopBarNav';
 import TopBar from '../../../components/TopBar';
 import { Button, Card, Heading, PageHeader, Text } from '../../../components/ui';
 import { useTheme } from '../../../context/ThemeContext';
-import { updateUserProfile } from '../../../utils/social';
+import { setEquippedCosmetics } from '../../../utils/shop/giuros';
 import { themeClasses } from '../../../utils/themeUtils';
 import { useProfileData } from '../hooks/useProfileData';
 import { useProfileState } from '../hooks/useProfileState';
@@ -75,24 +75,14 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ username }) => {
     [state.profileData, state.shopFrames]
   );
 
-  const handleSaveProfile = async (newName: string, newAvatarId: string, newFrameId: string) => {
-    const updates = {
-      realName: newName,
-      equippedCosmetics: {
-        ...state.equippedCosmetics,
-        avatarId: newAvatarId,
-        frameId: newFrameId,
-      },
+  const handleSaveProfile = async (newAvatarId: string, newFrameId: string) => {
+    const newEquipped = {
+      ...state.equippedCosmetics,
+      avatarId: newAvatarId,
+      frameId: newFrameId,
     };
-
-    await updateUserProfile(username, updates);
-
-    // Update local state
-    actions.updateProfile(updates);
-
-    // Refetch profile data instead of page reload
-    await profileData.refetch();
-
+    await setEquippedCosmetics(username, newEquipped);
+    actions.updateProfile({ equippedCosmetics: newEquipped });
     actions.setEditing(false);
   };
 
@@ -213,14 +203,12 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ username }) => {
                   allTitles: state.shopTitles,
                 }}
                 onEdit={() => actions.setEditing(true)}
-                onNavigateShop={() => navigate('/shop')}
               />
 
               <EditProfileModal
                 isOpen={state.isEditing}
                 onClose={() => actions.setEditing(false)}
                 onSave={handleSaveProfile}
-                currentName={state.profileData.realName || ''}
                 currentAvatarId={state.equippedCosmetics.avatarId || ''}
                 currentFrameId={state.equippedCosmetics.frameId || ''}
                 ownedAvatars={ownedAvatars}

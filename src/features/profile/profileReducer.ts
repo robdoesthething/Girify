@@ -159,6 +159,9 @@ export function profileReducer(state: ProfileState, action: ProfileAction): Prof
       return {
         ...state,
         profileData: state.profileData ? { ...state.profileData, ...action.payload } : null,
+        ...(action.payload.equippedCosmetics !== undefined && {
+          equippedCosmetics: action.payload.equippedCosmetics,
+        }),
       };
 
     case 'LOAD_PROFILE_DATA':
@@ -168,7 +171,12 @@ export function profileReducer(state: ProfileState, action: ProfileAction): Prof
         allHistory: action.payload.allHistory,
         friendCount: action.payload.friendCount,
         giuros: action.payload.giuros,
-        equippedCosmetics: action.payload.equippedCosmetics,
+        // Only overwrite equippedCosmetics on the first load (state.loading === true).
+        // Subsequent LOAD_PROFILE_DATA calls triggered by background shop-items fetch
+        // carry stale equippedCosmetics from the hook and must not revert user edits.
+        equippedCosmetics: state.loading
+          ? action.payload.equippedCosmetics
+          : state.equippedCosmetics,
         joinedDate: action.payload.joinedDate,
         shopAvatars: action.payload.shopAvatars,
         shopFrames: action.payload.shopFrames,

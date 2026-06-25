@@ -1,15 +1,13 @@
 import React, { useEffect, useState } from 'react';
-import { Button, Heading, Input, Modal } from '../../../components/ui';
+import { useNavigate } from 'react-router-dom';
+import { Button, Heading, Modal } from '../../../components/ui';
 import { useTheme } from '../../../context/ThemeContext';
 import { ShopItem } from '../../../utils/shop';
-
-const NAME_MAX = 30;
 
 interface EditProfileModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSave: (name: string, avatarId: string, frameId: string) => void;
-  currentName: string;
+  onSave: (avatarId: string, frameId: string) => void;
   currentAvatarId: string;
   currentFrameId: string;
   ownedAvatars: ShopItem[];
@@ -21,7 +19,6 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({
   isOpen,
   onClose,
   onSave,
-  currentName,
   currentAvatarId,
   currentFrameId,
   ownedAvatars,
@@ -29,38 +26,24 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({
   allAvatars,
 }) => {
   const { t } = useTheme();
-  const [name, setName] = useState(currentName);
+  const navigate = useNavigate();
   const [selectedAvatarId, setSelectedAvatarId] = useState(currentAvatarId);
   const [selectedFrameId, setSelectedFrameId] = useState(currentFrameId);
 
-  // Sync state whenever the modal opens with fresh prop values.
   /* eslint-disable react-hooks/set-state-in-effect */
   useEffect(() => {
     if (isOpen) {
-      setName(currentName);
       setSelectedAvatarId(currentAvatarId);
       setSelectedFrameId(currentFrameId);
     }
-  }, [isOpen, currentName, currentAvatarId, currentFrameId]);
+  }, [isOpen, currentAvatarId, currentFrameId]);
   /* eslint-enable react-hooks/set-state-in-effect */
 
-  const trimmedName = name.trim();
-  const nameError =
-    trimmedName.length === 0
-      ? t('nameRequired') || 'Name is required'
-      : trimmedName.length > NAME_MAX
-        ? `${t('nameTooLong') || 'Name too long'} (${NAME_MAX} ${t('charsMax') || 'chars max'})`
-        : '';
-
   const handleSave = () => {
-    if (nameError) {
-      return;
-    }
-    onSave(trimmedName, selectedAvatarId, selectedFrameId);
+    onSave(selectedAvatarId, selectedFrameId);
     onClose();
   };
 
-  // Helper to find avatar image
   const getAvatarImage = (id: string) => {
     return allAvatars.find(a => a.id === id)?.image;
   };
@@ -76,30 +59,13 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({
           <Button variant="ghost" onClick={onClose} className="flex-1">
             {t('cancel') || 'Cancel'}
           </Button>
-          <Button variant="primary" onClick={handleSave} className="flex-1" disabled={!!nameError}>
+          <Button variant="primary" onClick={handleSave} className="flex-1">
             {t('saveChanges') || 'Save Changes'}
           </Button>
         </div>
       }
     >
       <div className="space-y-6">
-        {/* Name Input */}
-        <div>
-          <Input
-            label={t('displayName') || 'Display Name'}
-            value={name}
-            onChange={e => setName(e.target.value.slice(0, NAME_MAX + 1))}
-            placeholder={t('enterYourName') || 'Enter your name'}
-            error={name.length > 0 && nameError ? nameError : undefined}
-            maxLength={NAME_MAX + 1}
-          />
-          <p
-            className={`mt-1 text-right text-xs font-mono ${name.trim().length > NAME_MAX ? 'text-red-500' : 'opacity-40'}`}
-          >
-            {name.trim().length}/{NAME_MAX}
-          </p>
-        </div>
-
         {/* Avatar Selection */}
         <div>
           <Heading variant="h6" className="mb-2 opacity-70">
@@ -128,7 +94,7 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({
                       style={{ imageRendering: 'pixelated' }}
                     />
                   ) : (
-                    <span className="text-2xl">{avatar.emoji}</span> // Fallback
+                    <span className="text-2xl">{avatar.emoji}</span>
                   )}
                   {isSelected && (
                     <div className="absolute top-1 right-1 w-3 h-3 bg-sky-500 rounded-full border border-white" />
@@ -137,6 +103,16 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({
               );
             })}
           </div>
+          <button
+            type="button"
+            onClick={() => {
+              onClose();
+              navigate('/shop');
+            }}
+            className="mt-2 text-xs font-semibold text-sky-500 hover:text-sky-400 transition-colors"
+          >
+            {t('getMoreAvatarsInShop') || 'Get more avatars in the shop →'}
+          </button>
         </div>
 
         {/* Frame Selection */}
