@@ -5,17 +5,17 @@ import { Street } from '../../types/game';
 // Generates consistent street selection based on date
 
 const NEARBY_THRESHOLD = 0.01; // ~1km
-const EXCLUSION_DAYS = 7;
+const EXCLUSION_DAYS = 14;
 const MIN_STREETS = 10;
 const PRESENTATION_SEED_OFFSET = 1000;
 const SECONDS_PER_MINUTE = 60;
 const MINUTES_PER_HOUR = 60;
 const MS_PER_HOUR = 1000 * MINUTES_PER_HOUR * SECONDS_PER_MINUTE;
 const MS_PER_MINUTE = 1000 * SECONDS_PER_MINUTE;
-const TIER_1_COUNT = 3;
+const TIER_1_COUNT = 4;
 const TIER_2_COUNT = 3;
 const TIER_3_COUNT = 2;
-const TIER_4_COUNT = 2;
+const TIER_4_COUNT = 1;
 
 const TIER_1 = 1;
 const TIER_2 = 2;
