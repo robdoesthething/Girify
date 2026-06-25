@@ -26,7 +26,7 @@ interface TopBarProps {
 
 const TopBar: React.FC<TopBarProps> = React.memo(
   ({ onOpenPage, username, onTriggerLogin, onLogout }) => {
-    const { theme, t } = useTheme();
+    const { theme, toggleTheme, t } = useTheme();
     const location = useLocation();
     const navigate = useNavigate();
     const [menuOpen, setMenuOpen] = useState(false);
@@ -122,7 +122,7 @@ backdrop-blur-md border-b ${themeClasses(theme, 'border-white/8', 'border-slate-
           <div className="flex items-center gap-4 md:gap-4">
             <button
               onClick={() => setMenuOpen(!menuOpen)}
-              className={`p-2.5 rounded-full transition-all active:scale-90 shrink-0 ${themeClasses(theme, 'hover:bg-neutral-300', 'hover:bg-slate-100')} `}
+              className={`p-2.5 rounded-full transition-all active:scale-90 shrink-0 ${themeClasses(theme, 'hover:bg-slate-700', 'hover:bg-slate-100')} `}
               type="button"
               aria-label="Open menu"
               aria-expanded={menuOpen}
@@ -147,7 +147,22 @@ backdrop-blur-md border-b ${themeClasses(theme, 'border-white/8', 'border-slate-
             </button>
           </div>
 
-          <div className="w-10" />
+          <button
+            onClick={toggleTheme}
+            className={`p-2.5 rounded-full transition-all active:scale-90 shrink-0 ${themeClasses(theme, 'hover:bg-slate-700', 'hover:bg-slate-100')}`}
+            type="button"
+            aria-label={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
+          >
+            {theme === 'dark' ? (
+              <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M12 3a1 1 0 0 1 1 1v1a1 1 0 1 1-2 0V4a1 1 0 0 1 1-1zm6.364 2.636a1 1 0 0 1 0 1.414l-.707.707a1 1 0 1 1-1.414-1.414l.707-.707a1 1 0 0 1 1.414 0zM21 11a1 1 0 1 1 0 2h-1a1 1 0 1 1 0-2h1zM17.657 17.657a1 1 0 0 1-1.414 0l-.707-.707a1 1 0 1 1 1.414-1.414l.707.707a1 1 0 0 1 0 1.414zM12 19a1 1 0 0 1 1 1v1a1 1 0 1 1-2 0v-1a1 1 0 0 1 1-1zM6.343 17.657a1 1 0 0 1 0-1.414l.707-.707a1 1 0 1 1 1.414 1.414l-.707.707a1 1 0 0 1-1.414 0zM4 11a1 1 0 1 1 0 2H3a1 1 0 1 1 0-2h1zM6.343 6.343a1 1 0 0 1 1.414 0l.707.707A1 1 0 1 1 7.05 8.464l-.707-.707a1 1 0 0 1 0-1.414zM12 7a5 5 0 1 0 0 10A5 5 0 0 0 12 7z" />
+              </svg>
+            ) : (
+              <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M21.752 15.002A9.72 9.72 0 0 1 18 15.75 9.75 9.75 0 0 1 8.25 6a9.72 9.72 0 0 1 .252-2.252A9.752 9.752 0 0 0 12 21.75c3.58 0 6.703-1.924 8.45-4.797a9.75 9.75 0 0 0 1.302-.951z" />
+              </svg>
+            )}
+          </button>
         </div>
 
         <AnimatePresence>

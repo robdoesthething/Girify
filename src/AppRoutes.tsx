@@ -2,8 +2,10 @@ import { AnimatePresence } from 'framer-motion';
 import React, { Suspense, useEffect, useRef } from 'react';
 import { Navigate, Route, Routes, useParams } from 'react-router-dom';
 import TopBar from './components/TopBar';
+import UpdateModal from './components/UpdateModal';
 import { useAppInitialization } from './hooks/useAppInitialization';
 import { usePageTitle } from './hooks/usePageTitle';
+import { useUpdateModal } from './hooks/useUpdateModal';
 import { themeClasses } from './utils/themeUtils';
 
 // Lazy loaded components for better code splitting
@@ -61,6 +63,13 @@ const AppRoutes: React.FC = () => {
     scrollRef.current?.scrollTo({ top: 0, behavior: 'instant' });
   }, [location.pathname]);
 
+  const currentUsername =
+    profile?.username || user?.user_metadata?.full_name || user?.user_metadata?.name || undefined;
+
+  const { showUpdateModal, giurosAwarded, dismissUpdateModal } = useUpdateModal(
+    currentUsername || ''
+  );
+
   // Show loader while initializing
   if (isLoading) {
     return <PageLoader />;
@@ -71,12 +80,9 @@ const AppRoutes: React.FC = () => {
     navigate(page ? `/${page}` : '/');
   };
 
-  const currentUsername =
-    profile?.username || user?.user_metadata?.full_name || user?.user_metadata?.name || undefined;
-
   return (
     <div
-      className={`fixed inset-0 w-full h-full flex flex-col overflow-hidden transition-colors duration-500 bg-slate-50 ${themeClasses(theme, 'text-white', 'text-slate-900')}`}
+      className={`fixed inset-0 w-full h-full flex flex-col overflow-hidden transition-colors duration-500 ${themeClasses(theme, 'bg-slate-950 text-white', 'bg-slate-50 text-slate-900')}`}
     >
       <TopBar
         onOpenPage={handleOpenPage}
@@ -190,6 +196,12 @@ const AppRoutes: React.FC = () => {
           onCancel={() => handleConfirmClose(false)}
         />
       </Suspense>
+
+      <AnimatePresence>
+        {showUpdateModal && (
+          <UpdateModal giurosAwarded={giurosAwarded} onDismiss={dismissUpdateModal} />
+        )}
+      </AnimatePresence>
 
       {import.meta.env.DEV && (
         <Suspense fallback={null}>

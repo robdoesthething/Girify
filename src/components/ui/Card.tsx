@@ -19,8 +19,8 @@ const Card: React.FC<CardProps> = ({ children, className = '', onClick, hover = 
         rounded-2xl border p-6
         ${themeClasses(
           theme,
-          'bg-white border-slate-200 shadow-sm',
-          'bg-slate-800 border-slate-700 shadow-lg'
+          'bg-slate-800 border-slate-700 shadow-lg',
+          'bg-white border-slate-200 shadow-sm'
         )}
         ${hover || onClick ? 'transition-transform cursor-pointer hover:scale-[1.02] active:scale-[0.98]' : ''}
         ${className}
