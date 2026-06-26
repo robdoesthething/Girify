@@ -4,6 +4,10 @@ import { awardGiuros } from '../utils/shop/giuros';
 const UPDATE_VERSION = 'v0.2';
 const GIUROS_REWARD = 25;
 
+// Device-wide key — not username-scoped. Avoids the "modal reappears" bug
+// that happens when the username changes between renders (display name vs DB username).
+const SEEN_KEY = `girify_update_${UPDATE_VERSION}_seen`;
+
 function seenKey(username: string) {
   return `girify_update_${UPDATE_VERSION}_seen_${username}`;
 }
@@ -22,7 +26,7 @@ export function useUpdateModal(username: string): UseUpdateModalReturn {
     if (!username) {
       return () => {};
     }
-    if (localStorage.getItem(seenKey(username))) {
+    if (localStorage.getItem(SEEN_KEY) || localStorage.getItem(seenKey(username))) {
       return () => {};
     }
 
@@ -43,6 +47,8 @@ export function useUpdateModal(username: string): UseUpdateModalReturn {
 
   const dismissUpdateModal = () => {
     setShowUpdateModal(false);
+    // Write both keys so re-checks pass even if the username drifts between renders.
+    localStorage.setItem(SEEN_KEY, '1');
     if (username) {
       localStorage.setItem(seenKey(username), '1');
     }
