@@ -263,11 +263,28 @@ export const setEquippedCosmetics = async (
   if (!username) {
     return;
   }
-  const normalizedUsername = normalizeUsername(username);
   try {
-    // Cast to expected Map type. Supabase defines it as Record<string, string>
-    // But usage might include non-string values?
+    // Prefer UID-based update: works with RLS regardless of username format,
+    // and guarantees we're updating the current auth user's own row.
+    const {
+      data: { user: authUser },
+    } = await supabase.auth.getUser();
 
+    if (authUser?.id) {
+      const { error } = await supabase
+        .from('users')
+
+        .update({ equipped_cosmetics: equipped as any })
+        .eq('supabase_uid', authUser.id);
+
+      if (!error) {
+        return;
+      }
+      console.error('[Giuros] UID-based cosmetics update failed:', error.message);
+    }
+
+    // Fallback: username-based update
+    const normalizedUsername = normalizeUsername(username);
     await updateUser(normalizedUsername, { equipped_cosmetics: equipped as any });
   } catch (e) {
     console.error('Error setting equipped cosmetics:', e);
