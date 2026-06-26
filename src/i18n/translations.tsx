@@ -134,8 +134,15 @@ const translations: Translations = {
     share: 'Share',
     playAgain: 'Play Again',
 
-    // Profile
+    // Profile / Edit modal
     profile: 'Profile',
+    editProfile: 'Edit Profile',
+    saveChanges: 'Save Changes',
+    chooseAvatar: 'Choose Avatar',
+    chooseFrame: 'Choose Frame',
+    getMoreAvatarsInShop: 'Get more avatars in the Shop →',
+    defaultAvatar: 'Default',
+    noFrame: 'None',
     playerSince: 'Player since',
     streak: 'Streak',
     friends: 'Friends',
@@ -544,8 +551,15 @@ const translations: Translations = {
     share: 'Compartir',
     playAgain: 'Jugar de nuevo',
 
-    // Profile
+    // Profile / Edit modal
     profile: 'Perfil',
+    editProfile: 'Editar Perfil',
+    saveChanges: 'Guardar Cambios',
+    chooseAvatar: 'Elegir Avatar',
+    chooseFrame: 'Elegir Marco',
+    getMoreAvatarsInShop: 'Obtener más avatares en la Tienda →',
+    defaultAvatar: 'Por defecto',
+    noFrame: 'Ninguno',
     playerSince: 'Jugador desde',
     streak: 'Racha',
     friends: 'Amigos',
@@ -915,8 +929,15 @@ const translations: Translations = {
     share: 'Compartir',
     playAgain: 'Tornar a jugar',
 
-    // Profile
+    // Profile / Edit modal
     profile: 'Perfil',
+    editProfile: 'Editar Perfil',
+    saveChanges: 'Desar Canvis',
+    chooseAvatar: 'Triar Avatar',
+    chooseFrame: 'Triar Marc',
+    getMoreAvatarsInShop: 'Aconsegueix més avatars a la Botiga →',
+    defaultAvatar: 'Per defecte',
+    noFrame: 'Cap',
     playerSince: 'Jugador des de',
     streak: 'Ratxa',
     friends: 'Amics',
