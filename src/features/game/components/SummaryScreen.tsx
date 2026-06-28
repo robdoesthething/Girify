@@ -175,22 +175,18 @@ const SummaryScreen: React.FC<SummaryScreenProps> = ({
     }
   };
 
-  const curiositiesWithData = useMemo(() => {
+  const getCuriosity = (streetId: string) => {
+    const entry = streetCuriosities[streetId];
+    if (!entry) {
+      return null;
+    }
     const lang = language as 'ca' | 'es' | 'en';
-    return quizResults
-      .map(result => {
-        const entry = streetCuriosities[result.street.id];
-        if (!entry) {
-          return null;
-        }
-        const text = entry[lang] ?? entry.ca ?? entry.es ?? entry.en;
-        if (!text) {
-          return null;
-        }
-        return { name: result.street.name, text, img: entry.img };
-      })
-      .filter((x): x is { name: string; text: string; img: string | undefined } => x !== null);
-  }, [quizResults, streetCuriosities, language]);
+    const text = entry[lang] ?? entry.ca ?? entry.es ?? entry.en;
+    if (!text) {
+      return null;
+    }
+    return { text, img: entry.img };
+  };
 
   return (
     <div
@@ -275,6 +271,7 @@ const SummaryScreen: React.FC<SummaryScreenProps> = ({
             {quizResults.map((result, i) => {
               const isExpanded = expandedIndex === i;
               const isCorrect = result.status === 'correct';
+              const curiosity = getCuriosity(result.street.id);
               return (
                 <div key={i}>
                   <button
@@ -295,9 +292,20 @@ const SummaryScreen: React.FC<SummaryScreenProps> = ({
                     >
                       {isCorrect ? '✓' : '✗'}
                     </span>
-                    <span className="flex-1 font-semibold truncate opacity-90">
-                      {result.street.name}
-                    </span>
+                    <div className="flex-1 min-w-0">
+                      <span className="font-semibold truncate opacity-90 block">
+                        {result.street.name}
+                      </span>
+                      {curiosity && !isExpanded && (
+                        <span
+                          className={`text-[10px] block truncate mt-0.5 ${
+                            theme === 'dark' ? 'text-slate-500' : 'text-slate-400'
+                          }`}
+                        >
+                          {curiosity.text.slice(0, 60)}…
+                        </span>
+                      )}
+                    </div>
                     <span
                       className={`font-black tabular-nums flex-shrink-0 ${
                         isCorrect ? 'text-emerald-400' : 'text-red-400'
@@ -306,9 +314,9 @@ const SummaryScreen: React.FC<SummaryScreenProps> = ({
                       {isCorrect ? `+${result.points}` : '0'}
                     </span>
                     <span
-                      className={`text-xs flex-shrink-0 ml-1 ${theme === 'dark' ? 'text-slate-400' : 'text-slate-500'}`}
+                      className={`text-xs flex-shrink-0 ml-1 transition-transform duration-200 ${isExpanded ? 'rotate-180' : ''} ${theme === 'dark' ? 'text-slate-400' : 'text-slate-500'}`}
                     >
-                      {isExpanded ? '▲' : '🗺'}
+                      ▾
                     </span>
                   </button>
                   <AnimatePresence>
@@ -323,14 +331,38 @@ const SummaryScreen: React.FC<SummaryScreenProps> = ({
                         <button
                           type="button"
                           onClick={() => setExpandedIndex(null)}
-                          className={`w-full p-1.5 pt-0 rounded-b-xl ${
+                          className={`w-full rounded-b-xl overflow-hidden text-left ${
                             isCorrect
                               ? 'bg-emerald-500/10 border-x border-b border-emerald-500/20'
                               : 'bg-red-500/10 border-x border-b border-red-500/20'
                           }`}
-                          aria-label="Hide street map"
+                          aria-label="Collapse"
                         >
-                          <StreetSnapshotMap street={result.street} theme={theme} />
+                          {curiosity ? (
+                            <>
+                              {curiosity.img && (
+                                <img
+                                  src={curiosity.img}
+                                  alt={result.street.name}
+                                  className="w-full h-28 object-cover"
+                                  loading="lazy"
+                                />
+                              )}
+                              <div className="px-4 py-3">
+                                <p
+                                  className={`text-xs leading-relaxed ${
+                                    theme === 'dark' ? 'text-slate-300' : 'text-slate-600'
+                                  }`}
+                                >
+                                  {curiosity.text}
+                                </p>
+                              </div>
+                            </>
+                          ) : (
+                            <div className="p-1.5 pt-0">
+                              <StreetSnapshotMap street={result.street} theme={theme} />
+                            </div>
+                          )}
                         </button>
                       </motion.div>
                     )}
@@ -340,53 +372,6 @@ const SummaryScreen: React.FC<SummaryScreenProps> = ({
             })}
           </div>
         </div>
-
-        {curiositiesWithData.length > 0 && (
-          <div className="w-full mb-6">
-            <p
-              className={`text-[10px] font-black uppercase tracking-[0.2em] mb-2.5 ${theme === 'dark' ? 'text-slate-400' : 'text-slate-500'}`}
-            >
-              {t('whatYouLearned') || 'What you learned today'}
-            </p>
-            <div className="space-y-2">
-              {curiositiesWithData.map((item, i) => (
-                <div
-                  key={i}
-                  className={`rounded-xl text-left overflow-hidden ${
-                    theme === 'dark'
-                      ? 'bg-amber-900/10 border border-amber-700/20'
-                      : 'bg-amber-50 border border-amber-200/60'
-                  }`}
-                >
-                  {item.img && (
-                    <img
-                      src={item.img}
-                      alt={item.name}
-                      className="w-full h-28 object-cover"
-                      loading="lazy"
-                    />
-                  )}
-                  <div className="px-4 py-3">
-                    <p
-                      className={`text-[10px] font-black uppercase tracking-wide mb-1.5 ${
-                        theme === 'dark' ? 'text-amber-400' : 'text-amber-700'
-                      }`}
-                    >
-                      {item.name}
-                    </p>
-                    <p
-                      className={`text-xs leading-relaxed ${
-                        theme === 'dark' ? 'text-slate-300' : 'text-slate-600'
-                      }`}
-                    >
-                      {item.text}
-                    </p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
 
         {!user && (
           <div
@@ -441,32 +426,31 @@ const SummaryScreen: React.FC<SummaryScreenProps> = ({
               👤 {t('myProfile') || 'My Profile'}
             </button>
           )}
+          <button
+            onClick={() => navigate('/feedback')}
+            className="flex-1 py-3 rounded-xl font-bold text-sm transition-all active:scale-95 bg-slate-800 text-slate-300 hover:bg-slate-700 hover:text-white border border-slate-700 hover:border-slate-500"
+          >
+            📝 {t('haveFeedback') || 'Feedback'}
+          </button>
         </div>
 
-        {onKeepPlaying && (
+        {onKeepPlaying ? (
           <button
             onClick={onKeepPlaying}
             className="w-full py-4 rounded-xl font-bold text-lg uppercase tracking-wider transition-all active:scale-95
-               bg-gradient-to-r from-sky-500 to-emerald-500 hover:from-sky-400 hover:to-emerald-400 text-white shadow-xl mb-3"
+               bg-gradient-to-r from-sky-500 to-emerald-500 hover:from-sky-400 hover:to-emerald-400 text-white shadow-xl mb-6"
           >
             ♾️ {t('keepPlaying') || 'Keep Playing'}
           </button>
+        ) : (
+          <button
+            onClick={onRestart}
+            className="w-full py-4 rounded-xl font-bold text-lg uppercase tracking-wider transition-all active:scale-95
+               bg-slate-800 text-slate-300 hover:bg-slate-700 hover:text-white border border-slate-700 hover:border-slate-500 glass-button mb-6"
+          >
+            🔄 {t('playAgain') || 'Play Again'}
+          </button>
         )}
-
-        <button
-          onClick={onRestart}
-          className="w-full py-4 rounded-xl font-bold text-lg uppercase tracking-wider transition-all active:scale-95
-             bg-slate-800 text-slate-300 hover:bg-slate-700 hover:text-white border border-slate-700 hover:border-slate-500 glass-button mb-6"
-        >
-          🔄 {t('playAgain') || 'Play Again'}
-        </button>
-
-        <button
-          onClick={() => navigate('/feedback')}
-          className="text-xs opacity-40 hover:opacity-100 hover:text-sky-400 transition-colors uppercase tracking-widest font-semibold"
-        >
-          📝 {t('haveFeedback') || 'Share Feedback'}
-        </button>
       </motion.div>
     </div>
   );
