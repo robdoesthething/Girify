@@ -34,12 +34,12 @@ const SummaryScreen: React.FC<SummaryScreenProps> = ({
   t,
 }) => {
   const navigate = useNavigate();
-  const { profile } = useAuth();
+  const { user, profile } = useAuth();
   const { language } = useTheme();
   const [shareStatus, setShareStatus] = useState<string | null>(null);
   const [expandedIndex, setExpandedIndex] = useState<number | null>(null);
   const [streetCuriosities, setStreetCuriosities] = useState<
-    Record<string, { ca?: string; es?: string; en?: string }>
+    Record<string, { ca?: string; es?: string; en?: string; img?: string }>
   >({});
 
   useEffect(() => {
@@ -187,14 +187,14 @@ const SummaryScreen: React.FC<SummaryScreenProps> = ({
         if (!text) {
           return null;
         }
-        return { name: result.street.name, text };
+        return { name: result.street.name, text, img: entry.img };
       })
-      .filter((x): x is { name: string; text: string } => x !== null);
+      .filter((x): x is { name: string; text: string; img: string | undefined } => x !== null);
   }, [quizResults, streetCuriosities, language]);
 
   return (
     <div
-      className={`absolute inset-0 flex flex-col items-center justify-center p-6 text-center backdrop-blur-md transition-colors duration-500 pointer-events-auto overflow-y-auto font-inter
+      className={`absolute inset-0 flex flex-col items-center justify-start py-8 px-6 text-center backdrop-blur-md transition-colors duration-500 pointer-events-auto overflow-y-auto font-inter
             ${theme === 'dark' ? 'bg-slate-950/95 text-white' : 'bg-slate-50/95 text-slate-800'}`}
     >
       <motion.div
@@ -352,29 +352,64 @@ const SummaryScreen: React.FC<SummaryScreenProps> = ({
               {curiositiesWithData.map((item, i) => (
                 <div
                   key={i}
-                  className={`px-4 py-3 rounded-xl text-left ${
+                  className={`rounded-xl text-left overflow-hidden ${
                     theme === 'dark'
                       ? 'bg-amber-900/10 border border-amber-700/20'
                       : 'bg-amber-50 border border-amber-200/60'
                   }`}
                 >
-                  <p
-                    className={`text-[10px] font-black uppercase tracking-wide mb-1.5 ${
-                      theme === 'dark' ? 'text-amber-400' : 'text-amber-700'
-                    }`}
-                  >
-                    {item.name}
-                  </p>
-                  <p
-                    className={`text-xs leading-relaxed ${
-                      theme === 'dark' ? 'text-slate-300' : 'text-slate-600'
-                    }`}
-                  >
-                    {item.text}
-                  </p>
+                  {item.img && (
+                    <img
+                      src={item.img}
+                      alt={item.name}
+                      className="w-full h-28 object-cover"
+                      loading="lazy"
+                    />
+                  )}
+                  <div className="px-4 py-3">
+                    <p
+                      className={`text-[10px] font-black uppercase tracking-wide mb-1.5 ${
+                        theme === 'dark' ? 'text-amber-400' : 'text-amber-700'
+                      }`}
+                    >
+                      {item.name}
+                    </p>
+                    <p
+                      className={`text-xs leading-relaxed ${
+                        theme === 'dark' ? 'text-slate-300' : 'text-slate-600'
+                      }`}
+                    >
+                      {item.text}
+                    </p>
+                  </div>
                 </div>
               ))}
             </div>
+          </div>
+        )}
+
+        {!user && (
+          <div
+            className={`w-full mb-4 p-4 rounded-2xl border flex flex-col gap-2 text-left ${
+              theme === 'dark' ? 'bg-sky-900/20 border-sky-700/30' : 'bg-sky-50 border-sky-200'
+            }`}
+          >
+            <p
+              className={`text-xs font-black uppercase tracking-widest ${theme === 'dark' ? 'text-sky-400' : 'text-sky-600'}`}
+            >
+              {t('saveYourScore') || 'Save your score'}
+            </p>
+            <p className={`text-xs ${theme === 'dark' ? 'text-slate-300' : 'text-slate-600'}`}>
+              {t('signInToSave') ||
+                'Sign in to track your streak, compete on the leaderboard, and save your progress.'}
+            </p>
+            <button
+              onClick={() => navigate('/?auth=login')}
+              className="mt-1 self-start text-xs font-bold text-sky-500 hover:text-sky-400 underline underline-offset-2 transition-colors"
+              type="button"
+            >
+              {t('signIn') || 'Sign in →'}
+            </button>
           </div>
         )}
 

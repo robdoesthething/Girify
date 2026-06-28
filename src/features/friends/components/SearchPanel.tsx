@@ -67,26 +67,28 @@ const SearchPanel: React.FC<SearchPanelProps> = ({
           {searchResults.map(u => (
             <div
               key={u.username}
-              className={`flex justify-between items-center p-2 rounded ${themeClasses(theme, 'bg-slate-800', 'bg-white')}`}
+              className={`flex justify-between items-center p-2 rounded ${themeClasses(theme, 'bg-slate-800', 'bg-white border border-slate-200')}`}
             >
-              <span className="font-bold">{u.username.toLowerCase()}</span>
+              <span className={`font-bold ${themeClasses(theme, 'text-white', 'text-slate-900')}`}>
+                {u.username.toLowerCase()}
+              </span>
               <button
                 onClick={() => handleSend(u.username)}
                 disabled={successfulRequests.has(u.username)}
-                className={`text-xs px-3 py-1 rounded transition-all font-bold active:scale-95
+                className={`text-xs px-3 py-1.5 rounded transition-all font-bold active:scale-95
                     ${
                       successfulRequests.has(u.username)
                         ? 'bg-emerald-500 text-white cursor-default'
                         : themeClasses(
                             theme,
-                            'bg-slate-700 hover:bg-sky-500 hover:text-white',
-                            'bg-slate-200 hover:bg-sky-500 hover:text-white'
+                            'bg-sky-600 hover:bg-sky-500 text-white',
+                            'bg-sky-500 hover:bg-sky-400 text-white'
                           )
                     }
                   `}
                 type="button"
               >
-                {successfulRequests.has(u.username) ? 'Sent' : 'Add'}
+                {successfulRequests.has(u.username) ? '✓ Sent' : 'Add'}
               </button>
             </div>
           ))}

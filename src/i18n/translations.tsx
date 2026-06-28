@@ -395,6 +395,9 @@ const translations: Translations = {
     scoreTierWander: 'Keep Wandering',
     scoreLabel: 'Score',
     whatYouLearned: 'What you learned today',
+    saveYourScore: 'Save your score',
+    signInToSave:
+      'Sign in to track your streak, compete on the leaderboard, and save your progress.',
     shareCuriosity: 'Share this curiosity',
     shareTextQuestion: 'Do I know Barcelona?',
     shareStreakDays: 'days',
@@ -820,6 +823,9 @@ const translations: Translations = {
     scoreTierWander: 'Sigue Explorando',
     scoreLabel: 'Puntuación',
     whatYouLearned: 'Lo que aprendiste hoy',
+    saveYourScore: 'Guarda tu puntuación',
+    signInToSave:
+      'Inicia sesión para seguir tu racha, competir en el ranking y guardar tu progreso.',
     shareCuriosity: 'Compartir esta curiosidad',
     shareTextQuestion: '¿Conozco Barcelona?',
     shareStreakDays: 'días',
@@ -1248,6 +1254,9 @@ const translations: Translations = {
     scoreTierWander: 'Segueix Explorant',
     scoreLabel: 'Puntuació',
     whatYouLearned: 'El que has après avui',
+    saveYourScore: 'Desa la teva puntuació',
+    signInToSave:
+      'Inicia sessió per seguir la teva ratxa, competir al rànquing i desar el teu progrés.',
     shareCuriosity: 'Compartir aquesta curiositat',
     shareTextQuestion: 'Conec Barcelona?',
     shareStreakDays: 'dies',

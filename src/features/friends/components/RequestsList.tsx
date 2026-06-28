@@ -39,17 +39,21 @@ const RequestsList: React.FC<RequestsListProps> = ({
         return (
           <div
             key={req.id}
-            className={`p-3 rounded-lg border flex justify-between items-center shadow-sm ${themeClasses(theme, 'bg-white border-sky-500/30', 'bg-slate-900 border-sky-500/30')}`}
+            className={`p-3 rounded-lg border flex justify-between items-center shadow-sm ${themeClasses(theme, 'bg-slate-900 border-sky-500/30', 'bg-white border-sky-500/30')}`}
           >
             <div className="flex flex-col">
-              <span className="font-bold text-lg">{req.from.toLowerCase()}</span>
+              <span
+                className={`font-bold text-lg ${themeClasses(theme, 'text-white', 'text-slate-900')}`}
+              >
+                {req.from.toLowerCase()}
+              </span>
               <span className="text-xs text-slate-500">wants to be friends</span>
             </div>
             <div className="flex gap-2">
               <button
                 onClick={() => onDecline(req.from)}
                 disabled={isProcessing}
-                className={`px-3 py-1 rounded text-xs font-bold transition-all active:scale-95 ${themeClasses(theme, 'bg-slate-200', 'bg-slate-800')} ${isProcessing ? 'opacity-50 cursor-not-allowed' : ''}`}
+                className={`px-3 py-1 rounded text-xs font-bold transition-all active:scale-95 ${themeClasses(theme, 'bg-slate-800 text-slate-300', 'bg-slate-100 text-slate-700')} ${isProcessing ? 'opacity-50 cursor-not-allowed' : ''}`}
                 type="button"
               >
                 {isDeclining ? 'Ignoring...' : 'Not now'}
