@@ -47,6 +47,7 @@
     "prepare": "husky install",
     "computer-use": "tsx scripts/computer-use-test.ts",
     "fetch-streets": "node scripts/fetchStreets.js",
+    "fetch-curiosities": "npx tsx scripts/fetchCuriosities.ts",
     "export-csv": "node scripts/export_streets_csv.js",
     "generate-quiz-plan": "node scripts/generateQuizPlan.js",
     "storybook": "storybook dev -p 6006",

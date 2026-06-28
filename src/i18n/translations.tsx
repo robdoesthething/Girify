@@ -92,6 +92,8 @@ const translations: Translations = {
     next: 'NEXT',
     startQuiz: 'PLAY',
     replayChallenge: 'REPLAY CHALLENGE',
+    nextChallenge: 'Next challenge',
+    comeBackTomorrow: 'Come back tomorrow to keep your streak!',
     scoreNotSaved: 'Score will not be saved',
     tapStreet: 'Tap the highlighted street',
     clickStreet: 'Click the highlighted street',
@@ -124,6 +126,8 @@ const translations: Translations = {
     greatJob: 'Great Job!',
     shareAndEarnGiuros: 'Share & Earn Giuros',
     inviteFriendsEarnRewards: 'Invite friends and earn rewards when they play!',
+    shareYourResult: 'Share your result',
+    earnGiurosWhenFriendsJoin: 'Earn giuros when friends join',
 
     // Results
     dailyChallenge: 'Daily Challenge',
@@ -390,6 +394,7 @@ const translations: Translations = {
     scoreTierKnowledge: 'Local Knowledge',
     scoreTierWander: 'Keep Wandering',
     scoreLabel: 'Score',
+    whatYouLearned: 'What you learned today',
     shareCuriosity: 'Share this curiosity',
     shareTextQuestion: 'Do I know Barcelona?',
     shareStreakDays: 'days',
@@ -509,6 +514,8 @@ const translations: Translations = {
     next: 'SIGUIENTE',
     startQuiz: 'JUGAR',
     replayChallenge: 'REPETIR RETO',
+    nextChallenge: 'Próximo reto',
+    comeBackTomorrow: '¡Vuelve mañana para mantener tu racha!',
     scoreNotSaved: 'La puntuación no se guardará',
     tapStreet: 'Toca la calle resaltada',
     clickStreet: 'Haz clic en la calle resaltada',
@@ -541,6 +548,8 @@ const translations: Translations = {
     greatJob: '¡Gran Trabajo!',
     shareAndEarnGiuros: 'Compartir y Ganar Giuros',
     inviteFriendsEarnRewards: '¡Invita amigos y gana recompensas cuando jueguen!',
+    shareYourResult: 'Comparte tu resultado',
+    earnGiurosWhenFriendsJoin: 'Gana giuros cuando tus amigos se unan',
 
     // Results
     dailyChallenge: 'Reto diario',
@@ -810,6 +819,7 @@ const translations: Translations = {
     scoreTierKnowledge: 'Conocedor Local',
     scoreTierWander: 'Sigue Explorando',
     scoreLabel: 'Puntuación',
+    whatYouLearned: 'Lo que aprendiste hoy',
     shareCuriosity: 'Compartir esta curiosidad',
     shareTextQuestion: '¿Conozco Barcelona?',
     shareStreakDays: 'días',
@@ -1017,6 +1027,8 @@ const translations: Translations = {
     next: 'SEGÜENT',
     startQuiz: 'JUGAR',
     replayChallenge: 'REPETIR REPTE',
+    nextChallenge: 'Proper repte',
+    comeBackTomorrow: 'Torna demà per mantenir la teva ratxa!',
     scoreNotSaved: 'La puntuació no es guardarà',
     tapStreet: 'Toca el carrer ressaltat',
     clickStreet: 'Fes clic al carrer ressaltat',
@@ -1035,6 +1047,8 @@ const translations: Translations = {
     greatJob: 'Bona Feina!',
     shareAndEarnGiuros: 'Compartir i Guanyar Giuros',
     inviteFriendsEarnRewards: 'Convida amics i guanya recompenses quan juguin!',
+    shareYourResult: 'Comparteix el resultat',
+    earnGiurosWhenFriendsJoin: 'Guanya giuros quan els amics es registrin',
 
     // About
     aboutGirify: 'Quant a Girify',
@@ -1233,6 +1247,7 @@ const translations: Translations = {
     scoreTierKnowledge: 'Coneixedor Local',
     scoreTierWander: 'Segueix Explorant',
     scoreLabel: 'Puntuació',
+    whatYouLearned: 'El que has après avui',
     shareCuriosity: 'Compartir aquesta curiositat',
     shareTextQuestion: 'Conec Barcelona?',
     shareStreakDays: 'dies',

@@ -42,10 +42,15 @@ vi.mock('../../../hooks/useToast', () => ({
   }),
 }));
 
+const mockProfile: { username: string | null; team: string | null } = {
+  username: 'testuser',
+  team: null,
+};
+
 vi.mock('../../../auth/hooks/useAuth', () => ({
   useAuth: () => ({
     user: null,
-    profile: null,
+    profile: mockProfile,
     loading: false,
   }),
 }));
@@ -77,6 +82,12 @@ describe('SummaryScreen Integration', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mockState.username = 'testuser';
+    mockProfile.username = 'testuser';
+    mockProfile.team = null;
+    Object.assign(navigator, {
+      share: undefined,
+      clipboard: { writeText: vi.fn().mockResolvedValue(undefined) },
+    });
   });
 
   it('renders summary stats immediately without an intermediate screen', () => {
@@ -94,5 +105,47 @@ describe('SummaryScreen Integration', () => {
 
     fireEvent.click(screen.getByText('keepPlaying', { exact: false }));
     expect(onKeepPlaying).toHaveBeenCalledTimes(1);
+  });
+
+  describe('share button', () => {
+    it('copies share text with www.girifyapp.com domain', async () => {
+      const writeText = vi.fn().mockResolvedValue(undefined);
+      Object.assign(navigator, { share: undefined, clipboard: { writeText } });
+
+      renderWithRouter(<SummaryScreen {...baseProps} />);
+      await fireEvent.click(screen.getByText('shareYourResult'));
+
+      expect(writeText).toHaveBeenCalledTimes(1);
+      const shareText = writeText.mock.calls[0]?.[0] as string;
+      expect(shareText).toContain('www.girifyapp.com');
+      expect(shareText).not.toContain('girify.vercel.app');
+    });
+
+    it('includes ?ref=username when profile has a username', async () => {
+      const writeText = vi.fn().mockResolvedValue(undefined);
+      Object.assign(navigator, { share: undefined, clipboard: { writeText } });
+      mockProfile.username = 'testuser';
+
+      renderWithRouter(<SummaryScreen {...baseProps} />);
+      await fireEvent.click(screen.getByText('shareYourResult'));
+
+      const shareText = writeText.mock.calls[0]?.[0] as string;
+      expect(shareText).toContain('?ref=testuser');
+    });
+
+    it('omits ?ref param when username is null', async () => {
+      const writeText = vi.fn().mockResolvedValue(undefined);
+      Object.assign(navigator, { share: undefined, clipboard: { writeText } });
+      mockProfile.username = null;
+
+      renderWithRouter(<SummaryScreen {...baseProps} />);
+      await fireEvent.click(screen.getByText('shareYourResult'));
+
+      const shareText = writeText.mock.calls[0]?.[0] as string;
+      expect(shareText).toContain('www.girifyapp.com');
+      expect(shareText).not.toContain('?ref=null');
+      expect(shareText).not.toContain('?ref=undefined');
+      expect(shareText).not.toContain('?ref=');
+    });
   });
 });

@@ -1,10 +1,11 @@
 import { AnimatePresence, motion } from 'framer-motion';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import StreetSnapshotMap from './StreetSnapshotMap';
 import { useNavigate } from 'react-router-dom';
 import { GAME, GIRIFY_EPOCH, STORAGE_KEYS, TIME, UI } from '../../../config/constants';
 import { getTimeUntilNext } from '../../../utils/game/dailyChallenge';
 import { useAuth } from '../../auth/hooks/useAuth';
+import { useTheme } from '../../../context/ThemeContext';
 import { QuizResult, Street } from '../../../types/game';
 import { GameHistory } from '../../../types/user';
 import { storage } from '../../../utils/storage';
@@ -34,8 +35,19 @@ const SummaryScreen: React.FC<SummaryScreenProps> = ({
 }) => {
   const navigate = useNavigate();
   const { profile } = useAuth();
+  const { language } = useTheme();
   const [shareStatus, setShareStatus] = useState<string | null>(null);
   const [expandedIndex, setExpandedIndex] = useState<number | null>(null);
+  const [streetCuriosities, setStreetCuriosities] = useState<
+    Record<string, { ca?: string; es?: string; en?: string }>
+  >({});
+
+  useEffect(() => {
+    fetch('/streetCuriosities.json')
+      .then(r => r.json())
+      .then(setStreetCuriosities)
+      .catch(() => {});
+  }, []);
 
   const maxPossibleScore = total * 100;
 
@@ -137,13 +149,14 @@ const SummaryScreen: React.FC<SummaryScreenProps> = ({
     const formattedMax = maxPossibleScore.toLocaleString('ca-ES');
     const districtLine = profile?.team ? `🏙️ ${profile.team}\n` : '';
     const streakLine = streakValue > 1 ? `🔥 ${streakValue} ${t('shareStreakDays')} · ` : '';
+    const refSuffix = profile?.username ? `?ref=${profile.username}` : '';
 
     return (
       `Girify #${dayNumber} — ${t('shareTextQuestion')}\n` +
       `${squares}\n` +
       `${formattedScore} / ${formattedMax}\n` +
       `${districtLine}` +
-      `${streakLine}girify.vercel.app`
+      `${streakLine}www.girifyapp.com${refSuffix}`
     );
   };
 
@@ -161,6 +174,23 @@ const SummaryScreen: React.FC<SummaryScreenProps> = ({
       console.error('[Game] Share failed:', e);
     }
   };
+
+  const curiositiesWithData = useMemo(() => {
+    const lang = language as 'ca' | 'es' | 'en';
+    return quizResults
+      .map(result => {
+        const entry = streetCuriosities[result.street.id];
+        if (!entry) {
+          return null;
+        }
+        const text = entry[lang] ?? entry.ca ?? entry.es ?? entry.en;
+        if (!text) {
+          return null;
+        }
+        return { name: result.street.name, text };
+      })
+      .filter((x): x is { name: string; text: string } => x !== null);
+  }, [quizResults, streetCuriosities, language]);
 
   return (
     <div
@@ -311,15 +341,52 @@ const SummaryScreen: React.FC<SummaryScreenProps> = ({
           </div>
         </div>
 
+        {curiositiesWithData.length > 0 && (
+          <div className="w-full mb-6">
+            <p
+              className={`text-[10px] font-black uppercase tracking-[0.2em] mb-2.5 ${theme === 'dark' ? 'text-slate-400' : 'text-slate-500'}`}
+            >
+              {t('whatYouLearned') || 'What you learned today'}
+            </p>
+            <div className="space-y-2">
+              {curiositiesWithData.map((item, i) => (
+                <div
+                  key={i}
+                  className={`px-4 py-3 rounded-xl text-left ${
+                    theme === 'dark'
+                      ? 'bg-amber-900/10 border border-amber-700/20'
+                      : 'bg-amber-50 border border-amber-200/60'
+                  }`}
+                >
+                  <p
+                    className={`text-[10px] font-black uppercase tracking-wide mb-1.5 ${
+                      theme === 'dark' ? 'text-amber-400' : 'text-amber-700'
+                    }`}
+                  >
+                    {item.name}
+                  </p>
+                  <p
+                    className={`text-xs leading-relaxed ${
+                      theme === 'dark' ? 'text-slate-300' : 'text-slate-600'
+                    }`}
+                  >
+                    {item.text}
+                  </p>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
         <button
           onClick={handleShare}
           className="w-full py-5 bg-gradient-to-r from-emerald-500 to-sky-500 hover:from-emerald-400 hover:to-sky-400 active:scale-95 text-white rounded-2xl shadow-2xl font-black text-lg transition-all transform hover:scale-[1.02] mb-4 flex items-center justify-center gap-3 group"
         >
-          <span className="text-2xl group-hover:rotate-12 transition-transform">🎁</span>
+          <span className="text-2xl group-hover:rotate-12 transition-transform">📤</span>
           <div className="flex flex-col items-start leading-none">
-            <span>{shareStatus || t('shareAndEarnGiuros') || 'Share & Earn Giuros'}</span>
+            <span>{shareStatus || t('shareYourResult') || 'Share your result'}</span>
             <span className="text-[10px] font-medium opacity-80 mt-1 uppercase tracking-wide">
-              {t('inviteFriendsEarnRewards') || 'Invite friends & earn'}
+              {t('earnGiurosWhenFriendsJoin') || 'Earn giuros when friends join'}
             </span>
           </div>
         </button>

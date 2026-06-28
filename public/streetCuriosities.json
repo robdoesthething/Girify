@@ -1,0 +1,902 @@
+{
+  "1": {
+    "ca": "La Gran Via de les Corts Catalanes és una de les vies més importants de la ciutat de Barcelona, que la travessa d'un costat a l'altre, amb un recorregut de més de nou quilòmetres, amb què és el carrer més llarg de l'Estat espanyol. La numeració de les finques arriba fins al 1198.",
+    "es": "La Gran Via de las Cortes Catalanas es una de las vías más importantes de la ciudad de Barcelona, que la cruza longitudinalmente con un recorrido de más de 13 km. Es la calle más larga en portales de España. La numeración de las fincas va desde 21 hasta 1198.",
+    "en": "Gran Via de les Corts Catalanes, more simply known as Gran Via, is one of Barcelona's major avenues."
+  },
+  "2": {
+    "ca": "L'Avinguda Diagonal és una de les principals artèries de la ciutat de Barcelona, i la travessa de punta a punta en sentit sud-oest/nord-est.",
+    "es": "La avenida Diagonal es el nombre de una de las mayores y más importantes avenidas de Barcelona, España. Corta el distrito central del Ensanche en dos diagonalmente, de ahí su nombre.",
+    "en": "Avinguda Diagonal is the name of one of Barcelona's broadest and most important avenues. It cuts the city in two, diagonally with respect to the grid pattern of the surrounding streets, hence the name."
+  },
+  "3": {
+    "ca": "La B-20 o Ronda de Dalt és una via ràpida que recorre la part alta de l'àrea metropolitana de Barcelona per la part de la muntanya. És administrada per l'AMB.",
+    "es": "La Ronda de Dalt, identificada también como B-20, es una vía de circunvalación de la ciudad de Barcelona, España, que transcurre entre el Nudo de la Trinidad y el Nudo del Llobregat, recorriendo el norte de la ciudad condal.",
+    "en": "Ronda de Dalt or B-20 motorway is a ring road or beltway within Barcelona and other parts of its metropolitan area, running from l'Hospitalet de Llobregat, to Nus de la Trinitat in the Sant Andreu district of Barcelona."
+  },
+  "4": {
+    "ca": "La B-10 o Ronda del Litoral és una via ràpida de circumval·lació de 20 km que recorre el cor de l'àrea metropolitana de Barcelona passant pel sud de Barcelona, tot seguint el curs dels rius Llobregat i Besòs, i la mar Mediterrània.",
+    "es": "La Ronda Litoral, identificada también como B-10, es una vía de circunvalación de la ciudad de Barcelona, España, que transcurre entre el Nudo del Llobregat y el Nudo de la Trinidad, recorriendo el sur de la ciudad condal."
+  },
+  "5": {
+    "en": "Avinguda Meridiana is a major avenue in Barcelona, Catalonia, Spain, spanning parts of the Sant Andreu, Nou Barris and Sant Martí northern districts of the city."
+  },
+  "6": {
+    "ca": "El carrer del Consell de Cent porta el nom de l'assemblea representativa de la comunitat política dels barcelonins i travessa successivament els districtes de Sants-Montjuïc, l'Eixample i Sant Martí. Comença al carrer de Creu Coberta i s'acaba a l'Avinguda de la Meridiana.",
+    "en": "Carrer del Consell de Cent is a long avenue in Barcelona, Catalonia, Spain."
+  },
+  "7": {
+    "ca": "La Via Augusta fou una via romana que unia la península d'Hispània amb el centre del món romà. Estrictament, transcorria al llarg de la costa mediterrània: des dels Pirineus fins a Cadis."
+  },
+  "8": {
+    "ca": "El carrer d'Aragó és un més amples de l'Eixample, i també a part del de districte de Sant Martí de Barcelona."
+  },
+  "9": {
+    "ca": "La Ronda del Guinardó és una ronda que travessa el barri barceloní del Guinardó. Forma part de la Ronda del Mig."
+  },
+  "10": {
+    "ca": "La ronda del General Mitre és un dels trams de la Ronda del Mig de Barcelona, que discorre entre les places de Prat de la Riba i de Lesseps."
+  },
+  "11": {
+    "ca": "El passeig de Gràcia és una de les avingudes principals de Barcelona i també una de les seves àrees comercials i de negocis més importants."
+  },
+  "12": {},
+  "13": {
+    "ca": "El carrer de la Diputació és una via pública de l'Eixample de Barcelona. Al disseny del Pla Cerdà apareix anomenat amb la lletr M, i rebé la seva denominació actual ja a la proposta inicial de noms feta per Víctor Balaguer el 1863."
+  },
+  "14": {
+    "ca": "El Passeig de Maragall, anomenat anteriorment General Martínez Anido i Carretera Nueva de Horta, és un carrer de Barcelona que es troba als districtes d'Horta-Guinardó, Nou Barris, Sant Andreu i Sant Martí."
+  },
+  "15": {},
+  "16": {
+    "ca": "El Passeig de Fabra i Puig és un carrer de Barcelona, antigament Rambla de Santa Eulàlia, que es troba als districtes d'Horta-Guinardó, Nou Barris i Sant Andreu."
+  },
+  "17": {
+    "ca": "La Ronda del Mig, originàriament Primer Cinturó de Ronda, és una via ràpida de Barcelona que discorre entre la Ronda del Litoral i l'Avinguda Meridiana."
+  },
+  "18": {
+    "ca": "La Travessera de Dalt és un carrer de Barcelona, amb direcció paral·lela a la costa, que es troba al districte de Gràcia."
+  },
+  "19": {
+    "ca": "La Rambla −també anomenada les Rambles perquè té diversos trams amb noms diferents― és un passeig emblemàtic de Barcelona que discorre entre la plaça de Catalunya, centre neuràlgic de la ciutat, i la del Portal de la Pau, on s'aixeca el monument a Colom."
+  },
+  "20": {},
+  "21": {
+    "ca": "L'avinguda de Sarrià, hereva de l'antiga carretera de Sarrià, és una avinguda de Barcelona que connecta el carrer de París amb la plaça Prat de la Riba. Està repartida pels districtes de l'Eixample i de Sarrià-Sant Gervasi."
+  },
+  "22": {},
+  "23": {
+    "ca": "L'avinguda de Roma és una via urbana de l'Eixample de Barcelona, que enllaça el carrer d'Aragó amb la plaça dels Països Catalans, entre els de Casanova i de Tarragona."
+  },
+  "24": {},
+  "25": {
+    "ca": "El carrer de Tarragona és una via urbana de Barcelona que separa els districtes de Sants-Montjuïc a l'oest (barri d'Hostafrancs) i l'Eixample a l'est (barri de la Nova Esquerra de l'Eixample). Està dedicat a la ciutat catalana de Tarragona."
+  },
+  "26": {},
+  "27": {
+    "ca": "«Plaça d'Espanya» té aquests significats:"
+  },
+  "28": {},
+  "29": {},
+  "30": {
+    "ca": "La plaça de Lesseps és una plaça de Barcelona que es troba al límit dels districtes de Gràcia i Sarrià - Sant Gervasi."
+  },
+  "31": {},
+  "32": {
+    "ca": "La rambla del Carmel és una rambla de Barcelona. És la via principal del barri del Carmel, al districte de Horta-Guinardó. Aquí es troba un dels dos extrems del túnel de la Rovira."
+  },
+  "33": {},
+  "34": {},
+  "35": {
+    "ca": "La plaça d'Ildefons Cerdà és un espai públic del districte de Sants-Montjuïc de Barcelona, dedicat a l'enginyer i urbanista Ildefons Cerdà i Sunyer."
+  },
+  "36": {},
+  "37": {
+    "ca": "La plaça de Tetuan es troba a la cruïlla de la Gran Via de les Corts Catalanes amb el passeig de Sant Joan, al nord-oest de l'Arc de Triomf de Barcelona, com una mena d'oasi emmig del trànsit."
+  },
+  "38": {
+    "ca": "El carrer d'Arnau d'Oms és un carrer de Barcelona que es troba als districtes de Nou Barris i (testimonialment) Sant Andreu. Té uns cinc cents metres de llargada i fou inaugurat l'any 1929."
+  },
+  "39": {
+    "ca": "El carrer de Ramon Albó és un carrer de Barcelona que es troba entre els districtes de Sant Andreu i Nou Barris. Té uns cinc cents metres de llargada."
+  },
+  "40": {},
+  "41": {},
+  "42": {
+    "ca": "La carretera de Collblanc és una avinguda de l'Hospitalet de Llobregat que comença a la Riera Blanca, que fa de frontera amb Barcelona, i acaba amb la del municipi d'Esplugues de Llobregat."
+  },
+  "43": {},
+  "44": {},
+  "45": {},
+  "46": {},
+  "47": {},
+  "48": {},
+  "49": {},
+  "50": {},
+  "51": {
+    "ca": "«Gran Via» té aquests significats:"
+  },
+  "52": {
+    "ca": "L'Avinguda de la Granvia de l'Hospitalet, coneguda simplement com a Gran Via, és una via urbana de l'Hospitalet de Llobregat, continuació de la Gran Via de les Corts Catalanes de Barcelona més enllà de la plaça d'Ildefons Cerdà, per la que discorre l'autovia C-31."
+  },
+  "55": {
+    "ca": "La Rambla de Prim és un carrer del districte de Sant Martí de Barcelona, dedicat al militar i polític Joan Prim i Prats (Reus, 1814 - Madrid, 1870)."
+  },
+  "56": {},
+  "57": {
+    "ca": "El Carrer de Balmes (dedicat al filòsof i religiós català Jaume Balmes) és una de les vies més importants de la ciutat de Barcelona per la seva centralitat i llargària. Juntament amb el Carrer Muntaner és la via més llarga en direcció mar-muntanya."
+  },
+  "58": {
+    "ca": "L'avinguda del Paral·lel és un carrer de la ciutat de Barcelona, que va des de les Drassanes Reials de Barcelona a la plaça d'Espanya. El Paral·lel va ser un indret d'oci i d'espectacles que va existir des de finals del segle&#160;xix i fins ben entrats la dècada de 1970."
+  },
+  "59": {
+    "ca": "El Carrer de València és un carrer de l'Eixample de Barcelona. Travessa el pla de Barcelona de sud-oest a nord-est i discorre pels districtes barcelonins de Sants-Montjuïc, l'Eixample i Sant Martí. Recorda la ciutat de València, conquerida en 1238 per Jaume I."
+  },
+  "60": {
+    "ca": "L'avinguda de Josep Tarradellas és una avinguda de Barcelona que separa els districtes de l'Eixample de les Corts i Sants-Montjuïc. Té forma de rambla, amb un bulevard central i dues calçades pels dos sentits, una a cada costat."
+  },
+  "61": {
+    "ca": "El Passeig de Sant Joan és un bulevard de Barcelona que travessa els barris de la Dreta de l'Eixample i el Camp d'en Grassot. Comença al Passeig de Lluís Companys i acaba a la Travessera de Gràcia."
+  },
+  "62": {},
+  "63": {
+    "ca": "El carrer d'Entença és un carrer de Barcelona situat al districte de l'Eixample i de Les Corts. Està delimitat pel carrer de Tamarit i l'Avinguda Diagonal.\nEn el Pla Cerdà es va identificar com a Número 15, fins que en va ser aprovada la nova nomenclatura l'any 1863."
+  },
+  "66": {},
+  "67": {},
+  "68": {},
+  "69": {},
+  "70": {},
+  "71": {
+    "ca": "«Carrer de la Indústria» té aquests significats:"
+  },
+  "72": {},
+  "74": {
+    "ca": "El carrer de Muntaner és un carrer de Barcelona. Té una longitud aproximada de 4 kilòmetres i travessa els barris de Sarrià-Sant Gervasi i l'Eixample."
+  },
+  "75": {
+    "ca": "El carrer de Lepant és un carrer de Barcelona que situat al districte de l'Eixample i al d'Horta-Guinardó, i travessa els barris del Fort Pienc, la Sagrada Família i el Baix Guinardó. Comença a l'Avinguda Meridiana i acaba a la Ronda del Guinardó."
+  },
+  "76": {},
+  "77": {},
+  "78": {},
+  "79": {
+    "ca": "El carrer de Pau Claris és un carrer barceloní de la Dreta de l'Eixample. Té aproximadament 1400&#160;metres de llargada. Està dedicat a Pau Claris i Casademunt, 94è."
+  },
+  "80": {},
+  "82": {},
+  "83": {
+    "ca": "La Via Laietana és un carrer de Barcelona que comunica l'Eixample amb el port travessant Ciutat Vella. El seu nom està dedicat a la tribu ibèrica dels laietans, antics pobladors de la zona."
+  },
+  "84": {},
+  "85": {
+    "ca": "«Plaça de Catalunya» té aquests significats:"
+  },
+  "87": {},
+  "89": {},
+  "90": {},
+  "91": {},
+  "92": {},
+  "93": {},
+  "95": {},
+  "96": {},
+  "97": {},
+  "99": {
+    "ca": "L'avinguda del Tibidabo és un carrer del barri de Sant Gervasi - la Bonanova de Barcelona de 1.500&#160;m de llargada, que comença a la plaça de John F. Kennedy fins a arribar a la del Doctor Andreu, on es troba l'estació del funicular que puja al parc d'atraccions del Tibidabo."
+  },
+  "100": {},
+  "101": {},
+  "102": {
+    "ca": "La Ronda de Sant Pere és una via de 30&#160;metres d'amplada que forma part de les antigues Rondes de Barcelona, que separen la Ciutat Vella de la ciutat nova o Eixample."
+  },
+  "103": {},
+  "105": {},
+  "107": {},
+  "108": {},
+  "109": {},
+  "110": {},
+  "111": {},
+  "113": {
+    "ca": "Joan Ventosa i Calvell   (Barcelona,&#160;7 de març de 1879&#160;- Lausana,&#160;18 d'agost de 1959) fou un polític i economista català."
+  },
+  "114": {
+    "ca": "L'avinguda de la República Argentina és un vial de Barcelona que separa els barris de Vallcarca i els Penitents (districte de Gràcia) i el Putxet (districte de Sarrià-Sant Gervasi). Discorre des de la plaça de Lesseps fins a la plaça d'Alfonso Comín."
+  },
+  "116": {},
+  "117": {
+    "ca": "La Ronda de Sant Pau és una via de 30&#160;metres d'amplada que forma part de les antigues Rondes de Barcelona, que separen la Ciutat Vella de l'Eixample."
+  },
+  "118": {
+    "ca": "La plaça de Francesc Macià es troba a la confluència de l'Avinguda Diagonal, el carrer del Comte d'Urgell, i les avingudes de Josep Tarradellas i Pau Casals de Barcelona."
+  },
+  "120": {
+    "ca": "Vallvidrera, el Tibidabo i les Planes és un barri del districte barceloní de Sarrià - Sant Gervasi, situat a la serra de Collserola."
+  },
+  "121": {
+    "ca": "Joaquim Valls i Casanova (L'Armentera, 12 d'abril de 1914 - Figueres, 6 de juliol de 1994) fou un futbolista català de les dècades de 1930 i 1940. Començà a destacar al FC L'Escala i a continuació a la UE Figueres, club on passà la major part de la seva carrera.",
+    "es": "Joaquim Valls Morató (Barcelona, 11 de diciembre de 1959) es un economista, doctor, profesor universitario, escritor, conferenciante, investigador y coach neurocaligráfico."
+  },
+  "122": {
+    "ca": "Josep Carner i Puig-Oriol (Barcelona, el 9 de febrer de 1884 - Brussel·les (Bèlgica), el 4 de juny de 1970), fou un poeta, periodista, autor de teatre i traductor català. És també conegut com el príncep dels poetes catalans i el màxim representant de la poesia del Noucentisme.",
+    "es": "Josep Carner i Puig-Oriol (Barcelona, 9 de febrero de 1884-Bruselas, 4 de junio de 1970) fue un poeta, periodista, diplomático, autor de teatro y traductor español. Es conocido como el príncipe de los poetas catalanes."
+  },
+  "123": {},
+  "124": {
+    "ca": "La plaça del Cinc d'Oros, anteriorment anomenada de Joan Carles I, es troba en la intersecció entre l'avinguda Diagonal i el passeig de Gracia de Barcelona."
+  },
+  "125": {},
+  "126": {
+    "es": "El funicular de Vallvidrera es un funicular de Barcelona que une la parte alta del barrio de Sarrià con Vallvidrera. La estación inferior enlaza con la estación de Peu del Funicular del Metro del Vallés de FGC."
+  },
+  "127": {
+    "es": "Alexander Fleming (Darvel, Escocia, 6 de agosto de 1881-Londres, 11 de marzo de 1955) fue un médico y científico británico famoso por  ser el descubridor de la penicilina, al observar de forma casual sus efectos antibióticos sobre un cultivo bacteriano, fue obtenida a partir del "
+  },
+  "128": {
+    "ca": "El carrer del Doctor Pi i Molist és un carrer barceloní del districtes de Nou Barris. Està dedicat al doctor Emili Pi i Molist, eminent metge i psiquiatre barceloní del segle&#160;xix, i primer director de l'Institut Mental de la Santa Creu situat l'extrem final del carrer."
+  },
+  "131": {
+    "ca": "El Pont de Bac de Roda, també conegut com a de Calatrava, connecta el carrer de Bac de Roda, al barri de Sant Martí de Provençals, amb el de Felip II al barri de la Sagrera de Barcelona, tot creuant les línies de Barcelona-Portbou i Barcelona - Maçanet Massanes i la LAV Madrid-Fr"
+  },
+  "133": {
+    "ca": "La plaça d'Urquinaona es troba a la Dreta de l'Eixample de Barcelona, en la frontera amb els barris de Sant Pere, Santa Caterina i la Ribera de Ciutat Vella. Està dedicada a José María de Urquinaona Bidot (Cadis 1813 - Barcelona 1883), bisbe de Barcelona entre 1878 i 1883."
+  },
+  "134": {
+    "ca": "«Passeig del Born» té aquests significats:"
+  },
+  "137": {},
+  "138": {
+    "ca": "El passeig de Colom és un carrer al districte de Ciutat Vella de Barcelona. S'inicia com a continuació del passeig d'Isabel II a la plaça de Correus i finalitza a la plaça del Portal de la Pau, on es troba el monument a Colom."
+  },
+  "139": {},
+  "140": {
+    "ca": "La Ronda de la Universitat forma part del circuit de les antigues Rondes de Barcelona, que separen la Ciutat Vella de la ciutat nova o Eixample. Connecta la plaça de la Universitat amb la plaça de Catalunya."
+  },
+  "141": {},
+  "142": {
+    "ca": "Josep Manyanet i Vives   (Tremp,&#160;7 de gener de 1833&#160;- Barcelona,&#160;17 de desembre de 1901) fou un prevere català, fundador dels Fills de la Sagrada Família i les Missioneres Filles de la Sagrada Família de Natzaret, i apòstol de la devoció a la Sagrada Família."
+  },
+  "144": {
+    "ca": "Francesc Cambó i Batlle (Verges, el Baix Empordà, 2 de setembre de 1876 - Buenos Aires, l'Argentina, 30 d'abril de 1947) fou un empresari i polític català conservador, fundador i líder de la Lliga Regionalista, ferm defensor que el catalanisme intervingués en la política espanyol"
+  },
+  "145": {
+    "ca": "Onze de Setembre és una estació de la L9/L10 del metro de Barcelona. En aquesta estació del Tram 4 (La Sagrera – Can Zam / Gorg) hi tenen parada trens de la L9 Nord i la L10.\nSe situa al barri de Sant Andreu de Palomar, al districte de Sant Andreu."
+  },
+  "146": {
+    "ca": "El carrer Major de Sarrià és una via del barri de Sarrià de Barcelona, que comença a la plaça d'Artós i arriba fins al carrer del General Vives, a la ronda de Dalt. Era el carrer gran de l'antiga vila de Sarrià."
+  },
+  "147": {
+    "ca": "«Ballester» té aquests significats:\n\nBallester (menestral), menestral que tenia com a ofici fer ballestes i vendre-les\nBallester (unitat militar), soldat que combat amb una ballesta\nBallester (ocell) (Tachymarptis melba), ocell de l'ordre dels falciots\nBallester (planta) (Arthroc"
+  },
+  "148": {
+    "ca": "La plaça de Mossèn Jacint Verdaguer es troba a la intersecció entre l'avinguda Diagonal, el passeig de Sant Joan i el carrer de Mallorca de Barcelona. Està dedicada a Jacint Verdaguer (Folgueroles, 1845 - Vallvidrera, 1902), un sacerdot i poeta, autor del poema L'Atlàntida."
+  },
+  "149": {
+    "ca": "El castell d'Ulldecona és un conjunt fortificat d'Ulldecona (Montsià) declarat bé cultural d'interès nacional. S'aixeca dalt del Puig del Castell, una petita elevació que forma part de la Serra Grossa."
+  },
+  "150": {
+    "ca": "El carrer d'Horta, antic carrer Major, és una via del barri d'Horta de Barcelona."
+  },
+  "151": {},
+  "152": {
+    "en": "Robert Joseph Vila (born June 20, 1946) is an American home improvement television show host known for This Old House (1979–1989), Bob Vila's Home Again (1990–2005), and Bob Vila (2005–2007)."
+  },
+  "153": {
+    "en": "La Jonquera (Catalan pronunciation: [lə ʒuŋˈkeɾə]; Spanish: La Junquera) is a municipality in the comarca of  l'Alt Empordà, in Catalonia, Spain. It is situated next to the border with France, opposite the municipality of Le Perthus."
+  },
+  "154": {},
+  "155": {},
+  "156": {},
+  "157": {},
+  "158": {
+    "ca": "L'avinguda de Gaudí és una via urbana de Barcelona, que discorre entre el Temple Expiatori de la Sagrada Família i l'Hospital de la Santa Creu i Sant Pau, dos dels principals monuments modernistes de la ciutat."
+  },
+  "159": {},
+  "160": {},
+  "161": {},
+  "162": {},
+  "163": {},
+  "164": {},
+  "165": {
+    "ca": "L'avinguda de Vilanova és un carrer de Barcelona que rep aquest nom en honor d'Arnau de Vilanova (?, 1238 - Gènova, 1311), metge i filòsof català medieval."
+  },
+  "166": {},
+  "168": {},
+  "169": {},
+  "171": {},
+  "172": {},
+  "173": {},
+  "175": {},
+  "176": {},
+  "178": {},
+  "179": {},
+  "181": {},
+  "182": {},
+  "183": {},
+  "184": {},
+  "186": {},
+  "187": {},
+  "188": {},
+  "189": {
+    "ca": "El Passeig de la Vall d'Hebron és un carrer de Barcelona, a la vora de Collserola, als districtes de Gràcia i Horta-Guinardó. El seu traçat coincideix amb el de la Ronda de Dalt que passa soterrada i semisoterrada."
+  },
+  "190": {
+    "ca": "El Rambla de Badal és un carrer del barri de Sants de Barcelona obert l'any 1885 pels germans Badal segons un pla d'urbanització de la zona compresa entre la via del tren i la carretera de la Bordeta (al barri de La Bordeta)."
+  },
+  "191": {
+    "ca": "La Travessera de Gràcia és un carrer de Barcelona que s'estén per tres districtes de la ciutat."
+  },
+  "192": {},
+  "194": {},
+  "195": {},
+  "196": {
+    "ca": "La Rambla de Guipúscoa és una rambla de Barcelona que es troba al districte de Sant Martí, als barris de Sant Martí de Provençals i la Verneda i la Pau. Duu el nom en motiu del territori històric (lurralde) basc de Guipúscoa."
+  },
+  "200": {},
+  "202": {},
+  "203": {},
+  "205": {},
+  "207": {},
+  "209": {},
+  "210": {},
+  "212": {
+    "ca": "L'Avinguda de la Reina Maria Cristina és una avinguda del districte de Sants-Montjuïc de Barcelona, que enllaça Plaça d'Espanya amb el Museu Nacional d'Art de Catalunya (MNAC) sobre el turó de Montjuïc.."
+  },
+  "213": {},
+  "214": {},
+  "215": {},
+  "216": {},
+  "217": {},
+  "218": {},
+  "219": {},
+  "220": {},
+  "221": {},
+  "222": {},
+  "223": {},
+  "224": {},
+  "226": {
+    "ca": "La Ronda de Sant Antoni és una via de 30&#160;metres d'amplada que forma part de les antigues Rondes de Barcelona que separen la Ciutat Vella de l'Eixample. Està situada entre la Ronda de Sant Pau i la plaça de la Universitat."
+  },
+  "227": {},
+  "228": {},
+  "230": {},
+  "231": {},
+  "233": {},
+  "234": {},
+  "235": {},
+  "236": {},
+  "237": {
+    "ca": "El passeig de la Bonanova uneix els antics nuclis de Sant Gervasi de Cassoles i Sarrià. Amb una amplada de 20&#160;metres i una llargada d'aproximadament un quilòmetre, va en línia recta de la plaça de Sarrià a la plaça de la Bonanova."
+  },
+  "239": {
+    "ca": "El passeig de Sant Gervasi és un carrer situat als barris de Sant Gervasi - la Bonanova i el Putxet i Farró de Barcelona. Uneix les places de la Bonanova amb la d'Alfonso Comín, passant per la de John F. Kennedy."
+  },
+  "241": {
+    "ca": "El carrer de Mandri uneix el passeig de la Bonanova amb la Ronda del General Mitre de Barcelona. És un eix comercial i s'hi troben bars i restaurants com el bar l'Escocès."
+  },
+  "242": {},
+  "243": {
+    "ca": "L'avinguda de la Riera de Cassoles va des de la via Augusta amb la plaça de Gal·la Placídia fins a la plaça de Lesseps de Barcelona."
+  },
+  "244": {},
+  "245": {},
+  "249": {},
+  "251": {
+    "ca": "El carrer de Sants és un dels principals eixos del barri de Sants, del districte de Sants-Montjuïc i també del districte de les Corts. Deu el seu nom al barri i a l'antic municipi, provinent del de l'església de Santa Maria de Sants (segle&#160;viii)."
+  },
+  "252": {},
+  "253": {
+    "ca": "L'avinguda de Joan XXIII és una via urbana de València situada entre l'avinguda del Dr. Peset Aleixandre pel sud i l'avinguda dels Germans Machado (que forma part de la Ronda Nord de València o CV-30) pel nord."
+  },
+  "254": {
+    "ca": "El carrer Nou de la Rambla és una via de Barcelona que va des de la Rambla fins a la muntanya de Montjuïc, travessant els barris del Raval i el Poble Sec."
+  },
+  "255": {},
+  "256": {},
+  "257": {},
+  "261": {},
+  "265": {},
+  "266": {
+    "ca": "El carrer Gran de Gràcia discorre entre els Jardinets de Gràcia i la plaça de Lesseps de Barcelona, i era el carrer major de l'antic municipi de Gràcia. Altres noms que ha tingut han estat: Major, Major de Gràcia, Gràcia, Nicolás Salmerón."
+  },
+  "267": {},
+  "268": {},
+  "269": {
+    "ca": "La plaça d'Alfonso Comín és un espai lliure situat al barri de Vallcarca i els Penitents de Barcelona."
+  },
+  "270": {},
+  "271": {
+    "ca": "La Rambla del Raval és un boulevard d'uns 300&#160;m de llarg i 60 d'amplada entre els carrers de l'Hospital i de Sant Pau del Raval de Barcelona."
+  },
+  "272": {},
+  "273": {},
+  "274": {},
+  "275": {},
+  "277": {},
+  "278": {},
+  "279": {},
+  "281": {
+    "ca": "La Plaça de les Matemàtiques és una plaça situada a la ciutat de Barcelona. L'any 2007, l'Ajuntament de Barcelona es va unir al Govern d'Espanya al nomenament de l'Any de la ciència."
+  },
+  "282": {},
+  "283": {},
+  "284": {
+    "ca": "«Carrer de l'Hospital» té aquests significats:"
+  },
+  "285": {},
+  "286": {},
+  "287": {},
+  "288": {},
+  "289": {},
+  "291": {},
+  "292": {
+    "ca": "El passeig de Manuel Girona és un vial de Barcelona, que comença a la plaça de Prat de la Riba i acaba a l'avinguda de Pedralbes, al límit entre els districtes de Les Corts i Sarrià - Sant Gervasi."
+  },
+  "293": {
+    "ca": "L'avinguda de Pearson és un vial al barri de Pedralbes de Barcelona que comença a l'avinguda d'Esplugues i finalitza en un atzucac al vessant de la serra de Collserola, per sota de la carretera de les Aigües."
+  },
+  "295": {},
+  "297": {},
+  "298": {},
+  "299": {},
+  "300": {},
+  "301": {
+    "ca": "Caracas (oficialment Santiago de León de Caracas) és la capital federal de Veneçuela, així com el centre administratiu, financer, comercial i cultural de la nació, a més de servir de seu del govern de Veneçuela."
+  },
+  "302": {},
+  "303": {
+    "ca": "Damas Calvet i de Budallés (Figueres, 11 de desembre de 1836 - Barcelona, 2 de novembre de 1891) fou un enginyer, poeta i dramaturg català. Damas Calvet de Budallés nasqué el 1836 al si d'una família més aviat benestant."
+  },
+  "305": {
+    "ca": "«Montjuïc» té aquests significats:"
+  },
+  "306": {
+    "ca": "Can Caralleu és un sector del barri de Sarrià, al districte de Sarrià - Sant Gervasi de Barcelona, situat al vessant marítim de la serralada de Collserola, entre la carretera de les Aigües i la ronda de Dalt."
+  },
+  "307": {},
+  "308": {},
+  "310": {
+    "es": "El Santuario de Nuestra Señora de Meritxell es una basílica que se encuentra en la localidad de Meritxell, en la parroquia andorrana de Canillo."
+  },
+  "311": {
+    "ca": "El passeig de Sant Joan Bosco és un vial de Barcelona, que uneix la plaça d'Artós amb la de Prat de la Riba, i que delimita els barris de Sarrià, a ponent, i les Tres Torres, a llevant."
+  },
+  "312": {
+    "es": "Reina Elisenda es una estación subterránea de ferrocarril metropolitano de la red de Ferrocarriles de la Generalidad de Cataluña (FGC) perteneciente a la línea 12, incluida dentro del bloque de la línea Barcelona-Vallés situada en el distrito de Sarriá-San Gervasio de Barcelona."
+  },
+  "313": {},
+  "314": {
+    "es": "La iglesia de Santa María del Taulat es una iglesia parroquial católica de la ciudad de Barcelona. Está situada en el barrio de Pueblo Nuevo, en la calle Marià Aguiló."
+  },
+  "315": {
+    "es": "Monterrey(en español: ) es una metrópoli mexicana, cabecera del municipio de Monterrey, capital y ciudad más poblada del estado de Nuevo León. Se encuentra en las faldas de la Sierra Madre Oriental en la región noreste de México."
+  },
+  "316": {},
+  "317": {
+    "en": "Junípero Serra Ferrer (; Spanish: [xuˈnipeɾo ˈsera]; November 24, 1713&#160;– August 28, 1784), popularly known simply as Junipero Serra, was a Spanish Catholic priest and missionary of the Franciscan Order."
+  },
+  "318": {},
+  "319": {
+    "en": "Benedetti is an Italian surname."
+  },
+  "320": {
+    "en": "La Clota (Catalan pronunciation: [lə ˈklɔtə], Spanish pronunciation: [la ˈklota]) is a neighborhood in the Horta-Guinardó district of Barcelona, Catalonia (Spain)."
+  },
+  "321": {
+    "ca": "La plaça de Sarrià es troba al barri homònim de Barcelona, i era la plaça major de l'antic municipi."
+  },
+  "322": {
+    "ca": "El Pont del Molinet és un pont del municipi de Viver i Serrateix a la comarca del Berguedà que forma part de l'Inventari del Patrimoni Arquitectònic de Catalunya.\nCreua la riera de l'Hospital, poc abans de la desembocadura a la riera de Navel. És a prop del Molinet."
+  },
+  "323": {},
+  "324": {},
+  "325": {},
+  "326": {
+    "ca": "La plaça de la Bonanova es troba al barri de Sant Gervasi - la Bonanova de Barcelona."
+  },
+  "327": {},
+  "328": {},
+  "329": {},
+  "330": {},
+  "331": {},
+  "332": {},
+  "333": {},
+  "334": {
+    "ca": "«Plaça de Sant Jordi» té aquests significats:"
+  },
+  "335": {
+    "ca": "La plaça dels Països Catalans està situada davant de l'estació de Sants, al barri de Sants de Barcelona, entre els carrers de Viriat, Tarragona i l'avinguda de Roma."
+  },
+  "336": {
+    "ca": "El carrer de Craywinckel és un vial que uneix el passeig de Sant Gervasi amb l'avinguda de la República Argentina, al barri d'el Putxet i el Farró de Barcelona."
+  },
+  "337": {},
+  "338": {},
+  "339": {},
+  "341": {},
+  "342": {},
+  "343": {},
+  "344": {},
+  "345": {},
+  "346": {},
+  "347": {},
+  "348": {},
+  "350": {},
+  "351": {},
+  "352": {
+    "ca": "El viaducte de Vallcarca és un pont situat al barri del mateix nom de Barcelona, catalogat com a bé amb elements d'interès (categoria C)."
+  },
+  "353": {},
+  "355": {},
+  "356": {
+    "ca": "El carrer de Llança és una via urbana de l'Eixample de Barcelona, que va des del carrer de Sepúlveda, on conflueix amb les avingudes del Paral·lel i de Mistral, fins a l'avinguda de Roma, amb la interrupció del parc de Joan Miró."
+  },
+  "358": {},
+  "362": {},
+  "363": {},
+  "365": {},
+  "366": {},
+  "367": {},
+  "368": {},
+  "369": {},
+  "370": {},
+  "371": {},
+  "372": {
+    "ca": "El Camí de la Cadena va ser un petit tram de l'antiga via que comunicava Sarrià, les Corts i Sants amb la Marina de Sants, desaparegut amb la renovació urbana del veí recinte de Can Batlló."
+  },
+  "373": {},
+  "375": {},
+  "376": {},
+  "377": {},
+  "380": {},
+  "381": {},
+  "389": {},
+  "400": {},
+  "437": {},
+  "438": {},
+  "442": {},
+  "443": {},
+  "444": {},
+  "477": {},
+  "478": {},
+  "484": {},
+  "501": {},
+  "515": {},
+  "555": {},
+  "571": {},
+  "593": {},
+  "596": {
+    "ca": "El carrer dels Cavallers és una via urbana històrica del centre de València. Està situat entre la plaça del Tossal i la plaça de la Mare de Déu dels Desemparats, i fita amb els carrers dels Serrans i de Quart."
+  },
+  "604": {},
+  "625": {},
+  "660": {},
+  "676": {},
+  "683": {},
+  "693": {},
+  "703": {},
+  "708": {},
+  "714": {},
+  "716": {},
+  "728": {},
+  "729": {},
+  "730": {},
+  "732": {},
+  "746": {},
+  "753": {},
+  "773": {},
+  "775": {},
+  "776": {},
+  "779": {},
+  "782": {},
+  "794": {},
+  "812": {
+    "ca": "El Carrer del Vidre de Barcelona rep el seu nom perquè antigament s'anomenà Forn del Vidre, per un obrador d'aquest ofici que s'hi establí."
+  },
+  "826": {},
+  "829": {},
+  "840": {},
+  "853": {},
+  "854": {},
+  "897": {},
+  "898": {},
+  "912": {},
+  "936": {},
+  "947": {},
+  "972": {},
+  "980": {},
+  "1002": {
+    "ca": "El Monument a la Batalla del Bruc és una escultura pública del Bruc (Anoia) declarada bé cultural d'interès nacional."
+  },
+  "1005": {
+    "ca": "Conxa Pérez Collado (Barcelona, 17 d'octubre de 1915 - Barcelona, 17 d'abril de 2014), sindicalista, activista, miliciana i lluitadora antifeixista, va néixer en una família obrera de tendència anarquista del barri de Les Corts de Barcelona."
+  },
+  "1012": {
+    "ca": "Guitard, a vegades escrit Guitart, fou vescomte de Barcelona successor probablement de Gombau (també Gombald) que era el seu pare. Fou marmessor del comte de Barcelona Miró I (966) i va anar dues vegades a la cort califal de Còrdova com a ambaixador del comte Borrell II."
+  },
+  "1038": {
+    "ca": "«Vallfogona» té aquests significats:"
+  },
+  "1042": {
+    "ca": "Nicolau Copèrnic    (Toruń,&#160;19 de febrer de 1473&#160;- Frombork,&#160;24 de maig de 1543) fou un astrònom polonès, també conegut com a Niklas Koppernigk (en alemany) o Nicolaus Copernicus (en llatí)."
+  },
+  "1044": {},
+  "1048": {},
+  "1057": {
+    "es": "El Real Santuario de San José de la Montaña (en catalán Reial Santuari de Sant Josep de la Muntanya) está situado en el barrio de La Salud, en el distrito de Gracia de Barcelona."
+  },
+  "1058": {
+    "es": "Las Tres Torres es un barrio del distrito de Sarriá-San Gervasio de la ciudad de Barcelona, con una de las rentas per cápita más elevadas de Cataluña, albergando las residencias de gran parte de la burguesía industrial catalana."
+  },
+  "1063": {},
+  "1068": {},
+  "1080": {},
+  "1083": {},
+  "1088": {
+    "es": "Mon du Cap es una localidad de Santa Lucía que forma parte del distrito de Gros Islet.​​",
+    "en": "Los Tres Claveles (English: The Three Carnations) is a Spanish folktale from Extremadura collected by folklorist Sérgio Hernandez de Soto in Zafra, Badajoz."
+  },
+  "1092": {},
+  "1113": {},
+  "1131": {
+    "en": "Eudald Domènech Riera, (Ripoll, 1962), is a Spanish businessman linked to new technologies and the Internet, considered \"the first businessman in Spain on the Internet.\" He was the founder of Servicom, the first private company to offer internet connection and internet services a"
+  },
+  "1156": {},
+  "1191": {},
+  "1195": {},
+  "1209": {},
+  "1210": {},
+  "1211": {},
+  "1213": {},
+  "1231": {},
+  "1245": {},
+  "1276": {},
+  "1279": {},
+  "1282": {},
+  "1284": {},
+  "1315": {},
+  "1327": {},
+  "1341": {},
+  "1347": {},
+  "1383": {},
+  "1411": {},
+  "1421": {},
+  "1448": {},
+  "1454": {
+    "ca": "El carrer de Jesús és una via urbana de la ciutat de València, orientada en sentit nord-sud, que connecta el centre de la ciutat amb el districte de Jesús, al sud-oest."
+  },
+  "1455": {},
+  "1459": {},
+  "1470": {},
+  "1472": {
+    "ca": "El passatge de Mulet és un vial del barri del Putxet i el Farró de Barcelona, entre els carrers de Saragossa i de Vallirana. Està catalogat com a bé amb elements d'interès (categoria C)."
+  },
+  "1473": {},
+  "1490": {},
+  "1517": {},
+  "1529": {},
+  "1552": {},
+  "1556": {},
+  "1557": {},
+  "1562": {},
+  "1568": {},
+  "1580": {},
+  "1597": {},
+  "1598": {},
+  "1605": {},
+  "1625": {},
+  "1642": {},
+  "1653": {},
+  "1667": {},
+  "1675": {},
+  "1679": {},
+  "1680": {},
+  "1754": {},
+  "1755": {},
+  "1759": {},
+  "1772": {},
+  "1795": {},
+  "1811": {},
+  "1812": {},
+  "1816": {},
+  "1828": {},
+  "1847": {},
+  "1858": {},
+  "1871": {},
+  "1873": {},
+  "1878": {},
+  "1899": {},
+  "1912": {},
+  "1914": {},
+  "1924": {},
+  "1932": {},
+  "1936": {},
+  "1958": {},
+  "1960": {},
+  "1977": {},
+  "2037": {},
+  "2039": {},
+  "2059": {},
+  "2075": {},
+  "2076": {},
+  "2088": {},
+  "2169": {},
+  "2170": {},
+  "2196": {},
+  "2220": {},
+  "2222": {},
+  "2224": {},
+  "2226": {},
+  "2249": {},
+  "2253": {},
+  "2263": {},
+  "2277": {},
+  "2283": {},
+  "2286": {},
+  "2311": {},
+  "2314": {},
+  "2320": {},
+  "2344": {
+    "ca": "Joaquim Blume i Carreras (Barcelona, 21 de juny de 1933 - Valdemeca, Conca, 29 d'abril de 1959) va ser gimnasta català."
+  },
+  "2359": {
+    "ca": "Salvador Casañas i Pagès (Barcelona, 5 de setembre de 1834 — 27 d'octubre de 1908) fou un bisbe d'Urgell i copríncep d'Andorra, bisbe de Barcelona i cardenal català."
+  },
+  "2374": {
+    "ca": "La Baixada de Sant Miquel és un carrer de Barcelona, el qual, com totes les baixades, correspon a una sortida de la ciutat a través d'un esvoranc fet a la muralla romana."
+  },
+  "2387": {},
+  "2393": {
+    "ca": "Sant Pere (Betsaida, Galilea,&#160;? – Roma, entre 64 i 68 dC) també conegut com a Simó Pere, Simeó, Simó, Cefes, o Pere Apòstol, va ser un dels Dotze Apòstols de Jesucrist, un dels primers líders de l'Església primitiva i va ser considerat per la hagiografia posterior com el pri"
+  },
+  "2404": {},
+  "2414": {},
+  "2415": {},
+  "2441": {
+    "es": "Leonor Ferrer Girabau (Barcelona, 1 de julio de 1874-Barcelona, 1960) fue la primera mujer delineante de España.​ \nEl año 1897 obtuvo el título de maestra.​ El 13 de marzo del  1905 obtuvo el título de perito delineante expedido por la Sociedad Económica Amigos del País, Sección "
+  },
+  "2442": {
+    "es": "Salvador Sanpere y Miquel (Barcelona, 1840 – Barcelona, 25 de septiembre de 1915)​ fue un historiador positivista, crítico, publicista, y político español de ideología republicana."
+  },
+  "2471": {
+    "es": "Lleó Borrell i Gambús (Puigcerdà, 11 de noviembre de 1924 - Barcelona, 18 de febrero de 1994), fue un compositor de música y pianista de jazz español, relacionado especialmente con la Nova Cançó, de la que fue uno de sus autores fundamentales en colaboración con los textos del po"
+  },
+  "2480": {
+    "es": "Augusto Pi Suñer (Barcelona, 1879-Ciudad de México, 1965) fue un fisiólogo y político español."
+  },
+  "2484": {},
+  "2486": {},
+  "2493": {},
+  "2495": {},
+  "2497": {
+    "en": "Mercè Rodoreda i Gurguí (Catalan pronunciation: [məɾˈsɛ ruðuˈɾɛðə]; 10 October 1908 – 13 April 1983) was a Catalan novelist, who wrote in the Catalan language."
+  },
+  "2498": {},
+  "2500": {},
+  "2503": {},
+  "2519": {
+    "en": "Turó de Sant Elies is a mountain of Catalonia, Spain. It has an elevation of 1,003&#160;m (3,291&#160;ft) above sea level."
+  },
+  "2526": {},
+  "2529": {},
+  "2532": {},
+  "2535": {},
+  "2539": {},
+  "2543": {},
+  "2544": {},
+  "2553": {},
+  "2558": {},
+  "2588": {},
+  "2590": {},
+  "2591": {},
+  "2613": {},
+  "2634": {},
+  "2658": {},
+  "2669": {},
+  "2685": {},
+  "2692": {},
+  "2695": {},
+  "2730": {},
+  "2739": {},
+  "2741": {},
+  "2767": {},
+  "2778": {},
+  "2779": {},
+  "2796": {},
+  "2824": {},
+  "2827": {},
+  "2838": {},
+  "2843": {},
+  "2858": {},
+  "2861": {},
+  "2877": {},
+  "2886": {},
+  "2917": {},
+  "2939": {},
+  "2940": {},
+  "2978": {},
+  "2981": {},
+  "2983": {},
+  "3020": {},
+  "3027": {},
+  "3029": {},
+  "3048": {},
+  "3058": {},
+  "3067": {},
+  "3071": {},
+  "3075": {},
+  "3078": {},
+  "3106": {},
+  "3110": {},
+  "3153": {},
+  "3154": {},
+  "3184": {},
+  "3198": {},
+  "3201": {},
+  "3210": {},
+  "3221": {},
+  "3243": {},
+  "3246": {},
+  "3251": {},
+  "3252": {},
+  "3269": {},
+  "3272": {},
+  "3276": {},
+  "3304": {},
+  "3358": {},
+  "3359": {},
+  "3375": {},
+  "3383": {},
+  "3401": {},
+  "3431": {},
+  "3438": {},
+  "3441": {},
+  "3443": {},
+  "3444": {},
+  "3454": {},
+  "3467": {},
+  "3470": {},
+  "3485": {},
+  "3488": {},
+  "3493": {},
+  "3534": {},
+  "3539": {},
+  "3541": {},
+  "3548": {},
+  "3551": {
+    "ca": "L'Edifici Illa Diagonal és un edifici d'oficines i centre comercial situat a l'avinguda Diagonal de Barcelona, inclòs a l'Inventari del Patrimoni Arquitectònic de Catalunya."
+  },
+  "3559": {
+    "ca": "Nulles és un municipi de la comarca de l'Alt Camp."
+  },
+  "3560": {},
+  "3568": {},
+  "3607": {},
+  "3608": {},
+  "3623": {
+    "ca": "Guillem el Trobador, Guillem IX d'Aquitània, Guillem VII de Peitieu (22 d'octubre de 1071 - Poitiers, 1126), fou un noble occità, considerat el primer trobador en llengua occitana, comandant de la croada de 1101, Duc d'Aquitània (Guillem IX d'Aquitània) i de Gascunya (Guillem IV "
+  },
+  "3645": {
+    "es": "El Club Atletisme Viladecans es el único Club de Atletismo federado que existe en Viladecans (Barcelona), fue fundado en el año 1981 por un grupo de atletas y amigos que tenían una afición en común, las carreras de fondo y las carreras de cross o campo a través."
+  },
+  "3647": {
+    "es": "Joan Ayats Plantalech (Sant Salvador de Bianya, 4 de junio de 1875-Barcelona, 28 de julio de 1936), fue un fraile capuchino español cuyo nombre religioso fue fray Eloi de Bianya."
+  },
+  "3648": {
+    "es": "Feijoo es un apellido de origen gallego. Puede referirse a las siguientes personas:\n\nBenito Jerónimo Feijoo (1676-1764), ensayista y escritor benedictino español, figura destacada de la Ilustración española. Bernardo Canal Feijóo, escritor argentino."
+  },
+  "3668": {
+    "es": "El ferrocarril (del latín: ferre,​‘hierro’, y carril) o transporte ferroviario es un sistema de transporte de personas y mercancías sobre una vía férrea."
+  },
+  "3675": {},
+  "3690": {},
+  "3695": {},
+  "3697": {},
+  "3706": {},
+  "3713": {},
+  "3739": {},
+  "3773": {},
+  "3780": {
+    "en": "The Plaça d'Urquinaona (Catalan pronunciation: [ˈplasə ðurkinəˈonə]) is one of the principal squares in central Barcelona."
+  },
+  "3794": {}
+}
