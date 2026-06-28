@@ -2,7 +2,7 @@
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import React, { useEffect, useState } from 'react';
-import { MapContainer, Marker, Polyline, TileLayer, Tooltip } from 'react-leaflet';
+import { MapContainer, Marker, Polygon, Polyline, TileLayer, Tooltip } from 'react-leaflet';
 import { LANDMARKS } from '../../../data/landmarks';
 import { logger } from '../../../utils/logger';
 import { themeClasses, themeValue } from '../../../utils/themeUtils';
@@ -65,6 +65,9 @@ const MapArea: React.FC<MapAreaProps> = ({
   onAnimationComplete,
 }) => {
   const [boundary, setBoundary] = useState<L.LatLngExpression[] | null>(null);
+  const [districts, setDistricts] = useState<
+    { id: string; name: string; color: string; coordinates: [number, number][] }[]
+  >([]);
   const [currentZoom, setCurrentZoom] = useState(INITIAL_ZOOM);
   const [mapError, setMapError] = useState(false);
   const geometry = currentStreet ? currentStreet.geometry : null;
@@ -81,6 +84,10 @@ const MapArea: React.FC<MapAreaProps> = ({
       .then(res => res.json())
       .then(data => setBoundary(data as unknown as L.LatLngExpression[]))
       .catch(() => logger.info('No boundary data found'));
+    fetch('/districtBoundaries.json')
+      .then(res => res.json())
+      .then(data => setDistricts(data))
+      .catch(() => {});
   }, []);
 
   const [useFallbackTiles, setUseFallbackTiles] = useState(false);
@@ -163,6 +170,24 @@ const MapArea: React.FC<MapAreaProps> = ({
               }}
             />
           )}
+
+          {districts.map(district => (
+            <Polygon
+              key={district.id}
+              positions={district.coordinates as L.LatLngExpression[]}
+              pathOptions={{
+                color: district.color,
+                weight: 1.5,
+                opacity: 0.6,
+                fillColor: district.color,
+                fillOpacity: themeValue(theme, 0.06, 0.05),
+              }}
+            >
+              <Tooltip sticky className="font-bold text-xs font-inter">
+                {district.name}
+              </Tooltip>
+            </Polygon>
+          ))}
 
           {currentZoom >= MIN_ZOOM &&
             LANDMARKS.map((l, idx) => (

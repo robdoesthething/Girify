@@ -39,7 +39,7 @@ const SummaryScreen: React.FC<SummaryScreenProps> = ({
   const [shareStatus, setShareStatus] = useState<string | null>(null);
   const [expandedIndex, setExpandedIndex] = useState<number | null>(null);
   const [streetCuriosities, setStreetCuriosities] = useState<
-    Record<string, { ca?: string; es?: string; en?: string; img?: string }>
+    Record<string, { ca?: string; es?: string; en?: string }>
   >({});
 
   useEffect(() => {
@@ -105,18 +105,24 @@ const SummaryScreen: React.FC<SummaryScreenProps> = ({
     return 'text-red-400';
   };
 
-  const getScoreTier = () => {
-    const ratio = score / maxPossibleScore;
-    if (ratio >= UI.PERFORMANCE_THRESHOLDS.EXCELLENT) {
-      return t('scoreTierExpert');
+  const getGentrifRank = () => {
+    const ratio = score / 1000;
+    if (ratio >= 0.95) {
+      return t('gentriRankVei');
     }
-    if (ratio >= UI.PERFORMANCE_THRESHOLDS.GOOD) {
-      return t('scoreTierLocal');
+    if (ratio >= 0.8) {
+      return t('gentriRankSpeculador');
     }
-    if (ratio >= UI.PERFORMANCE_THRESHOLDS.FAIR) {
-      return t('scoreTierKnowledge');
+    if (ratio >= 0.6) {
+      return t('gentriRankLandlord');
     }
-    return t('scoreTierWander');
+    if (ratio >= 0.4) {
+      return t('gentriRankNomad');
+    }
+    if (ratio >= 0.2) {
+      return t('gentriRankExpat');
+    }
+    return t('gentriRankGuiri');
   };
 
   const getGreeting = () => {
@@ -146,15 +152,16 @@ const SummaryScreen: React.FC<SummaryScreenProps> = ({
       .join('');
 
     const formattedScore = score.toLocaleString('ca-ES');
-    const formattedMax = maxPossibleScore.toLocaleString('ca-ES');
     const districtLine = profile?.team ? `🏙️ ${profile.team}\n` : '';
     const streakLine = streakValue > 1 ? `🔥 ${streakValue} ${t('shareStreakDays')} · ` : '';
     const refSuffix = profile?.username ? `?ref=${profile.username}` : '';
+    const rankLine = `${getGentrifRank()}\n`;
 
     return (
       `Girify #${dayNumber} — ${t('shareTextQuestion')}\n` +
       `${squares}\n` +
-      `${formattedScore} / ${formattedMax}\n` +
+      `${formattedScore} / 1000\n` +
+      `${rankLine}` +
       `${districtLine}` +
       `${streakLine}www.girifyapp.com${refSuffix}`
     );
@@ -180,12 +187,21 @@ const SummaryScreen: React.FC<SummaryScreenProps> = ({
     if (!entry) {
       return null;
     }
-    const lang = language as 'ca' | 'es' | 'en';
-    const text = entry[lang] ?? entry.ca ?? entry.es ?? entry.en;
+    const preferred = language as 'ca' | 'es' | 'en';
+    const langs: ('ca' | 'es' | 'en')[] = [preferred, 'ca', 'es', 'en'];
+    let text: string | undefined;
+    let actualLang: 'ca' | 'es' | 'en' = preferred;
+    for (const l of langs) {
+      if (entry[l]) {
+        text = entry[l];
+        actualLang = l;
+        break;
+      }
+    }
     if (!text) {
       return null;
     }
-    return { text, img: entry.img };
+    return { text, lang: actualLang, isFallback: actualLang !== preferred };
   };
 
   return (
@@ -223,10 +239,8 @@ const SummaryScreen: React.FC<SummaryScreenProps> = ({
               <span className="text-sm font-bold text-slate-400 mt-1">
                 / {maxPossibleScore} {t('pts')}
               </span>
-              <span
-                className={`text-[10px] font-bold uppercase tracking-wider mt-1 ${getScoreColor()} opacity-70`}
-              >
-                {getScoreTier()}
+              <span className={`text-[11px] font-black mt-1 ${getScoreColor()}`}>
+                {getGentrifRank()}
               </span>
             </div>
           </div>
@@ -328,42 +342,51 @@ const SummaryScreen: React.FC<SummaryScreenProps> = ({
                         transition={{ duration: 0.2 }}
                         className="overflow-hidden"
                       >
-                        <button
-                          type="button"
-                          onClick={() => setExpandedIndex(null)}
-                          className={`w-full rounded-b-xl overflow-hidden text-left ${
+                        <div
+                          className={`w-full rounded-b-xl overflow-hidden ${
                             isCorrect
                               ? 'bg-emerald-500/10 border-x border-b border-emerald-500/20'
                               : 'bg-red-500/10 border-x border-b border-red-500/20'
                           }`}
-                          aria-label="Collapse"
                         >
-                          {curiosity ? (
-                            <>
-                              {curiosity.img && (
-                                <img
-                                  src={curiosity.img}
-                                  alt={result.street.name}
-                                  className="w-full h-28 object-cover"
-                                  loading="lazy"
-                                />
-                              )}
-                              <div className="px-4 py-3">
-                                <p
-                                  className={`text-xs leading-relaxed ${
-                                    theme === 'dark' ? 'text-slate-300' : 'text-slate-600'
+                          <div className="p-1.5 pt-0">
+                            <StreetSnapshotMap street={result.street} theme={theme} zoomable />
+                          </div>
+                          {curiosity && (
+                            <div className="px-4 pb-3">
+                              {curiosity.isFallback && (
+                                <span
+                                  className={`inline-block text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded mb-2 ${
+                                    theme === 'dark'
+                                      ? 'bg-slate-700 text-slate-400'
+                                      : 'bg-slate-200 text-slate-500'
                                   }`}
                                 >
-                                  {curiosity.text}
-                                </p>
-                              </div>
-                            </>
-                          ) : (
-                            <div className="p-1.5 pt-0">
-                              <StreetSnapshotMap street={result.street} theme={theme} />
+                                  {curiosity.lang}
+                                </span>
+                              )}
+                              <p
+                                className={`text-xs leading-relaxed mb-2 ${
+                                  theme === 'dark' ? 'text-slate-300' : 'text-slate-600'
+                                }`}
+                              >
+                                {curiosity.text}
+                              </p>
+                              <a
+                                href={`https://${curiosity.lang}.wikipedia.org/wiki/${encodeURIComponent(result.street.name)}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className={`inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider hover:underline ${
+                                  theme === 'dark'
+                                    ? 'text-slate-500 hover:text-slate-400'
+                                    : 'text-slate-400 hover:text-slate-600'
+                                }`}
+                              >
+                                🔗 Wikipedia
+                              </a>
                             </div>
                           )}
-                        </button>
+                        </div>
                       </motion.div>
                     )}
                   </AnimatePresence>

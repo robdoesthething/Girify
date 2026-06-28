@@ -42,10 +42,12 @@ function GamePageContent({ username }: GamePageProps) {
     }
   }, [location.state, dispatch, state.gameState]);
 
-  // Sync username if provided
+  // Sync username if provided; clear on logout so LandingPage shows instead of PlayOverlay
   useEffect(() => {
     if (username && state.username !== username) {
       dispatch({ type: 'SET_USERNAME', payload: username });
+    } else if (!username && state.username) {
+      dispatch({ type: 'LOGOUT' });
     }
   }, [username, state.username, dispatch]);
 

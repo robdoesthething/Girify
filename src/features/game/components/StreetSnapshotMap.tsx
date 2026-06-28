@@ -23,9 +23,14 @@ const FitBounds: React.FC<{ geometry: number[][][] }> = ({ geometry }) => {
 interface StreetSnapshotMapProps {
   street: Street;
   theme?: 'light' | 'dark';
+  zoomable?: boolean;
 }
 
-const StreetSnapshotMap: React.FC<StreetSnapshotMapProps> = ({ street, theme = 'dark' }) => {
+const StreetSnapshotMap: React.FC<StreetSnapshotMapProps> = ({
+  street,
+  theme = 'dark',
+  zoomable = false,
+}) => {
   const tileUrl =
     theme === 'dark'
       ? 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png'
@@ -37,14 +42,14 @@ const StreetSnapshotMap: React.FC<StreetSnapshotMapProps> = ({ street, theme = '
       center={[CENTER_LAT, CENTER_LNG]}
       zoom={14}
       scrollWheelZoom={false}
-      dragging={false}
-      zoomControl={false}
+      dragging={zoomable}
+      zoomControl={zoomable}
       attributionControl={false}
-      doubleClickZoom={false}
-      touchZoom={false}
+      doubleClickZoom={zoomable}
+      touchZoom={zoomable}
       keyboard={false}
-      style={{ height: '160px', width: '100%', borderRadius: '0.75rem' }}
-      className="pointer-events-none"
+      style={{ height: zoomable ? '200px' : '160px', width: '100%', borderRadius: '0.75rem' }}
+      className={zoomable ? undefined : 'pointer-events-none'}
     >
       <TileLayer url={tileUrl} />
       <Polyline
