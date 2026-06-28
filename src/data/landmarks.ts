@@ -100,4 +100,17 @@ export const LANDMARKS: Landmark[] = [
   { name: 'Ciutat Meridiana', pos: [41.4613, 2.1792], icon: '🏘️' },
   { name: 'Parc de les Aigües', pos: [41.4391, 2.1653], icon: '💧' },
   { name: 'Can Dragó', pos: [41.435, 2.1818], icon: '🏟️' },
+  { name: 'Via Júlia', pos: [41.4432, 2.1773], icon: '🛣️' },
+  { name: 'Mercat de la Guineueta', pos: [41.4419, 2.1707], icon: '🛒' },
+  { name: 'Plaça de Sóller', pos: [41.4467, 2.1751], icon: '⛲' },
+
+  // Horta neighborhood
+  { name: "Plaça d'Eivissa", pos: [41.4304, 2.1665], icon: '⛲' },
+  { name: "Mercat d'Horta", pos: [41.4297, 2.1602], icon: '🛒' },
+  { name: "Velòdrom d'Horta", pos: [41.4337, 2.1549], icon: '🚴' },
+
+  // Sarrià-Sant Gervasi upper areas
+  { name: 'La Bonanova', pos: [41.4068, 2.1275], icon: '⛪' },
+  { name: 'Turó Park', pos: [41.3963, 2.1374], icon: '🌳' },
+  { name: 'Palau Reial de Pedralbes', pos: [41.3878, 2.1148], icon: '🏰' },
 ];

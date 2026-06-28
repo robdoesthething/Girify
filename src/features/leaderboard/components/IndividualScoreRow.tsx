@@ -1,10 +1,12 @@
 import { motion } from 'framer-motion';
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
+import CosmeticAvatar from '../../../components/ui/CosmeticAvatar';
 import { DISTRICTS } from '../../../data/districts';
 import { useTheme } from '../../../context/ThemeContext';
 import { UI } from '../../../utils/constants';
 import { displayUsername, usernamesMatch } from '../../../utils/format';
+import { getCosmeticAvatarImage } from '../../../utils/shop/catalog';
 import { ScoreEntry } from '../../../utils/social/leaderboard';
 import { themeClasses } from '../../../utils/themeUtils';
 
@@ -39,6 +41,7 @@ const IndividualScoreRow: React.FC<IndividualScoreRowProps> = ({
 
   const isMe = currentUser && usernamesMatch(s.username, currentUser);
   const teamName = s.district ? (DISTRICTS.find(d => d.id === s.district)?.teamName ?? null) : null;
+  const avatarImage = getCosmeticAvatarImage(s.equippedCosmetics?.avatarId ?? null);
 
   const handleClick = () => {
     if (currentUser && usernamesMatch(s.username, currentUser)) {
@@ -65,14 +68,21 @@ const IndividualScoreRow: React.FC<IndividualScoreRowProps> = ({
         ${isMe ? 'border-sky-500 bg-sky-500/10 shadow-lg shadow-sky-500/10 hover:bg-sky-500/20 hover:shadow-sky-500/30' : themeClasses(theme, 'bg-slate-800 border-slate-700 hover:border-slate-600', 'bg-white border-slate-200 hover:border-sky-200 shadow-sm')}
       `}
     >
-      <div className="flex items-center gap-4">
+      <div className="flex items-center gap-3">
         <div
-          className={`w-8 h-8 flex items-center justify-center rounded-full font-black text-sm relative overflow-hidden
+          className={`w-6 h-6 flex items-center justify-center rounded-full font-black text-xs shrink-0
             ${index === 0 ? 'bg-yellow-400 text-yellow-900' : index === 1 ? 'bg-slate-300 text-slate-900' : index === 2 ? 'bg-amber-600 text-white' : 'bg-slate-100 dark:bg-slate-700 opacity-50'}
           `}
         >
           {index + 1}
         </div>
+        <CosmeticAvatar
+          image={avatarImage}
+          fallback="🏙️"
+          size={32}
+          alt={`${s.username} avatar`}
+          className="shrink-0"
+        />
         <div>
           <div className="font-bold text-sm flex items-center gap-2 font-inter">
             {displayUsername(s.username)}

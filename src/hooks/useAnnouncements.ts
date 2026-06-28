@@ -1,26 +1,38 @@
 import { useCallback, useRef, useState } from 'react';
 import { Announcement, getUnreadAnnouncements, markAnnouncementAsRead } from '../utils/social/news';
 
+const LS_KEY = 'girify_read_announcements';
+
+function getLocallyReadIds(): number[] {
+  try {
+    return JSON.parse(localStorage.getItem(LS_KEY) || '[]') as number[];
+  } catch {
+    return [];
+  }
+}
+
+function saveLocallyReadId(id: string): void {
+  try {
+    const ids = getLocallyReadIds();
+    const num = parseInt(id, 10);
+    if (!ids.includes(num)) {
+      localStorage.setItem(LS_KEY, JSON.stringify([...ids, num]));
+    }
+  } catch {
+    // localStorage unavailable — skip
+  }
+}
+
 interface UseAnnouncementsReturn {
   pendingAnnouncement: Announcement | null;
   dismissAnnouncement: () => Promise<void>;
   checkAnnouncements: () => Promise<void>;
 }
 
-/**
- * Hook for managing announcement display and read state
- * @param username - Current user's username
- * @returns { pendingAnnouncement, dismissAnnouncement, checkAnnouncements }
- */
 export const useAnnouncements = (username: string): UseAnnouncementsReturn => {
   const [pendingAnnouncement, setPendingAnnouncement] = useState<Announcement | null>(null);
-  // Track dismissed IDs in this session so they never re-show even if the DB
-  // mark-as-read is slow or fails.
   const dismissedIds = useRef<Set<string>>(new Set());
 
-  /**
-   * Check for and display unread announcements
-   */
   const checkAnnouncements = useCallback(async () => {
     if (!username) {
       return;
@@ -28,21 +40,22 @@ export const useAnnouncements = (username: string): UseAnnouncementsReturn => {
 
     try {
       const unread = await getUnreadAnnouncements(username);
-      if (unread && unread.length > 0) {
-        // Skip announcements already dismissed this session
-        const firstNew = unread.find(a => !dismissedIds.current.has(a.id));
-        if (firstNew) {
-          setPendingAnnouncement(firstNew);
-        }
+      if (!unread || unread.length === 0) {
+        return;
+      }
+
+      const localRead = getLocallyReadIds();
+      const firstNew = unread.find(
+        a => !dismissedIds.current.has(a.id) && !localRead.includes(parseInt(a.id, 10))
+      );
+      if (firstNew) {
+        setPendingAnnouncement(firstNew);
       }
     } catch (err) {
       console.warn('Failed to fetch announcements:', err);
     }
   }, [username]);
 
-  /**
-   * Dismiss and mark current announcement as read
-   */
   const dismissAnnouncement = useCallback(async () => {
     const current = pendingAnnouncement;
     if (!current || !username) {
@@ -50,11 +63,10 @@ export const useAnnouncements = (username: string): UseAnnouncementsReturn => {
       return;
     }
 
-    // Mark locally dismissed immediately so it never re-shows this session
     dismissedIds.current.add(current.id);
+    saveLocallyReadId(current.id);
     setPendingAnnouncement(null);
 
-    // Persist to DB in background
     try {
       await markAnnouncementAsRead(username, current.id);
     } catch (err) {

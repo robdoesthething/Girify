@@ -16,8 +16,8 @@ import { supabase } from '../../../services/supabase';
 
 /**
  * Link existing user row to Supabase Auth by setting supabase_uid.
- * Matches by email on first login after migration.
- * Single atomic UPDATE — no separate read needed.
+ * Uses a SECURITY DEFINER RPC so it can write even when the RLS policy
+ * hasn't matched yet (supabase_uid IS NULL on first login).
  */
 export async function linkSupabaseUid(user: User): Promise<void> {
   if (!user.email) {
@@ -25,11 +25,10 @@ export async function linkSupabaseUid(user: User): Promise<void> {
   }
 
   try {
-    await supabase
-      .from('users')
-      .update({ supabase_uid: user.id })
-      .eq('email', user.email)
-      .is('supabase_uid', null);
+    const { error } = await (supabase as any).rpc('link_supabase_uid');
+    if (error) {
+      console.warn('[Auth] Failed to link supabase_uid via RPC:', error.message);
+    }
   } catch (e) {
     console.warn('[Auth] Failed to link supabase_uid:', e);
   }

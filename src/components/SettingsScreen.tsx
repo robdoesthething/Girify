@@ -1,5 +1,6 @@
 import { motion } from 'framer-motion';
 import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { STORAGE_KEYS } from '../config/constants';
 import { useTheme } from '../context/ThemeContext';
 import { useConfirm } from '../hooks/useConfirm';
@@ -24,6 +25,7 @@ const SettingsScreen: React.FC<SettingsScreenProps> = ({
   username,
 }) => {
   const { theme, themeMode, changeTheme, language, changeLanguage, languages, t } = useTheme();
+  const navigate = useNavigate();
   const { notify } = useNotification();
   const { confirm, confirmConfig, handleClose } = useConfirm();
 
@@ -333,23 +335,39 @@ const SettingsScreen: React.FC<SettingsScreenProps> = ({
           </div>
 
           <div className="pt-2">
-            {isAdmin ? (
+            {isAdmin && (
               <a
                 href="/admin"
-                className="block w-full text-center p-3 rounded-xl bg-slate-800 text-slate-200 font-bold hover:bg-slate-700 transition-colors font-inter"
+                className="block w-full text-center p-3 rounded-xl bg-slate-800 text-slate-200 font-bold hover:bg-slate-700 transition-colors font-inter mb-4"
               >
                 Open Admin Panel
               </a>
-            ) : (
-              <div className="mt-8 text-center pb-4">
-                <p
-                  onClick={handleVersionClick}
-                  className="text-xs text-slate-300 dark:text-slate-700 select-none cursor-default font-mono"
-                >
-                  v0.1.0
-                </p>
-              </div>
             )}
+            <div className="mt-4 text-center pb-4 space-y-2">
+              <div className="flex items-center justify-center gap-4 text-xs opacity-40 font-inter">
+                <button
+                  type="button"
+                  onClick={() => navigate('/privacy')}
+                  className="hover:opacity-70 transition-opacity"
+                >
+                  {t('privacy') || 'Privacy'}
+                </button>
+                <span>·</span>
+                <button
+                  type="button"
+                  onClick={() => navigate('/terms')}
+                  className="hover:opacity-70 transition-opacity"
+                >
+                  {t('terms') || 'Terms'}
+                </button>
+              </div>
+              <p
+                onClick={handleVersionClick}
+                className="text-xs opacity-30 select-none cursor-default font-mono"
+              >
+                v0.1.0
+              </p>
+            </div>
           </div>
         </div>
       </motion.div>

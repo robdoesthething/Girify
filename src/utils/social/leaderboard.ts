@@ -30,6 +30,7 @@ export interface ScoreEntry {
   sortDate?: Date;
   gamesCount?: number;
   district?: string | null;
+  equippedCosmetics?: { avatarId?: string; frameId?: string } | null;
 }
 
 /**
@@ -79,16 +80,22 @@ export const getLeaderboard = async (
     const usernames = rows.map(r => r.username).filter(Boolean);
 
     const districtMap: Record<string, string | null> = {};
+    const cosmeticsMap: Record<string, { avatarId?: string; frameId?: string } | null> = {};
+
     if (usernames.length > 0) {
       const { data: usersData } = await supabase
         .from('users')
-        .select('username, district')
+        .select('username, district, equipped_cosmetics')
         .in('username', usernames);
-      (usersData || []).forEach((u: { username: string; district: string | null }) => {
-        if (u.username) {
-          districtMap[u.username] = u.district;
+      (usersData || []).forEach(
+        (u: { username: string; district: string | null; equipped_cosmetics: unknown }) => {
+          if (u.username) {
+            districtMap[u.username] = u.district;
+            cosmeticsMap[u.username] =
+              (u.equipped_cosmetics as { avatarId?: string; frameId?: string } | null) ?? null;
+          }
         }
-      });
+      );
     }
 
     return rows.map(row => ({
@@ -98,6 +105,7 @@ export const getLeaderboard = async (
       time: row.avg_time ?? 0,
       gamesCount: row.games_count,
       district: districtMap[row.username] ?? null,
+      equippedCosmetics: cosmeticsMap[row.username] ?? null,
     }));
   } catch (e) {
     console.error('[Leaderboard] Error fetching leaderboard from Supabase:', e);

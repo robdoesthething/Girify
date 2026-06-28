@@ -210,12 +210,8 @@ backdrop-blur-md border-b ${themeClasses(theme, 'border-white/8', 'border-slate-
                     { page: 'friends', emoji: '👥', label: t('friends') },
                     { page: 'leaderboard', emoji: '🏆', label: t('leaderboard') },
                     { page: 'shop', emoji: '🛒', label: t('shop') },
-                    { page: 'about', emoji: 'ℹ️', label: t('about') },
-                    { page: 'news', emoji: '📰', label: t('news') || 'News' },
                     { page: 'feedback', emoji: '📝', label: t('feedback') || 'Feedback' },
                     { page: 'settings', emoji: '⚙️', label: t('settings') },
-                    { page: 'privacy', emoji: '🔒', label: t('privacy') || 'Privacy' },
-                    { page: 'terms', emoji: '📋', label: t('terms') || 'Terms' },
                   ].map(item => (
                     <button
                       key={item.page ?? 'home'}

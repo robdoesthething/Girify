@@ -52,6 +52,7 @@ describe('Leaderboard Service', () => {
         time: 8.0,
         gamesCount: 2,
         district: null,
+        equippedCosmetics: null,
       });
       // null avg_time falls back to 0; @-prefixed usernames stay as-is
       expect(result[1]!.time).toBe(0);

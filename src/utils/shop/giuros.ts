@@ -264,28 +264,26 @@ export const setEquippedCosmetics = async (
     return;
   }
   try {
-    // Prefer UID-based update: works with RLS regardless of username format,
-    // and guarantees we're updating the current auth user's own row.
-    const {
-      data: { user: authUser },
-    } = await supabase.auth.getUser();
+    // Use SECURITY DEFINER RPC to bypass RLS policy issues.
+    // The function validates auth.uid() server-side and updates the correct row.
+    const { error: rpcError } = await (supabase as any).rpc('update_equipped_cosmetics', {
+      cosmetics: equipped,
+    });
 
-    if (authUser?.id) {
-      const { error } = await supabase
-        .from('users')
-
-        .update({ equipped_cosmetics: equipped as any })
-        .eq('supabase_uid', authUser.id);
-
-      if (!error) {
-        return;
-      }
-      console.error('[Giuros] UID-based cosmetics update failed:', error.message);
+    if (!rpcError) {
+      return;
     }
 
-    // Fallback: username-based update
+    console.error('[Giuros] RPC update_equipped_cosmetics failed:', rpcError.message);
+
+    // Fallback: direct username-based update (requires permissive RLS policy)
     const normalizedUsername = normalizeUsername(username);
-    await updateUser(normalizedUsername, { equipped_cosmetics: equipped as any });
+    const fallbackOk = await updateUser(normalizedUsername, {
+      equipped_cosmetics: equipped as any,
+    });
+    if (!fallbackOk) {
+      console.error('[Giuros] Username fallback also failed for:', normalizedUsername);
+    }
   } catch (e) {
     console.error('Error setting equipped cosmetics:', e);
   }

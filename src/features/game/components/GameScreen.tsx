@@ -117,7 +117,7 @@ const GameScreen: FC = () => {
 
           {/* Floating hints overlay — left side of map */}
           {state.gameState === 'playing' && state.hintStreets.length > 0 && (
-            <div className="absolute left-3 bottom-4 z-[500] flex flex-col gap-1.5 pointer-events-auto max-w-[180px]">
+            <div className="absolute left-3 bottom-4 z-[500] flex flex-col gap-1.5 pointer-events-auto max-w-xs">
               <AnimatePresence>
                 {state.hintStreets.slice(0, state.hintsRevealedCount).map(street => (
                   <motion.div
@@ -129,9 +129,7 @@ const GameScreen: FC = () => {
                     className="flex items-center gap-2 px-2.5 py-1.5 rounded-xl bg-slate-900/85 backdrop-blur-sm border border-sky-500/30 shadow-lg"
                   >
                     <div className="w-1.5 h-1.5 rounded-full bg-sky-400 shrink-0" />
-                    <span className="text-xs font-semibold text-sky-300 line-clamp-1">
-                      Near: {street.name}
-                    </span>
+                    <span className="text-xs font-semibold text-sky-300">Near: {street.name}</span>
                   </motion.div>
                 ))}
               </AnimatePresence>
