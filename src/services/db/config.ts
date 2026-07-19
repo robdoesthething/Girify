@@ -65,6 +65,7 @@ let pendingPayoutFetch: Promise<PayoutConfig> | null = null;
 
 let cachedGameConfig: GameConfig | null = null;
 let gameConfigCacheTimestamp = 0;
+let pendingGameConfigFetch: Promise<GameConfig> | null = null;
 
 // Use 'any' for local table overrides since these tables are not in generated types
 
@@ -239,50 +240,59 @@ const validateGameConfig = (updates: Partial<GameConfig>): void => {
 export const getGameConfig = async (): Promise<GameConfig> => {
   const now = Date.now();
 
-  // Return cached if still valid
   if (cachedGameConfig && now - gameConfigCacheTimestamp < CACHE_TTL) {
     return cachedGameConfig;
   }
 
-  try {
-    const client = supabase as AnySupabaseClient;
-    const { data, error } = await client
-      .from('game_config')
-      .select('*')
-      .eq('id', 'default')
-      .single();
-
-    if (error) {
-      console.error('[Config] Error fetching game config:', error);
-      return DEFAULT_GAME_CONFIG;
-    }
-
-    if (data) {
-      cachedGameConfig = {
-        maintenanceMode: data.maintenance_mode ?? DEFAULT_GAME_CONFIG.maintenanceMode,
-        scoreMultiplier:
-          data.score_multiplier !== null && data.score_multiplier !== undefined
-            ? Number(data.score_multiplier)
-            : DEFAULT_GAME_CONFIG.scoreMultiplier,
-        giurosMultiplier:
-          data.giuros_multiplier !== null && data.giuros_multiplier !== undefined
-            ? Number(data.giuros_multiplier)
-            : DEFAULT_GAME_CONFIG.giurosMultiplier,
-        dailyGameLimit: data.daily_game_limit ?? DEFAULT_GAME_CONFIG.dailyGameLimit,
-        announcementBar: data.announcement_bar ?? undefined,
-        enabledShopCategories:
-          data.enabled_shop_categories ?? DEFAULT_GAME_CONFIG.enabledShopCategories,
-      };
-    } else {
-      cachedGameConfig = DEFAULT_GAME_CONFIG;
-    }
-
-    gameConfigCacheTimestamp = now;
-    return cachedGameConfig;
-  } catch (e) {
-    console.error('[Config] Exception fetching game config:', e);
-    return DEFAULT_GAME_CONFIG;
+  if (pendingGameConfigFetch) {
+    return pendingGameConfigFetch;
   }
+
+  pendingGameConfigFetch = (async (): Promise<GameConfig> => {
+    try {
+      const client = supabase as AnySupabaseClient;
+      const { data, error } = await client
+        .from('game_config')
+        .select('*')
+        .eq('id', 'default')
+        .single();
+
+      if (error) {
+        console.error('[Config] Error fetching game config:', error);
+        return DEFAULT_GAME_CONFIG;
+      }
+
+      if (data) {
+        cachedGameConfig = {
+          maintenanceMode: data.maintenance_mode ?? DEFAULT_GAME_CONFIG.maintenanceMode,
+          scoreMultiplier:
+            data.score_multiplier !== null && data.score_multiplier !== undefined
+              ? Number(data.score_multiplier)
+              : DEFAULT_GAME_CONFIG.scoreMultiplier,
+          giurosMultiplier:
+            data.giuros_multiplier !== null && data.giuros_multiplier !== undefined
+              ? Number(data.giuros_multiplier)
+              : DEFAULT_GAME_CONFIG.giurosMultiplier,
+          dailyGameLimit: data.daily_game_limit ?? DEFAULT_GAME_CONFIG.dailyGameLimit,
+          announcementBar: data.announcement_bar ?? undefined,
+          enabledShopCategories:
+            data.enabled_shop_categories ?? DEFAULT_GAME_CONFIG.enabledShopCategories,
+        };
+      } else {
+        cachedGameConfig = DEFAULT_GAME_CONFIG;
+      }
+
+      gameConfigCacheTimestamp = now;
+      return cachedGameConfig;
+    } catch (e) {
+      console.error('[Config] Exception fetching game config:', e);
+      return DEFAULT_GAME_CONFIG;
+    } finally {
+      pendingGameConfigFetch = null;
+    }
+  })();
+
+  return pendingGameConfigFetch;
 };
 
 /**

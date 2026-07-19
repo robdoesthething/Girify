@@ -19,9 +19,7 @@ interface ThemeContextType {
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
 const applyThemeClass = (theme: 'light' | 'dark') => {
-  const root = document.documentElement;
-  root.classList.toggle('dark', theme === 'dark');
-  root.classList.toggle('light', theme === 'light');
+  document.documentElement.classList.toggle('dark', theme === 'dark');
 };
 
 export const useTheme = (): ThemeContextType => {
@@ -146,10 +144,6 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
   };
 
   const t = (key: string) => getTranslation(language, key);
-
-  useEffect(() => {
-    applyThemeClass(theme);
-  }, [theme]);
 
   return (
     <ThemeContext.Provider

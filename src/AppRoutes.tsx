@@ -109,7 +109,7 @@ const AppRoutes: React.FC = () => {
                 path="/"
                 element={
                   user && user.email_confirmed_at === null ? (
-                    <VerifyEmailScreen theme={theme as 'light' | 'dark'} />
+                    <VerifyEmailScreen />
                   ) : (
                     <GamePage username={currentUsername} />
                   )

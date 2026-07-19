@@ -3,12 +3,8 @@ import { useTheme } from '../../../context/ThemeContext';
 import { supabase } from '../../../services/supabase';
 import { themeClasses } from '../../../utils/themeUtils';
 
-interface VerifyEmailScreenProps {
-  theme: 'light' | 'dark';
-}
-
-const VerifyEmailScreen: React.FC<VerifyEmailScreenProps> = ({ theme }) => {
-  const { t } = useTheme();
+const VerifyEmailScreen: React.FC = () => {
+  const { t, theme } = useTheme();
   const [sent, setSent] = React.useState(false);
   const [email, setEmail] = React.useState<string | null>(null);
 

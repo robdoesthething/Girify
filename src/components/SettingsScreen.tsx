@@ -41,9 +41,6 @@ const SettingsScreen: React.FC<SettingsScreenProps> = ({
   const autoAdvance = autoAdvanceProp ?? localAutoAdvance;
   const setAutoAdvance = setAutoAdvanceProp ?? setLocalAutoAdvance;
 
-  const [isAdmin] = useState(false);
-  const [devTapCount, setDevTapCount] = useState(0);
-
   const [profileSettings, setProfileSettings] = useState({
     notificationSettings: {
       dailyReminder: true,
@@ -68,31 +65,10 @@ const SettingsScreen: React.FC<SettingsScreenProps> = ({
     }
   }, [username]);
 
-  const handleVersionClick = () => {
-    if (isAdmin) {
-      return;
-    }
-    const newCount = devTapCount + 1;
-    setDevTapCount(newCount);
-    if (newCount >= 7) {
-      handleAdminAccess();
-      setDevTapCount(0);
-    }
-  };
-
-  // Admin check via Supabase is handled by AdminRoute — no client-side check needed here
-
   const handleClearHistory = async () => {
-    if (
-      await confirm(
-        t('clearHistoryConfirm') ||
-          'Are you sure you want to clear your game history? This cannot be undone.',
-        'Clear History',
-        true
-      )
-    ) {
+    if (await confirm(t('clearHistoryConfirm'), 'Clear History', true)) {
       storage.remove(STORAGE_KEYS.HISTORY);
-      notify(t('historyCleared') || 'Game history cleared.', 'success');
+      notify(t('historyCleared'), 'success');
       setTimeout(() => window.location.reload(), 1000);
     }
   };
@@ -105,11 +81,6 @@ const SettingsScreen: React.FC<SettingsScreenProps> = ({
 
   const toggleAutoAdvance = () => {
     setAutoAdvance(!autoAdvance);
-  };
-
-  const handleAdminAccess = async () => {
-    // Admin promotion is managed via Supabase dashboard
-    notify('Admin access is managed via the Supabase dashboard.', 'info');
   };
 
   return (
@@ -335,14 +306,6 @@ const SettingsScreen: React.FC<SettingsScreenProps> = ({
           </div>
 
           <div className="pt-2">
-            {isAdmin && (
-              <a
-                href="/admin"
-                className="block w-full text-center p-3 rounded-xl bg-slate-800 text-slate-200 font-bold hover:bg-slate-700 transition-colors font-inter mb-4"
-              >
-                Open Admin Panel
-              </a>
-            )}
             <div className="mt-4 text-center pb-4 space-y-2">
               <div className="flex items-center justify-center gap-4 text-xs opacity-40 font-inter">
                 <button
@@ -350,7 +313,7 @@ const SettingsScreen: React.FC<SettingsScreenProps> = ({
                   onClick={() => navigate('/privacy')}
                   className="hover:opacity-70 transition-opacity"
                 >
-                  {t('privacy') || 'Privacy'}
+                  {t('privacy')}
                 </button>
                 <span>·</span>
                 <button
@@ -358,15 +321,10 @@ const SettingsScreen: React.FC<SettingsScreenProps> = ({
                   onClick={() => navigate('/terms')}
                   className="hover:opacity-70 transition-opacity"
                 >
-                  {t('terms') || 'Terms'}
+                  {t('terms')}
                 </button>
               </div>
-              <p
-                onClick={handleVersionClick}
-                className="text-xs opacity-30 select-none cursor-default font-mono"
-              >
-                v0.1.0
-              </p>
+              <p className="text-xs opacity-30 select-none cursor-default font-mono">v0.2.0</p>
             </div>
           </div>
         </div>

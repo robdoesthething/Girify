@@ -1,5 +1,5 @@
 import { AnimatePresence, motion } from 'framer-motion';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useTheme } from '../context/ThemeContext';
 import { DISTRICTS } from '../data/districts';
@@ -21,7 +21,7 @@ interface LandingPageProps {
 const LandingPage: React.FC<LandingPageProps> = ({ onLogin, theme }) => {
   const { t } = useTheme();
   const [newsIndex, setNewsIndex] = useState(0);
-  const newsHeadlines = getNewsHeadlines(t);
+  const newsHeadlines = useMemo(() => getNewsHeadlines(t), [t]);
 
   useEffect(() => {
     const interval = setInterval(() => {

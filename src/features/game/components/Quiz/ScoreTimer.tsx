@@ -17,7 +17,8 @@ const ScoreTimer: React.FC<ScoreTimerProps> = ({ questionStartTime, hintsUsed, f
 
     const tick = () => {
       const elapsed = (Date.now() - questionStartTime) / 1000;
-      setPotential(calculateScore(elapsed, true, hintsUsed));
+      const next = calculateScore(elapsed, true, hintsUsed);
+      setPotential(prev => (prev === next ? prev : next));
     };
 
     tick();

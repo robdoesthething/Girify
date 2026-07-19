@@ -81,9 +81,6 @@ export const FIRESTORE_BATCH_SIZE = 200;
 // GAME CONFIGURATION
 // =============================================================================
 
-/** Number of questions per game */
-export const QUESTIONS_PER_GAME = 5;
-
 /** Maximum score per question */
 export const MAX_SCORE_PER_QUESTION = 1000;
 
