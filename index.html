@@ -3,6 +3,15 @@
 
 <head>
   <meta charset="UTF-8" />
+  <script>
+    (function () {
+      var mode = localStorage.getItem('girify_theme_mode') || 'auto';
+      var dark =
+        mode === 'dark' ||
+        (mode === 'auto' && window.matchMedia('(prefers-color-scheme: dark)').matches);
+      document.documentElement.classList.add(dark ? 'dark' : 'light');
+    })();
+  </script>
   <link rel="icon" type="image/png" href="/favicon2.png" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta http-equiv="Content-Security-Policy"
@@ -28,12 +37,19 @@
 <body>
   <!-- Inline shell: text visible immediately as FCP, replaced by React on mount -->
   <div id="root">
-    <style>@keyframes _lb{0%{width:0;margin-left:0}50%{width:100%;margin-left:0}100%{width:0;margin-left:100%}}</style>
-    <div style="position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;background:#020617;gap:1.5rem;">
-      <span style="font-size:1.5rem;font-weight:700;color:#f8fafc;letter-spacing:-0.02em;font-family:system-ui,sans-serif;">Girify</span>
-      <div style="width:10rem;height:0.25rem;border-radius:9999px;background:#1e293b;overflow:hidden;">
-        <div style="height:100%;background:#0ea5e9;border-radius:9999px;animation:_lb 1.4s ease-in-out infinite;"></div>
-      </div>
+    <style>
+      @keyframes _lb{0%{width:0;margin-left:0}50%{width:100%;margin-left:0}100%{width:0;margin-left:100%}}
+      #_shell{position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;background:#f8fafc;gap:1.5rem;}
+      .dark #_shell{background:#020617;}
+      #_shell .t{font-size:1.5rem;font-weight:700;color:#0f172a;letter-spacing:-0.02em;font-family:system-ui,sans-serif;}
+      .dark #_shell .t{color:#f8fafc;}
+      #_shell .bar{width:10rem;height:0.25rem;border-radius:9999px;background:#e2e8f0;overflow:hidden;}
+      .dark #_shell .bar{background:#1e293b;}
+      #_shell .bar i{display:block;height:100%;background:#0ea5e9;border-radius:9999px;animation:_lb 1.4s ease-in-out infinite;}
+    </style>
+    <div id="_shell">
+      <span class="t">Girify</span>
+      <div class="bar"><i></i></div>
     </div>
   </div>
   <script type="module" src="/src/main.tsx"></script>

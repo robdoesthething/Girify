@@ -18,6 +18,12 @@ interface ThemeContextType {
 
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
+const applyThemeClass = (theme: 'light' | 'dark') => {
+  const root = document.documentElement;
+  root.classList.toggle('dark', theme === 'dark');
+  root.classList.toggle('light', theme === 'light');
+};
+
 export const useTheme = (): ThemeContextType => {
   const context = useContext(ThemeContext);
   if (!context) {
@@ -62,7 +68,7 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
       // Use requestAnimationFrame to avoid synchronous setState in effect
       requestAnimationFrame(() => setTheme(newTheme));
     }
-    document.documentElement.setAttribute('class', newTheme);
+    applyThemeClass(newTheme);
     localStorage.setItem('girify_theme_mode', themeMode);
   }, [themeMode]); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -75,7 +81,7 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
       if (themeMode === 'auto') {
         const newTheme = e.matches ? 'dark' : 'light';
         setTheme(newTheme);
-        document.documentElement.setAttribute('class', newTheme);
+        applyThemeClass(newTheme);
       }
     };
     mediaQuery.addEventListener('change', handleChange);
@@ -142,7 +148,7 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
   const t = (key: string) => getTranslation(language, key);
 
   useEffect(() => {
-    document.documentElement.setAttribute('class', theme);
+    applyThemeClass(theme);
   }, [theme]);
 
   return (
