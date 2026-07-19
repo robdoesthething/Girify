@@ -19,17 +19,22 @@
       sans-serif;
     line-height: 1.5;
     font-weight: 400;
+    color-scheme: light;
+  }
+
+  .dark {
     color-scheme: dark;
   }
 
   body {
     @apply m-0 min-h-screen min-w-[320px] antialiased;
-    @apply bg-slate-950 text-slate-300 selection:bg-sky-500/30;
+    @apply bg-slate-50 text-slate-600 selection:bg-sky-500/30;
+    @apply dark:bg-slate-950 dark:text-slate-300;
   }
 
   /* Better focus states */
   *:focus-visible {
-    @apply outline-none ring-2 ring-sky-500/50 ring-offset-2 ring-offset-slate-950;
+    @apply outline-none ring-2 ring-sky-500/50 ring-offset-2 ring-offset-slate-50 dark:ring-offset-slate-950;
   }
 
   /* Smooth scrolling */
@@ -41,7 +46,8 @@
 @layer components {
   /* Enhanced Glassmorphism */
   .glass {
-    @apply bg-gradient-to-b from-white/10 to-white/5 backdrop-blur-xl border border-white/10 shadow-xl shadow-black/20 ring-1 ring-white/5;
+    @apply bg-gradient-to-b from-white/80 to-white/60 backdrop-blur-xl border border-slate-200/80 shadow-xl shadow-slate-900/5 ring-1 ring-slate-900/5;
+    @apply dark:from-white/10 dark:to-white/5 dark:border-white/10 dark:shadow-black/20 dark:ring-white/5;
   }
 
   .glass-panel {
@@ -49,7 +55,7 @@
   }
 
   .glass-button {
-    @apply glass hover:bg-white/15 hover:border-white/20 transition-all duration-300 active:scale-95 flex items-center justify-center gap-2 cursor-pointer;
+    @apply glass hover:bg-white dark:hover:bg-white/15 hover:border-slate-300 dark:hover:border-white/20 transition-all duration-300 active:scale-95 flex items-center justify-center gap-2 cursor-pointer;
   }
 
   /* Modern Button Styles */
@@ -78,7 +84,7 @@
   }
 
   .heading-lg {
-    @apply text-3xl md:text-4xl font-bold tracking-tight text-white;
+    @apply text-3xl md:text-4xl font-bold tracking-tight text-slate-900 dark:text-white;
   }
 
   .heading-md {
@@ -137,7 +143,7 @@
 }
 
 .leaflet-control-attribution {
-  @apply !bg-slate-950/80 !text-slate-500 backdrop-blur-sm rounded-tr-lg pr-2;
+  @apply !bg-white/80 !text-slate-500 dark:!bg-slate-950/80 dark:!text-slate-500 backdrop-blur-sm rounded-tr-lg pr-2;
 }
 
 /* Improved Map Animations */
