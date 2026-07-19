@@ -1,0 +1,308 @@
+{
+  "_style": "chunky retro pixel art game sprite, 16-bit era, bold thick black outlines, bright vivid saturated colors, cheerful sunny mood, flat cel shading, crisp square pixels, single centered subject, full subject visible with empty margin around it, isolated on a solid bright magenta background, no text, no letters, no words, no numbers, no watermark, no scenery, no ground, no shadows on background",
+  "_framing_avatar": "character bust portrait, head and shoulders, facing viewer",
+  "_framing_mascot": "animal head emblem, facing viewer, symmetric, team logo style",
+  "_framing_object": "single object icon, slight three-quarter view",
+  "assets": [
+    {
+      "path": "public/assets/pixel_avatar_guiri.png",
+      "framing": "avatar",
+      "subject": "funny tourist, straw hat, big black sunglasses, camera hanging on neck strap, colorful hawaiian shirt, sunburnt red nose"
+    },
+    {
+      "path": "public/assets/pixel_avatar_local.png",
+      "framing": "avatar",
+      "subject": "stylish confident local person, slicked dark hair, sunglasses, black leather jacket, cool smirk"
+    },
+    {
+      "path": "public/assets/pixel_avatar_artist.png",
+      "framing": "avatar",
+      "subject": "artist wearing beret, clothes covered in colorful mosaic tile patterns, holding painter palette, Gaudi inspired"
+    },
+    {
+      "path": "public/assets/pixel_avatar_cat.png",
+      "framing": "avatar",
+      "subject": "cute orange tabby street cat head and paws, big curious eyes"
+    },
+    {
+      "path": "public/assets/pixel_avatar_robot.png",
+      "framing": "avatar",
+      "subject": "retro tin toy robot, boxy head with antenna, friendly glowing cyan eyes"
+    },
+    {
+      "path": "public/assets/pixel_avatar_alien.png",
+      "framing": "avatar",
+      "subject": "green alien tourist, big black oval eyes, wearing straw hat and hawaiian shirt, camera on neck"
+    },
+    {
+      "path": "public/assets/pixel_avatar_ninja.png",
+      "framing": "avatar",
+      "subject": "urban ninja, black hoodie and face mask, only determined eyes visible"
+    },
+
+    {
+      "path": "public/assets/pixel_compass.png",
+      "framing": "object",
+      "subject": "old brass navigation compass with red needle"
+    },
+    {
+      "path": "public/assets/pixel_blueprint.png",
+      "framing": "object",
+      "subject": "rolled city blueprint plan with white street grid lines on blue paper"
+    },
+    {
+      "path": "public/assets/pixel_crown.png",
+      "framing": "object",
+      "subject": "golden royal crown with red velvet and colorful gems"
+    },
+    {
+      "path": "public/assets/pixel_briefcase.png",
+      "framing": "object",
+      "subject": "brown leather briefcase with brass buckles and a magnifying glass"
+    },
+    {
+      "path": "public/assets/pixel_merit_supporter.png",
+      "framing": "object",
+      "subject": "glossy pink heart wrapped in a golden ribbon"
+    },
+    {
+      "path": "public/assets/pixel_merit_contributor.png",
+      "framing": "object",
+      "subject": "yellow construction crane building a small brick house"
+    },
+    {
+      "path": "public/assets/pixel_merit_vip.png",
+      "framing": "object",
+      "subject": "golden fleur-de-lis emblem with a purple gem in the center"
+    },
+
+    {
+      "path": "public/assets/pixel_paella.png",
+      "framing": "object",
+      "subject": "paella pan with yellow saffron rice, shrimp, mussels and lemon wedges"
+    },
+    {
+      "path": "public/assets/pixel_sangria.png",
+      "framing": "object",
+      "subject": "glass pitcher of red sangria with orange slices and a wooden ladle"
+    },
+    {
+      "path": "public/assets/pixel_ticket.png",
+      "framing": "object",
+      "subject": "purple public transport metro card ticket"
+    },
+    {
+      "path": "public/assets/pixel_pigeon.png",
+      "framing": "object",
+      "subject": "fat proud city pigeon with iridescent green neck, standing"
+    },
+    {
+      "path": "public/assets/pixel_grandmother.png",
+      "framing": "object",
+      "subject": "old grandmother with hair curlers leaning over a balcony railing with flower pots, watching judgmentally"
+    },
+    {
+      "path": "public/assets/pixel_watergun.png",
+      "framing": "object",
+      "subject": "colorful plastic water gun, orange and green"
+    },
+    {
+      "path": "public/assets/pixel_vermut.png",
+      "framing": "object",
+      "subject": "glass of red vermouth with ice cubes, orange slice and a green olive on a stick"
+    },
+    {
+      "path": "public/assets/pixel_croissant.png",
+      "framing": "object",
+      "subject": "fancy golden croissant on a small plate with a tiny price tag"
+    },
+    {
+      "path": "public/assets/pixel_yoga.png",
+      "framing": "object",
+      "subject": "person meditating cross-legged in lotus pose, zen, bright daylight colors, subject only, absolutely no circle or disc behind the subject"
+    },
+    {
+      "path": "public/assets/pixel_laptop.png",
+      "framing": "object",
+      "subject": "open laptop with code on screen and a coffee cup beside it"
+    },
+    {
+      "path": "public/assets/pixel_diamond.png",
+      "framing": "object",
+      "subject": "sparkling light-blue diamond gem"
+    },
+    {
+      "path": "public/assets/pixel_scooter.png",
+      "framing": "object",
+      "subject": "black electric kick scooter"
+    },
+    {
+      "path": "public/assets/pixel_yacht.png",
+      "framing": "object",
+      "subject": "white luxury yacht with blue windows"
+    },
+    {
+      "path": "public/assets/pixel_name_tag.png",
+      "framing": "object",
+      "subject": "blank red and white name tag sticker, empty white center"
+    },
+
+    {
+      "path": "public/assets/districts/pixel_bat.png",
+      "framing": "mascot",
+      "subject": "purple bat head with small spread wings"
+    },
+    {
+      "path": "public/assets/districts/pixel_dragon.png",
+      "framing": "mascot",
+      "subject": "red dragon head with golden horns"
+    },
+    {
+      "path": "public/assets/districts/pixel_lion.png",
+      "framing": "mascot",
+      "subject": "golden lion head with full mane"
+    },
+    {
+      "path": "public/assets/districts/pixel_eagle.png",
+      "framing": "mascot",
+      "subject": "royal blue eagle head with sharp yellow beak"
+    },
+    {
+      "path": "public/assets/districts/pixel_fox.png",
+      "framing": "mascot",
+      "subject": "orange fox head with white cheeks"
+    },
+    {
+      "path": "public/assets/districts/pixel_cat.png",
+      "framing": "mascot",
+      "subject": "emerald green cat head with big eyes"
+    },
+    {
+      "path": "public/assets/districts/pixel_boar.png",
+      "framing": "mascot",
+      "subject": "brown wild boar head with white tusks"
+    },
+    {
+      "path": "public/assets/districts/pixel_wolf.png",
+      "framing": "mascot",
+      "subject": "slate gray wolf head"
+    },
+    {
+      "path": "public/assets/districts/pixel_bear.png",
+      "framing": "mascot",
+      "subject": "teal bear head"
+    },
+    {
+      "path": "public/assets/districts/pixel_shark.png",
+      "framing": "mascot",
+      "subject": "cyan shark head with open jaws and teeth"
+    },
+
+    {
+      "path": "public/badges/badge_gentrificador.png",
+      "framing": "object",
+      "subject": "takeaway coffee cup with a hipster mustache and a rising price arrow"
+    },
+    {
+      "path": "public/badges/badge_tour_guide.png",
+      "framing": "object",
+      "subject": "tour guide umbrella held high with a small flag"
+    },
+    {
+      "path": "public/badges/badge_influencer.png",
+      "framing": "object",
+      "subject": "smartphone on a selfie stick with a ring light and floating hearts"
+    },
+    {
+      "path": "public/badges/badge_first_game.png",
+      "framing": "object",
+      "subject": "travel suitcase covered in colorful travel stickers"
+    },
+    {
+      "path": "public/badges/badge_explorer.png",
+      "framing": "object",
+      "subject": "pair of worn walking sneakers next to a folded city map"
+    },
+    {
+      "path": "public/badges/badge_scholar.png",
+      "framing": "object",
+      "subject": "red metro subway train, front view"
+    },
+    {
+      "path": "public/badges/badge_veteran.png",
+      "framing": "object",
+      "subject": "bunch of golden house keys on a keychain"
+    },
+    {
+      "path": "public/badges/badge_legend.png",
+      "framing": "object",
+      "subject": "golden mayoral chain with medal on a red sash"
+    },
+    {
+      "path": "public/badges/badge_streak_3.png",
+      "framing": "object",
+      "subject": "grilled calcot green onions with char marks on a terracotta roof tile"
+    },
+    {
+      "path": "public/badges/badge_streak_7.png",
+      "framing": "object",
+      "subject": "colorful fireworks rocket bursting with confetti"
+    },
+    {
+      "path": "public/badges/badge_streak_30.png",
+      "framing": "object",
+      "subject": "Sagrada Familia basilica towers with mosaic spires"
+    },
+    {
+      "path": "public/badges/badge_champion.png",
+      "framing": "object",
+      "subject": "tapas plate with olives, jamon slices and cheese cubes"
+    },
+    {
+      "path": "public/badges/badge_perfect.png",
+      "framing": "object",
+      "subject": "Gaudi mosaic salamander lizard made of colorful trencadis tiles, top-down view"
+    },
+    {
+      "path": "public/badges/badge_gamba_roja.png",
+      "framing": "object",
+      "subject": "big bright red cooked prawn with long antennae, well-lit, vivid red shell"
+    },
+    {
+      "path": "public/badges/badge_night_owl.png",
+      "framing": "object",
+      "subject": "sleepy half-closed owl with a tiny disco ball"
+    },
+    {
+      "path": "public/badges/badge_fast_loss.png",
+      "framing": "object",
+      "subject": "sneaky hand pulling a wallet out of a back pocket"
+    },
+    {
+      "path": "public/badges/badge_precision.png",
+      "framing": "object",
+      "subject": "glossy bright red teardrop map marker pin with a white target symbol in its center"
+    },
+
+    {
+      "path": "public/giuro.png",
+      "framing": "object",
+      "subject": "shiny golden game coin with a flip-flop sandal embossed in the center"
+    },
+    {
+      "path": "public/mejur_jouma.png",
+      "framing": "avatar",
+      "subject": "grumpy bald old mayor, frowning, red ceremonial sash and golden medal"
+    },
+    {
+      "path": "public/assets/pixel_mayor_jaume.png",
+      "framing": "avatar",
+      "subject": "cheerful bald old mayor smiling, red ceremonial sash and golden medal"
+    },
+    {
+      "path": "src/assets/gecko_pixel.png",
+      "framing": "object",
+      "subject": "Gaudi mosaic gecko lizard made of colorful trencadis tiles, top-down view, curled tail, full body visible, floating, absolutely no shadow, no ground, no surface beneath it"
+    }
+  ]
+}
