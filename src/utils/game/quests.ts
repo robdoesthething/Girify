@@ -3,7 +3,7 @@ import {
   deleteQuest as dbDeleteQuest,
   getAllQuests as dbGetQuests,
   updateQuest as dbUpdateQuest,
-} from '../../services/database';
+} from '../../services/db';
 import { QuestRow } from '../../types/supabase';
 import { requireAdmin } from '../auth';
 import { logger } from '../logger';

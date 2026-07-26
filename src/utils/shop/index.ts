@@ -3,8 +3,11 @@ import {
   deleteShopItem as dbDeleteShopItem,
   getShopItems as dbGetShopItems,
   updateShopItem as dbUpdateShopItem,
-} from '../../services/database';
+} from '../../services/db';
 import { ShopItemRow } from '../../types/supabase';
+import { createLogger } from '../logger';
+
+const logger = createLogger('Shop');
 import { LOCAL_SHOP_ITEMS } from './catalog';
 import type { GroupedShopItems, OperationResult, ShopItem, ShopItemType } from './types';
 
@@ -61,7 +64,7 @@ export const getShopItems = async (forceRefresh = false): Promise<GroupedShopIte
       });
     });
   } catch (error) {
-    console.error('Error fetching shop items from DB:', error);
+    logger.error('Error fetching shop items from DB:', error);
     // Continue with just local items
   }
 
@@ -149,7 +152,7 @@ export const updateShopItem = async (
     }
     return { success: false, error: 'Update failed' };
   } catch (error) {
-    console.error('Error updating shop item:', error);
+    logger.error('Error updating shop item:', error);
     return { success: false, error: (error as Error).message };
   }
 };
@@ -187,7 +190,7 @@ export const createShopItem = async (itemData: ShopItem): Promise<OperationResul
     }
     return { success: false, error: 'Creation failed' };
   } catch (error) {
-    console.error('Error creating shop item:', error);
+    logger.error('Error creating shop item:', error);
     return { success: false, error: (error as Error).message };
   }
 };
@@ -206,7 +209,7 @@ export const deleteShopItem = async (id: string): Promise<OperationResult> => {
     }
     return { success: false, error: 'Delete failed' };
   } catch (error) {
-    console.error('Error deleting shop item:', error);
+    logger.error('Error deleting shop item:', error);
     return { success: false, error: (error as Error).message };
   }
 };
@@ -254,7 +257,7 @@ export const syncWithLocal = async (): Promise<{ updated: number; errors: number
       }
       updated++;
     } catch (e) {
-      console.error(`Failed to sync item ${item.id}`, e);
+      logger.error(`Failed to sync item ${item.id}`, e);
       errors++;
     }
   }

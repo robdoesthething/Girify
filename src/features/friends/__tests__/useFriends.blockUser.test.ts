@@ -5,6 +5,7 @@
 import { act, renderHook } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import * as friendsUtils from '../../../utils/social/friends';
+import * as blocksUtils from '../../../utils/social/blocks';
 import { useFriends } from '../hooks/useFriends';
 
 vi.mock('../../../services/supabase', () => ({
@@ -20,6 +21,7 @@ vi.mock('../../../services/supabase', () => ({
 }));
 
 vi.mock('../../../utils/social/friends');
+vi.mock('../../../utils/social/blocks');
 
 describe('useFriends – blockUser', () => {
   const mockUsername = 'testuser';
@@ -32,7 +34,7 @@ describe('useFriends – blockUser', () => {
   });
 
   it('calls blockUser util with correct arguments', async () => {
-    vi.spyOn(friendsUtils, 'blockUser').mockResolvedValue(undefined);
+    vi.spyOn(blocksUtils, 'blockUser').mockResolvedValue(undefined);
     vi.spyOn(friendsUtils, 'removeFriend').mockResolvedValue({ success: true });
 
     const { result } = renderHook(() => useFriends(mockUsername));
@@ -41,11 +43,11 @@ describe('useFriends – blockUser', () => {
       await result.current.blockUser('badactor');
     });
 
-    expect(friendsUtils.blockUser).toHaveBeenCalledWith(mockUsername, 'badactor');
+    expect(blocksUtils.blockUser).toHaveBeenCalledWith(mockUsername, 'badactor');
   });
 
   it('also calls removeFriend after blocking (to remove from friend list)', async () => {
-    vi.spyOn(friendsUtils, 'blockUser').mockResolvedValue(undefined);
+    vi.spyOn(blocksUtils, 'blockUser').mockResolvedValue(undefined);
     vi.spyOn(friendsUtils, 'removeFriend').mockResolvedValue({ success: true });
 
     const { result } = renderHook(() => useFriends(mockUsername));
@@ -58,7 +60,7 @@ describe('useFriends – blockUser', () => {
   });
 
   it('reloads friends list after blocking', async () => {
-    vi.spyOn(friendsUtils, 'blockUser').mockResolvedValue(undefined);
+    vi.spyOn(blocksUtils, 'blockUser').mockResolvedValue(undefined);
     vi.spyOn(friendsUtils, 'removeFriend').mockResolvedValue({ success: true });
     const getFriendsSpy = vi.spyOn(friendsUtils, 'getFriends').mockResolvedValue([]);
 

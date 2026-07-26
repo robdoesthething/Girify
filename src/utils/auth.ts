@@ -1,3 +1,4 @@
+import { getUserByEmail, getUserByUid } from '../services/db';
 import { supabase } from '../services/supabase';
 import { normalizeUsername } from './format';
 import { logger } from './logger';
@@ -65,22 +66,13 @@ export const getCurrentUsername = async (): Promise<string | null> => {
     return null;
   }
 
-  const { data, error } = await supabase
-    .from('users')
-    .select('username')
-    .eq('supabase_uid', user.id)
-    .single();
+  const data = await getUserByUid(user.id);
 
-  if (error || !data) {
+  if (!data) {
     // Fallback: try by email for users who haven't linked supabase_uid yet
     if (user.email) {
-      const { data: emailData, error: emailError } = await supabase
-        .from('users')
-        .select('username')
-        .eq('email', user.email)
-        .single();
-
-      if (!emailError && emailData) {
+      const emailData = await getUserByEmail(user.email);
+      if (emailData) {
         return emailData.username;
       }
     }

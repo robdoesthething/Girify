@@ -4,14 +4,16 @@
  * Functions for user profile CRUD operations, lookups, and updates.
  */
 
+import { getRandomAvatarId } from '../../config/appConstants';
 import { DISTRICTS } from '../../data/districts';
 import {
   createUser,
+  getUserByEmail as dbGetUserByEmail,
   getUserByUid as dbGetUserByUid,
   getUserByUsername,
   updateUser,
   upsertUser,
-} from '../../services/database';
+} from '../../services/db';
 import { supabase } from '../../services/supabase';
 import type { UserRow } from '../../types/supabase';
 import { normalizeUsername } from '../format';
@@ -23,7 +25,6 @@ import type {
   UserProfile,
 } from './types';
 
-const DEFAULT_AVATAR_COUNT = 20;
 const DEFAULT_GIUROS = 10;
 
 /**
@@ -143,7 +144,7 @@ export const ensureUserProfile = async (
       supabase_uid: uid,
       email: additionalData.email ? additionalData.email.toLowerCase().trim() : null,
       real_name: additionalData.realName || null,
-      avatar_id: additionalData.avatarId || Math.floor(Math.random() * DEFAULT_AVATAR_COUNT) + 1,
+      avatar_id: additionalData.avatarId || getRandomAvatarId(),
       friend_count: 0,
       games_played: 0,
       best_score: 0,
@@ -220,17 +221,10 @@ export const getUserByEmail = async (email: string): Promise<UserProfile | null>
   if (!email) {
     return null;
   }
-  const cleanEmail = email.toLowerCase().trim();
 
   try {
-    const { data, error } = await supabase
-      .from('users')
-      .select('*')
-      .eq('email', cleanEmail)
-      .limit(1)
-      .single();
-
-    if (error || !data) {
+    const data = await dbGetUserByEmail(email);
+    if (!data) {
       return null;
     }
     return rowToProfile(data);

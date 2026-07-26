@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useReducer, useRef } from 'react';
+import { blockUser } from '../../../utils/social/blocks';
 import {
   acceptFriendRequest,
-  blockUser,
   declineFriendRequest,
   getFriendFeed,
   getFriends,
@@ -10,7 +10,10 @@ import {
   searchUsers,
   sendFriendRequest,
 } from '../../../utils/social/friends';
+import { createLogger } from '../../../utils/logger';
 import { type FeedItem, type Friend, friendsReducer, initialState } from './friendsReducer';
+
+const logger = createLogger('useFriends');
 
 // Re-export types for consumers
 export type { FeedItem, Friend } from './friendsReducer';
@@ -41,7 +44,7 @@ export function useFriends(username: string) {
       const list = (await getFriends(username)) as Friend[];
       dispatch({ type: 'SET_FRIENDS', payload: list });
     } catch (e) {
-      console.error('[Friends] Error loading friends:', e);
+      logger.error('[Friends] Error loading friends:', e);
       dispatch({ type: 'SET_ERROR', payload: 'Failed to load friends. Please try again.' });
     } finally {
       dispatch({ type: 'SET_LOADING', payload: false });
@@ -61,7 +64,7 @@ export function useFriends(username: string) {
       const list = await getIncomingRequests(username);
       dispatch({ type: 'SET_REQUESTS', payload: list });
     } catch (e) {
-      console.error('[Friends] Error loading requests:', e);
+      logger.error('[Friends] Error loading requests:', e);
       dispatch({ type: 'SET_ERROR', payload: 'Failed to load friend requests. Please try again.' });
     } finally {
       dispatch({ type: 'SET_LOADING', payload: false });
@@ -99,7 +102,7 @@ export function useFriends(username: string) {
           dispatch({ type: 'SET_FEED', payload: activity as unknown as FeedItem[] });
         }
       } catch (e) {
-        console.error('[Friends] Error loading feed:', e);
+        logger.error('[Friends] Error loading feed:', e);
         dispatch({ type: 'SET_ERROR', payload: 'Failed to load activity feed. Please try again.' });
       } finally {
         dispatch({ type: 'SET_LOADING', payload: false });
@@ -121,7 +124,7 @@ export function useFriends(username: string) {
           payload: results.filter((r: { username: string }) => r.username !== username),
         });
       } catch (e) {
-        console.error(e);
+        logger.error(e);
       } finally {
         dispatch({ type: 'SET_SEARCHING', payload: false });
       }
@@ -143,7 +146,7 @@ export function useFriends(username: string) {
         }
         return { success: false, error: res.error };
       } catch (e) {
-        console.error(e);
+        logger.error(e);
         return { success: false, error: 'Unknown error' };
       }
     },

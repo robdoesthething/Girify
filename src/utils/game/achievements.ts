@@ -4,7 +4,7 @@ import {
   deleteAchievement as dbDeleteAchievement,
   getAchievements as dbGetAchievements,
   updateAchievement as dbUpdateAchievement,
-} from '../../services/database';
+} from '../../services/db';
 import { AchievementRow } from '../../types/supabase';
 import { logger } from '../logger';
 

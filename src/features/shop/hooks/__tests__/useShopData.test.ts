@@ -3,7 +3,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { useShopData } from '../useShopData';
 
 // Mock the new dependencies
-vi.mock('../../../../services/database', () => ({
+vi.mock('../../../../services/db', () => ({
   getUserShopData: vi.fn().mockResolvedValue({
     username: 'testuser',
     giuros: 1000,

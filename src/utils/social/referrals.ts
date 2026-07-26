@@ -10,7 +10,7 @@ import {
   getUserByUsername,
   updateUser,
   upsertBadgeStats,
-} from '../../services/database';
+} from '../../services/db';
 import { supabase } from '../../services/supabase';
 import { normalizeUsername } from '../format';
 

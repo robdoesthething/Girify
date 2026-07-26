@@ -1,7 +1,7 @@
 /**
  * Utility to publish activity events to friend feed
  */
-import { publishActivity as dbPublishActivity } from '../../services/database';
+import { publishActivity as dbPublishActivity } from '../../services/db';
 import { getUserByUsername } from '../../services/db/users';
 import { supabase } from '../../services/supabase';
 import { ActivityFeedRow } from '../../types/supabase';

@@ -1,3 +1,4 @@
+import { countUsers, getUserMetricsSample } from '../../services/db';
 import { supabase } from '../../services/supabase';
 
 export interface DashboardMetrics {
@@ -34,32 +35,28 @@ export const getDashboardMetrics = async (forceRefresh = false): Promise<Dashboa
 
   try {
     const [
-      totalUsersResult,
-      newUsersResult,
-      bannedResult,
+      totalUsers,
+      newUsers,
+      bannedUsers,
+      usersData,
       recentGamesResult,
       weeklyGamesResult,
-      usersDataResult,
       retentionGamesResult,
     ] = await Promise.all([
-      supabase.from('users').select('*', { count: 'exact', head: true }),
-      supabase
-        .from('users')
-        .select('*', { count: 'exact', head: true })
-        .gte('joined_at', yesterday),
-      supabase.from('users').select('*', { count: 'exact', head: true }).eq('banned', true),
+      countUsers(),
+      countUsers({ since: yesterday }),
+      countUsers({ banned: true }),
+      getUserMetricsSample(),
       supabase
         .from('game_results')
         .select('username, score, correct_answers, question_count')
         .gte('played_at', yesterday),
       supabase.from('game_results').select('username').gte('played_at', lastWeek),
-      supabase.from('users').select('username, joined_at, giuros').limit(500),
       supabase.from('game_results').select('username, played_at').gte('played_at', sixtyDaysAgo),
     ]);
 
     const recentGames = recentGamesResult.data || [];
     const weeklyGames = weeklyGamesResult.data || [];
-    const usersData = usersDataResult.data || [];
     const retentionGames = retentionGamesResult.data || [];
 
     const uniquePlayers24h = new Set<string>(
@@ -124,12 +121,12 @@ export const getDashboardMetrics = async (forceRefresh = false): Promise<Dashboa
     };
 
     const metrics: DashboardMetrics = {
-      totalUsers: totalUsersResult.count || 0,
-      newUsers24h: newUsersResult.count || 0,
+      totalUsers,
+      newUsers24h: newUsers,
       gamesPlayed24h: recentGames.length,
       activeUsers24h: uniquePlayers24h.size,
       weeklyActiveUsers: uniqueWeekly.size,
-      bannedUsersCount: bannedResult.count || 0,
+      bannedUsersCount: bannedUsers,
       totalGiuros,
       correctAnswerRate,
       avgScore,

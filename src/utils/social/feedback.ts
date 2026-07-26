@@ -8,7 +8,7 @@ import {
   submitFeedback as dbSubmitFeedback,
   getApprovedFeedbackRewards,
   markFeedbackNotified,
-} from '../../services/database';
+} from '../../services/db';
 import { supabase } from '../../services/supabase';
 import type { FeedbackRow } from '../../types/supabase';
 

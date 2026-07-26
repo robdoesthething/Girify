@@ -1,5 +1,6 @@
 import { SOCIAL } from '../../config/constants';
 import { DISTRICTS } from '../../data/districts';
+import { getLeaderboardUserData, getUserTeamData } from '../../services/db';
 import { supabase } from '../../services/supabase';
 import { debugLog } from '../debug';
 import { normalizeUsername } from '../format';
@@ -39,12 +40,6 @@ export interface ScoreEntry {
  * @param limitCount - Max number of entries to return (default: constant)
  * @returns Promise resolving to list of ranked score entries
  */
-/**
- * Fetch leaderboard scores using Supabase
- * @param period - The time period to filter by (all, daily, weekly, monthly)
- * @param limitCount - Max number of entries to return (default: constant)
- * @returns Promise resolving to list of ranked score entries
- */
 export const getLeaderboard = async (
   period: LeaderboardPeriod = 'all',
   limitCount: number = SOCIAL.LEADERBOARD.FETCH_LIMIT
@@ -52,7 +47,7 @@ export const getLeaderboard = async (
   try {
     // Server-side aggregation via RPC — Postgres does the GROUP BY and returns
     // only the final N rows instead of streaming all matching raw rows to the client.
-    const { data, error } = await (supabase as any).rpc('get_leaderboard', {
+    const { data, error } = await supabase.rpc('get_leaderboard', {
       p_period: period,
       p_limit: limitCount,
     });
@@ -83,19 +78,14 @@ export const getLeaderboard = async (
     const cosmeticsMap: Record<string, { avatarId?: string; frameId?: string } | null> = {};
 
     if (usernames.length > 0) {
-      const { data: usersData } = await supabase
-        .from('users')
-        .select('username, district, equipped_cosmetics')
-        .in('username', usernames);
-      (usersData || []).forEach(
-        (u: { username: string; district: string | null; equipped_cosmetics: unknown }) => {
-          if (u.username) {
-            districtMap[u.username] = u.district;
-            cosmeticsMap[u.username] =
-              (u.equipped_cosmetics as { avatarId?: string; frameId?: string } | null) ?? null;
-          }
+      const usersData = await getLeaderboardUserData(usernames);
+      usersData.forEach(u => {
+        if (u.username) {
+          districtMap[u.username] = u.district;
+          cosmeticsMap[u.username] =
+            (u.equipped_cosmetics as { avatarId?: string; frameId?: string } | null) ?? null;
         }
-      );
+      });
     }
 
     return rows.map(row => ({
@@ -132,35 +122,17 @@ export const getTeamLeaderboard = async (
   period: LeaderboardPeriod = 'all'
 ): Promise<TeamScoreEntry[]> => {
   try {
-    // Define type for the query result
-    interface UserTeamData {
-      username: string;
-      team: string | null;
-      district: string | null;
-    }
-
     // Fetch user profiles and individual scores in parallel
     const TEAM_LEADERBOARD_LIMIT = 2000;
 
-    const [usersResult, individualScores] = await Promise.all([
-      supabase
-        .from('users')
-        .select('username, team, district')
-        .not('team', 'is', null)
-        .returns<UserTeamData[]>(),
+    const [usersData, individualScores] = await Promise.all([
+      getUserTeamData(),
       getLeaderboard(period, TEAM_LEADERBOARD_LIMIT),
     ]);
 
-    const { data: usersData, error: usersError } = usersResult;
-
-    if (usersError) {
-      console.error('Error fetching users for team leaderboard:', usersError);
-      return [];
-    }
-
     const userTeamMap: Record<string, { team: string; district: string }> = {};
 
-    (usersData || []).forEach(user => {
+    usersData.forEach(user => {
       const username = normalizeUsername(user.username);
       if (user.team && user.district) {
         userTeamMap[username] = {

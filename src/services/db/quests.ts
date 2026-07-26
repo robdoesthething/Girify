@@ -90,7 +90,7 @@ export async function claimQuestReward(
   try {
     const cleanUserId = normalizeUsername(userId);
 
-    const { data, error } = await (supabase as any).rpc('claim_quest_reward', {
+    const { data, error } = await supabase.rpc('claim_quest_reward', {
       p_username: cleanUserId,
       p_quest_id: questId,
     });

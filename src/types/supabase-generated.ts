@@ -832,6 +832,39 @@ export type Database = {
         }[];
       };
       is_admin: { Args: never; Returns: boolean };
+      add_giuros: {
+        Args: { p_username: string; p_amount: number; p_reason?: string };
+        Returns: Json;
+      };
+      spend_giuros: {
+        Args: { p_username: string; p_cost: number; p_item_id: string };
+        Returns: Json;
+      };
+      claim_daily_login_bonus: { Args: { p_username: string }; Returns: Json };
+      claim_quest_reward: {
+        Args: { p_username: string; p_quest_id: number };
+        Returns: Json;
+      };
+      increment_district_score: {
+        Args: { district_id: string; score_to_add: number };
+        Returns: undefined;
+      };
+      update_equipped_cosmetics: { Args: { cosmetics: Json }; Returns: undefined };
+      link_supabase_uid: { Args: never; Returns: undefined };
+      check_friend_request_rate_limit: { Args: { p_user_id: string }; Returns: boolean };
+      record_game_result: {
+        Args: { p_username: string; p_score: number; p_streak: number; p_last_play_date: string };
+        Returns: Json;
+      };
+      get_leaderboard: {
+        Args: { p_period?: string; p_limit?: number };
+        Returns: {
+          username: string;
+          score: number;
+          avg_time: number | null;
+          games_count: number;
+        }[];
+      };
       remove_friendship: {
         Args: { user1: string; user2: string };
         Returns: boolean;

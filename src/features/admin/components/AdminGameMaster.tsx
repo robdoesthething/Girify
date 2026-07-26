@@ -1,8 +1,9 @@
 import { AnimatePresence, motion } from 'framer-motion';
 import React, { useState } from 'react';
+import { upsertUser } from '../../../services/db';
+import { supabase } from '../../../services/supabase';
 import { getUserProfile, updateUserAsAdmin } from '../../../utils/social';
 
-import { supabase } from '../../../services/supabase';
 import Input from '../../../components/ui/Input';
 
 interface AdminGameMasterProps {
@@ -28,30 +29,24 @@ const AdminGameMaster: React.FC<AdminGameMasterProps> = ({ onNotify, confirm }) 
       return;
     }
     try {
-      await supabase.from('users').upsert(
-        {
-          username: '@MayorJaume',
-          real_name: 'Mayor Jaume',
-          email: 'mayor@girify.com',
-          role: 'user',
-          verified: true,
-          joined_at: new Date().toISOString(),
-          last_login: new Date().toISOString(),
-          banned: false,
-          giuros: 9000000,
-          total_score: 1000000,
-          games_played: 1000,
-          streak: 999,
-          best_score: 25000,
-          purchased_cosmetics: ['title_mayor', 'frame_gold', 'avatar_mayor'],
-          equipped_cosmetics: {
-            titleId: 'title_mayor',
-            frameId: 'frame_gold',
-            avatarId: 'avatar_mayor',
-          },
+      await upsertUser({
+        username: '@MayorJaume',
+        real_name: 'Mayor Jaume',
+        email: 'mayor@girify.com',
+        joined_at: new Date().toISOString(),
+        banned: false,
+        giuros: 9000000,
+        total_score: 1000000,
+        games_played: 1000,
+        streak: 999,
+        best_score: 25000,
+        purchased_cosmetics: ['title_mayor', 'frame_gold', 'avatar_mayor'],
+        equipped_cosmetics: {
+          titleId: 'title_mayor',
+          frameId: 'frame_gold',
+          avatarId: 'avatar_mayor',
         },
-        { onConflict: 'username' }
-      );
+      });
       onNotify('Mayor Jaume seeded successfully!', 'success');
     } catch (e) {
       console.error(e);
