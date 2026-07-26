@@ -1,7 +1,5 @@
 import React from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { useTopBarNav } from '../../../hooks/useTopBarNav';
-import TopBar from '../../../components/TopBar';
 import { useTheme } from '../../../context/ThemeContext';
 import { getUnlockedAchievements } from '../../../data/achievements';
 import { themeClasses } from '../../../utils/themeUtils';
@@ -21,7 +19,6 @@ const PublicProfileScreen: React.FC<PublicProfileScreenProps> = ({ currentUser }
   const { handle: encodedUsername } = useParams<{ handle: string }>();
   const username = decodeURIComponent(encodedUsername || '');
   const navigate = useNavigate();
-  const topBarNav = useTopBarNav();
 
   const {
     profile,
@@ -48,11 +45,7 @@ const PublicProfileScreen: React.FC<PublicProfileScreenProps> = ({ currentUser }
   const showFriendActions = currentUser && currentUser !== username;
 
   return (
-    <div
-      className={`fixed inset-0 w-full h-full flex flex-col overflow-hidden transition-colors duration-500 ${themeClasses(theme, 'bg-slate-900 text-white', 'bg-slate-50 text-slate-900')}`}
-    >
-      <TopBar onOpenPage={topBarNav.onOpenPage} onTriggerLogin={topBarNav.onTriggerLogin} />
-
+    <>
       <div className="flex-1 overflow-y-auto w-full px-4 py-8 pt-16">
         <div className="max-w-2xl lg:max-w-5xl mx-auto">
           <div className="flex items-center justify-between mb-6">
@@ -139,7 +132,7 @@ const PublicProfileScreen: React.FC<PublicProfileScreenProps> = ({ currentUser }
           </div>
         </div>
       </div>
-    </div>
+    </>
   );
 };
 
