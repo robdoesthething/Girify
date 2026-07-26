@@ -7,6 +7,7 @@ import { useConfirm } from '../hooks/useConfirm';
 import { useNotification } from '../hooks/useNotification';
 import { getUserProfile, updateUserProfile } from '../utils/social';
 import { storage } from '../utils/storage';
+import { themeClasses } from '../utils/themeUtils';
 import { ConfirmDialog } from './ConfirmDialog';
 
 interface SettingsScreenProps {
@@ -89,15 +90,15 @@ const SettingsScreen: React.FC<SettingsScreenProps> = ({
         initial={{ scale: 0.9, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
         exit={{ scale: 0.9, opacity: 0 }}
-        className={`w-full max-w-md max-h-[80vh] flex flex-col rounded-3xl shadow-2xl overflow-hidden ${theme === 'dark' ? 'bg-slate-900 text-white' : 'bg-white text-slate-900'}`}
+        className={`w-full max-w-md max-h-[80vh] flex flex-col rounded-3xl shadow-2xl overflow-hidden ${themeClasses(theme, 'bg-slate-900 text-white', 'bg-white text-slate-900')}`}
       >
         <div
-          className={`p-6 border-b shrink-0 flex justify-between items-center ${theme === 'dark' ? 'border-slate-800' : 'border-slate-100'}`}
+          className={`p-6 border-b shrink-0 flex justify-between items-center ${themeClasses(theme, 'border-slate-800', 'border-slate-100')}`}
         >
           <h2 className="text-2xl font-black tracking-tight font-inter">{t('settings')}</h2>
           <button
             onClick={() => onClose?.()}
-            className={`p-2 rounded-full transition-all active:scale-90 ${theme === 'dark' ? 'hover:bg-slate-800' : 'hover:bg-slate-100'}`}
+            className={`p-2 rounded-full transition-all active:scale-90 ${themeClasses(theme, 'hover:bg-slate-800', 'hover:bg-slate-100')}`}
             type="button"
           >
             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -117,14 +118,14 @@ const SettingsScreen: React.FC<SettingsScreenProps> = ({
               {t('language')}
             </h3>
             <div
-              className={`p-4 rounded-xl border ${theme === 'dark' ? 'border-slate-800 bg-slate-800/50' : 'border-slate-100 bg-slate-50'}`}
+              className={`p-4 rounded-xl border ${themeClasses(theme, 'border-slate-800 bg-slate-800/50', 'border-slate-100 bg-slate-50')}`}
             >
               <div className="flex gap-2">
                 {languages.map(lang => (
                   <button
                     key={lang.code}
                     onClick={() => changeLanguage(lang.code)}
-                    className={`flex-1 py-2 px-3 rounded-lg text-sm font-medium transition-all font-inter ${language === lang.code ? 'bg-sky-500 text-white shadow-md' : theme === 'dark' ? 'bg-slate-700 hover:bg-slate-600 text-slate-300' : 'bg-white hover:bg-slate-100 text-slate-700 border border-slate-200'}`}
+                    className={`flex-1 py-2 px-3 rounded-lg text-sm font-medium transition-all font-inter ${language === lang.code ? 'bg-sky-500 text-white shadow-md' : themeClasses(theme, 'bg-slate-700 hover:bg-slate-600 text-slate-300', 'bg-white hover:bg-slate-100 text-slate-700 border border-slate-200')}`}
                     type="button"
                   >
                     <span className="mr-1">{lang.flag}</span> {lang.name}
@@ -139,7 +140,7 @@ const SettingsScreen: React.FC<SettingsScreenProps> = ({
               {t('appearance') || 'Appearance'}
             </h3>
             <div
-              className={`p-1.5 rounded-xl border flex ${theme === 'dark' ? 'border-slate-800 bg-slate-800/50' : 'border-slate-100 bg-slate-50'}`}
+              className={`p-1.5 rounded-xl border flex ${themeClasses(theme, 'border-slate-800 bg-slate-800/50', 'border-slate-100 bg-slate-50')}`}
             >
               {[
                 { id: 'light', icon: '☀️', label: 'Light' },
@@ -169,11 +170,11 @@ const SettingsScreen: React.FC<SettingsScreenProps> = ({
               Gameplay
             </h3>
             <div
-              className={`flex items-center justify-between p-4 rounded-xl border ${theme === 'dark' ? 'border-slate-800 bg-slate-800/50' : 'border-slate-100 bg-slate-50'}`}
+              className={`flex items-center justify-between p-4 rounded-xl border ${themeClasses(theme, 'border-slate-800 bg-slate-800/50', 'border-slate-100 bg-slate-50')}`}
             >
               <div className="flex items-center gap-3">
                 <div
-                  className={`p-2 rounded-full ${theme === 'dark' ? 'bg-emerald-500/20 text-emerald-400' : 'bg-emerald-100 text-emerald-600'}`}
+                  className={`p-2 rounded-full ${themeClasses(theme, 'bg-emerald-500/20 text-emerald-400', 'bg-emerald-100 text-emerald-600')}`}
                 >
                   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path
@@ -206,11 +207,11 @@ const SettingsScreen: React.FC<SettingsScreenProps> = ({
               Notifications
             </h3>
             <div
-              className={`flex items-center justify-between p-4 rounded-xl border ${theme === 'dark' ? 'border-slate-800 bg-slate-800/50' : 'border-slate-100 bg-slate-50'}`}
+              className={`flex items-center justify-between p-4 rounded-xl border ${themeClasses(theme, 'border-slate-800 bg-slate-800/50', 'border-slate-100 bg-slate-50')}`}
             >
               <div className="flex items-center gap-3">
                 <div
-                  className={`p-2 rounded-full ${theme === 'dark' ? 'bg-amber-500/20 text-amber-400' : 'bg-amber-100 text-amber-600'}`}
+                  className={`p-2 rounded-full ${themeClasses(theme, 'bg-amber-500/20 text-amber-400', 'bg-amber-100 text-amber-600')}`}
                 >
                   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path
@@ -290,7 +291,7 @@ const SettingsScreen: React.FC<SettingsScreenProps> = ({
 
             <button
               onClick={handleSignOut}
-              className={`w-full flex items-center gap-3 p-4 rounded-xl border transition-all active:scale-95 font-medium font-inter ${theme === 'dark' ? 'border-slate-700 hover:bg-slate-800' : 'border-slate-200 hover:bg-slate-50'}`}
+              className={`w-full flex items-center gap-3 p-4 rounded-xl border transition-all active:scale-95 font-medium font-inter ${themeClasses(theme, 'border-slate-700 hover:bg-slate-800', 'border-slate-200 hover:bg-slate-50')}`}
               type="button"
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

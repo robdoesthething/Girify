@@ -1,14 +1,12 @@
-import { Turnstile } from '@marsidev/react-turnstile';
-import type { TurnstileInstance } from '@marsidev/react-turnstile';
 import { AnimatePresence, motion } from 'framer-motion';
-import React, { useRef, useState } from 'react';
+import React, { Suspense, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useTopBarNav } from '../hooks/useTopBarNav';
 import { STORAGE_KEYS } from '../config/constants';
 import { useTheme } from '../context/ThemeContext';
+import { turnstileSiteKey, useFeedbackSubmit } from '../hooks/useFeedbackSubmit';
 import { storage } from '../utils/storage';
 import { themeClasses } from '../utils/themeUtils';
-import TopBar from './TopBar';
+import { LazyTurnstile } from './LazyTurnstile';
 import { PageHeader } from './ui';
 
 interface FeedbackScreenProps {
@@ -18,58 +16,24 @@ interface FeedbackScreenProps {
 const FeedbackScreen: React.FC<FeedbackScreenProps> = ({ username }) => {
   const { theme, t } = useTheme();
   const navigate = useNavigate();
-  const topBarNav = useTopBarNav();
   const [feedback, setFeedback] = useState('');
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
-  const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
   const [turnstileErrored, setTurnstileErrored] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const turnstileRef = useRef<TurnstileInstance | undefined>(undefined);
-
-  const rawSiteKey = import.meta.env.VITE_TURNSTILE_SITE_KEY as string | undefined;
-  // Cloudflare real keys start with "0x". Test keys (1x/2x/3x) auto-resolve
-  // and show a "testing only" banner — skip Turnstile when a test key is in use.
-  const turnstileSiteKey = rawSiteKey?.startsWith('0x') ? rawSiteKey : undefined;
+  const { submitFeedback, isSubmitting, error, turnstileToken, setTurnstileToken, turnstileRef } =
+    useFeedbackSubmit({
+      onSuccess: () => {
+        storage.set(STORAGE_KEYS.LAST_FEEDBACK, Date.now().toString());
+        setSubmitted(true);
+      },
+    });
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!feedback.trim() || (turnstileSiteKey && !turnstileToken)) {
-      return;
-    }
-
-    setIsSubmitting(true);
-    setError(null);
-
-    try {
-      const response = await fetch('/api/feedback', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username, text: feedback, turnstileToken }),
-      });
-
-      if (!response.ok) {
-        const data = (await response.json()) as { error?: string };
-        throw new Error(data.error || 'Failed to submit feedback');
-      }
-
-      storage.set(STORAGE_KEYS.LAST_FEEDBACK, Date.now().toString());
-      setSubmitted(true);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Something went wrong. Please try again.');
-      setTurnstileToken(null);
-      turnstileRef.current?.reset();
-    } finally {
-      setIsSubmitting(false);
-    }
+    await submitFeedback(username, feedback);
   };
 
   return (
-    <div
-      className={`fixed inset-0 w-full h-full flex flex-col overflow-hidden transition-colors duration-500 ${themeClasses(theme, 'bg-slate-900 text-white', 'bg-slate-50 text-slate-900')}`}
-    >
-      <TopBar onOpenPage={topBarNav.onOpenPage} onTriggerLogin={topBarNav.onTriggerLogin} />
-
+    <>
       <div className="flex-1 w-full px-4 py-8 pt-20 overflow-x-hidden overflow-y-auto">
         <div className="max-w-2xl mx-auto w-full">
           <PageHeader title={t('feedback') || 'Feedback'} />
@@ -113,23 +77,25 @@ const FeedbackScreen: React.FC<FeedbackScreenProps> = ({ username }) => {
                     {turnstileSiteKey && feedback.trim() && (
                       <div className="flex flex-col items-center mb-4 gap-2">
                         {!turnstileErrored && (
-                          <Turnstile
-                            ref={turnstileRef}
-                            siteKey={turnstileSiteKey}
-                            onSuccess={token => {
-                              setTurnstileToken(token);
-                              setTurnstileErrored(false);
-                            }}
-                            onError={() => {
-                              setTurnstileToken(null);
-                              setTurnstileErrored(true);
-                            }}
-                            onExpire={() => {
-                              setTurnstileToken(null);
-                              setTurnstileErrored(false);
-                            }}
-                            options={{ theme }}
-                          />
+                          <Suspense fallback={null}>
+                            <LazyTurnstile
+                              ref={turnstileRef}
+                              siteKey={turnstileSiteKey}
+                              onSuccess={token => {
+                                setTurnstileToken(token);
+                                setTurnstileErrored(false);
+                              }}
+                              onError={() => {
+                                setTurnstileToken(null);
+                                setTurnstileErrored(true);
+                              }}
+                              onExpire={() => {
+                                setTurnstileToken(null);
+                                setTurnstileErrored(false);
+                              }}
+                              options={{ theme }}
+                            />
+                          </Suspense>
                         )}
                         {turnstileErrored && (
                           <div className="flex flex-col items-center gap-2 p-3 bg-red-100 dark:bg-red-900/30 border border-red-200 dark:border-red-700/50 rounded-xl w-full text-center">
@@ -201,7 +167,7 @@ const FeedbackScreen: React.FC<FeedbackScreenProps> = ({ username }) => {
           </AnimatePresence>
         </div>
       </div>
-    </div>
+    </>
   );
 };
 

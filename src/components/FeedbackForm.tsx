@@ -1,7 +1,8 @@
-import { Turnstile, TurnstileInstance } from '@marsidev/react-turnstile';
-import React, { useReducer, useRef, useState } from 'react';
+import React, { Suspense, useState } from 'react';
 import { useTheme } from '../context/ThemeContext';
+import { turnstileSiteKey, useFeedbackSubmit } from '../hooks/useFeedbackSubmit';
 import { themeClasses } from '../utils/themeUtils';
+import { LazyTurnstile } from './LazyTurnstile';
 
 interface FeedbackFormProps {
   username: string;
@@ -10,78 +11,16 @@ interface FeedbackFormProps {
   isInline: boolean;
 }
 
-interface FormState {
-  feedback: string;
-  isSubmitting: boolean;
-  error: string | null;
-}
-
-type FormAction =
-  | { type: 'SET_FEEDBACK'; payload: string }
-  | { type: 'SET_SUBMITTING'; payload: boolean }
-  | { type: 'SET_ERROR'; payload: string | null };
-
-function formReducer(state: FormState, action: FormAction): FormState {
-  switch (action.type) {
-    case 'SET_FEEDBACK':
-      return { ...state, feedback: action.payload };
-    case 'SET_SUBMITTING':
-      return { ...state, isSubmitting: action.payload };
-    case 'SET_ERROR':
-      return { ...state, error: action.payload };
-    default:
-      return state;
-  }
-}
-
 const FeedbackForm: React.FC<FeedbackFormProps> = ({ username, onSuccess, onClose, isInline }) => {
   const { theme, t } = useTheme();
-  const [formState, dispatch] = useReducer(formReducer, {
-    feedback: '',
-    isSubmitting: false,
-    error: null,
-  });
-  const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
+  const [feedback, setFeedback] = useState('');
   const [turnstileErrored, setTurnstileErrored] = useState(false);
-  const turnstileRef = useRef<TurnstileInstance | undefined>(undefined);
-
-  const { feedback, isSubmitting, error } = formState;
-
-  const rawSiteKey = import.meta.env.VITE_TURNSTILE_SITE_KEY as string | undefined;
-  const turnstileSiteKey = rawSiteKey?.startsWith('0x') ? rawSiteKey : undefined;
+  const { submitFeedback, isSubmitting, error, turnstileToken, setTurnstileToken, turnstileRef } =
+    useFeedbackSubmit({ onSuccess });
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!feedback.trim() || (turnstileSiteKey && !turnstileToken)) {
-      return;
-    }
-
-    dispatch({ type: 'SET_SUBMITTING', payload: true });
-    dispatch({ type: 'SET_ERROR', payload: null });
-
-    try {
-      const response = await fetch('/api/feedback', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username, text: feedback, turnstileToken }),
-      });
-
-      if (!response.ok) {
-        const data = (await response.json()) as { error?: string };
-        throw new Error(data.error || 'Failed to submit feedback');
-      }
-
-      onSuccess();
-    } catch (err) {
-      dispatch({
-        type: 'SET_ERROR',
-        payload: err instanceof Error ? err.message : 'Something went wrong. Please try again.',
-      });
-      setTurnstileToken(null);
-      turnstileRef.current?.reset();
-    } finally {
-      dispatch({ type: 'SET_SUBMITTING', payload: false });
-    }
+    await submitFeedback(username, feedback);
   };
 
   return (
@@ -104,7 +43,7 @@ const FeedbackForm: React.FC<FeedbackFormProps> = ({ username, onSuccess, onClos
       <form onSubmit={handleSubmit}>
         <textarea
           value={feedback}
-          onChange={e => dispatch({ type: 'SET_FEEDBACK', payload: e.target.value })}
+          onChange={e => setFeedback(e.target.value)}
           placeholder={t('feedbackPlaceholderFeatures') || 'I wish the game had...'}
           className={`w-full h-32 p-4 rounded-xl resize-none outline-none border focus:ring-2 focus:ring-sky-500 transition-all mb-4 font-inter ${themeClasses(theme, 'bg-slate-900 border-slate-700 placeholder-slate-600', 'bg-slate-50 border-slate-200 placeholder-slate-400')}`}
         />
@@ -112,23 +51,25 @@ const FeedbackForm: React.FC<FeedbackFormProps> = ({ username, onSuccess, onClos
         {turnstileSiteKey && feedback.trim() && (
           <div className="flex flex-col items-center mb-4 gap-2">
             {!turnstileErrored && (
-              <Turnstile
-                ref={turnstileRef}
-                siteKey={turnstileSiteKey}
-                onSuccess={token => {
-                  setTurnstileToken(token);
-                  setTurnstileErrored(false);
-                }}
-                onError={() => {
-                  setTurnstileToken(null);
-                  setTurnstileErrored(true);
-                }}
-                onExpire={() => {
-                  setTurnstileToken(null);
-                  setTurnstileErrored(false);
-                }}
-                options={{ theme, size: 'compact' }}
-              />
+              <Suspense fallback={null}>
+                <LazyTurnstile
+                  ref={turnstileRef}
+                  siteKey={turnstileSiteKey}
+                  onSuccess={token => {
+                    setTurnstileToken(token);
+                    setTurnstileErrored(false);
+                  }}
+                  onError={() => {
+                    setTurnstileToken(null);
+                    setTurnstileErrored(true);
+                  }}
+                  onExpire={() => {
+                    setTurnstileToken(null);
+                    setTurnstileErrored(false);
+                  }}
+                  options={{ theme, size: 'compact' }}
+                />
+              </Suspense>
             )}
             {turnstileErrored && (
               <div className="flex flex-col items-center gap-1 p-2 bg-red-100 dark:bg-red-900/30 border border-red-200 dark:border-red-700/50 rounded-lg w-full text-center">

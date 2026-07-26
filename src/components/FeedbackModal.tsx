@@ -3,6 +3,7 @@ import React, { useCallback, useState } from 'react';
 import { useTheme } from '../context/ThemeContext';
 import { themeClasses } from '../utils/themeUtils';
 import FeedbackForm from './FeedbackForm';
+import Modal from './ui/Modal';
 
 const SUBMIT_DELAY = 2000;
 
@@ -45,39 +46,43 @@ const FeedbackModal: React.FC<FeedbackModalProps> = ({ username, onClose, isInli
     ? `w-full max-w-md p-6 rounded-[2.5rem] shadow-xl border ${themeClasses(theme, 'bg-slate-800 border-slate-700', 'bg-white border-slate-200')}`
     : `w-full max-w-md p-6 rounded-3xl shadow-2xl ${themeClasses(theme, 'bg-slate-800 text-white', 'bg-white text-slate-900')}`;
 
-  const wrapperClasses = isInline
-    ? ''
-    : 'fixed inset-0 z-40 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm';
+  const content = (
+    <motion.div
+      initial={{ opacity: 0, scale: 0.9 }}
+      animate={{ opacity: 1, scale: 1 }}
+      exit={{ opacity: 0, scale: 0.9 }}
+      className={isInline ? containerClasses : 'contents'}
+    >
+      <AnimatePresence mode="wait">
+        {!submitted ? (
+          <motion.div
+            key="form"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+          >
+            <FeedbackForm
+              username={username}
+              onSuccess={handleSuccess}
+              onClose={onClose}
+              isInline={isInline}
+            />
+          </motion.div>
+        ) : (
+          <FeedbackSuccess t={t} />
+        )}
+      </AnimatePresence>
+    </motion.div>
+  );
+
+  if (isInline) {
+    return <div>{content}</div>;
+  }
 
   return (
-    <div className={wrapperClasses}>
-      <motion.div
-        initial={{ opacity: 0, scale: 0.9 }}
-        animate={{ opacity: 1, scale: 1 }}
-        exit={{ opacity: 0, scale: 0.9 }}
-        className={containerClasses}
-      >
-        <AnimatePresence mode="wait">
-          {!submitted ? (
-            <motion.div
-              key="form"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-            >
-              <FeedbackForm
-                username={username}
-                onSuccess={handleSuccess}
-                onClose={onClose}
-                isInline={isInline}
-              />
-            </motion.div>
-          ) : (
-            <FeedbackSuccess t={t} />
-          )}
-        </AnimatePresence>
-      </motion.div>
-    </div>
+    <Modal isOpen onClose={onClose} showCloseButton={false} contentClassName={containerClasses}>
+      {content}
+    </Modal>
   );
 };
 
