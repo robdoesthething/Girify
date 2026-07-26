@@ -25,8 +25,6 @@ export const AVATARS = [
   '🦅',
 ];
 
-export const DEFAULT_AVATAR = '🐼';
-
 /**
  * Get avatar emoji by avatarId (1-indexed in database)
  * @param avatarId - 1-indexed avatar ID from database

@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { UI } from '../config/constants';
 import { getTranslation, LANGUAGES } from '../i18n/translations';
 
@@ -8,8 +8,6 @@ interface ThemeContextType {
   changeTheme: (mode: 'light' | 'dark' | 'auto') => void;
   toggleTheme: () => void;
   deviceMode: 'mobile' | 'tablet' | 'desktop';
-  zoom: number;
-  setZoom: React.Dispatch<React.SetStateAction<number>>;
   language: string;
   changeLanguage: (lang: string) => void;
   languages: typeof LANGUAGES;
@@ -35,8 +33,6 @@ export const useTheme = (): ThemeContextType => {
       languages: LANGUAGES,
       t: key => key,
       deviceMode: 'desktop',
-      zoom: 1,
-      setZoom: () => {},
     };
   }
   return context;
@@ -98,8 +94,6 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
     return 'en';
   });
 
-  const [zoom, setZoom] = useState(1);
-
   const getInitialDeviceMode = (): 'mobile' | 'tablet' | 'desktop' => {
     const width = window.innerWidth;
     if (width < UI.BREAKPOINTS.MOBILE) {
@@ -130,38 +124,35 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  const changeTheme = (mode: 'light' | 'dark' | 'auto') => {
+  const changeTheme = useCallback((mode: 'light' | 'dark' | 'auto') => {
     setThemeMode(mode);
-  };
+  }, []);
 
-  const toggleTheme = () => {
+  const toggleTheme = useCallback(() => {
     setThemeMode(prev => (prev === 'light' ? 'dark' : 'light'));
-  };
+  }, []);
 
-  const changeLanguage = (lang: string) => {
+  const changeLanguage = useCallback((lang: string) => {
     setLanguage(lang);
     localStorage.setItem('girify_language', lang);
-  };
+  }, []);
 
-  const t = (key: string) => getTranslation(language, key);
+  const t = useCallback((key: string) => getTranslation(language, key), [language]);
 
-  return (
-    <ThemeContext.Provider
-      value={{
-        theme,
-        themeMode,
-        changeTheme,
-        toggleTheme,
-        deviceMode,
-        zoom,
-        setZoom,
-        language,
-        changeLanguage,
-        languages: LANGUAGES,
-        t,
-      }}
-    >
-      {children}
-    </ThemeContext.Provider>
+  const value = useMemo(
+    () => ({
+      theme,
+      themeMode,
+      changeTheme,
+      toggleTheme,
+      deviceMode,
+      language,
+      changeLanguage,
+      languages: LANGUAGES,
+      t,
+    }),
+    [theme, themeMode, changeTheme, toggleTheme, deviceMode, language, changeLanguage, t]
   );
+
+  return <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>;
 };

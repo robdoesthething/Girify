@@ -1,5 +1,5 @@
 import { AnimatePresence, motion } from 'framer-motion';
-import React, { ReactNode, useState } from 'react';
+import React, { ReactNode, useCallback, useMemo, useState } from 'react';
 import { Z_INDEX } from '../config/zIndex';
 import { NotificationContext } from '../context/NotificationContext';
 
@@ -16,25 +16,30 @@ interface NotificationProviderProps {
 export const NotificationProvider: React.FC<NotificationProviderProps> = ({ children }) => {
   const [notifications, setNotifications] = useState<Notification[]>([]);
 
-  const notify = (message: string, type: Notification['type'] = 'info', duration = 3000) => {
-    const id = Date.now();
-    setNotifications(prev => [...prev, { id, message, type }]);
-
-    if (duration > 0) {
-      setTimeout(() => {
-        setNotifications(prev => prev.filter(n => n.id !== id));
-      }, duration);
-    }
-
-    return id;
-  };
-
-  const dismiss = (id: number | string) => {
+  const dismiss = useCallback((id: number | string) => {
     setNotifications(prev => prev.filter(n => n.id !== id));
-  };
+  }, []);
+
+  const notify = useCallback(
+    (message: string, type: Notification['type'] = 'info', duration = 3000) => {
+      const id = Date.now();
+      setNotifications(prev => [...prev, { id, message, type }]);
+
+      if (duration > 0) {
+        setTimeout(() => {
+          setNotifications(prev => prev.filter(n => n.id !== id));
+        }, duration);
+      }
+
+      return id;
+    },
+    []
+  );
+
+  const value = useMemo(() => ({ notify, dismiss }), [notify, dismiss]);
 
   return (
-    <NotificationContext.Provider value={{ notify, dismiss }}>
+    <NotificationContext.Provider value={value}>
       {children}
       <NotificationContainer notifications={notifications} onDismiss={dismiss} />
     </NotificationContext.Provider>

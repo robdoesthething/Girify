@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import CosmeticAvatar from '../../../components/ui/CosmeticAvatar';
 import { DISTRICTS } from '../../../data/districts';
 import { useTheme } from '../../../context/ThemeContext';
-import { UI } from '../../../utils/constants';
+import { UI } from '../../../config/constants';
 import { displayUsername, usernamesMatch } from '../../../utils/format';
 import { getCosmeticAvatarImage } from '../../../utils/shop/catalog';
 import { ScoreEntry } from '../../../utils/social/leaderboard';

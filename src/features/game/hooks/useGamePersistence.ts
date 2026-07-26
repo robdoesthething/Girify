@@ -7,6 +7,9 @@ import { useNotification } from '../../../hooks/useNotification';
 import { updateDistrictScore } from '../../../services/db/games';
 import { checkAndProgressQuests } from '../../../services/db/quests';
 import { getUserByUsername } from '../../../services/db/users';
+import { createLogger } from '../../../utils/logger';
+
+const logger = createLogger('GamePersistence');
 import { endGame } from '../../../services/gameService';
 import { GameStateObject, QuizResult } from '../../../types/game';
 import { GameHistory } from '../../../types/user';
@@ -89,11 +92,11 @@ export const useGamePersistence = () => {
                 saved = true;
                 debugLog(`[Persistence] Save Success (GameID: ${result.gameId})`);
               } else {
-                console.error('[Save Error] Failed to save game:', result.error);
+                logger.error('[Save Error] Failed to save game:', result.error);
                 debugLog(`[Persistence] Save Failed: ${result.error}`);
               }
             } catch (error) {
-              console.error('[Save Exception] Critical error:', error);
+              logger.error('[Save Exception] Critical error:', error);
             }
 
             if (!saved) {
@@ -108,12 +111,12 @@ export const useGamePersistence = () => {
                 .then(userRow => {
                   if (userRow?.district) {
                     updateDistrictScore(userRow.district, state.score).catch(err => {
-                      console.error('[District] Failed to update district score:', err);
+                      logger.error('[District] Failed to update district score:', err);
                     });
                   }
                 })
                 .catch(err => {
-                  console.error('[District] Failed to fetch user for district update:', err);
+                  logger.error('[District] Failed to fetch user for district update:', err);
                 });
 
               // Economy side-effects (streaks, quests, referrals) only run when the
@@ -131,7 +134,7 @@ export const useGamePersistence = () => {
               if (activityResult.status === 'fulfilled') {
                 debugLog(`[Activity] Published game completion for ${state.username}`);
               } else {
-                console.error('[Activity] Failed to publish game activity:', activityResult.reason);
+                logger.error('[Activity] Failed to publish game activity:', activityResult.reason);
               }
 
               if (questsResult.status === 'fulfilled') {
@@ -141,7 +144,7 @@ export const useGamePersistence = () => {
                   }
                 });
               } else {
-                console.error('Quest check failed', questsResult.reason);
+                logger.error('Quest check failed', questsResult.reason);
               }
             }
 

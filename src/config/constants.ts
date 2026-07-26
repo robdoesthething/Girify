@@ -27,6 +27,46 @@ export const UI = {
     FAIR: 0.5,
   },
   ACHIEVEMENT_COMPLETION_THRESHOLD: 0.99,
+  ANIMATION: {
+    DURATION_FAST: 0.05,
+    DURATION_MEDIUM: 0.1,
+    DURATION_SLOW: 0.3,
+    DELAY_SHORT: 0.1,
+    DELAY_TRANSITION_MS: 1500,
+  },
+} as const;
+
+// ==================== HTTP ====================
+export const HTTP = {
+  STATUS: {
+    UNAUTHORIZED: 401,
+    FORBIDDEN: 403,
+    TOO_MANY_REQUESTS: 429,
+  },
+} as const;
+
+// ==================== CACHE ====================
+export const CACHE = {
+  TTL_MINUTES: 5,
+} as const;
+
+// ==================== DATE ====================
+export const DATE = {
+  DAYS_IN_WEEK: 7,
+  SUNDAY_INDEX: 0,
+  SATURDAY_INDEX: 6,
+  PARSING: {
+    YYYYMMDD_LENGTH: 8,
+    YEAR_LEN: 4,
+    MONTH_LEN: 2,
+    DAY_LEN: 2,
+    BASE_10: 10,
+  },
+} as const;
+
+// ==================== DEBUG ====================
+export const DEBUG = {
+  MAX_LOGS: 50,
 } as const;
 
 // ==================== GAME CONFIG ====================

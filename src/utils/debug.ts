@@ -1,4 +1,4 @@
-import { DEBUG } from './constants';
+import { DEBUG } from '../config/constants';
 
 export const debugLog = (msg: string) => {
   try {

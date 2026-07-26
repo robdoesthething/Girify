@@ -2,7 +2,7 @@ import { motion } from 'framer-motion';
 import React from 'react';
 import { useTheme } from '../../../context/ThemeContext';
 import { DISTRICTS } from '../../../data/districts';
-import { UI } from '../../../utils/constants';
+import { UI } from '../../../config/constants';
 import { TeamScoreEntry } from '../../../utils/social/leaderboard';
 import { themeClasses } from '../../../utils/themeUtils';
 
