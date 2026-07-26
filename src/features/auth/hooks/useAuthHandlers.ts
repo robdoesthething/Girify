@@ -4,17 +4,15 @@
  * Handles all authentication logic for Google and Email auth flows via Supabase Auth.
  */
 
+import { getRandomAvatarId } from '../../../config/appConstants';
 import { STORAGE_KEYS } from '../../../config/constants';
 import { supabase } from '../../../services/supabase';
-import { ensureUserProfile, getUserByEmail, getUserByUid } from '../../../utils/social';
+import { ensureUserProfile } from '../../../utils/social';
 import { storage } from '../../../utils/storage';
 
-import {
-  generateHandle,
-  getAuthErrorMessage,
-  getRandomAvatarId,
-  validateUsername,
-} from '../utils/authUtils';
+import { generateHandle, getAuthErrorMessage, validateUsername } from '../utils/authUtils';
+import { getMetadataDisplayNameOrUndefined } from '../utils/displayName';
+import { resolveOAuthProfile } from '../utils/oauthProfile';
 import type { FormAction, PendingGoogleUser } from './useRegisterForm';
 
 import type { User } from '@supabase/supabase-js';
@@ -59,31 +57,9 @@ export function createAuthHandlers(config: AuthHandlersConfig, state: AuthHandle
 
   const processGoogleUser = async (user: User) => {
     try {
-      let handle = user.user_metadata?.full_name || user.user_metadata?.name || '';
-      let avatarId = getRandomAvatarId();
-      const fullName =
-        user.user_metadata?.full_name ||
-        user.user_metadata?.name ||
-        user.email?.split('@')[0] ||
-        'User';
-
-      let existingProfile = (await getUserByUid(user.id)) as any;
+      const { existingProfile, fullName, avatarId, handle } = await resolveOAuthProfile(user);
 
       if (!existingProfile) {
-        existingProfile = (await getUserByEmail(user.email || '')) as any;
-      }
-
-      if (existingProfile) {
-        handle = existingProfile.username;
-        if (!handle.startsWith('@')) {
-          handle = `@${handle}`;
-        }
-        avatarId = existingProfile.avatarId || avatarId;
-      } else {
-        handle = generateHandle(fullName);
-        if (!handle.startsWith('@')) {
-          handle = `@${handle}`;
-        }
         // Update user metadata with handle
         await supabase.auth.updateUser({ data: { display_name: handle } });
       }
@@ -257,7 +233,7 @@ export function createAuthHandlers(config: AuthHandlersConfig, state: AuthHandle
         return;
       }
 
-      const displayName = user?.user_metadata?.display_name || user?.user_metadata?.full_name || '';
+      const displayName = getMetadataDisplayNameOrUndefined(user) || '';
       const storedUsername = storage.get(STORAGE_KEYS.USERNAME, '');
 
       if (!storedUsername && displayName) {

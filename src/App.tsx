@@ -3,6 +3,7 @@ import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 import AppRoutes from './AppRoutes';
 import ErrorBoundary from './components/ErrorBoundary';
 import { NotificationProvider } from './components/NotificationSystem';
+import { AuthProvider } from './context/AuthContext';
 import { LoadingProvider } from './context/LoadingContext';
 import { ThemeProvider } from './context/ThemeContext';
 
@@ -21,7 +22,9 @@ const router = createBrowserRouter([
       <ErrorBoundary>
         <NotificationProvider>
           <LoadingProvider>
-            <AppRoutes />
+            <AuthProvider>
+              <AppRoutes />
+            </AuthProvider>
           </LoadingProvider>
         </NotificationProvider>
       </ErrorBoundary>

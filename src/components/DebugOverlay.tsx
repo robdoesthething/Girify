@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { getMetadataDisplayNameOrUndefined } from '../features/auth/utils/displayName';
 import { supabase } from '../services/supabase';
 import { storage } from '../utils/storage';
 
@@ -15,7 +16,7 @@ const DebugOverlay: React.FC = () => {
       setInfo({
         uid: user?.id || 'null',
         email: user?.email || 'null',
-        displayName: user?.user_metadata?.display_name || user?.user_metadata?.full_name || 'null',
+        displayName: getMetadataDisplayNameOrUndefined(user) ?? 'null',
         storageUser: storage.get('girify_username', 'null'),
         redirectPending: sessionStorage.getItem('girify_redirect_pending') || 'null',
         processing: sessionStorage.getItem('girify_processing_redirect') || 'null',
