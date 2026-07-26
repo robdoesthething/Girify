@@ -1,5 +1,23 @@
 # Changelog
 
+## [0.3.0] - 2026-07-26
+
+### Fixed
+
+- The top navigation bar no longer renders twice on leaderboard, shop, friends, profile, news, about, and feedback pages — menus and keyboard shortcuts now behave reliably.
+- Logged-in players no longer see an incorrect "login required" popup when navigating from certain pages.
+- Signing in no longer triggers duplicate background profile syncs, making login faster and more reliable.
+- Sign-in error messages now correctly explain what went wrong (e.g. wrong password vs. unverified email).
+
+### Improved
+
+- The app loads noticeably faster — every page is now loaded on demand, and the feedback widget's verification script no longer slows down the initial load.
+- The interface feels snappier — theme and notification updates no longer re-render the entire app.
+
+### Changed
+
+- Internal cleanup: consolidated database access, removed dead code and one-off maintenance scripts, and unified error logging for faster future fixes.
+
 ## [Unreleased] - 2026-06-20
 
 ### Added

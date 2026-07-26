@@ -192,8 +192,8 @@ refactor(game): extract scoring logic to hook
 
 **Database**:
 
-- `src/services/database.ts` - Supabase queries
-- `src/utils/supabase.ts` - Supabase client initialization
+- `src/services/db/` - Supabase queries (modular: users, friends, blocks, shop, quests, etc.)
+- `src/services/supabase.ts` - Supabase client initialization
 - `scripts/supabase-schema.sql` - Database schema
 
 **Authentication**:
@@ -207,7 +207,7 @@ refactor(game): extract scoring logic to hook
 - `scripts/publishNews.js` - Create news/announcements
 - `scripts/fix-supabase-permissions.sql` - Set up RLS policies
 - `scripts/seed-test-data.sql` - Test data for development
-- `scripts/migrate-*.ts` - Firebase → Supabase migration scripts
+- `supabase/migrations/` - Database migrations (applied via Supabase CLI)
 
 ## Common Patterns
 
@@ -216,7 +216,7 @@ refactor(game): extract scoring logic to hook
 Always handle errors and use proper typing:
 
 ```typescript
-import { supabase } from '@/utils/supabase';
+import { supabase } from '../services/supabase';
 
 export async function getUserProfile(userId: string): Promise<UserProfile | null> {
   const { data, error } = await supabase.from('users').select('*').eq('uid', userId).single();
