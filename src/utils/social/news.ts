@@ -1,6 +1,7 @@
 /**
  * News/Announcements Utility Functions
  */
+import { createLogger } from '../logger';
 import {
   createAnnouncement as dbCreateAnnouncement,
   deleteAnnouncement as dbDeleteAnnouncement,
@@ -9,8 +10,10 @@ import {
   markAnnouncementAsRead as dbMarkAnnouncementAsRead,
   updateAnnouncement as dbUpdateAnnouncement,
   getReadAnnouncementIds,
-} from '../../services/database';
+} from '../../services/db';
 import { AnnouncementRow } from '../../types/supabase';
+
+const logger = createLogger('News');
 
 export type AnnouncementPriority = 'low' | 'normal' | 'high' | 'urgent';
 export type TargetAudience = 'all' | 'new_users' | 'returning';
@@ -67,7 +70,7 @@ export const getAllAnnouncements = async (): Promise<Announcement[]> => {
     const rows = await dbGetAllAnnouncements();
     return rows.map(mapRowToAnnouncement);
   } catch (e) {
-    console.error('[News] Error fetching announcements:', e);
+    logger.error('[News] Error fetching announcements:', e);
     return [];
   }
 };
@@ -81,7 +84,7 @@ export const getActiveAnnouncements = async (): Promise<Announcement[]> => {
     const rows = await dbGetActiveAnnouncements();
     return rows.map(mapRowToAnnouncement);
   } catch (e) {
-    console.error('[News] Error fetching active announcements:', e);
+    logger.error('[News] Error fetching active announcements:', e);
     return [];
   }
 };
@@ -109,7 +112,7 @@ export const getUnreadAnnouncements = async (username: string): Promise<Announce
 
     return active.filter(a => !readIds.includes(parseInt(a.id, 10)));
   } catch (e) {
-    console.error('[News] Error getting unread announcements:', e);
+    logger.error('[News] Error getting unread announcements:', e);
     return [];
   }
 };
@@ -140,7 +143,7 @@ export const markAnnouncementAsRead = async (
       await dbMarkAnnouncementAsRead(username, numericId);
     }
   } catch (e) {
-    console.error('[News] Error marking as read:', e);
+    logger.error('[News] Error marking as read:', e);
   }
 };
 
@@ -191,7 +194,7 @@ export const createAnnouncement = async (
 
     return { success: true, id };
   } catch (e) {
-    console.error('[News] Error creating announcement:', e);
+    logger.error('[News] Error creating announcement:', e);
     return { success: false, error: (e as Error).message };
   }
 };
@@ -237,7 +240,7 @@ export const updateAnnouncement = async (
     }
     return { success: false, error: 'Update failed' };
   } catch (e) {
-    console.error('[News] Error updating announcement:', e);
+    logger.error('[News] Error updating announcement:', e);
     return { success: false, error: (e as Error).message };
   }
 };
@@ -256,7 +259,7 @@ export const deleteAnnouncement = async (id: string): Promise<OperationResult> =
     }
     return { success: false, error: 'Delete failed' };
   } catch (e) {
-    console.error('[News] Error deleting announcement:', e);
+    logger.error('[News] Error deleting announcement:', e);
     return { success: false, error: (e as Error).message };
   }
 };

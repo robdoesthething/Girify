@@ -18,7 +18,7 @@ export const getUTCStartOfDay = (date: Date = new Date()): string => {
  * Returns the ISO string for the start of the current week (Monday) in UTC.
  * @param date Optional date object (defaults to now)
  */
-import { DATE } from './constants';
+import { DATE } from '../config/constants';
 
 // ...
 

@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import { getUserPurchasedBadges, getUserShopData } from '../../../services/database';
+import { getUserPurchasedBadges, getUserShopData } from '../../../services/db';
 import { getShopItems, GroupedShopItems } from '../../../utils/shop';
 import type { EquippedCosmetics } from '../../../utils/social/types';
 

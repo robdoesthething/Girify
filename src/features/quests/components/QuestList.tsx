@@ -3,7 +3,7 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { useTheme } from '../../../context/ThemeContext';
 import { useToast } from '../../../hooks/useToast';
 import { claimQuestReward, getDailyQuests, QuestWithProgress } from '../../../services/db/quests';
-import { UI } from '../../../utils/constants';
+import { UI } from '../../../config/constants';
 import { createLogger } from '../../../utils/logger';
 import { themeClasses } from '../../../utils/themeUtils';
 

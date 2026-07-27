@@ -4,7 +4,7 @@
  * Functions for updating user game statistics and district scores.
  */
 
-import { getUserGameHistory as dbGetUserGameHistory } from '../../services/database';
+import { getUserGameHistory as dbGetUserGameHistory } from '../../services/db';
 import { supabase } from '../../services/supabase';
 import { normalizeUsername } from '../format';
 import { getTeamLeaderboard } from './leaderboard';
@@ -27,7 +27,7 @@ export const updateUserGameStats = async (
   const normalizedName = normalizeUsername(username);
 
   try {
-    const { data, error } = await (supabase as any).rpc('record_game_result', {
+    const { data, error } = await supabase.rpc('record_game_result', {
       p_username: normalizedName,
       p_score: currentScore ?? 0,
       p_streak: streak,

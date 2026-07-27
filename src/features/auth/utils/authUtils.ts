@@ -7,7 +7,6 @@
 // Constants
 export const MAX_USERNAME_LENGTH = 20;
 export const USERNAME_REGEX = /^[a-zA-Z0-9_]+$/;
-const DEFAULT_AVATAR_COUNT = 20;
 
 export const BLOCKED_WORDS = [
   'admin',
@@ -69,52 +68,34 @@ export const generateHandle = (baseName: string): string => {
 };
 
 /**
- * Get a random avatar ID
- */
-export const getRandomAvatarId = (): number => Math.floor(Math.random() * DEFAULT_AVATAR_COUNT) + 1;
-
-/**
- * Map auth error codes to user-friendly messages
+ * Map Supabase Auth error codes/messages to user-friendly messages
  */
 export const getAuthErrorMessage = (code: string, message?: string): string => {
-  switch (code) {
-    case 'auth/popup-closed-by-user':
-      return 'Sign-in cancelled. Please try again.';
-    case 'auth/cancelled-popup-request':
-      return 'Multiple sign-in attempts detected. Please try again.';
-    case 'auth/network-request-failed':
-      return 'Network error. Please check your connection and try again.';
-    case 'auth/too-many-requests':
-      return 'Too many attempts. Please wait a moment and try again.';
-    case 'auth/popup-blocked':
-      return message
-        ? `Google sign-in failed: ${message}`
-        : 'Popup blocked by browser. Please allow popups and try again.';
-    case 'auth/invalid-email':
-      return 'Invalid email address format.';
-    case 'auth/user-not-found':
-      return 'No account found with this email. Please sign up first.';
-    case 'auth/wrong-password':
-      return 'Incorrect password. Please try again.';
-    case 'auth/email-already-in-use':
-      return 'This email is already registered. Please sign in instead.';
-    case 'auth/weak-password':
-      return 'Password must be at least 6 characters long.';
-    case 'auth/invalid-credential':
-      return 'Invalid email or password. Please check your credentials.';
-    case 'auth/user-disabled':
-      return 'This account has been disabled. Please contact support.';
-    case 'auth/unauthorized-domain':
-      return 'This domain is not authorized for sign-in. Please contact support.';
-    case 'auth/operation-not-allowed':
-      return 'Google sign-in is not enabled. Please contact support.';
-    case 'auth/internal-error':
-      return message
-        ? `Authentication error: ${message}`
-        : 'An internal error occurred. Please try again.';
-    default:
-      return message
-        ? `Authentication failed: ${message}`
-        : 'Authentication failed. Please try again.';
+  const msg = message?.toLowerCase() ?? '';
+
+  if (code === 'invalid_credentials' || msg.includes('invalid login credentials')) {
+    return 'Invalid email or password. Please check your credentials.';
   }
+  if (code === 'email_not_confirmed' || msg.includes('email not confirmed')) {
+    return 'Please verify your email address before signing in. Check your inbox.';
+  }
+  if (code === 'user_already_exists' || msg.includes('already registered')) {
+    return 'This email is already registered. Please sign in instead.';
+  }
+  if (code === 'weak_password' || msg.includes('weak password')) {
+    return 'Password must be at least 6 characters long.';
+  }
+  if (code === 'over_request_rate_limit' || code === 'over_email_send_rate_limit') {
+    return 'Too many attempts. Please wait a moment and try again.';
+  }
+  if (code === 'validation_failed' || msg.includes('invalid email')) {
+    return 'Invalid email address format.';
+  }
+  if (code === 'user_banned') {
+    return 'This account has been disabled. Please contact support.';
+  }
+  if (msg.includes('network') || msg.includes('failed to fetch')) {
+    return 'Network error. Please check your connection and try again.';
+  }
+  return message ? `Authentication failed: ${message}` : 'Authentication failed. Please try again.';
 };

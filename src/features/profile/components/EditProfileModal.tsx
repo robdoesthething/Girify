@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button, Modal } from '../../../components/ui';
 import { useTheme } from '../../../context/ThemeContext';
-import { AVATARS } from '../../../data/avatars';
+import { getAvatar } from '../../../data/avatars';
 import { getCosmeticAvatarImage, getFrameClass } from '../../../utils/shop/catalog';
 import { ShopItem } from '../../../utils/shop';
 
@@ -54,7 +54,7 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({
   const selectedFrame = ownedFrames.find(f => f.id === selectedFrameId);
   const previewFrameClass = selectedFrame?.cssClass || getFrameClass(selectedFrameId) || '';
 
-  const legacyFallback = AVATARS[Math.max(0, Math.min(legacyAvatarIndex, AVATARS.length - 1))];
+  const legacyFallback = getAvatar(legacyAvatarIndex + 1);
 
   const isDark = theme === 'dark';
 

@@ -16,7 +16,7 @@
   "author": "robdoesthething",
   "license": "MIT",
   "private": true,
-  "version": "0.2.0",
+  "version": "0.3.0",
   "type": "module",
   "engines": {
     "node": ">=20.0.0"
@@ -56,7 +56,6 @@
   "dependencies": {
     "@marsidev/react-turnstile": "^1.4.2",
     "@sentry/react": "^10.36.0",
-    "@sentry/vite-plugin": "^4.7.0",
     "@supabase/supabase-js": "^2.90.1",
     "@turf/boolean-disjoint": "^7.3.2",
     "@turf/centroid": "^7.3.2",
@@ -70,7 +69,7 @@
     "react-dom": "^19.2.0",
     "react-helmet-async": "^2.0.5",
     "react-leaflet": "^5.0.0",
-    "react-router-dom": "^7.11.0",
+    "react-router-dom": "^7.18.1",
     "web-vitals": "^5.1.0"
   },
   "devDependencies": {
@@ -81,6 +80,7 @@
     "@emotion/is-prop-valid": "^1.4.0",
     "@eslint/js": "^9.39.1",
     "@playwright/test": "^1.57.0",
+    "@sentry/vite-plugin": "^5.4.0",
     "@storybook/addon-a11y": "^10.1.11",
     "@storybook/addon-docs": "^10.1.11",
     "@storybook/addon-onboarding": "^10.1.11",

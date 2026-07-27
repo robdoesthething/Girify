@@ -1,12 +1,8 @@
 import { useEffect, useState } from 'react';
 import { getUserGameHistory, getUserProfile, UserProfile } from '../../../utils/social';
 import { EquippedCosmetics } from '../../../utils/social/types';
-import {
-  blockUser,
-  getBlockStatus,
-  getFriendshipStatus,
-  sendFriendRequest,
-} from '../../../utils/social/friends';
+import { blockUser, getBlockStatus } from '../../../utils/social/blocks';
+import { getFriendshipStatus, sendFriendRequest } from '../../../utils/social/friends';
 
 interface UsePublicProfileReturn {
   profile: UserProfile | null;

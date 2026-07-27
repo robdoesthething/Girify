@@ -6,7 +6,10 @@
 
 import type { AnnouncementRow } from '../../types/supabase';
 import { normalizeUsername } from '../../utils/format';
+import { createLogger } from '../../utils/logger';
 import { supabase } from '../supabase';
+
+const logger = createLogger('AnnouncementsDB');
 
 export async function getActiveAnnouncements(): Promise<AnnouncementRow[]> {
   const now = new Date().toISOString();
@@ -21,7 +24,7 @@ export async function getActiveAnnouncements(): Promise<AnnouncementRow[]> {
     .order('publish_date', { ascending: false });
 
   if (error) {
-    console.error('[DB] getActiveAnnouncements error:', error.message);
+    logger.error('[DB] getActiveAnnouncements error:', error.message);
     return [];
   }
 
@@ -35,7 +38,7 @@ export async function getAllAnnouncements(): Promise<AnnouncementRow[]> {
     .order('publish_date', { ascending: false });
 
   if (error) {
-    console.error('[DB] getAllAnnouncements error:', error.message);
+    logger.error('[DB] getAllAnnouncements error:', error.message);
     return [];
   }
   return data || [];
@@ -51,7 +54,7 @@ export async function createAnnouncement(
     .single();
 
   if (error) {
-    console.error('[DB] createAnnouncement error:', error.message);
+    logger.error('[DB] createAnnouncement error:', error.message);
     return null;
   }
   return data?.id?.toString() || null;
@@ -64,7 +67,7 @@ export async function updateAnnouncement(
   const { error } = await supabase.from('announcements').update(updates).eq('id', id);
 
   if (error) {
-    console.error('[DB] updateAnnouncement error:', error.message);
+    logger.error('[DB] updateAnnouncement error:', error.message);
     return false;
   }
   return true;
@@ -74,7 +77,7 @@ export async function deleteAnnouncement(id: number): Promise<boolean> {
   const { error } = await supabase.from('announcements').delete().eq('id', id);
 
   if (error) {
-    console.error('[DB] deleteAnnouncement error:', error.message);
+    logger.error('[DB] deleteAnnouncement error:', error.message);
     return false;
   }
   return true;
@@ -88,7 +91,7 @@ export async function getReadAnnouncementIds(username: string): Promise<number[]
     .eq('username', normalized);
 
   if (error) {
-    console.error('[DB] getReadAnnouncementIds error:', error.message);
+    logger.error('[DB] getReadAnnouncementIds error:', error.message);
     return [];
   }
   return data?.map(r => r.announcement_id) || [];
@@ -105,7 +108,7 @@ export async function markAnnouncementAsRead(
   });
 
   if (error) {
-    console.error('[DB] markAnnouncementAsRead error:', error.message);
+    logger.error('[DB] markAnnouncementAsRead error:', error.message);
     return false;
   }
   return true;

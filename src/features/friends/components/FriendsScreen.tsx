@@ -1,6 +1,4 @@
 import React, { useEffect } from 'react';
-import { useTopBarNav } from '../../../hooks/useTopBarNav';
-import TopBar from '../../../components/TopBar';
 import { PageHeader } from '../../../components/ui';
 import { useTheme } from '../../../context/ThemeContext';
 import { useTabs } from '../../../hooks/useTabs';
@@ -18,7 +16,6 @@ interface FriendsScreenProps {
 
 const FriendsScreen: React.FC<FriendsScreenProps> = ({ username }) => {
   const { theme, t } = useTheme();
-  const topBarNav = useTopBarNav();
 
   // Custom hooks
   const { activeTab, setTab, isTabActive } = useTabs<'feed' | 'friends' | 'requests'>('feed');
@@ -76,11 +73,7 @@ const FriendsScreen: React.FC<FriendsScreenProps> = ({ username }) => {
     }`;
 
   return (
-    <div
-      className={`fixed inset-0 w-full h-full flex flex-col overflow-hidden transition-colors duration-500 ${themeClasses(theme, 'bg-slate-900 text-white', 'bg-slate-50 text-slate-900')}`}
-    >
-      <TopBar onOpenPage={topBarNav.onOpenPage} onTriggerLogin={topBarNav.onTriggerLogin} />
-
+    <>
       <div className="flex-1 w-full px-4 py-8 pt-20 overflow-x-hidden overflow-y-auto">
         <div className="max-w-2xl lg:max-w-5xl mx-auto w-full">
           <PageHeader title={`👥 ${t('friends') || 'Friends'}`} />
@@ -171,7 +164,7 @@ const FriendsScreen: React.FC<FriendsScreenProps> = ({ username }) => {
           </div>
         </div>
       </div>
-    </div>
+    </>
   );
 };
 

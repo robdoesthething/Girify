@@ -1,4 +1,5 @@
 import { Helmet } from 'react-helmet-async';
+import { env } from '../config/env';
 import { useTheme } from '../context/ThemeContext';
 
 interface SeoHeadProps {
@@ -9,7 +10,7 @@ interface SeoHeadProps {
   index?: boolean;
 }
 
-const SITE_URL = import.meta.env.VITE_SITE_URL || 'https://girify.vercel.app';
+const SITE_URL = env.siteUrl || 'https://girify.vercel.app';
 const DEFAULT_TITLE = 'Girify — Daily Barcelona Streets Quiz';
 const DEFAULT_DESCRIPTION =
   'Girify is a free daily geography quiz about Barcelona streets. Identify highlighted streets on an interactive map, earn points, climb the leaderboard, and unlock badges. A new challenge every 24 hours.';

@@ -25,7 +25,7 @@ export async function linkSupabaseUid(user: User): Promise<void> {
   }
 
   try {
-    const { error } = await (supabase as any).rpc('link_supabase_uid');
+    const { error } = await supabase.rpc('link_supabase_uid');
     if (error) {
       console.warn('[Auth] Failed to link supabase_uid via RPC:', error.message);
     }

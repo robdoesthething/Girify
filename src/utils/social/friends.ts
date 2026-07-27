@@ -3,20 +3,22 @@ import {
   addFriendship,
   areFriends,
   createFriendRequest,
-  blockUser as dbBlockUser,
   getFriends as dbGetFriends,
   searchUsers as dbSearchUsers,
-  unblockUser as dbUnblockUser,
   deleteFriendRequest,
   getActivityFeed,
+  getFriendProfilesByUsernames,
   getPendingFriendRequests,
   getSentFriendRequests,
   getUserByUsername,
   isUserBlocked,
   removeFriendship,
   updateFriendRequestStatus,
-} from '../../services/database';
+} from '../../services/db';
 import { supabase } from '../../services/supabase';
+import { createLogger } from '../logger';
+
+const logger = createLogger('Friends');
 import { normalizeUsername } from '../format';
 
 export interface UserSearchResult {
@@ -108,14 +110,13 @@ export const sendFriendRequest = async (
 
   try {
     // Rate limit check (10 requests per hour)
-    // Note: RPC function added via migration, cast needed until types regenerated
-    const { data: rateLimitOk, error: rateLimitError } = await (supabase as any).rpc(
+    const { data: rateLimitOk, error: rateLimitError } = await supabase.rpc(
       'check_friend_request_rate_limit',
       { p_user_id: fromClean }
     );
 
     if (rateLimitError) {
-      console.error('[Friends] Rate limit check failed:', rateLimitError);
+      logger.error('[Friends] Rate limit check failed:', rateLimitError);
       // Fail open - allow request if rate limit check fails
     } else if (rateLimitOk === false) {
       return { error: 'Too many friend requests. Please wait an hour before sending more.' };
@@ -170,7 +171,7 @@ export const sendFriendRequest = async (
 
     return { success: true };
   } catch (e) {
-    console.error('[Friends] Error sending request:', e);
+    logger.error('[Friends] Error sending request:', e);
     return { error: (e as Error).message };
   }
 };
@@ -238,7 +239,7 @@ export const acceptFriendRequest = async (
 
     return { success: true };
   } catch (e) {
-    console.error('[Friends] Error accepting request:', e);
+    logger.error('[Friends] Error accepting request:', e);
     return { error: (e as Error).message };
   }
 };
@@ -286,11 +287,8 @@ export const getFriends = async (username: string): Promise<Friend[]> => {
     const todayStr = new Date().toISOString().split('T')[0];
 
     // Batch fetch profiles and today's games count in parallel
-    const [{ data: profiles }, { data: todayGamesEntries }] = await Promise.all([
-      supabase
-        .from('users')
-        .select('username, equipped_badges, avatar_id, equipped_cosmetics')
-        .in('username', friendUsernames),
+    const [profiles, { data: todayGamesEntries }] = await Promise.all([
+      getFriendProfilesByUsernames(friendUsernames),
       supabase
         .from('user_games')
         .select('username')
@@ -298,7 +296,7 @@ export const getFriends = async (username: string): Promise<Friend[]> => {
         .in('username', friendUsernames),
     ]);
 
-    const profilesMap = new Map(profiles?.map(p => [p.username, p]) || []);
+    const profilesMap = new Map(profiles.map(p => [p.username, p]));
 
     const gamesCountMap = new Map<string, number>();
     todayGamesEntries?.forEach((g: { username: string }) => {
@@ -321,7 +319,7 @@ export const getFriends = async (username: string): Promise<Friend[]> => {
 
     return friends;
   } catch (e) {
-    console.error('[Friends] Error getting friends:', e);
+    logger.error('[Friends] Error getting friends:', e);
     return [];
   }
 };
@@ -362,7 +360,7 @@ export const getFriendFeed = async (
       badge: a.badge_name ? { name: a.badge_name, emoji: '🏆' } : undefined, // Simplified
     }));
   } catch (e) {
-    console.error('Feed query failed:', e);
+    logger.error('Feed query failed:', e);
     return [];
   }
 };
@@ -384,7 +382,7 @@ export const removeFriend = async (user1: string, user2: string): Promise<Operat
     await removeFriendship(clean1, clean2);
     return { success: true };
   } catch (e) {
-    console.error('Error removing friend:', e);
+    logger.error('Error removing friend:', e);
     return { error: (e as Error).message };
   }
 };
@@ -424,45 +422,9 @@ export const getFriendshipStatus = async (
 
     return 'none';
   } catch (e) {
-    console.error('Error checking friendship:', e);
+    logger.error('Error checking friendship:', e);
     return 'none';
   }
-};
-
-/**
- * Block a user
- * @param blocker - The username blocking the other
- * @param blocked - The username to be blocked
- * @returns Promise resolving when block is complete
- */
-export const blockUser = async (blocker: string, blocked: string): Promise<void> => {
-  if (!blocker || !blocked || blocker === blocked) {
-    return;
-  }
-  await dbBlockUser(blocker, blocked);
-};
-
-/**
- * Unblock a user
- * @param blocker - The username who blocked
- * @param blocked - The username to unblock
- * @returns Promise resolving when unblock is complete
- */
-export const unblockUser = async (blocker: string, blocked: string): Promise<void> => {
-  if (!blocker || !blocked) {
-    return;
-  }
-  await dbUnblockUser(blocker, blocked);
-};
-
-/**
- * Check if user1 has blocked user2
- * @param user1 - The potential blocker
- * @param user2 - The potential blocked user
- * @returns Promise resolving to true if blocked, false otherwise
- */
-export const getBlockStatus = async (user1: string, user2: string): Promise<boolean> => {
-  return isUserBlocked(user1, user2);
 };
 
 /**
@@ -479,7 +441,7 @@ export const getFriendCount = async (username: string): Promise<number> => {
     const user = await getUserByUsername(normalizeUsername(username));
     return user?.friend_count || 0;
   } catch (e) {
-    console.error('Error getting friend count:', e);
+    logger.error('Error getting friend count:', e);
     return 0;
   }
 };

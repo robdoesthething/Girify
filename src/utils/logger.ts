@@ -51,9 +51,13 @@ export class Logger {
     }
   }
 
-  private sendToErrorTracking(_args: unknown[]): void {
-    // Integrate with Sentry, LogRocket, etc.
-    // Sentry.captureException(args[0]);
+  private sendToErrorTracking(args: unknown[]): void {
+    const first = args[0];
+    const error =
+      first instanceof Error
+        ? first
+        : new Error(args.map(a => (typeof a === 'string' ? a : JSON.stringify(a))).join(' '));
+    import('@sentry/react').then(({ captureException }) => captureException(error)).catch(() => {});
   }
 }
 

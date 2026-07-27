@@ -8,7 +8,7 @@ import {
   getBadgeStats as dbGetBadgeStats,
   getUserPurchasedBadges,
   upsertBadgeStats,
-} from '../../services/database';
+} from '../../services/db';
 import { BadgeStatsRow } from '../../types/supabase';
 
 // Street name patterns

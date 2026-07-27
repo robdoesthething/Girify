@@ -102,7 +102,7 @@ export async function updateDistrictScore(
   scoreToAdd: number
 ): Promise<boolean> {
   // Atomic increment via RPC to avoid TOCTOU race condition
-  const { error } = await (supabase as any).rpc('increment_district_score', {
+  const { error } = await supabase.rpc('increment_district_score', {
     district_id: districtId,
     score_to_add: scoreToAdd,
   });

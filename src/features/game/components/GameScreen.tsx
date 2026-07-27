@@ -5,7 +5,7 @@ import LandingPage from '../../../components/LandingPage';
 import { useGameContext } from '../../../context/GameContext';
 import { useTheme } from '../../../context/ThemeContext';
 import { Street } from '../../../types/game';
-import { UI } from '../../../utils/constants';
+import { UI } from '../../../config/constants';
 import { themeClasses } from '../../../utils/themeUtils';
 import RegisterPanel from '../../auth/components/RegisterPanel';
 import InstructionsOverlay from './InstructionsOverlay';

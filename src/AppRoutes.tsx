@@ -3,6 +3,7 @@ import React, { Suspense, useEffect, useRef } from 'react';
 import { Navigate, Route, Routes, useParams } from 'react-router-dom';
 import TopBar from './components/TopBar';
 import UpdateModal from './components/UpdateModal';
+import { getMetadataFullNameOrUndefined } from './features/auth/utils/displayName';
 import { useAppInitialization } from './hooks/useAppInitialization';
 import { usePageTitle } from './hooks/usePageTitle';
 import { useUpdateModal } from './hooks/useUpdateModal';
@@ -63,8 +64,7 @@ const AppRoutes: React.FC = () => {
     scrollRef.current?.scrollTo({ top: 0, behavior: 'instant' });
   }, [location.pathname]);
 
-  const currentUsername =
-    profile?.username || user?.user_metadata?.full_name || user?.user_metadata?.name || undefined;
+  const currentUsername = profile?.username || getMetadataFullNameOrUndefined(user);
 
   const { showUpdateModal, giurosAwarded, dismissUpdateModal } = useUpdateModal(
     currentUsername || ''

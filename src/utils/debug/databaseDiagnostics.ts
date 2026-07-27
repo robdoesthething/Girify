@@ -7,6 +7,7 @@
 
 /* eslint-disable no-console */
 
+import { getUserByUsername } from '../../services/db';
 import { supabase } from '../../services/supabase';
 import { normalizeUsername } from '../format';
 
@@ -22,17 +23,13 @@ export interface DiagnosticResult {
  */
 async function checkUserExists(username: string): Promise<DiagnosticResult> {
   const normalized = normalizeUsername(username);
-  const { data, error } = await supabase
-    .from('users')
-    .select('username, supabase_uid, games_played')
-    .eq('username', normalized)
-    .single();
+  const data = await getUserByUsername(normalized);
 
-  if (error) {
+  if (!data) {
     return {
       check: 'User Profile',
       status: 'fail',
-      message: `User not found: ${error.message}`,
+      message: `User not found: ${normalized}`,
     };
   }
 
@@ -216,11 +213,11 @@ async function checkFriendsFeed(username: string): Promise<DiagnosticResult> {
  */
 async function checkRLSPolicies(): Promise<DiagnosticResult> {
   // Try to read from tables that need RLS
-  const tables = ['users', 'game_results', 'activity_feed', 'friendships'];
+  const tables = ['users', 'game_results', 'activity_feed', 'friendships'] as const;
   const results: string[] = [];
 
   for (const table of tables) {
-    const { error } = await (supabase as any).from(table).select('*').limit(1);
+    const { error } = await supabase.from(table).select('*').limit(1);
 
     if (error) {
       results.push(`❌ ${table}: ${error.message}`);

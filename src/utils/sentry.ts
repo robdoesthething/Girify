@@ -4,8 +4,10 @@
  * to avoid blocking the critical rendering path.
  * Uses named imports to enable tree-shaking of unused Sentry modules.
  */
+import { env } from '../config/env';
+
 export async function initSentry(): Promise<void> {
-  const dsn = import.meta.env.VITE_SENTRY_DSN;
+  const dsn = env.sentryDsn;
   if (!dsn) {
     return;
   }

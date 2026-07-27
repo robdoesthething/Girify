@@ -7,19 +7,20 @@
 
 import { lazy } from 'react';
 
-// Eagerly imported lightweight pages (no Suspense spinner flash)
-export { default as AboutScreen } from './components/AboutScreen';
-export { ConfirmDialog } from './components/ConfirmDialog';
-export { default as FeedbackScreen } from './components/FeedbackScreen';
-export { default as NewsScreen } from './components/NewsScreen';
-export { default as NotFoundScreen } from './components/NotFoundScreen';
-export { default as PrivacyPolicy } from './components/PrivacyPolicy';
-export { default as SettingsScreen } from './components/SettingsScreen';
-export { default as TermsOfService } from './components/TermsOfService';
+// Lazy loaded route components — everything behind Suspense in AppRoutes
+export const AboutScreen = lazy(() => import('./components/AboutScreen'));
+export const FeedbackScreen = lazy(() => import('./components/FeedbackScreen'));
+export const NewsScreen = lazy(() => import('./components/NewsScreen'));
+export const NotFoundScreen = lazy(() => import('./components/NotFoundScreen'));
+export const PrivacyPolicy = lazy(() => import('./components/PrivacyPolicy'));
+export const SettingsScreen = lazy(() => import('./components/SettingsScreen'));
+export const TermsOfService = lazy(() => import('./components/TermsOfService'));
+export const ConfirmDialog = lazy(() =>
+  import('./components/ConfirmDialog').then(m => ({ default: m.ConfirmDialog }))
+);
 
 // Lazy loaded heavy route components
 export const GamePage = lazy(() => import('./features/game/components/GamePage'));
-export const GameScreen = lazy(() => import('./features/game/components/GameScreen'));
 export const AdminPanel = lazy(() => import('./features/admin/components/AdminPanel'));
 export const AdminRoute = lazy(() => import('./features/admin/components/AdminRoute'));
 export const FriendsScreen = lazy(() => import('./features/friends/components/FriendsScreen'));

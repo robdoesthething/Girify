@@ -10,6 +10,7 @@ import { sanitizeInput } from '../../../utils/security';
 import { storage } from '../../../utils/storage';
 import { getUserByUid } from '../../../utils/social';
 import { linkSupabaseUid, syncUserProfile } from './authSyncHelpers';
+import { getMetadataDisplayName } from '../utils/displayName';
 
 import type { Session, User } from '@supabase/supabase-js';
 
@@ -97,13 +98,7 @@ export const useAuth = (onAnnouncementsCheck?: () => void): UseAuthResult => {
 
     if (!usernameToUse) {
       // Truly new user — derive a handle and migrate format if needed
-      const displayName = sanitizeInput(
-        authUser.user_metadata?.display_name ||
-          authUser.user_metadata?.full_name ||
-          authUser.user_metadata?.name ||
-          authUser.email?.split('@')[0] ||
-          'User'
-      ).toLowerCase();
+      const displayName = sanitizeInput(getMetadataDisplayName(authUser)).toLowerCase();
       usernameToUse = await UserMigrationService.migrateToNewFormat(displayName);
     }
 

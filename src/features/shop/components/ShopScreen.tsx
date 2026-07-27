@@ -1,8 +1,6 @@
 import { AnimatePresence } from 'framer-motion';
 import React, { useCallback, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useTopBarNav } from '../../../hooks/useTopBarNav';
-import TopBar from '../../../components/TopBar';
 import { Button, Heading, PageHeader, Tabs, Text } from '../../../components/ui';
 import { useTheme } from '../../../context/ThemeContext';
 import { useTabs } from '../../../hooks/useTabs';
@@ -23,7 +21,6 @@ interface ShopScreenProps {
 const ShopScreen: React.FC<ShopScreenProps> = ({ username }) => {
   const { theme, t } = useTheme();
   const navigate = useNavigate();
-  const topBarNav = useTopBarNav();
   // Hooks
   const { activeTab, setTab } = useTabs<'avatars' | 'frames' | 'titles' | 'badges' | 'special'>(
     'avatars'
@@ -110,11 +107,7 @@ const ShopScreen: React.FC<ShopScreenProps> = ({ username }) => {
   );
 
   return (
-    <div
-      className={`fixed inset-0 w-full h-full flex flex-col overflow-hidden transition-colors duration-500 ${themeClasses(theme, 'bg-slate-900 text-white', 'bg-slate-50 text-slate-900')}`}
-    >
-      <TopBar onOpenPage={topBarNav.onOpenPage} onTriggerLogin={topBarNav.onTriggerLogin} />
-
+    <>
       <div className="flex-1 overflow-y-auto w-full px-4 py-6 pt-16">
         <div className="max-w-6xl mx-auto">
           <PageHeader
@@ -250,7 +243,7 @@ const ShopScreen: React.FC<ShopScreenProps> = ({ username }) => {
           />
         )}
       </AnimatePresence>
-    </div>
+    </>
   );
 };
 

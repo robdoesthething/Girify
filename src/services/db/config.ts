@@ -6,7 +6,7 @@
  */
 
 import { SupabaseClient } from '@supabase/supabase-js';
-import { CACHE, TIME } from '../../utils/constants';
+import { CACHE, TIME } from '../../config/constants';
 import { createLogger } from '../../utils/logger';
 import { supabase } from '../supabase';
 
@@ -71,7 +71,7 @@ let pendingGameConfigFetch: Promise<GameConfig> | null = null;
 
 type AnySupabaseClient = SupabaseClient<any>;
 
-const CACHE_TTL = CACHE.TTL_MINUTES * TIME.SECONDS_PER_MINUTE * TIME.MS_PER_SECOND; // 5 minutes
+const CACHE_TTL = CACHE.TTL_MINUTES * TIME.ONE_MINUTE; // 5 minutes
 
 // ============================================================================
 // PAYOUT CONFIG FUNCTIONS
@@ -103,7 +103,7 @@ export const getPayoutConfig = async (): Promise<PayoutConfig> => {
         .single();
 
       if (error) {
-        console.error('[Config] Error fetching payout config:', error);
+        logger.error('[Config] Error fetching payout config:', error);
         return DEFAULT_PAYOUTS;
       }
 
@@ -122,7 +122,7 @@ export const getPayoutConfig = async (): Promise<PayoutConfig> => {
       payoutCacheTimestamp = Date.now();
       return cachedPayouts;
     } catch (e) {
-      console.error('[Config] Exception fetching payout config:', e);
+      logger.error('[Config] Exception fetching payout config:', e);
       return DEFAULT_PAYOUTS;
     } finally {
       pendingPayoutFetch = null;
@@ -170,7 +170,7 @@ export const updatePayoutConfig = async (
       .eq('id', 'default');
 
     if (error) {
-      console.error('[Config] Error updating payout config:', error);
+      logger.error('[Config] Error updating payout config:', error);
       return { success: false, error: error.message };
     }
 
@@ -183,7 +183,7 @@ export const updatePayoutConfig = async (
     logger.info('Payout config updated:', updates);
     return { success: true };
   } catch (e: unknown) {
-    console.error('[Config] Exception updating payout config:', e);
+    logger.error('[Config] Exception updating payout config:', e);
     const errorMessage = e instanceof Error ? e.message : String(e);
     return { success: false, error: errorMessage };
   }
@@ -258,7 +258,7 @@ export const getGameConfig = async (): Promise<GameConfig> => {
         .single();
 
       if (error) {
-        console.error('[Config] Error fetching game config:', error);
+        logger.error('[Config] Error fetching game config:', error);
         return DEFAULT_GAME_CONFIG;
       }
 
@@ -285,7 +285,7 @@ export const getGameConfig = async (): Promise<GameConfig> => {
       gameConfigCacheTimestamp = now;
       return cachedGameConfig;
     } catch (e) {
-      console.error('[Config] Exception fetching game config:', e);
+      logger.error('[Config] Exception fetching game config:', e);
       return DEFAULT_GAME_CONFIG;
     } finally {
       pendingGameConfigFetch = null;
@@ -336,7 +336,7 @@ export const updateGameConfig = async (
       .eq('id', 'default');
 
     if (error) {
-      console.error('[Config] Error updating game config:', error);
+      logger.error('[Config] Error updating game config:', error);
       return { success: false, error: error.message };
     }
 
@@ -349,7 +349,7 @@ export const updateGameConfig = async (
     logger.info('Game config updated:', updates);
     return { success: true };
   } catch (error) {
-    console.error('[Config] Exception updating game config:', error);
+    logger.error('[Config] Exception updating game config:', error);
     return { success: false, error: String(error) };
   }
 };

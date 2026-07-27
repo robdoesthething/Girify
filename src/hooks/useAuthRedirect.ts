@@ -1,14 +1,11 @@
 import { useEffect, useRef, useState } from 'react';
-import {
-  DISTRICT_CHECK_DELAY_MS,
-  getRandomAvatarId,
-  getRandomHandleSuffix,
-} from '../config/appConstants';
+import { DISTRICT_CHECK_DELAY_MS } from '../config/appConstants';
 import { STORAGE_KEYS } from '../config/constants';
+import { resolveOAuthProfile } from '../features/auth/utils/oauthProfile';
 import { supabase } from '../services/supabase';
 import { debugLog } from '../utils/debug';
 import { normalizeUsername } from '../utils/format';
-import { ensureUserProfile, getUserByEmail, getUserByUid, getUserProfile } from '../utils/social';
+import { ensureUserProfile, getUserProfile } from '../utils/social';
 import { storage } from '../utils/storage';
 
 interface UseAuthRedirectOptions {
@@ -67,27 +64,9 @@ export function useAuthRedirect({
           setHasProcessedRedirect(true);
           sessionStorage.removeItem('girify_redirect_pending');
 
-          let handle = user.user_metadata?.full_name || user.user_metadata?.name || '';
-          let avatarId = getRandomAvatarId();
-          const fullName =
-            user.user_metadata?.full_name ||
-            user.user_metadata?.name ||
-            user.email?.split('@')[0] ||
-            'User';
-
-          let existingProfile = (await getUserByUid(user.id)) as any;
-
-          if (!existingProfile) {
-            existingProfile = (await getUserByEmail(user.email || '')) as any;
-          }
+          const { existingProfile, fullName, avatarId, handle } = await resolveOAuthProfile(user);
 
           if (existingProfile) {
-            handle = existingProfile.username || handle || fullName;
-            if (!handle.startsWith('@')) {
-              handle = `@${handle}`;
-            }
-            avatarId = existingProfile.avatarId || avatarId;
-
             if (existingProfile.district) {
               await ensureUserProfile(handle, user.id, {
                 realName: fullName,
@@ -105,9 +84,6 @@ export function useAuthRedirect({
               setShowDistrictModal(true);
             }
           } else {
-            const namePart = (fullName.split(' ')[0] || 'User').replace(/[^a-zA-Z0-9]/g, '');
-            handle = `@${namePart}${getRandomHandleSuffix()}`;
-
             await supabase.auth.updateUser({ data: { display_name: handle } });
             storage.set(STORAGE_KEYS.USERNAME, handle);
             setPendingOAuthHandle(handle);

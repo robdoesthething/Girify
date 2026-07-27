@@ -1,7 +1,7 @@
 import React, { useMemo } from 'react';
 import { CosmeticAvatar } from '../../../components/ui';
 import { useTheme } from '../../../context/ThemeContext';
-import { AVATARS } from '../../../data/avatars';
+import { getAvatar } from '../../../data/avatars';
 import { UserProfile } from '../../../types/user';
 import { formatUsername } from '../../../utils/format';
 import { ShopItem } from '../../../utils/shop';
@@ -39,8 +39,7 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
   // Prefer the live (DB-merged) shop items, fall back to the bundled catalog
   const cosmeticAvatar = cosmetics.allAvatars.find(a => a.id === equippedAvatarId);
   const avatarImage = (cosmeticAvatar?.image as string) || getCosmeticAvatarImage(equippedAvatarId);
-  const legacyAvatarIndex = profileData?.avatarId ? profileData.avatarId - 1 : 0;
-  const legacyAvatar = AVATARS[Math.max(0, Math.min(legacyAvatarIndex, AVATARS.length - 1))];
+  const legacyAvatar = getAvatar(profileData?.avatarId);
   const equippedFrame = cosmetics.allFrames.find(f => f.id === cosmetics.equipped.frameId);
   const frameClass = equippedFrame?.cssClass || getFrameClass(cosmetics.equipped.frameId);
   const titleName =

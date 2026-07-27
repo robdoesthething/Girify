@@ -9,7 +9,7 @@ import {
   getPendingFriendRequests as dbGetPendingFriendRequests,
   unblockUser as dbUnblockUser,
   isUserBlocked,
-} from '../../services/database';
+} from '../../services/db';
 
 /**
  * Get pending friend requests for a user

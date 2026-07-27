@@ -47,8 +47,8 @@ const mockProfile: { username: string | null; team: string | null } = {
   team: null,
 };
 
-vi.mock('../../../auth/hooks/useAuth', () => ({
-  useAuth: () => ({
+vi.mock('../../../../context/AuthContext', () => ({
+  useAuthContext: () => ({
     user: null,
     profile: mockProfile,
     loading: false,

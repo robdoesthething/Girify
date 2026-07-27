@@ -6,10 +6,18 @@
 
 // Users
 export {
+  countUsers,
   createUser,
+  deleteUserByUsername,
+  getAllUsers,
+  getFriendProfilesByUsernames,
+  getLeaderboardUserData,
+  getUserByEmail,
   getUserByUid,
   getUserByUsername,
+  getUserMetricsSample,
   getUserShopData,
+  getUserTeamData,
   searchUsers,
   updateUser,
   upsertUser,

@@ -11,7 +11,10 @@ import type {
   ShopItemRow,
 } from '../../types/supabase';
 import { normalizeUsername } from '../../utils/format';
+import { createLogger } from '../../utils/logger';
 import { supabase } from '../supabase';
+
+const logger = createLogger('ShopDB');
 
 // ============================================================================
 // BADGE STATS
@@ -28,7 +31,7 @@ export async function getBadgeStats(username: string): Promise<BadgeStatsRow | n
     if (error.code === 'PGRST116') {
       return null;
     }
-    console.error('[DB] getBadgeStats error:', error.message);
+    logger.error('[DB] getBadgeStats error:', error.message);
     return null;
   }
   return data;
@@ -43,7 +46,7 @@ export async function upsertBadgeStats(
     .upsert({ username: normalizeUsername(username), ...stats }, { onConflict: 'username' });
 
   if (error) {
-    console.error('[DB] upsertBadgeStats error:', error.message);
+    logger.error('[DB] upsertBadgeStats error:', error.message);
     return false;
   }
   return true;
@@ -62,7 +65,7 @@ export async function getShopItems(): Promise<ShopItemRow[]> {
     .order('cost');
 
   if (error) {
-    console.error('[DB] getShopItems error:', error.message);
+    logger.error('[DB] getShopItems error:', error.message);
     return [];
   }
   return data || [];
@@ -75,7 +78,7 @@ export async function getShopItemById(id: string): Promise<ShopItemRow | null> {
     if (error.code === 'PGRST116') {
       return null;
     }
-    console.error('[DB] getShopItemById error:', error.message);
+    logger.error('[DB] getShopItemById error:', error.message);
     return null;
   }
   return data;
@@ -85,7 +88,7 @@ export async function createShopItem(item: ShopItemRow): Promise<boolean> {
   const { error } = await supabase.from('shop_items').insert(item);
 
   if (error) {
-    console.error('[DB] createShopItem error:', error.message);
+    logger.error('[DB] createShopItem error:', error.message);
     return false;
   }
   return true;
@@ -95,7 +98,7 @@ export async function updateShopItem(id: string, updates: Partial<ShopItemRow>):
   const { error } = await supabase.from('shop_items').update(updates).eq('id', id);
 
   if (error) {
-    console.error('[DB] updateShopItem error:', error.message);
+    logger.error('[DB] updateShopItem error:', error.message);
     return false;
   }
   return true;
@@ -105,7 +108,7 @@ export async function deleteShopItem(id: string): Promise<boolean> {
   const { error } = await supabase.from('shop_items').delete().eq('id', id);
 
   if (error) {
-    console.error('[DB] deleteShopItem error:', error.message);
+    logger.error('[DB] deleteShopItem error:', error.message);
     return false;
   }
   return true;
@@ -123,7 +126,7 @@ export async function getAchievements(): Promise<AchievementRow[]> {
     .order('sort_order');
 
   if (error) {
-    console.error('[DB] getAchievements error:', error.message);
+    logger.error('[DB] getAchievements error:', error.message);
     return [];
   }
   return data || [];
@@ -136,7 +139,7 @@ export async function getAchievementById(id: string): Promise<AchievementRow | n
     if (error.code === 'PGRST116') {
       return null;
     }
-    console.error('[DB] getAchievementById error:', error.message);
+    logger.error('[DB] getAchievementById error:', error.message);
     return null;
   }
   return data;
@@ -146,7 +149,7 @@ export async function createAchievement(achievement: AchievementRow): Promise<bo
   const { error } = await supabase.from('achievements').insert(achievement);
 
   if (error) {
-    console.error('[DB] createAchievement error:', error.message);
+    logger.error('[DB] createAchievement error:', error.message);
     return false;
   }
   return true;
@@ -159,7 +162,7 @@ export async function updateAchievement(
   const { error } = await supabase.from('achievements').update(updates).eq('id', id);
 
   if (error) {
-    console.error('[DB] updateAchievement error:', error.message);
+    logger.error('[DB] updateAchievement error:', error.message);
     return false;
   }
   return true;
@@ -169,7 +172,7 @@ export async function deleteAchievement(id: string): Promise<boolean> {
   const { error } = await supabase.from('achievements').delete().eq('id', id);
 
   if (error) {
-    console.error('[DB] deleteAchievement error:', error.message);
+    logger.error('[DB] deleteAchievement error:', error.message);
     return false;
   }
   return true;
@@ -186,7 +189,7 @@ export async function getUserPurchasedBadges(username: string): Promise<string[]
     .eq('username', normalizeUsername(username));
 
   if (error) {
-    console.error('[DB] getUserPurchasedBadges error:', error.message);
+    logger.error('[DB] getUserPurchasedBadges error:', error.message);
     return [];
   }
   return data?.map(b => b.badge_id) || [];
@@ -199,7 +202,7 @@ export async function addPurchasedBadge(username: string, badgeId: string): Prom
   });
 
   if (error) {
-    console.error('[DB] addPurchasedBadge error:', error.message);
+    logger.error('[DB] addPurchasedBadge error:', error.message);
     return false;
   }
   return true;

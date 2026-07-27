@@ -4,11 +4,13 @@ import StreetSnapshotMap from './StreetSnapshotMap';
 import { useNavigate } from 'react-router-dom';
 import { GAME, GIRIFY_EPOCH, STORAGE_KEYS, TIME, UI } from '../../../config/constants';
 import { getTimeUntilNext } from '../../../utils/game/dailyChallenge';
-import { useAuth } from '../../auth/hooks/useAuth';
+import { useAuthContext } from '../../../context/AuthContext';
 import { useTheme } from '../../../context/ThemeContext';
 import { QuizResult, Street } from '../../../types/game';
 import { GameHistory } from '../../../types/user';
+import { calculateStreakFromDateStrings } from '../../../utils/stats';
 import { storage } from '../../../utils/storage';
+import { themeClasses } from '../../../utils/themeUtils';
 
 interface SummaryScreenProps {
   score: number;
@@ -34,7 +36,7 @@ const SummaryScreen: React.FC<SummaryScreenProps> = ({
   t,
 }) => {
   const navigate = useNavigate();
-  const { user, profile } = useAuth();
+  const { user, profile } = useAuthContext();
   const { language } = useTheme();
   const [shareStatus, setShareStatus] = useState<string | null>(null);
   const [expandedIndex, setExpandedIndex] = useState<number | null>(null);
@@ -57,38 +59,8 @@ const SummaryScreen: React.FC<SummaryScreenProps> = ({
     }
     try {
       const history = storage.get(STORAGE_KEYS.HISTORY, []);
-      if (history.length === 0) {
-        return 1;
-      }
-
-      const uniqueDates = [...new Set(history.map((h: GameHistory) => h.date))].sort().reverse();
-      if (uniqueDates.length === 0) {
-        return 1;
-      }
-
-      const now = new Date();
-      const today = (now.toISOString().split('T')[0] ?? '').replace(/-/g, '');
-      const yesterdayDate = new Date(now);
-      yesterdayDate.setDate(yesterdayDate.getDate() - 1);
-      const yesterday = (yesterdayDate.toISOString().split('T')[0] ?? '').replace(/-/g, '');
-
-      if (uniqueDates[0] !== today && uniqueDates[0] !== yesterday) {
-        return 1;
-      }
-
-      let currentStreak = 0;
-      const expectedDate = new Date(now);
-
-      for (const dateStr of uniqueDates) {
-        const expected = (expectedDate.toISOString().split('T')[0] ?? '').replace(/-/g, '');
-        if (dateStr === expected) {
-          currentStreak++;
-          expectedDate.setDate(expectedDate.getDate() - 1);
-        } else {
-          break;
-        }
-      }
-      return Math.max(currentStreak, 1);
+      const streakCount = calculateStreakFromDateStrings(history.map((h: GameHistory) => h.date));
+      return Math.max(streakCount, 1);
     } catch {
       return 1;
     }
@@ -207,7 +179,7 @@ const SummaryScreen: React.FC<SummaryScreenProps> = ({
   return (
     <div
       className={`absolute inset-0 flex flex-col items-center justify-start py-8 px-6 text-center backdrop-blur-md transition-colors duration-500 pointer-events-auto overflow-y-auto font-inter
-            ${theme === 'dark' ? 'bg-slate-950/95 text-white' : 'bg-slate-50/95 text-slate-800'}`}
+            ${themeClasses(theme, 'bg-slate-950/95 text-white', 'bg-slate-50/95 text-slate-800')}`}
     >
       <motion.div
         initial={{ opacity: 0, y: 20 }}
@@ -219,7 +191,7 @@ const SummaryScreen: React.FC<SummaryScreenProps> = ({
             {getGreeting()}
           </h2>
           <p
-            className={`text-sm uppercase tracking-widest font-bold ${theme === 'dark' ? 'text-slate-400' : 'text-slate-500'}`}
+            className={`text-sm uppercase tracking-widest font-bold ${themeClasses(theme, 'text-slate-400', 'text-slate-500')}`}
           >
             {t('todaysChallenge') || "Today's Challenge"}
           </p>
@@ -228,7 +200,7 @@ const SummaryScreen: React.FC<SummaryScreenProps> = ({
         <div className="grid grid-cols-2 gap-4 w-full mb-8">
           <div className="glass-panel p-4 flex flex-col items-center justify-center col-span-1">
             <span
-              className={`text-xs uppercase tracking-wider font-bold mb-1 ${theme === 'dark' ? 'text-slate-400' : 'text-slate-500'}`}
+              className={`text-xs uppercase tracking-wider font-bold mb-1 ${themeClasses(theme, 'text-slate-400', 'text-slate-500')}`}
             >
               {t('scoreLabel')}
             </span>
@@ -261,14 +233,14 @@ const SummaryScreen: React.FC<SummaryScreenProps> = ({
             <span className="text-3xl">⏰</span>
             <div className="flex-1">
               <p
-                className={`text-[10px] font-black uppercase tracking-widest mb-0.5 ${theme === 'dark' ? 'text-slate-400' : 'text-slate-500'}`}
+                className={`text-[10px] font-black uppercase tracking-widest mb-0.5 ${themeClasses(theme, 'text-slate-400', 'text-slate-500')}`}
               >
                 {t('nextChallenge') || 'Next challenge'}
               </p>
               <p className="text-xl font-black text-sky-400 tabular-nums">{getTimeUntilNext()}</p>
             </div>
             <p
-              className={`text-xs font-semibold text-right max-w-[100px] leading-tight ${theme === 'dark' ? 'text-slate-400' : 'text-slate-500'}`}
+              className={`text-xs font-semibold text-right max-w-[100px] leading-tight ${themeClasses(theme, 'text-slate-400', 'text-slate-500')}`}
             >
               {t('comeBackTomorrow') || 'Come back tomorrow to keep your streak!'}
             </p>
@@ -277,7 +249,7 @@ const SummaryScreen: React.FC<SummaryScreenProps> = ({
 
         <div className="w-full mb-6">
           <p
-            className={`text-[10px] font-black uppercase tracking-[0.2em] mb-2.5 ${theme === 'dark' ? 'text-slate-400' : 'text-slate-500'}`}
+            className={`text-[10px] font-black uppercase tracking-[0.2em] mb-2.5 ${themeClasses(theme, 'text-slate-400', 'text-slate-500')}`}
           >
             {t('resultsBreakdown') || 'Resultats'}
           </p>
@@ -312,9 +284,11 @@ const SummaryScreen: React.FC<SummaryScreenProps> = ({
                       </span>
                       {curiosity && !isExpanded && (
                         <span
-                          className={`text-[10px] block truncate mt-0.5 ${
-                            theme === 'dark' ? 'text-slate-500' : 'text-slate-400'
-                          }`}
+                          className={`text-[10px] block truncate mt-0.5 ${themeClasses(
+                            theme,
+                            'text-slate-500',
+                            'text-slate-400'
+                          )}`}
                         >
                           {curiosity.text.slice(0, 60)}…
                         </span>
@@ -328,7 +302,7 @@ const SummaryScreen: React.FC<SummaryScreenProps> = ({
                       {isCorrect ? `+${result.points}` : '0'}
                     </span>
                     <span
-                      className={`text-xs flex-shrink-0 ml-1 transition-transform duration-200 ${isExpanded ? 'rotate-180' : ''} ${theme === 'dark' ? 'text-slate-400' : 'text-slate-500'}`}
+                      className={`text-xs flex-shrink-0 ml-1 transition-transform duration-200 ${isExpanded ? 'rotate-180' : ''} ${themeClasses(theme, 'text-slate-400', 'text-slate-500')}`}
                     >
                       ▾
                     </span>
@@ -356,19 +330,21 @@ const SummaryScreen: React.FC<SummaryScreenProps> = ({
                             <div className="px-4 pb-3">
                               {curiosity.isFallback && (
                                 <span
-                                  className={`inline-block text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded mb-2 ${
-                                    theme === 'dark'
-                                      ? 'bg-slate-700 text-slate-400'
-                                      : 'bg-slate-200 text-slate-500'
-                                  }`}
+                                  className={`inline-block text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded mb-2 ${themeClasses(
+                                    theme,
+                                    'bg-slate-700 text-slate-400',
+                                    'bg-slate-200 text-slate-500'
+                                  )}`}
                                 >
                                   {curiosity.lang}
                                 </span>
                               )}
                               <p
-                                className={`text-xs leading-relaxed mb-2 ${
-                                  theme === 'dark' ? 'text-slate-300' : 'text-slate-600'
-                                }`}
+                                className={`text-xs leading-relaxed mb-2 ${themeClasses(
+                                  theme,
+                                  'text-slate-300',
+                                  'text-slate-600'
+                                )}`}
                               >
                                 {curiosity.text}
                               </p>
@@ -376,11 +352,11 @@ const SummaryScreen: React.FC<SummaryScreenProps> = ({
                                 href={`https://${curiosity.lang}.wikipedia.org/wiki/${encodeURIComponent(result.street.name)}`}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className={`inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider hover:underline ${
-                                  theme === 'dark'
-                                    ? 'text-slate-500 hover:text-slate-400'
-                                    : 'text-slate-400 hover:text-slate-600'
-                                }`}
+                                className={`inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider hover:underline ${themeClasses(
+                                  theme,
+                                  'text-slate-500 hover:text-slate-400',
+                                  'text-slate-400 hover:text-slate-600'
+                                )}`}
                               >
                                 🔗 Wikipedia
                               </a>
@@ -398,16 +374,18 @@ const SummaryScreen: React.FC<SummaryScreenProps> = ({
 
         {!user && (
           <div
-            className={`w-full mb-4 p-4 rounded-2xl border flex flex-col gap-2 text-left ${
-              theme === 'dark' ? 'bg-sky-900/20 border-sky-700/30' : 'bg-sky-50 border-sky-200'
-            }`}
+            className={`w-full mb-4 p-4 rounded-2xl border flex flex-col gap-2 text-left ${themeClasses(
+              theme,
+              'bg-sky-900/20 border-sky-700/30',
+              'bg-sky-50 border-sky-200'
+            )}`}
           >
             <p
-              className={`text-xs font-black uppercase tracking-widest ${theme === 'dark' ? 'text-sky-400' : 'text-sky-600'}`}
+              className={`text-xs font-black uppercase tracking-widest ${themeClasses(theme, 'text-sky-400', 'text-sky-600')}`}
             >
               {t('saveYourScore') || 'Save your score'}
             </p>
-            <p className={`text-xs ${theme === 'dark' ? 'text-slate-300' : 'text-slate-600'}`}>
+            <p className={`text-xs ${themeClasses(theme, 'text-slate-300', 'text-slate-600')}`}>
               {t('signInToSave') ||
                 'Sign in to track your streak, compete on the leaderboard, and save your progress.'}
             </p>

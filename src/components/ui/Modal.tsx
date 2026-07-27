@@ -8,9 +8,12 @@ interface ModalProps {
   isOpen: boolean;
   onClose: () => void;
   title?: string;
-  size?: 'sm' | 'md' | 'lg' | 'xl' | 'full';
+  size?: 'sm' | 'md' | 'lg' | 'xl' | 'xxl' | 'full';
   showCloseButton?: boolean;
   closeOnBackdrop?: boolean;
+  closeOnEsc?: boolean;
+  /** Replaces the default visual classes on the content container (bg, padding, rounding). */
+  contentClassName?: string;
   children: React.ReactNode;
   footer?: React.ReactNode;
 }
@@ -22,6 +25,8 @@ const Modal: React.FC<ModalProps> = ({
   size = 'md',
   showCloseButton = true,
   closeOnBackdrop = true,
+  closeOnEsc = true,
+  contentClassName,
   children,
   footer,
 }) => {
@@ -32,11 +37,11 @@ const Modal: React.FC<ModalProps> = ({
   // ESC key handler
   const handleKeyDown = useCallback(
     (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
+      if (closeOnEsc && e.key === 'Escape') {
         onClose();
       }
     },
-    [onClose]
+    [closeOnEsc, onClose]
   );
 
   useEffect(() => {
@@ -53,6 +58,7 @@ const Modal: React.FC<ModalProps> = ({
     md: 'max-w-md',
     lg: 'max-w-lg',
     xl: 'max-w-xl',
+    xxl: 'max-w-4xl',
     full: 'max-w-full mx-4',
   };
 
@@ -88,8 +94,8 @@ const Modal: React.FC<ModalProps> = ({
             transition={{ type: 'spring', damping: 25, stiffness: 300 }}
             className={`
               relative ${Z_INDEX.MODAL} w-full ${sizeClasses[size]}
-              p-6 rounded-2xl shadow-2xl outline-none
-              ${themeClasses(theme, 'bg-slate-800 text-white', 'bg-white text-slate-900')}
+              outline-none
+              ${contentClassName ?? `p-6 rounded-2xl shadow-2xl ${themeClasses(theme, 'bg-slate-800 text-white', 'bg-white text-slate-900')}`}
             `}
           >
             {/* Header */}

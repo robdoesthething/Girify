@@ -1,8 +1,6 @@
 import { AnimatePresence, motion } from 'framer-motion';
 import React, { useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useTopBarNav } from '../../../hooks/useTopBarNav';
-import TopBar from '../../../components/TopBar';
 import { Button, Card, Heading, PageHeader, Text } from '../../../components/ui';
 import { useTheme } from '../../../context/ThemeContext';
 import { setEquippedCosmetics } from '../../../utils/shop/giuros';
@@ -24,7 +22,6 @@ interface ProfileScreenProps {
 const ProfileScreen: React.FC<ProfileScreenProps> = ({ username }) => {
   const { theme, t } = useTheme();
   const navigate = useNavigate();
-  const topBarNav = useTopBarNav();
 
   // Custom hooks
   const profileData = useProfileData(username);
@@ -87,11 +84,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ username }) => {
   };
 
   return (
-    <div
-      className={`fixed inset-0 w-full h-full flex flex-col overflow-hidden transition-colors duration-500 ${themeClasses(theme, 'bg-slate-900 text-white', 'bg-slate-50 text-slate-900')}`}
-    >
-      <TopBar onOpenPage={topBarNav.onOpenPage} onTriggerLogin={topBarNav.onTriggerLogin} />
-
+    <>
       <div className="flex-1 w-full px-4 py-8 pt-20 overflow-x-hidden">
         <div className="max-w-2xl lg:max-w-5xl mx-auto w-full">
           <PageHeader
@@ -239,7 +232,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ username }) => {
           )}
         </div>
       </div>
-    </div>
+    </>
   );
 };
 

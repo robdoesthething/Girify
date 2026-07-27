@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useTheme } from '../context/ThemeContext';
-import { useAuth } from '../features/auth/hooks/useAuth';
+import { useAuthContext } from '../context/AuthContext';
 import { useConfirm } from './useConfirm';
 
 export const useAppInitialization = () => {
@@ -10,8 +10,8 @@ export const useAppInitialization = () => {
   const navigate = useNavigate();
   const { confirm, confirmConfig, handleClose: handleConfirmClose } = useConfirm();
 
-  // Auth - now decoupled from game state
-  const { user, profile, isLoading: authLoading, handleLogout: authLogout } = useAuth(); // No args needed
+  // Auth - single shared subscription from AuthProvider
+  const { user, profile, isLoading: authLoading, handleLogout: authLogout } = useAuthContext();
 
   // UI State
   const [isInitialized, setIsInitialized] = useState(false);

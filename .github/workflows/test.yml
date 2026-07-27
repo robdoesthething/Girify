@@ -46,6 +46,8 @@ jobs:
         run: npm test -- --run
         env:
           NODE_OPTIONS: '--max-old-space-size=4096'
+          VITE_SUPABASE_URL: 'https://placeholder.supabase.co'
+          VITE_SUPABASE_ANON_KEY: 'placeholder-anon-key'
 
       - name: Generate coverage report
         run: npm run test:coverage -- --run

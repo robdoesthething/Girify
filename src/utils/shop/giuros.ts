@@ -1,7 +1,8 @@
 import { calculateStreakBonus } from '../../config/gameConfig';
-import { getUserByUsername, getUserPurchasedBadges, updateUser } from '../../services/database';
+import { getUserByUsername, getUserPurchasedBadges, updateUser } from '../../services/db';
 import { getPayoutConfig } from '../../services/db/config';
 import { supabase } from '../../services/supabase';
+import type { Json } from '../../types/supabase';
 import { assertCurrentUser } from '../auth';
 import { normalizeUsername } from '../format';
 import { logger } from '../logger';
@@ -29,7 +30,7 @@ export const getGiuros = async (username: string | null): Promise<number> => {
     const user = await getUserByUsername(normalizedUsername);
     return user?.giuros ?? STARTING_GIUROS;
   } catch (e) {
-    console.error('Error getting giuros:', e);
+    logger.error('Error getting giuros:', e);
     return 0;
   }
 };
@@ -52,21 +53,21 @@ export const addGiuros = async (
   const normalizedUsername = normalizeUsername(username);
 
   try {
-    const { data, error } = await (supabase as any).rpc('add_giuros', {
+    const { data, error } = await supabase.rpc('add_giuros', {
       p_username: normalizedUsername,
       p_amount: amount,
       p_reason: reason,
     });
 
     if (error) {
-      console.error('[Giuros] add_giuros RPC error:', error);
+      logger.error('[Giuros] add_giuros RPC error:', error);
       return { success: false, newBalance: 0 };
     }
 
     const result = data as { success: boolean; error?: string; new_balance?: number };
 
     if (!result.success) {
-      console.error('[Giuros] add_giuros failed:', result.error);
+      logger.error('[Giuros] add_giuros failed:', result.error);
       return { success: false, newBalance: 0 };
     }
 
@@ -76,7 +77,7 @@ export const addGiuros = async (
     );
     return { success: true, newBalance };
   } catch (e) {
-    console.error('Error adding giuros:', e);
+    logger.error('Error adding giuros:', e);
     return { success: false, newBalance: 0 };
   }
 };
@@ -111,14 +112,14 @@ export const spendGiuros = async (
     await assertCurrentUser(normalizedUsername);
 
     // Use atomic RPC to prevent TOCTOU race conditions
-    const { data, error } = await (supabase as any).rpc('spend_giuros', {
+    const { data, error } = await supabase.rpc('spend_giuros', {
       p_username: normalizedUsername,
       p_cost: cost,
       p_item_id: itemId,
     });
 
     if (error) {
-      console.error('[Giuros] RPC error:', error);
+      logger.error('[Giuros] RPC error:', error);
       return { success: false, error: error.message };
     }
 
@@ -148,7 +149,7 @@ export const spendGiuros = async (
     return { success: true, newBalance };
   } catch (e: unknown) {
     const err = e instanceof Error ? e : new Error(String(e));
-    console.error('Error spending giuros:', err);
+    logger.error('Error spending giuros:', err);
     return { success: false, error: err.message };
   }
 };
@@ -168,12 +169,12 @@ export const claimDailyLoginBonus = async (
 
   try {
     // Bonus amount is now read server-side from app_config — do not pass p_bonus.
-    const { data, error } = await (supabase as any).rpc('claim_daily_login_bonus', {
+    const { data, error } = await supabase.rpc('claim_daily_login_bonus', {
       p_username: normalizedUsername,
     });
 
     if (error) {
-      console.error('[Giuros] claim_daily_login_bonus RPC error:', error);
+      logger.error('[Giuros] claim_daily_login_bonus RPC error:', error);
       return { claimed: false, bonus: 0, newBalance: 0 };
     }
 
@@ -188,7 +189,7 @@ export const claimDailyLoginBonus = async (
       newBalance: result.new_balance ?? 0,
     };
   } catch (e) {
-    console.error('Error claiming daily login:', e);
+    logger.error('Error claiming daily login:', e);
     return { claimed: false, bonus: 0, newBalance: 0 };
   }
 };
@@ -245,7 +246,7 @@ export const getPurchasedCosmetics = async (username: string | null): Promise<st
 
     return [...cosmetics, ...badges];
   } catch (e) {
-    console.error('Error getting purchased cosmetics:', e);
+    logger.error('Error getting purchased cosmetics:', e);
     return [];
   }
 };
@@ -266,15 +267,15 @@ export const setEquippedCosmetics = async (
   try {
     // Use SECURITY DEFINER RPC to bypass RLS policy issues.
     // The function validates auth.uid() server-side and updates the correct row.
-    const { error: rpcError } = await (supabase as any).rpc('update_equipped_cosmetics', {
-      cosmetics: equipped,
+    const { error: rpcError } = await supabase.rpc('update_equipped_cosmetics', {
+      cosmetics: equipped as Json,
     });
 
     if (!rpcError) {
       return;
     }
 
-    console.error('[Giuros] RPC update_equipped_cosmetics failed:', rpcError.message);
+    logger.error('[Giuros] RPC update_equipped_cosmetics failed:', rpcError.message);
 
     // Fallback: direct username-based update (requires permissive RLS policy)
     const normalizedUsername = normalizeUsername(username);
@@ -282,10 +283,10 @@ export const setEquippedCosmetics = async (
       equipped_cosmetics: equipped as any,
     });
     if (!fallbackOk) {
-      console.error('[Giuros] Username fallback also failed for:', normalizedUsername);
+      logger.error('[Giuros] Username fallback also failed for:', normalizedUsername);
     }
   } catch (e) {
-    console.error('Error setting equipped cosmetics:', e);
+    logger.error('Error setting equipped cosmetics:', e);
   }
 };
 
@@ -313,7 +314,7 @@ export const getEquippedCosmetics = async (
       }) || {}
     );
   } catch (e) {
-    console.error('Error getting equipped cosmetics:', e);
+    logger.error('Error getting equipped cosmetics:', e);
     return {};
   }
 };

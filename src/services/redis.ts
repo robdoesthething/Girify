@@ -1,7 +1,8 @@
 import { Redis } from '@upstash/redis';
+import { env } from '../config/env';
 
-const redisUrl = import.meta.env.VITE_UPSTASH_REDIS_REST_URL;
-const redisToken = import.meta.env.VITE_UPSTASH_REDIS_REST_TOKEN;
+const redisUrl = env.upstashRedisRestUrl;
+const redisToken = env.upstashRedisRestToken;
 
 if (!redisUrl || !redisToken) {
   console.error('Upstash Redis credentials missing.');

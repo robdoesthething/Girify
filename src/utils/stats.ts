@@ -69,3 +69,42 @@ export const calculateStreak = (history: HistoryRecord[]): number => {
 
   return streak;
 };
+
+/**
+ * Calculate streak from storage-format date strings ('YYYYMMDD', UTC-based).
+ * Used by SummaryScreen, whose history records store string dates.
+ * Returns 0 for empty history or a broken streak — callers decide the floor.
+ *
+ * @param dates - List of 'YYYYMMDD' date strings
+ * @returns Current streak count
+ */
+export const calculateStreakFromDateStrings = (dates: string[]): number => {
+  const uniqueDates = [...new Set(dates)].sort().reverse();
+  if (uniqueDates.length === 0) {
+    return 0;
+  }
+
+  const now = new Date();
+  const today = (now.toISOString().split('T')[0] ?? '').replace(/-/g, '');
+  const yesterdayDate = new Date(now);
+  yesterdayDate.setDate(yesterdayDate.getDate() - 1);
+  const yesterday = (yesterdayDate.toISOString().split('T')[0] ?? '').replace(/-/g, '');
+
+  if (uniqueDates[0] !== today && uniqueDates[0] !== yesterday) {
+    return 0;
+  }
+
+  let streak = 0;
+  const expectedDate = new Date(now);
+
+  for (const dateStr of uniqueDates) {
+    const expected = (expectedDate.toISOString().split('T')[0] ?? '').replace(/-/g, '');
+    if (dateStr === expected) {
+      streak++;
+      expectedDate.setDate(expectedDate.getDate() - 1);
+    } else {
+      break;
+    }
+  }
+  return streak;
+};

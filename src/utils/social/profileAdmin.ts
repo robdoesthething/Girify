@@ -6,7 +6,12 @@
  */
 
 import { supabase } from '../../services/supabase';
-import { getUserByUsername, updateUser } from '../../services/database';
+import {
+  deleteUserByUsername,
+  getAllUsers as dbGetAllUsers,
+  getUserByUsername,
+  updateUser,
+} from '../../services/db';
 import type { UserProfile } from './types';
 import { normalizeUsername } from '../format';
 import { rowToProfile } from './profile';
@@ -18,12 +23,7 @@ import { rowToProfile } from './profile';
  */
 export const getAllUsers = async (limitCount = 50): Promise<UserProfile[]> => {
   try {
-    const { data, error } = await supabase.from('users').select('*').limit(limitCount);
-
-    if (error || !data) {
-      return [];
-    }
-
+    const data = await dbGetAllUsers(limitCount);
     return data.map(rowToProfile);
   } catch (e) {
     console.error('Error fetching all users:', e);
@@ -94,14 +94,10 @@ export const deleteUserAndData = async (
 
     // Fetch supabase_uid before deleting (needed to remove auth entry)
     const userRow = await getUserByUsername(normalized);
-    const supabaseUid = (userRow as any)?.supabase_uid as string | undefined;
+    const supabaseUid = userRow?.supabase_uid ?? undefined;
 
     // Delete users row — ON DELETE CASCADE handles all child tables
-    const { error } = await supabase.from('users').delete().eq('username', normalized);
-
-    if (error) {
-      throw new Error(error.message);
-    }
+    await deleteUserByUsername(normalized);
 
     // Remove auth entry via service-role API (best-effort — DB row already gone)
     if (supabaseUid) {

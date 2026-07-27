@@ -3,7 +3,7 @@ import { getTeamLeaderboard } from '../social/leaderboard';
 
 // getTeamLeaderboard calls supabase.from('users') AND the getLeaderboard RPC.
 // We build both mocks with vi.hoisted so factory closures can use them.
-const { mockRpc, mockFromUsers, mockFromDistricts } = vi.hoisted(() => {
+const { mockRpc, mockFromUsers } = vi.hoisted(() => {
   const mockRpc = vi.fn();
 
   // Mock for the from('users').select(...).not(...).returns(...)  chain
@@ -43,9 +43,7 @@ describe('Team Leaderboard – getTeamLeaderboard', () => {
     // Reset defaults: no users, no individual scores
     mockFromUsers.mockReturnValue({
       select: vi.fn().mockReturnThis(),
-      not: vi.fn().mockReturnValue({
-        returns: vi.fn().mockResolvedValue({ data: [], error: null }),
-      }),
+      not: vi.fn().mockResolvedValue({ data: [], error: null }),
       in: vi.fn().mockResolvedValue({ data: [], error: null }),
     });
     mockRpc.mockResolvedValue({ data: [], error: null });
@@ -77,9 +75,7 @@ describe('Team Leaderboard – getTeamLeaderboard', () => {
   it('returns an empty array when the users query returns an error', async () => {
     mockFromUsers.mockReturnValue({
       select: vi.fn().mockReturnThis(),
-      not: vi.fn().mockReturnValue({
-        returns: vi.fn().mockResolvedValue({ data: null, error: { message: 'DB error' } }),
-      }),
+      not: vi.fn().mockResolvedValue({ data: null, error: { message: 'DB error' } }),
       in: vi.fn().mockResolvedValue({ data: [], error: null }),
     });
 
@@ -106,9 +102,7 @@ describe('Team Leaderboard – getTeamLeaderboard', () => {
 
     mockFromUsers.mockReturnValue({
       select: vi.fn().mockReturnThis(),
-      not: vi.fn().mockReturnValue({
-        returns: vi.fn().mockResolvedValue({ data: usersData, error: null }),
-      }),
+      not: vi.fn().mockResolvedValue({ data: usersData, error: null }),
       in: vi.fn().mockResolvedValue({ data: [], error: null }),
     });
 

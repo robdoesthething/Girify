@@ -30,6 +30,9 @@ jobs:
 
       - name: Run tests
         run: npm run test -- --run --coverage
+        env:
+          VITE_SUPABASE_URL: 'https://placeholder.supabase.co'
+          VITE_SUPABASE_ANON_KEY: 'placeholder-anon-key'
 
       - name: Build
         run: npm run build

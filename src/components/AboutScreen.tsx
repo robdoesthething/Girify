@@ -1,27 +1,18 @@
 import React from 'react';
-import { useTopBarNav } from '../hooks/useTopBarNav';
 import { useTheme } from '../context/ThemeContext';
-import { themeClasses } from '../utils/themeUtils';
-import TopBar from './TopBar';
 import { PageHeader } from './ui';
 import SeoHead from './SeoHead';
 
 const AboutScreen: React.FC = () => {
-  const { theme, t } = useTheme();
-  const topBarNav = useTopBarNav();
+  const { t } = useTheme();
 
   return (
-    <div
-      className={`fixed inset-0 w-full h-full flex flex-col overflow-hidden transition-colors duration-500
-           ${themeClasses(theme, 'bg-slate-900 text-white', 'bg-slate-50 text-slate-900')}
-      `}
-    >
+    <>
       <SeoHead
         title="About"
         description="Learn about Girify — a free daily Barcelona streets geography quiz built with React, Supabase, and Leaflet."
         path="/about"
       />
-      <TopBar onOpenPage={topBarNav.onOpenPage} onTriggerLogin={topBarNav.onTriggerLogin} />
 
       <div className="flex-1 overflow-y-auto w-full px-4 py-6 pt-16">
         <div className="max-w-2xl mx-auto">
@@ -91,7 +82,7 @@ const AboutScreen: React.FC = () => {
           </div>
         </div>
       </div>
-    </div>
+    </>
   );
 };
 
