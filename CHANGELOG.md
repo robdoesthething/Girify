@@ -1,5 +1,19 @@
 # Changelog
 
+## [Unreleased] - 2026-10-27
+
+### Fixed
+
+- Closed several account-safety gaps: in-game currency can no longer be spent from another player's account, and unverified email sign-ins can no longer take over an existing profile.
+- Admin-only settings (payouts, game config) now verify admin status before saving.
+- Removed an exposed backend credential from the app bundle; that service is now contacted server-side only.
+- Fixed the failing dependency security audit that was breaking the automated test workflow.
+
+### Improved
+
+- The side-menu navigation now uses crisp icons instead of emoji.
+- Updated core libraries (routing, animation, maps, developer tools) to their latest secure versions.
+
 ## [0.3.0] - 2026-07-26
 
 ### Fixed
