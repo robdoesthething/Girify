@@ -20,6 +20,15 @@ DECLARE
   v_is_badge BOOLEAN;
   v_already_owned BOOLEAN := FALSE;
 BEGIN
+  -- Verify caller owns this account (prevents spending other users' giuros)
+  IF NOT EXISTS (
+    SELECT 1 FROM users
+    WHERE username = p_username
+      AND supabase_uid = auth.uid()
+  ) THEN
+    RETURN jsonb_build_object('success', false, 'error', 'Unauthorized');
+  END IF;
+
   v_is_badge := p_item_id LIKE 'badge_%';
 
   -- Lock the user row for update (prevents concurrent modifications)
@@ -76,3 +85,7 @@ BEGIN
   RETURN jsonb_build_object('success', true, 'new_balance', v_new_balance);
 END;
 $$;
+
+-- Restrict execution to authenticated Supabase users only
+REVOKE ALL ON FUNCTION spend_giuros(TEXT, INTEGER, TEXT) FROM PUBLIC;
+GRANT EXECUTE ON FUNCTION spend_giuros(TEXT, INTEGER, TEXT) TO authenticated;

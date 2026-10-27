@@ -150,24 +150,14 @@ export const useGameState = (
         return;
       }
 
-      // Initialize game session (non-blocking)
-      const redisPromise = Promise.race([
-        startGame().then(gameId => {
-          dispatch({ type: 'SET_GAME_ID', payload: gameId });
-        }),
-        new Promise((_, reject) => setTimeout(() => reject(new Error('Redis timeout')), 3000)),
-      ]).catch(e => {
-        console.error('Failed to start game session in Redis:', e);
-      });
+      // Initialize game session (generates a correlation ID)
+      const gameId = await startGame();
+      dispatch({ type: 'SET_GAME_ID', payload: gameId });
 
-      // Start game immediately — don't wait for Redis
       dispatch({
         type: 'START_GAME',
         payload: setupResult,
       });
-
-      // Let Redis finish in background
-      void redisPromise;
     },
     [state.username, validStreets, dispatch]
   );

@@ -1,4 +1,4 @@
--- DEPRECATED: superseded by scripts/security-fixes.sql
+-- DEPRECATED: superseded by supabase/migrations/20260324_security_fixes.sql
 -- The authoritative, ownership-checked version of add_giuros lives there.
 --
 -- This file is kept for git history only. Running it would overwrite the
@@ -8,6 +8,6 @@
 DO $$
 BEGIN
   RAISE EXCEPTION
-    'atomic-add-giuros.sql is deprecated — run scripts/security-fixes.sql instead';
+    'atomic-add-giuros.sql is deprecated — run supabase/migrations/20260324_security_fixes.sql instead';
 END;
 $$;

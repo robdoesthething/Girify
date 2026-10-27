@@ -4,6 +4,7 @@
  *  - syncUserProfile: sets girify_onboarding_completed when games_played > 0
  *  - syncUserProfile: does NOT set that key when games_played = 0 and no metadata
  *  - backfillJoinDate: sets STORAGE_KEYS.JOINED when profile.joinedAt exists
+ *  - linkSupabaseUid: links only when the email is confirmed
  */
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { STORAGE_KEYS } from '../../../../config/constants';
@@ -13,9 +14,10 @@ import * as socialUtils from '../../../../utils/social';
 // Storage mock — must use vi.hoisted so the factory can reference the fns
 // before vi.mock is hoisted to the top of the file.
 // ------------------------------------------------------------------
-const { mockStorageGet, mockStorageSet } = vi.hoisted(() => ({
+const { mockStorageGet, mockStorageSet, mockSupabaseRpc } = vi.hoisted(() => ({
   mockStorageGet: vi.fn(),
   mockStorageSet: vi.fn(),
+  mockSupabaseRpc: vi.fn(),
 }));
 
 vi.mock('../../../../utils/storage', () => ({
@@ -46,6 +48,7 @@ vi.mock('../../../../utils/shop/giuros', () => ({
 
 vi.mock('../../../../services/supabase', () => ({
   supabase: {
+    rpc: mockSupabaseRpc,
     from: vi.fn(() => ({
       update: vi.fn().mockReturnThis(),
       eq: vi.fn().mockReturnThis(),
@@ -59,7 +62,7 @@ vi.mock('../../../../utils/logger', () => ({
   createLogger: () => ({ info: vi.fn(), error: vi.fn(), warn: vi.fn() }),
 }));
 
-import { backfillJoinDate, syncUserProfile } from '../authSyncHelpers';
+import { backfillJoinDate, linkSupabaseUid, syncUserProfile } from '../authSyncHelpers';
 
 // Minimal mock Supabase User
 const mockUser: any = {
@@ -195,5 +198,31 @@ describe('backfillJoinDate', () => {
       'testuser',
       expect.objectContaining({ joinedAt: expect.any(Date) })
     );
+  });
+});
+
+describe('linkSupabaseUid', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mockSupabaseRpc.mockResolvedValue({ error: null });
+  });
+
+  it('links via RPC when the email is confirmed', async () => {
+    await linkSupabaseUid({ ...mockUser } as any);
+
+    expect(mockSupabaseRpc).toHaveBeenCalledWith('link_supabase_uid');
+  });
+
+  it('skips linking when the email is NOT confirmed (prevents account takeover)', async () => {
+    await linkSupabaseUid({ ...mockUser, email_confirmed_at: null } as any);
+
+    expect(mockSupabaseRpc).not.toHaveBeenCalled();
+  });
+
+  it('skips linking when the user has no email', async () => {
+    const { email: _email, ...noEmail } = mockUser;
+    await linkSupabaseUid(noEmail as any);
+
+    expect(mockSupabaseRpc).not.toHaveBeenCalled();
   });
 });
