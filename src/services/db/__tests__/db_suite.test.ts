@@ -199,4 +199,44 @@ describe('Database Integration Suite', () => {
       expect(supabaseMock.from).toHaveBeenCalledWith('game_results');
     });
   });
+
+  describe('Config Service - admin guards', () => {
+    it('updatePayoutConfig succeeds for admins', async () => {
+      mockBuilder.then.mockImplementation((resolve: any) => resolve({ data: [], error: null }));
+
+      const { updatePayoutConfig } = await import('../config');
+      const result = await updatePayoutConfig({ DAILY_LOGIN_BONUS: 50 });
+
+      expect(result.success).toBe(true);
+      expect(supabaseMock.from).toHaveBeenCalledWith('app_config');
+    });
+
+    it('updatePayoutConfig rejects non-admins without writing', async () => {
+      vi.resetModules();
+      vi.doMock('../../supabase', () => ({ supabase: supabaseMock }));
+      vi.doMock('../../../utils/auth', () => ({
+        requireAdmin: vi.fn().mockRejectedValue(new Error('Not authorized')),
+      }));
+
+      const { updatePayoutConfig } = await import('../config');
+      const result = await updatePayoutConfig({ DAILY_LOGIN_BONUS: 50 });
+
+      expect(result.success).toBe(false);
+      expect(supabaseMock.from).not.toHaveBeenCalled();
+    });
+
+    it('updateGameConfig rejects non-admins without writing', async () => {
+      vi.resetModules();
+      vi.doMock('../../supabase', () => ({ supabase: supabaseMock }));
+      vi.doMock('../../../utils/auth', () => ({
+        requireAdmin: vi.fn().mockRejectedValue(new Error('Not authorized')),
+      }));
+
+      const { updateGameConfig } = await import('../config');
+      const result = await updateGameConfig({ maintenanceMode: true });
+
+      expect(result.success).toBe(false);
+      expect(supabaseMock.from).not.toHaveBeenCalled();
+    });
+  });
 });

@@ -58,7 +58,7 @@ This document provides context and best practices for AI assistants (Claude) wor
   - Game results & leaderboards
   - Social data (friends, activity feed)
   - Shop items & cosmetics
-- **Upstash Redis** - Session management (optional, has fallback)
+- **Upstash Redis** - Server-side API rate limiting only (`api/_lib/rate-limit.ts`); never in the client bundle
 
 ### State Management
 
@@ -187,7 +187,7 @@ refactor(game): extract scoring logic to hook
 
 - `src/features/game/hooks/useGameState.ts` - Main game reducer
 - `src/features/game/hooks/useGamePersistence.ts` - Score saving
-- `src/services/gameService.ts` - Game session management (Redis)
+- `src/services/gameService.ts` - Game session IDs + score saving (direct Supabase)
 - `src/utils/scoring.ts` - Score calculation
 
 **Database**:
@@ -312,10 +312,9 @@ All modals must have:
 
 **Current Architecture** (post-migration):
 
-1. Game session created in Redis (optional)
-2. On game end, try to save via `gameService.endGame()`
-3. If Redis fails or unavailable, fallback to direct Supabase save
-4. Check return value to confirm success
+1. Game session ID generated locally via `gameService.startGame()`
+2. On game end, save via `gameService.endGame()` (direct Supabase insert)
+3. Check return value to confirm success
 
 ```typescript
 const result = await endGame(gameId, gameData);
@@ -587,21 +586,12 @@ const checkedUsername = useRef<string | null>(null);
 - `user.id` is the Supabase UUID; `user.user_metadata.full_name` is the display name
 - Do not reference Firebase anywhere — it has been fully removed
 
-### 3. Redis Session Optional
+### 3. Redis Is Server-Only
 
-**Redis is optional** - app has fallback mechanism:
-
-```typescript
-// Always check return value from endGame
-const result = await endGame(gameId, data);
-
-if (!result.success) {
-  // Fallback saves directly to Supabase
-  await fallbackSaveScore(data);
-}
-```
-
-Don't assume Redis is always available.
+**Redis is only used by Vercel API functions** (`api/_lib/rate-limit.ts`) with
+non-prefixed `UPSTASH_*` env vars. Never reference Redis or `VITE_UPSTASH_*`
+vars from client code — Vite inlines `VITE_` vars into the JS bundle,
+exposing the token.
 
 ### 4. Row Level Security (RLS)
 
@@ -939,14 +929,13 @@ VITE_SITE_URL=https://girify.vercel.app
 VITE_SUPABASE_URL=
 VITE_SUPABASE_ANON_KEY=
 
-# Upstash Redis (Optional)
-VITE_UPSTASH_REDIS_REST_URL=
-VITE_UPSTASH_REDIS_REST_TOKEN=
-
 # Cloudflare Turnstile
 VITE_TURNSTILE_SITE_KEY=
 
 # Server-only (Vercel serverless functions)
+# Upstash Redis is server-only (api/_lib/rate-limit.ts) — never VITE_ prefixed
+UPSTASH_REDIS_REST_URL=
+UPSTASH_REDIS_REST_TOKEN=
 ADMIN_SECRET_KEY=
 SUPABASE_SERVICE_ROLE_KEY=
 SUPABASE_JWT_SECRET=

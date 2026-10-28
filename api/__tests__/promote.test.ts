@@ -307,6 +307,29 @@ describe('Admin Promotion API', () => {
       });
     });
 
+    it('should cleanly reject a different-length admin key (no length oracle, no crash)', async () => {
+      const req = createMockReq({
+        body: { adminKey: 'short', username: MOCK_USERNAME },
+      });
+      const res = createMockRes();
+
+      vi.mocked(verifySupabaseToken).mockResolvedValue(MOCK_USER_RECORD);
+
+      vi.mocked(checkRateLimit).mockResolvedValue({
+        allowed: true,
+        remaining: 4,
+        resetAt: Date.now() + 900000,
+      });
+
+      await handler(req, res);
+
+      expect(res.status).toHaveBeenCalledWith(403);
+      expect(res.json).toHaveBeenCalledWith({
+        success: false,
+        error: 'Invalid admin key',
+      });
+    });
+
     it('should reject when ADMIN_SECRET_KEY not configured', async () => {
       delete process.env.ADMIN_SECRET_KEY;
 
